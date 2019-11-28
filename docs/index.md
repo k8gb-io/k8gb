@@ -9,7 +9,7 @@ In short, the ability to direct HTTP requests to a local load balancer (Kubernet
 
 ## Motivation
 
-The ability to load balance HTTP requests across multiple Kubernetes clusters, running in multiple data centers/clouds is a key requirement for a resilient system. At the time of writing there does not seem to be an existing OSS GSLB (Global Load Service Balancer) solution that will support this requirement in a cloud native, Kubernetes friendly way.
+The ability to load balance HTTP requests across multiple Kubernetes clusters, running in multiple data centers/clouds is a key requirement for a resilient system. At the time of writing there does not seem to be an existing OSS GSLB (Global Server Load Balancer) solution that will support this requirement in a cloud native, Kubernetes friendly way.
 
 ### Service health
 
