@@ -112,7 +112,7 @@ This use case demonstrates that clusters with healthy Pods should have their Ing
 
 > The load balancing strategy should be configurable, see [Load balancing strategies](#load-balancing-strategies)
 
-### 3. Unhealthy service - Two clusters
+### 3. Unhealthy service - Multi cluster
 
 This use case demonstrates what should happen if the Pods in a cluster (in this use case, cluster **Y**) are not available or unhealthy.
 
