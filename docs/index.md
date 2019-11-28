@@ -1,11 +1,11 @@
 # Oh My GLB
 
-A Global Server Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context. GSLB, as used in this context, is the same principles as explained in the following sources:
+A Global Server Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context. The term GSLB, as used in this context, obeys the same principles as defined in the following sources:
 
 * [What Is GSLB? Load Balancing Explained - Cloudflare](https://www.cloudflare.com/learning/cdn/glossary/global-server-load-balancing-gslb/)
 * [Global Server Load Balancing Definition - AVI Networks](https://avinetworks.com/glossary/global-server-load-balancing-2/)
 
-In short, the ability to direct HTTP requests to a local load balancer (Kubernetes Ingress controller instances) based on the health of services (Pods) in multiple geographic Kubernetes clusters, whether on premises or in cloud, with additional options around what criteria to use (round robin, weighting, active/passive, etc.) when determining the best local load balancer to resolve.
+In short, the ability to direct HTTP requests to a local load balancer (Kubernetes Ingress controller instances) based on the health of services (Pods) in multiple, potentially geographically dispersed, Kubernetes clusters whether on premises or in cloud. With additional options around what criteria to use (round robin, weighting, active/passive, etc.) when determining the best local load balancer/ingress instance to resolve.
 
 ## Motivation
 
