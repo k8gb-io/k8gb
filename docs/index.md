@@ -42,13 +42,13 @@ At it's simplest, an HTTP request should be handled by a healthy service. This s
 
 In the use case above, the following resources are configured by the _application_ team:
 
-**A.** The Kubernetes `Glsb` CRD (Custom Resource Definition) is created which indicates to an Oh My GLB controller that it should create the necessary GSLB configuration for the cluster where the the `Gslb` resource is created and the Oh My GLB controller for that cluster.
+**A.** The Kubernetes `Gslb` CRD (Custom Resource Definition) is created which indicates to an Oh My GLB controller that it should create the necessary GSLB configuration for the cluster where the the `Gslb` resource is created and the Oh My GLB controller for that cluster.
 
-A potential example of what this `Glsb` resource would look like:
+A potential example of what this `Gslb` resource would look like:
 
 ```yaml
 apiVersion: ohmyglb.absa.oss/v1beta1
-kind: Glsb
+kind: Gslb
 metadata:
   name: app
 spec:
@@ -64,7 +64,7 @@ spec:
     secretName: app-glsb-tls # Use this Secret to add to the TLS configuration for the new Ingress resource that will be created for the GSLB host
 ```
 
-On creating this `Glsb` resource, the Oh My GLB controller watching the cluster where this resource is created, will:
+On creating this `Gslb` resource, the Oh My GLB controller watching the cluster where this resource is created, will:
 
 1. Create a new `Ingress` resource that will allow requests with the GSLB host (`app.cloud.absa.internal`) to be handled by the cluster's Ingress controller
 2. Configure a health check strategy on the underlying `app` Pods. The Pods here are the Pods matched by the Service configured by `serviceName`
@@ -108,7 +108,7 @@ Once again, the client request is handled much the same as the first use case, e
 
 #### 2.3 Outcome
 
-This use case demonstrates that clusters with healthy Pods should have their Ingress node IPs eligible for resolution, across *all* clusters configured with a `Glsb` resource with the same **`spec.name`**.
+This use case demonstrates that clusters with healthy Pods should have their Ingress node IPs eligible for resolution, across *all* clusters configured with a `Gslb` resource with the same **`spec.name`**.
 
 > The load balancing strategy should be configurable, see [Load balancing strategies](#load-balancing-strategies)
 
@@ -159,7 +159,7 @@ Oh My GLB instances should be able to run on any Linux based operating system bu
 
 ## Existing GSLB projects
 
-The following projects represent examples of other GSLB implementations that could be leveraged or used as reference. However, it is important that the implementation of this project adhere to the [goals](#goals) outlined and which might not align with the implementation of these projects.
+The following projects represent examples of other GSLB implementations that could be leveraged or used as reference. However, it is important that the implementation of this project adhere to the [goals](#goals) outlined and which may not align with the implementation of these projects.
 
 ### Open source
 
