@@ -159,7 +159,7 @@ Oh My GLB instances should be able to run on any Linux based operating system bu
 
 ## Existing GSLB projects
 
-The following projects represent examples of other GSLB implementations that could be leveraged or used as reference. It is important that the implementation of this project adhere to the [goal](#goals) outlined.
+The following projects represent examples of other GSLB implementations that could be leveraged or used as reference. However, it is important that the implementation of this project adhere to the [goals](#goals) outlined and which might not align with the implementation of these projects.
 
 ### Open source
 
