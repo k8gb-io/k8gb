@@ -13,7 +13,7 @@ The ability to load balance HTTP requests across multiple Kubernetes clusters, r
 
 ### Service health
 
-One important aspect of this solution is that the GSLB load balancing should be based on the availability of Kubernetes Pods that a GSLB enabled host represents. I.e. Pod health, as determined by the configured [liveness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) of a Pod should determine which resulting IP of the downstream Ingress will be resolved.
+One important aspect of this solution is that the GSLB load balancing should be based on the availability of Kubernetes Pods that a GSLB enabled host represents. I.e. Pod health, as determined by the configured [liveness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) and [readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes) of a Pod should determine which resulting IP of the downstream Ingress will be resolved.
 
 This is in contrast to most existing OSS GSLB solutions which focus on traditional ICMP, TCP and HTTP health checks.
 
@@ -135,7 +135,7 @@ Same as the [multi cluster use case](#2-basic---multi-cluster).
 
 This use case demonstrates that clusters with no healthy Pods should *not* have their Ingress node IPs eligible for resolution. Meaning that no ingress traffic should ever be sent to clusters where the application is not in a state to accept requests.
 
-If the Pods in cluster **Y** were to once again become healthy (liveness probes start passing) then the Ingress node IPs for cluster **Y** would once again be added to the eligible pool of Ingress node IPs.
+If the Pods in cluster **Y** were to once again become healthy (liveness and readiness probes start passing) then the Ingress node IPs for cluster **Y** would once again be added to the eligible pool of Ingress node IPs.
 
 ## Load balancing strategies
 
