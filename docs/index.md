@@ -4,6 +4,8 @@ A Global Server Load Balancing solution with a focus on having cloud native qual
 
 * [What Is GSLB? Load Balancing Explained - Cloudflare](https://www.cloudflare.com/learning/cdn/glossary/global-server-load-balancing-gslb/)
 * [Global Server Load Balancing Definition - AVI Networks](https://avinetworks.com/glossary/global-server-load-balancing-2/)
+* [What is Global Server Load Balancing (GSLB)? - A10 Networks](https://www.a10networks.com/blog/global-server-load-balancing/)
+* [Global Load Balancing, Caching and TTLs - NS1 - Important points on DNS Caching and how it affects GSLB](https://ns1.com/blog/global-load-balancing-caching-and-ttls)
 
 In short, the ability to direct HTTP requests to a local load balancer (Kubernetes Ingress controller instances) based on the health of services (Pods) in multiple, potentially geographically dispersed, Kubernetes clusters whether on premises or in cloud. With additional options around what criteria to use (round robin, weighting, active/passive, etc.) when determining the best local load balancer/ingress instance to resolve.
 
