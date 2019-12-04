@@ -1,0 +1,7 @@
+apiVersion: ohmyglb.absa.oss/v1beta1
+kind: GslbResolver
+metadata:
+  name: example-gslbresolver
+spec:
+  # Add fields here
+  size: 3
