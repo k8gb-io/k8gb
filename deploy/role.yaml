@@ -58,5 +58,13 @@ rules:
   - ohmyglb.absa.oss
   resources:
   - '*'
+  - gslbs
   verbs:
   - '*'
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list

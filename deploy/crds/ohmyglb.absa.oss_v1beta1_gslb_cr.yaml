@@ -1,0 +1,15 @@
+apiVersion: ohmyglb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: example-gslb
+spec:
+  ingress:
+    rules:
+      - host: app.cloud.absa.internal # This is the GSLB enabled host that clients would use
+        http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
+          paths:
+            - backend:
+                serviceName: app
+                servicePort: http
+              path: /
+  strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
