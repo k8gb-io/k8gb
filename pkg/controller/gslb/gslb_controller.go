@@ -2,8 +2,11 @@ package gslb
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -125,6 +128,30 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 
 	// GslbResolver already exists - don't requeue
 	reqLogger.Info("Skip reconcile: GslbResolver already exists", "GslbResolver.Namespace", found.Namespace, "GslbResolver.Name", found.Name)
+
+	//Update Gslb status with managed host list that are getting retrieved from Ingress objects with special annotation
+	ingressList := &v1beta1.IngressList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels{"gslb": "true"},
+	}
+	if err = r.client.List(context.TODO(), ingressList, listOpts...); err != nil {
+		reqLogger.Error(err, "Failed to list ingresses", "Gslb.Namespace", instance.Namespace, "Gslb.Name", instance.Name)
+		return reconcile.Result{}, err
+	}
+
+	gslbHosts := getIngressHosts(ingressList.Items)
+
+	// Update status.Nodes if needed
+	if !reflect.DeepEqual(gslbHosts, instance.Status.Hosts) {
+		instance.Status.Hosts = gslbHosts
+		err := r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Gslb status")
+			return reconcile.Result{}, err
+		}
+	}
+
 	return reconcile.Result{}, nil
 }
 
@@ -143,4 +170,12 @@ func newGslbResolverForCR(cr *ohmyglbv1beta1.Gslb) *ohmyglbv1beta1.GslbResolver 
 			Size: 3,
 		},
 	}
+}
+
+func getIngressHosts(ingresses []v1beta1.Ingress) []string {
+	var ingressHosts []string
+	for _, ingress := range ingresses {
+		ingressHosts = append(ingressHosts, fmt.Sprintf("%#v", ingress.Spec))
+	}
+	return ingressHosts
 }

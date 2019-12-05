@@ -61,3 +61,10 @@ rules:
   - gslbs
   verbs:
   - '*'
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
