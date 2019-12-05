@@ -1,0 +1,6 @@
+apiVersion: ohmyglb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: example-gslb
+spec:
+  external_dns: 8.8.8.8

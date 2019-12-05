@@ -58,5 +58,6 @@ rules:
   - ohmyglb.absa.oss
   resources:
   - '*'
+  - gslbs
   verbs:
   - '*'
