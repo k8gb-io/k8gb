@@ -13,6 +13,20 @@ type GslbSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	Host string `json:"host"`
+	HTTP struct {
+		Paths []struct {
+			Backend struct {
+				ServiceName string `json:"serviceName"`
+				ServicePort string `json:"servicePort"`
+			} `json:"backend"`
+			Path string `json:"path"`
+		} `json:"paths"`
+	} `json:"http"`
+	Strategy string `json:"strategy"`
+	TLS      struct {
+		SecretName string `json:"secretName"`
+	} `json:"tls"`
 }
 
 // GslbStatus defines the observed state of Gslb
