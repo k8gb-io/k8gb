@@ -197,7 +197,7 @@ func schema_pkg_apis_ohmyglb_v1beta1_GslbStatus(ref common.ReferenceCallback) co
 				Description: "GslbStatus defines the observed state of Gslb",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"ingressStatus": {
+					"managedHosts": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "set",
@@ -205,14 +205,20 @@ func schema_pkg_apis_ohmyglb_v1beta1_GslbStatus(ref common.ReferenceCallback) co
 						},
 						SchemaProps: spec.SchemaProps{
 							Description: "INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run \"operator-sdk generate k8s\" to regenerate code after modifying this file Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html",
-							Ref:         ref("k8s.io/api/extensions/v1beta1.IngressStatus"),
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
-				Required: []string{"ingressStatus"},
+				Required: []string{"managedHosts"},
 			},
 		},
-		Dependencies: []string{
-			"k8s.io/api/extensions/v1beta1.IngressStatus"},
 	}
 }

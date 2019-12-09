@@ -25,7 +25,7 @@ type GslbStatus struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 	// +listType=set
-	IngressStatus v1beta1.IngressStatus `json:"ingressStatus"`
+	ManagedHosts []string `json:"managedHosts"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
