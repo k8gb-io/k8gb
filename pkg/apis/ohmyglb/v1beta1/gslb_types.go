@@ -1,6 +1,7 @@
 package v1beta1
 
 import (
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -13,20 +14,8 @@ type GslbSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	Host string `json:"host"`
-	HTTP struct {
-		Paths []struct {
-			Backend struct {
-				ServiceName string `json:"serviceName"`
-				ServicePort string `json:"servicePort"`
-			} `json:"backend"`
-			Path string `json:"path"`
-		} `json:"paths"`
-	} `json:"http"`
-	Strategy string `json:"strategy"`
-	TLS      struct {
-		SecretName string `json:"secretName"`
-	} `json:"tls"`
+	Ingress  v1beta1.IngressSpec `json:"ingress"`
+	Strategy string              `json:"strategy"`
 }
 
 // GslbStatus defines the observed state of Gslb
@@ -36,7 +25,7 @@ type GslbStatus struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 	// +listType=set
-	Hosts []string `json:"hosts"`
+	IngressStatus v1beta1.IngressStatus `json:"ingressStatus"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
