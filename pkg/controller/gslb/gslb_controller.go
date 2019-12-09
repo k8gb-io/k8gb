@@ -105,6 +105,13 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return *result, err
 	}
 
+	// == Status =
+	err = r.updateManagedHostsStatus(gslb)
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
 	// == Finish ==========
 	// Everything went fine, don't requeue
 	return reconcile.Result{}, nil
