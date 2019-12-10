@@ -13,8 +13,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	zap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 var gslbYaml = []byte(`
@@ -45,7 +46,7 @@ spec:
 
 func TestGslbController(t *testing.T) {
 	// Set the logger to development mode for verbose logs.
-	logf.SetLogger(logf.ZapLogger(true))
+	logf.SetLogger(zap.Logger(true))
 
 	gslb, err := YamlToGslb(gslbYaml)
 	if err != nil {
