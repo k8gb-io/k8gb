@@ -8,7 +8,9 @@ import (
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	yamlConv "github.com/ghodss/yaml"
+	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -34,11 +36,18 @@ spec:
             serviceName: app
             servicePort: http
           path: /
-    - host: app.cloud.absa.external
+    - host: app1.cloud.absa.external
       http:
         paths:
         - backend:
-            serviceName: nginx
+            serviceName: unhealthy-nginx
+            servicePort: http
+          path: /
+    - host: app2.cloud.absa.external
+      http:
+        paths:
+        - backend:
+            serviceName: healthy-nginx
             servicePort: http
           path: /
   strategy: roundRobin
@@ -47,6 +56,9 @@ spec:
 func TestGslbController(t *testing.T) {
 	// Set the logger to development mode for verbose logs.
 	logf.SetLogger(zap.Logger(true))
+
+	gslbName := "test-gslb"
+	namespace := "test-gslb"
 
 	gslb, err := YamlToGslb(gslbYaml)
 	if err != nil {
@@ -69,8 +81,8 @@ func TestGslbController(t *testing.T) {
 	// watched resource .
 	req := reconcile.Request{
 		NamespacedName: types.NamespacedName{
-			Name:      "test-gslb",
-			Namespace: "test-gslb",
+			Name:      gslbName,
+			Namespace: namespace,
 		},
 	}
 
@@ -88,7 +100,7 @@ func TestGslbController(t *testing.T) {
 		t.Fatalf("Failed to get expected ingress: (%v)", err)
 	}
 
-	// Reconcile again so Reconcile() checks pods and updates the Gslb
+	// Reconcile again so Reconcile() checks services and updates the Gslb
 	// resources' Status.
 	res, err = r.Reconcile(req)
 	if err != nil {
@@ -98,22 +110,112 @@ func TestGslbController(t *testing.T) {
 		t.Error("reconcile did not return an empty Result")
 	}
 
-	err = cl.Get(context.TODO(), req.NamespacedName, gslb)
-	if err != nil {
-		t.Fatalf("Failed to get expected gslb: (%v)", err)
-	}
+	t.Run("ManagedHosts status", func(t *testing.T) {
+		err = cl.Get(context.TODO(), req.NamespacedName, gslb)
+		if err != nil {
+			t.Fatalf("Failed to get expected gslb: (%v)", err)
+		}
 
-	expectedHosts := []string{"app.cloud.absa.internal", "app.cloud.absa.external"}
-	actualHosts := gslb.Status.ManagedHosts
-	if !reflect.DeepEqual(expectedHosts, actualHosts) {
-		t.Errorf("expected %v managed hosts, but got %v", expectedHosts, actualHosts)
-	}
+		expectedHosts := []string{"app.cloud.absa.internal", "app1.cloud.absa.external", "app2.cloud.absa.external"}
+		actualHosts := gslb.Status.ManagedHosts
+		if !reflect.DeepEqual(expectedHosts, actualHosts) {
+			t.Errorf("expected %v managed hosts, but got %v", expectedHosts, actualHosts)
+		}
+	})
 
-	expectedServiceStatus := "NotFound"
-	actualServiceStatus := gslb.Status.ServiceHealth["app"]
-	if expectedServiceStatus != actualServiceStatus {
-		t.Errorf("expected App service status to be %s, but got %s", expectedServiceStatus, actualServiceStatus)
-	}
+	t.Run("NotFound service status", func(t *testing.T) {
+		expectedServiceStatus := "NotFound"
+		actualServiceStatus := gslb.Status.ServiceHealth["app"]
+		if expectedServiceStatus != actualServiceStatus {
+			t.Errorf("expected App service status to be %s, but got %s", expectedServiceStatus, actualServiceStatus)
+		}
+	})
+
+	t.Run("Unhealthy service status", func(t *testing.T) {
+		serviceName := "unhealthy-nginx"
+		service := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      serviceName,
+				Namespace: namespace,
+			},
+		}
+
+		err = cl.Create(context.TODO(), service)
+		if err != nil {
+			t.Fatalf("Failed to create testing service: (%v)", err)
+		}
+
+		// Reconcile again so Reconcile() checks services and updates the Gslb
+		// resources' Status.
+		res, err = r.Reconcile(req)
+		if err != nil {
+			t.Fatalf("reconcile: (%v)", err)
+		}
+		if res != (reconcile.Result{}) {
+			t.Error("reconcile did not return an empty Result")
+		}
+
+		err = cl.Get(context.TODO(), req.NamespacedName, gslb)
+		if err != nil {
+			t.Fatalf("Failed to get expected gslb: (%v)", err)
+		}
+
+		expectedServiceStatus := "Unhealthy"
+		actualServiceStatus := gslb.Status.ServiceHealth[serviceName]
+		if expectedServiceStatus != actualServiceStatus {
+			t.Errorf("expected App service status to be %s, but got %s", expectedServiceStatus, actualServiceStatus)
+		}
+	})
+
+	t.Run("Healthy service status", func(t *testing.T) {
+		serviceName := "healthy-nginx"
+		labels := map[string]string{"app": "nginx"}
+		service := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      serviceName,
+				Namespace: namespace,
+				Labels:    labels,
+			},
+		}
+
+		err = cl.Create(context.TODO(), service)
+		if err != nil {
+			t.Fatalf("Failed to create testing service: (%v)", err)
+		}
+
+		endpoint := &corev1.Endpoints{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      serviceName,
+				Namespace: namespace,
+				Labels:    labels,
+			},
+		}
+
+		err = cl.Create(context.TODO(), endpoint)
+		if err != nil {
+			t.Fatalf("Failed to create testing endpoint: (%v)", err)
+		}
+		// Reconcile again so Reconcile() checks services and updates the Gslb
+		// resources' Status.
+		res, err = r.Reconcile(req)
+		if err != nil {
+			t.Fatalf("reconcile: (%v)", err)
+		}
+		if res != (reconcile.Result{}) {
+			t.Error("reconcile did not return an empty Result")
+		}
+
+		err = cl.Get(context.TODO(), req.NamespacedName, gslb)
+		if err != nil {
+			t.Fatalf("Failed to get expected gslb: (%v)", err)
+		}
+
+		expectedServiceStatus := "Healthy"
+		actualServiceStatus := gslb.Status.ServiceHealth[serviceName]
+		if expectedServiceStatus != actualServiceStatus {
+			t.Errorf("expected App service status to be %s, but got %s", expectedServiceStatus, actualServiceStatus)
+		}
+	})
 }
 
 func YamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
