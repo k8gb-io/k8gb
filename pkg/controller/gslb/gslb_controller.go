@@ -97,10 +97,16 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 	var result *reconcile.Result
 
 	// == Ingress ==========
+	ingress, err := r.gslbIngress(gslb)
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
 	result, err = r.ensureIngress(
 		request,
 		gslb,
-		r.gslbIngress(gslb))
+		ingress)
 	if result != nil {
 		return *result, err
 	}

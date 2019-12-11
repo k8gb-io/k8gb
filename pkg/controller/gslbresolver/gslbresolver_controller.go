@@ -111,7 +111,10 @@ func (r *ReconcileGslbResolver) Reconcile(request reconcile.Request) (reconcile.
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: gslbresolver.Name, Namespace: gslbresolver.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new deployment
-		dep := r.deploymentForGslbResolver(gslbresolver)
+		dep, err := r.deploymentForGslbResolver(gslbresolver)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 		reqLogger.Info("Creating a new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
 		err = r.client.Create(context.TODO(), dep)
 		if err != nil {
@@ -165,7 +168,7 @@ func (r *ReconcileGslbResolver) Reconcile(request reconcile.Request) (reconcile.
 }
 
 // deploymentForGslbResolver returns a gslbresolver Deployment object
-func (r *ReconcileGslbResolver) deploymentForGslbResolver(m *ohmyglbv1beta1.GslbResolver) *appsv1.Deployment {
+func (r *ReconcileGslbResolver) deploymentForGslbResolver(m *ohmyglbv1beta1.GslbResolver) (*appsv1.Deployment, error) {
 	ls := labelsForGslbResolver(m.Name)
 	replicas := m.Spec.Size
 
@@ -197,8 +200,11 @@ func (r *ReconcileGslbResolver) deploymentForGslbResolver(m *ohmyglbv1beta1.Gslb
 		},
 	}
 	// Set GslbResolver instance as the owner and controller
-	controllerutil.SetControllerReference(m, dep, r.scheme)
-	return dep
+	err := controllerutil.SetControllerReference(m, dep, r.scheme)
+	if err != nil {
+		return nil, err
+	}
+	return dep, err
 }
 
 // labelsForGslbResolver returns the labels for selecting the resources
