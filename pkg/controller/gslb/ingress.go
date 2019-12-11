@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func (r *ReconcileGslb) gslbIngress(gslb *ohmyglbv1beta1.Gslb) *v1beta1.Ingress {
+func (r *ReconcileGslb) gslbIngress(gslb *ohmyglbv1beta1.Gslb) (*v1beta1.Ingress, error) {
 	ingress := &v1beta1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      gslb.Name,
@@ -21,8 +21,11 @@ func (r *ReconcileGslb) gslbIngress(gslb *ohmyglbv1beta1.Gslb) *v1beta1.Ingress 
 		Spec: gslb.Spec.Ingress,
 	}
 
-	controllerutil.SetControllerReference(gslb, ingress, r.scheme)
-	return ingress
+	err := controllerutil.SetControllerReference(gslb, ingress, r.scheme)
+	if err != nil {
+		return nil, err
+	}
+	return ingress, err
 }
 
 func (r *ReconcileGslb) ensureIngress(request reconcile.Request,
