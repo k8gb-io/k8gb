@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	zap "sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -145,20 +146,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to create testing service: (%v)", err)
 		}
 
-		// Reconcile again so Reconcile() checks services and updates the Gslb
-		// resources' Status.
-		res, err = r.Reconcile(req)
-		if err != nil {
-			t.Fatalf("reconcile: (%v)", err)
-		}
-		if res != (reconcile.Result{}) {
-			t.Error("reconcile did not return an empty Result")
-		}
-
-		err = cl.Get(context.TODO(), req.NamespacedName, gslb)
-		if err != nil {
-			t.Fatalf("Failed to get expected gslb: (%v)", err)
-		}
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		expectedServiceStatus := "Unhealthy"
 		actualServiceStatus := gslb.Status.ServiceHealth[serviceName]
@@ -195,20 +183,8 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create testing endpoint: (%v)", err)
 		}
-		// Reconcile again so Reconcile() checks services and updates the Gslb
-		// resources' Status.
-		res, err = r.Reconcile(req)
-		if err != nil {
-			t.Fatalf("reconcile: (%v)", err)
-		}
-		if res != (reconcile.Result{}) {
-			t.Error("reconcile did not return an empty Result")
-		}
 
-		err = cl.Get(context.TODO(), req.NamespacedName, gslb)
-		if err != nil {
-			t.Fatalf("Failed to get expected gslb: (%v)", err)
-		}
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		expectedServiceStatus := "Healthy"
 		actualServiceStatus := gslb.Status.ServiceHealth[serviceName]
@@ -216,6 +192,66 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("expected App service status to be %s, but got %s", expectedServiceStatus, actualServiceStatus)
 		}
 	})
+
+	t.Run("Healthy workers status", func(t *testing.T) {
+		nodeName := "test-node"
+		nodeAddress := "10.0.0.1"
+		nodeLabels := map[string]string{"node-role.kubernetes.io/worker": ""}
+		node := &corev1.Node{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      nodeName,
+				Labels:    nodeLabels,
+			},
+		}
+		err = cl.Create(context.TODO(), node)
+		if err != nil {
+			t.Fatalf("Failed to create testing node: (%v)", err)
+		}
+		node.Status.Addresses = []corev1.NodeAddress{
+			{
+				Type:    "InternalIP",
+				Address: nodeAddress},
+		}
+		err = r.client.Status().Update(context.TODO(), node)
+		if err != nil {
+			t.Fatalf("Failed to update Node status:(%v)", err)
+		}
+
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+
+		want := make(map[string]string)
+		want[nodeName] = nodeAddress
+
+		got := gslb.Status.HealthyWorkers
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("expected HealthyWorkers status to be %s, but got %s", want, got)
+		}
+	})
+}
+
+func reconcileAndUpdateGslb(t *testing.T,
+	r *ReconcileGslb,
+	req reconcile.Request,
+	cl client.Client,
+	gslb *ohmyglbv1beta1.Gslb,
+) {
+	t.Helper()
+	// Reconcile again so Reconcile() checks services and updates the Gslb
+	// resources' Status.
+	res, err := r.Reconcile(req)
+	if err != nil {
+		t.Fatalf("reconcile: (%v)", err)
+	}
+	if res != (reconcile.Result{}) {
+		t.Error("reconcile did not return an empty Result")
+	}
+
+	err = cl.Get(context.TODO(), req.NamespacedName, gslb)
+	if err != nil {
+		t.Fatalf("Failed to get expected gslb: (%v)", err)
+	}
 }
 
 func YamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
