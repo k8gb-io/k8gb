@@ -101,6 +101,13 @@ func (in *GslbStatus) DeepCopyInto(out *GslbStatus) {
 			(*out)[key] = val
 		}
 	}
+	if in.HealthyWorkers != nil {
+		in, out := &in.HealthyWorkers, &out.HealthyWorkers
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
