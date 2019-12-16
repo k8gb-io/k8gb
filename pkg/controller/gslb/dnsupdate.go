@@ -12,6 +12,10 @@ import (
 
 func (r *ReconcileGslb) updateHostsConfigMap(gslb *ohmyglbv1beta1.Gslb, cmName string) error {
 	workerIPs, err := r.getWorkerIPs()
+	if err != nil {
+		return err
+	}
+
 	managedHosts, err := r.getServiceHealthStatus(gslb)
 	if err != nil {
 		return err
