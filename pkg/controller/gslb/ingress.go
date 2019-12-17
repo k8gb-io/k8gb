@@ -47,10 +47,9 @@ func (r *ReconcileGslb) ensureIngress(request reconcile.Request,
 			// Creation failed
 			log.Error(err, "Failed to create new Ingress", "Ingress.Namespace", i.Namespace, "Ingress.Name", i.Name)
 			return &reconcile.Result{}, err
-		} else {
-			// Creation was successful
-			return nil, nil
 		}
+		// Creation was successful
+		return nil, nil
 	} else if err != nil {
 		// Error that isn't due to the service not existing
 		log.Error(err, "Failed to get Ingress")
