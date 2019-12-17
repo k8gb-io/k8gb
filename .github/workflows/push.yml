@@ -8,5 +8,7 @@ jobs:
     - uses: actions/checkout@master
     - name: go1.13  linters
       uses: shoukoo/golang-pipeline/go1.13/linter@master
+      with:
+        GOLINT: on
     - name: go1.13 test
       uses: shoukoo/golang-pipeline/go1.13/test@master
