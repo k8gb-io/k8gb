@@ -67,7 +67,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				client.InNamespace(a.Meta.GetNamespace()),
 			}
 			c := mgr.GetClient()
-			c.List(context.TODO(), gslbList, opts...)
+			err := c.List(context.TODO(), gslbList, opts...)
+			if err != nil {
+				log.Info("Can't fetch gslb objects")
+				return nil
+			}
 			gslbName := ""
 			for _, gslb := range gslbList.Items {
 				for _, rule := range gslb.Spec.Ingress.Rules {
@@ -78,12 +82,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 					}
 				}
 			}
-			return []reconcile.Request{
-				{NamespacedName: types.NamespacedName{
-					Name:      gslbName,
-					Namespace: a.Meta.GetNamespace(),
-				}},
+			if len(gslbName) > 0 {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      gslbName,
+						Namespace: a.Meta.GetNamespace(),
+					}},
+				}
 			}
+			return nil
 		})
 
 	// Watch for Endpoints that are not controlled directly
