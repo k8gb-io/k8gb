@@ -12,4 +12,18 @@ spec:
                 serviceName: app
                 servicePort: http
               path: /
+      - host: app1.cloud.absa.external
+        http:
+          paths:
+          - backend:
+              serviceName: unhealthy-nginx
+              servicePort: http
+            path: /
+      - host: app2.cloud.absa.external
+        http:
+          paths:
+          - backend:
+              serviceName: healthy-nginx
+              servicePort: http
+            path: /
   strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too

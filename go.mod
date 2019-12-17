@@ -5,11 +5,9 @@ go 1.13
 require (
 	github.com/ghodss/yaml v1.0.1-0.20180820084758-c7ce16629ff4
 	github.com/go-openapi/spec v0.19.0
-	github.com/kisielk/errcheck v1.2.0 // indirect
 	github.com/operator-framework/operator-sdk v0.12.0
 	github.com/spf13/pflag v1.0.3
-	golang.org/x/tools v0.0.0-20191209225234-22774f7dae43 // indirect
-	honnef.co/go/tools v0.0.1-2019.2.3 // indirect
+	github.com/txn2/txeh v1.3.0
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v11.0.0+incompatible

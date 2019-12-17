@@ -111,6 +111,13 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return *result, err
 	}
 
+	// == CoreDNS ConfigMap =====
+	err = r.updateHostsConfigMap(gslb, "gslb-coredns-coredns")
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
 	// == Status =
 	err = r.updateGslbStatus(gslb)
 	if err != nil {

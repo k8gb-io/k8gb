@@ -6,6 +6,7 @@ import (
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	types "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -16,7 +17,7 @@ func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
 		return err
 	}
 	gslb.Status.ServiceHealth = serviceHealth
-	gslb.Status.HealthyWorkers, err = r.getHealthyWorkers(gslb)
+	gslb.Status.HealthyWorkers, err = r.getHealthyWorkers()
 	if err != nil {
 		return err
 	}
@@ -44,31 +45,38 @@ func (r *ReconcileGslb) getServiceHealthStatus(gslb *ohmyglbv1beta1.Gslb) (map[s
 			err := r.client.Get(context.TODO(), finder, service)
 			if err != nil {
 				if errors.IsNotFound(err) {
-					serviceHealth[path.Backend.ServiceName] = "NotFound"
+					serviceHealth[rule.Host] = "NotFound"
 					continue
 				}
 				return serviceHealth, err
 			}
-			endpointsList := &corev1.EndpointsList{}
-			opts := []client.ListOption{
-				client.InNamespace(gslb.Namespace),
-				client.MatchingLabels(service.Spec.Selector),
+
+			endpoints := &corev1.Endpoints{}
+
+			nn := types.NamespacedName{
+				Name:      path.Backend.ServiceName,
+				Namespace: gslb.Namespace,
 			}
-			err = r.client.List(context.TODO(), endpointsList, opts...)
+
+			err = r.client.Get(context.TODO(), nn, endpoints)
 			if err != nil {
 				return serviceHealth, err
 			}
-			if len(endpointsList.Items) > 0 {
-				serviceHealth[service.Name] = "Healthy"
-			} else {
-				serviceHealth[service.Name] = "Unhealthy"
+
+			serviceHealth[rule.Host] = "Unhealthy"
+			if len(endpoints.Subsets) > 0 {
+				for _, subset := range endpoints.Subsets {
+					if len(subset.Addresses) > 0 {
+						serviceHealth[rule.Host] = "Healthy"
+					}
+				}
 			}
 		}
 	}
 	return serviceHealth, nil
 }
 
-func (r *ReconcileGslb) getHealthyWorkers(gslb *ohmyglbv1beta1.Gslb) (map[string]string, error) {
+func (r *ReconcileGslb) getHealthyWorkers() (map[string]string, error) {
 	healthyWorkers := make(map[string]string)
 	nodeLabels := map[string]string{"node-role.kubernetes.io/worker": ""}
 	nodeList := &corev1.NodeList{}
