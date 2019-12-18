@@ -4,9 +4,11 @@ import (
 	"context"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	types "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -53,6 +55,51 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		IsController: true,
 		OwnerType:    &ohmyglbv1beta1.Gslb{},
 	})
+	if err != nil {
+		return err
+	}
+
+	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
+	mapFn := handler.ToRequestsFunc(
+		func(a handler.MapObject) []reconcile.Request {
+			gslbList := &ohmyglbv1beta1.GslbList{}
+			opts := []client.ListOption{
+				client.InNamespace(a.Meta.GetNamespace()),
+			}
+			c := mgr.GetClient()
+			err := c.List(context.TODO(), gslbList, opts...)
+			if err != nil {
+				log.Info("Can't fetch gslb objects")
+				return nil
+			}
+			gslbName := ""
+			for _, gslb := range gslbList.Items {
+				for _, rule := range gslb.Spec.Ingress.Rules {
+					for _, path := range rule.HTTP.Paths {
+						if path.Backend.ServiceName == a.Meta.GetName() {
+							gslbName = gslb.Name
+						}
+					}
+				}
+			}
+			if len(gslbName) > 0 {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      gslbName,
+						Namespace: a.Meta.GetNamespace(),
+					}},
+				}
+			}
+			return nil
+		})
+
+	// Watch for Endpoints that are not controlled directly
+	err = c.Watch(
+		&source.Kind{Type: &corev1.Endpoints{}},
+		&handler.EnqueueRequestsFromMapFunc{
+			ToRequests: mapFn,
+		},
+	)
 	if err != nil {
 		return err
 	}
