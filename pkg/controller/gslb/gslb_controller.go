@@ -18,6 +18,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
+const gslbOperatorNamespace = "ohmyglb"
+
 var log = logf.Log.WithName("controller_gslb")
 
 /**

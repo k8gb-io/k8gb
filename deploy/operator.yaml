@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ohmyglb
+  namespace: ohmyglb
 spec:
   replicas: 1
   selector:
@@ -16,15 +17,13 @@ spec:
       containers:
         - name: ohmyglb
           # Replace this with the built image name
-          image: ytsarev/ohmyglb:v0.0.2
+          image: ytsarev/ohmyglb:v0.1.1
           command:
           - ohmyglb
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+              value: ""
             - name: POD_NAME
               valueFrom:
                 fieldRef:

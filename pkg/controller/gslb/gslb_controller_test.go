@@ -82,7 +82,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: gslb-coredns
   name: gslb-coredns-coredns
-  namespace: test-gslb
+  namespace: ohmyglb
 `)
 
 func TestGslbController(t *testing.T) {
@@ -295,7 +295,7 @@ func TestGslbController(t *testing.T) {
 
 		nn := types.NamespacedName{
 			Name:      cmName,
-			Namespace: gslb.Namespace,
+			Namespace: gslbOperatorNamespace,
 		}
 
 		err = cl.Get(context.TODO(), nn, corednsConfigMap)
@@ -317,7 +317,7 @@ func TestGslbController(t *testing.T) {
 
 		nn := types.NamespacedName{
 			Name:      cmName,
-			Namespace: gslb.Namespace,
+			Namespace: gslbOperatorNamespace,
 		}
 
 		err = cl.Get(context.TODO(), nn, corednsConfigMap)
