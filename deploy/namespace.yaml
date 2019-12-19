@@ -1,0 +1,6 @@
+kind: Namespace
+metadata:
+  name: ohmyglb
+spec:
+  finalizers:
+  - kubernetes

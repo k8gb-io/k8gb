@@ -1,5 +1,5 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   creationTimestamp: null
   name: ohmyglb
@@ -8,6 +8,7 @@ rules:
   - ""
   resources:
   - pods
+  - nodes
   - services
   - services/finalizers
   - endpoints
@@ -66,5 +67,4 @@ rules:
   resources:
   - ingresses
   verbs:
-  - get
-  - list
+  - '*'

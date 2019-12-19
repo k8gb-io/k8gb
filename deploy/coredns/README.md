@@ -1,5 +1,5 @@
 # CoreDNS helm install to act as resolver for GSLB
 
 ```
-helm upgrade gslb-coredns -f deploy/coredns/values.yaml
+helm -n ohmyglb upgrade -i gslb-coredns stable/coredns -f values.yaml
 ```

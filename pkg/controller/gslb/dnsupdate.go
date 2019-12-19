@@ -38,7 +38,7 @@ func (r *ReconcileGslb) updateHostsConfigMap(gslb *ohmyglbv1beta1.Gslb, cmName s
 
 	nn := types.NamespacedName{
 		Name:      cmName,
-		Namespace: gslb.Namespace,
+		Namespace: gslbOperatorNamespace,
 	}
 
 	cm := &corev1.ConfigMap{}
