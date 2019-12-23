@@ -76,11 +76,12 @@ servers:
     parameters: 0.0.0.0:9153
   - name: forward
     parameters: . /etc/resolv.conf
-  - name: hosts
-    parameters: /etc/coredns/gslb.hosts
+  - name: etcd
+    parameters: absa.external
     configBlock: |-
-      ttl 30
-      reload "300ms"
+      stubzones
+      path /skydns
+      endpoint http://etcd-cluster-client:2379
 
 # Complete example with all the options:
 # - zones:                 # the `zones` block can be left out entirely, defaults to "."
