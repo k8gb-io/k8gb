@@ -1,7 +1,8 @@
-# CoreDNS helm install to act as resolver for GSLB
+# Ingress controller, etcd-operator, CoreDNS helm install
 
+Here we are installing resources which are working in tandem but not directly managed by OhMyGLB operator
 
-### Baremetal nginx-controller setup
+### Baremetal(or local Minukube/Kind cluster) nginx-controller setup
 ```
 helm -n ohmyglb upgrade -i nginx-ingress stable/nginx-ingress --set controller.service.type=NodePort --set controller.reportNodeInternalIp=true --set controller.hostNetwork=true
 ```
