@@ -4,10 +4,14 @@ import (
 	"context"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/txn2/txeh"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 func (r *ReconcileGslb) updateHostsConfigMap(gslb *ohmyglbv1beta1.Gslb, cmName string) error {
@@ -68,4 +72,52 @@ func (r *ReconcileGslb) getWorkerIPs() ([]string, error) {
 		IPs = append(IPs, address)
 	}
 	return IPs, err
+}
+
+func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
+	dnsEndpointSpec := externaldns.DNSEndpointSpec{}
+	dnsEndpoint := &externaldns.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      gslb.Name,
+			Namespace: gslb.Namespace,
+		},
+		Spec: dnsEndpointSpec,
+	}
+
+	err := controllerutil.SetControllerReference(gslb, dnsEndpoint, r.scheme)
+	if err != nil {
+		return nil, err
+	}
+	return dnsEndpoint, err
+}
+
+func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,
+	instance *ohmyglbv1beta1.Gslb,
+	i *externaldns.DNSEndpoint,
+) (*reconcile.Result, error) {
+	found := &externaldns.DNSEndpoint{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      instance.Name,
+		Namespace: instance.Namespace,
+	}, found)
+	if err != nil && errors.IsNotFound(err) {
+
+		// Create the service
+		log.Info("Creating a new DNSEndpoint", "DNSEndpoint.Namespace", i.Namespace, "DNSEndpoint.Name", i.Name)
+		err = r.client.Create(context.TODO(), i)
+
+		if err != nil {
+			// Creation failed
+			log.Error(err, "Failed to create new DNSEndpoint", "DNSEndpoint.Namespace", i.Namespace, "DNSEndpoint.Name", i.Name)
+			return &reconcile.Result{}, err
+		}
+		// Creation was successful
+		return nil, nil
+	} else if err != nil {
+		// Error that isn't due to the service not existing
+		log.Error(err, "Failed to get DNSEndpoint")
+		return &reconcile.Result{}, err
+	}
+
+	return nil, nil
 }
