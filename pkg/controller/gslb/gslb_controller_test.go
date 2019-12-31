@@ -9,10 +9,12 @@ import (
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	yamlConv "github.com/ghodss/yaml"
+	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -111,6 +113,8 @@ func TestGslbController(t *testing.T) {
 	// Register operator types with the runtime scheme.
 	s := scheme.Scheme
 	s.AddKnownTypes(ohmyglbv1beta1.SchemeGroupVersion, gslb)
+	// Register external-dns DNSEndpoint CRD
+	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	// Create a fake client to mock API calls.
 	cl := fake.NewFakeClient(objs...)
 	// Create a ReconcileGslb object with the scheme and fake client.
@@ -332,6 +336,17 @@ func TestGslbController(t *testing.T) {
 			if matched {
 				t.Errorf("Expected to NOT to have non healthy '%s' in the host configmap '%s' ", want, got)
 			}
+		}
+	})
+
+	t.Run("Gslb creates DNSEndpoint CR for healthy ingress hosts", func(t *testing.T) {
+
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+
+		dnsEndpoint := &externaldns.DNSEndpoint{}
+		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
 		}
 	})
 }

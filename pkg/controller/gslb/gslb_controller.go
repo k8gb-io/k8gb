@@ -167,6 +167,21 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, err
 	}
 
+	// == external-dns dnsendpoints CRs ==
+	dnsEndpoint, err := r.gslbDNSEndpoint(gslb)
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
+	result, err = r.ensureDNSEndpoint(
+		request,
+		gslb,
+		dnsEndpoint)
+	if result != nil {
+		return *result, err
+	}
+
 	// == Status =
 	err = r.updateGslbStatus(gslb)
 	if err != nil {
