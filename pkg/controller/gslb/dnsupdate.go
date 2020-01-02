@@ -155,9 +155,9 @@ func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,
 }
 
 func prettyPrint(s interface{}) string {
-	pretty_s, err := json.MarshalIndent(s, "", "\t")
+	prettyStruct, err := json.MarshalIndent(s, "", "\t")
 	if err != nil {
 		fmt.Println("can't convert struct to json")
 	}
-	return string(pretty_s)
+	return string(prettyStruct)
 }
