@@ -3,6 +3,7 @@ package gslb
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"reflect"
 	"regexp"
@@ -321,20 +322,20 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
 		}
 
-		got := dnsEndpoint
+		got := dnsEndpoint.Spec.Endpoints
 
-		want := &externaldns.DNSEndpoint{
-			Spec: externaldns.DNSEndpointSpec{
-				Endpoints: []*externaldns.Endpoint{{
-					DNSName:    "app3.absa.cloud.internal",
-					RecordTTL:  30,
-					RecordType: "A",
-					Targets:    externaldns.Targets{"10.0.0.1"}},
-				},
-			},
+		want := []*externaldns.Endpoint{{
+			DNSName:    "app3.absa.cloud.internal",
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets:    externaldns.Targets{"10.0.0.1"}},
 		}
+
+		prettyGot := prettyPrint(got)
+		prettyWant := prettyPrint(want)
+
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %v DNSEndpoint, got %v", want, got)
+			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
 	})
 }
@@ -392,4 +393,12 @@ func yamlToConfigMap(yaml []byte) (*corev1.ConfigMap, error) {
 		return &corev1.ConfigMap{}, err
 	}
 	return cm, nil
+}
+
+func prettyPrint(s interface{}) string {
+	pretty_s, err := json.MarshalIndent(s, "", "\t")
+	if err != nil {
+		fmt.Println("can't convert struct to json")
+	}
+	return string(pretty_s)
 }
