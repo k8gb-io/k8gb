@@ -68,3 +68,9 @@ rules:
   - ingresses
   verbs:
   - '*'
+- apiGroups:
+  - externaldns.k8s.io
+  resources:
+  - dnsendpoints
+  verbs:
+  - '*'

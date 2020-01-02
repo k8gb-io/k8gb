@@ -4,6 +4,7 @@ import (
 	"context"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -54,6 +55,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for changes to secondary resource Ingress
 	err = c.Watch(&source.Kind{Type: &v1beta1.Ingress{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &ohmyglbv1beta1.Gslb{},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch for changes to secondary resource DNSEndpoint
+	err = c.Watch(&source.Kind{Type: &externaldns.DNSEndpoint{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &ohmyglbv1beta1.Gslb{},
 	})
