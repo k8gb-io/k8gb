@@ -2,6 +2,8 @@ package gslb
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
@@ -75,7 +77,33 @@ func (r *ReconcileGslb) getWorkerIPs() ([]string, error) {
 }
 
 func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
-	dnsEndpointSpec := externaldns.DNSEndpointSpec{}
+	var gslbHosts []*externaldns.Endpoint
+
+	serviceHealth, err := r.getServiceHealthStatus(gslb)
+	if err != nil {
+		return nil, err
+	}
+
+	targets, err := r.getWorkerIPs()
+	if err != nil {
+		return nil, err
+	}
+
+	for host, health := range serviceHealth {
+		if health == "Healthy" {
+			dnsRecord := &externaldns.Endpoint{
+				DNSName:    host,
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    targets,
+			}
+			gslbHosts = append(gslbHosts, dnsRecord)
+		}
+	}
+	dnsEndpointSpec := externaldns.DNSEndpointSpec{
+		Endpoints: gslbHosts,
+	}
+
 	dnsEndpoint := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      gslb.Name,
@@ -84,7 +112,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 		Spec: dnsEndpointSpec,
 	}
 
-	err := controllerutil.SetControllerReference(gslb, dnsEndpoint, r.scheme)
+	err = controllerutil.SetControllerReference(gslb, dnsEndpoint, r.scheme)
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +130,8 @@ func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 
-		// Create the service
-		log.Info("Creating a new DNSEndpoint", "DNSEndpoint.Namespace", i.Namespace, "DNSEndpoint.Name", i.Name)
+		// Create the DNSEndpoint
+		log.Info(fmt.Sprintf("Creating a new DNSEndpoint:\n %s", prettyPrint(i)))
 		err = r.client.Create(context.TODO(), i)
 
 		if err != nil {
@@ -119,5 +147,17 @@ func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,
 		return &reconcile.Result{}, err
 	}
 
+	// Update existing object with new spec
+	found.Spec = i.Spec
+	r.client.Update(context.TODO(), found)
+
 	return nil, nil
+}
+
+func prettyPrint(s interface{}) string {
+	pretty_s, err := json.MarshalIndent(s, "", "\t")
+	if err != nil {
+		fmt.Println("can't convert struct to json")
+	}
+	return string(pretty_s)
 }

@@ -3,7 +3,6 @@ package gslb
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"reflect"
 	"regexp"
@@ -325,7 +324,7 @@ func TestGslbController(t *testing.T) {
 		got := dnsEndpoint.Spec.Endpoints
 
 		want := []*externaldns.Endpoint{{
-			DNSName:    "app3.absa.cloud.internal",
+			DNSName:    "app3.cloud.absa.internal",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1"}},
@@ -393,12 +392,4 @@ func yamlToConfigMap(yaml []byte) (*corev1.ConfigMap, error) {
 		return &corev1.ConfigMap{}, err
 	}
 	return cm, nil
-}
-
-func prettyPrint(s interface{}) string {
-	pretty_s, err := json.MarshalIndent(s, "", "\t")
-	if err != nil {
-		fmt.Println("can't convert struct to json")
-	}
-	return string(pretty_s)
 }

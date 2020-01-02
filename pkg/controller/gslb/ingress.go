@@ -56,5 +56,9 @@ func (r *ReconcileGslb) ensureIngress(request reconcile.Request,
 		return &reconcile.Result{}, err
 	}
 
+	// Update existing object with new spec
+	found.Spec = i.Spec
+	r.client.Update(context.TODO(), found)
+
 	return nil, nil
 }
