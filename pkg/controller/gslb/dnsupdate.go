@@ -9,6 +9,7 @@ import (
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/txn2/txeh"
 	corev1 "k8s.io/api/core/v1"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -76,6 +77,31 @@ func (r *ReconcileGslb) getWorkerIPs() ([]string, error) {
 	return IPs, err
 }
 
+func (r *ReconcileGslb) getGslbIngressIPs(gslb *ohmyglbv1beta1.Gslb) ([]string, error) {
+	nn := types.NamespacedName{
+		Name:      gslb.Name,
+		Namespace: gslb.Namespace,
+	}
+
+	gslbIngress := &v1beta1.Ingress{}
+
+	err := r.client.Get(context.TODO(), nn, gslbIngress)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info(fmt.Sprintf("Can't find gslb Ingress: %s", gslb.Name))
+		}
+		return nil, err
+	}
+
+	var gslbIngressIPs []string
+
+	for _, ip := range gslbIngress.Status.LoadBalancer.Ingress {
+		gslbIngressIPs = append(gslbIngressIPs, ip.IP)
+	}
+
+	return gslbIngressIPs, nil
+}
+
 func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
 	var gslbHosts []*externaldns.Endpoint
 
@@ -84,7 +110,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 		return nil, err
 	}
 
-	targets, err := r.getWorkerIPs()
+	targets, err := r.getGslbIngressIPs(gslb)
 	if err != nil {
 		return nil, err
 	}
