@@ -313,6 +313,15 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("Gslb creates DNSEndpoint CR for healthy ingress hosts", func(t *testing.T) {
 
+		ingressIP := corev1.LoadBalancerIngress{
+			IP: "10.0.0.1",
+		}
+		ingress.Status.LoadBalancer.Ingress = append(ingress.Status.LoadBalancer.Ingress, ingressIP)
+		err := cl.Status().Update(context.TODO(), ingress)
+		if err != nil {
+			t.Fatalf("Failed to update gslb Ingress Address: (%v)", err)
+		}
+
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		dnsEndpoint := &externaldns.DNSEndpoint{}

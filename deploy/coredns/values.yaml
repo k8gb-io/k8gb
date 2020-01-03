@@ -77,7 +77,7 @@ servers:
   - name: forward
     parameters: . /etc/resolv.conf
   - name: etcd
-    parameters: absa.external
+    parameters: absa.internal
     configBlock: |-
       stubzones
       path /skydns
