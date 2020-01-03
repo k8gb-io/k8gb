@@ -118,8 +118,6 @@ github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/txn2/txeh v1.3.0
-github.com/txn2/txeh
 # go.uber.org/atomic v1.4.0
 go.uber.org/atomic
 # go.uber.org/multierr v1.1.0

@@ -17,7 +17,6 @@ func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
 		return err
 	}
 	gslb.Status.ServiceHealth = serviceHealth
-	gslb.Status.HealthyWorkers, err = r.getHealthyWorkers()
 	if err != nil {
 		return err
 	}
@@ -74,25 +73,4 @@ func (r *ReconcileGslb) getServiceHealthStatus(gslb *ohmyglbv1beta1.Gslb) (map[s
 		}
 	}
 	return serviceHealth, nil
-}
-
-func (r *ReconcileGslb) getHealthyWorkers() (map[string]string, error) {
-	healthyWorkers := make(map[string]string)
-	nodeLabels := map[string]string{"node-role.kubernetes.io/worker": ""}
-	nodeList := &corev1.NodeList{}
-	opts := []client.ListOption{
-		client.MatchingLabels(nodeLabels),
-	}
-	err := r.client.List(context.TODO(), nodeList, opts...)
-	for _, node := range nodeList.Items {
-		for _, address := range node.Status.Addresses {
-			if address.Type == "InternalIP" {
-				healthyWorkers[node.Name] = address.Address
-			}
-		}
-	}
-	if err != nil {
-		return healthyWorkers, err
-	}
-	return healthyWorkers, nil
 }
