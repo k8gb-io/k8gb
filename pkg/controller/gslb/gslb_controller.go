@@ -19,8 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-const gslbOperatorNamespace = "ohmyglb"
-
 var log = logf.Log.WithName("controller_gslb")
 
 /**
@@ -168,13 +166,6 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 		ingress)
 	if result != nil {
 		return *result, err
-	}
-
-	// == CoreDNS ConfigMap =====
-	err = r.updateHostsConfigMap(gslb, "gslb-coredns-coredns")
-	if err != nil {
-		// Requeue the request
-		return reconcile.Result{}, err
 	}
 
 	// == external-dns dnsendpoints CRs ==

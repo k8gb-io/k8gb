@@ -171,10 +171,6 @@ spec:
         status:
           description: GslbStatus defines the observed state of Gslb
           properties:
-            healthyWorkers:
-              additionalProperties:
-                type: string
-              type: object
             managedHosts:
               description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                 of cluster Important: Run "operator-sdk generate k8s" to regenerate
@@ -188,7 +184,6 @@ spec:
                 type: string
               type: object
           required:
-          - healthyWorkers
           - managedHosts
           - serviceHealth
           type: object

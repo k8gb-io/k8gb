@@ -8,7 +8,7 @@ require (
 	github.com/kubernetes-incubator/external-dns v0.5.17
 	github.com/operator-framework/operator-sdk v0.12.0
 	github.com/spf13/pflag v1.0.3
-	github.com/txn2/txeh v1.3.0
+	github.com/txn2/txeh v1.3.0 // indirect
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v11.0.0+incompatible

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"reflect"
-	"regexp"
 	"testing"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
@@ -25,36 +24,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var corednsConfigMapYaml = []byte(`
-apiVersion: v1
-data:
-  Corefile: |-
-    .:53 {
-        cache 30
-        errors
-        health
-        ready
-        kubernetes cluster.local
-        loadbalance round_robin
-        prometheus 0.0.0.0:9153
-        forward . /etc/resolv.conf
-        hosts /etc/coredns/gslb.hosts {
-            ttl 30
-            reload "300ms"
-        }
-    }
-  gslb.hosts: |
-    127.0.0.1       localhost
-    192.168.1.10    absa.oss.org            absa
-kind: ConfigMap
-metadata:
-  creationTimestamp: null
-  labels:
-    app.kubernetes.io/instance: gslb-coredns
-  name: gslb-coredns-coredns
-  namespace: ohmyglb
-`)
-
 var crSampleYaml = "../../../deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml"
 
 func TestGslbController(t *testing.T) {
@@ -65,21 +34,13 @@ func TestGslbController(t *testing.T) {
 	// Set the logger to development mode for verbose logs.
 	logf.SetLogger(zap.Logger(true))
 
-	cmName := "gslb-coredns-coredns"
-
 	gslb, err := yamlToGslb(gslbYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	corednsConfigMap, err := yamlToConfigMap(corednsConfigMapYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	objs := []runtime.Object{
 		gslb,
-		corednsConfigMap,
 	}
 
 	// Register operator types with the runtime scheme.
@@ -228,89 +189,6 @@ func TestGslbController(t *testing.T) {
 		}
 	})
 
-	t.Run("Healthy workers status", func(t *testing.T) {
-		nodeName := "test-node"
-		nodeAddress := "10.0.0.1"
-		nodeLabels := map[string]string{"node-role.kubernetes.io/worker": ""}
-		node := &corev1.Node{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: gslb.Namespace,
-				Name:      nodeName,
-				Labels:    nodeLabels,
-			},
-		}
-		err = cl.Create(context.TODO(), node)
-		if err != nil {
-			t.Fatalf("Failed to create testing node: (%v)", err)
-		}
-		node.Status.Addresses = []corev1.NodeAddress{
-			{
-				Type:    "InternalIP",
-				Address: nodeAddress},
-		}
-		err = r.client.Status().Update(context.TODO(), node)
-		if err != nil {
-			t.Fatalf("Failed to update Node status:(%v)", err)
-		}
-
-		reconcileAndUpdateGslb(t, r, req, cl, gslb)
-
-		want := make(map[string]string)
-		want[nodeName] = nodeAddress
-
-		got := gslb.Status.HealthyWorkers
-
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("expected HealthyWorkers status to be %s, but got %s", want, got)
-		}
-	})
-
-	t.Run("CoreDNS configmap was updated with healthy service references", func(t *testing.T) {
-
-		reconcileAndUpdateGslb(t, r, req, cl, gslb)
-
-		nn := types.NamespacedName{
-			Name:      cmName,
-			Namespace: gslbOperatorNamespace,
-		}
-
-		err = cl.Get(context.TODO(), nn, corednsConfigMap)
-		if err != nil {
-			t.Fatalf("Failed to get expected corednsConfigMap: (%v)", err)
-		}
-
-		want := `10\.0\.0\.1.*app3.cloud.absa.internal`
-		got := corednsConfigMap.Data["gslb.hosts"]
-		matched, _ := regexp.MatchString(want, got)
-		if !matched {
-			t.Errorf("Expected to have '%s' in the host configmap '%s'", want, got)
-		}
-	})
-
-	t.Run("CoreDNS configmap contains no uhealthy service references", func(t *testing.T) {
-
-		reconcileAndUpdateGslb(t, r, req, cl, gslb)
-
-		nn := types.NamespacedName{
-			Name:      cmName,
-			Namespace: gslbOperatorNamespace,
-		}
-
-		err = cl.Get(context.TODO(), nn, corednsConfigMap)
-		if err != nil {
-			t.Fatalf("Failed to get expected corednsConfigMap: (%v)", err)
-		}
-
-		wants := []string{`10\.0\.0\.1.*app.cloud.absa.internal`, `10\.0\.0\.1.*app2.cloud.absa.internal`}
-		for _, want := range wants {
-			got := corednsConfigMap.Data["gslb.hosts"]
-			matched, _ := regexp.MatchString(want, got)
-			if matched {
-				t.Errorf("Expected to NOT to have non healthy '%s' in the host configmap '%s' ", want, got)
-			}
-		}
-	})
-
 	t.Run("Gslb creates DNSEndpoint CR for healthy ingress hosts", func(t *testing.T) {
 
 		ingressIP := corev1.LoadBalancerIngress{
@@ -385,20 +263,4 @@ func yamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
 		return &ohmyglbv1beta1.Gslb{}, err
 	}
 	return gslb, nil
-}
-
-func yamlToConfigMap(yaml []byte) (*corev1.ConfigMap, error) {
-	// yamlBytes contains a []byte of my yaml job spec
-	// convert the yaml to json
-	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
-	if err != nil {
-		return &corev1.ConfigMap{}, err
-	}
-	// unmarshal the json into the kube struct
-	var cm = &corev1.ConfigMap{}
-	err = json.Unmarshal(jsonBytes, &cm)
-	if err != nil {
-		return &corev1.ConfigMap{}, err
-	}
-	return cm, nil
 }
