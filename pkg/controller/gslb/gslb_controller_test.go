@@ -3,6 +3,7 @@ package gslb
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 	"regexp"
 	"testing"
@@ -23,39 +24,6 @@ import (
 	zap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
-
-var gslbYaml = []byte(`
-apiVersion: ohmyglb.absa.oss/v1beta1
-kind: Gslb
-metadata:
-  name: test-gslb
-  namespace: test-gslb
-spec:
-  ingress:
-    rules:
-    - host: app.cloud.absa.internal
-      http:
-        paths:
-        - backend:
-            serviceName: app
-            servicePort: http
-          path: /
-    - host: app1.cloud.absa.external
-      http:
-        paths:
-        - backend:
-            serviceName: unhealthy-nginx
-            servicePort: http
-          path: /
-    - host: app2.cloud.absa.external
-      http:
-        paths:
-        - backend:
-            serviceName: healthy-nginx
-            servicePort: http
-          path: /
-  strategy: roundRobin
-`)
 
 var corednsConfigMapYaml = []byte(`
 apiVersion: v1
@@ -87,12 +55,16 @@ metadata:
   namespace: ohmyglb
 `)
 
+var crSampleYaml = "../../../deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml"
+
 func TestGslbController(t *testing.T) {
+	gslbYaml, err := ioutil.ReadFile(crSampleYaml)
+	if err != nil {
+		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
+	}
 	// Set the logger to development mode for verbose logs.
 	logf.SetLogger(zap.Logger(true))
 
-	gslbName := "test-gslb"
-	namespace := "test-gslb"
 	cmName := "gslb-coredns-coredns"
 
 	gslb, err := yamlToGslb(gslbYaml)
@@ -124,8 +96,8 @@ func TestGslbController(t *testing.T) {
 	// watched resource .
 	req := reconcile.Request{
 		NamespacedName: types.NamespacedName{
-			Name:      gslbName,
-			Namespace: namespace,
+			Name:      gslb.Name,
+			Namespace: gslb.Namespace,
 		},
 	}
 
@@ -159,7 +131,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected gslb: (%v)", err)
 		}
 
-		expectedHosts := []string{"app.cloud.absa.internal", "app1.cloud.absa.external", "app2.cloud.absa.external"}
+		expectedHosts := []string{"app.cloud.absa.internal", "app2.cloud.absa.internal", "app3.cloud.absa.internal"}
 		actualHosts := gslb.Status.ManagedHosts
 		if !reflect.DeepEqual(expectedHosts, actualHosts) {
 			t.Errorf("expected %v managed hosts, but got %v", expectedHosts, actualHosts)
@@ -177,11 +149,11 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("Unhealthy service status", func(t *testing.T) {
 		serviceName := "unhealthy-nginx"
-		unhealthyHost := "app1.cloud.absa.external"
+		unhealthyHost := "app2.cloud.absa.internal"
 		service := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
-				Namespace: namespace,
+				Namespace: gslb.Namespace,
 			},
 		}
 
@@ -193,7 +165,7 @@ func TestGslbController(t *testing.T) {
 		endpoint := &corev1.Endpoints{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
-				Namespace: namespace,
+				Namespace: gslb.Namespace,
 			},
 		}
 
@@ -217,7 +189,7 @@ func TestGslbController(t *testing.T) {
 		service := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
-				Namespace: namespace,
+				Namespace: gslb.Namespace,
 				Labels:    labels,
 			},
 		}
@@ -231,7 +203,7 @@ func TestGslbController(t *testing.T) {
 		endpoint := &corev1.Endpoints{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
-				Namespace: namespace,
+				Namespace: gslb.Namespace,
 				Labels:    labels,
 			},
 			Subsets: []corev1.EndpointSubset{
@@ -249,7 +221,7 @@ func TestGslbController(t *testing.T) {
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		expectedServiceStatus := "Healthy"
-		healthyHost := "app2.cloud.absa.external"
+		healthyHost := "app3.cloud.absa.internal"
 		actualServiceStatus := gslb.Status.ServiceHealth[healthyHost]
 		if expectedServiceStatus != actualServiceStatus {
 			t.Errorf("expected %s service status to be %s, but got %s", healthyHost, expectedServiceStatus, actualServiceStatus)
@@ -262,7 +234,7 @@ func TestGslbController(t *testing.T) {
 		nodeLabels := map[string]string{"node-role.kubernetes.io/worker": ""}
 		node := &corev1.Node{
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
+				Namespace: gslb.Namespace,
 				Name:      nodeName,
 				Labels:    nodeLabels,
 			},
@@ -307,7 +279,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected corednsConfigMap: (%v)", err)
 		}
 
-		want := `10\.0\.0\.1.*app2.cloud.absa.external`
+		want := `10\.0\.0\.1.*app3.cloud.absa.internal`
 		got := corednsConfigMap.Data["gslb.hosts"]
 		matched, _ := regexp.MatchString(want, got)
 		if !matched {
@@ -329,7 +301,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected corednsConfigMap: (%v)", err)
 		}
 
-		wants := []string{`10\.0\.0\.1.*app.cloud.absa.internal`, `10\.0\.0\.1.*app1.cloud.absa.external`}
+		wants := []string{`10\.0\.0\.1.*app.cloud.absa.internal`, `10\.0\.0\.1.*app2.cloud.absa.internal`}
 		for _, want := range wants {
 			got := corednsConfigMap.Data["gslb.hosts"]
 			matched, _ := regexp.MatchString(want, got)
@@ -347,6 +319,22 @@ func TestGslbController(t *testing.T) {
 		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
 		if err != nil {
 			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+
+		got := dnsEndpoint.Spec.Endpoints
+
+		want := []*externaldns.Endpoint{{
+			DNSName:    "app3.cloud.absa.internal",
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets:    externaldns.Targets{"10.0.0.1"}},
+		}
+
+		prettyGot := prettyPrint(got)
+		prettyWant := prettyPrint(want)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
 	})
 }

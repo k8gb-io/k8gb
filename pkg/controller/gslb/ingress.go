@@ -56,5 +56,15 @@ func (r *ReconcileGslb) ensureIngress(request reconcile.Request,
 		return &reconcile.Result{}, err
 	}
 
+	// Update existing object with new spec
+	found.Spec = i.Spec
+	err = r.client.Update(context.TODO(), found)
+
+	if err != nil {
+		// Update failed
+		log.Error(err, "Failed to update Ingress", "Ingress.Namespace", found.Namespace, "Ingress.Name", found.Name)
+		return &reconcile.Result{}, err
+	}
+
 	return nil, nil
 }

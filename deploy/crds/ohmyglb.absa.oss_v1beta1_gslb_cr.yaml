@@ -1,7 +1,8 @@
 apiVersion: ohmyglb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: example-gslb
+  name: test-gslb
+  namespace: test-gslb
 spec:
   ingress:
     rules:
@@ -12,14 +13,14 @@ spec:
                 serviceName: app
                 servicePort: http
               path: /
-      - host: app1.cloud.absa.external
+      - host: app2.cloud.absa.internal
         http:
           paths:
           - backend:
               serviceName: unhealthy-nginx
               servicePort: http
             path: /
-      - host: app2.cloud.absa.external
+      - host: app3.cloud.absa.internal
         http:
           paths:
           - backend:
