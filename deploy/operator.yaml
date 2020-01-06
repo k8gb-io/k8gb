@@ -17,7 +17,7 @@ spec:
       containers:
         - name: ohmyglb
           # Replace this with the built image name
-          image: ytsarev/ohmyglb:v0.1.1
+          image: ytsarev/ohmyglb:v0.2.0
           command:
           - ohmyglb
           imagePullPolicy: Always
