@@ -30,10 +30,10 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	"sigs.k8s.io/controller-runtime/pkg/scheme"
 
 	// DNSEndoints
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Change below variables to serve metrics on different host or port.
@@ -108,16 +108,14 @@ func main() {
 
 	log.Info("Registering Components.")
 
-	scheme := mgr.GetScheme()
-
 	// Add external-dns DNSEndpoints resource
 	// https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md#adding-3rd-party-resources-to-your-operator
-	externaldnsSchemaGroupVersion := schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}
-	scheme.AddKnownTypes(externaldnsSchemaGroupVersion, &externaldns.DNSEndpoint{})
-	scheme.AddKnownTypes(externaldnsSchemaGroupVersion, &externaldns.DNSEndpointList{})
-	// https://github.com/kubernetes/kubernetes/pull/57243/files
-	// without metav1 we will face `Failed to list *endpoint.DNSEndpoint: v1.ListOptions is not suitable for converting to "externaldns.k8s.io/v1alpha1" in scheme "k8s.io/client-go/kubernetes/scheme/register.go:65"`
-	metav1.AddToGroupVersion(scheme, externaldnsSchemaGroupVersion)
+	schemeBuilder := &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}}
+	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
+	if err := schemeBuilder.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
