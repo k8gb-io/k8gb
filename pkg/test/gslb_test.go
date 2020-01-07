@@ -2,13 +2,13 @@ package e2e
 
 import (
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"testing"
 	"time"
 
 	"github.com/AbsaOSS/ohmyglb/pkg/apis"
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	ohmyhelpers "github.com/AbsaOSS/ohmyglb/pkg/controller/gslb"
 	"k8s.io/api/extensions/v1beta1"
 	rbac "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,8 +16,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	goctx "context"
-
-	yamlConv "github.com/ghodss/yaml"
 
 	framework "github.com/operator-framework/operator-sdk/pkg/test"
 	"github.com/operator-framework/operator-sdk/pkg/test/e2eutil"
@@ -99,7 +97,7 @@ func createGslb(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) (*
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
 	}
 
-	testGslb, err := yamlToGslb(gslbYaml)
+	testGslb, err := ohmyhelpers.YamlToGslb(gslbYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,20 +131,4 @@ func testGslbIngress(t *testing.T, f *framework.Framework, ctx *framework.TestCt
 	if err != nil {
 		t.Fatalf("Failed to get expected ingress: (%v)", err)
 	}
-}
-
-func yamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
-	// yamlBytes contains a []byte of my yaml job spec
-	// convert the yaml to json
-	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
-	if err != nil {
-		return &ohmyglbv1beta1.Gslb{}, err
-	}
-	// unmarshal the json into the kube struct
-	var gslb = &ohmyglbv1beta1.Gslb{}
-	err = json.Unmarshal(jsonBytes, &gslb)
-	if err != nil {
-		return &ohmyglbv1beta1.Gslb{}, err
-	}
-	return gslb, nil
 }
