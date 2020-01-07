@@ -85,9 +85,7 @@ func TestGslb(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(2 * time.Second)
 	testGslbIngress(t, f, ctx, gslb)
-
 }
 
 func createGslb(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) (*ohmyglbv1beta1.Gslb, error) {
