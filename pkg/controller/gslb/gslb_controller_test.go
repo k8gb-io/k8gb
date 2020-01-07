@@ -2,13 +2,11 @@ package gslb
 
 import (
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"reflect"
 	"testing"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
-	yamlConv "github.com/ghodss/yaml"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -34,7 +32,7 @@ func TestGslbController(t *testing.T) {
 	// Set the logger to development mode for verbose logs.
 	logf.SetLogger(zap.Logger(true))
 
-	gslb, err := yamlToGslb(gslbYaml)
+	gslb, err := YamlToGslb(gslbYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,20 +245,4 @@ func reconcileAndUpdateGslb(t *testing.T,
 	if err != nil {
 		t.Fatalf("Failed to get expected gslb: (%v)", err)
 	}
-}
-
-func yamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
-	// yamlBytes contains a []byte of my yaml job spec
-	// convert the yaml to json
-	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
-	if err != nil {
-		return &ohmyglbv1beta1.Gslb{}, err
-	}
-	// unmarshal the json into the kube struct
-	var gslb = &ohmyglbv1beta1.Gslb{}
-	err = json.Unmarshal(jsonBytes, &gslb)
-	if err != nil {
-		return &ohmyglbv1beta1.Gslb{}, err
-	}
-	return gslb, nil
 }

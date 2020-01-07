@@ -2,22 +2,23 @@ package e2e
 
 import (
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"testing"
 	"time"
 
 	"github.com/AbsaOSS/ohmyglb/pkg/apis"
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	ohmyhelpers "github.com/AbsaOSS/ohmyglb/pkg/controller/gslb"
+	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"k8s.io/api/extensions/v1beta1"
 	rbac "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"sigs.k8s.io/controller-runtime/pkg/scheme"
 
 	goctx "context"
-
-	yamlConv "github.com/ghodss/yaml"
 
 	framework "github.com/operator-framework/operator-sdk/pkg/test"
 	"github.com/operator-framework/operator-sdk/pkg/test/e2eutil"
@@ -34,6 +35,12 @@ var (
 func TestGslb(t *testing.T) {
 	gslbList := &ohmyglbv1beta1.GslbList{}
 	err := framework.AddToFrameworkScheme(apis.AddToScheme, gslbList)
+	if err != nil {
+		t.Fatalf("failed to add custom resource scheme to framework: %v", err)
+	}
+	schemeBuilder := &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}}
+	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
+	err = framework.AddToFrameworkScheme(schemeBuilder.AddToScheme, &externaldns.DNSEndpointList{})
 	if err != nil {
 		t.Fatalf("failed to add custom resource scheme to framework: %v", err)
 	}
@@ -87,9 +94,8 @@ func TestGslb(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(2 * time.Second)
 	testGslbIngress(t, f, ctx, gslb)
-
+	testGslbDNSEndpoint(t, f, ctx, gslb)
 }
 
 func createGslb(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) (*ohmyglbv1beta1.Gslb, error) {
@@ -99,7 +105,7 @@ func createGslb(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) (*
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
 	}
 
-	testGslb, err := yamlToGslb(gslbYaml)
+	testGslb, err := ohmyhelpers.YamlToGslb(gslbYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,32 +127,35 @@ func createGslb(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) (*
 }
 
 func testGslbIngress(t *testing.T, f *framework.Framework, ctx *framework.TestCtx, gslb *ohmyglbv1beta1.Gslb) {
-	ingress := &v1beta1.Ingress{}
-	nn := types.NamespacedName{Name: gslb.Name, Namespace: gslb.Namespace}
-	err := wait.Poll(retryInterval, timeout, func() (done bool, err error) {
-		err = f.Client.Get(context.TODO(), nn, ingress)
+	t.Run("Gslb creates associated Ingress", func(t *testing.T) {
+		ingress := &v1beta1.Ingress{}
+		nn := types.NamespacedName{Name: gslb.Name, Namespace: gslb.Namespace}
+		err := wait.Poll(retryInterval, timeout, func() (done bool, err error) {
+			err = f.Client.Get(context.TODO(), nn, ingress)
+			if err != nil {
+				return false, err
+			}
+			return true, nil
+		})
 		if err != nil {
-			return false, err
+			t.Fatalf("Failed to get expected ingress: (%v)", err)
 		}
-		return true, nil
 	})
-	if err != nil {
-		t.Fatalf("Failed to get expected ingress: (%v)", err)
-	}
 }
 
-func yamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
-	// yamlBytes contains a []byte of my yaml job spec
-	// convert the yaml to json
-	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
-	if err != nil {
-		return &ohmyglbv1beta1.Gslb{}, err
-	}
-	// unmarshal the json into the kube struct
-	var gslb = &ohmyglbv1beta1.Gslb{}
-	err = json.Unmarshal(jsonBytes, &gslb)
-	if err != nil {
-		return &ohmyglbv1beta1.Gslb{}, err
-	}
-	return gslb, nil
+func testGslbDNSEndpoint(t *testing.T, f *framework.Framework, ctx *framework.TestCtx, gslb *ohmyglbv1beta1.Gslb) {
+	t.Run("Gslb creates DNSEndpoint", func(t *testing.T) {
+		dnsEndpoint := &externaldns.DNSEndpoint{}
+		nn := types.NamespacedName{Name: gslb.Name, Namespace: gslb.Namespace}
+		err := wait.Poll(retryInterval, timeout, func() (done bool, err error) {
+			err = f.Client.Get(context.TODO(), nn, dnsEndpoint)
+			if err != nil {
+				return false, err
+			}
+			return true, nil
+		})
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+	})
 }
