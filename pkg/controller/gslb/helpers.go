@@ -7,6 +7,7 @@ import (
 	yamlConv "github.com/ghodss/yaml"
 )
 
+//YamlToGslb takes yaml and returns Gslb object
 func YamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
 	// yamlBytes contains a []byte of my yaml job spec
 	// convert the yaml to json
