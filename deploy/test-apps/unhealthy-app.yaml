@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: unhealthy-app
+  name: unhealthy-app
+  namespace: test-gslb
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      run: unhealthy-app
+  template:
+    metadata:
+      labels:
+        run: unhealthy-app
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: unhealthy-app

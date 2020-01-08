@@ -18,6 +18,18 @@ dns-tools:
 	kubectl -n ohmyglb get svc gslb-coredns-coredns
 	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 
+.PHONY: dns-smoke-test
+dns-smoke-test:
+	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @gslb-coredns-coredns app3.cloud.absa.internal
+
 .PHONY: deploy
 deploy:
 	deploy/deploy.sh
+
+.PHONY: deploy-test-apps
+deploy-test-apps:
+	kubectl apply -f deploy/test-apps
+
+.PHONY: clean-test-apps
+clean-test-apps:
+	kubectl delete -f deploy/test-apps

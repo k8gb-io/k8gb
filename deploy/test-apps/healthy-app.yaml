@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: healthy-app
+  name: healthy-app
+  namespace: test-gslb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: healthy-app
+  template:
+    metadata:
+      labels:
+        run: healthy-app
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: healthy-app
