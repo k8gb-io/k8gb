@@ -22,8 +22,16 @@ dns-tools:
 dns-smoke-test:
 	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @gslb-coredns-coredns app3.cloud.absa.internal
 
-.PHONY: deploy
-deploy:
+.PHONY: deploy-local-cluster
+deploy-local-cluster:
+	kind create cluster --config=deploy/kind/cluster.yaml
+
+.PHONY: destroy-local-cluster
+destroy-local-cluster:
+	kind delete cluster
+
+.PHONY: deploy-gslb
+deploy-gslb:
 	deploy/deploy.sh
 
 .PHONY: deploy-test-apps
