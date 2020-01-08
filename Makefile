@@ -12,3 +12,12 @@ test:
 .PHONY: e2e-test
 e2e-test:
 	operator-sdk test local ./pkg/test/
+
+.PHONY: dns-tools
+dns-tools:
+	kubectl -n ohmyglb get svc gslb-coredns-coredns
+	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
+
+.PHONY: deploy
+deploy:
+	deploy/deploy.sh

@@ -16,5 +16,5 @@ helm -n ohmyglb upgrade -i etcd-for-coredns stable/etcd-operator --set customRes
 ### CoreDNS itself
 
 ```
-helm -n ohmyglb upgrade -i gslb-coredns stable/coredns -f values.yaml
+helm -n ohmyglb upgrade -i gslb-coredns stable/coredns -f deploy/coredns/values.yaml
 ```
