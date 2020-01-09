@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: udp-services
+  namespace: ohmyglb
+data:
+  53: "ohmyglb/gslb-coredns-coredns:53"
