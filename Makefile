@@ -12,3 +12,32 @@ test:
 .PHONY: e2e-test
 e2e-test:
 	operator-sdk test local ./pkg/test/
+
+.PHONY: dns-tools
+dns-tools:
+	kubectl -n ohmyglb get svc gslb-coredns-coredns
+	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
+
+.PHONY: dns-smoke-test
+dns-smoke-test:
+	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @gslb-coredns-coredns app3.cloud.absa.internal
+
+.PHONY: deploy-local-cluster
+deploy-local-cluster:
+	kind create cluster --config=deploy/kind/cluster.yaml
+
+.PHONY: destroy-local-cluster
+destroy-local-cluster:
+	kind delete cluster
+
+.PHONY: deploy-gslb
+deploy-gslb:
+	deploy/deploy.sh
+
+.PHONY: deploy-test-apps
+deploy-test-apps:
+	kubectl apply -f deploy/test-apps
+
+.PHONY: clean-test-apps
+clean-test-apps:
+	kubectl delete -f deploy/test-apps

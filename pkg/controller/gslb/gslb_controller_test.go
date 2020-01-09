@@ -90,7 +90,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected gslb: (%v)", err)
 		}
 
-		expectedHosts := []string{"app.cloud.absa.internal", "app2.cloud.absa.internal", "app3.cloud.absa.internal"}
+		expectedHosts := []string{"app1.cloud.absa.internal", "app2.cloud.absa.internal", "app3.cloud.absa.internal"}
 		actualHosts := gslb.Status.ManagedHosts
 		if !reflect.DeepEqual(expectedHosts, actualHosts) {
 			t.Errorf("expected %v managed hosts, but got %v", expectedHosts, actualHosts)
@@ -99,7 +99,7 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("NotFound service status", func(t *testing.T) {
 		expectedServiceStatus := "NotFound"
-		notFoundHost := "app.cloud.absa.internal"
+		notFoundHost := "app1.cloud.absa.internal"
 		actualServiceStatus := gslb.Status.ServiceHealth[notFoundHost]
 		if expectedServiceStatus != actualServiceStatus {
 			t.Errorf("expected %s service status to be %s, but got %s", notFoundHost, expectedServiceStatus, actualServiceStatus)
@@ -107,7 +107,7 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Unhealthy service status", func(t *testing.T) {
-		serviceName := "unhealthy-nginx"
+		serviceName := "unhealthy-app"
 		unhealthyHost := "app2.cloud.absa.internal"
 		service := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
@@ -143,13 +143,11 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Healthy service status", func(t *testing.T) {
-		serviceName := "healthy-nginx"
-		labels := map[string]string{"app": "nginx"}
+		serviceName := "healthy-app"
 		service := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
 				Namespace: gslb.Namespace,
-				Labels:    labels,
 			},
 		}
 
@@ -163,7 +161,6 @@ func TestGslbController(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
 				Namespace: gslb.Namespace,
-				Labels:    labels,
 			},
 			Subsets: []corev1.EndpointSubset{
 				{
