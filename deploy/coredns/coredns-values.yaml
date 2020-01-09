@@ -17,7 +17,7 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-serviceType: "NodePort"
+serviceType: "ClusterIP"
 
 prometheus:
   monitor:

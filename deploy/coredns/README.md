@@ -4,7 +4,7 @@ Here we are installing resources which are working in tandem but not directly ma
 
 ### Baremetal(or local Minukube/Kind cluster) nginx-controller setup
 ```
-helm -n ohmyglb upgrade -i nginx-ingress stable/nginx-ingress --set controller.service.type=NodePort --set controller.reportNodeInternalIp=true --set controller.hostNetwork=true
+helm -n ohmyglb upgrade -i nginx-ingress stable/nginx-ingress -f deploy/coredns/nginx-ingress-values.yaml
 ```
 
 ### Etcd backend for CoreDNS
@@ -16,5 +16,5 @@ helm -n ohmyglb upgrade -i etcd-for-coredns stable/etcd-operator --set customRes
 ### CoreDNS itself
 
 ```
-helm -n ohmyglb upgrade -i gslb-coredns stable/coredns -f deploy/coredns/values.yaml
+helm -n ohmyglb upgrade -i gslb-coredns stable/coredns -f deploy/coredns/coredns-values.yaml
 ```
