@@ -1,3 +1,6 @@
+REPO ?= ytsarev/ohmyglb
+VERSION ?= $$(operator-sdk up local --operator-flags=-v)
+
 .PHONY: up-local
 up-local:
 	kubectl create ns test-gslb
@@ -41,3 +44,11 @@ deploy-test-apps:
 .PHONY: clean-test-apps
 clean-test-apps:
 	kubectl delete -f deploy/test-apps
+
+.PHONY: build
+build:
+	operator-sdk build $(REPO):$(VERSION)
+
+.PHONY: push
+push:
+	docker push $(REPO):$(VERSION)
