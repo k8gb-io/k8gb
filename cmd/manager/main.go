@@ -60,8 +60,14 @@ func main() {
 	// controller-runtime)
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
+	v := pflag.BoolP("version", "v", false, "print operator version")
+
 	pflag.Parse()
 
+	if *v {
+		fmt.Printf("v%v\n", version.Version)
+		os.Exit(0)
+	}
 	// Use a zap logr.Logger implementation. If none of the zap
 	// flags are configured (or if the zap flag set is not being
 	// used), this defaults to a production zap logger.
