@@ -18,7 +18,7 @@ e2e-test:
 
 .PHONY: dns-tools
 dns-tools:
-	kubectl -n ohmyglb get svc gslb-coredns-coredns
+	kubectl -n ohmyglb get svc ohmyglb-coredns
 	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 
 .PHONY: dns-smoke-test
@@ -33,12 +33,19 @@ deploy-local-cluster:
 destroy-local-cluster:
 	kind delete cluster
 
-.PHONY: deploy-gslb
-deploy-gslb:
-	deploy/deploy.sh
+.PHONY: deploy-gslb-operator
+deploy-gslb-operator:
+	kubectl apply -f deploy/namespace.yaml
+	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb
+
+.PHONY: deploy-gslb-cr
+deploy-gslb-cr:
+	kubectl apply -f deploy/crds/test-namespace.yaml
+	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 
 .PHONY: deploy-test-apps
 deploy-test-apps:
+	kubectl apply -f deploy/crds/test-namespace.yaml
 	kubectl apply -f deploy/test-apps
 
 .PHONY: clean-test-apps

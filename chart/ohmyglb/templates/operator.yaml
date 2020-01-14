@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ohmyglb
+  namespace: ohmyglb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: ohmyglb
+  template:
+    metadata:
+      labels:
+        name: ohmyglb
+    spec:
+      serviceAccountName: ohmyglb
+      containers:
+        - name: ohmyglb
+          image: {{ .Values.ohmyglb.image }}
+          command:
+          - ohmyglb
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "ohmyglb"

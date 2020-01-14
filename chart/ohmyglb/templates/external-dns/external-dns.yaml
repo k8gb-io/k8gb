@@ -41,8 +41,7 @@ kind: ServiceAccount
 metadata:
   name: external-dns
   namespace: ohmyglb
-imagePullSecrets:
-- name: regcred
+imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -63,7 +62,7 @@ spec:
       serviceAccountName: external-dns
       containers:
       - name: external-dns
-        image: registry.opensource.zalan.do/teapot/external-dns:latest
+        image: {{ .Values.externaldns.image }}
         args:
         - --source=crd
         - --provider=coredns
