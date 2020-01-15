@@ -4,4 +4,4 @@ metadata:
   name: udp-services
   namespace: ohmyglb
 data:
-  53: "ohmyglb/gslb-coredns-coredns:53"
+  53: "ohmyglb/ohmyglb-coredns:53"

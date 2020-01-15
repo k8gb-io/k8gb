@@ -41,6 +41,8 @@ kind: ServiceAccount
 metadata:
   name: external-dns
   namespace: ohmyglb
+imagePullSecrets:
+- name: regcred
 ---
 apiVersion: apps/v1
 kind: Deployment

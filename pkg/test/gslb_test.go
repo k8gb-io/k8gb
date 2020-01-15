@@ -11,8 +11,6 @@ import (
 	ohmyhelpers "github.com/AbsaOSS/ohmyglb/pkg/controller/gslb"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"k8s.io/api/extensions/v1beta1"
-	rbac "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -59,29 +57,6 @@ func TestGslb(t *testing.T) {
 	}
 	// get global framework variables
 	f := framework.Global
-
-	// Dynamically create ClusterRoleBinding for dynamically created namespaced gslb ServiceAccount
-	// Otherwise tests will fail with rbac restrictions
-	clusterRoleBinding := &rbac.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
-		},
-		Subjects: []rbac.Subject{{
-			Kind:      "ServiceAccount",
-			Name:      "ohmyglb",
-			Namespace: namespace,
-		}},
-		RoleRef: rbac.RoleRef{
-			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "ClusterRole",
-			Name:     "ohmyglb",
-		},
-	}
-
-	err = f.Client.Create(goctx.TODO(), clusterRoleBinding, &framework.CleanupOptions{TestContext: ctx, Timeout: cleanupTimeout, RetryInterval: cleanupRetryInterval})
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	// wait for ohmyglb-operator to be ready
 	err = e2eutil.WaitForOperatorDeployment(t, f.KubeClient, namespace, "ohmyglb", 1, retryInterval, timeout)

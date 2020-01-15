@@ -75,3 +75,6 @@ tags
 .vscode/*
 .history
 # End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
+
+# Exclude chart tar.gz files
+chart/ohmyglb/charts/

@@ -16,8 +16,7 @@ spec:
       serviceAccountName: ohmyglb
       containers:
         - name: ohmyglb
-          # Replace this with the built image name
-          image: ytsarev/ohmyglb:v0.2.0
+          image: {{ .Values.ohmyglb.image }}
           command:
           - ohmyglb
           imagePullPolicy: Always
