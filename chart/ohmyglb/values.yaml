@@ -6,7 +6,7 @@ global:
   # - name: "image-pull-secret"
 
 ohmyglb:
-  image: ytsarev/ohmyglb:v0.2.1
+  image: ytsarev/ohmyglb:v0.2.2
   ingressNamespace: "ohmyglb"
   dnsZone: &dnsZone "example.com"
 

@@ -129,8 +129,29 @@ func schema_pkg_apis_ohmyglb_v1beta1_GslbStatus(ref common.ReferenceCallback) co
 							},
 						},
 					},
+					"healthyRecords": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type: []string{"array"},
+										Items: &spec.SchemaOrArray{
+											Schema: &spec.Schema{
+												SchemaProps: spec.SchemaProps{
+													Type:   []string{"string"},
+													Format: "",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"managedHosts", "serviceHealth"},
+				Required: []string{"managedHosts", "serviceHealth", "healthyRecords"},
 			},
 		},
 	}

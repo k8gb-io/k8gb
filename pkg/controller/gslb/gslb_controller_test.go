@@ -219,6 +219,17 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
 	})
+
+	// Test is dependant on fixtures created in other tests which is
+	// kind of antipattern. OTOH we avoid a lot of fixture creation
+	// code so I will keep it this way for a time being
+	t.Run("DNS Record reflection in status", func(t *testing.T) {
+		got := gslb.Status.HealthyRecords
+		want := map[string][]string{"app3.cloud.example.com": {"10.0.0.1"}}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s healthyRecords status,\n\n want:\n %s", got, want)
+		}
+	})
 }
 
 func reconcileAndUpdateGslb(t *testing.T,
