@@ -8,7 +8,7 @@ global:
 ohmyglb:
   image: ytsarev/ohmyglb:v0.2.1
   ingressNamespace: "ohmyglb"
-  dnsZone: &dnsZone "absa.internal"
+  dnsZone: &dnsZone "example.com"
 
 externaldns:
   image: registry.opensource.zalan.do/teapot/external-dns:latest

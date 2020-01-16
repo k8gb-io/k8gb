@@ -90,7 +90,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected gslb: (%v)", err)
 		}
 
-		expectedHosts := []string{"app1.cloud.absa.internal", "app2.cloud.absa.internal", "app3.cloud.absa.internal"}
+		expectedHosts := []string{"app1.cloud.example.com", "app2.cloud.example.com", "app3.cloud.example.com"}
 		actualHosts := gslb.Status.ManagedHosts
 		if !reflect.DeepEqual(expectedHosts, actualHosts) {
 			t.Errorf("expected %v managed hosts, but got %v", expectedHosts, actualHosts)
@@ -99,7 +99,7 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("NotFound service status", func(t *testing.T) {
 		expectedServiceStatus := "NotFound"
-		notFoundHost := "app1.cloud.absa.internal"
+		notFoundHost := "app1.cloud.example.com"
 		actualServiceStatus := gslb.Status.ServiceHealth[notFoundHost]
 		if expectedServiceStatus != actualServiceStatus {
 			t.Errorf("expected %s service status to be %s, but got %s", notFoundHost, expectedServiceStatus, actualServiceStatus)
@@ -108,7 +108,7 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("Unhealthy service status", func(t *testing.T) {
 		serviceName := "unhealthy-app"
-		unhealthyHost := "app2.cloud.absa.internal"
+		unhealthyHost := "app2.cloud.example.com"
 		service := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
@@ -177,7 +177,7 @@ func TestGslbController(t *testing.T) {
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		expectedServiceStatus := "Healthy"
-		healthyHost := "app3.cloud.absa.internal"
+		healthyHost := "app3.cloud.example.com"
 		actualServiceStatus := gslb.Status.ServiceHealth[healthyHost]
 		if expectedServiceStatus != actualServiceStatus {
 			t.Errorf("expected %s service status to be %s, but got %s", healthyHost, expectedServiceStatus, actualServiceStatus)
@@ -206,7 +206,7 @@ func TestGslbController(t *testing.T) {
 		got := dnsEndpoint.Spec.Endpoints
 
 		want := []*externaldns.Endpoint{{
-			DNSName:    "app3.cloud.absa.internal",
+			DNSName:    "app3.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1"}},
