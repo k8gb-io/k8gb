@@ -6,21 +6,21 @@ metadata:
 spec:
   ingress:
     rules:
-      - host: app1.cloud.absa.internal # This is the GSLB enabled host that clients would use
+      - host: app1.cloud.example.com # This is the GSLB enabled host that clients would use
         http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
           paths:
             - backend:
                 serviceName: non-existing-app
                 servicePort: http
               path: /
-      - host: app2.cloud.absa.internal
+      - host: app2.cloud.example.com
         http:
           paths:
           - backend:
               serviceName: unhealthy-app
               servicePort: http
             path: /
-      - host: app3.cloud.absa.internal
+      - host: app3.cloud.example.com
         http:
           paths:
           - backend:

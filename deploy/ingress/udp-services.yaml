@@ -1,3 +1,5 @@
+# Standalone ConfigMap to expose coredns in Rancher
+# without any other ingress contoller reconfiguration
 apiVersion: v1
 kind: ConfigMap
 metadata:

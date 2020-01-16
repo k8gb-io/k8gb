@@ -23,7 +23,7 @@ dns-tools:
 
 .PHONY: dns-smoke-test
 dns-smoke-test:
-	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @ohmyglb-coredns app3.cloud.absa.internal
+	kubectl -n ohmyglb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @ohmyglb-coredns app3.cloud.example.com
 
 .PHONY: deploy-local-cluster
 deploy-local-cluster:

@@ -54,7 +54,7 @@ kind: Gslb
 metadata:
   name: app
 spec:
-  host: app.cloud.absa.internal # This is the GSLB enabled host that clients would use
+  host: app.cloud.example.com # This is the GSLB enabled host that clients would use
   http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
     paths:
     - backend:
@@ -68,7 +68,7 @@ spec:
 
 On creating this `Gslb` resource, the Oh My GLB controller watching the cluster where this resource is created, will:
 
-1. Create a new `Ingress` resource that will allow requests with the GSLB host (`app.cloud.absa.internal`) to be handled by the cluster's Ingress controller
+1. Create a new `Ingress` resource that will allow requests with the GSLB host (`app.cloud.example.com`) to be handled by the cluster's Ingress controller
 2. Configure a health check strategy on the underlying `app` Pods. The Pods here are the Pods matched by the Service configured by `serviceName`
 3. Based on the health (see [Service health](#service-health)) of those Pods, if at least one of the Pods is healthy, add DNS records with the external addresses of the cluster's nodes running the Ingress controllers
 
@@ -76,14 +76,14 @@ On creating this `Gslb` resource, the Oh My GLB controller watching the cluster 
 
 In the use case above, the following would describe a client request:
 
-1. Client makes a request to <https://app.cloud.absa.internal>
-2. In resolving the IP for `app.cloud.absa.internal`, the Recursive Resolver forwards the requests to one of the instances of Oh My GLB
+1. Client makes a request to <https://app.cloud.example.com>
+2. In resolving the IP for `app.cloud.example.com`, the Recursive Resolver forwards the requests to one of the instances of Oh My GLB
 3. One of the cluster Ingress node IPs is returned to the client. E.g. `10.0.100.20`
 4. The client, using the resolved IP of `10.0.100.20` now makes a connection and proceeds with the request. The request will be handled by one of the cluster's Ingress controllers and via the created GSLB Ingress resource, the request is proxied through to one of the available Pods as per the usual Kubernetes Ingress mechanics
 
 #### 1.3 Outcome
 
-In this use case, only _Kubernetes cluster X_ would be eligible to handle ingress traffic for `https://app.cloud.absa.internal` as there was no `Gslb` resource created in _Kubernetes cluster Y_.
+In this use case, only _Kubernetes cluster X_ would be eligible to handle ingress traffic for `https://app.cloud.example.com` as there was no `Gslb` resource created in _Kubernetes cluster Y_.
 
 ### 2. Basic - Multi cluster
 
