@@ -119,7 +119,9 @@ func (r *ReconcileGslb) getHealthyRecords(gslb *ohmyglbv1beta1.Gslb) (map[string
 	for _, host := range healthyHosts {
 		for _, endpoint := range dnsEndpoint.Spec.Endpoints {
 			if endpoint.DNSName == host {
-				healthyRecords[host] = endpoint.Targets
+				if len(endpoint.Targets) > 0 {
+					healthyRecords[host] = endpoint.Targets
+				}
 			}
 		}
 	}
