@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
+	"github.com/miekg/dns"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,6 +43,44 @@ func (r *ReconcileGslb) getGslbIngressIPs(gslb *ohmyglbv1beta1.Gslb) ([]string, 
 	return gslbIngressIPs, nil
 }
 
+func (r *ReconcileGslb) getExternalTargets(gslb *ohmyglbv1beta1.Gslb) ([]string, error) {
+
+	extGslbClustersVar := os.Getenv("EXT_GSLB_CLUSTERS")
+
+	if extGslbClustersVar == "" {
+		log.Info("No other Gslb enabled clusters are defined in the configuration...Working standalone")
+		return nil, nil
+	}
+
+	extGslbClusters := strings.Split(extGslbClustersVar, ",")
+
+	var targets []string
+
+	for _, cluster := range extGslbClusters {
+		log.Info(fmt.Sprintf("Adding external Gslb targets from %s cluster...", cluster))
+		g := new(dns.Msg)
+		hostsz := fmt.Sprintf("hostsz.%s.%s.", gslb.Name, cluster)
+		g.SetQuestion(hostsz, dns.TypeA)
+		ns := fmt.Sprintf("%s:53", cluster)
+		a, err := dns.Exchange(g, ns)
+		if err != nil {
+			return nil, err
+		}
+		var clusterTargets []string
+
+		for _, A := range a.Answer {
+			IP := strings.Split(A.String(), "\t")[4]
+			clusterTargets = append(clusterTargets, IP)
+		}
+		if len(clusterTargets) > 0 {
+			targets = append(targets, clusterTargets...)
+			log.Info(fmt.Sprintf("Added external %s Gslb targets from %s cluster", clusterTargets, hostsz))
+		}
+	}
+
+	return targets, nil
+}
+
 func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
 	var gslbHosts []*externaldns.Endpoint
 
@@ -51,6 +92,29 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 	targets, err := r.getGslbIngressIPs(gslb)
 	if err != nil {
 		return nil, err
+	}
+
+	dnsZone := os.Getenv("DNS_ZONE")
+
+	// Service TXT DNS Record to share healthy target with ext. Gslb
+	serviceDNSRecord := &externaldns.Endpoint{
+		DNSName:    fmt.Sprintf("hostsz.%s.%s", gslb.Name, dnsZone),
+		RecordTTL:  30,
+		RecordType: "A",
+		Targets:    targets,
+	}
+	gslbHosts = append(gslbHosts, serviceDNSRecord)
+
+	externalTargets, err := r.getExternalTargets(gslb)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(externalTargets) > 0 {
+		switch gslb.Spec.Strategy {
+		case "roundRobin":
+			targets = append(targets, externalTargets...)
+		}
 	}
 
 	for host, health := range serviceHealth {

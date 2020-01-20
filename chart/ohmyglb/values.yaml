@@ -9,6 +9,7 @@ ohmyglb:
   image: ytsarev/ohmyglb:v0.2.3
   ingressNamespace: "ohmyglb"
   dnsZone: &dnsZone "example.com"
+  extGslbClusters: "" # comma-separated list of FQDNs pointing to external Gslb enabled clusters to work with
 
 externaldns:
   image: registry.opensource.zalan.do/teapot/external-dns:latest

@@ -6,9 +6,9 @@ require (
 	github.com/ghodss/yaml v1.0.1-0.20180820084758-c7ce16629ff4
 	github.com/go-openapi/spec v0.19.0
 	github.com/kubernetes-incubator/external-dns v0.5.17
+	github.com/miekg/dns v1.1.27
 	github.com/operator-framework/operator-sdk v0.12.0
 	github.com/spf13/pflag v1.0.3
-	github.com/txn2/txeh v1.3.0 // indirect
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v11.0.0+incompatible
