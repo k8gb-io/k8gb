@@ -43,7 +43,7 @@ func (r *ReconcileGslb) getGslbIngressIPs(gslb *ohmyglbv1beta1.Gslb) ([]string, 
 	return gslbIngressIPs, nil
 }
 
-func (r *ReconcileGslb) getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error) {
+func (r *ReconcileGslb) getExternalTargets(host string) ([]string, error) {
 
 	extGslbClustersVar := os.Getenv("EXT_GSLB_CLUSTERS")
 
@@ -110,7 +110,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 		}
 
 		// Check if host is alive on external Gslb
-		externalTargets, err := r.getExternalTargets(gslb, host)
+		externalTargets, err := r.getExternalTargets(host)
 		if err != nil {
 			return nil, err
 		}
