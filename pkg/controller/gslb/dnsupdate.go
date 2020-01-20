@@ -43,7 +43,7 @@ func (r *ReconcileGslb) getGslbIngressIPs(gslb *ohmyglbv1beta1.Gslb) ([]string, 
 	return gslbIngressIPs, nil
 }
 
-func (r *ReconcileGslb) getExternalTargets(gslb *ohmyglbv1beta1.Gslb) ([]string, error) {
+func (r *ReconcileGslb) getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error) {
 
 	extGslbClustersVar := os.Getenv("EXT_GSLB_CLUSTERS")
 
@@ -59,8 +59,8 @@ func (r *ReconcileGslb) getExternalTargets(gslb *ohmyglbv1beta1.Gslb) ([]string,
 	for _, cluster := range extGslbClusters {
 		log.Info(fmt.Sprintf("Adding external Gslb targets from %s cluster...", cluster))
 		g := new(dns.Msg)
-		hostsz := fmt.Sprintf("hostsz.%s.%s.", gslb.Name, cluster)
-		g.SetQuestion(hostsz, dns.TypeA)
+		host = fmt.Sprintf("localtargets.%s.", host) //Convert to true FQDN with dot at the endOtherwise dns lib freaks out
+		g.SetQuestion(host, dns.TypeA)
 		ns := fmt.Sprintf("%s:53", cluster)
 		a, err := dns.Exchange(g, ns)
 		if err != nil {
@@ -74,7 +74,7 @@ func (r *ReconcileGslb) getExternalTargets(gslb *ohmyglbv1beta1.Gslb) ([]string,
 		}
 		if len(clusterTargets) > 0 {
 			targets = append(targets, clusterTargets...)
-			log.Info(fmt.Sprintf("Added external %s Gslb targets from %s cluster", clusterTargets, hostsz))
+			log.Info(fmt.Sprintf("Added external %s Gslb targets from %s cluster", clusterTargets, cluster))
 		}
 	}
 
@@ -89,41 +89,44 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 		return nil, err
 	}
 
-	targets, err := r.getGslbIngressIPs(gslb)
+	localTargets, err := r.getGslbIngressIPs(gslb)
 	if err != nil {
 		return nil, err
-	}
-
-	dnsZone := os.Getenv("DNS_ZONE")
-
-	// Service TXT DNS Record to share healthy target with ext. Gslb
-	serviceDNSRecord := &externaldns.Endpoint{
-		DNSName:    fmt.Sprintf("hostsz.%s.%s", gslb.Name, dnsZone),
-		RecordTTL:  30,
-		RecordType: "A",
-		Targets:    targets,
-	}
-	gslbHosts = append(gslbHosts, serviceDNSRecord)
-
-	externalTargets, err := r.getExternalTargets(gslb)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(externalTargets) > 0 {
-		switch gslb.Spec.Strategy {
-		case "roundRobin":
-			targets = append(targets, externalTargets...)
-		}
 	}
 
 	for host, health := range serviceHealth {
+		var finalTargets []string
+
 		if health == "Healthy" {
+			finalTargets = append(finalTargets, localTargets...)
+			localTargetsHost := fmt.Sprintf("localtargets.%s", host)
+			dnsRecord := &externaldns.Endpoint{
+				DNSName:    localTargetsHost,
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    localTargets,
+			}
+			gslbHosts = append(gslbHosts, dnsRecord)
+		}
+
+		// Check if host is alive on external Gslb
+		externalTargets, err := r.getExternalTargets(gslb, host)
+		if err != nil {
+			return nil, err
+		}
+		if len(externalTargets) > 0 {
+			switch gslb.Spec.Strategy {
+			case "roundRobin":
+				finalTargets = append(finalTargets, externalTargets...)
+			}
+		}
+
+		if len(finalTargets) > 0 {
 			dnsRecord := &externaldns.Endpoint{
 				DNSName:    host,
 				RecordTTL:  30,
 				RecordType: "A",
-				Targets:    targets,
+				Targets:    finalTargets,
 			}
 			gslbHosts = append(gslbHosts, dnsRecord)
 		}
