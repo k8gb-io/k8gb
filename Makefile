@@ -2,8 +2,7 @@ REPO ?= ytsarev/ohmyglb
 VERSION ?= $$(operator-sdk up local --operator-flags=-v)
 
 .PHONY: up-local
-up-local:
-	kubectl create ns test-gslb
+up-local: create-test-ns
 	kubectl apply -f ./deploy/crds/ohmyglb.absa.oss_gslbs_crd.yaml
 	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 	operator-sdk up local --namespace=test-gslb

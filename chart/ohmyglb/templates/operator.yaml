@@ -29,3 +29,5 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "ohmyglb"
+            - name: EXT_GSLB_CLUSTERS
+              value: {{ .Values.ohmyglb.extGslbClusters }}
