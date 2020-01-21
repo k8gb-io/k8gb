@@ -1,5 +1,6 @@
 REPO ?= ytsarev/ohmyglb
 VERSION ?= $$(operator-sdk up local --operator-flags=-v)
+VALUES_YAML ?= chart/ohmyglb/values.yaml
 
 .PHONY: up-local
 up-local: create-test-ns
@@ -47,7 +48,13 @@ deploy-local-ingress: create-ohmyglb-ns
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: create-ohmyglb-ns
 	cd chart/ohmyglb && helm dependency update
-	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb
+	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb -f $(VALUES_YAML)
+
+# workaround until https://github.com/crossplaneio/crossplane/issues/1170 solved
+.PHONY: deploy-gslb-operator-14
+deploy-gslb-operator-14: create-ohmyglb-ns
+	cd chart/ohmyglb && helm dependency update
+	helm -n ohmyglb template ohmyglb chart/ohmyglb -f $(VALUES_YAML) | kubectl -n ohmyglb --validate=false apply -f -
 
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: create-test-ns
