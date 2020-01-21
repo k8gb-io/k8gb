@@ -64,7 +64,8 @@ func getExternalTargets(host string) ([]string, error) {
 		ns := fmt.Sprintf("%s:53", cluster)
 		a, err := dns.Exchange(g, ns)
 		if err != nil {
-			return nil, err
+			log.Info(fmt.Sprintf("Error contacting external Gslb cluster(%s) : (%v)", cluster, err))
+			return nil, nil
 		}
 		var clusterTargets []string
 
