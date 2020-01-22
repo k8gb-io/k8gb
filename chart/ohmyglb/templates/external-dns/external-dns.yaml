@@ -67,6 +67,7 @@ spec:
         - --source=crd
         - --provider=coredns
         - --log-level=debug # debug only
+        - --txt-owner-id="ohmyglb"
         env:
         - name: ETCD_URLS
           value: http://etcd-cluster-client:2379

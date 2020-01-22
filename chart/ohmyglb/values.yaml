@@ -12,7 +12,7 @@ ohmyglb:
   extGslbClusters: "" # comma-separated list of FQDNs pointing to external Gslb enabled clusters to work with
 
 externaldns:
-  image: registry.opensource.zalan.do/teapot/external-dns:latest
+  image: eu.gcr.io/k8s-artifacts-prod/external-dns/external-dns:v0.5.18
 
 etcd-operator:
   customResources:

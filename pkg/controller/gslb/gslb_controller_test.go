@@ -191,10 +191,14 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("Gslb creates DNSEndpoint CR for healthy ingress hosts", func(t *testing.T) {
 
-		ingressIP := corev1.LoadBalancerIngress{
-			IP: "10.0.0.1",
+		ingressIPs := []corev1.LoadBalancerIngress{
+			{IP: "10.0.0.1"},
+			{IP: "10.0.0.2"},
+			{IP: "10.0.0.3"},
 		}
-		ingress.Status.LoadBalancer.Ingress = append(ingress.Status.LoadBalancer.Ingress, ingressIP)
+
+		ingress.Status.LoadBalancer.Ingress = append(ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+
 		err := cl.Status().Update(context.TODO(), ingress)
 		if err != nil {
 			t.Fatalf("Failed to update gslb Ingress Address: (%v)", err)
@@ -215,12 +219,12 @@ func TestGslbController(t *testing.T) {
 				DNSName:    "localtargets.app3.cloud.example.com",
 				RecordTTL:  30,
 				RecordType: "A",
-				Targets:    externaldns.Targets{"10.0.0.1"}},
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
 			{
 				DNSName:    "app3.cloud.example.com",
 				RecordTTL:  30,
 				RecordType: "A",
-				Targets:    externaldns.Targets{"10.0.0.1"}},
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
 		}
 
 		prettyGot := prettyPrint(got)
@@ -236,7 +240,7 @@ func TestGslbController(t *testing.T) {
 	// code so I will keep it this way for a time being
 	t.Run("DNS Record reflection in status", func(t *testing.T) {
 		got := gslb.Status.HealthyRecords
-		want := map[string][]string{"app3.cloud.example.com": {"10.0.0.1"}}
+		want := map[string][]string{"app3.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got:\n %s healthyRecords status,\n\n want:\n %s", got, want)
 		}
