@@ -2,6 +2,7 @@ package gslb
 
 import (
 	"context"
+	"time"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
@@ -191,6 +192,8 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 	}
 
 	// == Finish ==========
-	// Everything went fine, don't requeue
-	return reconcile.Result{}, nil
+	// Everything went fine, requeue after some time to catch up
+	// with external Gslb status
+	// TODO: potentially enhance with smarter reaction to external Event
+	return reconcile.Result{RequeueAfter: time.Second * 30}, nil
 }
