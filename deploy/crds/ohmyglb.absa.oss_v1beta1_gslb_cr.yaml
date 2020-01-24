@@ -10,21 +10,21 @@ spec:
         http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
           paths:
             - backend:
-                serviceName: non-existing-app
+                serviceName: non-existing-app # Gslb should reflect NotFound status
                 servicePort: http
               path: /
       - host: app2.cloud.example.com
         http:
           paths:
           - backend:
-              serviceName: unhealthy-app
+              serviceName: unhealthy-app # Gslb should reflect Unhealthy status
               servicePort: http
             path: /
       - host: app3.cloud.example.com
         http:
           paths:
           - backend:
-              serviceName: healthy-app
+              serviceName: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
               servicePort: http
             path: /
   strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too

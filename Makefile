@@ -63,10 +63,15 @@ deploy-gslb-cr: create-test-ns
 .PHONY: deploy-test-apps
 deploy-test-apps: create-test-ns
 	kubectl apply -f deploy/test-apps
+	helm repo add podinfo https://stefanprodan.github.io/podinfo
+	helm upgrade --install --wait frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml --set backend=http://backend-podinfo:9898/echo podinfo/podinfo
+	helm upgrade --install --wait backend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml podinfo/podinfo
 
 .PHONY: clean-test-apps
 clean-test-apps:
 	kubectl delete -f deploy/test-apps
+	helm -n test-gslb uninstall backend
+	helm -n test-gslb uninstall frontend
 
 .PHONY: build
 build:
