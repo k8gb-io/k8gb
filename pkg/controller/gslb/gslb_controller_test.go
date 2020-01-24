@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
@@ -81,13 +82,7 @@ func TestGslbController(t *testing.T) {
 
 	// Reconcile again so Reconcile() checks services and updates the Gslb
 	// resources' Status.
-	res, err = r.Reconcile(req)
-	if err != nil {
-		t.Fatalf("reconcile: (%v)", err)
-	}
-	if res != (reconcile.Result{}) {
-		t.Error("reconcile did not return an empty Result")
-	}
+	reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 	t.Run("ManagedHosts status", func(t *testing.T) {
 		err = cl.Get(context.TODO(), req.NamespacedName, gslb)
@@ -260,8 +255,8 @@ func reconcileAndUpdateGslb(t *testing.T,
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)
 	}
-	if res != (reconcile.Result{}) {
-		t.Error("reconcile did not return an empty Result")
+	if res != (reconcile.Result{RequeueAfter: time.Second * 30}) {
+		t.Error("reconcile did not return Result with Requeue")
 	}
 
 	err = cl.Get(context.TODO(), req.NamespacedName, gslb)

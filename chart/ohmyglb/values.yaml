@@ -6,7 +6,7 @@ global:
   # - name: "image-pull-secret"
 
 ohmyglb:
-  image: ytsarev/ohmyglb:v0.3.1
+  image: ytsarev/ohmyglb:v0.3.2
   ingressNamespace: "ohmyglb"
   dnsZone: &dnsZone "example.com"
   extGslbClusters: "" # comma-separated list of FQDNs pointing to external Gslb enabled clusters to work with
