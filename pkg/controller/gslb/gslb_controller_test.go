@@ -143,7 +143,7 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Healthy service status", func(t *testing.T) {
-		serviceName := "healthy-app"
+		serviceName := "frontend-podinfo"
 		service := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceName,
