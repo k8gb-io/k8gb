@@ -87,3 +87,9 @@ push:
 .PHONY: debug-test-etcd
 debug-test-etcd:
 	kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace ohmyglb etcd-test --image "$(ETCD_DEBUG_IMAGE)" --restart=Never -- /bin/sh
+
+.PHONY: infoblox-secret
+infoblox-secret:
+	kubectl -n ohmyglb create secret generic external-dns \
+	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
+	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
