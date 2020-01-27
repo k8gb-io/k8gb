@@ -3,7 +3,6 @@ package gslb
 import (
 	"context"
 	"io/ioutil"
-	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -27,10 +26,7 @@ import (
 var crSampleYaml = "../../../deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml"
 
 func TestGslbController(t *testing.T) {
-	err := os.Setenv("DNS_ZONE", "example.com")
-	if err != nil {
-		t.Fatalf("Can't setup env var: (%v)", err)
-	}
+
 	gslbYaml, err := ioutil.ReadFile(crSampleYaml)
 	if err != nil {
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
