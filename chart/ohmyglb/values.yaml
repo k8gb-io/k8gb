@@ -14,7 +14,7 @@ ohmyglb:
   clusterGeoTag: "eu" # used for places where we need to distinguish between differnet Gslb instances
 
 externaldns:
-  image: eu.gcr.io/k8s-artifacts-prod/external-dns/external-dns:v0.5.18
+  image: ytsarev/external-dns:v0.5.18-27-g432d0696-dirty
 
 etcd-operator:
   customResources:
@@ -74,5 +74,5 @@ coredns:
 
 infoblox:
   enabled: false
-  dnsZone: *edgeDNSZone # main zone which would contain gslb zone to delegate(cloud.example.com in this example)
+  dnsZone: *edgeDNSZone # main zone which would contain gslb zone to delegate
   gridHost: 10.0.0.1

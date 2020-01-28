@@ -138,8 +138,9 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 
 	dnsEndpoint := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      gslb.Name,
-			Namespace: gslb.Namespace,
+			Name:        gslb.Name,
+			Namespace:   gslb.Namespace,
+			Annotations: map[string]string{"ohmyglb.absa.oss/dnstype": "local"},
 		},
 		Spec: dnsEndpointSpec,
 	}

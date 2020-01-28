@@ -295,6 +295,21 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("got:\n %q annotation value,\n\n want:\n %q", got, want)
 		}
 	})
+
+	t.Run("Local DNS records has special annotation", func(t *testing.T) {
+		dnsEndpoint := &externaldns.DNSEndpoint{}
+		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+
+		got := dnsEndpoint.Annotations["ohmyglb.absa.oss/dnstype"]
+
+		want := "local"
+		if got != want {
+			t.Errorf("got:\n %q annotation value,\n\n want:\n %q", got, want)
+		}
+	})
 }
 
 func reconcileAndUpdateGslb(t *testing.T,

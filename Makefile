@@ -62,6 +62,7 @@ deploy-gslb-operator-14: create-ohmyglb-ns
 deploy-gslb-cr: create-test-ns
 	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
+	git checkout -- deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 
 .PHONY: deploy-test-apps
 deploy-test-apps: create-test-ns

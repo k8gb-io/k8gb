@@ -68,6 +68,7 @@ spec:
         - --provider=coredns
         - --log-level=debug # debug only
         - --txt-owner-id="ohmyglb"
+        - --annotation-filter=ohmyglb.absa.oss/dnstype=local # filter out only relevant DNSEntrypoints
         env:
         - name: ETCD_URLS
           value: http://etcd-cluster-client:2379
