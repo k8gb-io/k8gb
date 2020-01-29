@@ -76,3 +76,4 @@ infoblox:
   enabled: false
   dnsZone: *edgeDNSZone # main zone which would contain gslb zone to delegate
   gridHost: 10.0.0.1
+  sslVerify: true

@@ -26,7 +26,11 @@ spec:
         - --infoblox-grid-host={{ .Values.infoblox.gridHost }} # (required) IP of the Infoblox Grid host.
         - --infoblox-wapi-port=443          # (optional) Infoblox WAPI port. The default is "443".
         - --infoblox-wapi-version=2.3.1     # (optional) Infoblox WAPI version. The default is "2.3.1"
+        {{ if .Values.infoblox.sslVerify }}
         - --infoblox-ssl-verify             # (optional) Use --no-infoblox-ssl-verify to skip server certificate verification.
+        {{ else }}
+        - --no-infoblox-ssl-verify
+        {{ end }}
         - --log-level=debug # debug only
         - --txt-owner-id=ohmyglb-{{ .Values.ohmyglb.clusterGeoTag }} # to differnetiate between multiple instances
         env:
