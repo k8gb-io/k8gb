@@ -6,13 +6,15 @@ global:
   # - name: "image-pull-secret"
 
 ohmyglb:
-  image: ytsarev/ohmyglb:v0.3.2
+  image: ytsarev/ohmyglb:v0.4.0
   ingressNamespace: "ohmyglb"
-  dnsZone: &dnsZone "example.com"
+  dnsZone: &dnsZone "cloud.example.com"
+  edgeDNSZone: &edgeDNSZone "example.com"
   extGslbClusters: "" # comma-separated list of FQDNs pointing to external Gslb enabled clusters to work with
+  clusterGeoTag: "eu" # used for places where we need to distinguish between differnet Gslb instances
 
 externaldns:
-  image: eu.gcr.io/k8s-artifacts-prod/external-dns/external-dns:v0.5.18
+  image: ytsarev/external-dns:v0.5.18-27-g432d0696-dirty
 
 etcd-operator:
   customResources:
@@ -70,3 +72,8 @@ coredns:
         path /skydns
         endpoint http://etcd-cluster-client:2379
 
+infoblox:
+  enabled: false
+  dnsZone: *edgeDNSZone # main zone which would contain gslb zone to delegate
+  gridHost: 10.0.0.1
+  sslVerify: true

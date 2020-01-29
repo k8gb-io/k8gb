@@ -138,8 +138,9 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 
 	dnsEndpoint := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      gslb.Name,
-			Namespace: gslb.Namespace,
+			Name:        gslb.Name,
+			Namespace:   gslb.Namespace,
+			Annotations: map[string]string{"ohmyglb.absa.oss/dnstype": "local"},
 		},
 		Spec: dnsEndpointSpec,
 	}
@@ -150,15 +151,54 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 	}
 	return dnsEndpoint, err
 }
+func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
+	edgeDNSEndpointSpec := externaldns.DNSEndpointSpec{}
+	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
+	if len(clusterGeoTag) > 0 {
+		localTargets, err := r.getGslbIngressIPs(gslb)
+		if err != nil {
+			return nil, err
+		}
+		// Type A record to be registered resolve NS records in edge dns responses(infoblox, route53,...)
+		edgeDNSRecord := &externaldns.Endpoint{
+			DNSName:    fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone),
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets:    localTargets,
+		}
+		edgeDNSEndpointSpec = externaldns.DNSEndpointSpec{
+			Endpoints: []*externaldns.Endpoint{
+				edgeDNSRecord,
+			},
+		}
+
+	} else {
+		log.Info("CLUSTER_GEO_TAG env variable is not set - skipping creating Edge DNS records")
+	}
+	edgeDNSEndpoint := &externaldns.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        fmt.Sprintf("%s-ns", gslb.Name),
+			Namespace:   gslb.Namespace,
+			Annotations: map[string]string{"ohmyglb.absa.oss/dnstype": "edgedns"},
+		},
+		Spec: edgeDNSEndpointSpec,
+	}
+	err := controllerutil.SetControllerReference(gslb, edgeDNSEndpoint, r.scheme)
+	if err != nil {
+		return nil, err
+	}
+	return edgeDNSEndpoint, nil
+}
 
 func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,
-	instance *ohmyglbv1beta1.Gslb,
+	gslb *ohmyglbv1beta1.Gslb,
 	i *externaldns.DNSEndpoint,
 ) (*reconcile.Result, error) {
 	found := &externaldns.DNSEndpoint{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{
-		Name:      instance.Name,
-		Namespace: instance.Namespace,
+		Name:      i.Name,
+		Namespace: gslb.Namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 

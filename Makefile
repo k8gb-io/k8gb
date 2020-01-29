@@ -1,6 +1,8 @@
 REPO ?= ytsarev/ohmyglb
 VERSION ?= $$(operator-sdk up local --operator-flags=-v)
 VALUES_YAML ?= chart/ohmyglb/values.yaml
+ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
+GSLB_DOMAIN ?= cloud.example.com
 
 .PHONY: up-local
 up-local: create-test-ns
@@ -58,7 +60,9 @@ deploy-gslb-operator-14: create-ohmyglb-ns
 
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: create-test-ns
+	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
+	git checkout -- deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 
 .PHONY: deploy-test-apps
 deploy-test-apps: create-test-ns
@@ -80,3 +84,13 @@ build:
 .PHONY: push
 push:
 	docker push $(REPO):$(VERSION)
+
+.PHONY: debug-test-etcd
+debug-test-etcd:
+	kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace ohmyglb etcd-test --image "$(ETCD_DEBUG_IMAGE)" --restart=Never -- /bin/sh
+
+.PHONY: infoblox-secret
+infoblox-secret:
+	kubectl -n ohmyglb create secret generic external-dns \
+	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
+	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
