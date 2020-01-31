@@ -6,6 +6,10 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 cloud.google.com/go v0.37.4 h1:glPeL3BQJsbF6aIIYfZizMwc5LTYz250bDMjttbBGAU=
 cloud.google.com/go v0.37.4/go.mod h1:NHPJ89PdicEuT9hdPXMROBD91xc5uRDxsMtSB16k7hw=
 code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f/go.mod h1:sk5LnIjB/nIEU7yP5sDQExVm62wu0pBh3yrElngUisI=
+github.com/AbsaOSS/infoblox-go-client v0.8.0 h1:bekXSm+HGdyabL5KxmUKN2FBtg8T+0Szsos0GNKS9NA=
+github.com/AbsaOSS/infoblox-go-client v0.8.0/go.mod h1:MxeaLEnYmDInNuJ7NPxN39oj0NkJGvRoPpJYCwtmnR0=
+github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200130232150-0c6a2e7f39f3 h1:SGnkkMl4AsyZQroteRJ/gTLSN4FhyGBK/ykoGoRRfjg=
+github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200130232150-0c6a2e7f39f3/go.mod h1:MxeaLEnYmDInNuJ7NPxN39oj0NkJGvRoPpJYCwtmnR0=
 github.com/Azure/azure-sdk-for-go v10.0.4-beta+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/azure-sdk-for-go v21.4.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=

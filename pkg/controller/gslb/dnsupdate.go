@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	ibclient "github.com/AbsaOSS/infoblox-go-client"
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/miekg/dns"
@@ -151,31 +152,35 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 	}
 	return dnsEndpoint, err
 }
-func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
-	edgeDNSEndpointSpec := externaldns.DNSEndpointSpec{}
+
+func nsServerName(gslb *ohmyglbv1beta1.Gslb) string {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
-	if len(clusterGeoTag) > 0 {
-		localTargets, err := r.getGslbIngressIPs(gslb)
-		if err != nil {
-			return nil, err
-		}
-		// Type A record to be registered resolve NS records in edge dns responses(infoblox, route53,...)
-		edgeDNSRecord := &externaldns.Endpoint{
-			DNSName:    fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone),
-			RecordTTL:  30,
-			RecordType: "A",
-			Targets:    localTargets,
-		}
-		edgeDNSEndpointSpec = externaldns.DNSEndpointSpec{
-			Endpoints: []*externaldns.Endpoint{
-				edgeDNSRecord,
-			},
-		}
-
-	} else {
-		log.Info("CLUSTER_GEO_TAG env variable is not set - skipping creating Edge DNS records")
+	if len(clusterGeoTag) == 0 {
+		clusterGeoTag = "default"
 	}
+	return fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+}
+
+func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
+	edgeDNSEndpointSpec := externaldns.DNSEndpointSpec{}
+	localTargets, err := r.getGslbIngressIPs(gslb)
+	if err != nil {
+		return nil, err
+	}
+	// Type A record to be registered resolve NS records in edge dns responses(infoblox, route53,...)
+	edgeDNSRecord := &externaldns.Endpoint{
+		DNSName:    nsServerName(gslb),
+		RecordTTL:  30,
+		RecordType: "A",
+		Targets:    localTargets,
+	}
+	edgeDNSEndpointSpec = externaldns.DNSEndpointSpec{
+		Endpoints: []*externaldns.Endpoint{
+			edgeDNSRecord,
+		},
+	}
+
 	edgeDNSEndpoint := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        fmt.Sprintf("%s-ns", gslb.Name),
@@ -184,11 +189,59 @@ func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externa
 		},
 		Spec: edgeDNSEndpointSpec,
 	}
-	err := controllerutil.SetControllerReference(gslb, edgeDNSEndpoint, r.scheme)
+	err = controllerutil.SetControllerReference(gslb, edgeDNSEndpoint, r.scheme)
 	if err != nil {
 		return nil, err
 	}
 	return edgeDNSEndpoint, nil
+}
+
+func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*reconcile.Result, error) {
+	if len(os.Getenv("INFOBLOX_GRID_HOST")) > 0 {
+		hostConfig := ibclient.HostConfig{
+			Host:     os.Getenv("INFOBLOX_GRID_HOST"),
+			Version:  os.Getenv("INFOBLOX_WAPI_VERSION"),
+			Port:     os.Getenv("INFOBLIX_WAPI_PORT"),
+			Username: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"),
+			Password: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"),
+		}
+		transportConfig := ibclient.NewTransportConfig("false", 20, 10)
+		requestBuilder := &ibclient.WapiRequestBuilder{}
+		requestor := &ibclient.WapiHttpRequestor{}
+		conn, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
+		if err != nil {
+			return &reconcile.Result{}, err
+		}
+		defer conn.Logout()
+		objMgr := ibclient.NewObjectManager(conn, "ohmyclient", "")
+		addresses, err := r.getGslbIngressIPs(gslb)
+		if err != nil {
+			return &reconcile.Result{}, err
+		}
+		delegateTo := []ibclient.NameServer{}
+		for _, address := range addresses {
+			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb)}
+			delegateTo = append(delegateTo, nameServer)
+		}
+		gslbZoneName := os.Getenv("DNS_ZONE")
+		findZone, err := objMgr.GetZoneDelegated(gslbZoneName)
+		if err != nil {
+			return &reconcile.Result{}, err
+		}
+
+		if len(findZone.Ref) > 0 {
+			log.Info(fmt.Sprintf("Updating delegated zone(%s)...", gslbZoneName))
+			_, err = objMgr.UpdateZoneDelegated(findZone.Ref, delegateTo)
+		} else {
+			log.Info(fmt.Sprintf("Creating delegated zone(%s)...", gslbZoneName))
+			_, err = objMgr.CreateZoneDelegated(gslbZoneName, delegateTo)
+		}
+		if err != nil {
+			return &reconcile.Result{}, err
+		}
+		return &reconcile.Result{}, err
+	}
+	return nil, nil
 }
 
 func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,

@@ -3,6 +3,7 @@ module github.com/AbsaOSS/ohmyglb
 go 1.13
 
 require (
+	github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200130232150-0c6a2e7f39f3
 	github.com/ghodss/yaml v1.0.1-0.20180820084758-c7ce16629ff4
 	github.com/go-openapi/spec v0.19.0
 	github.com/kubernetes-incubator/external-dns v0.5.17

@@ -35,3 +35,33 @@ spec:
               value: {{ .Values.ohmyglb.clusterGeoTag }}
             - name: EDGE_DNS_ZONE
               value: {{ .Values.ohmyglb.edgeDNSZone }}
+            - name: DNS_ZONE
+              value: {{ .Values.ohmyglb.dnsZone }}
+            {{ if .Values.infoblox.enabled }}
+            - name: INFOBLOX_GRID_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: infoblox
+                  key: INFOBLOX_GRID_HOST
+            - name: INFOBLOX_WAPI_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: infoblox
+                  key: INFOBLOX_WAPI_VERSION
+            - name: INFOBLOX_WAPI_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: infoblox
+                  key: INFOBLOX_WAPI_PORT
+            - name: EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: external-dns
+                  key: EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME
+            - name: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: external-dns
+                  key: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
+            {{ end }}
+

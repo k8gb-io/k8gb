@@ -198,6 +198,13 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return *result, err
 	}
 
+	// == handle delegated zone in Edge DNS
+
+	result, err = r.configureZoneDelegation(gslb)
+	if result != nil {
+		return *result, err
+	}
+
 	// == Status =
 	err = r.updateGslbStatus(gslb)
 	if err != nil {
