@@ -212,7 +212,13 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
-		defer conn.Logout()
+		defer func() {
+			err = conn.Logout()
+			if err != nil {
+				log.Error(err, "Failed to close connection to infoblox")
+			}
+		}()
+
 		objMgr := ibclient.NewObjectManager(conn, "ohmyclient", "")
 		addresses, err := r.getGslbIngressIPs(gslb)
 		if err != nil {
