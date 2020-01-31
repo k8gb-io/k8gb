@@ -129,6 +129,8 @@ type ReconcileGslb struct {
 	scheme *runtime.Scheme
 }
 
+const gslbFinalizer = "finalizer.ohmyglb.absa.oss"
+
 // Reconcile reads that state of the cluster for a Gslb object and makes changes based on the state read
 // and what is in the Gslb.Spec
 // Note:
@@ -153,6 +155,38 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 	}
 
 	var result *reconcile.Result
+
+	// == Finalizer business ==
+
+	// Check if the Gslb instance is marked to be deleted, which is
+	// indicated by the deletion timestamp being set.
+	isGslbMarkedToBeDeleted := gslb.GetDeletionTimestamp() != nil
+	if isGslbMarkedToBeDeleted {
+		if contains(gslb.GetFinalizers(), gslbFinalizer) {
+			// Run finalization logic for gslbFinalizer. If the
+			// finalization logic fails, don't remove the finalizer so
+			// that we can retry during the next reconciliation.
+			if err := r.finalizeGslb(gslb); err != nil {
+				return reconcile.Result{}, err
+			}
+
+			// Remove gslbFinalizer. Once all finalizers have been
+			// removed, the object will be deleted.
+			gslb.SetFinalizers(remove(gslb.GetFinalizers(), gslbFinalizer))
+			err := r.client.Update(context.TODO(), gslb)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+		}
+		return reconcile.Result{}, nil
+	}
+
+	// Add finalizer for this CR
+	if !contains(gslb.GetFinalizers(), gslbFinalizer) {
+		if err := r.addFinalizer(gslb); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
 
 	// == Ingress ==========
 	ingress, err := r.gslbIngress(gslb)

@@ -196,30 +196,39 @@ func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externa
 	return edgeDNSEndpoint, nil
 }
 
+func infobloxConnection() (*ibclient.ObjectManager, error) {
+	hostConfig := ibclient.HostConfig{
+		Host:     os.Getenv("INFOBLOX_GRID_HOST"),
+		Version:  os.Getenv("INFOBLOX_WAPI_VERSION"),
+		Port:     os.Getenv("INFOBLIX_WAPI_PORT"),
+		Username: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"),
+		Password: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"),
+	}
+	transportConfig := ibclient.NewTransportConfig("false", 20, 10)
+	requestBuilder := &ibclient.WapiRequestBuilder{}
+	requestor := &ibclient.WapiHttpRequestor{}
+	conn, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err = conn.Logout()
+		if err != nil {
+			log.Error(err, "Failed to close connection to infoblox")
+		}
+	}()
+
+	objMgr := ibclient.NewObjectManager(conn, "ohmyclient", "")
+	return objMgr, nil
+}
+
 func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*reconcile.Result, error) {
 	if len(os.Getenv("INFOBLOX_GRID_HOST")) > 0 {
-		hostConfig := ibclient.HostConfig{
-			Host:     os.Getenv("INFOBLOX_GRID_HOST"),
-			Version:  os.Getenv("INFOBLOX_WAPI_VERSION"),
-			Port:     os.Getenv("INFOBLIX_WAPI_PORT"),
-			Username: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"),
-			Password: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"),
-		}
-		transportConfig := ibclient.NewTransportConfig("false", 20, 10)
-		requestBuilder := &ibclient.WapiRequestBuilder{}
-		requestor := &ibclient.WapiHttpRequestor{}
-		conn, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
+
+		objMgr, err := infobloxConnection()
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
-		defer func() {
-			err = conn.Logout()
-			if err != nil {
-				log.Error(err, "Failed to close connection to infoblox")
-			}
-		}()
-
-		objMgr := ibclient.NewObjectManager(conn, "ohmyclient", "")
 		addresses, err := r.getGslbIngressIPs(gslb)
 		if err != nil {
 			return &reconcile.Result{}, err
