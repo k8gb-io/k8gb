@@ -6,7 +6,7 @@ global:
   # - name: "image-pull-secret"
 
 ohmyglb:
-  image: ytsarev/ohmyglb:v0.4.0
+  image: ytsarev/ohmyglb:v0.5.1
   ingressNamespace: "ohmyglb"
   dnsZone: &dnsZone "cloud.example.com"
   edgeDNSZone: &edgeDNSZone "example.com"
@@ -76,4 +76,6 @@ infoblox:
   enabled: false
   dnsZone: *edgeDNSZone # main zone which would contain gslb zone to delegate
   gridHost: 10.0.0.1
+  wapiVersion: 2.3.1 
+  wapiPort: 443
   sslVerify: true

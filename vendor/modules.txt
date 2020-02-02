@@ -1,5 +1,7 @@
 # cloud.google.com/go v0.37.4
 cloud.google.com/go/compute/metadata
+# github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200202014520-4fcca3cefb11
+github.com/AbsaOSS/infoblox-go-client
 # github.com/Azure/go-autorest v11.1.2+incompatible
 github.com/Azure/go-autorest/autorest
 github.com/Azure/go-autorest/autorest/adal
@@ -181,6 +183,7 @@ golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
+golang.org/x/net/publicsuffix
 # golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 golang.org/x/oauth2
 golang.org/x/oauth2/google
