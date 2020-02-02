@@ -686,6 +686,9 @@ func (objMgr *ObjectManager) GetZoneAuth() ([]ZoneAuth, error) {
 
 // GetZoneDelegated returns the delegated zone
 func (objMgr *ObjectManager) GetZoneDelegated(fqdn string) (*ZoneDelegated, error) {
+	if len(fqdn) == 0 {
+		return nil, nil
+	}
 	var res []ZoneDelegated
 
 	zoneDelegated := NewZoneDelegated(ZoneDelegated{Fqdn: fqdn})

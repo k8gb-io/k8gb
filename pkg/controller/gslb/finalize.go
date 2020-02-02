@@ -24,11 +24,18 @@ func (r *ReconcileGslb) finalizeGslb(gslb *ohmyglbv1beta1.Gslb) error {
 		if err != nil {
 			return err
 		}
-		if len(findZone.Ref) > 0 {
-			log.Info(fmt.Sprintf("Deleting delegated zone(%s)...", gslbZoneName))
-			_, err := objMgr.DeleteZoneDelegated(findZone.Ref)
+
+		if findZone != nil {
+			err = checkZoneDelegated(findZone, gslbZoneName)
 			if err != nil {
 				return err
+			}
+			if len(findZone.Ref) > 0 {
+				log.Info(fmt.Sprintf("Deleting delegated zone(%s)...", gslbZoneName))
+				_, err := objMgr.DeleteZoneDelegated(findZone.Ref)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

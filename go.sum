@@ -10,6 +10,10 @@ github.com/AbsaOSS/infoblox-go-client v0.8.0 h1:bekXSm+HGdyabL5KxmUKN2FBtg8T+0Sz
 github.com/AbsaOSS/infoblox-go-client v0.8.0/go.mod h1:MxeaLEnYmDInNuJ7NPxN39oj0NkJGvRoPpJYCwtmnR0=
 github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200130232150-0c6a2e7f39f3 h1:SGnkkMl4AsyZQroteRJ/gTLSN4FhyGBK/ykoGoRRfjg=
 github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200130232150-0c6a2e7f39f3/go.mod h1:MxeaLEnYmDInNuJ7NPxN39oj0NkJGvRoPpJYCwtmnR0=
+github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200202003449-a9f1474a3b36 h1:brM4tFE9YNUAdo6HA0KILyt3FAPz7OwM1Snmwzb3qWo=
+github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200202003449-a9f1474a3b36/go.mod h1:MxeaLEnYmDInNuJ7NPxN39oj0NkJGvRoPpJYCwtmnR0=
+github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200202014520-4fcca3cefb11 h1:i3sZoqYyKwTMVyy1tv7WD9ISs85kK2btkMWq2J09dgg=
+github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200202014520-4fcca3cefb11/go.mod h1:MxeaLEnYmDInNuJ7NPxN39oj0NkJGvRoPpJYCwtmnR0=
 github.com/Azure/azure-sdk-for-go v10.0.4-beta+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/azure-sdk-for-go v21.4.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=

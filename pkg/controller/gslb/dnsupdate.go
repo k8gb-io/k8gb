@@ -244,17 +244,25 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 			return &reconcile.Result{}, err
 		}
 
-		if len(findZone.Ref) > 0 {
-			log.Info(fmt.Sprintf("Updating delegated zone(%s)...", gslbZoneName))
-			_, err = objMgr.UpdateZoneDelegated(findZone.Ref, delegateTo)
+		if findZone != nil {
+			err = checkZoneDelegated(findZone, gslbZoneName)
+			if err != nil {
+				return &reconcile.Result{}, err
+			}
+			if len(findZone.Ref) > 0 {
+				log.Info(fmt.Sprintf("Updating delegated zone(%s)...", gslbZoneName))
+				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, delegateTo)
+				if err != nil {
+					return &reconcile.Result{}, err
+				}
+			}
 		} else {
 			log.Info(fmt.Sprintf("Creating delegated zone(%s)...", gslbZoneName))
 			_, err = objMgr.CreateZoneDelegated(gslbZoneName, delegateTo)
+			if err != nil {
+				return &reconcile.Result{}, err
+			}
 		}
-		if err != nil {
-			return &reconcile.Result{}, err
-		}
-		return &reconcile.Result{}, err
 	}
 	return nil, nil
 }
@@ -298,6 +306,14 @@ func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,
 	}
 
 	return nil, nil
+}
+
+func checkZoneDelegated(findZone *ibclient.ZoneDelegated, gslbZoneName string) error {
+	if findZone.Fqdn != gslbZoneName {
+		err := fmt.Errorf("delegated zone returned from infoblox(%s) does not match requested gslb zone(%s)", findZone.Fqdn, gslbZoneName)
+		return err
+	}
+	return nil
 }
 
 func prettyPrint(s interface{}) string {
