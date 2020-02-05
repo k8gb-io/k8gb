@@ -32,7 +32,7 @@ spec:
             - name: EXT_GSLB_CLUSTERS
               value: {{ .Values.ohmyglb.extGslbClusters }}
             - name: CLUSTER_GEO_TAG
-              value: {{ .Values.ohmyglb.clusterGeoTag }}
+              value: {{ quote .Values.ohmyglb.clusterGeoTag }}
             - name: EDGE_DNS_ZONE
               value: {{ .Values.ohmyglb.edgeDNSZone }}
             - name: DNS_ZONE
