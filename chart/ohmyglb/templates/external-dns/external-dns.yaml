@@ -67,7 +67,7 @@ spec:
         - --source=crd
         - --provider=coredns
         - --log-level=debug # debug only
-        - --txt-owner-id="ohmyglb"
+        - --registry=noop # disable local external-dns ownership, see https://github.com/kubernetes-sigs/external-dns/issues/1414
         - --annotation-filter=ohmyglb.absa.oss/dnstype=local # filter out only relevant DNSEntrypoints
         env:
         - name: ETCD_URLS
