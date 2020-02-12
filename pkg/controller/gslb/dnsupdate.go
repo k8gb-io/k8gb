@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	ibclient "github.com/AbsaOSS/infoblox-go-client"
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
@@ -169,15 +170,26 @@ func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externa
 		return nil, err
 	}
 	// Type A record to be registered resolve NS records in edge dns responses(infoblox, route53,...)
-	edgeDNSRecord := &externaldns.Endpoint{
+	edgeDNSRecordA := &externaldns.Endpoint{
 		DNSName:    nsServerName(gslb),
 		RecordTTL:  30,
 		RecordType: "A",
 		Targets:    localTargets,
 	}
+
+	edgeTimestamp := fmt.Sprint(time.Now())
+
+	edgeDNSRecordTXT := &externaldns.Endpoint{
+		DNSName:    nsServerName(gslb),
+		RecordTTL:  30,
+		RecordType: "TXT",
+		Targets:    []string{edgeTimestamp},
+	}
+
 	edgeDNSEndpointSpec = externaldns.DNSEndpointSpec{
 		Endpoints: []*externaldns.Endpoint{
-			edgeDNSRecord,
+			edgeDNSRecordA,
+			edgeDNSRecordTXT,
 		},
 	}
 
