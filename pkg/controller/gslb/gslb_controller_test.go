@@ -261,13 +261,22 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
 		}
 
+		fqdn := fmt.Sprintf("%s-ns-%s.example.com", gslb.Name, clusterGeoTag)
+		timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
 		got := edgeDNSEndpoint.Spec.Endpoints
 		want := []*externaldns.Endpoint{
 			{
-				DNSName:    fmt.Sprintf("%s-ns-%s.example.com", gslb.Name, clusterGeoTag),
+				DNSName:    fqdn,
 				RecordTTL:  30,
 				RecordType: "A",
-				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+			},
+			{
+				DNSName:    fqdn,
+				RecordTTL:  30,
+				RecordType: "TXT",
+				Targets:    externaldns.Targets{timestamp},
+			},
 		}
 
 		prettyGot := prettyPrint(got)

@@ -45,23 +45,28 @@ func (r *ReconcileGslb) getGslbIngressIPs(gslb *ohmyglbv1beta1.Gslb) ([]string, 
 	return gslbIngressIPs, nil
 }
 
-func getExternalTargets(host string) ([]string, error) {
+func getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error) {
+	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
 
-	extGslbClustersVar := os.Getenv("EXT_GSLB_CLUSTERS")
-
-	if extGslbClustersVar == "" {
+	if extGslbClustersGeoTagsVar == "" {
 		log.Info("No other Gslb enabled clusters are defined in the configuration...Working standalone")
 		return nil, nil
 	}
 
-	extGslbClusters := strings.Split(extGslbClustersVar, ",")
+	extGslbClustersGeoTags := strings.Split(extGslbClustersGeoTagsVar, ",")
+
+	var extGslbClusters []string
+	for _, geoTag := range extGslbClustersGeoTags {
+		cluster := nsServerName(gslb, geoTag)
+		extGslbClusters = append(extGslbClusters, cluster)
+	}
 
 	var targets []string
 
 	for _, cluster := range extGslbClusters {
 		log.Info(fmt.Sprintf("Adding external Gslb targets from %s cluster...", cluster))
 		g := new(dns.Msg)
-		host = fmt.Sprintf("localtargets.%s.", host) //Convert to true FQDN with dot at the endOtherwise dns lib freaks out
+		host = fmt.Sprintf("localtargets.%s.", host) //Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
 		g.SetQuestion(host, dns.TypeA)
 		ns := fmt.Sprintf("%s:53", cluster)
 		a, err := dns.Exchange(g, ns)
@@ -113,7 +118,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 		}
 
 		// Check if host is alive on external Gslb
-		externalTargets, err := getExternalTargets(host)
+		externalTargets, err := getExternalTargets(gslb, host)
 		if err != nil {
 			return nil, err
 		}
@@ -154,8 +159,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 	return dnsEndpoint, err
 }
 
-func nsServerName(gslb *ohmyglbv1beta1.Gslb) string {
-	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+func nsServerName(gslb *ohmyglbv1beta1.Gslb, clusterGeoTag string) string {
 	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
 	if len(clusterGeoTag) == 0 {
 		clusterGeoTag = "default"
@@ -164,6 +168,7 @@ func nsServerName(gslb *ohmyglbv1beta1.Gslb) string {
 }
 
 func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
+	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 	edgeDNSEndpointSpec := externaldns.DNSEndpointSpec{}
 	localTargets, err := r.getGslbIngressIPs(gslb)
 	if err != nil {
@@ -171,16 +176,16 @@ func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externa
 	}
 	// Type A record to be registered resolve NS records in edge dns responses(infoblox, route53,...)
 	edgeDNSRecordA := &externaldns.Endpoint{
-		DNSName:    nsServerName(gslb),
+		DNSName:    nsServerName(gslb, clusterGeoTag),
 		RecordTTL:  30,
 		RecordType: "A",
 		Targets:    localTargets,
 	}
 
-	edgeTimestamp := fmt.Sprint(time.Now())
+	edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
 
 	edgeDNSRecordTXT := &externaldns.Endpoint{
-		DNSName:    nsServerName(gslb),
+		DNSName:    nsServerName(gslb, clusterGeoTag),
 		RecordTTL:  30,
 		RecordType: "TXT",
 		Targets:    []string{edgeTimestamp},
@@ -246,8 +251,10 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 			return &reconcile.Result{}, err
 		}
 		delegateTo := []ibclient.NameServer{}
+		clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+
 		for _, address := range addresses {
-			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb)}
+			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb, clusterGeoTag)}
 			delegateTo = append(delegateTo, nameServer)
 		}
 		gslbZoneName := os.Getenv("DNS_ZONE")

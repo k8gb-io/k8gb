@@ -29,10 +29,10 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "ohmyglb"
-            - name: EXT_GSLB_CLUSTERS
-              value: {{ .Values.ohmyglb.extGslbClusters }}
             - name: CLUSTER_GEO_TAG
               value: {{ quote .Values.ohmyglb.clusterGeoTag }}
+            - name: EXT_GSLB_CLUSTERS_GEO_TAGS
+              value: {{ .Values.ohmyglb.extGslbClustersGeoTags }}
             - name: EDGE_DNS_ZONE
               value: {{ .Values.ohmyglb.edgeDNSZone }}
             - name: DNS_ZONE
