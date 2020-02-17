@@ -28,6 +28,11 @@ import (
 var crSampleYaml = "../../../deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml"
 
 func TestGslbController(t *testing.T) {
+	// Isolate the unit tests from interaction with real infoblox grid
+	err := os.Setenv("INFOBLOX_GRID_HOST", "")
+	if err != nil {
+		t.Fatalf("Can't setup env var: (%v)", err)
+	}
 
 	gslbYaml, err := ioutil.ReadFile(crSampleYaml)
 	if err != nil {

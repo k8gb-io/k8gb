@@ -217,7 +217,7 @@ func infobloxConnection() (*ibclient.ObjectManager, error) {
 	hostConfig := ibclient.HostConfig{
 		Host:     os.Getenv("INFOBLOX_GRID_HOST"),
 		Version:  os.Getenv("INFOBLOX_WAPI_VERSION"),
-		Port:     os.Getenv("INFOBLIX_WAPI_PORT"),
+		Port:     os.Getenv("INFOBLOX_WAPI_PORT"),
 		Username: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"),
 		Password: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"),
 	}
