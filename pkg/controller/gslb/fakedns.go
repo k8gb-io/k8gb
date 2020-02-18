@@ -1,4 +1,5 @@
 // fake dns server that is used for external dns communication tests of ohmyglb
+
 package gslb
 
 import (
@@ -9,16 +10,16 @@ import (
 )
 
 var records = map[string][]string{
-	"app3.cloud.example.com.": []string{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
+	"localtargets.app3.cloud.example.com.": []string{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
 }
 
 func parseQuery(m *dns.Msg) {
 	for _, q := range m.Question {
 		switch q.Qtype {
 		case dns.TypeA:
-			log.Info("Query for %s\n", q.Name)
+			log.Info(fmt.Sprintf("Query for %s\n", q.Name))
 			ips := records[q.Name]
-			log.Info("IPs found: %s\n", ips)
+			log.Info(fmt.Sprintf("IPs found: %s\n", ips))
 			if len(ips) > 0 {
 				for _, ip := range ips {
 					rr, err := dns.NewRR(fmt.Sprintf("%s A %s", q.Name, ip))
@@ -52,7 +53,7 @@ func fakedns() {
 	port := 7753
 	server := &dns.Server{Addr: ":" + strconv.Itoa(port), Net: "udp"}
 	go func() {
-		log.Info("Starting at %d\n", port)
+		log.Info(fmt.Sprintf("Starting at %d\n", port))
 		err := server.ListenAndServe()
 		defer server.Shutdown()
 		if err != nil {

@@ -342,6 +342,11 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Can get external targets from ohmyglb in another location", func(t *testing.T) {
+		err := os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		dnsEndpoint := &externaldns.DNSEndpoint{}

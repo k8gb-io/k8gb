@@ -74,7 +74,17 @@ func getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error
 		g := new(dns.Msg)
 		host = fmt.Sprintf("localtargets.%s.", host) //Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
 		g.SetQuestion(host, dns.TypeA)
-		ns := fmt.Sprintf("%s:53", cluster)
+
+		localTestDNSinject := os.Getenv("OVERRIDE_WITH_FAKE_EXT_DNS")
+
+		var ns string
+
+		if localTestDNSinject == "true" {
+			ns = "127.0.0.1:7753"
+		} else {
+			ns = fmt.Sprintf("%s:53", cluster)
+		}
+
 		a, err := dns.Exchange(g, ns)
 		if err != nil {
 			log.Info(fmt.Sprintf("Error contacting external Gslb cluster(%s) : (%v)", cluster, err))
