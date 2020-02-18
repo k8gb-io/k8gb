@@ -28,6 +28,8 @@ import (
 var crSampleYaml = "../../../deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml"
 
 func TestGslbController(t *testing.T) {
+	// Start fakedns server for external dns tests
+	fakedns()
 	// Isolate the unit tests from interaction with real infoblox grid
 	err := os.Setenv("INFOBLOX_GRID_HOST", "")
 	if err != nil {
@@ -322,6 +324,52 @@ func TestGslbController(t *testing.T) {
 		want := "local"
 		if got != want {
 			t.Errorf("got:\n %q annotation value,\n\n want:\n %q", got, want)
+		}
+	})
+
+	t.Run("Generates proper external NS target FQDNs according to the geo tags", func(t *testing.T) {
+		err := os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "sa")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+
+		got := getExternalClusterFQDNs(gslb)
+
+		want := []string{"test-gslb-ns-sa.example.com"}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %q externalGslb NS records,\n\n want:\n %q", got, want)
+		}
+	})
+
+	t.Run("Can get external targets from ohmyglb in another location", func(t *testing.T) {
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+
+		dnsEndpoint := &externaldns.DNSEndpoint{}
+		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+
+		got := dnsEndpoint.Spec.Endpoints
+
+		want := []*externaldns.Endpoint{
+			{
+				DNSName:    "localtargets.app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
+			{
+				DNSName:    "app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}},
+		}
+
+		prettyGot := prettyPrint(got)
+		prettyWant := prettyPrint(want)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
 	})
 }

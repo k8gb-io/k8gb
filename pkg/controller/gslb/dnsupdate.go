@@ -45,12 +45,12 @@ func (r *ReconcileGslb) getGslbIngressIPs(gslb *ohmyglbv1beta1.Gslb) ([]string, 
 	return gslbIngressIPs, nil
 }
 
-func getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error) {
+func getExternalClusterFQDNs(gslb *ohmyglbv1beta1.Gslb) []string {
 	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
 
 	if extGslbClustersGeoTagsVar == "" {
 		log.Info("No other Gslb enabled clusters are defined in the configuration...Working standalone")
-		return nil, nil
+		return nil
 	}
 
 	extGslbClustersGeoTags := strings.Split(extGslbClustersGeoTagsVar, ",")
@@ -60,6 +60,12 @@ func getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error
 		cluster := nsServerName(gslb, geoTag)
 		extGslbClusters = append(extGslbClusters, cluster)
 	}
+	return extGslbClusters
+}
+
+func getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error) {
+
+	extGslbClusters := getExternalClusterFQDNs(gslb)
 
 	var targets []string
 
@@ -239,7 +245,17 @@ func infobloxConnection() (*ibclient.ObjectManager, error) {
 	return objMgr, nil
 }
 
+func checkAliveFromTXT(fqdn string) error {
+	return nil
+}
+
+func getExternalAddressesFromNSRecord(fqdn string) ([]string, error) {
+	return nil, nil
+}
+
 func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*reconcile.Result, error) {
+	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+	extClusters := getExternalClusterFQDNs(gslb)
 	if len(os.Getenv("INFOBLOX_GRID_HOST")) > 0 {
 
 		objMgr, err := infobloxConnection()
@@ -251,12 +267,32 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 			return &reconcile.Result{}, err
 		}
 		delegateTo := []ibclient.NameServer{}
-		clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 
 		for _, address := range addresses {
 			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb, clusterGeoTag)}
 			delegateTo = append(delegateTo, nameServer)
 		}
+
+		for _, extCluster := range extClusters {
+			err = checkAliveFromTXT(extCluster)
+			if err != nil {
+				return &reconcile.Result{}, err
+			}
+			extAddresses, err := getExternalAddressesFromNSRecord(extCluster)
+			if err != nil {
+				return &reconcile.Result{}, err
+			}
+			for _, address := range extAddresses {
+				nameServer := ibclient.NameServer{Address: address, Name: extCluster}
+				delegateTo = append(delegateTo, nameServer)
+			}
+		}
+
+		for _, address := range addresses {
+			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb, clusterGeoTag)}
+			delegateTo = append(delegateTo, nameServer)
+		}
+
 		gslbZoneName := os.Getenv("DNS_ZONE")
 		findZone, err := objMgr.GetZoneDelegated(gslbZoneName)
 		if err != nil {
