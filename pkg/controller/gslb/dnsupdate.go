@@ -259,13 +259,18 @@ func checkAliveFromTXT(fqdn string) error {
 	return nil
 }
 
-func getExternalAddressesFromNSRecord(fqdn string) ([]string, error) {
-	return nil, nil
+func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclient.NameServer {
+	for i := 0; i < len(delegateTo); i++ {
+		if delegateTo[i].Name == fqdn {
+			delegateTo = append(delegateTo[:i], delegateTo[i+1:]...)
+			i--
+		}
+	}
+	return delegateTo
 }
 
 func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*reconcile.Result, error) {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
-	extClusters := getExternalClusterFQDNs(gslb)
 	if len(os.Getenv("INFOBLOX_GRID_HOST")) > 0 {
 
 		objMgr, err := infobloxConnection()
@@ -277,26 +282,6 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 			return &reconcile.Result{}, err
 		}
 		delegateTo := []ibclient.NameServer{}
-
-		for _, address := range addresses {
-			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb, clusterGeoTag)}
-			delegateTo = append(delegateTo, nameServer)
-		}
-
-		for _, extCluster := range extClusters {
-			err = checkAliveFromTXT(extCluster)
-			if err != nil {
-				return &reconcile.Result{}, err
-			}
-			extAddresses, err := getExternalAddressesFromNSRecord(extCluster)
-			if err != nil {
-				return &reconcile.Result{}, err
-			}
-			for _, address := range extAddresses {
-				nameServer := ibclient.NameServer{Address: address, Name: extCluster}
-				delegateTo = append(delegateTo, nameServer)
-			}
-		}
 
 		for _, address := range addresses {
 			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb, clusterGeoTag)}
@@ -316,7 +301,21 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 			}
 			if len(findZone.Ref) > 0 {
 				log.Info(fmt.Sprintf("Updating delegated zone(%s)...", gslbZoneName))
-				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, delegateTo)
+
+				// Drop own records for straight away update
+				existingDelegateTo := filterOutDelegateTo(findZone.DelegateTo, nsServerName(gslb, clusterGeoTag))
+				existingDelegateTo = append(existingDelegateTo, delegateTo...)
+
+				// Drop external records if they are stale
+				extClusters := getExternalClusterFQDNs(gslb)
+				for _, extCluster := range extClusters {
+					err = checkAliveFromTXT(extCluster)
+					if err != nil {
+						existingDelegateTo = filterOutDelegateTo(existingDelegateTo, extCluster)
+					}
+				}
+
+				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, existingDelegateTo)
 				if err != nil {
 					return &reconcile.Result{}, err
 				}

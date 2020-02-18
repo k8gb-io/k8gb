@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	ibclient "github.com/AbsaOSS/infoblox-go-client"
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
@@ -328,14 +329,14 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Generates proper external NS target FQDNs according to the geo tags", func(t *testing.T) {
-		err := os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "sa")
+		err := os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "za")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 
 		got := getExternalClusterFQDNs(gslb)
 
-		want := []string{"test-gslb-ns-sa.example.com"}
+		want := []string{"test-gslb-ns-za.example.com"}
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got:\n %q externalGslb NS records,\n\n want:\n %q", got, want)
 		}
@@ -375,6 +376,36 @@ func TestGslbController(t *testing.T) {
 
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		}
+
+		err = os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "false")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+	})
+
+	t.Run("Can check external Gslb TXT record for validity", func(t *testing.T) {
+		extClusters := getExternalClusterFQDNs(gslb)
+
+		delegateTo := []ibclient.NameServer{
+			{Address: "10.0.0.1", Name: "test-gslb-ns-eu.example.com"},
+			{Address: "10.0.0.2", Name: "test-gslb-ns-eu.example.com"},
+			{Address: "10.0.0.3", Name: "test-gslb-ns-eu.example.com"},
+			{Address: "10.1.0.1", Name: "test-gslb-ns-za.example.com"},
+			{Address: "10.1.0.2", Name: "test-gslb-ns-za.example.com"},
+			{Address: "10.1.0.3", Name: "test-gslb-ns-za.example.com"},
+		}
+
+		got := filterOutDelegateTo(delegateTo, extClusters[0])
+
+		want := []ibclient.NameServer{
+			{Address: "10.0.0.1", Name: "test-gslb-ns-eu.example.com"},
+			{Address: "10.0.0.2", Name: "test-gslb-ns-eu.example.com"},
+			{Address: "10.0.0.3", Name: "test-gslb-ns-eu.example.com"},
+		}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 		}
 	})
 }

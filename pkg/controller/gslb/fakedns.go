@@ -32,7 +32,7 @@ func parseQuery(m *dns.Msg) {
 	}
 }
 
-func handleDnsRequest(w dns.ResponseWriter, r *dns.Msg) {
+func handleDNSRequest(w dns.ResponseWriter, r *dns.Msg) {
 	m := new(dns.Msg)
 	m.SetReply(r)
 	m.Compress = false
@@ -47,7 +47,7 @@ func handleDnsRequest(w dns.ResponseWriter, r *dns.Msg) {
 
 func fakedns() {
 	// attach request handler func
-	dns.HandleFunc("cloud.example.com.", handleDnsRequest)
+	dns.HandleFunc("cloud.example.com.", handleDNSRequest)
 
 	// start server
 	port := 7753
