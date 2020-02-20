@@ -42,7 +42,10 @@ func handleDNSRequest(w dns.ResponseWriter, r *dns.Msg) {
 		parseQuery(m)
 	}
 
-	w.WriteMsg(m)
+	err := w.WriteMsg(m)
+	if err != nil {
+		log.Info(fmt.Sprintf("Failed to write message:%s", err))
+	}
 }
 
 func fakedns() {
@@ -55,7 +58,13 @@ func fakedns() {
 	go func() {
 		log.Info(fmt.Sprintf("Starting at %d\n", port))
 		err := server.ListenAndServe()
-		defer server.Shutdown()
+		defer func() {
+			err := server.Shutdown()
+			if err != nil {
+				log.Error(err, "Failed to shutdown fakedns server")
+			}
+
+		}()
 		if err != nil {
 			log.Error(err, "Failed to start fakedns server")
 		}
