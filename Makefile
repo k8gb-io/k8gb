@@ -10,6 +10,11 @@ up-local: create-test-ns
 	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 	operator-sdk up local --namespace=test-gslb
 
+.PHONY: lint
+lint:
+	staticcheck ./pkg/...
+	errcheck ./pkg/...
+
 .PHONY: test
 test:
 	go test -v ./pkg/controller/gslb/

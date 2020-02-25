@@ -230,15 +230,15 @@ func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externa
 }
 
 type fakeInfobloxConnector struct {
-	createObjectObj interface{}
+	//createObjectObj interface{}
 
 	getObjectObj interface{}
 	getObjectRef string
 
-	deleteObjectRef string
+	//deleteObjectRef string
 
-	updateObjectObj interface{}
-	updateObjectRef string
+	//updateObjectObj interface{}
+	//updateObjectRef string
 
 	resultObject interface{}
 
