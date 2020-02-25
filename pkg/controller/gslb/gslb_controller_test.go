@@ -32,7 +32,12 @@ func TestGslbController(t *testing.T) {
 	// Start fakedns server for external dns tests
 	fakedns()
 	// Isolate the unit tests from interaction with real infoblox grid
-	err := os.Setenv("INFOBLOX_GRID_HOST", "")
+	err := os.Setenv("INFOBLOX_GRID_HOST", "fakeinfoblox.example.com")
+	if err != nil {
+		t.Fatalf("Can't setup env var: (%v)", err)
+	}
+
+	err = os.Setenv("FAKE_INFOBLOX", "true")
 	if err != nil {
 		t.Fatalf("Can't setup env var: (%v)", err)
 	}

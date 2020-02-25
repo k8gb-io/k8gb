@@ -229,6 +229,41 @@ func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externa
 	return edgeDNSEndpoint, nil
 }
 
+type fakeInfobloxConnector struct {
+	createObjectObj interface{}
+
+	getObjectObj interface{}
+	getObjectRef string
+
+	deleteObjectRef string
+
+	updateObjectObj interface{}
+	updateObjectRef string
+
+	resultObject interface{}
+
+	fakeRefReturn string
+}
+
+func (c *fakeInfobloxConnector) CreateObject(obj ibclient.IBObject) (string, error) {
+
+	return c.fakeRefReturn, nil
+}
+
+func (c *fakeInfobloxConnector) GetObject(obj ibclient.IBObject, ref string, res interface{}) (err error) {
+	return nil
+}
+
+func (c *fakeInfobloxConnector) DeleteObject(ref string) (string, error) {
+
+	return c.fakeRefReturn, nil
+}
+
+func (c *fakeInfobloxConnector) UpdateObject(obj ibclient.IBObject, ref string) (string, error) {
+
+	return c.fakeRefReturn, nil
+}
+
 func infobloxConnection() (*ibclient.ObjectManager, error) {
 	hostConfig := ibclient.HostConfig{
 		Host:     os.Getenv("INFOBLOX_GRID_HOST"),
@@ -240,18 +275,33 @@ func infobloxConnection() (*ibclient.ObjectManager, error) {
 	transportConfig := ibclient.NewTransportConfig("false", 20, 10)
 	requestBuilder := &ibclient.WapiRequestBuilder{}
 	requestor := &ibclient.WapiHttpRequestor{}
-	conn, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err = conn.Logout()
-		if err != nil {
-			log.Error(err, "Failed to close connection to infoblox")
-		}
-	}()
 
-	objMgr := ibclient.NewObjectManager(conn, "ohmyclient", "")
+	fakeInfoblox := os.Getenv("FAKE_INFOBLOX")
+
+	var objMgr *ibclient.ObjectManager
+
+	if len(fakeInfoblox) > 0 {
+		fqdn := "fakezone.example.com"
+		fakeRefReturn := "zone_delegated/ZG5zLnpvbmUkLl9kZWZhdWx0LnphLmNvLmFic2EuY2Fhcy5vaG15Z2xiLmdzbGJpYmNsaWVudA:fakezone.example.com/default"
+		ohmyFakeConnector := &fakeInfobloxConnector{
+			getObjectObj: ibclient.NewZoneDelegated(ibclient.ZoneDelegated{Fqdn: fqdn}),
+			getObjectRef: "",
+			resultObject: []ibclient.ZoneDelegated{*ibclient.NewZoneDelegated(ibclient.ZoneDelegated{Fqdn: fqdn, Ref: fakeRefReturn})},
+		}
+		objMgr = ibclient.NewObjectManager(ohmyFakeConnector, "ohmyclient", "")
+	} else {
+		conn, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			err = conn.Logout()
+			if err != nil {
+				log.Error(err, "Failed to close connection to infoblox")
+			}
+		}()
+		objMgr = ibclient.NewObjectManager(conn, "ohmyclient", "")
+	}
 	return objMgr, nil
 }
 
