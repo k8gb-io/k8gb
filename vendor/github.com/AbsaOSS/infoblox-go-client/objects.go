@@ -492,7 +492,7 @@ type ZoneDelegated struct {
 func NewZoneDelegated(za ZoneDelegated) *ZoneDelegated {
 	res := za
 	res.objectType = "zone_delegated"
-	res.returnFields = []string{"extattrs", "fqdn", "view"}
+	res.returnFields = []string{"extattrs", "fqdn", "view", "delegate_to"}
 
 	return &res
 }

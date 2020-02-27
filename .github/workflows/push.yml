@@ -7,9 +7,9 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: go1.13  linters
-      uses: AbsaOSS/golang-pipeline/go1.13/linter@master
+      uses: shoukoo/golang-pipeline/go1.13/linter@master
       with:
         GOLINT: on
         GOLINTPATH: pkg/controller
     - name: go1.13 test
-      uses: AbsaOSS/golang-pipeline/go1.13/test@master
+      uses: shoukoo/golang-pipeline/go1.13/test@master

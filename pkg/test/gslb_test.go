@@ -1,7 +1,6 @@
 package e2e
 
 import (
-	"context"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -106,7 +105,7 @@ func testGslbIngress(t *testing.T, f *framework.Framework, ctx *framework.TestCt
 		ingress := &v1beta1.Ingress{}
 		nn := types.NamespacedName{Name: gslb.Name, Namespace: gslb.Namespace}
 		err := wait.Poll(retryInterval, timeout, func() (done bool, err error) {
-			err = f.Client.Get(context.TODO(), nn, ingress)
+			err = f.Client.Get(goctx.TODO(), nn, ingress)
 			if err != nil {
 				return false, err
 			}
@@ -123,7 +122,7 @@ func testGslbDNSEndpoint(t *testing.T, f *framework.Framework, ctx *framework.Te
 		dnsEndpoint := &externaldns.DNSEndpoint{}
 		nn := types.NamespacedName{Name: gslb.Name, Namespace: gslb.Namespace}
 		err := wait.Poll(retryInterval, timeout, func() (done bool, err error) {
-			err = f.Client.Get(context.TODO(), nn, dnsEndpoint)
+			err = f.Client.Get(goctx.TODO(), nn, dnsEndpoint)
 			if err != nil {
 				return false, err
 			}
