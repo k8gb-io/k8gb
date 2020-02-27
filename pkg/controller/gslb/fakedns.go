@@ -5,12 +5,22 @@ package gslb
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/miekg/dns"
 )
 
+func oldEdgeTimestamp() string {
+	now := time.Now()
+	duration, _ := time.ParseDuration("10m")
+	before := now.Add(-duration)
+	edgeTimestamp := fmt.Sprint(before.UTC().Format("2006-01-02T15:04:05"))
+	return edgeTimestamp
+}
+
 var records = map[string][]string{
 	"localtargets.app3.cloud.example.com.": []string{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
+	"test-gslb-ns-eu.example.com.":         []string{oldEdgeTimestamp()},
 }
 
 func parseQuery(m *dns.Msg) {
@@ -23,6 +33,18 @@ func parseQuery(m *dns.Msg) {
 			if len(ips) > 0 {
 				for _, ip := range ips {
 					rr, err := dns.NewRR(fmt.Sprintf("%s A %s", q.Name, ip))
+					if err == nil {
+						m.Answer = append(m.Answer, rr)
+					}
+				}
+			}
+		case dns.TypeTXT:
+			log.Info(fmt.Sprintf("Query for TXT %s\n", q.Name))
+			TXTs := records[q.Name]
+			log.Info(fmt.Sprintf("TXTs found: %s\n", TXTs))
+			if len(TXTs) > 0 {
+				for _, txt := range TXTs {
+					rr, err := dns.NewRR(fmt.Sprintf("%s TXT %s", q.Name, txt))
 					if err == nil {
 						m.Answer = append(m.Answer, rr)
 					}
@@ -50,7 +72,7 @@ func handleDNSRequest(w dns.ResponseWriter, r *dns.Msg) {
 
 func fakedns() {
 	// attach request handler func
-	dns.HandleFunc("cloud.example.com.", handleDNSRequest)
+	dns.HandleFunc("example.com.", handleDNSRequest)
 
 	// start server
 	port := 7753

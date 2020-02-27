@@ -390,6 +390,20 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Can check external Gslb TXT record for validity", func(t *testing.T) {
+		err = os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+
+		got := checkAliveFromTXT("fake", "test-gslb-ns-eu.example.com")
+
+		if got != nil {
+			t.Errorf("got:\n %s from TXT split brain check,\n\n want:\n %v", got, nil)
+		}
+
+	})
+
+	t.Run("Can filter out delegated zone entry according FQDN provided", func(t *testing.T) {
 		extClusters := getExternalClusterFQDNs(gslb)
 
 		delegateTo := []ibclient.NameServer{

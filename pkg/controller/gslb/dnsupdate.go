@@ -305,8 +305,36 @@ func infobloxConnection() (*ibclient.ObjectManager, error) {
 	return objMgr, nil
 }
 
-func checkAliveFromTXT(fqdn string) error {
-	return nil
+func checkAliveFromTXT(dnsserver string, fqdn string) error {
+	localTestDNSinject := os.Getenv("OVERRIDE_WITH_FAKE_EXT_DNS")
+
+	var ns string
+
+	if localTestDNSinject == "true" {
+		ns = "127.0.0.1:7753"
+	} else {
+		ns = dnsserver
+	}
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(fqdn), dns.TypeTXT)
+	txt, err := dns.Exchange(m, ns)
+	if err != nil {
+		log.Info(fmt.Sprintf("Error contacting EdgeDNS server (%s) for TXT split brain record: (%s)", ns, err))
+		return err
+	}
+	var timestamp string
+	if len(txt.Answer) > 0 {
+		if t, ok := txt.Answer[0].(*dns.TXT); ok {
+			timestamp = t.String()
+		}
+	}
+
+	if len(timestamp) > 0 {
+		return nil
+	}
+	return errors.NewGone(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))
+
 }
 
 func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclient.NameServer {
@@ -321,7 +349,8 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 
 func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*reconcile.Result, error) {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
-	if len(os.Getenv("INFOBLOX_GRID_HOST")) > 0 {
+	infobloxGridHost := os.Getenv("INFOBLOX_GRID_HOST")
+	if len(infobloxGridHost) > 0 {
 
 		objMgr, err := infobloxConnection()
 		if err != nil {
@@ -359,7 +388,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 				// Drop external records if they are stale
 				extClusters := getExternalClusterFQDNs(gslb)
 				for _, extCluster := range extClusters {
-					err = checkAliveFromTXT(extCluster)
+					err = checkAliveFromTXT(infobloxGridHost, extCluster)
 					if err != nil {
 						existingDelegateTo = filterOutDelegateTo(existingDelegateTo, extCluster)
 					}
