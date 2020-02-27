@@ -14,6 +14,7 @@ import (
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -389,7 +390,7 @@ func TestGslbController(t *testing.T) {
 		}
 	})
 
-	t.Run("Can check external Gslb TXT record for validity", func(t *testing.T) {
+	t.Run("Can check external Gslb TXT record for validity and fail if it is expired", func(t *testing.T) {
 		err = os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
@@ -397,8 +398,24 @@ func TestGslbController(t *testing.T) {
 
 		got := checkAliveFromTXT("fake", "test-gslb-ns-eu.example.com")
 
-		if got != nil {
-			t.Errorf("got:\n %s from TXT split brain check,\n\n want:\n %v", got, nil)
+		want := errors.NewGone("Split brain TXT record expired the time threshold: (5m0s)")
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
+		}
+
+	})
+
+	t.Run("Can check external Gslb TXT record for validity and pass if it is not expired", func(t *testing.T) {
+		err = os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+
+		err := checkAliveFromTXT("fake", "test-gslb-ns-za.example.com")
+
+		if err != nil {
+			t.Errorf("got:\n %s from TXT split brain check,\n\n want error:\n %v", err, nil)
 		}
 
 	})

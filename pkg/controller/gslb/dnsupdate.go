@@ -326,11 +326,31 @@ func checkAliveFromTXT(dnsserver string, fqdn string) error {
 	var timestamp string
 	if len(txt.Answer) > 0 {
 		if t, ok := txt.Answer[0].(*dns.TXT); ok {
-			timestamp = t.String()
+			log.Info(fmt.Sprintf("Split brain TXT raw record: %s", t.String()))
+			timestamp = strings.Split(t.String(), "\t")[4]
+			timestamp = strings.Trim(timestamp, "\"") // Otherwise time.Parse() will miserably fail
 		}
 	}
 
 	if len(timestamp) > 0 {
+		log.Info(fmt.Sprintf("Split brain TXT raw time stamp: %s", timestamp))
+		timeFromTXT, err := time.Parse("2006-01-02T15:04:05", timestamp)
+		if err != nil {
+			return err
+		}
+
+		log.Info(fmt.Sprintf("Split brain TXT parsed time stamp: %s", timeFromTXT))
+		now := time.Now().UTC()
+
+		diff := now.Sub(timeFromTXT)
+		log.Info(fmt.Sprintf("Split brain TXT time diff: %s", diff))
+
+		timeThreshold := 5 * time.Minute
+
+		if diff > timeThreshold {
+			return errors.NewGone(fmt.Sprintf("Split brain TXT record expired the time threshold: (%s)", timeThreshold))
+		}
+
 		return nil
 	}
 	return errors.NewGone(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))

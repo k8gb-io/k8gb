@@ -10,9 +10,9 @@ import (
 	"github.com/miekg/dns"
 )
 
-func oldEdgeTimestamp() string {
+func oldEdgeTimestamp(threshold string) string {
 	now := time.Now()
-	duration, _ := time.ParseDuration("10m")
+	duration, _ := time.ParseDuration(threshold)
 	before := now.Add(-duration)
 	edgeTimestamp := fmt.Sprint(before.UTC().Format("2006-01-02T15:04:05"))
 	return edgeTimestamp
@@ -20,7 +20,8 @@ func oldEdgeTimestamp() string {
 
 var records = map[string][]string{
 	"localtargets.app3.cloud.example.com.": []string{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
-	"test-gslb-ns-eu.example.com.":         []string{oldEdgeTimestamp()},
+	"test-gslb-ns-eu.example.com.":         []string{oldEdgeTimestamp("10m")},
+	"test-gslb-ns-za.example.com.":         []string{oldEdgeTimestamp("3m")},
 }
 
 func parseQuery(m *dns.Msg) {
