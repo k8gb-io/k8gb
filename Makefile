@@ -1,4 +1,4 @@
-REPO ?= ytsarev/ohmyglb
+REPO ?= absaoss/ohmyglb
 VERSION ?= $$(operator-sdk up local --operator-flags=-v)
 VALUES_YAML ?= chart/ohmyglb/values.yaml
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
