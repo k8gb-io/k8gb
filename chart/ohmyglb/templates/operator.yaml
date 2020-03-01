@@ -13,6 +13,12 @@ spec:
       labels:
         name: ohmyglb
     spec:
+      {{ if .Values.ohmyglb.hostAlias.enabled }}
+      hostAliases:
+        - ip: "{{ .Values.ohmyglb.hostAlias.ip }}"
+          hostnames:
+          - "{{ .Values.ohmyglb.hostAlias.hostname }}"
+      {{ end }}
       serviceAccountName: ohmyglb
       containers:
         - name: ohmyglb

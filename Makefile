@@ -35,11 +35,22 @@ dns-smoke-test:
 
 .PHONY: deploy-local-cluster
 deploy-local-cluster:
-	kind create cluster --config=deploy/kind/cluster.yaml
+	kind create cluster --config=deploy/kind/cluster.yaml --name test-gslb1
+
+.PHONY: deploy-local-multi-cluster-setup
+deploy-local-multi-cluster-setup:
+	kind create cluster --config=deploy/kind/cluster.yaml --name test-gslb1
+	kind create cluster --config=deploy/kind/cluster2.yaml --name test-gslb2
+
 
 .PHONY: destroy-local-cluster
 destroy-local-cluster:
-	kind delete cluster
+	kind delete cluster --name test-gslb1
+
+.PHONY: destroy-local-multi-cluster-setup
+destroy-local-multi-cluster-setup:
+	kind delete cluster --name test-gslb1
+	kind delete cluster --name test-gslb2
 
 .PHONY: create-ohmyglb-ns
 create-ohmyglb-ns:
