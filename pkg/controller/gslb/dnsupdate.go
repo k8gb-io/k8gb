@@ -313,7 +313,7 @@ func checkAliveFromTXT(dnsserver string, fqdn string) error {
 	if localTestDNSinject == "true" {
 		ns = "127.0.0.1:7753"
 	} else {
-		ns = dnsserver
+		ns = fmt.Sprintf("%s:53", dnsserver)
 	}
 
 	m := new(dns.Msg)
