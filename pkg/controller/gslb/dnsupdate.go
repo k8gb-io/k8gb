@@ -183,53 +183,6 @@ func nsServerName(gslb *ohmyglbv1beta1.Gslb, clusterGeoTag string) string {
 	return fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
 }
 
-func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
-	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
-	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
-	edgeDNSEndpointSpec := externaldns.DNSEndpointSpec{}
-	localTargets, err := r.getGslbIngressIPs(gslb)
-	if err != nil {
-		return nil, err
-	}
-	// Type A record to be registered resolve NS records in edge dns responses(infoblox, route53,...)
-	edgeDNSRecordA := &externaldns.Endpoint{
-		DNSName:    nsServerName(gslb, clusterGeoTag),
-		RecordTTL:  30,
-		RecordType: "A",
-		Targets:    localTargets,
-	}
-
-	edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
-
-	edgeDNSRecordTXT := &externaldns.Endpoint{
-		DNSName:    fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone),
-		RecordTTL:  30,
-		RecordType: "TXT",
-		Targets:    []string{edgeTimestamp},
-	}
-
-	edgeDNSEndpointSpec = externaldns.DNSEndpointSpec{
-		Endpoints: []*externaldns.Endpoint{
-			edgeDNSRecordA,
-			edgeDNSRecordTXT,
-		},
-	}
-
-	edgeDNSEndpoint := &externaldns.DNSEndpoint{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-ns", gslb.Name),
-			Namespace:   gslb.Namespace,
-			Annotations: map[string]string{"ohmyglb.absa.oss/dnstype": "edgedns"},
-		},
-		Spec: edgeDNSEndpointSpec,
-	}
-	err = controllerutil.SetControllerReference(gslb, edgeDNSEndpoint, r.scheme)
-	if err != nil {
-		return nil, err
-	}
-	return edgeDNSEndpoint, nil
-}
-
 type fakeInfobloxConnector struct {
 	//createObjectObj interface{}
 

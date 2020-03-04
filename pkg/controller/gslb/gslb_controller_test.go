@@ -2,7 +2,6 @@ package gslb
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -253,73 +252,6 @@ func TestGslbController(t *testing.T) {
 		}
 	})
 
-	t.Run("Created DNS Record for Edge DNS(e.g. Infoblox, Route53,...", func(t *testing.T) {
-		err := os.Setenv("EDGE_DNS_ZONE", "example.com")
-		if err != nil {
-			t.Fatalf("Can't setup env var: (%v)", err)
-		}
-
-		clusterGeoTag := "eu"
-		err = os.Setenv("CLUSTER_GEO_TAG", clusterGeoTag)
-		if err != nil {
-			t.Fatalf("Can't setup env var: (%v)", err)
-		}
-
-		reconcileAndUpdateGslb(t, r, req, cl, gslb)
-
-		edgeDNSEndpoint := &externaldns.DNSEndpoint{}
-		edgeDNSEName := fmt.Sprintf("%s-ns", gslb.Name)
-		nn := types.NamespacedName{Name: edgeDNSEName, Namespace: gslb.Namespace}
-		err = cl.Get(context.TODO(), nn, edgeDNSEndpoint)
-		if err != nil {
-			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
-		}
-
-		nsFqdn := fmt.Sprintf("%s-ns-%s.example.com", gslb.Name, clusterGeoTag)
-		heartbeatFqdn := fmt.Sprintf("%s-heartbeat-%s.example.com", gslb.Name, clusterGeoTag)
-		timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
-		got := edgeDNSEndpoint.Spec.Endpoints
-		want := []*externaldns.Endpoint{
-			{
-				DNSName:    nsFqdn,
-				RecordTTL:  30,
-				RecordType: "A",
-				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
-			},
-			{
-				DNSName:    heartbeatFqdn,
-				RecordTTL:  30,
-				RecordType: "TXT",
-				Targets:    externaldns.Targets{timestamp},
-			},
-		}
-
-		prettyGot := prettyPrint(got)
-		prettyWant := prettyPrint(want)
-
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
-		}
-
-	})
-
-	t.Run("Edge DNS records has special annotation", func(t *testing.T) {
-		edgeDNSEndpoint := &externaldns.DNSEndpoint{}
-		edgeDNSEName := fmt.Sprintf("%s-ns", gslb.Name)
-		nn := types.NamespacedName{Name: edgeDNSEName, Namespace: gslb.Namespace}
-		err = cl.Get(context.TODO(), nn, edgeDNSEndpoint)
-		if err != nil {
-			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
-		}
-
-		got := edgeDNSEndpoint.Annotations["ohmyglb.absa.oss/dnstype"]
-
-		want := "edgedns"
-		if got != want {
-			t.Errorf("got:\n %q annotation value,\n\n want:\n %q", got, want)
-		}
-	})
-
 	t.Run("Local DNS records has special annotation", func(t *testing.T) {
 		dnsEndpoint := &externaldns.DNSEndpoint{}
 		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
@@ -336,7 +268,11 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Generates proper external NS target FQDNs according to the geo tags", func(t *testing.T) {
-		err := os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "za")
+		err := os.Setenv("EDGE_DNS_ZONE", "example.com")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+		err = os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "za")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
