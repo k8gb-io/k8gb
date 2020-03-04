@@ -185,6 +185,7 @@ func nsServerName(gslb *ohmyglbv1beta1.Gslb, clusterGeoTag string) string {
 
 func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
 	edgeDNSEndpointSpec := externaldns.DNSEndpointSpec{}
 	localTargets, err := r.getGslbIngressIPs(gslb)
 	if err != nil {
@@ -201,7 +202,7 @@ func (r *ReconcileGslb) gslbEdgeDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externa
 	edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
 
 	edgeDNSRecordTXT := &externaldns.Endpoint{
-		DNSName:    nsServerName(gslb, clusterGeoTag),
+		DNSName:    fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone),
 		RecordTTL:  30,
 		RecordType: "TXT",
 		Targets:    []string{edgeTimestamp},

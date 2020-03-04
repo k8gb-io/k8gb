@@ -275,18 +275,19 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
 		}
 
-		fqdn := fmt.Sprintf("%s-ns-%s.example.com", gslb.Name, clusterGeoTag)
+		nsFqdn := fmt.Sprintf("%s-ns-%s.example.com", gslb.Name, clusterGeoTag)
+		heartbeatFqdn := fmt.Sprintf("%s-heartbeat-%s.example.com", gslb.Name, clusterGeoTag)
 		timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
 		got := edgeDNSEndpoint.Spec.Endpoints
 		want := []*externaldns.Endpoint{
 			{
-				DNSName:    fqdn,
+				DNSName:    nsFqdn,
 				RecordTTL:  30,
 				RecordType: "A",
 				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
 			},
 			{
-				DNSName:    fqdn,
+				DNSName:    heartbeatFqdn,
 				RecordTTL:  30,
 				RecordType: "TXT",
 				Targets:    externaldns.Targets{timestamp},
@@ -396,7 +397,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 
-		got := checkAliveFromTXT("fake", "test-gslb-ns-eu.example.com")
+		got := checkAliveFromTXT("fake", "test-gslb-heartbeat-eu.example.com")
 
 		want := errors.NewGone("Split brain TXT record expired the time threshold: (5m0s)")
 
@@ -412,7 +413,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 
-		err := checkAliveFromTXT("fake", "test-gslb-ns-za.example.com")
+		err := checkAliveFromTXT("fake", "test-gslb-heartbeat-za.example.com")
 
 		if err != nil {
 			t.Errorf("got:\n %s from TXT split brain check,\n\n want error:\n %v", err, nil)
