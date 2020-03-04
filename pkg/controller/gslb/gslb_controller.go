@@ -209,25 +209,11 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 		// Requeue the request
 		return reconcile.Result{}, err
 	}
-	// == external-dns dnsendpoints CRs for Edge DNS==
-	edgeDNSEndpoint, err := r.gslbEdgeDNSEndpoint(gslb)
-	if err != nil {
-		// Requeue the request
-		return reconcile.Result{}, err
-	}
 
 	result, err = r.ensureDNSEndpoint(
 		request,
 		gslb,
 		dnsEndpoint)
-	if result != nil {
-		return *result, err
-	}
-
-	result, err = r.ensureDNSEndpoint(
-		request,
-		gslb,
-		edgeDNSEndpoint)
 	if result != nil {
 		return *result, err
 	}
