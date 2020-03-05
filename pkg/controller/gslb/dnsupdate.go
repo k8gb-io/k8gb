@@ -342,6 +342,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 		}
 
 		gslbZoneName := os.Getenv("DNS_ZONE")
+		edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
 		findZone, err := objMgr.GetZoneDelegated(gslbZoneName)
 		if err != nil {
 			return &reconcile.Result{}, err
@@ -376,6 +377,24 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 		} else {
 			log.Info(fmt.Sprintf("Creating delegated zone(%s)...", gslbZoneName))
 			_, err = objMgr.CreateZoneDelegated(gslbZoneName, delegateTo)
+			if err != nil {
+				return &reconcile.Result{}, err
+			}
+		}
+
+		edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
+		heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+		heartbeatTXTRecord, err := objMgr.GetTXTRecord(heartbeatTXTName)
+		if err != nil {
+			return &reconcile.Result{}, err
+		}
+		if heartbeatTXTRecord == nil {
+			_, err := objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, "default")
+			if err != nil {
+				return &reconcile.Result{}, err
+			}
+		} else {
+			_, err := objMgr.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
 			if err != nil {
 				return &reconcile.Result{}, err
 			}

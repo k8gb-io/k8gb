@@ -1,6 +1,6 @@
 # cloud.google.com/go v0.37.4
 cloud.google.com/go/compute/metadata
-# github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200220151434-d103ffba14dd
+# github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200305141429-91388c9466d8
 github.com/AbsaOSS/infoblox-go-client
 # github.com/Azure/go-autorest v11.1.2+incompatible
 github.com/Azure/go-autorest/autorest
