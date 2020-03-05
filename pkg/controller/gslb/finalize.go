@@ -38,6 +38,25 @@ func (r *ReconcileGslb) finalizeGslb(gslb *ohmyglbv1beta1.Gslb) error {
 				}
 			}
 		}
+
+		edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
+		clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+		heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+		findTXT, err := objMgr.GetTXTRecord(heartbeatTXTName)
+		if err != nil {
+			return err
+		}
+
+		if findTXT != nil {
+			if len(findTXT.Ref) > 0 {
+				log.Info(fmt.Sprintf("Deleting split brain TXT record(%s)...", heartbeatTXTName))
+				_, err := objMgr.DeleteTXTRecord(findTXT.Ref)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
 	}
 
 	log.Info("Successfully finalized Gslb")
