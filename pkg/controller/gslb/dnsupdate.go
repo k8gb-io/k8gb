@@ -389,11 +389,13 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 			return &reconcile.Result{}, err
 		}
 		if heartbeatTXTRecord == nil {
+			log.Info(fmt.Sprintf("Creating split brain TXT record(%s)...", heartbeatTXTName))
 			_, err := objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, "default")
 			if err != nil {
 				return &reconcile.Result{}, err
 			}
 		} else {
+			log.Info(fmt.Sprintf("Updating split brain TXT record(%s)...", heartbeatTXTName))
 			_, err := objMgr.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
 			if err != nil {
 				return &reconcile.Result{}, err
