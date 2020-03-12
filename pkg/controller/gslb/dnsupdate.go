@@ -343,6 +343,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 
 		gslbZoneName := os.Getenv("DNS_ZONE")
 		edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
+		edgeDNSServer := os.Getenv("EDGE_DNS_SERVER")
 		findZone, err := objMgr.GetZoneDelegated(gslbZoneName)
 		if err != nil {
 			return &reconcile.Result{}, err
@@ -363,7 +364,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 				// Drop external records if they are stale
 				extClusters := getExternalClusterFQDNs(gslb)
 				for _, extCluster := range extClusters {
-					err = checkAliveFromTXT(infobloxGridHost, extCluster)
+					err = checkAliveFromTXT(edgeDNSServer, extCluster)
 					if err != nil {
 						existingDelegateTo = filterOutDelegateTo(existingDelegateTo, extCluster)
 					}

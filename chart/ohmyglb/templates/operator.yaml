@@ -41,6 +41,8 @@ spec:
               value: {{ quote .Values.ohmyglb.extGslbClustersGeoTags }}
             - name: EDGE_DNS_ZONE
               value: {{ .Values.ohmyglb.edgeDNSZone }}
+            - name: EDGE_DNS_SERVER
+              value: {{ .Values.ohmyglb.edgeDNSServer }}
             - name: DNS_ZONE
               value: {{ .Values.ohmyglb.dnsZone }}
             {{ if .Values.infoblox.enabled }}
