@@ -381,6 +381,14 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 		}
 	})
+
+	t.Run("Can generate external heartbeat FQDNs", func(t *testing.T) {
+		got := getExternalClusterHeartbeatFQDNs(gslb)
+		want := []string{"test-gslb-heartbeat-za.example.com"}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s unexpected heartbeat records,\n\n want:\n %s", got, want)
+		}
+	})
 }
 
 func reconcileAndUpdateGslb(t *testing.T,

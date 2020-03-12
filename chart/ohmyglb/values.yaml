@@ -8,8 +8,9 @@ global:
 ohmyglb:
   image: absaoss/ohmyglb:v0.5.3
   ingressNamespace: "ohmyglb"
-  dnsZone: &dnsZone "cloud.example.com"
-  edgeDNSZone: &edgeDNSZone "example.com"
+  dnsZone: &dnsZone "cloud.example.com" # dnsZone controlled by gslb
+  edgeDNSZone: &edgeDNSZone "example.com" # main zone which would contain gslb zone to delegate
+  edgeDNSServer: &edgeDNSServer "1.1.1.1" # to handle splitbrain situation with TXT timestamp
   clusterGeoTag: "eu" # used for places where we need to distinguish between differnet Gslb instances
   extGslbClustersGeoTags: "us" # comma-separated list of external gslb geo tags to pair with
   hostAlias: # use https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ inside operator pod. Useful for advanced testing scenarios and to break dependency on EdgeDNS for cross ohmyglb collaboration
@@ -78,7 +79,6 @@ coredns:
 
 infoblox:
   enabled: false
-  dnsZone: *edgeDNSZone # main zone which would contain gslb zone to delegate
   gridHost: 10.0.0.1
   wapiVersion: 2.3.1 
   wapiPort: 443
