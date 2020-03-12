@@ -355,7 +355,6 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 				return &reconcile.Result{}, err
 			}
 			if len(findZone.Ref) > 0 {
-				log.Info(fmt.Sprintf("Updating delegated zone(%s)...", gslbZoneName))
 
 				// Drop own records for straight away update
 				existingDelegateTo := filterOutDelegateTo(findZone.DelegateTo, nsServerName(gslb, clusterGeoTag))
@@ -366,9 +365,12 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 				for _, extCluster := range extClusters {
 					err = checkAliveFromTXT(edgeDNSServer, extCluster)
 					if err != nil {
+						log.Error(err, "got the error from TXT based checkAlive")
+						log.Info(fmt.Sprintf("External cluster (%s) doesn't look alive, filtering it out from delegated zone configuration...", extCluster))
 						existingDelegateTo = filterOutDelegateTo(existingDelegateTo, extCluster)
 					}
 				}
+				log.Info(fmt.Sprintf("Updating delegated zone(%s) with the server list(%v)", gslbZoneName, existingDelegateTo))
 
 				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, existingDelegateTo)
 				if err != nil {
