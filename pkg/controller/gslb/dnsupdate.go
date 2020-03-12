@@ -63,6 +63,24 @@ func getExternalClusterFQDNs(gslb *ohmyglbv1beta1.Gslb) []string {
 	return extGslbClusters
 }
 
+func getExternalClusterHeartbeatFQDNs(gslb *ohmyglbv1beta1.Gslb) []string {
+	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
+
+	if extGslbClustersGeoTagsVar == "" {
+		log.Info("No other Gslb enabled clusters are defined in the configuration...Working standalone")
+		return nil
+	}
+
+	extGslbClustersGeoTags := strings.Split(extGslbClustersGeoTagsVar, ",")
+
+	var extGslbClusters []string
+	for _, geoTag := range extGslbClustersGeoTags {
+		cluster := heartbeatFQDN(gslb, geoTag)
+		extGslbClusters = append(extGslbClusters, cluster)
+	}
+	return extGslbClusters
+}
+
 func getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error) {
 
 	extGslbClusters := getExternalClusterFQDNs(gslb)
@@ -181,6 +199,14 @@ func nsServerName(gslb *ohmyglbv1beta1.Gslb, clusterGeoTag string) string {
 		clusterGeoTag = "default"
 	}
 	return fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+}
+
+func heartbeatFQDN(gslb *ohmyglbv1beta1.Gslb, clusterGeoTag string) string {
+	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
+	if len(clusterGeoTag) == 0 {
+		clusterGeoTag = "default"
+	}
+	return fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
 }
 
 type fakeInfobloxConnector struct {
@@ -361,7 +387,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 				existingDelegateTo = append(existingDelegateTo, delegateTo...)
 
 				// Drop external records if they are stale
-				extClusters := getExternalClusterFQDNs(gslb)
+				extClusters := getExternalClusterHeartbeatFQDNs(gslb)
 				for _, extCluster := range extClusters {
 					err = checkAliveFromTXT(edgeDNSServer, extCluster)
 					if err != nil {
