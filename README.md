@@ -80,3 +80,10 @@ $ kubectl -n test-gslb describe gslb test-gslb
     app2.cloud.example.com:  Unhealthy
     app3.cloud.example.com:  Healthy
 ```
+
+#### Deploy full local setup
+
+To deploy two cross communicating `ohmyglb` enabled clusters with testing application on top, execute
+```
+$ make deploy-full-local-setup
+```

@@ -1,6 +1,7 @@
 REPO ?= absaoss/ohmyglb
 VERSION ?= $$(operator-sdk up local --operator-flags=-v)
-VALUES_YAML ?= chart/ohmyglb/values.yaml
+VALUES_YAML ?= -f chart/ohmyglb/values.yaml
+HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
 GSLB_DOMAIN ?= cloud.example.com
 
@@ -37,18 +38,40 @@ dns-smoke-test:
 deploy-local-cluster:
 	kind create cluster --config=deploy/kind/cluster.yaml --name test-gslb1
 
-.PHONY: deploy-local-multi-cluster-setup
-deploy-local-multi-cluster-setup:
+.PHONY: deploy-two-local-clusters
+deploy-two-local-clusters:
 	kind create cluster --config=deploy/kind/cluster.yaml --name test-gslb1
 	kind create cluster --config=deploy/kind/cluster2.yaml --name test-gslb2
 
+.PHONY: use-first-context
+use-first-context:
+	kubectl config use-context kind-test-gslb1
+
+.PHONY: use-second-context
+use-second-context:
+	kubectl config use-context kind-test-gslb2
+
+.PHONY: deploy-first-ohmyglb
+deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true
+deploy-first-ohmyglb: deploy-gslb-operator deploy-local-ingress deploy-gslb-cr
+
+.PHONY: deploy-second-ohmyglb
+deploy-second-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.clusterGeoTag="us" --set ohmyglb.extGslbClustersGeoTags="eu" --set ohmyglb.hostAlias.hostname="test-gslb-ns-eu.example.com"
+deploy-second-ohmyglb: deploy-gslb-operator deploy-local-ingress deploy-gslb-cr
+
+.PHONY: deploy-full-local-setup
+deploy-full-local-setup:
+	./deploy/full.sh
+
+.PHONY: destroy-full-local-setup
+destroy-full-local-setup: destroy-two-local-clusters
 
 .PHONY: destroy-local-cluster
 destroy-local-cluster:
 	kind delete cluster --name test-gslb1
 
-.PHONY: destroy-local-multi-cluster-setup
-destroy-local-multi-cluster-setup:
+.PHONY: destroy-two-local-clusters
+destroy-two-local-clusters:
 	kind delete cluster --name test-gslb1
 	kind delete cluster --name test-gslb2
 
@@ -67,18 +90,19 @@ deploy-local-ingress: create-ohmyglb-ns
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: create-ohmyglb-ns
 	cd chart/ohmyglb && helm dependency update
-	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb -f $(VALUES_YAML)
+	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb $(VALUES_YAML) $(HELM_ARGS)
 
 # workaround until https://github.com/crossplaneio/crossplane/issues/1170 solved
 .PHONY: deploy-gslb-operator-14
 deploy-gslb-operator-14: create-ohmyglb-ns
 	cd chart/ohmyglb && helm dependency update
-	helm -n ohmyglb template ohmyglb chart/ohmyglb -f $(VALUES_YAML) | kubectl -n ohmyglb --validate=false apply -f -
+	helm -n ohmyglb template ohmyglb chart/ohmyglb $(VALUES_YAML) | kubectl -n ohmyglb --validate=false apply -f -
 
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: create-test-ns
 	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
+	kubectl -n test-gslb wait --for condition=established --timeout=2s crd/gslbs.ohmyglb.absa.oss
 	git checkout -- deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
 
 .PHONY: deploy-test-apps
