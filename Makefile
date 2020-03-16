@@ -1,6 +1,6 @@
 REPO ?= absaoss/ohmyglb
 VERSION ?= $$(operator-sdk up local --operator-flags=-v)
-VALUES_YAML ?= -f chart/ohmyglb/values.yaml
+VALUES_YAML ?= chart/ohmyglb/values.yaml
 HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
 GSLB_DOMAIN ?= cloud.example.com
@@ -90,13 +90,13 @@ deploy-local-ingress: create-ohmyglb-ns
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: create-ohmyglb-ns
 	cd chart/ohmyglb && helm dependency update
-	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb $(VALUES_YAML) $(HELM_ARGS)
+	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb -f $(VALUES_YAML) $(HELM_ARGS)
 
 # workaround until https://github.com/crossplaneio/crossplane/issues/1170 solved
 .PHONY: deploy-gslb-operator-14
 deploy-gslb-operator-14: create-ohmyglb-ns
 	cd chart/ohmyglb && helm dependency update
-	helm -n ohmyglb template ohmyglb chart/ohmyglb $(VALUES_YAML) | kubectl -n ohmyglb --validate=false apply -f -
+	helm -n ohmyglb template ohmyglb chart/ohmyglb -f $(VALUES_YAML) | kubectl -n ohmyglb --validate=false apply -f -
 
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: create-test-ns
