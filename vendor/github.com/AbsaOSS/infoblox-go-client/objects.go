@@ -446,6 +446,7 @@ type RecordTXT struct {
 	Ref    string `json:"_ref,omitempty"`
 	Name   string `json:"name,omitempty"`
 	Text   string `json:"text,omitempty"`
+	TTL    int    `json:"ttl,omitempty"`
 	View   string `json:"view,omitempty"`
 	Zone   string `json:"zone,omitempty"`
 	Ea     EA     `json:"extattrs,omitempty"`

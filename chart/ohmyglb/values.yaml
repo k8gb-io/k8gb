@@ -6,7 +6,7 @@ global:
   # - name: "image-pull-secret"
 
 ohmyglb:
-  image: absaoss/ohmyglb:v0.5.3
+  image: absaoss/ohmyglb:v0.5.4
   ingressNamespace: "ohmyglb"
   dnsZone: &dnsZone "cloud.example.com" # dnsZone controlled by gslb
   edgeDNSZone: &edgeDNSZone "example.com" # main zone which would contain gslb zone to delegate

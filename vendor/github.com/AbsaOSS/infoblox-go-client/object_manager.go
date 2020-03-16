@@ -562,12 +562,14 @@ func (objMgr *ObjectManager) DeleteCNAMERecord(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
 
-func (objMgr *ObjectManager) CreateTXTRecord(recordname string, text string, dnsview string) (*RecordTXT, error) {
+// Creates TXT Record. Use TTL of 0 to inherit TTL from the Zone
+func (objMgr *ObjectManager) CreateTXTRecord(recordname string, text string, ttl int, dnsview string) (*RecordTXT, error) {
 
 	recordTXT := NewRecordTXT(RecordTXT{
 		View: dnsview,
 		Name: recordname,
 		Text: text,
+		TTL:  ttl,
 	})
 
 	ref, err := objMgr.connector.CreateObject(recordTXT)
@@ -582,8 +584,8 @@ func (objMgr *ObjectManager) GetTXTRecordByRef(ref string) (*RecordTXT, error) {
 }
 
 func (objMgr *ObjectManager) GetTXTRecord(name string) (*RecordTXT, error) {
-	if len(name) == 0 {
-		return nil, nil
+	if name == "" {
+		return nil, fmt.Errorf("name can not be empty")
 	}
 	var res []RecordTXT
 
@@ -605,9 +607,13 @@ func (objMgr *ObjectManager) UpdateTXTRecord(recordname string, text string) (*R
 
 	err := objMgr.connector.GetObject(recordTXT, "", &res)
 
+	if len(res) == 0 {
+		return nil, nil
+	}
+
 	res[0].Text = text
 
-	res[0].Zone = "" // otherwize infoblox API freaks out with ""text": "Field is not writable: zone""
+	res[0].Zone = "" //  set the Zone value to "" as its a non writable field
 
 	_, err = objMgr.connector.UpdateObject(&res[0], res[0].Ref)
 
