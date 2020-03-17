@@ -73,6 +73,7 @@ func (in *GslbList) DeepCopyObject() runtime.Object {
 func (in *GslbSpec) DeepCopyInto(out *GslbSpec) {
 	*out = *in
 	in.Ingress.DeepCopyInto(&out.Ingress)
+	out.Strategy = in.Strategy
 	return
 }
 

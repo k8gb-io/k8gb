@@ -157,9 +157,26 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 			return nil, err
 		}
 		if len(externalTargets) > 0 {
-			switch gslb.Spec.Strategy {
+			switch gslb.Spec.Strategy.Type {
 			case "roundRobin":
 				finalTargets = append(finalTargets, externalTargets...)
+			case "failover":
+				clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+				// If cluster is Primary
+				if gslb.Spec.Strategy.PrimaryGeoTag == clusterGeoTag {
+					// If cluster is Primary and Healthy return only own targets
+					// If cluster is Primary and Unhealthy return Secondary external targets
+					if health != "Healthy" {
+						finalTargets = externalTargets
+					}
+				} else {
+					// If cluster is Secondary and Primary external cluster is Healthy
+					// then return Primary external targets.
+					// Return own targets by default.
+					if len(externalTargets) > 0 {
+						finalTargets = externalTargets
+					}
+				}
 			}
 		}
 

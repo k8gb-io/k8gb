@@ -389,6 +389,118 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("got:\n %s unexpected heartbeat records,\n\n want:\n %s", got, want)
 		}
 	})
+
+	t.Run("Returns own records using Failover strategy when Primary", func(t *testing.T) {
+		err := os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+		err = os.Setenv("CLUSTER_GEO_TAG", "eu")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+
+		// Enable failover strategy
+		gslb.Spec.Strategy.Type = "failover"
+		gslb.Spec.Strategy.PrimaryGeoTag = "eu"
+		err = cl.Update(context.TODO(), gslb)
+		if err != nil {
+			t.Fatalf("Can't update gslb: (%v)", err)
+		}
+
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+
+		dnsEndpoint := &externaldns.DNSEndpoint{}
+		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+
+		got := dnsEndpoint.Spec.Endpoints
+
+		want := []*externaldns.Endpoint{
+			{
+				DNSName:    "localtargets.app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+			},
+			{
+				DNSName:    "app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+			},
+		}
+
+		prettyGot := prettyPrint(got)
+		prettyWant := prettyPrint(want)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		}
+
+		err = os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "false")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+	})
+
+	t.Run("Returns external records using Failover strategy when Secondary", func(t *testing.T) {
+		err := os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+		err = os.Setenv("CLUSTER_GEO_TAG", "za")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+
+		// Enable failover strategy
+		gslb.Spec.Strategy.Type = "failover"
+		gslb.Spec.Strategy.PrimaryGeoTag = "eu"
+		err = cl.Update(context.TODO(), gslb)
+		if err != nil {
+			t.Fatalf("Can't update gslb: (%v)", err)
+		}
+
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+
+		dnsEndpoint := &externaldns.DNSEndpoint{}
+		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+
+		got := dnsEndpoint.Spec.Endpoints
+
+		want := []*externaldns.Endpoint{
+			{
+				DNSName:    "localtargets.app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+			},
+			{
+				DNSName:    "app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
+			},
+		}
+
+		prettyGot := prettyPrint(got)
+		prettyWant := prettyPrint(want)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		}
+
+		err = os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "false")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+	})
 }
 
 func reconcileAndUpdateGslb(t *testing.T,
