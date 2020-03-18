@@ -27,4 +27,5 @@ spec:
               serviceName: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
               servicePort: http
             path: /
-  strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
+  strategy:
+    type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too

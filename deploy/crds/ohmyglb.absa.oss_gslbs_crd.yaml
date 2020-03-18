@@ -165,7 +165,15 @@ spec:
                   type: array
               type: object
             strategy:
-              type: string
+              properties:
+                primaryGeoTag:
+                  type: string
+                type:
+                  type: string
+              required:
+              - primaryGeoTag
+              - type
+              type: object
           required:
           - ingress
           - strategy

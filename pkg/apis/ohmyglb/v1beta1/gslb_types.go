@@ -8,6 +8,11 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type Strategy struct {
+	Type          string `json:"type"`
+	PrimaryGeoTag string `json:"primaryGeoTag"`
+}
+
 // GslbSpec defines the desired state of Gslb
 // +k8s:openapi-gen=true
 type GslbSpec struct {
@@ -15,7 +20,7 @@ type GslbSpec struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 	Ingress  v1beta1.IngressSpec `json:"ingress"`
-	Strategy string              `json:"strategy"`
+	Strategy Strategy            `json:"strategy"`
 }
 
 // GslbStatus defines the observed state of Gslb
