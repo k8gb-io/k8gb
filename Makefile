@@ -1,5 +1,5 @@
 REPO ?= absaoss/ohmyglb
-VERSION ?= $$(operator-sdk up local --operator-flags=-v)
+VERSION ?= $$(operator-sdk run --local --operator-flags=-v)
 VALUES_YAML ?= chart/ohmyglb/values.yaml
 HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
@@ -52,7 +52,7 @@ use-second-context:
 	kubectl config use-context kind-test-gslb2
 
 .PHONY: deploy-first-ohmyglb
-deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true
+deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.hostAlias.ip="172.17.0.9"
 deploy-first-ohmyglb: deploy-gslb-operator deploy-local-ingress deploy-gslb-cr
 
 .PHONY: deploy-second-ohmyglb
