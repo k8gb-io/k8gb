@@ -171,7 +171,6 @@ spec:
                 type:
                   type: string
               required:
-              - primaryGeoTag
               - type
               type: object
           required:

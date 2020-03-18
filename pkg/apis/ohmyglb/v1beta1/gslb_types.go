@@ -10,7 +10,7 @@ import (
 
 type Strategy struct {
 	Type          string `json:"type"`
-	PrimaryGeoTag string `json:"primaryGeoTag"`
+	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
 }
 
 // GslbSpec defines the desired state of Gslb
