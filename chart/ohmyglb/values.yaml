@@ -19,7 +19,7 @@ ohmyglb:
     hostname: "test-gslb-ns-us.example.com"
 
 externaldns:
-  image: ytsarev/external-dns:v0.5.18-27-g432d0696-dirty
+  image: absaoss/external-dns:v0.5.18-90-g3602c476-dirty
 
 etcd-operator:
   customResources:
