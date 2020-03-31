@@ -34,6 +34,9 @@ import (
 
 	// DNSEndoints
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
+
+	// For metrics Namespace retrieval
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Change below variables to serve metrics on different host or port.
@@ -181,15 +184,33 @@ func serveCRMetrics(cfg *rest.Config) error {
 	if err != nil {
 		return err
 	}
-	// Get the namespace the operator is currently deployed in.
-	operatorNs, err := k8sutil.GetOperatorNamespace()
+
+	// We are about to generate metrics for all namespaces
+	allNamespaceNames := []string{}
+
+	allNamespaces := &v1.NamespaceList{}
+
+	clientcfg, err := config.GetConfig()
 	if err != nil {
 		return err
 	}
-	// To generate metrics in other namespaces, add the values below.
-	ns := []string{operatorNs}
+
+	c, err := client.New(clientcfg, client.Options{})
+	if err != nil {
+		return err
+	}
+
+	err = c.List(context.TODO(), allNamespaces)
+	if err != nil {
+		return err
+	}
+
+	for _, namespace := range allNamespaces.Items {
+		allNamespaceNames = append(allNamespaceNames, namespace.Name)
+	}
+
 	// Generate and serve custom resource specific metrics.
-	err = kubemetrics.GenerateAndServeCRMetrics(cfg, ns, filteredGVK, metricsHost, operatorMetricsPort)
+	err = kubemetrics.GenerateAndServeCRMetrics(cfg, allNamespaceNames, filteredGVK, metricsHost, operatorMetricsPort)
 	if err != nil {
 		return err
 	}
