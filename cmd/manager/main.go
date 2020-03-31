@@ -36,7 +36,6 @@ import (
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 
 	// For metrics Namespace retrieval
-	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -189,11 +188,14 @@ func serveCRMetrics(cfg *rest.Config) error {
 	// We are about to generate metrics for all namespaces
 	allNamespaceNames := []string{}
 
-	allNamespaces := &corev1.NamespaceList{}
+	allNamespaces := &v1.NamespaceList{}
 
-	cfg, err = config.GetConfig()
+	clientcfg, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
 
-	c, err := client.New(cfg, client.Options{})
+	c, err := client.New(clientcfg, client.Options{})
 	if err != nil {
 		return err
 	}
