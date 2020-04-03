@@ -74,3 +74,9 @@ rules:
   - dnsendpoints
   verbs:
   - '*'
+- apiGroups:
+  - '*'
+  resources:
+  - namespaces
+  verbs:
+  - 'list'
