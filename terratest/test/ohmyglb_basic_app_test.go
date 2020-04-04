@@ -50,6 +50,11 @@ func TestOhmyglbBasicAppExample(t *testing.T) {
 	ingress := k8s.GetIngress(t, options, "test-gslb")
 	require.Equal(t, ingress.Name, "test-gslb")
 
+	// Path to the Kubernetes resource config we will test
+	unhealthyAppPath, err := filepath.Abs("../examples/unhealthy-app.yaml")
+	require.NoError(t, err)
+	k8s.KubectlApply(t, options, unhealthyAppPath)
+
 	helmRepoAdd := shell.Command{
 		Command: "helm",
 		Args:    []string{"repo", "add", "podinfo", "https://stefanprodan.github.io/podinfo"},
@@ -91,7 +96,7 @@ func TestOhmyglbBasicAppExample(t *testing.T) {
 		t.Errorf("Failed to get ohmyglb status with kubectl (%s)", err)
 	}
 
-	want := "'map[app1.cloud.example.com:NotFound app2.cloud.example.com:NotFound app3.cloud.example.com:Healthy]'"
+	want := "'map[app1.cloud.example.com:NotFound app2.cloud.example.com:Unhealthy app3.cloud.example.com:Healthy]'"
 	assert.Equal(t, ohmyglbServiceHealth, want)
 
 }
