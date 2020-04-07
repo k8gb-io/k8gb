@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -14,6 +15,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/helm"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/shell"
 
 	corev1 "k8s.io/api/core/v1"
@@ -54,7 +56,16 @@ func TestOhmyglbBasicFailoverExample(t *testing.T) {
 
 	expectedIPs := GetIngressIPs(t, optionsContext1, gslbName)
 
-	checkWithDig(t, "localhost", 53, "terratest-failover.cloud.example.com", expectedIPs)
+	beforeFailoverResponse, err := DoWithRetryWaitingForValueE(
+		t,
+		"Wait coredns to pickup dns values...",
+		300,
+		1*time.Second,
+		func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
+		expectedIPs)
+	require.NoError(t, err)
+
+	assert.Equal(t, beforeFailoverResponse, expectedIPs)
 
 	k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=0")
 
@@ -62,10 +73,16 @@ func TestOhmyglbBasicFailoverExample(t *testing.T) {
 
 	expectedIPsAfterFailover := GetIngressIPs(t, optionsContext2, gslbName)
 
-	fmt.Println("Waiting for coredns to pick new records up...")
-	time.Sleep(180 * time.Second) // Wait for CRD->etcd->Coredns reconciliation
+	afterFailoverResponse, err := DoWithRetryWaitingForValueE(
+		t,
+		"Wait for failover to happen and coredns to pickup new values...",
+		300,
+		1*time.Second,
+		func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
+		expectedIPsAfterFailover)
+	require.NoError(t, err)
 
-	checkWithDig(t, "localhost", 53, "terratest-failover.cloud.example.com", expectedIPsAfterFailover)
+	assert.Equal(t, afterFailoverResponse, expectedIPsAfterFailover)
 
 }
 
@@ -78,7 +95,7 @@ func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string
 	return ingressIPs
 }
 
-func checkWithDig(t *testing.T, dnsServer string, dnsPort int, dnsName string, want []string) {
+func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string) ([]string, error) {
 	port := fmt.Sprintf("-p%v", dnsPort)
 	dnsServer = fmt.Sprintf("@%s", dnsServer)
 
@@ -92,7 +109,31 @@ func checkWithDig(t *testing.T, dnsServer string, dnsPort int, dnsName string, w
 
 	sort.Strings(digAppSlice)
 
-	assert.Equal(t, want, digAppSlice)
+	return digAppSlice, nil
+}
+
+// Concept is borrowed from terratest/modules/retry and extended to our use case
+func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetries int, sleepBetweenRetries time.Duration, action func() ([]string, error), expectedResult []string) ([]string, error) {
+	var output []string
+	var err error
+
+	for i := 0; i <= maxRetries; i++ {
+
+		output, err = action()
+		if err != nil {
+			return output, nil
+			t.Logf("%s returned an error: %s. Sleeping for %s and will try again.", actionDescription, err.Error(), sleepBetweenRetries)
+		}
+
+		if reflect.DeepEqual(output, expectedResult) {
+			return output, err
+		}
+
+		t.Logf("%s does not match expected result. Expected:(%s). Actual:(%s). Sleeping for %s and will try again.", actionDescription, expectedResult, output, sleepBetweenRetries)
+		time.Sleep(sleepBetweenRetries)
+	}
+
+	return output, retry.MaxRetriesExceeded{Description: actionDescription, MaxRetries: maxRetries}
 }
 
 func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string) {
