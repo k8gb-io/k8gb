@@ -42,7 +42,7 @@ func TestGslb(t *testing.T) {
 		t.Fatalf("failed to add custom resource scheme to framework: %v", err)
 	}
 
-	ctx := framework.NewTestCtx(t)
+	ctx := framework.NewContext(t)
 	defer ctx.Cleanup()
 
 	err = ctx.InitializeClusterResources(&framework.CleanupOptions{TestContext: ctx, Timeout: cleanupTimeout, RetryInterval: cleanupRetryInterval})
@@ -72,7 +72,7 @@ func TestGslb(t *testing.T) {
 	testGslbDNSEndpoint(t, f, ctx, gslb)
 }
 
-func createGslb(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) (*ohmyglbv1beta1.Gslb, error) {
+func createGslb(t *testing.T, f *framework.Framework, ctx *framework.Context) (*ohmyglbv1beta1.Gslb, error) {
 
 	gslbYaml, err := ioutil.ReadFile(crSampleYaml)
 	if err != nil {
@@ -100,7 +100,7 @@ func createGslb(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) (*
 
 }
 
-func testGslbIngress(t *testing.T, f *framework.Framework, ctx *framework.TestCtx, gslb *ohmyglbv1beta1.Gslb) {
+func testGslbIngress(t *testing.T, f *framework.Framework, ctx *framework.Context, gslb *ohmyglbv1beta1.Gslb) {
 	t.Run("Gslb creates associated Ingress", func(t *testing.T) {
 		ingress := &v1beta1.Ingress{}
 		nn := types.NamespacedName{Name: gslb.Name, Namespace: gslb.Namespace}
@@ -117,7 +117,7 @@ func testGslbIngress(t *testing.T, f *framework.Framework, ctx *framework.TestCt
 	})
 }
 
-func testGslbDNSEndpoint(t *testing.T, f *framework.Framework, ctx *framework.TestCtx, gslb *ohmyglbv1beta1.Gslb) {
+func testGslbDNSEndpoint(t *testing.T, f *framework.Framework, ctx *framework.Context, gslb *ohmyglbv1beta1.Gslb) {
 	t.Run("Gslb creates DNSEndpoint", func(t *testing.T) {
 		dnsEndpoint := &externaldns.DNSEndpoint{}
 		nn := types.NamespacedName{Name: gslb.Name, Namespace: gslb.Namespace}
