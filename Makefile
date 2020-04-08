@@ -21,6 +21,10 @@ lint:
 test:
 	go test -v ./pkg/controller/gslb/
 
+.PHONY: terratest
+terratest: test
+	cd terratest/test/ && go mod download && go test -v
+
 .PHONY: e2e-test
 e2e-test: deploy-gslb-operator
 	operator-sdk test local ./pkg/test --no-setup --namespace ohmyglb
@@ -85,6 +89,8 @@ create-test-ns:
 
 .PHONY: deploy-local-ingress
 deploy-local-ingress: create-ohmyglb-ns
+	helm repo add stable https://kubernetes-charts.storage.googleapis.com
+	helm repo update
 	helm -n ohmyglb upgrade -i nginx-ingress stable/nginx-ingress -f deploy/ingress/nginx-ingress-values.yaml
 
 .PHONY: deploy-gslb-operator

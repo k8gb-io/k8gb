@@ -76,5 +76,9 @@ tags
 .history
 # End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
 
+### JetBrains IDE ###
+.idea
+# End of idea tools
+ 
 # Exclude chart tar.gz files
 chart/ohmyglb/charts/
