@@ -71,18 +71,20 @@ func TestOhmyglbBasicFailoverExample(t *testing.T) {
 
 	assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover.cloud.example.com:Unhealthy")
 
-	expectedIPsAfterFailover := GetIngressIPs(t, optionsContext2, gslbName)
+	t.Run("failover happens as expected", func(t *testing.T) {
+		expectedIPsAfterFailover := GetIngressIPs(t, optionsContext2, gslbName)
 
-	afterFailoverResponse, err := DoWithRetryWaitingForValueE(
-		t,
-		"Wait for failover to happen and coredns to pickup new values...",
-		300,
-		1*time.Second,
-		func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
-		expectedIPsAfterFailover)
-	require.NoError(t, err)
+		afterFailoverResponse, err := DoWithRetryWaitingForValueE(
+			t,
+			"Wait for failover to happen and coredns to pickup new values...",
+			300,
+			1*time.Second,
+			func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
+			expectedIPsAfterFailover)
+		require.NoError(t, err)
 
-	assert.Equal(t, afterFailoverResponse, expectedIPsAfterFailover)
+		assert.Equal(t, afterFailoverResponse, expectedIPsAfterFailover)
+	})
 
 }
 
