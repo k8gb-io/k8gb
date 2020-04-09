@@ -112,4 +112,25 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 		assert.Equal(t, afterFailoverResponse, expectedIPsCluster2)
 	})
 
+	t.Run("serviceHealth becomes Healthy after scaling up", func(t *testing.T) {
+
+		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=2")
+
+		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover.cloud.example.com:Healthy")
+	})
+
+	t.Run("Cluster 1 returns own entries again", func(t *testing.T) {
+
+		afterFailoverResponse, err := DoWithRetryWaitingForValueE(
+			t,
+			"Wait for failover to happen and coredns to pickup new values(cluster1)...",
+			300,
+			1*time.Second,
+			func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
+			expectedIPsCluster1)
+		require.NoError(t, err)
+
+		assert.Equal(t, afterFailoverResponse, expectedIPsCluster1)
+	})
+
 }
