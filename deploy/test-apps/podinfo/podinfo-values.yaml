@@ -1,6 +1,0 @@
-replicaCount: 2
-
-image:
-  repository: stefanprodan/podinfo
-  tag: 3.2.0
-  pullPolicy: IfNotPresent

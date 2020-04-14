@@ -1,9 +1,0 @@
-# Standalone ConfigMap to expose coredns in Rancher
-# without any other ingress contoller reconfiguration
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: udp-services
-  namespace: ohmyglb
-data:
-  53: "ohmyglb/ohmyglb-coredns:53"
