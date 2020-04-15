@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Actions Status](https://github.com/AbsaOSS/ohmyglb/workflows/build/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/ohmyglb)](https://goreportcard.com/report/github.com/AbsaOSS/ohmyglb)
+[![Helm Publish](https://github.com/AbsaOSS/ohmyglb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3A%22Helm+Publish%22)
+[![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/ohmyglb)](https://hub.docker.com/r/absaoss/ohmyglb)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
@@ -13,6 +15,20 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
 Please see the extended documentation [here](/docs/index.md)
 
 ## Installation and Configuration
+
+### Installation with Helm3
+
+
+#### Add ohmyglb Helm repository
+
+```sh
+$ helm repo add ohmyglb https://absaoss.github.io/ohmyglb/
+$ helm repo update
+$ helm install ohmyglb ohmyglb/ohmyglb
+```
+
+See [values.yaml](https://github.com/AbsaOSS/ohmyglb/blob/master/chart/ohmyglb/values.yaml)
+for customization options.
 
 ### Local Playground
 
