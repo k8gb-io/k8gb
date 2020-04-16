@@ -7,13 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Create 1st k8s Kind Cluster
-        uses: helm/kind-action@v1.0.0-rc.1
-        with:
-          cluster_name: kind-test-gslb1
-          config: deploy/kind/cluster.yaml
+        #     - name: Create 1st k8s Kind Cluster
+        #       uses: helm/kind-action@v1.0.0-rc.1
+        #       with:
+        #         cluster_name: kind-test-gslb1
+        #         config: deploy/kind/cluster.yaml
       - name: Testing
         run: |
+          docker run --hostname kind-test-gslb1-worker3 --name kind-test-gslb1-worker3 --label io.x-k8s.kind.role=worker --privileged --security-opt seccomp=unconfined --security-opt apparmor=unconfined --tmpfs /tmp --tmpfs /run --volume /var --volume /lib/modules:/lib/modules:ro --detach --tty --label io.x-k8s.kind.cluster=kind-test-gslb1 --publish=80:80/TCP --publish=443:443/TCP --publish=53:53/UDP kindest/node:v1.17.0@sha256:9512edae126da271b66b990b6fff768fbb7cd786c7d39e86bdf55906352fdf62
           kubectl cluster-info
           kubectl get pods -n kube-system
           echo "current-context:" $(kubectl config current-context)
