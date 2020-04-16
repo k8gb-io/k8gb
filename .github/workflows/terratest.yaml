@@ -1,0 +1,32 @@
+name: Terratest
+
+on: pull_request
+
+jobs:
+  create-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Create 1st k8s Kind Cluster
+        uses: helm/kind-action@v1.0.0-rc.1
+        with:
+          cluster_name: kind-test-gslb1
+          config: deploy/kind/cluster.yaml
+      - name: Testing
+        run: |
+          kubectl cluster-info
+          kubectl get pods -n kube-system
+          echo "current-context:" $(kubectl config current-context)
+      - name: Create 2nd k8s Kind Cluster
+        uses: helm/kind-action@v1.0.0-rc.1
+        with:
+          cluster_name: kind-test-gslb2
+          config: deploy/kind/cluster2.yaml
+          wait: 180s
+      - name: Testing
+        run: |
+          kubectl cluster-info
+          kubectl get pods -n kube-system
+          echo "current-context:" $(kubectl config current-context)
+          kubectl config use-context kind-kind1
+          kubectl get pods -n kube-system
