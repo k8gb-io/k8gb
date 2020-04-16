@@ -13,7 +13,6 @@ import (
 	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/shell"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,7 +68,7 @@ func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetr
 	return output, retry.MaxRetriesExceeded{Description: actionDescription, MaxRetries: maxRetries}
 }
 
-func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string) {
+func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
 	k8s.KubectlApply(t, options, kubeResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
@@ -108,19 +107,28 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 
 	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
 
-	assertGslbStatus(t, options, gslbName, "terratest-failover.cloud.example.com:Healthy")
+	serviceHealthStatus := fmt.Sprintf("%s:Healthy", hostName)
+	assertGslbStatus(t, options, gslbName, serviceHealthStatus)
 }
 
 func assertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName string, serviceStatus string) {
-	// Totally not ideal, but we need to wait until Gslb figures out Healthy status
-	// We can optimize it by waiting loop with threshold later
-	time.Sleep(10 * time.Second)
 
-	ohmyglbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o", "jsonpath='{.status.serviceHealth}'")
-	if err != nil {
-		t.Errorf("Failed to get ohmyglb status with kubectl (%s)", err)
+	t.Helper()
+
+	actualHealthStatus := func() ([]string, error) {
+		ohmyglbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o", "jsonpath='{.status.serviceHealth}'")
+		if err != nil {
+			t.Errorf("Failed to get ohmyglb status with kubectl (%s)", err)
+		}
+		return []string{ohmyglbServiceHealth}, nil
 	}
-
-	want := fmt.Sprintf("'map[%s]'", serviceStatus)
-	assert.Equal(t, ohmyglbServiceHealth, want)
+	expectedHealthStatus := []string{fmt.Sprintf("'map[%s]'", serviceStatus)}
+	_, err := DoWithRetryWaitingForValueE(
+		t,
+		"Wait for expected ServiceHealth status...",
+		60,
+		1*time.Second,
+		actualHealthStatus,
+		expectedHealthStatus)
+	require.NoError(t, err)
 }

@@ -4,6 +4,8 @@ VALUES_YAML ?= chart/ohmyglb/values.yaml
 HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
 GSLB_DOMAIN ?= cloud.example.com
+HOST_ALIAS_IP1 ?=
+HOST_ALIAS_IP2 ?=
 
 .PHONY: up-local
 up-local: create-test-ns
@@ -52,16 +54,16 @@ use-second-context:
 	kubectl config use-context kind-test-gslb2
 
 .PHONY: deploy-first-ohmyglb
-deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.hostAlias.ip="172.17.0.9"
-deploy-first-ohmyglb: deploy-gslb-operator deploy-local-ingress deploy-gslb-cr
+deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP1)"
+deploy-first-ohmyglb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-second-ohmyglb
-deploy-second-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.clusterGeoTag="us" --set ohmyglb.extGslbClustersGeoTags="eu" --set ohmyglb.hostAlias.hostname="test-gslb-ns-eu.example.com"
-deploy-second-ohmyglb: deploy-gslb-operator deploy-local-ingress deploy-gslb-cr
+deploy-second-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.clusterGeoTag="us" --set ohmyglb.extGslbClustersGeoTags="eu" --set ohmyglb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP2)"
+deploy-second-ohmyglb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-full-local-setup
-deploy-full-local-setup:
-	./deploy/full.sh
+deploy-full-local-setup: deploy-two-local-clusters
+	./deploy/full.sh deploy-test-apps
 
 .PHONY: destroy-full-local-setup
 destroy-full-local-setup: destroy-two-local-clusters
@@ -85,12 +87,22 @@ create-test-ns:
 
 .PHONY: deploy-local-ingress
 deploy-local-ingress: create-ohmyglb-ns
+	helm repo add stable https://kubernetes-charts.storage.googleapis.com
+	helm repo update
 	helm -n ohmyglb upgrade -i nginx-ingress stable/nginx-ingress -f deploy/ingress/nginx-ingress-values.yaml
+
+.PHONY: wait-for-nginx-ingress-ready
+wait-for-nginx-ingress-ready:
+	kubectl -n ohmyglb wait --for=condition=Ready pod -l app=nginx-ingress --timeout=600s
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: create-ohmyglb-ns
 	cd chart/ohmyglb && helm dependency update
 	helm -n ohmyglb upgrade -i ohmyglb chart/ohmyglb -f $(VALUES_YAML) $(HELM_ARGS)
+
+.PHONY: wait-for-gslb-ready
+wait-for-gslb-ready:
+	kubectl -n ohmyglb wait --for=condition=Ready pod -l app=etcd --timeout=600s
 
 # workaround until https://github.com/crossplaneio/crossplane/issues/1170 solved
 .PHONY: deploy-gslb-operator-14

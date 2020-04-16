@@ -21,7 +21,7 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 	t.Parallel()
 
 	// Path to the Kubernetes resource config we will test
-	kubeResourcePath1, err := filepath.Abs("../examples/failover.yaml")
+	kubeResourcePath1, err := filepath.Abs("../examples/failover1.yaml")
 	require.NoError(t, err)
 
 	kubeResourcePath2, err := filepath.Abs("../examples/failover2.yaml")
@@ -46,9 +46,9 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 
 	gslbName := "test-gslb"
 
-	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath1, gslbName)
+	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath1, gslbName, "terratest-failover-split.cloud.example.com")
 
-	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath2, gslbName)
+	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath2, gslbName, "terratest-failover-split.cloud.example.com")
 
 	expectedIPsCluster1 := GetIngressIPs(t, optionsContext1, gslbName)
 	expectedIPsCluster2 := GetIngressIPs(t, optionsContext2, gslbName)
@@ -59,7 +59,9 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 			"Wait 1st cluster coredns to pickup dns values...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
+			func() ([]string, error) {
+				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
+			},
 			expectedIPsCluster1)
 		require.NoError(t, err)
 
@@ -70,7 +72,9 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 			"Wait 2nd cluster coredns to pickup dns values...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 54, "terratest-failover.cloud.example.com") },
+			func() ([]string, error) {
+				return Dig(t, "localhost", 5054, "terratest-failover-split.cloud.example.com")
+			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
 
@@ -81,7 +85,7 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 
 		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=0")
 
-		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover.cloud.example.com:Unhealthy")
+		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split.cloud.example.com:Unhealthy")
 	})
 
 	t.Run("Cluster 1 failovers to Cluster 2", func(t *testing.T) {
@@ -91,7 +95,9 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 			"Wait for failover to happen and coredns to pickup new values(cluster1)...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
+			func() ([]string, error) {
+				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
+			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
 
@@ -105,7 +111,9 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 			"Wait for failover to happen and coredns to pickup new values(cluster2)...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 54, "terratest-failover.cloud.example.com") },
+			func() ([]string, error) {
+				return Dig(t, "localhost", 5054, "terratest-failover-split.cloud.example.com")
+			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
 
@@ -116,7 +124,7 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 
 		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=2")
 
-		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover.cloud.example.com:Healthy")
+		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split.cloud.example.com:Healthy")
 	})
 
 	t.Run("Cluster 1 returns own entries again", func(t *testing.T) {
@@ -126,7 +134,9 @@ func TestOhmyglbSplitFailoverExample(t *testing.T) {
 			"Wait for failover to happen and coredns to pickup new values(cluster1)...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 53, "terratest-failover.cloud.example.com") },
+			func() ([]string, error) {
+				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
+			},
 			expectedIPsCluster1)
 		require.NoError(t, err)
 
