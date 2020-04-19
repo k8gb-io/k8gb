@@ -13,5 +13,5 @@ nodes:
     hostPort: 444
     protocol: TCP
   - containerPort: 53
-    hostPort: 54
+    hostPort: 5054
     protocol: UDP

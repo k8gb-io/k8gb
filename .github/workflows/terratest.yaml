@@ -1,0 +1,31 @@
+name: Terratest
+
+on: [push, pull_request]
+
+jobs:
+  terratest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Create 1st k8s Kind Cluster
+        uses: helm/kind-action@v1.0.0-rc.1
+        with:
+          cluster_name: test-gslb1
+          config: deploy/kind/cluster-terratest.yaml
+      - name: Create 2nd k8s Kind Cluster
+        uses: helm/kind-action@v1.0.0-rc.1
+        with:
+          cluster_name: test-gslb2
+          config: deploy/kind/cluster2-terratest.yaml
+          wait: 180s
+      - name: Ohmyglb deployment
+        run: |
+          ./deploy/full.sh
+          kubectl get pods -A
+          make use-second-context
+          kubectl get pods -A
+      - name: Terratest
+        run: |
+          cd terratest/test/
+          go mod download
+          go test -v
