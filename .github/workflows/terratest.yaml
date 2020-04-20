@@ -25,7 +25,4 @@ jobs:
           make use-second-context
           kubectl get pods -A
       - name: Terratest
-        run: |
-          cd terratest/test/
-          go mod download
-          go test -v
+        run: make terratest
