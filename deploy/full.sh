@@ -22,8 +22,10 @@ fi
 
 make use-second-context
 export HOST_ALIAS_IP1=$(kubectl get nodes test-gslb2-${NODE_ROLE} -o custom-columns='IP:status.addresses[0].address' --no-headers)
+export REGION_ARG="eu"
 make use-first-context deploy-first-ohmyglb deploy-gslb-cr ${ADDITIONAL_TARGETS}
 export HOST_ALIAS_IP2=$(kubectl get nodes test-gslb1-${NODE_ROLE} -o custom-columns='IP:status.addresses[0].address' --no-headers)
+export REGION_ARG="us"
 make use-second-context deploy-second-ohmyglb deploy-gslb-cr ${ADDITIONAL_TARGETS}
 
 make wait-for-nginx-ingress-ready

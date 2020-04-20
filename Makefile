@@ -7,6 +7,7 @@ GSLB_DOMAIN ?= cloud.example.com
 HOST_ALIAS_IP1 ?= 172.17.0.9
 HOST_ALIAS_IP2 ?= 172.17.0.5
 OHMYGLB_IMAGE ?= absaoss/ohmyglb:$(VERSION)
+OHMYGLB_COREDNS_IP ?= kubectl get svc ohmyglb-coredns -n ohmyglb -o custom-columns='IP:spec.clusterIP' --no-headers
 
 .PHONY: up-local
 up-local: create-test-ns
@@ -126,7 +127,7 @@ deploy-gslb-cr: create-test-ns
 deploy-test-apps: create-test-ns
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
-	helm upgrade --install --wait frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml --set backend=http://backend-podinfo:9898/echo podinfo/podinfo
+	helm upgrade --install --wait frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml --set backend=http://backend-podinfo:9898/echo --set ui.message="$(REGION_ARG)" podinfo/podinfo
 	helm upgrade --install --wait backend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml podinfo/podinfo
 
 .PHONY: clean-test-apps
@@ -152,3 +153,9 @@ infoblox-secret:
 	kubectl -n ohmyglb create secret generic external-dns \
 	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
 	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
+
+.PHONY: test-round-robin
+test-round-robin:
+	@kubectl run -it --rm busybox --restart=Never --image=busybox -- sh -c \
+		"echo 'nameserver `$(OHMYGLB_COREDNS_IP)`' > /etc/resolv.conf && \
+		wget -qO - app3.cloud.example.com"
