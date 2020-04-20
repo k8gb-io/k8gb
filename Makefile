@@ -23,6 +23,10 @@ lint:
 test:
 	go test -v ./pkg/controller/gslb/
 
+.PHONY: terratest
+terratest: test
+	cd terratest/test/ && go mod download && go test -v
+
 .PHONY: e2e-test
 e2e-test: deploy-gslb-operator
 	operator-sdk test local ./pkg/test --no-setup --namespace ohmyglb

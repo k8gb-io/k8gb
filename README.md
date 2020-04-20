@@ -11,6 +11,18 @@
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
+- [Motivation and Architecture](#motivation-and-architecture)
+- [Installation and Configuration](#installation-and-configuration)
+    - [Installation with Helm3](#installation-with-helm3)
+        - [Add ohmyglb Helm repository](#add-ohmyglb-helm-repository)
+    - [Installation Local Playground](#installation-local-playground)
+        - [Environment prerequisites](#environment-prerequisites)
+        - [Running project locally](#running-project-locally)
+        - [Verify installation](#verify-installation)
+        - [Run integration tests](#run-integration-tests)
+        - [Cleaning](#cleaning)
+
+
 ## Motivation and Architecture
 
 Please see the extended documentation [here](/docs/index.md)
@@ -18,7 +30,6 @@ Please see the extended documentation [here](/docs/index.md)
 ## Installation and Configuration
 
 ### Installation with Helm3
-
 
 #### Add ohmyglb Helm repository
 
@@ -31,76 +42,103 @@ $ helm install ohmyglb ohmyglb/ohmyglb
 See [values.yaml](https://github.com/AbsaOSS/ohmyglb/blob/master/chart/ohmyglb/values.yaml)
 for customization options.
 
-### Local Playground
+### Local Playground Install
 
-####  Deploy local cluster
+#### Environment prerequisites
 
-```sh
-$ make deploy-local-cluster
-```
-Creates local [kind](https://github.com/kubernetes-sigs/kind) cluster
-with several workers for more realistic setup.
+ - [install **GO 1.14**](https://golang.org/dl/)
+ 
+ - [install **GIT**](https://git-scm.com/downloads)     
+    
+ - install **gnu-sed** if you don't have it  
+    - If you are on a Mac, install sed by Homebrew
+    ```shell script
+    brew install gnu-sed 
+    ``` 
+   
+ - [install **Docker**](https://docs.docker.com/get-docker/)
+    - ensure you are able to push/pull from your docker registry
+    - to run multiple clusters reserve 8GB of memory  
+    
+      ![](docs/images/docker_settings.png)
+      <div>
+        <sup>above screenshot is for <strong>Docker for Mac</strong> and that options for other Docker distributions may vary</sup>
+      </div>
 
-#### Deploy local ingress
+ - [install **Kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to operate clusters
+     
+ - [install **Helm3**](https://helm.sh/docs/intro/install/) to get charts
+ 
+ - [install **kind**](https://kind.sigs.k8s.io/) as tool for running local Kubernetes clusters
+    - follow https://kind.sigs.k8s.io/docs/user/quick-start/
+ 
 
-```sh
-$ make deploy-local-ingress
-```
-Creates local nginx ingress with deployment config similar to Rancher.
-IP addresses of workers will be exposed as Ingress addresses.
-It will create proper environment for Ohmyglb testing
 
-#### Deploy gslb operator
+#### Running project locally
 
-```sh
-$ make deploy-gslb-operator
-```
-Operator is packaged as a helm chart at [chart/ohmyglb](/chart/ohmyglb) and its
-configuration is controlled by [chart/ohmyglb/values.yaml](/chart/ohmyglb/values.yaml)
-
-This step will deploy the operator and its dependencies:
-
-* `EtcdCluster` controlled by [etcd-operator](https://github.com/helm/charts/tree/master/stable/etcd-operator)
-* Dedicated [CoreDNS](https://coredns.io/) which uses this etcd cluster as a backend
-* [external-dns](https://github.com/kubernetes-sigs/external-dns) with CRD as the source
-* ohmyglb controller
-
-Follow the chart notes instructions to check the deployment status.
-
-#### Deploy gslb Custom Resource
-
-```sh
-$ make deploy-gslb-cr
-```
-Creates example `gslb` custom resource of sample configuration
-
-Check testing `gslb` status with
-```sh
-$ kubectl -n test-gslb describe gslb test-gslb
+To spin-up a local environment using two Kind clusters and deploy a test application to both clusters, execute the command below: 
+```shell script
+make deploy-full-local-setup 
 ```
 
-#### Deploy sample workload
 
-```sh
-$ make deploy-test-apps
+#### Verify installation
+If local setup runs well, check if clusters are correctly installed 
+
+```shell script
+kubectl cluster-info --context kind-test-gslb1 && kubectl cluster-info --context kind-test-gslb2
 ```
-It will deploy sample [podinfo](https://github.com/stefanprodan/podinfo) application
-matching with `app3` in `gslb` configuration.
 
-After successful deployment you should observe healthy status of `app3` in `gslb` status
+Check if Etcd cluster is healthy
+```shell script
+kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace ohmyglb etcd-test --image quay.io/coreos/etcd --restart=Never -- /bin/sh -c 'etcdctl  member list' 
+```
+as expected output you will see three started pods: `etcd-cluster`
 
-```sh
-$ kubectl -n test-gslb describe gslb test-gslb
+```shell script
 ...
-  Service Health:
-    app1.cloud.example.com:  NotFound
-    app2.cloud.example.com:  Unhealthy
-    app3.cloud.example.com:  Healthy
+c3261c079f6990a7, started, etcd-cluster-5bcpvf6ngz, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.ohmyglb.svc:2380, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.ohmyglb.svc:2379
+eb6ead15c2b92606, started, etcd-cluster-6d8pxtpklm, http://etcd-cluster-6d8pxtpklm.etcd-cluster.ohmyglb.svc:2380, http://etcd-cluster-6d8pxtpklm.etcd-cluster.ohmyglb.svc:2379
+eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.ohmyglb.svc:2380, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.ohmyglb.svc:2379
+...
 ```
 
-#### Deploy full local setup
-
-To deploy two cross communicating `ohmyglb` enabled clusters with testing application on top, execute
+Cluster [test-gslb1](deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053` 
+while [test-gslb2](deploy/kind/cluster2.yaml) on port `:5054`.  
+```shell script
+dig @localhost localtargets.app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets.app3.cloud.example.com
 ```
-$ make deploy-full-local-setup
+As expected result you should see **six A records** divided between nodes of both clusters. 
+```shell script
+...
+...
+;; ANSWER SECTION:
+localtargets.app3.cloud.example.com. 30 IN A    172.17.0.2
+localtargets.app3.cloud.example.com. 30 IN A    172.17.0.5
+localtargets.app3.cloud.example.com. 30 IN A    172.17.0.3
+...
+...
+localtargets.app3.cloud.example.com. 30 IN A    172.17.0.8
+localtargets.app3.cloud.example.com. 30 IN A    172.17.0.6
+localtargets.app3.cloud.example.com. 30 IN A    172.17.0.7
+```
+Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top. 
+Run following command and check if you get two json responses.
+```shell script
+curl localhost:80 -H "Host:app3.cloud.example.com" && curl localhost:81 -H "Host:app3.cloud.example.com"
+```
+
+#### Run integration tests
+There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](terratest).
+To check whether everything is running properly execute [terratests](https://terratest.gruntwork.io/) :
+  
+```shell script
+make terratest
+```
+    
+#### Cleaning
+Clean up your local development clusters with
+  
+```shell script
+make destroy-full-local-setup
 ```
