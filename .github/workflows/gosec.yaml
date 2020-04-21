@@ -1,6 +1,6 @@
 name: Gosec
 
-on: [push, pull_request]
+on: push
 
 jobs:
   security_tests:

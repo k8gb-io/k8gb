@@ -80,6 +80,6 @@ coredns:
 infoblox:
   enabled: false
   gridHost: 10.0.0.1
-  wapiVersion: 2.3.1 
+  wapiVersion: 2.3.1
   wapiPort: 443
   sslVerify: true
