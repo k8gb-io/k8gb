@@ -19,6 +19,8 @@ jobs:
           config: deploy/kind/cluster2-terratest.yaml
           wait: 180s
       - name: Ohmyglb deployment
+        env:
+          NODE_ROLE: control-plane
         run: |
           ./deploy/full.sh
           kubectl get pods -A
