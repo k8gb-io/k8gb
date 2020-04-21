@@ -19,13 +19,12 @@ jobs:
           config: deploy/kind/cluster2-terratest.yaml
           wait: 180s
       - name: Ohmyglb deployment
+        env:
+          NODE_ROLE: control-plane
         run: |
           ./deploy/full.sh
           kubectl get pods -A
           make use-second-context
           kubectl get pods -A
       - name: Terratest
-        run: |
-          cd terratest/test/
-          go mod download
-          go test -v
+        run: make terratest
