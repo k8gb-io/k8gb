@@ -4,8 +4,9 @@ VALUES_YAML ?= chart/ohmyglb/values.yaml
 HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
 GSLB_DOMAIN ?= cloud.example.com
-HOST_ALIAS_IP1 ?=
-HOST_ALIAS_IP2 ?=
+HOST_ALIAS_IP1 ?= 172.17.0.9
+HOST_ALIAS_IP2 ?= 172.17.0.5
+OHMYGLB_IMAGE ?= absaoss/ohmyglb:$(VERSION)
 
 .PHONY: up-local
 up-local: create-test-ns
@@ -58,16 +59,16 @@ use-second-context:
 	kubectl config use-context kind-test-gslb2
 
 .PHONY: deploy-first-ohmyglb
-deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP1)"
+deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP1)" --set ohmyglb.image=$(OHMYGLB_IMAGE)
 deploy-first-ohmyglb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-second-ohmyglb
-deploy-second-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.clusterGeoTag="us" --set ohmyglb.extGslbClustersGeoTags="eu" --set ohmyglb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP2)"
+deploy-second-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.clusterGeoTag="us" --set ohmyglb.extGslbClustersGeoTags="eu" --set ohmyglb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP2)" --set ohmyglb.image=$(OHMYGLB_IMAGE)
 deploy-second-ohmyglb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: deploy-two-local-clusters
-	./deploy/full.sh deploy-test-apps
+	ADDITIONAL_TARGETS=deploy-test-apps ./deploy/full.sh
 
 .PHONY: destroy-full-local-setup
 destroy-full-local-setup: destroy-two-local-clusters
