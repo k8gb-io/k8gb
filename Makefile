@@ -25,7 +25,7 @@ test:
 	go test -v ./pkg/controller/gslb/
 
 .PHONY: terratest
-terratest: test
+terratest:
 	cd terratest/test/ && go mod download && go test -v
 
 .PHONY: e2e-test
