@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	types "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
@@ -21,7 +22,18 @@ func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
 		return err
 	}
 
+	err = r.updateManagedHostsTotalMetric(gslb, gslb.Status.ServiceHealth)
+	if err != nil {
+		return err
+	}
+
+
 	gslb.Status.HealthyRecords, err = r.getHealthyRecords(gslb)
+	if err != nil {
+		return err
+	}
+
+	err = r.updateHealthyRecordsTotalMetric(gslb, gslb.Status.HealthyRecords)
 	if err != nil {
 		return err
 	}
@@ -127,4 +139,32 @@ func (r *ReconcileGslb) getHealthyRecords(gslb *ohmyglbv1beta1.Gslb) (map[string
 	}
 
 	return healthyRecords, nil
+}
+
+func (r *ReconcileGslb) updateManagedHostsTotalMetric(gslb *ohmyglbv1beta1.Gslb, serviceHealth map[string]string) error {
+	var healthyTotal, unhealthyTotal, notFoundTotal int
+	for _, hs := range serviceHealth {
+		switch hs {
+		case healthyStatus:
+			healthyTotal++
+		case unhealthyStatus:
+			unhealthyTotal++
+		default:
+			notFoundTotal++
+		}
+		managedHostsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus}).Set(float64(healthyTotal))
+		managedHostsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus}).Set(float64(unhealthyTotal))
+		managedHostsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus}).Set(float64(notFoundTotal))
+	}
+
+	return nil
+}
+
+func (r *ReconcileGslb) updateHealthyRecordsTotalMetric(gslb *ohmyglbv1beta1.Gslb, healthyRecords map[string][]string) error {
+	var hrsTotal int
+	for _, hrs := range healthyRecords {
+		hrsTotal += len(hrs)
+	}
+	healthyRecordsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsTotal))
+	return nil
 }
