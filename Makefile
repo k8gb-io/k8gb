@@ -13,8 +13,8 @@ PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 .PHONY: up-local
 up-local: create-test-ns
 	kubectl apply -f ./deploy/crds/ohmyglb.absa.oss_gslbs_crd.yaml
-	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
-	operator-sdk up local --namespace=test-gslb
+	kubectl apply -f ./deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
+	operator-sdk run --local --namespace=test-gslb --enable-delve
 
 .PHONY: lint
 lint:
@@ -138,11 +138,11 @@ clean-test-apps:
 
 .PHONY: build
 build:
-	operator-sdk build $(REPO):$(VERSION)
+	operator-sdk build $(OHMYGLB_IMAGE)
 
 .PHONY: push
 push:
-	docker push $(REPO):$(VERSION)
+	docker push $(OHMYGLB_IMAGE)
 
 .PHONY: debug-test-etcd
 debug-test-etcd:
