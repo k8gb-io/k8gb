@@ -15,13 +15,14 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
 - [Installation and Configuration](#installation-and-configuration)
     - [Installation with Helm3](#installation-with-helm3)
         - [Add ohmyglb Helm repository](#add-ohmyglb-helm-repository)
-    - [Installation Local Playground](#installation-local-playground)
+    - [Local Playground Install](#local-playground-install)
         - [Environment prerequisites](#environment-prerequisites)
         - [Running project locally](#running-project-locally)
         - [Verify installation](#verify-installation)
         - [Run integration tests](#run-integration-tests)
         - [Cleaning](#cleaning)
-
+- [Sample demo](#sample-demo)
+    - [Round Robin](#round-robin)
 
 ## Motivation and Architecture
 
@@ -48,17 +49,17 @@ for customization options.
 
  - [install **GO 1.14**](https://golang.org/dl/)
  
- - [install **GIT**](https://git-scm.com/downloads)     
+ - [install **GIT**](https://git-scm.com/downloads)
     
- - install **gnu-sed** if you don't have it  
+ - install **gnu-sed** if you don't have it
     - If you are on a Mac, install sed by Homebrew
     ```shell script
-    brew install gnu-sed 
-    ``` 
+    brew install gnu-sed
+    ```
    
  - [install **Docker**](https://docs.docker.com/get-docker/)
     - ensure you are able to push/pull from your docker registry
-    - to run multiple clusters reserve 8GB of memory  
+    - to run multiple clusters reserve 8GB of memory
     
       ![](docs/images/docker_settings.png)
       <div>
@@ -66,12 +67,11 @@ for customization options.
       </div>
 
  - [install **Kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to operate clusters
-     
+
  - [install **Helm3**](https://helm.sh/docs/intro/install/) to get charts
- 
+
  - [install **kind**](https://kind.sigs.k8s.io/) as tool for running local Kubernetes clusters
     - follow https://kind.sigs.k8s.io/docs/user/quick-start/
- 
 
 
 #### Running project locally
@@ -83,6 +83,7 @@ make deploy-full-local-setup
 
 
 #### Verify installation
+
 If local setup runs well, check if clusters are correctly installed 
 
 ```shell script
@@ -104,11 +105,11 @@ eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkd
 ```
 
 Cluster [test-gslb1](deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053` 
-while [test-gslb2](deploy/kind/cluster2.yaml) on port `:5054`.  
+while [test-gslb2](deploy/kind/cluster2.yaml) on port `:5054`.
 ```shell script
 dig @localhost localtargets.app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets.app3.cloud.example.com
 ```
-As expected result you should see **six A records** divided between nodes of both clusters. 
+As expected result you should see **six A records** divided between nodes of both clusters.
 ```shell script
 ...
 ...
@@ -129,16 +130,51 @@ curl localhost:80 -H "Host:app3.cloud.example.com" && curl localhost:81 -H "Host
 ```
 
 #### Run integration tests
+
 There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](terratest).
 To check whether everything is running properly execute [terratests](https://terratest.gruntwork.io/) :
   
 ```shell script
 make terratest
 ```
-    
+
 #### Cleaning
+
 Clean up your local development clusters with
   
 ```shell script
 make destroy-full-local-setup
+```
+
+
+## Sample demo
+
+### Round Robin
+
+Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each 
+cluster has adjusted a different region. In this demo we will hit podinfo by `curl app3.cloud.example.com` and depending 
+on region will podinfo return **us** or **eu**. In current round robin implementation are ip addresses randomly picked. 
+See [Gslb manifest with round robin strategy](/deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml)
+
+Run several times command below and watch `message` field.
+```shell script
+make test-round-robin
+```
+As expected result you should see podinfo message changing
+
+```text
+{
+  "hostname": "frontend-podinfo-856bb46677-8p45m",
+  ...
+  "message": "us",
+  ...
+}
+```
+```text
+{
+  "hostname": "frontend-podinfo-856bb46677-8p45m",
+  ...
+  "message": "eu",
+  ...
+}
 ```
