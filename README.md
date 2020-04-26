@@ -23,6 +23,7 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
         - [Cleaning](#cleaning)
 - [Sample demo](#sample-demo)
     - [Round Robin](#round-robin)
+    - [Failover](#failover)    
 
 ## Motivation and Architecture
 
@@ -152,7 +153,7 @@ make destroy-full-local-setup
 ### Round Robin
 
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each 
-cluster has adjusted a different region. In this demo we will hit podinfo by `curl app3.cloud.example.com` and depending 
+cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - app3.cloud.example.com` and depending 
 on region will podinfo return **us** or **eu**. In current round robin implementation are ip addresses randomly picked. 
 See [Gslb manifest with round robin strategy](/deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml)
 
@@ -177,4 +178,73 @@ As expected result you should see podinfo message changing
   "message": "eu",
   ...
 }
+```
+
+### Failover
+
+Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each 
+cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending
+on whether podinfo is running inside the cluster it returns only **eu** or **us**.
+See [Gslb manifest with failover strategy](/deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+
+Switch GLSB to failover mode:
+```shell script
+make init-failover
+```
+Now both clusters are running in failover mode and podinfo is running on both of them.
+Run several times command below and watch `message` field.
+```shell script
+make test-failover
+```
+You will see only **eu** podinfo is responsive:
+```text
+{
+  "hostname": "frontend-podinfo-856bb46677-8p45m",
+  ...
+  "message": "eu",
+  ...
+}
+```
+Stop podinfo on **current (eu)** cluster:
+```
+make stop-test-app
+```
+Several times hit application again
+```shell script
+make test-failover
+```
+As expected result you should see only podinfo from **second cluster (us)** is responding:
+```text
+{
+  "hostname": "frontend-podinfo-856bb46677-v5nll",
+  ...
+  "message": "us",
+  ...
+}
+```
+It might happen that podinfo will be unavailable for a while due to 
+[DNS sync interval](https://github.com/AbsaOSS/ohmyglb/pull/81) and default ohmyglb DNS TTL of 30 seconds  
+```text
+wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
+```
+Start podinfo again on **current (eu)** cluster:
+```shell script
+make start-test-app
+```
+and hit several times hit podinfo:
+```shell script
+make test-failover 
+```
+After DNS sync interval is over **eu** will be back
+```text
+{
+  "hostname": "frontend-podinfo-6945c9ddd7-xksrc",
+  ...
+  "message": "eu",
+  ...
+}
+```
+Optionally you can switch GLSB back to round-robin mode
+```shell script
+make init-round-robin
 ```
