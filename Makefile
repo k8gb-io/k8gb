@@ -154,8 +154,44 @@ infoblox-secret:
 	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
 	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
 
+.PHONY: init-failover
+init-failover:
+	$(call init-test-strategy, "deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr_failover.yaml")
+
+.PHONY: init-round-robin
+init-round-robin:
+	$(call init-test-strategy, "deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml")
+
+.PHONY: stop-test-app
+stop-test-app:
+	$(call testapp-set-replicas,0)
+
+.PHONY: start-test-app
+start-test-app:
+	$(call testapp-set-replicas,2)
+
 .PHONY: test-round-robin
 test-round-robin:
-	@kubectl run -it --rm busybox --restart=Never --image=busybox -- sh -c \
-		"echo 'nameserver `$(OHMYGLB_COREDNS_IP)`' > /etc/resolv.conf && \
-		wget -qO - app3.cloud.example.com"
+	@$(call hit-testapp-host, "app3.cloud.example.com")
+
+.PHONY: test-failover
+test-failover:
+	@$(call hit-testapp-host, "failover.cloud.example.com")
+
+define testapp-set-replicas
+	kubectl scale deployment frontend-podinfo -n test-gslb --replicas=$1
+endef
+
+define hit-testapp-host
+	kubectl run -it --rm busybox --restart=Never --image=busybox -- sh -c \
+	"echo 'nameserver `$(OHMYGLB_COREDNS_IP)`' > /etc/resolv.conf && \
+	wget -qO - $1"
+endef
+
+define init-test-strategy
+ 	kubectl config use-context kind-test-gslb2
+ 	kubectl apply -f $1
+ 	kubectl config use-context kind-test-gslb1
+ 	kubectl apply -f $1
+ 	$(call testapp-set-replicas,2)
+endef
