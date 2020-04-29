@@ -3,11 +3,12 @@
 ## Project Health
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Actions Status](https://github.com/AbsaOSS/ohmyglb/workflows/build/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions)
+[![Build Status](https://github.com/AbsaOSS/ohmyglb/workflows/build/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3A%22Golang+lint+and+test%22)
+[![Gosec](https://github.com/AbsaOSS/ohmyglb/workflows/Gosec/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3AGosec)
+[![Terratest Status](https://github.com/AbsaOSS/ohmyglb/workflows/Terratest/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/ohmyglb)](https://goreportcard.com/report/github.com/AbsaOSS/ohmyglb)
 [![Helm Publish](https://github.com/AbsaOSS/ohmyglb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3A%22Helm+Publish%22)
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/ohmyglb)](https://hub.docker.com/r/absaoss/ohmyglb)
-[![Gosec](https://github.com/AbsaOSS/ohmyglb/workflows/Gosec/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3AGosec)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
