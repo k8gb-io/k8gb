@@ -8,6 +8,7 @@ HOST_ALIAS_IP1 ?= 172.17.0.9
 HOST_ALIAS_IP2 ?= 172.17.0.5
 OHMYGLB_IMAGE ?= absaoss/ohmyglb:$(VERSION)
 OHMYGLB_COREDNS_IP ?= kubectl get svc ohmyglb-coredns -n ohmyglb -o custom-columns='IP:spec.clusterIP' --no-headers
+PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 
 .PHONY: up-local
 up-local: create-test-ns
@@ -127,8 +128,7 @@ deploy-gslb-cr: create-test-ns
 deploy-test-apps: create-test-ns
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
-	helm upgrade --install --wait frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml --set backend=http://backend-podinfo:9898/echo --set ui.message="$(REGION_ARG)" podinfo/podinfo
-	helm upgrade --install --wait backend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml podinfo/podinfo
+	helm upgrade --install --wait frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml --set ui.message="\"`$(call get-cluster-geo-tag)`\"" --set image.repository="$(PODINFO_IMAGE_REPO)" podinfo/podinfo
 
 .PHONY: clean-test-apps
 clean-test-apps:
@@ -194,4 +194,8 @@ define init-test-strategy
  	kubectl config use-context kind-test-gslb1
  	kubectl apply -f $1
  	$(call testapp-set-replicas,2)
+endef
+
+define get-cluster-geo-tag
+	kubectl -n ohmyglb describe deploy ohmyglb |  awk '/CLUSTER_GEO_TAG/ { printf $$2 }'
 endef
