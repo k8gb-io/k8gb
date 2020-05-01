@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/gruntwork-io/terratest/modules/helm"
@@ -87,16 +86,6 @@ func TestOhmyglbBasicAppExample(t *testing.T) {
 
 	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
 
-	// Totally not ideal, but we need to wait until Gslb figures out Healthy status
-	// We can optimize it by waiting loop with threshold later
-	time.Sleep(10 * time.Second)
-
-	ohmyglbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", "test-gslb", "-o", "jsonpath='{.status.serviceHealth}'")
-	if err != nil {
-		t.Errorf("Failed to get ohmyglb status with kubectl (%s)", err)
-	}
-
-	want := "'map[app1.cloud.example.com:NotFound app2.cloud.example.com:Unhealthy app3.cloud.example.com:Healthy]'"
-	assert.Equal(t, ohmyglbServiceHealth, want)
+	assertGslbStatus(t, options, "test-gslb", "app1.cloud.example.com:NotFound app2.cloud.example.com:Unhealthy app3.cloud.example.com:Healthy")
 
 }
