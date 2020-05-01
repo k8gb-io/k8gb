@@ -39,7 +39,7 @@ etcd-operator:
   etcdCluster:
     image:
       repository: quay.io/coreos/etcd
-      tag: v3.2.25
+    version: 3.2.25
     pod:
       busyboxImage: busybox:1.28.0-glibc
 
