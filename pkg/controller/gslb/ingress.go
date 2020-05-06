@@ -15,8 +15,9 @@ import (
 func (r *ReconcileGslb) gslbIngress(gslb *ohmyglbv1beta1.Gslb) (*v1beta1.Ingress, error) {
 	ingress := &v1beta1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      gslb.Name,
-			Namespace: gslb.Namespace,
+			Name:        gslb.Name,
+			Namespace:   gslb.Namespace,
+			Annotations: gslb.Annotations,
 		},
 		Spec: gslb.Spec.Ingress,
 	}
@@ -56,8 +57,9 @@ func (r *ReconcileGslb) ensureIngress(request reconcile.Request,
 		return &reconcile.Result{}, err
 	}
 
-	// Update existing object with new spec
+	// Update existing object with new spec and annotations
 	found.Spec = i.Spec
+	found.Annotations = i.Annotations
 	err = r.client.Update(context.TODO(), found)
 
 	if err != nil {

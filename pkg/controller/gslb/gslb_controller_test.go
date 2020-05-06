@@ -500,6 +500,28 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
+
+	})
+
+	t.Run("Gslb properly propagates annotation down to Ingress", func(t *testing.T) {
+
+		expectedAnnotations := map[string]string{"annotation": "test"}
+		gslb.Annotations = expectedAnnotations
+		err = cl.Update(context.TODO(), gslb)
+		if err != nil {
+			t.Fatalf("Can't update gslb: (%v)", err)
+		}
+
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+
+		err = cl.Get(context.TODO(), req.NamespacedName, ingress)
+		if err != nil {
+			t.Fatalf("Failed to get expected ingress: (%v)", err)
+		}
+
+		if !reflect.DeepEqual(ingress.Annotations, expectedAnnotations) {
+			t.Errorf("got:\n %s Gslb ingress annotations,\n\n want:\n %s", ingress.Annotations, expectedAnnotations)
+		}
 	})
 }
 
