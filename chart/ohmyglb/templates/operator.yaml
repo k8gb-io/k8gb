@@ -45,6 +45,8 @@ spec:
               value: {{ .Values.ohmyglb.edgeDNSServer }}
             - name: DNS_ZONE
               value: {{ .Values.ohmyglb.dnsZone }}
+            - name: RECONCILE_REQUEUE_SECONDS
+              value: {{ quote .Values.ohmyglb.reconcileRequeueSeconds}}
             {{ if .Values.infoblox.enabled }}
             - name: INFOBLOX_GRID_HOST
               valueFrom:

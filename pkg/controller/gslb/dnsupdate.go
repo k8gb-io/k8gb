@@ -125,6 +125,7 @@ func getExternalTargets(gslb *ohmyglbv1beta1.Gslb, host string) ([]string, error
 
 func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
 	var gslbHosts []*externaldns.Endpoint
+	var ttl = externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 
 	serviceHealth, err := r.getServiceHealthStatus(gslb)
 	if err != nil {
@@ -144,7 +145,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 			localTargetsHost := fmt.Sprintf("localtargets.%s", host)
 			dnsRecord := &externaldns.Endpoint{
 				DNSName:    localTargetsHost,
-				RecordTTL:  30,
+				RecordTTL:  ttl,
 				RecordType: "A",
 				Targets:    localTargets,
 			}
@@ -183,7 +184,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *ohmyglbv1beta1.Gslb) (*externaldns
 		if len(finalTargets) > 0 {
 			dnsRecord := &externaldns.Endpoint{
 				DNSName:    host,
-				RecordTTL:  30,
+				RecordTTL:  ttl,
 				RecordType: "A",
 				Targets:    finalTargets,
 			}
@@ -302,7 +303,7 @@ func infobloxConnection() (*ibclient.ObjectManager, error) {
 	return objMgr, nil
 }
 
-func checkAliveFromTXT(dnsserver string, fqdn string) error {
+func checkAliveFromTXT(dnsserver string, fqdn string, splitBrainThreshold time.Duration) error {
 	localTestDNSinject := os.Getenv("OVERRIDE_WITH_FAKE_EXT_DNS")
 
 	var ns string
@@ -342,10 +343,8 @@ func checkAliveFromTXT(dnsserver string, fqdn string) error {
 		diff := now.Sub(timeFromTXT)
 		log.Info(fmt.Sprintf("Split brain TXT time diff: %s", diff))
 
-		timeThreshold := 5 * time.Minute
-
-		if diff > timeThreshold {
-			return errors.NewGone(fmt.Sprintf("Split brain TXT record expired the time threshold: (%s)", timeThreshold))
+		if diff > splitBrainThreshold {
+			return errors.NewGone(fmt.Sprintf("Split brain TXT record expired the time threshold: (%s)", splitBrainThreshold))
 		}
 
 		return nil
@@ -406,7 +405,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 				// Drop external records if they are stale
 				extClusters := getExternalClusterHeartbeatFQDNs(gslb)
 				for _, extCluster := range extClusters {
-					err = checkAliveFromTXT(edgeDNSServer, extCluster)
+					err = checkAliveFromTXT(edgeDNSServer, extCluster, time.Second * time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
 					if err != nil {
 						log.Error(err, "got the error from TXT based checkAlive")
 						log.Info(fmt.Sprintf("External cluster (%s) doesn't look alive, filtering it out from delegated zone configuration...", extCluster))
@@ -436,7 +435,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *ohmyglbv1beta1.Gslb) (*rec
 		}
 		if heartbeatTXTRecord == nil {
 			log.Info(fmt.Sprintf("Creating split brain TXT record(%s)...", heartbeatTXTName))
-			_, err := objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, 30, "default")
+			_, err := objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
 			if err != nil {
 				return &reconcile.Result{}, err
 			}

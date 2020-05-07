@@ -8,11 +8,16 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// Strategy defines Gslb behavior
+// +k8s:openapi-gen=true
 type Strategy struct {
 	Type          string `json:"type"`
 	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
+	// Defines DNS record TTL in seconds
+	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty"`
+	// Split brain TXT record expiration in seconds
+	SplitBrainThresholdSeconds int `json:"splitBrainThresholdSeconds,omitempty"`
 }
-
 // GslbSpec defines the desired state of Gslb
 // +k8s:openapi-gen=true
 type GslbSpec struct {

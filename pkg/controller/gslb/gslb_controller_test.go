@@ -10,6 +10,8 @@ import (
 
 	ibclient "github.com/AbsaOSS/infoblox-go-client"
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	"github.com/AbsaOSS/ohmyglb/pkg/controller/gslb/internal/depresolver"
+	"github.com/AbsaOSS/ohmyglb/pkg/controller/gslb/internal/utils"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
@@ -51,7 +53,7 @@ func TestGslbController(t *testing.T) {
 	// Set the logger to development mode for verbose logs.
 	logf.SetLogger(zap.Logger(true))
 
-	gslb, err := YamlToGslb(gslbYaml)
+	gslb, err := utils.YamlToGslb(gslbYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,9 +69,13 @@ func TestGslbController(t *testing.T) {
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	// Create a fake client to mock API calls.
 	cl := fake.NewFakeClient(objs...)
+	// Create config
+	config,err := depresolver.NewDependencyResolver(context.TODO(), cl).ResolveOperatorConfig()
+	if err != nil {
+		t.Fatalf("config error: (%v)", err)
+	}
 	// Create a ReconcileGslb object with the scheme and fake client.
-	r := &ReconcileGslb{client: cl, scheme: s}
-
+	r := &ReconcileGslb{client: cl, scheme: s, config: config, depResolver: depresolver.NewDependencyResolver(context.TODO(), cl)}
 	// Mock request to simulate Reconcile() being called on an event for a
 	// watched resource .
 	req := reconcile.Request{
@@ -425,7 +431,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 
-		got := checkAliveFromTXT("fake", "test-gslb-heartbeat-eu.example.com")
+		got := checkAliveFromTXT("fake", "test-gslb-heartbeat-eu.example.com", time.Minute * 5)
 
 		want := errors.NewGone("Split brain TXT record expired the time threshold: (5m0s)")
 
@@ -441,7 +447,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 
-		err := checkAliveFromTXT("fake", "test-gslb-heartbeat-za.example.com")
+		err := checkAliveFromTXT("fake", "test-gslb-heartbeat-za.example.com", time.Minute * 5)
 
 		if err != nil {
 			t.Errorf("got:\n %s from TXT split brain check,\n\n want error:\n %v", err, nil)

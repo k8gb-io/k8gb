@@ -1,4 +1,5 @@
-package gslb
+//Package utils implements common, reusable helpers
+package utils
 
 import (
 	"encoding/json"
@@ -16,7 +17,7 @@ func YamlToGslb(yaml []byte) (*ohmyglbv1beta1.Gslb, error) {
 		return &ohmyglbv1beta1.Gslb{}, err
 	}
 	// unmarshal the json into the kube struct
-	var gslb = &ohmyglbv1beta1.Gslb{}
+	gslb := &ohmyglbv1beta1.Gslb{}
 	err = json.Unmarshal(jsonBytes, &gslb)
 	if err != nil {
 		return &ohmyglbv1beta1.Gslb{}, err

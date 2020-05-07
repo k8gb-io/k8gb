@@ -44,7 +44,7 @@ func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string) ([]string,
 	return digAppSlice, nil
 }
 
-// Concept is borrowed from terratest/modules/retry and extended to our use case
+// DoWithRetryWaitingForValueE Concept is borrowed from terratest/modules/retry and extended to our use case
 func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetries int, sleepBetweenRetries time.Duration, action func() ([]string, error), expectedResult []string) ([]string, error) {
 	var output []string
 	var err error
