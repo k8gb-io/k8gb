@@ -38,21 +38,21 @@ var (
 	)
 )
 
-func (r *ReconcileGslb) updateManagedHostsTotalMetric(gslb *ohmyglbv1beta1.Gslb, serviceHealth map[string]string) error {
-	var healthyTotal, unhealthyTotal, notFoundTotal int
+func (r *ReconcileGslb) updateIngressHostsPerStatusMetric(gslb *ohmyglbv1beta1.Gslb, serviceHealth map[string]string) error {
+	var healthyHostsCount, unhealthyHostsCount, notFoundHostsCount int
 	for _, hs := range serviceHealth {
 		switch hs {
 		case healthyStatus:
-			healthyTotal++
+			healthyHostsCount++
 		case unhealthyStatus:
-			unhealthyTotal++
+			unhealthyHostsCount++
 		default:
-			notFoundTotal++
+			notFoundHostsCount++
 		}
 	}
-	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus}).Set(float64(healthyTotal))
-	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus}).Set(float64(unhealthyTotal))
-	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus}).Set(float64(notFoundTotal))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus}).Set(float64(healthyHostsCount))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus}).Set(float64(unhealthyHostsCount))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus}).Set(float64(notFoundHostsCount))
 
 	return nil
 }

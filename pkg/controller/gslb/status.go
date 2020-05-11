@@ -21,11 +21,10 @@ func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
 		return err
 	}
 
-	err = r.updateManagedHostsTotalMetric(gslb, gslb.Status.ServiceHealth)
+	err = r.updateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
 	if err != nil {
 		return err
 	}
-
 
 	gslb.Status.HealthyRecords, err = r.getHealthyRecords(gslb)
 	if err != nil {
