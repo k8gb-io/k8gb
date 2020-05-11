@@ -27,11 +27,11 @@ var (
 		},
 		[]string{"namespace", "name"},
 	)
-	managedHostsMetric = prometheus.NewGaugeVec(
+	ingressHostsPerStatusMetric = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: ohmyglbNamespace,
 			Subsystem: gslbSubsystem,
-			Name:      "managed_hosts",
+			Name:      "ingress_hosts_per_status",
 			Help:      "Number of managed hosts observed by OhMyGLB.",
 		},
 		[]string{"namespace", "name", "status"},
@@ -50,9 +50,9 @@ func (r *ReconcileGslb) updateManagedHostsTotalMetric(gslb *ohmyglbv1beta1.Gslb,
 			notFoundTotal++
 		}
 	}
-	managedHostsMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus}).Set(float64(healthyTotal))
-	managedHostsMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus}).Set(float64(unhealthyTotal))
-	managedHostsMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus}).Set(float64(notFoundTotal))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus}).Set(float64(healthyTotal))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus}).Set(float64(unhealthyTotal))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus}).Set(float64(notFoundTotal))
 
 	return nil
 }
@@ -68,5 +68,5 @@ func (r *ReconcileGslb) updateHealthyRecordsTotalMetric(gslb *ohmyglbv1beta1.Gsl
 
 func init() {
 	metrics.Registry.MustRegister(healthyRecordsMetric)
-	metrics.Registry.MustRegister(managedHostsMetric)
+	metrics.Registry.MustRegister(ingressHostsPerStatusMetric)
 }

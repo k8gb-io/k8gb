@@ -287,18 +287,18 @@ Example:
 ohmyglb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6
 ```
 
-#### `managed_hosts`
+#### `ingress_hosts_per_status`
 
-Number of managed hosts observed by OhMyGLB.
+Number of ingress hosts per status (NotFound, Healthy, Unhealthy), observed by OhMyGLB.
 
 Example:
 
 ```yaml
-# HELP ohmyglb_gslb_managed_hosts Number of managed hosts observed by OhMyGLB.
-# TYPE ohmyglb_gslb_managed_hosts gauge
-ohmyglb_gslb_managed_hosts{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
-ohmyglb_gslb_managed_hosts{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
-ohmyglb_gslb_managed_hosts{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
+# HELP ohmyglb_gslb_ingress_hosts_per_status Number of managed hosts observed by OhMyGLB.
+# TYPE ohmyglb_gslb_ingress_hosts_per_status gauge
+ohmyglb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
+ohmyglb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
+ohmyglb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
 ```
 
 Served on `0.0.0.0:8383/metrics` endpoint
