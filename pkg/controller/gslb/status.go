@@ -31,7 +31,7 @@ func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
 		return err
 	}
 
-	err = r.updateHealthyRecordsTotalMetric(gslb, gslb.Status.HealthyRecords)
+	err = r.updateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
 	if err != nil {
 		return err
 	}

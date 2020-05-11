@@ -57,12 +57,12 @@ func (r *ReconcileGslb) updateIngressHostsPerStatusMetric(gslb *ohmyglbv1beta1.G
 	return nil
 }
 
-func (r *ReconcileGslb) updateHealthyRecordsTotalMetric(gslb *ohmyglbv1beta1.Gslb, healthyRecords map[string][]string) error {
-	var hrsTotal int
+func (r *ReconcileGslb) updateHealthyRecordsMetric(gslb *ohmyglbv1beta1.Gslb, healthyRecords map[string][]string) error {
+	var hrsCount int
 	for _, hrs := range healthyRecords {
-		hrsTotal += len(hrs)
+		hrsCount += len(hrs)
 	}
-	healthyRecordsMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsTotal))
+	healthyRecordsMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsCount))
 	return nil
 }
 
