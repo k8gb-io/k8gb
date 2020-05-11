@@ -628,7 +628,7 @@ func TestGslbController(t *testing.T) {
 }
 
 func createHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
-
+	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      serviceName,
@@ -660,7 +660,7 @@ func createHealthyService(t *testing.T, serviceName string, cl client.Client, gs
 }
 
 func deleteHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
-
+	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      serviceName,
@@ -692,7 +692,7 @@ func deleteHealthyService(t *testing.T, serviceName string, cl client.Client, gs
 }
 
 func createUnhealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
-
+	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      serviceName,
@@ -720,7 +720,7 @@ func createUnhealthyService(t *testing.T, serviceName string, cl client.Client, 
 }
 
 func deleteUnhealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
-
+	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      serviceName,
