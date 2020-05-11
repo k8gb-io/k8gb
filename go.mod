@@ -11,7 +11,7 @@ require (
 	github.com/kubernetes-incubator/external-dns v0.5.17
 	github.com/miekg/dns v1.1.27
 	github.com/operator-framework/operator-sdk v0.16.0
-	github.com/prometheus/client_golang v1.2.1
+	github.com/prometheus/client_golang v1.6.0
 	github.com/spf13/pflag v1.0.5
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0

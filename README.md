@@ -275,30 +275,30 @@ Metrics can be also automatically discovered and monitored by [Prometheus Operat
 
 [controller-runtime][controller-runtime-metrics] standard metrics, extended with OhMyGLB operator-specific metrics listed below:
 
-#### `healthy_records_total`
+#### `healthy_records`
 
 Number of healthy records observed by OhMyGLB.
 
 Example:
 
 ```yaml
-# HELP ohmyglb_gslb_healthy_records_total Number of healthy records observed by OhMyGLB.
-# TYPE ohmyglb_gslb_healthy_records_total gauge
-ohmyglb_gslb_healthy_records_total{name="test-gslb",namespace="test-gslb"} 6
+# HELP ohmyglb_gslb_healthy_records Number of healthy records observed by OhMyGLB.
+# TYPE ohmyglb_gslb_healthy_records gauge
+ohmyglb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6
 ```
 
-#### `managed_hosts_total`
+#### `managed_hosts`
 
 Number of managed hosts observed by OhMyGLB.
 
 Example:
 
 ```yaml
-# HELP ohmyglb_gslb_managed_hosts_total Number of managed hosts observed by OhMyGLB.
-# TYPE ohmyglb_gslb_managed_hosts_total gauge
-ohmyglb_gslb_managed_hosts_total{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
-ohmyglb_gslb_managed_hosts_total{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
-ohmyglb_gslb_managed_hosts_total{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
+# HELP ohmyglb_gslb_managed_hosts Number of managed hosts observed by OhMyGLB.
+# TYPE ohmyglb_gslb_managed_hosts gauge
+ohmyglb_gslb_managed_hosts{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
+ohmyglb_gslb_managed_hosts{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
+ohmyglb_gslb_managed_hosts{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
 ```
 
 Served on `0.0.0.0:8383/metrics` endpoint
