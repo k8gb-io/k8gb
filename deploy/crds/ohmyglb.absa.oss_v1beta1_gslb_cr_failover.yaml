@@ -1,7 +1,7 @@
 apiVersion: ohmyglb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: test-gslb
+  name: test-gslb-failover
   namespace: test-gslb
 spec:
   ingress:
