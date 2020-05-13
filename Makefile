@@ -125,10 +125,8 @@ deploy-gslb-operator-14: create-ohmyglb-ns
 
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: create-test-ns
-	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
-	kubectl apply -f deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
-	kubectl -n test-gslb wait --for condition=established --timeout=2s crd/gslbs.ohmyglb.absa.oss
-	git checkout -- deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml
+	$(call apply-cr,deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml)
+	$(call apply-cr,deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 .PHONY: deploy-test-apps
 deploy-test-apps: create-test-ns
@@ -204,4 +202,10 @@ endef
 
 define get-cluster-geo-tag
 	kubectl -n ohmyglb describe deploy ohmyglb |  awk '/CLUSTER_GEO_TAG/ { printf $$2 }'
+endef
+
+define apply-cr
+	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
+	kubectl apply -f "$1"
+	git checkout -- "$1"
 endef
