@@ -165,9 +165,16 @@ spec:
                   type: array
               type: object
             strategy:
+              description: Strategy defines Gslb behavior
               properties:
+                dnsTtlSeconds:
+                  description: Defines DNS record TTL in seconds
+                  type: integer
                 primaryGeoTag:
                   type: string
+                splitBrainThresholdSeconds:
+                  description: Split brain TXT record expiration in seconds
+                  type: integer
                 type:
                   type: string
               required:

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	"github.com/AbsaOSS/ohmyglb/pkg/controller/gslb/internal/depresolver"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -30,12 +31,26 @@ var log = logf.Log.WithName("controller_gslb")
 // Add creates a new Gslb Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+	reconciler, err := newReconciler(mgr)
+	if err != nil {
+		return err
+	}
+	return add(mgr, reconciler)
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileGslb{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+func newReconciler(mgr manager.Manager) (reconcile.Reconciler,error) {
+	var err error
+	reconciler := new(ReconcileGslb)
+	reconciler.client = mgr.GetClient()
+	reconciler.scheme = mgr.GetScheme()
+	reconciler.depResolver = depresolver.NewDependencyResolver(context.TODO(), reconciler.client)
+	reconciler.config, err = reconciler.depResolver.ResolveOperatorConfig()
+	if err != nil {
+		log.Error(err,"reading config env variables")
+		return nil,err
+	}
+	return reconciler,nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -125,8 +140,10 @@ var _ reconcile.Reconciler = &ReconcileGslb{}
 type ReconcileGslb struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client      client.Client
+	scheme      *runtime.Scheme
+	config      *depresolver.Config
+	depResolver *depresolver.DependencyResolver
 }
 
 const gslbFinalizer = "finalizer.ohmyglb.absa.oss"
@@ -156,6 +173,11 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 
 	var result *reconcile.Result
 
+	err = r.depResolver.ResolveGslbSpec(gslb)
+	if err != nil {
+		log.Error(err,"resolving spec.strategy")
+		return reconcile.Result{}, err
+	}
 	// == Finalizer business ==
 
 	// Check if the Gslb instance is marked to be deleted, which is
@@ -236,5 +258,4 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 	// Everything went fine, requeue after some time to catch up
 	// with external Gslb status
 	// TODO: potentially enhance with smarter reaction to external Event
-	return reconcile.Result{RequeueAfter: time.Second * 30}, nil
-}
+	return reconcile.Result{RequeueAfter: time.Second * time.Duration(r.config.ReconcileRequeueSeconds)}, nil}

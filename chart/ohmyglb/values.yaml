@@ -17,9 +17,11 @@ ohmyglb:
     enabled: false
     ip: "172.17.0.1"
     hostname: "test-gslb-ns-us.example.com"
+  reconcileRequeueSeconds: 30
 
 externaldns:
   image: absaoss/external-dns:v0.5.18-91-g44e98253-dirty
+  interval: "20s"
 
 etcd-operator:
   customResources:
