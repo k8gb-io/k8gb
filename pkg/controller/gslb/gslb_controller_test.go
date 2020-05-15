@@ -70,7 +70,7 @@ func TestGslbController(t *testing.T) {
 	// Create a fake client to mock API calls.
 	cl := fake.NewFakeClient(objs...)
 	// Create config
-	config,err := depresolver.NewDependencyResolver(context.TODO(), cl).ResolveOperatorConfig()
+	config, err := depresolver.NewDependencyResolver(context.TODO(), cl).ResolveOperatorConfig()
 	if err != nil {
 		t.Fatalf("config error: (%v)", err)
 	}
@@ -102,19 +102,6 @@ func TestGslbController(t *testing.T) {
 	// Reconcile again so Reconcile() checks services and updates the Gslb
 	// resources' Status.
 	reconcileAndUpdateGslb(t, r, req, cl, gslb)
-
-	t.Run("ManagedHosts status", func(t *testing.T) {
-		err = cl.Get(context.TODO(), req.NamespacedName, gslb)
-		if err != nil {
-			t.Fatalf("Failed to get expected gslb: (%v)", err)
-		}
-
-		expectedHosts := []string{"app1.cloud.example.com", "app2.cloud.example.com", "app3.cloud.example.com"}
-		actualHosts := gslb.Status.ManagedHosts
-		if !reflect.DeepEqual(expectedHosts, actualHosts) {
-			t.Errorf("expected %v managed hosts, but got %v", expectedHosts, actualHosts)
-		}
-	})
 
 	t.Run("NotFound service status", func(t *testing.T) {
 		expectedServiceStatus := "NotFound"
@@ -417,6 +404,13 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
 
+		hrGot := gslb.Status.HealthyRecords
+		hrWant := map[string][]string{"app3.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}}
+
+		if !reflect.DeepEqual(hrGot, hrWant) {
+			t.Errorf("got:\n %s Gslb Records status,\n\n want:\n %s", hrGot, hrWant)
+		}
+
 		err = os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "false")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
@@ -431,7 +425,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 
-		got := checkAliveFromTXT("fake", "test-gslb-heartbeat-eu.example.com", time.Minute * 5)
+		got := checkAliveFromTXT("fake", "test-gslb-heartbeat-eu.example.com", time.Minute*5)
 
 		want := errors.NewGone("Split brain TXT record expired the time threshold: (5m0s)")
 
@@ -447,7 +441,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 
-		err := checkAliveFromTXT("fake", "test-gslb-heartbeat-za.example.com", time.Minute * 5)
+		err := checkAliveFromTXT("fake", "test-gslb-heartbeat-za.example.com", time.Minute*5)
 
 		if err != nil {
 			t.Errorf("got:\n %s from TXT split brain check,\n\n want error:\n %v", err, nil)
@@ -629,6 +623,27 @@ func TestGslbController(t *testing.T) {
 
 		if !reflect.DeepEqual(ingress.Annotations, expectedAnnotations) {
 			t.Errorf("got:\n %s Gslb ingress annotations,\n\n want:\n %s", ingress.Annotations, expectedAnnotations)
+		}
+	})
+
+	t.Run("Reflect GeoTag in the Status", func(t *testing.T) {
+		defer func() {
+			err = os.Unsetenv("CLUSTER_GEO_TAG")
+			if err != nil {
+				t.Fatalf("Can't unset env var: (%v)", err)
+			}
+		}()
+
+		err = os.Setenv("CLUSTER_GEO_TAG", "eu")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+		got := gslb.Status.GeoTag
+		want := "eu"
+
+		if got != want {
+			t.Errorf("got: '%s' GeoTag status, want:'%s'", got, want)
 		}
 	})
 }

@@ -187,27 +187,26 @@ spec:
         status:
           description: GslbStatus defines the observed state of Gslb
           properties:
+            geoTag:
+              description: cluster Geo Tag to help determine where the operator runs
+              type: string
             healthyRecords:
               additionalProperties:
                 items:
                   type: string
                 type: array
               type: object
-            managedHosts:
+            serviceHealth:
+              additionalProperties:
+                type: string
               description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                 of cluster Important: Run "operator-sdk generate k8s" to regenerate
                 code after modifying this file Add custom validation using kubebuilder
                 tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
-              items:
-                type: string
-              type: array
-            serviceHealth:
-              additionalProperties:
-                type: string
               type: object
           required:
+          - geoTag
           - healthyRecords
-          - managedHosts
           - serviceHealth
           type: object
       type: object
