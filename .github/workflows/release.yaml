@@ -10,6 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Operator image build and push
+        env:
+          OPERATOR_SDK_VERSION: v0.16.0
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          wget https://github.com/operator-framework/operator-sdk/releases/download/${OPERATOR_SDK_VERSION}/operator-sdk-${OPERATOR_SDK_VERSION}-x86_64-linux-gnu -O ./operator-sdk
+          chmod +x ./operator-sdk
+          export PATH=.:$PATH
+          docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
+          make build
+          make push
       - uses: dave-mcconnell/helm-gh-pages-microservices@master
         with:
           access-token: ${{ secrets.CR_TOKEN }}

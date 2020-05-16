@@ -1,5 +1,5 @@
 REPO ?= absaoss/ohmyglb
-VERSION ?= $$(operator-sdk run --local --operator-flags=-v)
+VERSION ?= $$(helm show chart chart/ohmyglb/|awk '/appVersion:/ {print $$2}')
 VALUES_YAML ?= chart/ohmyglb/values.yaml
 HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
