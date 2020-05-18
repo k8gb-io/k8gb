@@ -6,7 +6,8 @@ ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
 GSLB_DOMAIN ?= cloud.example.com
 HOST_ALIAS_IP1 ?= 172.17.0.9
 HOST_ALIAS_IP2 ?= 172.17.0.5
-OHMYGLB_IMAGE ?= absaoss/ohmyglb:$(VERSION)
+OHMYGLB_IMAGE_REPO ?= absaoss/ohmyglb
+OHMYGLB_IMAGE_TAG  ?= v$(VERSION)
 OHMYGLB_COREDNS_IP ?= kubectl get svc ohmyglb-coredns -n ohmyglb -o custom-columns='IP:spec.clusterIP' --no-headers
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 
@@ -67,16 +68,16 @@ use-second-context:
 	kubectl config use-context kind-test-gslb2
 
 .PHONY: deploy-first-ohmyglb
-deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP1)" --set ohmyglb.image=$(OHMYGLB_IMAGE)
+deploy-first-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP1)" --set ohmyglb.imageRepo=$(OHMYGLB_IMAGE_REPO)
 deploy-first-ohmyglb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-second-ohmyglb
-deploy-second-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.clusterGeoTag="us" --set ohmyglb.extGslbClustersGeoTags="eu" --set ohmyglb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP2)" --set ohmyglb.image=$(OHMYGLB_IMAGE)
+deploy-second-ohmyglb: HELM_ARGS = --set ohmyglb.hostAlias.enabled=true --set ohmyglb.clusterGeoTag="us" --set ohmyglb.extGslbClustersGeoTags="eu" --set ohmyglb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set ohmyglb.hostAlias.ip="$(HOST_ALIAS_IP2)" --set ohmyglb.imageRepo=$(OHMYGLB_IMAGE_REPO)
 deploy-second-ohmyglb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: deploy-two-local-clusters
-	ADDITIONAL_TARGETS=deploy-test-apps ./deploy/full.sh
+	ADDITIONAL_TARGETS=deploy-test-apps VERSION=$(VERSION) ./deploy/full.sh
 
 .PHONY: destroy-full-local-setup
 destroy-full-local-setup: destroy-two-local-clusters
@@ -142,11 +143,11 @@ clean-test-apps:
 
 .PHONY: build
 build:
-	operator-sdk build $(OHMYGLB_IMAGE)
+	operator-sdk build $(OHMYGLB_IMAGE_REPO):$(OHMYGLB_IMAGE_TAG)
 
 .PHONY: push
 push:
-	docker push $(OHMYGLB_IMAGE)
+	docker push $(OHMYGLB_IMAGE_REPO):$(OHMYGLB_IMAGE_TAG)
 
 .PHONY: debug-test-etcd
 debug-test-etcd:
@@ -181,6 +182,10 @@ test-round-robin:
 .PHONY: test-failover
 test-failover:
 	@$(call hit-testapp-host, "failover.cloud.example.com")
+
+.PHONY: version
+version:
+	@echo $(VERSION)
 
 define testapp-set-replicas
 	kubectl scale deployment frontend-podinfo -n test-gslb --replicas=$1

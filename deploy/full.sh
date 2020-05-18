@@ -17,7 +17,8 @@ then
     operator-sdk build ohmyglb:${commit_hash}
     docker tag ohmyglb:${commit_hash} localhost:5000/ohmyglb:${commit_hash}
     docker push localhost:5000/ohmyglb:${commit_hash}
-    export OHMYGLB_IMAGE=localhost:5000/ohmyglb:${commit_hash}
+    export OHMYGLB_IMAGE_REPO=localhost:5000/ohmyglb
+    sed -i "s/${VERSION}/${commit_hash}/g" chart/ohmyglb/Chart.yaml
 fi
 
 make use-second-context
