@@ -1,5 +1,7 @@
 package version
 
+import "os"
+
 var (
-	Version = "0.6.0"
+	Version = os.Getenv("OHMYGLB_VERSION")
 )

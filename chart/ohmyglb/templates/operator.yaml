@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: ohmyglb
   namespace: ohmyglb
+  labels:
+{{ include "chart.labels" . | indent 4  }}
 spec:
   replicas: 1
   selector:
@@ -22,7 +24,7 @@ spec:
       serviceAccountName: ohmyglb
       containers:
         - name: ohmyglb
-          image: {{ .Values.ohmyglb.image }}
+          image: {{ .Values.ohmyglb.imageRepo }}:{{ .Chart.AppVersion }}
           command:
           - ohmyglb
           imagePullPolicy: Always
@@ -35,6 +37,8 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "ohmyglb"
+            - name: OHMYGLB_VERSION
+              value: {{ quote .Chart.AppVersion }}
             - name: CLUSTER_GEO_TAG
               value: {{ quote .Values.ohmyglb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS

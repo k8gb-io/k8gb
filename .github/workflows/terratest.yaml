@@ -27,6 +27,7 @@ jobs:
           wget https://github.com/operator-framework/operator-sdk/releases/download/${OPERATOR_SDK_VERSION}/operator-sdk-${OPERATOR_SDK_VERSION}-x86_64-linux-gnu -O ./operator-sdk
           chmod +x ./operator-sdk
           export PATH=.:$PATH
+          export VERSION=$(make version)
           ./deploy/full.sh
           kubectl get pods -A
           make use-second-context
