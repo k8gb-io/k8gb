@@ -28,6 +28,11 @@ jobs:
           source-charts-folder: 'chart'
           destination-repo: absaoss/ohmyglb
           destination-branch: gh-pages
+      - name: Create single node k8s Kind Cluster
+        uses: helm/kind-action@v1.0.0-rc.1
+        with:
+          cluster_name: test-gslb1
+          config: deploy/kind/cluster-terratest.yaml
       - name: Smoke test helm installation
         run: |
            helm repo add ohmyglb https://absaoss.github.io/ohmyglb/
