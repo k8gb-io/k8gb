@@ -3,13 +3,13 @@ entries:
   ohmyglb:
   - apiVersion: v2
     appVersion: 0.6.2
-    created: "2020-05-20T16:23:33.518353757Z"
+    created: "2020-05-20T18:09:46.585335433Z"
     dependencies:
     - name: coredns
       repository: https://kubernetes-charts.storage.googleapis.com
       version: 1.8.4
     description: A Helm chart for Kubernetes
-    digest: 1731c3af5173dd849cf670fbdf031568bebd3c4bab681ea5596f0d6b12e7b37e
+    digest: e2b54a43ad251c1174953fc7040912f36c4c963021525b5cbf7810d4fb6fec1a
     name: ohmyglb
     type: application
     urls:
@@ -17,7 +17,7 @@ entries:
     version: 0.6.2
   - apiVersion: v2
     appVersion: 0.6.1
-    created: "2020-05-20T16:23:33.515433976Z"
+    created: "2020-05-20T18:09:46.582189824Z"
     dependencies:
     - name: coredns
       repository: https://kubernetes-charts.storage.googleapis.com
@@ -31,7 +31,7 @@ entries:
     version: 0.6.1
   - apiVersion: v2
     appVersion: 0.6.0
-    created: "2020-05-20T16:23:33.493789316Z"
+    created: "2020-05-20T18:09:46.577677311Z"
     dependencies:
     - name: coredns
       repository: https://kubernetes-charts.storage.googleapis.com
@@ -45,7 +45,7 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 0.5.6
-    created: "2020-05-20T16:23:33.490541637Z"
+    created: "2020-05-20T18:09:46.528842073Z"
     dependencies:
     - name: coredns
       repository: https://kubernetes-charts.storage.googleapis.com
@@ -59,7 +59,7 @@ entries:
     version: 0.5.6
   - apiVersion: v2
     appVersion: 0.5.6
-    created: "2020-05-20T16:23:33.486702762Z"
+    created: "2020-05-20T18:09:46.501167995Z"
     dependencies:
     - name: etcd-operator
       repository: https://kubernetes-charts.storage.googleapis.com
@@ -74,4 +74,4 @@ entries:
     urls:
     - charts/ohmyglb-0.2.2.tgz
     version: 0.2.2
-generated: "2020-05-20T16:23:33.483306684Z"
+generated: "2020-05-20T18:09:46.498033186Z"
