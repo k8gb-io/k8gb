@@ -24,7 +24,7 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
         - [Cleaning](#cleaning)
 - [Sample demo](#sample-demo)
     - [Round Robin](#round-robin)
-    - [Failover](#failover)    
+    - [Failover](#failover)
 - [Metrics](#metrics)
     - [General metrics](#general-metrics)
     - [Custom resource specific metrics](#custom-resource-specific-metrics)
@@ -40,9 +40,9 @@ Please see the extended documentation [here](/docs/index.md)
 #### Add ohmyglb Helm repository
 
 ```sh
-$ helm repo add ohmyglb https://absaoss.github.io/ohmyglb/
-$ helm repo update
-$ helm install ohmyglb ohmyglb/ohmyglb
+helm repo add ohmyglb https://absaoss.github.io/ohmyglb/
+helm repo update
+helm -n ohmyglb upgrade -i ohmyglb ohmyglb/ohmyglb --create-namespace --wait
 ```
 
 See [values.yaml](https://github.com/AbsaOSS/ohmyglb/blob/master/chart/ohmyglb/values.yaml)

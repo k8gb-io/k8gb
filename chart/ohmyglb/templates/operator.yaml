@@ -24,7 +24,7 @@ spec:
       serviceAccountName: ohmyglb
       containers:
         - name: ohmyglb
-          image: {{ .Values.ohmyglb.imageRepo }}:{{ .Chart.AppVersion }}
+          image: {{ .Values.ohmyglb.imageRepo }}:v{{ .Chart.AppVersion }}
           command:
           - ohmyglb
           imagePullPolicy: Always
