@@ -15,8 +15,8 @@ then
     ./deploy/registry.sh
     commit_hash=$(git rev-parse --short HEAD)
     operator-sdk build ohmyglb:${commit_hash}
-    docker tag ohmyglb:${commit_hash} localhost:5000/ohmyglb:${commit_hash}
-    docker push localhost:5000/ohmyglb:${commit_hash}
+    docker tag ohmyglb:${commit_hash} localhost:5000/ohmyglb:v${commit_hash}
+    docker push localhost:5000/ohmyglb:v${commit_hash}
     export OHMYGLB_IMAGE_REPO=localhost:5000/ohmyglb
     sed -i "s/${VERSION}/${commit_hash}/g" chart/ohmyglb/Chart.yaml
 fi

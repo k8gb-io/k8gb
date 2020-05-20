@@ -28,3 +28,9 @@ jobs:
           source-charts-folder: 'chart'
           destination-repo: absaoss/ohmyglb
           destination-branch: gh-pages
+      - name: Smoke test helm installation
+        run: |
+           helm repo add ohmyglb https://absaoss.github.io/ohmyglb/
+           helm repo update
+           helm -n ohmyglb upgrade -i ohmyglb ohmyglb/ohmyglb --wait --create-namespace --version=$(make version)
+
