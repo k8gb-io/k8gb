@@ -31,7 +31,7 @@ lint:
 
 .PHONY: test
 test:
-	go test -v ./pkg/controller/gslb/...
+	go test -v ./...
 
 .PHONY: terratest
 terratest:
