@@ -18,6 +18,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+//GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
 	var ingressIPs []string
 	ingress := k8s.GetIngress(t, options, ingressName)
@@ -27,6 +28,7 @@ func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string
 	return ingressIPs
 }
 
+//Dig gets sorted slice of records related to dnsName
 func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string) ([]string, error) {
 	port := fmt.Sprintf("-p%v", dnsPort)
 	dnsServer = fmt.Sprintf("@%s", dnsServer)

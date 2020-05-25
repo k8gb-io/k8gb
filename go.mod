@@ -7,7 +7,6 @@ require github.com/Azure/go-autorest v14.0.1+incompatible // indirect
 require (
 	github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200316164013-1a033234161e
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/go-openapi/spec v0.19.4
 	github.com/kubernetes-incubator/external-dns v0.5.17
 	github.com/miekg/dns v1.1.27
 	github.com/operator-framework/operator-sdk v0.16.0
@@ -17,7 +16,6 @@ require (
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v12.0.0+incompatible
-	k8s.io/kube-openapi v0.0.0-20190918143330-0270cf2f1c1d
 	k8s.io/kubernetes v1.16.2
 	sigs.k8s.io/controller-runtime v0.4.0
 )
