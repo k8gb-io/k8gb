@@ -19,7 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-var defaultConfig = Config{30}
+var defaultConfig = Config{30, "unset"}
 
 func TestResolveSpecWithFilledFields(t *testing.T) {
 	//arrange
@@ -98,7 +98,7 @@ func TestResolveConfigWithOneValidEnv(t *testing.T) {
 	defer cleanup()
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
 	resolver := NewDependencyResolver(context.TODO(), cl)
-	expected := Config{50}
+	expected := Config{50, "unset"}
 	_ = os.Setenv(reconcileRequeueSecondsKey, strconv.Itoa(expected.ReconcileRequeueSeconds))
 	//act
 	config, err := resolver.ResolveOperatorConfig()

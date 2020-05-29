@@ -8,6 +8,7 @@ import (
 
 const (
 	reconcileRequeueSecondsKey = "RECONCILE_REQUEUE_SECONDS"
+	clusterGeoTagKey           = "CLUSTER_GEO_TAG"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -17,6 +18,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config = &Config{}
 		// set predefined values when not read from the environment variables
 		dr.config.ReconcileRequeueSeconds, _ = env.GetEnvAsIntOrFallback(reconcileRequeueSecondsKey, 30)
+		dr.config.ClusterGeoTag = env.GetEnvAsStringOrFallback(clusterGeoTagKey, "unset")
 		dr.errorConfig = dr.validateConfig(dr.config)
 	})
 	return dr.config, dr.errorConfig

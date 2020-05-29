@@ -18,6 +18,8 @@ import (
 type Config struct {
 	//Reschedule of Reconcile loop to pickup external Gslb targets
 	ReconcileRequeueSeconds int
+	// Cluster Geo Tag to determine specific location
+	ClusterGeoTag string
 }
 
 //DependencyResolver resolves configuration for GSLB

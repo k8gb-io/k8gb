@@ -626,6 +626,16 @@ func TestGslbController(t *testing.T) {
 		}
 	})
 
+	t.Run("Reflect GeoTag in the Status as unset by default", func(t *testing.T) {
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+		got := gslb.Status.GeoTag
+		want := "unset"
+
+		if got != want {
+			t.Errorf("got: '%s' GeoTag status, want:'%s'", got, want)
+		}
+	})
+
 	t.Run("Reflect GeoTag in the Status", func(t *testing.T) {
 		defer func() {
 			err = os.Unsetenv("CLUSTER_GEO_TAG")

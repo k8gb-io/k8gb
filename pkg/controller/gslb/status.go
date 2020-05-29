@@ -2,7 +2,6 @@ package gslb
 
 import (
 	"context"
-	"os"
 	"regexp"
 
 	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
@@ -31,7 +30,7 @@ func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
 		return err
 	}
 
-	gslb.Status.GeoTag = os.Getenv("CLUSTER_GEO_TAG")
+	gslb.Status.GeoTag = r.config.ClusterGeoTag
 
 	err = r.updateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
 	if err != nil {
