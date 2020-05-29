@@ -648,6 +648,11 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
+		resolver := depresolver.NewDependencyResolver(context.TODO(), cl)
+		r.config, err = resolver.ResolveOperatorConfig()
+		if err != nil {
+			t.Fatalf("config error: (%v)", err)
+		}
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		got := gslb.Status.GeoTag
 		want := "eu"
