@@ -36,6 +36,7 @@ type DependencyResolver struct {
 const (
 	lessOrEqualToZeroErrorMessage = "\"%s is less or equal to zero\""
 	lessThanZeroErrorMessage      = "\"%s is less than zero\""
+	doesNotMatchRegexMessage      = "\"%s does not match /%s/ regexp rule\""
 )
 
 //NewDependencyResolver returns a new depresolver.DependencyResolver

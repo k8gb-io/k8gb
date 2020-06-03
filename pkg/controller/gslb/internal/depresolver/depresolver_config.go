@@ -2,6 +2,7 @@ package depresolver
 
 import (
 	"fmt"
+	"regexp"
 
 	"k8s.io/kubernetes/pkg/util/env"
 )
@@ -27,6 +28,11 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 func (dr *DependencyResolver) validateConfig(config *Config) error {
 	if config.ReconcileRequeueSeconds <= 0 {
 		return fmt.Errorf(lessOrEqualToZeroErrorMessage, "ReconcileRequeueSeconds")
+	}
+	geoTagRegexString := "^[a-z]*[A-Z]*\\d*$"
+	geoTagRegex, _ := regexp.Compile(geoTagRegexString)
+	if !geoTagRegex.Match([]byte(config.ClusterGeoTag)) {
+		return fmt.Errorf(doesNotMatchRegexMessage, "ClusterGeoTag", geoTagRegexString)
 	}
 	return nil
 }
