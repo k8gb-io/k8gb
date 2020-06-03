@@ -29,7 +29,7 @@ func (dr *DependencyResolver) validateConfig(config *Config) error {
 	if config.ReconcileRequeueSeconds <= 0 {
 		return fmt.Errorf(lessOrEqualToZeroErrorMessage, "ReconcileRequeueSeconds")
 	}
-	geoTagRegexString := "^[a-z]*[A-Z]*\\d*$"
+	geoTagRegexString := "^[a-zA-Z\\-\\d]*$"
 	geoTagRegex, _ := regexp.Compile(geoTagRegexString)
 	if !geoTagRegex.Match([]byte(config.ClusterGeoTag)) {
 		return fmt.Errorf(doesNotMatchRegexMessage, "ClusterGeoTag", geoTagRegexString)

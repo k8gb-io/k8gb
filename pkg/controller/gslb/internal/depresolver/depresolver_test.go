@@ -209,7 +209,7 @@ func TestResolveConfigWithMalformedGeoTag(t *testing.T) {
 func TestResolveConfigWithProperGeoTag(t *testing.T) {
 	//arrange
 	defer cleanup()
-	_ = os.Setenv(clusterGeoTagKey, "eu")
+	_ = os.Setenv(clusterGeoTagKey, "eu-west-1")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
 	resolver := NewDependencyResolver(context.TODO(), cl)
 	//act
