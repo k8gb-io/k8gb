@@ -19,7 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-var defaultConfig = Config{30}
+var defaultConfig = Config{30, "unset"}
 
 func TestResolveSpecWithFilledFields(t *testing.T) {
 	//arrange
@@ -98,7 +98,7 @@ func TestResolveConfigWithOneValidEnv(t *testing.T) {
 	defer cleanup()
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
 	resolver := NewDependencyResolver(context.TODO(), cl)
-	expected := Config{50}
+	expected := Config{50, "unset"}
 	_ = os.Setenv(reconcileRequeueSecondsKey, strconv.Itoa(expected.ReconcileRequeueSeconds))
 	//act
 	config, err := resolver.ResolveOperatorConfig()
@@ -194,6 +194,30 @@ func TestResolveConfigWithEmptyReconcileRequeueSecondsKey(t *testing.T) {
 	assert.Equal(t, defaultConfig, *config)
 }
 
+func TestResolveConfigWithMalformedGeoTag(t *testing.T) {
+	//arrange
+	defer cleanup()
+	_ = os.Setenv(clusterGeoTagKey, "i.am.wrong??.")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(context.TODO(), cl)
+	//act
+	_, err := resolver.ResolveOperatorConfig()
+	//assert
+	assert.Error(t, err)
+}
+
+func TestResolveConfigWithProperGeoTag(t *testing.T) {
+	//arrange
+	defer cleanup()
+	_ = os.Setenv(clusterGeoTagKey, "eu-west-1")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(context.TODO(), cl)
+	//act
+	_, err := resolver.ResolveOperatorConfig()
+	//assert
+	assert.NoError(t, err)
+}
+
 func TestConfigRunOnce(t *testing.T) {
 	//arrange
 	defer cleanup()
@@ -215,6 +239,9 @@ func TestConfigRunOnce(t *testing.T) {
 func cleanup() {
 	if os.Unsetenv(reconcileRequeueSecondsKey) != nil {
 		panic(fmt.Errorf("cleanup %s", reconcileRequeueSecondsKey))
+	}
+	if os.Unsetenv(clusterGeoTagKey) != nil {
+		panic(fmt.Errorf("cleanup %s", clusterGeoTagKey))
 	}
 }
 

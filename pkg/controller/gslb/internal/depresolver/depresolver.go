@@ -18,6 +18,8 @@ import (
 type Config struct {
 	//Reschedule of Reconcile loop to pickup external Gslb targets
 	ReconcileRequeueSeconds int
+	// Cluster Geo Tag to determine specific location
+	ClusterGeoTag string
 }
 
 //DependencyResolver resolves configuration for GSLB
@@ -34,6 +36,7 @@ type DependencyResolver struct {
 const (
 	lessOrEqualToZeroErrorMessage = "\"%s is less or equal to zero\""
 	lessThanZeroErrorMessage      = "\"%s is less than zero\""
+	doesNotMatchRegexMessage      = "\"%s does not match /%s/ regexp rule\""
 )
 
 //NewDependencyResolver returns a new depresolver.DependencyResolver
