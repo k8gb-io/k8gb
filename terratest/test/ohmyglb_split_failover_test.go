@@ -14,10 +14,10 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 )
 
-// Basic kgb deployment test that is verifying that associated ingress is getting created
+// Basic ohmyglb deployment test that is verifying that associated ingress is getting created
 // Relies on two local clusters deployed by `$make deploy-two-local-clusters`
-// Tests expected behavior for https://github.com/AbsaOSS/kgb/issues/67
-func TestKgbSplitFailoverExample(t *testing.T) {
+// Tests expected behavior for https://github.com/AbsaOSS/ohmyglb/issues/67
+func TestOhmyglbSplitFailoverExample(t *testing.T) {
 	t.Parallel()
 
 	// Path to the Kubernetes resource config we will test
@@ -30,7 +30,7 @@ func TestKgbSplitFailoverExample(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("kgb-test-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("ohmyglb-test-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file

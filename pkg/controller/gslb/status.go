@@ -4,7 +4,7 @@ import (
 	"context"
 	"regexp"
 
-	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
+	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *ReconcileGslb) updateGslbStatus(gslb *kgbv1beta1.Gslb) error {
+func (r *ReconcileGslb) updateGslbStatus(gslb *ohmyglbv1beta1.Gslb) error {
 	var err error
 
 	gslb.Status.ServiceHealth, err = r.getServiceHealthStatus(gslb)
@@ -41,7 +41,7 @@ func (r *ReconcileGslb) updateGslbStatus(gslb *kgbv1beta1.Gslb) error {
 	return err
 }
 
-func (r *ReconcileGslb) getServiceHealthStatus(gslb *kgbv1beta1.Gslb) (map[string]string, error) {
+func (r *ReconcileGslb) getServiceHealthStatus(gslb *ohmyglbv1beta1.Gslb) (map[string]string, error) {
 	serviceHealth := make(map[string]string)
 	for _, rule := range gslb.Spec.Ingress.Rules {
 		for _, path := range rule.HTTP.Paths {
@@ -84,7 +84,7 @@ func (r *ReconcileGslb) getServiceHealthStatus(gslb *kgbv1beta1.Gslb) (map[strin
 	return serviceHealth, nil
 }
 
-func (r *ReconcileGslb) getHealthyRecords(gslb *kgbv1beta1.Gslb) (map[string][]string, error) {
+func (r *ReconcileGslb) getHealthyRecords(gslb *ohmyglbv1beta1.Gslb) (map[string][]string, error) {
 
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 

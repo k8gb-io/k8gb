@@ -81,4 +81,4 @@ tags
 # End of idea tools
  
 # Exclude chart tar.gz files
-chart/kgb/charts/*.tgz
+chart/ohmyglb/charts/*.tgz

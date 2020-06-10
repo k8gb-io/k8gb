@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
+	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
 )
 
-func (r *ReconcileGslb) finalizeGslb(gslb *kgbv1beta1.Gslb) error {
+func (r *ReconcileGslb) finalizeGslb(gslb *ohmyglbv1beta1.Gslb) error {
 	// TODO(user): Add the cleanup steps that the operator
 	// needs to do before the CR can be deleted. Examples
 	// of finalizers include performing backups and deleting
@@ -63,7 +63,7 @@ func (r *ReconcileGslb) finalizeGslb(gslb *kgbv1beta1.Gslb) error {
 	return nil
 }
 
-func (r *ReconcileGslb) addFinalizer(gslb *kgbv1beta1.Gslb) error {
+func (r *ReconcileGslb) addFinalizer(gslb *ohmyglbv1beta1.Gslb) error {
 	log.Info("Adding Finalizer for the Gslb")
 	gslb.SetFinalizers(append(gslb.GetFinalizers(), gslbFinalizer))
 

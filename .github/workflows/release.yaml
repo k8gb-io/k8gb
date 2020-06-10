@@ -26,7 +26,7 @@ jobs:
         with:
           access-token: ${{ secrets.CR_TOKEN }}
           source-charts-folder: 'chart'
-          destination-repo: absaoss/kgb
+          destination-repo: absaoss/ohmyglb
           destination-branch: gh-pages
       - name: Create single node k8s Kind Cluster
         uses: helm/kind-action@v1.0.0-rc.1
@@ -35,7 +35,7 @@ jobs:
           config: deploy/kind/cluster-terratest.yaml
       - name: Smoke test helm installation
         run: |
-           helm repo add kgb https://absaoss.github.io/kgb/
+           helm repo add ohmyglb https://absaoss.github.io/ohmyglb/
            helm repo update
-           helm -n kgb upgrade -i kgb kgb/kgb --wait --create-namespace --version=$(make version)
+           helm -n ohmyglb upgrade -i ohmyglb ohmyglb/ohmyglb --wait --create-namespace --version=$(make version)
 

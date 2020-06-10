@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: kgb
+  name: ohmyglb
 rules:
 - apiGroups:
   - ""
@@ -37,7 +37,7 @@ rules:
 - apiGroups:
   - apps
   resourceNames:
-  - kgb
+  - ohmyglb
   resources:
   - deployments/finalizers
   verbs:
@@ -56,7 +56,7 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - kgb.absa.oss
+  - ohmyglb.absa.oss
   resources:
   - '*'
   - gslbs

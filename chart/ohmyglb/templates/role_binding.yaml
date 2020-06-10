@@ -1,12 +1,12 @@
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: kgb
+  name: ohmyglb
 subjects:
 - kind: ServiceAccount
-  name: kgb
-  namespace: kgb
+  name: ohmyglb
+  namespace: ohmyglb
 roleRef:
   kind: ClusterRole
-  name: kgb
+  name: ohmyglb
   apiGroup: rbac.authorization.k8s.io

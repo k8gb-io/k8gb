@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  "53": kgb/kgb-coredns:53
-kind: ConfigMap
-metadata:
-  name: udp-services
-  namespace: {{ .Values.kgb.ingressNamespace }}

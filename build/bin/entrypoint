@@ -5,7 +5,7 @@
 
 if ! whoami &>/dev/null; then
   if [ -w /etc/passwd ]; then
-    echo "${USER_NAME:-kgb}:x:$(id -u):$(id -g):${USER_NAME:-kgb} user:${HOME}:/sbin/nologin" >> /etc/passwd
+    echo "${USER_NAME:-ohmyglb}:x:$(id -u):$(id -g):${USER_NAME:-ohmyglb} user:${HOME}:/sbin/nologin" >> /etc/passwd
   fi
 fi
 

@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"testing"
 
-	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
-	"github.com/AbsaOSS/kgb/pkg/controller/gslb/internal/utils"
+	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
+	"github.com/AbsaOSS/ohmyglb/pkg/controller/gslb/internal/utils"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -245,7 +245,7 @@ func cleanup() {
 	}
 }
 
-func getTestContext(testData string) (client.Client, *kgbv1beta1.Gslb) {
+func getTestContext(testData string) (client.Client, *ohmyglbv1beta1.Gslb) {
 	// Create a fake client to mock API calls.
 	var gslbYaml, err = ioutil.ReadFile(testData)
 	if err != nil {
@@ -260,7 +260,7 @@ func getTestContext(testData string) (client.Client, *kgbv1beta1.Gslb) {
 	}
 	// Register operator types with the runtime scheme.
 	s := scheme.Scheme
-	s.AddKnownTypes(kgbv1beta1.SchemeGroupVersion, gslb)
+	s.AddKnownTypes(ohmyglbv1beta1.SchemeGroupVersion, gslb)
 	// Register external-dns DNSEndpoint CRD
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	cl := fake.NewFakeClientWithScheme(s, objs...)
