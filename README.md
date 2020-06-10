@@ -3,19 +3,19 @@
 ## Project Health
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://github.com/AbsaOSS/ohmyglb/workflows/build/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3A%22Golang+lint+and+test%22)
-[![Gosec](https://github.com/AbsaOSS/ohmyglb/workflows/Gosec/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3AGosec)
-[![Terratest Status](https://github.com/AbsaOSS/ohmyglb/workflows/Terratest/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/ohmyglb)](https://goreportcard.com/report/github.com/AbsaOSS/ohmyglb)
-[![Helm Publish](https://github.com/AbsaOSS/ohmyglb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/ohmyglb/actions?query=workflow%3A%22Helm+Publish%22)
-[![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/ohmyglb)](https://hub.docker.com/r/absaoss/ohmyglb)
+[![Build Status](https://github.com/AbsaOSS/kgb/workflows/build/badge.svg)](https://github.com/AbsaOSS/kgb/actions?query=workflow%3A%22Golang+lint+and+test%22)
+[![Gosec](https://github.com/AbsaOSS/kgb/workflows/Gosec/badge.svg)](https://github.com/AbsaOSS/kgb/actions?query=workflow%3AGosec)
+[![Terratest Status](https://github.com/AbsaOSS/kgb/workflows/Terratest/badge.svg)](https://github.com/AbsaOSS/kgb/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/kgb)](https://goreportcard.com/report/github.com/AbsaOSS/kgb)
+[![Helm Publish](https://github.com/AbsaOSS/kgb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/kgb/actions?query=workflow%3A%22Helm+Publish%22)
+[![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/kgb)](https://hub.docker.com/r/absaoss/kgb)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
 - [Motivation and Architecture](#motivation-and-architecture)
 - [Installation and Configuration](#installation-and-configuration)
     - [Installation with Helm3](#installation-with-helm3)
-        - [Add ohmyglb Helm repository](#add-ohmyglb-helm-repository)
+        - [Add kgb Helm repository](#add-kgb-helm-repository)
     - [Local Playground Install](#local-playground-install)
         - [Environment prerequisites](#environment-prerequisites)
         - [Running project locally](#running-project-locally)
@@ -37,15 +37,15 @@ Please see the extended documentation [here](/docs/index.md)
 
 ### Installation with Helm3
 
-#### Add ohmyglb Helm repository
+#### Add kgb Helm repository
 
 ```sh
-helm repo add ohmyglb https://absaoss.github.io/ohmyglb/
+helm repo add kgb https://absaoss.github.io/kgb/
 helm repo update
-helm -n ohmyglb upgrade -i ohmyglb ohmyglb/ohmyglb --create-namespace --wait
+helm -n kgb upgrade -i kgb kgb/kgb --create-namespace --wait
 ```
 
-See [values.yaml](https://github.com/AbsaOSS/ohmyglb/blob/master/chart/ohmyglb/values.yaml)
+See [values.yaml](https://github.com/AbsaOSS/kgb/blob/master/chart/kgb/values.yaml)
 for customization options.
 
 ### Local Playground Install
@@ -96,15 +96,15 @@ kubectl cluster-info --context kind-test-gslb1 && kubectl cluster-info --context
 
 Check if Etcd cluster is healthy
 ```shell script
-kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace ohmyglb etcd-test --image quay.io/coreos/etcd --restart=Never -- /bin/sh -c 'etcdctl  member list' 
+kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace kgb etcd-test --image quay.io/coreos/etcd --restart=Never -- /bin/sh -c 'etcdctl  member list' 
 ```
 as expected output you will see three started pods: `etcd-cluster`
 
 ```shell script
 ...
-c3261c079f6990a7, started, etcd-cluster-5bcpvf6ngz, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.ohmyglb.svc:2380, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.ohmyglb.svc:2379
-eb6ead15c2b92606, started, etcd-cluster-6d8pxtpklm, http://etcd-cluster-6d8pxtpklm.etcd-cluster.ohmyglb.svc:2380, http://etcd-cluster-6d8pxtpklm.etcd-cluster.ohmyglb.svc:2379
-eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.ohmyglb.svc:2380, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.ohmyglb.svc:2379
+c3261c079f6990a7, started, etcd-cluster-5bcpvf6ngz, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.kgb.svc:2380, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.kgb.svc:2379
+eb6ead15c2b92606, started, etcd-cluster-6d8pxtpklm, http://etcd-cluster-6d8pxtpklm.etcd-cluster.kgb.svc:2380, http://etcd-cluster-6d8pxtpklm.etcd-cluster.kgb.svc:2379
+eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.kgb.svc:2380, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.kgb.svc:2379
 ...
 ```
 
@@ -157,7 +157,7 @@ make destroy-full-local-setup
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each 
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - app3.cloud.example.com` and depending 
 on region will podinfo return **us** or **eu**. In current round robin implementation are ip addresses randomly picked. 
-See [Gslb manifest with round robin strategy](/deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml)
+See [Gslb manifest with round robin strategy](/deploy/crds/kgb.absa.oss_v1beta1_gslb_cr.yaml)
 
 Run several times command below and watch `message` field.
 ```shell script
@@ -187,7 +187,7 @@ As expected result you should see podinfo message changing
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each 
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending
 on whether podinfo is running inside the cluster it returns only **eu** or **us**.
-See [Gslb manifest with failover strategy](/deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+See [Gslb manifest with failover strategy](/deploy/crds/kgb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 Switch GLSB to failover mode:
 ```shell script
@@ -225,7 +225,7 @@ As expected result you should see only podinfo from **second cluster (us)** is r
 }
 ```
 It might happen that podinfo will be unavailable for a while due to 
-[DNS sync interval](https://github.com/AbsaOSS/ohmyglb/pull/81) and default ohmyglb DNS TTL of 30 seconds  
+[DNS sync interval](https://github.com/AbsaOSS/kgb/pull/81) and default kgb DNS TTL of 30 seconds  
 ```text
 wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
 ```
@@ -252,7 +252,7 @@ make init-round-robin
 ```
 ## Metrics
 
-OhMyGLB generates [Prometheus][prometheus]-compatible metrics.
+KGB generates [Prometheus][prometheus]-compatible metrics.
 Metrics endpoints are exposed via `-metrics` service in operator namespace and can be scraped by 3rd party tools:
 
 ``` yaml
@@ -273,32 +273,32 @@ Metrics can be also automatically discovered and monitored by [Prometheus Operat
 
 ### General metrics
 
-[controller-runtime][controller-runtime-metrics] standard metrics, extended with OhMyGLB operator-specific metrics listed below:
+[controller-runtime][controller-runtime-metrics] standard metrics, extended with KGB operator-specific metrics listed below:
 
 #### `healthy_records`
 
-Number of healthy records observed by OhMyGLB.
+Number of healthy records observed by KGB.
 
 Example:
 
 ```yaml
-# HELP ohmyglb_gslb_healthy_records Number of healthy records observed by OhMyGLB.
-# TYPE ohmyglb_gslb_healthy_records gauge
-ohmyglb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6
+# HELP kgb_gslb_healthy_records Number of healthy records observed by KGB.
+# TYPE kgb_gslb_healthy_records gauge
+kgb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6
 ```
 
 #### `ingress_hosts_per_status`
 
-Number of ingress hosts per status (NotFound, Healthy, Unhealthy), observed by OhMyGLB.
+Number of ingress hosts per status (NotFound, Healthy, Unhealthy), observed by KGB.
 
 Example:
 
 ```yaml
-# HELP ohmyglb_gslb_ingress_hosts_per_status Number of managed hosts observed by OhMyGLB.
-# TYPE ohmyglb_gslb_ingress_hosts_per_status gauge
-ohmyglb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
-ohmyglb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
-ohmyglb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
+# HELP kgb_gslb_ingress_hosts_per_status Number of managed hosts observed by KGB.
+# TYPE kgb_gslb_ingress_hosts_per_status gauge
+kgb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
+kgb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
+kgb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
 ```
 
 Served on `0.0.0.0:8383/metrics` endpoint

@@ -1,4 +1,4 @@
-apiVersion: ohmyglb.absa.oss/v1beta1
+apiVersion: kgb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: test-gslb-failover

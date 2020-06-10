@@ -1,4 +1,4 @@
-module github.com/AbsaOSS/ohmyglb
+module github.com/AbsaOSS/kgb
 
 go 1.13
 

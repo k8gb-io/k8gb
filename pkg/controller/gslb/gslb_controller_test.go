@@ -9,9 +9,9 @@ import (
 	"time"
 
 	ibclient "github.com/AbsaOSS/infoblox-go-client"
-	ohmyglbv1beta1 "github.com/AbsaOSS/ohmyglb/pkg/apis/ohmyglb/v1beta1"
-	"github.com/AbsaOSS/ohmyglb/pkg/controller/gslb/internal/depresolver"
-	"github.com/AbsaOSS/ohmyglb/pkg/controller/gslb/internal/utils"
+	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
+	"github.com/AbsaOSS/kgb/pkg/controller/gslb/internal/depresolver"
+	"github.com/AbsaOSS/kgb/pkg/controller/gslb/internal/utils"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
@@ -30,7 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var crSampleYaml = "../../../deploy/crds/ohmyglb.absa.oss_v1beta1_gslb_cr.yaml"
+var crSampleYaml = "../../../deploy/crds/kgb.absa.oss_v1beta1_gslb_cr.yaml"
 
 func TestGslbController(t *testing.T) {
 	// Start fakedns server for external dns tests
@@ -64,7 +64,7 @@ func TestGslbController(t *testing.T) {
 
 	// Register operator types with the runtime scheme.
 	s := scheme.Scheme
-	s.AddKnownTypes(ohmyglbv1beta1.SchemeGroupVersion, gslb)
+	s.AddKnownTypes(kgbv1beta1.SchemeGroupVersion, gslb)
 	// Register external-dns DNSEndpoint CRD
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	// Create a fake client to mock API calls.
@@ -339,7 +339,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
 		}
 
-		got := dnsEndpoint.Annotations["ohmyglb.absa.oss/dnstype"]
+		got := dnsEndpoint.Annotations["kgb.absa.oss/dnstype"]
 
 		want := "local"
 		if got != want {
@@ -365,7 +365,7 @@ func TestGslbController(t *testing.T) {
 		}
 	})
 
-	t.Run("Can get external targets from ohmyglb in another location", func(t *testing.T) {
+	t.Run("Can get external targets from kgb in another location", func(t *testing.T) {
 		serviceName := "frontend-podinfo"
 		createHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
@@ -663,7 +663,7 @@ func TestGslbController(t *testing.T) {
 	})
 }
 
-func createHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
+func createHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *kgbv1beta1.Gslb) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -695,7 +695,7 @@ func createHealthyService(t *testing.T, serviceName string, cl client.Client, gs
 	}
 }
 
-func deleteHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
+func deleteHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *kgbv1beta1.Gslb) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -727,7 +727,7 @@ func deleteHealthyService(t *testing.T, serviceName string, cl client.Client, gs
 	}
 }
 
-func createUnhealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
+func createUnhealthyService(t *testing.T, serviceName string, cl client.Client, gslb *kgbv1beta1.Gslb) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -755,7 +755,7 @@ func createUnhealthyService(t *testing.T, serviceName string, cl client.Client, 
 
 }
 
-func deleteUnhealthyService(t *testing.T, serviceName string, cl client.Client, gslb *ohmyglbv1beta1.Gslb) {
+func deleteUnhealthyService(t *testing.T, serviceName string, cl client.Client, gslb *kgbv1beta1.Gslb) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -787,7 +787,7 @@ func reconcileAndUpdateGslb(t *testing.T,
 	r *ReconcileGslb,
 	req reconcile.Request,
 	cl client.Client,
-	gslb *ohmyglbv1beta1.Gslb,
+	gslb *kgbv1beta1.Gslb,
 ) {
 	t.Helper()
 	// Reconcile again so Reconcile() checks services and updates the Gslb
