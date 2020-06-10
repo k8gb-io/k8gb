@@ -49,7 +49,7 @@ In the use case above, the following resources are configured by the _applicatio
 A potential example of what this `Gslb` resource would look like:
 
 ```yaml
-apiVersion: ohmyglb.absa.oss/v1beta1
+apiVersion: kgb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: app

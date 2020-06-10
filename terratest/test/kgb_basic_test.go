@@ -13,8 +13,8 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 )
 
-// Basic ohmyglb deployment test that is verifying that associated ingress is getting created
-func TestOhmyglbBasicExample(t *testing.T) {
+// Basic kgb deployment test that is verifying that associated ingress is getting created
+func TestKgbBasicExample(t *testing.T) {
 	t.Parallel()
 
 	// Path to the Kubernetes resource config we will test
@@ -24,7 +24,7 @@ func TestOhmyglbBasicExample(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("ohmyglb-basic-example-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("kgb-basic-example-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file

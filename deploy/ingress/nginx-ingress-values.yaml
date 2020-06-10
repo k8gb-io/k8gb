@@ -541,4 +541,4 @@ tcp: {}
 # Ref: https://github.com/kubernetes/contrib/tree/master/ingress/controllers/nginx/examples/udp
 ##
 udp:
-  53: "ohmyglb/ohmyglb-coredns:53"
+  53: "kgb/kgb-coredns:53"

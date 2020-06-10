@@ -1,4 +1,4 @@
-// fake dns server that is used for external dns communication tests of ohmyglb
+// fake dns server that is used for external dns communication tests of kgb
 
 package gslb
 

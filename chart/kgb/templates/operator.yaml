@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ohmyglb
-  namespace: ohmyglb
+  name: kgb
+  namespace: kgb
   labels:
 {{ include "chart.labels" . | indent 4  }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: ohmyglb
+      name: kgb
   template:
     metadata:
       labels:
-        name: ohmyglb
+        name: kgb
     spec:
-      {{ if .Values.ohmyglb.hostAlias.enabled }}
+      {{ if .Values.kgb.hostAlias.enabled }}
       hostAliases:
-        - ip: "{{ .Values.ohmyglb.hostAlias.ip }}"
+        - ip: "{{ .Values.kgb.hostAlias.ip }}"
           hostnames:
-          - "{{ .Values.ohmyglb.hostAlias.hostname }}"
+          - "{{ .Values.kgb.hostAlias.hostname }}"
       {{ end }}
-      serviceAccountName: ohmyglb
+      serviceAccountName: kgb
       containers:
-        - name: ohmyglb
-          image: {{ .Values.ohmyglb.imageRepo }}:v{{ .Chart.AppVersion }}
+        - name: kgb
+          image: {{ .Values.kgb.imageRepo }}:v{{ .Chart.AppVersion }}
           command:
-          - ohmyglb
+          - kgb
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -36,21 +36,21 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "ohmyglb"
-            - name: OHMYGLB_VERSION
+              value: "kgb"
+            - name: KGB_VERSION
               value: {{ quote .Chart.AppVersion }}
             - name: CLUSTER_GEO_TAG
-              value: {{ quote .Values.ohmyglb.clusterGeoTag }}
+              value: {{ quote .Values.kgb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS
-              value: {{ quote .Values.ohmyglb.extGslbClustersGeoTags }}
+              value: {{ quote .Values.kgb.extGslbClustersGeoTags }}
             - name: EDGE_DNS_ZONE
-              value: {{ .Values.ohmyglb.edgeDNSZone }}
+              value: {{ .Values.kgb.edgeDNSZone }}
             - name: EDGE_DNS_SERVER
-              value: {{ .Values.ohmyglb.edgeDNSServer }}
+              value: {{ .Values.kgb.edgeDNSServer }}
             - name: DNS_ZONE
-              value: {{ .Values.ohmyglb.dnsZone }}
+              value: {{ .Values.kgb.dnsZone }}
             - name: RECONCILE_REQUEUE_SECONDS
-              value: {{ quote .Values.ohmyglb.reconcileRequeueSeconds}}
+              value: {{ quote .Values.kgb.reconcileRequeueSeconds}}
             {{ if .Values.infoblox.enabled }}
             - name: INFOBLOX_GRID_HOST
               valueFrom:
