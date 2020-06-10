@@ -1,4 +1,4 @@
-# Oh My GLB
+# KGB - Kubernetes Global Balancer
 
 ## Project Health
 
@@ -37,7 +37,7 @@ Please see the extended documentation [here](/docs/index.md)
 
 ### Installation with Helm3
 
-#### Add kgb Helm repository
+#### Add KGB Helm repository
 
 ```sh
 helm repo add kgb https://absaoss.github.io/kgb/
