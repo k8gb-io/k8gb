@@ -1,4 +1,4 @@
-module github.com/AbsaOSS/kgb
+module github.com/AbsaOSS/k8gb
 
 go 1.13
 

@@ -118,11 +118,11 @@ func assertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName string
 	t.Helper()
 
 	actualHealthStatus := func() ([]string, error) {
-		kgbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o", "jsonpath='{.status.serviceHealth}'")
+		k8gbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o", "jsonpath='{.status.serviceHealth}'")
 		if err != nil {
-			t.Errorf("Failed to get kgb status with kubectl (%s)", err)
+			t.Errorf("Failed to get k8gb status with kubectl (%s)", err)
 		}
-		return []string{kgbServiceHealth}, nil
+		return []string{k8gbServiceHealth}, nil
 	}
 	expectedHealthStatus := []string{fmt.Sprintf("'map[%s]'", serviceStatus)}
 	_, err := DoWithRetryWaitingForValueE(

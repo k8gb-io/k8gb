@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kgb
-  namespace: kgb
+  name: k8gb
+  namespace: k8gb
   labels:
 {{ include "chart.labels" . | indent 4  }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: kgb
+      name: k8gb
   template:
     metadata:
       labels:
-        name: kgb
+        name: k8gb
     spec:
-      {{ if .Values.kgb.hostAlias.enabled }}
+      {{ if .Values.k8gb.hostAlias.enabled }}
       hostAliases:
-        - ip: "{{ .Values.kgb.hostAlias.ip }}"
+        - ip: "{{ .Values.k8gb.hostAlias.ip }}"
           hostnames:
-          - "{{ .Values.kgb.hostAlias.hostname }}"
+          - "{{ .Values.k8gb.hostAlias.hostname }}"
       {{ end }}
-      serviceAccountName: kgb
+      serviceAccountName: k8gb
       containers:
-        - name: kgb
-          image: {{ .Values.kgb.imageRepo }}:v{{ .Chart.AppVersion }}
+        - name: k8gb
+          image: {{ .Values.k8gb.imageRepo }}:v{{ .Chart.AppVersion }}
           command:
-          - kgb
+          - k8gb
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -36,21 +36,21 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "kgb"
-            - name: KGB_VERSION
+              value: "k8gb"
+            - name: K8GB_VERSION
               value: {{ quote .Chart.AppVersion }}
             - name: CLUSTER_GEO_TAG
-              value: {{ quote .Values.kgb.clusterGeoTag }}
+              value: {{ quote .Values.k8gb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS
-              value: {{ quote .Values.kgb.extGslbClustersGeoTags }}
+              value: {{ quote .Values.k8gb.extGslbClustersGeoTags }}
             - name: EDGE_DNS_ZONE
-              value: {{ .Values.kgb.edgeDNSZone }}
+              value: {{ .Values.k8gb.edgeDNSZone }}
             - name: EDGE_DNS_SERVER
-              value: {{ .Values.kgb.edgeDNSServer }}
+              value: {{ .Values.k8gb.edgeDNSServer }}
             - name: DNS_ZONE
-              value: {{ .Values.kgb.dnsZone }}
+              value: {{ .Values.k8gb.dnsZone }}
             - name: RECONCILE_REQUEUE_SECONDS
-              value: {{ quote .Values.kgb.reconcileRequeueSeconds}}
+              value: {{ quote .Values.k8gb.reconcileRequeueSeconds}}
             {{ if .Values.infoblox.enabled }}
             - name: INFOBLOX_GRID_HOST
               valueFrom:

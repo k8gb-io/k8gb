@@ -1,4 +1,4 @@
-// Package depresolver abstracts and implements kgb dependencies resolver.
+// Package depresolver abstracts and implements k8gb dependencies resolver.
 // depresolver responsibilities
 // - abstracts multiple configurations into single point of access
 // - provides predefined values when configuration is missing

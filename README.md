@@ -1,21 +1,21 @@
-# KGB - Kubernetes Global Balancer
+# K8GB - Kubernetes Global Balancer
 
 ## Project Health
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://github.com/AbsaOSS/kgb/workflows/build/badge.svg)](https://github.com/AbsaOSS/kgb/actions?query=workflow%3A%22Golang+lint+and+test%22)
-[![Gosec](https://github.com/AbsaOSS/kgb/workflows/Gosec/badge.svg)](https://github.com/AbsaOSS/kgb/actions?query=workflow%3AGosec)
-[![Terratest Status](https://github.com/AbsaOSS/kgb/workflows/Terratest/badge.svg)](https://github.com/AbsaOSS/kgb/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/kgb)](https://goreportcard.com/report/github.com/AbsaOSS/kgb)
-[![Helm Publish](https://github.com/AbsaOSS/kgb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/kgb/actions?query=workflow%3A%22Helm+Publish%22)
-[![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/kgb)](https://hub.docker.com/r/absaoss/kgb)
+[![Build Status](https://github.com/AbsaOSS/k8gb/workflows/build/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3A%22Golang+lint+and+test%22)
+[![Gosec](https://github.com/AbsaOSS/k8gb/workflows/Gosec/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3AGosec)
+[![Terratest Status](https://github.com/AbsaOSS/k8gb/workflows/Terratest/badge.svg)](https://github.com/AbsaOSS/k8gb/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/k8gb)](https://goreportcard.com/report/github.com/AbsaOSS/k8gb)
+[![Helm Publish](https://github.com/AbsaOSS/k8gb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3A%22Helm+Publish%22)
+[![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
 - [Motivation and Architecture](#motivation-and-architecture)
 - [Installation and Configuration](#installation-and-configuration)
     - [Installation with Helm3](#installation-with-helm3)
-        - [Add kgb Helm repository](#add-kgb-helm-repository)
+        - [Add k8gb Helm repository](#add-k8gb-helm-repository)
     - [Local Playground Install](#local-playground-install)
         - [Environment prerequisites](#environment-prerequisites)
         - [Running project locally](#running-project-locally)
@@ -37,15 +37,15 @@ Please see the extended documentation [here](/docs/index.md)
 
 ### Installation with Helm3
 
-#### Add KGB Helm repository
+#### Add K8GB Helm repository
 
 ```sh
-helm repo add kgb https://absaoss.github.io/kgb/
+helm repo add k8gb https://absaoss.github.io/k8gb/
 helm repo update
-helm -n kgb upgrade -i kgb kgb/kgb --create-namespace --wait
+helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace --wait
 ```
 
-See [values.yaml](https://github.com/AbsaOSS/kgb/blob/master/chart/kgb/values.yaml)
+See [values.yaml](https://github.com/AbsaOSS/k8gb/blob/master/chart/k8gb/values.yaml)
 for customization options.
 
 ### Local Playground Install
@@ -96,15 +96,15 @@ kubectl cluster-info --context kind-test-gslb1 && kubectl cluster-info --context
 
 Check if Etcd cluster is healthy
 ```shell script
-kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace kgb etcd-test --image quay.io/coreos/etcd --restart=Never -- /bin/sh -c 'etcdctl  member list' 
+kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace k8gb etcd-test --image quay.io/coreos/etcd --restart=Never -- /bin/sh -c 'etcdctl  member list' 
 ```
 as expected output you will see three started pods: `etcd-cluster`
 
 ```shell script
 ...
-c3261c079f6990a7, started, etcd-cluster-5bcpvf6ngz, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.kgb.svc:2380, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.kgb.svc:2379
-eb6ead15c2b92606, started, etcd-cluster-6d8pxtpklm, http://etcd-cluster-6d8pxtpklm.etcd-cluster.kgb.svc:2380, http://etcd-cluster-6d8pxtpklm.etcd-cluster.kgb.svc:2379
-eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.kgb.svc:2380, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.kgb.svc:2379
+c3261c079f6990a7, started, etcd-cluster-5bcpvf6ngz, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.k8gb.svc:2380, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.k8gb.svc:2379
+eb6ead15c2b92606, started, etcd-cluster-6d8pxtpklm, http://etcd-cluster-6d8pxtpklm.etcd-cluster.k8gb.svc:2380, http://etcd-cluster-6d8pxtpklm.etcd-cluster.k8gb.svc:2379
+eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.k8gb.svc:2380, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.k8gb.svc:2379
 ...
 ```
 
@@ -157,7 +157,7 @@ make destroy-full-local-setup
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each 
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - app3.cloud.example.com` and depending 
 on region will podinfo return **us** or **eu**. In current round robin implementation are ip addresses randomly picked. 
-See [Gslb manifest with round robin strategy](/deploy/crds/kgb.absa.oss_v1beta1_gslb_cr.yaml)
+See [Gslb manifest with round robin strategy](/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 
 Run several times command below and watch `message` field.
 ```shell script
@@ -187,7 +187,7 @@ As expected result you should see podinfo message changing
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each 
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending
 on whether podinfo is running inside the cluster it returns only **eu** or **us**.
-See [Gslb manifest with failover strategy](/deploy/crds/kgb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+See [Gslb manifest with failover strategy](/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 Switch GLSB to failover mode:
 ```shell script
@@ -225,7 +225,7 @@ As expected result you should see only podinfo from **second cluster (us)** is r
 }
 ```
 It might happen that podinfo will be unavailable for a while due to 
-[DNS sync interval](https://github.com/AbsaOSS/kgb/pull/81) and default kgb DNS TTL of 30 seconds  
+[DNS sync interval](https://github.com/AbsaOSS/k8gb/pull/81) and default k8gb DNS TTL of 30 seconds  
 ```text
 wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
 ```
@@ -252,7 +252,7 @@ make init-round-robin
 ```
 ## Metrics
 
-KGB generates [Prometheus][prometheus]-compatible metrics.
+K8GB generates [Prometheus][prometheus]-compatible metrics.
 Metrics endpoints are exposed via `-metrics` service in operator namespace and can be scraped by 3rd party tools:
 
 ``` yaml
@@ -273,32 +273,32 @@ Metrics can be also automatically discovered and monitored by [Prometheus Operat
 
 ### General metrics
 
-[controller-runtime][controller-runtime-metrics] standard metrics, extended with KGB operator-specific metrics listed below:
+[controller-runtime][controller-runtime-metrics] standard metrics, extended with K8GB operator-specific metrics listed below:
 
 #### `healthy_records`
 
-Number of healthy records observed by KGB.
+Number of healthy records observed by K8GB.
 
 Example:
 
 ```yaml
-# HELP kgb_gslb_healthy_records Number of healthy records observed by KGB.
-# TYPE kgb_gslb_healthy_records gauge
-kgb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6
+# HELP k8gb_gslb_healthy_records Number of healthy records observed by K8GB.
+# TYPE k8gb_gslb_healthy_records gauge
+k8gb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6
 ```
 
 #### `ingress_hosts_per_status`
 
-Number of ingress hosts per status (NotFound, Healthy, Unhealthy), observed by KGB.
+Number of ingress hosts per status (NotFound, Healthy, Unhealthy), observed by K8GB.
 
 Example:
 
 ```yaml
-# HELP kgb_gslb_ingress_hosts_per_status Number of managed hosts observed by KGB.
-# TYPE kgb_gslb_ingress_hosts_per_status gauge
-kgb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
-kgb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
-kgb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
+# HELP k8gb_gslb_ingress_hosts_per_status Number of managed hosts observed by K8GB.
+# TYPE k8gb_gslb_ingress_hosts_per_status gauge
+k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Healthy"} 1
+k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="NotFound"} 1
+k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2
 ```
 
 Served on `0.0.0.0:8383/metrics` endpoint

@@ -18,7 +18,7 @@ jobs:
           cluster_name: test-gslb2
           config: deploy/kind/cluster2-terratest.yaml
           wait: 180s
-      - name: KGB deployment
+      - name: K8GB deployment
         env:
           NODE_ROLE: control-plane
           TEST_CURRENT_COMMIT: yes

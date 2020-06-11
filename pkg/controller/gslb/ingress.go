@@ -3,7 +3,7 @@ package gslb
 import (
 	"context"
 
-	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
+	k8gbv1beta1 "github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func (r *ReconcileGslb) gslbIngress(gslb *kgbv1beta1.Gslb) (*v1beta1.Ingress, error) {
+func (r *ReconcileGslb) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, error) {
 	ingress := &v1beta1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        gslb.Name,
@@ -30,7 +30,7 @@ func (r *ReconcileGslb) gslbIngress(gslb *kgbv1beta1.Gslb) (*v1beta1.Ingress, er
 }
 
 func (r *ReconcileGslb) ensureIngress(request reconcile.Request,
-	instance *kgbv1beta1.Gslb,
+	instance *k8gbv1beta1.Gslb,
 	i *v1beta1.Ingress,
 ) (*reconcile.Result, error) {
 	found := &v1beta1.Ingress{}

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/AbsaOSS/kgb/pkg/controller/gslb"
+	"github.com/AbsaOSS/k8gb/pkg/controller/gslb"
 )
 
 func init() {
