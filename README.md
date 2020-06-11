@@ -33,6 +33,17 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
 
 Please see the extended documentation [here](/docs/index.md)
 
+## Production Readiness
+
+k8gb is very well tested with the following environment options
+
+| Type                            | Implementation                                     |
+|---------------------------------|----------------------------------------------------|
+| Kubernetes Version              | >= 1.14 (with install workaround) >= 1.15 (Stable) |
+| Ingress Controller              | Nginx                                              |
+| EdgeDNS                         | Infoblox                                           |
+| Number of k8gb enabled clusters | 2                                                  |
+
 ## Installation and Configuration
 
 ### Installation with Helm3
