@@ -4,6 +4,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: udp-services
-  namespace: kgb
+  namespace: k8gb
 data:
-  53: "kgb/kgb-coredns:53"
+  53: "k8gb/k8gb-coredns:53"

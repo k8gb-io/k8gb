@@ -1,13 +1,13 @@
 package gslb
 
 import (
-	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
+	k8gbv1beta1 "github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 const (
-	kgbNamespace = "kgb"
+	k8gbNamespace = "k8gb"
 	gslbSubsystem    = "gslb"
 )
 const (
@@ -20,25 +20,25 @@ const (
 var (
 	healthyRecordsMetric = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: kgbNamespace,
+			Namespace: k8gbNamespace,
 			Subsystem: gslbSubsystem,
 			Name:      "healthy_records",
-			Help:      "Number of healthy records observed by KGB.",
+			Help:      "Number of healthy records observed by K8GB.",
 		},
 		[]string{"namespace", "name"},
 	)
 	ingressHostsPerStatusMetric = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: kgbNamespace,
+			Namespace: k8gbNamespace,
 			Subsystem: gslbSubsystem,
 			Name:      "ingress_hosts_per_status",
-			Help:      "Number of managed hosts observed by KGB.",
+			Help:      "Number of managed hosts observed by K8GB.",
 		},
 		[]string{"namespace", "name", "status"},
 	)
 )
 
-func (r *ReconcileGslb) updateIngressHostsPerStatusMetric(gslb *kgbv1beta1.Gslb, serviceHealth map[string]string) error {
+func (r *ReconcileGslb) updateIngressHostsPerStatusMetric(gslb *k8gbv1beta1.Gslb, serviceHealth map[string]string) error {
 	var healthyHostsCount, unhealthyHostsCount, notFoundHostsCount int
 	for _, hs := range serviceHealth {
 		switch hs {
@@ -57,7 +57,7 @@ func (r *ReconcileGslb) updateIngressHostsPerStatusMetric(gslb *kgbv1beta1.Gslb,
 	return nil
 }
 
-func (r *ReconcileGslb) updateHealthyRecordsMetric(gslb *kgbv1beta1.Gslb, healthyRecords map[string][]string) error {
+func (r *ReconcileGslb) updateHealthyRecordsMetric(gslb *k8gbv1beta1.Gslb, healthyRecords map[string][]string) error {
 	var hrsCount int
 	for _, hrs := range healthyRecords {
 		hrsCount += len(hrs)

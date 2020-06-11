@@ -1,26 +1,26 @@
-REPO ?= absaoss/kgb
-VERSION ?= $$(helm show chart chart/kgb/|awk '/appVersion:/ {print $$2}')
-VALUES_YAML ?= chart/kgb/values.yaml
+REPO ?= absaoss/k8gb
+VERSION ?= $$(helm show chart chart/k8gb/|awk '/appVersion:/ {print $$2}')
+VALUES_YAML ?= chart/k8gb/values.yaml
 HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
 GSLB_DOMAIN ?= cloud.example.com
 HOST_ALIAS_IP1 ?= 172.17.0.9
 HOST_ALIAS_IP2 ?= 172.17.0.5
-KGB_IMAGE_REPO ?= absaoss/kgb
-KGB_IMAGE_TAG  ?= v$(VERSION)
-KGB_COREDNS_IP ?= kubectl get svc kgb-coredns -n kgb -o custom-columns='IP:spec.clusterIP' --no-headers
+K8GB_IMAGE_REPO ?= absaoss/k8gb
+K8GB_IMAGE_TAG  ?= v$(VERSION)
+K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 
 .PHONY: up-local
 up-local: create-test-ns
-	kubectl apply -f ./deploy/crds/kgb.absa.oss_gslbs_crd.yaml
-	kubectl apply -f ./deploy/crds/kgb.absa.oss_v1beta1_gslb_cr.yaml
+	kubectl apply -f ./deploy/crds/k8gb.absa.oss_gslbs_crd.yaml
+	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml
 	operator-sdk run --local --namespace=test-gslb
 
 .PHONY: debug-local
 debug-local: create-test-ns
-	kubectl apply -f ./deploy/crds/kgb.absa.oss_gslbs_crd.yaml
-	kubectl apply -f ./deploy/crds/kgb.absa.oss_v1beta1_gslb_cr.yaml
+	kubectl apply -f ./deploy/crds/k8gb.absa.oss_gslbs_crd.yaml
+	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml
 	operator-sdk run --local --namespace=test-gslb --enable-delve
 
 .PHONY: lint
@@ -39,16 +39,16 @@ terratest:
 
 .PHONY: e2e-test
 e2e-test: deploy-gslb-operator
-	operator-sdk test local ./pkg/test --no-setup --namespace kgb
+	operator-sdk test local ./pkg/test --no-setup --namespace k8gb
 
 .PHONY: dns-tools
 dns-tools:
-	kubectl -n kgb get svc kgb-coredns
-	kubectl -n kgb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
+	kubectl -n k8gb get svc k8gb-coredns
+	kubectl -n k8gb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 
 .PHONY: dns-smoke-test
 dns-smoke-test:
-	kubectl -n kgb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @kgb-coredns app3.cloud.example.com
+	kubectl -n k8gb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @k8gb-coredns app3.cloud.example.com
 
 .PHONY: deploy-local-cluster
 deploy-local-cluster:
@@ -67,13 +67,13 @@ use-first-context:
 use-second-context:
 	kubectl config use-context kind-test-gslb2
 
-.PHONY: deploy-first-kgb
-deploy-first-kgb: HELM_ARGS = --set kgb.hostAlias.enabled=true --set kgb.hostAlias.ip="$(HOST_ALIAS_IP1)" --set kgb.imageRepo=$(KGB_IMAGE_REPO)
-deploy-first-kgb: deploy-gslb-operator deploy-local-ingress
+.PHONY: deploy-first-k8gb
+deploy-first-k8gb: HELM_ARGS = --set k8gb.hostAlias.enabled=true --set k8gb.hostAlias.ip="$(HOST_ALIAS_IP1)" --set k8gb.imageRepo=$(K8GB_IMAGE_REPO)
+deploy-first-k8gb: deploy-gslb-operator deploy-local-ingress
 
-.PHONY: deploy-second-kgb
-deploy-second-kgb: HELM_ARGS = --set kgb.hostAlias.enabled=true --set kgb.clusterGeoTag="us" --set kgb.extGslbClustersGeoTags="eu" --set kgb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set kgb.hostAlias.ip="$(HOST_ALIAS_IP2)" --set kgb.imageRepo=$(KGB_IMAGE_REPO)
-deploy-second-kgb: deploy-gslb-operator deploy-local-ingress
+.PHONY: deploy-second-k8gb
+deploy-second-k8gb: HELM_ARGS = --set k8gb.hostAlias.enabled=true --set k8gb.clusterGeoTag="us" --set k8gb.extGslbClustersGeoTags="eu" --set k8gb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set k8gb.hostAlias.ip="$(HOST_ALIAS_IP2)" --set k8gb.imageRepo=$(K8GB_IMAGE_REPO)
+deploy-second-k8gb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: deploy-two-local-clusters
@@ -91,8 +91,8 @@ destroy-two-local-clusters:
 	kind delete cluster --name test-gslb1
 	kind delete cluster --name test-gslb2
 
-.PHONY: create-kgb-ns
-create-kgb-ns:
+.PHONY: create-k8gb-ns
+create-k8gb-ns:
 	kubectl apply -f deploy/namespace.yaml
 
 .PHONY: create-test-ns
@@ -100,34 +100,34 @@ create-test-ns:
 	kubectl apply -f deploy/crds/test-namespace.yaml
 
 .PHONY: deploy-local-ingress
-deploy-local-ingress: create-kgb-ns
+deploy-local-ingress: create-k8gb-ns
 	helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	helm repo update
-	helm -n kgb upgrade -i nginx-ingress stable/nginx-ingress -f deploy/ingress/nginx-ingress-values.yaml
+	helm -n k8gb upgrade -i nginx-ingress stable/nginx-ingress -f deploy/ingress/nginx-ingress-values.yaml
 
 .PHONY: wait-for-nginx-ingress-ready
 wait-for-nginx-ingress-ready:
-	kubectl -n kgb wait --for=condition=Ready pod -l app=nginx-ingress --timeout=600s
+	kubectl -n k8gb wait --for=condition=Ready pod -l app=nginx-ingress --timeout=600s
 
 .PHONY: deploy-gslb-operator
-deploy-gslb-operator: create-kgb-ns
-	cd chart/kgb && helm dependency update
-	helm -n kgb upgrade -i kgb chart/kgb -f $(VALUES_YAML) $(HELM_ARGS)
+deploy-gslb-operator: create-k8gb-ns
+	cd chart/k8gb && helm dependency update
+	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS)
 
 .PHONY: wait-for-gslb-ready
 wait-for-gslb-ready:
-	kubectl -n kgb wait --for=condition=Ready pod -l app=etcd --timeout=600s
+	kubectl -n k8gb wait --for=condition=Ready pod -l app=etcd --timeout=600s
 
 # workaround until https://github.com/crossplaneio/crossplane/issues/1170 solved
 .PHONY: deploy-gslb-operator-14
-deploy-gslb-operator-14: create-kgb-ns
-	cd chart/kgb && helm dependency update
-	helm -n kgb template kgb chart/kgb -f $(VALUES_YAML) | kubectl -n kgb --validate=false apply -f -
+deploy-gslb-operator-14: create-k8gb-ns
+	cd chart/k8gb && helm dependency update
+	helm -n k8gb template k8gb chart/k8gb -f $(VALUES_YAML) | kubectl -n k8gb --validate=false apply -f -
 
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: create-test-ns
-	$(call apply-cr,deploy/crds/kgb.absa.oss_v1beta1_gslb_cr.yaml)
-	$(call apply-cr,deploy/crds/kgb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 .PHONY: deploy-test-apps
 deploy-test-apps: create-test-ns
@@ -143,29 +143,29 @@ clean-test-apps:
 
 .PHONY: build
 build:
-	operator-sdk build $(KGB_IMAGE_REPO):$(KGB_IMAGE_TAG)
+	operator-sdk build $(K8GB_IMAGE_REPO):$(K8GB_IMAGE_TAG)
 
 .PHONY: push
 push:
-	docker push $(KGB_IMAGE_REPO):$(KGB_IMAGE_TAG)
+	docker push $(K8GB_IMAGE_REPO):$(K8GB_IMAGE_TAG)
 
 .PHONY: debug-test-etcd
 debug-test-etcd:
-	kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace kgb etcd-test --image "$(ETCD_DEBUG_IMAGE)" --restart=Never -- /bin/sh
+	kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace k8gb etcd-test --image "$(ETCD_DEBUG_IMAGE)" --restart=Never -- /bin/sh
 
 .PHONY: infoblox-secret
 infoblox-secret:
-	kubectl -n kgb create secret generic external-dns \
+	kubectl -n k8gb create secret generic external-dns \
 	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
 	    --from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
 
 .PHONY: init-failover
 init-failover:
-	$(call init-test-strategy, "deploy/crds/kgb.absa.oss_v1beta1_gslb_cr_failover.yaml")
+	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml")
 
 .PHONY: init-round-robin
 init-round-robin:
-	$(call init-test-strategy, "deploy/crds/kgb.absa.oss_v1beta1_gslb_cr.yaml")
+	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml")
 
 .PHONY: stop-test-app
 stop-test-app:
@@ -193,7 +193,7 @@ endef
 
 define hit-testapp-host
 	kubectl run -it --rm busybox --restart=Never --image=busybox -- sh -c \
-	"echo 'nameserver `$(KGB_COREDNS_IP)`' > /etc/resolv.conf && \
+	"echo 'nameserver `$(K8GB_COREDNS_IP)`' > /etc/resolv.conf && \
 	wget -qO - $1"
 endef
 
@@ -206,7 +206,7 @@ define init-test-strategy
 endef
 
 define get-cluster-geo-tag
-	kubectl -n kgb describe deploy kgb |  awk '/CLUSTER_GEO_TAG/ { printf $$2 }'
+	kubectl -n k8gb describe deploy k8gb |  awk '/CLUSTER_GEO_TAG/ { printf $$2 }'
 endef
 
 define apply-cr

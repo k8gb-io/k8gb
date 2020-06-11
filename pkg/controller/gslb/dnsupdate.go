@@ -9,7 +9,7 @@ import (
 	"time"
 
 	ibclient "github.com/AbsaOSS/infoblox-go-client"
-	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
+	k8gbv1beta1 "github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/miekg/dns"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -20,7 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func (r *ReconcileGslb) getGslbIngressIPs(gslb *kgbv1beta1.Gslb) ([]string, error) {
+func (r *ReconcileGslb) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 	nn := types.NamespacedName{
 		Name:      gslb.Name,
 		Namespace: gslb.Namespace,
@@ -45,7 +45,7 @@ func (r *ReconcileGslb) getGslbIngressIPs(gslb *kgbv1beta1.Gslb) ([]string, erro
 	return gslbIngressIPs, nil
 }
 
-func getExternalClusterFQDNs(gslb *kgbv1beta1.Gslb) []string {
+func getExternalClusterFQDNs(gslb *k8gbv1beta1.Gslb) []string {
 	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
 
 	if extGslbClustersGeoTagsVar == "" {
@@ -63,7 +63,7 @@ func getExternalClusterFQDNs(gslb *kgbv1beta1.Gslb) []string {
 	return extGslbClusters
 }
 
-func getExternalClusterHeartbeatFQDNs(gslb *kgbv1beta1.Gslb) []string {
+func getExternalClusterHeartbeatFQDNs(gslb *k8gbv1beta1.Gslb) []string {
 	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
 
 	if extGslbClustersGeoTagsVar == "" {
@@ -81,7 +81,7 @@ func getExternalClusterHeartbeatFQDNs(gslb *kgbv1beta1.Gslb) []string {
 	return extGslbClusters
 }
 
-func getExternalTargets(gslb *kgbv1beta1.Gslb, host string) ([]string, error) {
+func getExternalTargets(gslb *k8gbv1beta1.Gslb, host string) ([]string, error) {
 
 	extGslbClusters := getExternalClusterFQDNs(gslb)
 
@@ -123,7 +123,7 @@ func getExternalTargets(gslb *kgbv1beta1.Gslb, host string) ([]string, error) {
 	return targets, nil
 }
 
-func (r *ReconcileGslb) gslbDNSEndpoint(gslb *kgbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
+func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
 	var gslbHosts []*externaldns.Endpoint
 	var ttl = externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 
@@ -199,7 +199,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *kgbv1beta1.Gslb) (*externaldns.DNS
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        gslb.Name,
 			Namespace:   gslb.Namespace,
-			Annotations: map[string]string{"kgb.absa.oss/dnstype": "local"},
+			Annotations: map[string]string{"k8gb.absa.oss/dnstype": "local"},
 		},
 		Spec: dnsEndpointSpec,
 	}
@@ -211,7 +211,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *kgbv1beta1.Gslb) (*externaldns.DNS
 	return dnsEndpoint, err
 }
 
-func nsServerName(gslb *kgbv1beta1.Gslb, clusterGeoTag string) string {
+func nsServerName(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
 	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
 	if len(clusterGeoTag) == 0 {
 		clusterGeoTag = "default"
@@ -219,7 +219,7 @@ func nsServerName(gslb *kgbv1beta1.Gslb, clusterGeoTag string) string {
 	return fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
 }
 
-func heartbeatFQDN(gslb *kgbv1beta1.Gslb, clusterGeoTag string) string {
+func heartbeatFQDN(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
 	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
 	if len(clusterGeoTag) == 0 {
 		clusterGeoTag = "default"
@@ -363,7 +363,7 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 	return delegateTo
 }
 
-func (r *ReconcileGslb) configureZoneDelegation(gslb *kgbv1beta1.Gslb) (*reconcile.Result, error) {
+func (r *ReconcileGslb) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 	infobloxGridHost := os.Getenv("INFOBLOX_GRID_HOST")
 	if len(infobloxGridHost) > 0 {
@@ -451,7 +451,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *kgbv1beta1.Gslb) (*reconci
 }
 
 func (r *ReconcileGslb) ensureDNSEndpoint(request reconcile.Request,
-	gslb *kgbv1beta1.Gslb,
+	gslb *k8gbv1beta1.Gslb,
 	i *externaldns.DNSEndpoint,
 ) (*reconcile.Result, error) {
 	found := &externaldns.DNSEndpoint{}

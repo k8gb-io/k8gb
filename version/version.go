@@ -3,6 +3,6 @@ package version
 import "os"
 
 var (
-	//Version of KGB release
-	Version = os.Getenv("KGB_VERSION")
+	//Version of K8GB release
+	Version = os.Getenv("K8GB_VERSION")
 )

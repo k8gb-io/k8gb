@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
+	"github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
 )
 
 func init() {

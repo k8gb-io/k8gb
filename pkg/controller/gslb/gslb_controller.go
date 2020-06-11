@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	kgbv1beta1 "github.com/AbsaOSS/kgb/pkg/apis/kgb/v1beta1"
-	"github.com/AbsaOSS/kgb/pkg/controller/gslb/internal/depresolver"
+	k8gbv1beta1 "github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
+	"github.com/AbsaOSS/k8gb/pkg/controller/gslb/internal/depresolver"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -62,7 +62,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Gslb
-	err = c.Watch(&source.Kind{Type: &kgbv1beta1.Gslb{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &k8gbv1beta1.Gslb{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource Ingress
 	err = c.Watch(&source.Kind{Type: &v1beta1.Ingress{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &kgbv1beta1.Gslb{},
+		OwnerType:    &k8gbv1beta1.Gslb{},
 	})
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource DNSEndpoint
 	err = c.Watch(&source.Kind{Type: &externaldns.DNSEndpoint{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &kgbv1beta1.Gslb{},
+		OwnerType:    &k8gbv1beta1.Gslb{},
 	})
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
 	mapFn := handler.ToRequestsFunc(
 		func(a handler.MapObject) []reconcile.Request {
-			gslbList := &kgbv1beta1.GslbList{}
+			gslbList := &k8gbv1beta1.GslbList{}
 			opts := []client.ListOption{
 				client.InNamespace(a.Meta.GetNamespace()),
 			}
@@ -146,7 +146,7 @@ type ReconcileGslb struct {
 	depResolver *depresolver.DependencyResolver
 }
 
-const gslbFinalizer = "finalizer.kgb.absa.oss"
+const gslbFinalizer = "finalizer.k8gb.absa.oss"
 
 // Reconcile reads that state of the cluster for a Gslb object and makes changes based on the state read
 // and what is in the Gslb.Spec
@@ -158,7 +158,7 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 	reqLogger.Info("Reconciling Gslb")
 
 	// Fetch the Gslb instance
-	gslb := &kgbv1beta1.Gslb{}
+	gslb := &k8gbv1beta1.Gslb{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, gslb)
 	if err != nil {
 		if errors.IsNotFound(err) {
