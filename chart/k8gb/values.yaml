@@ -20,7 +20,7 @@ k8gb:
   reconcileRequeueSeconds: 30
 
 externaldns:
-  image: absaoss/external-dns:v0.5.18-91-g44e98253-dirty
+  image: eu.gcr.io/k8s-artifacts-prod/external-dns/external-dns:v0.7.2
   interval: "20s"
 
 etcd-operator:

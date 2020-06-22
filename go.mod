@@ -2,11 +2,9 @@ module github.com/AbsaOSS/k8gb
 
 go 1.13
 
-require github.com/Azure/go-autorest v14.0.1+incompatible // indirect
-
 require (
-	github.com/AbsaOSS/infoblox-go-client v0.8.1-0.20200316164013-1a033234161e
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/infobloxopen/infoblox-go-client v1.1.0
 	github.com/kubernetes-incubator/external-dns v0.5.17
 	github.com/miekg/dns v1.1.27
 	github.com/operator-framework/operator-sdk v0.16.0
