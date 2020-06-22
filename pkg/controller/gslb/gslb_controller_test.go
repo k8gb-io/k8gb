@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	ibclient "github.com/AbsaOSS/infoblox-go-client"
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
 	"github.com/AbsaOSS/k8gb/pkg/controller/gslb/internal/depresolver"
 	"github.com/AbsaOSS/k8gb/pkg/controller/gslb/internal/utils"
+	ibclient "github.com/infobloxopen/infoblox-go-client"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"

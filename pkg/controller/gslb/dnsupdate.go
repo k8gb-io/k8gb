@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	ibclient "github.com/AbsaOSS/infoblox-go-client"
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
+	ibclient "github.com/infobloxopen/infoblox-go-client"
 	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/miekg/dns"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -405,7 +405,7 @@ func (r *ReconcileGslb) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconc
 				// Drop external records if they are stale
 				extClusters := getExternalClusterHeartbeatFQDNs(gslb)
 				for _, extCluster := range extClusters {
-					err = checkAliveFromTXT(edgeDNSServer, extCluster, time.Second * time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
+					err = checkAliveFromTXT(edgeDNSServer, extCluster, time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
 					if err != nil {
 						log.Error(err, "got the error from TXT based checkAlive")
 						log.Info(fmt.Sprintf("External cluster (%s) doesn't look alive, filtering it out from delegated zone configuration...", extCluster))
