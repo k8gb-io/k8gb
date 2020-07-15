@@ -74,9 +74,6 @@ The other parameters do not need to be modified unless you want to do something 
 
 * Export Infoblox related information in the shell. Instead of $ variables use the actual versions
 ```sh
-export INFOBLOX_GRID_HOST=$GRID_HOST
-export INFOBLOX_WAPI_PORT=$WAPI_PORT
-export INFOBLOX_WAPI_VERSION=$WAPI_VERSION
 export EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$WAPI_USERNAME
 export EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$WAPI_PASSWORD
 ```
