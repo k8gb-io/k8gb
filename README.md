@@ -82,6 +82,7 @@ export EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$WAPI_PASSWORD
 ```sh
 kubectl create ns k8gb
 make infoblox-secret
+```
 
 * Let's deploy k8gb to the first cluster. Most of the helper commands are abstracted by GNU `make`. If you want to look under the hood please check the `Makefile`. In general, standard Kubernetes/Helm commands are used. Point deployment mechanism to your custom `values.yaml`
 ```sh
