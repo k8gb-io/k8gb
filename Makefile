@@ -103,7 +103,7 @@ create-test-ns:
 deploy-local-ingress: create-k8gb-ns
 	helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	helm repo update
-	helm -n k8gb upgrade -i nginx-ingress stable/nginx-ingress -f deploy/ingress/nginx-ingress-values.yaml
+	helm -n k8gb upgrade -i nginx-ingress stable/nginx-ingress --version 1.41.1 -f deploy/ingress/nginx-ingress-values.yaml
 
 .PHONY: wait-for-nginx-ingress-ready
 wait-for-nginx-ingress-ready:
