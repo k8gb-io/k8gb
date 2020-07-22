@@ -74,8 +74,8 @@ The other parameters do not need to be modified unless you want to do something 
 
 * Export Infoblox related information in the shell. Instead of $ variables use the actual versions
 ```sh
-export EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$WAPI_USERNAME
-export EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$WAPI_PASSWORD
+export WAPI_USERNAME=<WAPI_USERNAME>
+export WAPI_PASSWORD=<WAPI_PASSWORD>
 ```
 
 * Create the Infoblox secret which is used by k8gb to configure edgeDNS by running:
@@ -131,7 +131,7 @@ k8gb-etcd-operator-etcd-restore-operator-8977cd5c8-k8l7l   1/1     Running   0  
 * We will use well known testing community app of [podinfo](https://github.com/stefanprodan/podinfo)
 ```sh
 helm repo add podinfo https://stefanprodan.github.io/podinfo
-kubectl create test-gslb
+kubectl create ns test-gslb
 helm upgrade --install podinfo --namespace test-gslb --set ui.message="us" podinfo/podinfo
 ```
 As you can see above we did set special geo tag message in podinfo configuration matching cluster geo tag. It is just for demonstration purposes.
@@ -253,7 +253,7 @@ Events:                         <none>
     ```
 * Now it's time to deploy this application to the first `eu` cluster. The steps and configuration are exactly the same. Just changing `ui.message` to `eu`
 ```sh
-kubectl create test-gslb
+kubectl create ns test-gslb
 helm upgrade --install podinfo --namespace test-gslb --set ui.message="eu" podinfo/podinfo
 ```
 
