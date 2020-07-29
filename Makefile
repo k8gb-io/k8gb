@@ -183,6 +183,14 @@ test-round-robin:
 test-failover:
 	@$(call hit-testapp-host, "failover.cloud.example.com")
 
+.PHONY: demo-roundrobin
+demo-roundrobin:
+	@$(call demo-host, "app3.cloud.example.com")
+
+.PHONY: demo-failover
+demo-failover:
+	@$(call demo-host, "failover.cloud.example.com")
+
 .PHONY: version
 version:
 	@echo $(VERSION)
@@ -195,6 +203,11 @@ define hit-testapp-host
 	kubectl run -it --rm busybox --restart=Never --image=busybox -- sh -c \
 	"echo 'nameserver `$(K8GB_COREDNS_IP)`' > /etc/resolv.conf && \
 	wget -qO - $1"
+endef
+
+define demo-host
+	kubectl run -it --rm k8gbdemo --restart=Never --image=absaoss/k8gbdemocurl  \
+	"`$(K8GB_COREDNS_IP)`" $1
 endef
 
 define init-test-strategy
