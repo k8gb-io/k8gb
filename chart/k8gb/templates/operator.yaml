@@ -19,7 +19,9 @@ spec:
       hostAliases:
         - ip: "{{ .Values.k8gb.hostAlias.ip }}"
           hostnames:
-          - "{{ .Values.k8gb.hostAlias.hostname }}"
+            {{- range.Values.k8gb.hostAlias.hostnames }}
+            - {{ . }}
+            {{- end }}
       {{ end }}
       serviceAccountName: k8gb
       containers:
