@@ -16,7 +16,9 @@ k8gb:
   hostAlias: # use https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ inside operator pod. Useful for advanced testing scenarios and to break dependency on EdgeDNS for cross k8gb collaboration
     enabled: false
     ip: "172.17.0.1"
-    hostname: "test-gslb-ns-us.example.com"
+    hostnames:
+     - "test-gslb-ns-us.example.com"
+     - "test-gslb-failover-ns-us.example.com"
   reconcileRequeueSeconds: 30
 
 externaldns:

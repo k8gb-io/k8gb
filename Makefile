@@ -72,7 +72,7 @@ deploy-first-k8gb: HELM_ARGS = --set k8gb.hostAlias.enabled=true --set k8gb.host
 deploy-first-k8gb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-second-k8gb
-deploy-second-k8gb: HELM_ARGS = --set k8gb.hostAlias.enabled=true --set k8gb.clusterGeoTag="us" --set k8gb.extGslbClustersGeoTags="eu" --set k8gb.hostAlias.hostname="test-gslb-ns-eu.example.com" --set k8gb.hostAlias.ip="$(HOST_ALIAS_IP2)" --set k8gb.imageRepo=$(K8GB_IMAGE_REPO)
+deploy-second-k8gb: HELM_ARGS = --set k8gb.hostAlias.enabled=true --set k8gb.clusterGeoTag="us" --set k8gb.extGslbClustersGeoTags="eu" --set k8gb.hostAlias.hostnames="{test-gslb-ns-eu.example.com,test-gslb-failover-ns-eu.example.com}" --set k8gb.hostAlias.ip="$(HOST_ALIAS_IP2)" --set k8gb.imageRepo=$(K8GB_IMAGE_REPO)
 deploy-second-k8gb: deploy-gslb-operator deploy-local-ingress
 
 .PHONY: deploy-full-local-setup
