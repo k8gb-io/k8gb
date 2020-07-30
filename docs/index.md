@@ -1,4 +1,4 @@
-# Oh My GLB
+# K8GB
 
 A Global Server Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context. The term GSLB, as used in this context, obeys the same principles as defined in the following sources:
 
