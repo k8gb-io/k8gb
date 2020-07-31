@@ -19,7 +19,7 @@ func oldEdgeTimestamp(threshold string) string {
 }
 
 var records = map[string][]string{
-	"localtargets.app3.cloud.example.com.": []string{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
+	"localtargets-app3.cloud.example.com.": []string{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
 	"test-gslb-heartbeat-eu.example.com.":  []string{oldEdgeTimestamp("10m")},
 	"test-gslb-heartbeat-za.example.com.":  []string{oldEdgeTimestamp("3m")},
 }
