@@ -90,7 +90,7 @@ func getExternalTargets(gslb *k8gbv1beta1.Gslb, host string) ([]string, error) {
 	for _, cluster := range extGslbClusters {
 		log.Info(fmt.Sprintf("Adding external Gslb targets from %s cluster...", cluster))
 		g := new(dns.Msg)
-		host = fmt.Sprintf("localtargets.%s.", host) //Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
+		host = fmt.Sprintf("localtargets-%s.", host) //Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
 		g.SetQuestion(host, dns.TypeA)
 
 		localTestDNSinject := os.Getenv("OVERRIDE_WITH_FAKE_EXT_DNS")
@@ -142,7 +142,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DN
 
 		if health == "Healthy" {
 			finalTargets = append(finalTargets, localTargets...)
-			localTargetsHost := fmt.Sprintf("localtargets.%s", host)
+			localTargetsHost := fmt.Sprintf("localtargets-%s", host)
 			dnsRecord := &externaldns.Endpoint{
 				DNSName:    localTargetsHost,
 				RecordTTL:  ttl,
@@ -169,6 +169,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DN
 					// If cluster is Primary and Unhealthy return Secondary external targets
 					if health != "Healthy" {
 						finalTargets = externalTargets
+						log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Primary. Primary %s cluster is healty, targets are %v", gslb.Name, clusterGeoTag, finalTargets))
 					}
 				} else {
 					// If cluster is Secondary and Primary external cluster is Healthy
@@ -176,10 +177,13 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DN
 					// Return own targets by default.
 					if len(externalTargets) > 0 {
 						finalTargets = externalTargets
+						log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Secondary. Primary %s cluster is healty, targets are %v", gslb.Name, clusterGeoTag, finalTargets))
 					}
 				}
 			}
 		}
+
+		log.Info(fmt.Sprintf("Final target list for %s Gslb: %v", gslb.Name, finalTargets))
 
 		if len(finalTargets) > 0 {
 			dnsRecord := &externaldns.Endpoint{

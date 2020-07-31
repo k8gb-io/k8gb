@@ -300,7 +300,7 @@ func TestGslbController(t *testing.T) {
 
 		want := []*externaldns.Endpoint{
 			{
-				DNSName:    "localtargets.app3.cloud.example.com",
+				DNSName:    "localtargets-app3.cloud.example.com",
 				RecordTTL:  30,
 				RecordType: "A",
 				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
@@ -386,7 +386,7 @@ func TestGslbController(t *testing.T) {
 
 		want := []*externaldns.Endpoint{
 			{
-				DNSName:    "localtargets.app3.cloud.example.com",
+				DNSName:    "localtargets-app3.cloud.example.com",
 				RecordTTL:  30,
 				RecordType: "A",
 				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
@@ -515,7 +515,7 @@ func TestGslbController(t *testing.T) {
 
 		want := []*externaldns.Endpoint{
 			{
-				DNSName:    "localtargets.app3.cloud.example.com",
+				DNSName:    "localtargets-app3.cloud.example.com",
 				RecordTTL:  30,
 				RecordType: "A",
 				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
@@ -576,7 +576,7 @@ func TestGslbController(t *testing.T) {
 
 		want := []*externaldns.Endpoint{
 			{
-				DNSName:    "localtargets.app3.cloud.example.com",
+				DNSName:    "localtargets-app3.cloud.example.com",
 				RecordTTL:  30,
 				RecordType: "A",
 				Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
