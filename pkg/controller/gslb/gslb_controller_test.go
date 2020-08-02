@@ -682,7 +682,7 @@ func TestGslbController(t *testing.T) {
 		}
 
 		_, err = r.Reconcile(req)
-		log.Info(fmt.Sprintf("got an error from controler: %s", err))
+		log.Info(fmt.Sprintf("got an error from controller: %s", err))
 		if err == nil {
 			t.Errorf("expected controller to detect Ingress hostname and edgeDNSZone mismatch")
 		}
