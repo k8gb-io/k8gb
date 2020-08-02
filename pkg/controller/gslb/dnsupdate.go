@@ -143,7 +143,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DN
 		var finalTargets []string
 
 		if !strings.Contains(host, edgeDNSZone) {
-			return nil, fmt.Errorf("ingress host %s is not matching delegated zone %s", host, edgeDNSZone)
+			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", host, edgeDNSZone)
 		}
 
 		if health == "Healthy" {
