@@ -2,6 +2,7 @@ package gslb
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -661,6 +662,31 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("got: '%s' GeoTag status, want:'%s'", got, want)
 		}
 	})
+
+	t.Run("Detects Ingress hostname mismatch", func(t *testing.T) {
+		defer func() {
+			err := os.Setenv("EDGE_DNS_ZONE", "example.com")
+			if err != nil {
+				t.Fatalf("Can't set env var: (%v)", err)
+			}
+		}()
+		err := os.Setenv("EDGE_DNS_ZONE", "otherdnszone.com")
+		if err != nil {
+			t.Fatalf("Can't set env var: (%v)", err)
+		}
+		req := reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Name:      gslb.Name,
+				Namespace: gslb.Namespace,
+			},
+		}
+
+		_, err = r.Reconcile(req)
+		log.Info(fmt.Sprintf("got an error from controler: %s", err))
+		if err == nil {
+			t.Errorf("expected controller to detect Ingress hostname and edgeDNSZone mismatch")
+		}
+	})
 }
 
 func createHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *k8gbv1beta1.Gslb) {
@@ -794,7 +820,7 @@ func reconcileAndUpdateGslb(t *testing.T,
 	// resources' Status.
 	res, err := r.Reconcile(req)
 	if err != nil {
-		t.Fatalf("reconcile: (%v)", err)
+		return
 	}
 	if res != (reconcile.Result{RequeueAfter: time.Second * 30}) {
 		t.Error("reconcile did not return Result with Requeue")

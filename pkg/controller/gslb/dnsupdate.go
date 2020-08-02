@@ -137,8 +137,14 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DN
 		return nil, err
 	}
 
+	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
+
 	for host, health := range serviceHealth {
 		var finalTargets []string
+
+		if !strings.Contains(host, edgeDNSZone) {
+			return nil, fmt.Errorf("ingress host %s is not matching delegated zone %s", host, edgeDNSZone)
+		}
 
 		if health == "Healthy" {
 			finalTargets = append(finalTargets, localTargets...)
