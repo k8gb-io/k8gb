@@ -26,7 +26,7 @@ spec:
       serviceAccountName: k8gb
       containers:
         - name: k8gb
-          image: {{ .Values.k8gb.imageRepo }}:v{{ .Chart.AppVersion }}
+          image: {{ .Values.k8gb.imageRepo }}:v{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
           command:
           - k8gb
           imagePullPolicy: Always
@@ -80,4 +80,3 @@ spec:
                   name: external-dns
                   key: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
             {{ end }}
-
