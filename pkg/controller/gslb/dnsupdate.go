@@ -183,7 +183,7 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DN
 					// then return Primary external targets.
 					// Return own targets by default.
 					finalTargets = externalTargets
-					log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Secondary. Primary %s cluster is healthy, targets are %v",
+					log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Secondary. Workload on primary %s cluster is healthy, targets are %v",
 						gslb.Name, gslb.Spec.Strategy.PrimaryGeoTag, finalTargets))
 				}
 			}
