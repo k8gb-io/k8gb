@@ -175,18 +175,20 @@ func (r *ReconcileGslb) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DN
 					// If cluster is Primary and Unhealthy return Secondary external targets
 					if health != "Healthy" {
 						finalTargets = externalTargets
-						log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Primary. Primary %s cluster is healty, targets are %v", gslb.Name, clusterGeoTag, finalTargets))
+						log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Primary. Workload on primary %s cluster is unhealthy, targets are %v",
+							gslb.Name, gslb.Spec.Strategy.PrimaryGeoTag, finalTargets))
 					}
 				} else {
 					// If cluster is Secondary and Primary external cluster is Healthy
 					// then return Primary external targets.
 					// Return own targets by default.
-					if len(externalTargets) > 0 {
-						finalTargets = externalTargets
-						log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Secondary. Primary %s cluster is healty, targets are %v", gslb.Name, clusterGeoTag, finalTargets))
-					}
+					finalTargets = externalTargets
+					log.Info(fmt.Sprintf("Executing failover strategy for %s Gslb on Secondary. Workload on primary %s cluster is healthy, targets are %v",
+						gslb.Name, gslb.Spec.Strategy.PrimaryGeoTag, finalTargets))
 				}
 			}
+		} else {
+			log.Info(fmt.Sprintf("No external targets have been found for host %s", host))
 		}
 
 		log.Info(fmt.Sprintf("Final target list for %s Gslb: %v", gslb.Name, finalTargets))
