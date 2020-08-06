@@ -24,3 +24,6 @@ dependencies:
   - name: coredns
     repository: https://kubernetes-charts.storage.googleapis.com
     version: 1.8.4
+  - name: etcd-operator
+    repository: https://kubernetes-charts.storage.googleapis.com
+    version: 0.11.0
