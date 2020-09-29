@@ -1,0 +1,7 @@
+domain: absa.oss
+layout: go.kubebuilder.io/v2
+projectName: k8gb
+repo: github.com/AbsaOSS/k8gb
+version: 1-beta
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}
