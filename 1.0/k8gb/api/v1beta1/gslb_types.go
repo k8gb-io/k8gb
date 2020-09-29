@@ -17,25 +17,41 @@ limitations under the License.
 package v1beta1
 
 import (
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// Strategy defines Gslb behavior
+// +k8s:openapi-gen=true
+type Strategy struct {
+	Type          string `json:"type"`
+	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
+	// Defines DNS record TTL in seconds
+	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty"`
+	// Split brain TXT record expiration in seconds
+	SplitBrainThresholdSeconds int `json:"splitBrainThresholdSeconds,omitempty"`
+}
+
 // GslbSpec defines the desired state of Gslb
+// +k8s:openapi-gen=true
 type GslbSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Gslb. Edit Gslb_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Ingress  v1beta1.IngressSpec `json:"ingress"`
+	Strategy Strategy            `json:"strategy"`
 }
 
 // GslbStatus defines the observed state of Gslb
 type GslbStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	ServiceHealth  map[string]string   `json:"serviceHealth"`
+	HealthyRecords map[string][]string `json:"healthyRecords"`
+	GeoTag         string              `json:"geoTag"`
 }
 
 // +kubebuilder:object:root=true
