@@ -18,8 +18,9 @@ package controllers
 
 import (
 	"context"
+	"time"
 
-	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,9 +30,15 @@ import (
 
 // GslbReconciler reconciles a Gslb object
 type GslbReconciler struct {
-	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	// New generated fields
+	//client.Client
+	//Log    logr.Logger
+	//Scheme *runtime.Scheme
+	// Olde migrated fields
+	client      client.Client
+	scheme      *runtime.Scheme
+	config      *depresolver.Config
+	depResolver *depresolver.DependencyResolver
 }
 
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
@@ -41,9 +48,104 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("gslb", req.NamespacedName)
 
-	// your logic here
+	// Fetch the Gslb instance
+	gslb := &k8gbv1beta1.Gslb{}
+	err := r.client.Get(context.TODO(), request.NamespacedName, gslb)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			return reconcile.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return reconcile.Result{}, err
+	}
 
-	return ctrl.Result{}, nil
+	var result *reconcile.Result
+
+	err = r.depResolver.ResolveGslbSpec(gslb)
+	if err != nil {
+		log.Error(err, "resolving spec.strategy")
+		return reconcile.Result{}, err
+	}
+	// == Finalizer business ==
+
+	// Check if the Gslb instance is marked to be deleted, which is
+	// indicated by the deletion timestamp being set.
+	isGslbMarkedToBeDeleted := gslb.GetDeletionTimestamp() != nil
+	if isGslbMarkedToBeDeleted {
+		if contains(gslb.GetFinalizers(), gslbFinalizer) {
+			// Run finalization logic for gslbFinalizer. If the
+			// finalization logic fails, don't remove the finalizer so
+			// that we can retry during the next reconciliation.
+			if err := r.finalizeGslb(gslb); err != nil {
+				return reconcile.Result{}, err
+			}
+
+			// Remove gslbFinalizer. Once all finalizers have been
+			// removed, the object will be deleted.
+			gslb.SetFinalizers(remove(gslb.GetFinalizers(), gslbFinalizer))
+			err := r.client.Update(context.TODO(), gslb)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+		}
+		return reconcile.Result{}, nil
+	}
+
+	// Add finalizer for this CR
+	if !contains(gslb.GetFinalizers(), gslbFinalizer) {
+		if err := r.addFinalizer(gslb); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
+	// == Ingress ==========
+	ingress, err := r.gslbIngress(gslb)
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
+	result, err = r.ensureIngress(
+		request,
+		gslb,
+		ingress)
+	if result != nil {
+		return *result, err
+	}
+
+	// == external-dns dnsendpoints CRs ==
+	dnsEndpoint, err := r.gslbDNSEndpoint(gslb)
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
+	result, err = r.ensureDNSEndpoint(
+		request,
+		gslb,
+		dnsEndpoint)
+	if result != nil {
+		return *result, err
+	}
+
+	// == handle delegated zone in Edge DNS
+
+	result, err = r.configureZoneDelegation(gslb)
+	if result != nil {
+		return *result, err
+	}
+
+	// == Status =
+	err = r.updateGslbStatus(gslb)
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
+	return ctrl.Result{RequeueAfter: time.Second * time.Duration(r.config.ReconcileRequeueSeconds)}, nil
 }
 
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
