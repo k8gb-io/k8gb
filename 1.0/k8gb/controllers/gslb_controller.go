@@ -20,6 +20,8 @@ import (
 	"context"
 	"time"
 
+	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -151,5 +153,54 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8gbv1beta1.Gslb{}).
+		Owns(&v1beta1.Ingress{}).
+		Owns(&externaldns.DNSEndpoint{}).
 		Complete(r)
+
+	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
+	mapFn := handler.ToRequestsFunc(
+		func(a handler.MapObject) []reconcile.Request {
+			gslbList := &k8gbv1beta1.GslbList{}
+			opts := []client.ListOption{
+				client.InNamespace(a.Meta.GetNamespace()),
+			}
+			c := mgr.GetClient()
+			err := c.List(context.TODO(), gslbList, opts...)
+			if err != nil {
+				log.Info("Can't fetch gslb objects")
+				return nil
+			}
+			gslbName := ""
+			for _, gslb := range gslbList.Items {
+				for _, rule := range gslb.Spec.Ingress.Rules {
+					for _, path := range rule.HTTP.Paths {
+						if path.Backend.ServiceName == a.Meta.GetName() {
+							gslbName = gslb.Name
+						}
+					}
+				}
+			}
+			if len(gslbName) > 0 {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      gslbName,
+						Namespace: a.Meta.GetNamespace(),
+					}},
+				}
+			}
+			return nil
+		})
+
+	// Watch for Endpoints that are not controlled directly
+	err = c.Watch(
+		&source.Kind{Type: &corev1.Endpoints{}},
+		&handler.EnqueueRequestsFromMapFunc{
+			ToRequests: mapFn,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
