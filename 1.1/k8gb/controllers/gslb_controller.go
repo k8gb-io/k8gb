@@ -22,11 +22,18 @@ import (
 
 	"github.com/AbsaOSS/k8gb/controllers/internal/depresolver"
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	types "k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+	externaldns "sigs.k8s.io/external-dns/endpoint"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
@@ -159,7 +166,47 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
+	mapFn := handler.ToRequestsFunc(
+		func(a handler.MapObject) []reconcile.Request {
+			gslbList := &k8gbv1beta1.GslbList{}
+			opts := []client.ListOption{
+				client.InNamespace(a.Meta.GetNamespace()),
+			}
+			c := mgr.GetClient()
+			err := c.List(context.TODO(), gslbList, opts...)
+			if err != nil {
+				log.Info("Can't fetch gslb objects")
+				return nil
+			}
+			gslbName := ""
+			for _, gslb := range gslbList.Items {
+				for _, rule := range gslb.Spec.Ingress.Rules {
+					for _, path := range rule.HTTP.Paths {
+						if path.Backend.ServiceName == a.Meta.GetName() {
+							gslbName = gslb.Name
+						}
+					}
+				}
+			}
+			if len(gslbName) > 0 {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      gslbName,
+						Namespace: a.Meta.GetNamespace(),
+					}},
+				}
+			}
+			return nil
+		})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8gbv1beta1.Gslb{}).
+		Owns(&v1beta1.Ingress{}).
+		Owns(&externaldns.DNSEndpoint{}).
+		Watches(&source.Kind{Type: &corev1.Endpoints{}},
+			&handler.EnqueueRequestsFromMapFunc{
+				ToRequests: mapFn}).
 		Complete(r)
+
 }
