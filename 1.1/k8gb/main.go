@@ -21,26 +21,29 @@ import (
 	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/scheme"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers"
+	externaldns "sigs.k8s.io/external-dns/endpoint"
 	// +kubebuilder:scaffold:imports
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	runtimescheme = runtime.NewScheme()
+	setupLog      = ctrl.Log.WithName("setup")
 )
 
 func init() {
-	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(clientgoscheme.AddToScheme(runtimescheme))
 
-	utilruntime.Must(k8gbv1beta1.AddToScheme(scheme))
+	utilruntime.Must(k8gbv1beta1.AddToScheme(runtimescheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -56,7 +59,7 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:             scheme,
+		Scheme:             runtimescheme,
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
 		LeaderElection:     enableLeaderElection,
@@ -64,6 +67,17 @@ func main() {
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	setupLog.Info("Registering Components.")
+
+	// Add external-dns DNSEndpoints resource
+	// https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md#adding-3rd-party-resources-to-your-operator
+	schemeBuilder := &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}}
+	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
+	if err := schemeBuilder.AddToScheme(mgr.GetScheme()); err != nil {
+		setupLog.Error(err, "")
 		os.Exit(1)
 	}
 
