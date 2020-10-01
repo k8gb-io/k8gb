@@ -22,7 +22,7 @@ func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, 
 		Spec: gslb.Spec.Ingress,
 	}
 
-	err := controllerutil.SetControllerReference(gslb, ingress, r.scheme)
+	err := controllerutil.SetControllerReference(gslb, ingress, r.Scheme)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (r *GslbReconciler) ensureIngress(request reconcile.Request,
 	i *v1beta1.Ingress,
 ) (*reconcile.Result, error) {
 	found := &v1beta1.Ingress{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{
+	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      instance.Name,
 		Namespace: instance.Namespace,
 	}, found)
@@ -42,7 +42,7 @@ func (r *GslbReconciler) ensureIngress(request reconcile.Request,
 
 		// Create the service
 		log.Info("Creating a new Ingress", "Ingress.Namespace", i.Namespace, "Ingress.Name", i.Name)
-		err = r.client.Create(context.TODO(), i)
+		err = r.Create(context.TODO(), i)
 
 		if err != nil {
 			// Creation failed
@@ -60,7 +60,7 @@ func (r *GslbReconciler) ensureIngress(request reconcile.Request,
 	// Update existing object with new spec and annotations
 	found.Spec = i.Spec
 	found.Annotations = i.Annotations
-	err = r.client.Update(context.TODO(), found)
+	err = r.Update(context.TODO(), found)
 
 	if err != nil {
 		// Update failed

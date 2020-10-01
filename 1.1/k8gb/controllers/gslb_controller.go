@@ -45,8 +45,6 @@ type GslbReconciler struct {
 	client.Client
 	Log         logr.Logger
 	Scheme      *runtime.Scheme
-	client      client.Client
-	scheme      *runtime.Scheme
 	config      *depresolver.Config
 	depResolver *depresolver.DependencyResolver
 }
@@ -62,7 +60,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
-	err := r.client.Get(context.TODO(), req.NamespacedName, gslb)
+	err := r.Get(context.TODO(), req.NamespacedName, gslb)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -98,7 +96,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			// Remove gslbFinalizer. Once all finalizers have been
 			// removed, the object will be deleted.
 			gslb.SetFinalizers(remove(gslb.GetFinalizers(), gslbFinalizer))
-			err := r.client.Update(context.TODO(), gslb)
+			err := r.Update(context.TODO(), gslb)
 			if err != nil {
 				return ctrl.Result{}, err
 			}

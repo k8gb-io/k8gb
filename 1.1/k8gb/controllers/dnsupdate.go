@@ -28,7 +28,7 @@ func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, er
 
 	gslbIngress := &v1beta1.Ingress{}
 
-	err := r.client.Get(context.TODO(), nn, gslbIngress)
+	err := r.Get(context.TODO(), nn, gslbIngress)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info(fmt.Sprintf("Can't find gslb Ingress: %s", gslb.Name))
@@ -216,7 +216,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		Spec: dnsEndpointSpec,
 	}
 
-	err = controllerutil.SetControllerReference(gslb, dnsEndpoint, r.scheme)
+	err = controllerutil.SetControllerReference(gslb, dnsEndpoint, r.Scheme)
 	if err != nil {
 		return nil, err
 	}
@@ -467,7 +467,7 @@ func (r *GslbReconciler) ensureDNSEndpoint(request reconcile.Request,
 	i *externaldns.DNSEndpoint,
 ) (*reconcile.Result, error) {
 	found := &externaldns.DNSEndpoint{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{
+	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      i.Name,
 		Namespace: gslb.Namespace,
 	}, found)
@@ -475,7 +475,7 @@ func (r *GslbReconciler) ensureDNSEndpoint(request reconcile.Request,
 
 		// Create the DNSEndpoint
 		log.Info(fmt.Sprintf("Creating a new DNSEndpoint:\n %s", prettyPrint(i)))
-		err = r.client.Create(context.TODO(), i)
+		err = r.Create(context.TODO(), i)
 
 		if err != nil {
 			// Creation failed
@@ -492,7 +492,7 @@ func (r *GslbReconciler) ensureDNSEndpoint(request reconcile.Request,
 
 	// Update existing object with new spec
 	found.Spec = i.Spec
-	err = r.client.Update(context.TODO(), found)
+	err = r.Update(context.TODO(), found)
 
 	if err != nil {
 		// Update failed

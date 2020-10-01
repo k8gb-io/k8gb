@@ -76,7 +76,7 @@ func TestGslbController(t *testing.T) {
 		t.Fatalf("config error: (%v)", err)
 	}
 	// Create a GslbReconciler object with the scheme and fake client.
-	r := &GslbReconciler{client: cl, scheme: s, config: config, depResolver: depresolver.NewDependencyResolver(context.TODO(), cl)}
+	r := &GslbReconciler{cl, nil, s, config, depresolver.NewDependencyResolver(context.TODO(), cl)}
 	// Mock request to simulate Reconcile() being called on an event for a
 	// watched resource .
 	req := reconcile.Request{
@@ -99,7 +99,6 @@ func TestGslbController(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get expected ingress: (%v)", err)
 	}
-
 	// Reconcile again so Reconcile() checks services and updates the Gslb
 	// resources' Status.
 	reconcileAndUpdateGslb(t, r, req, cl, gslb)

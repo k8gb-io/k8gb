@@ -37,7 +37,7 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 		return err
 	}
 
-	err = r.client.Status().Update(context.TODO(), gslb)
+	err = r.Status().Update(context.TODO(), gslb)
 	return err
 }
 
@@ -50,7 +50,7 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 				Namespace: gslb.Namespace,
 				Name:      path.Backend.ServiceName,
 			}
-			err := r.client.Get(context.TODO(), finder, service)
+			err := r.Get(context.TODO(), finder, service)
 			if err != nil {
 				if errors.IsNotFound(err) {
 					serviceHealth[rule.Host] = "NotFound"
@@ -66,7 +66,7 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 				Namespace: gslb.Namespace,
 			}
 
-			err = r.client.Get(context.TODO(), nn, endpoints)
+			err = r.Get(context.TODO(), nn, endpoints)
 			if err != nil {
 				return serviceHealth, err
 			}
@@ -93,7 +93,7 @@ func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][
 		Namespace: gslb.Namespace,
 	}
 
-	err := r.client.Get(context.TODO(), nn, dnsEndpoint)
+	err := r.Get(context.TODO(), nn, dnsEndpoint)
 	if err != nil {
 		return nil, err
 	}

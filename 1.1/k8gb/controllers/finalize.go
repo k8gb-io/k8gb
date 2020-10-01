@@ -68,7 +68,7 @@ func (r *GslbReconciler) addFinalizer(gslb *k8gbv1beta1.Gslb) error {
 	gslb.SetFinalizers(append(gslb.GetFinalizers(), gslbFinalizer))
 
 	// Update CR
-	err := r.client.Update(context.TODO(), gslb)
+	err := r.Update(context.TODO(), gslb)
 	if err != nil {
 		log.Error(err, "Failed to update Gslb with finalizer")
 		return err
