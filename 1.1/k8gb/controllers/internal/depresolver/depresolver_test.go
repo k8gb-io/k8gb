@@ -260,7 +260,7 @@ func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {
 	}
 	// Register operator types with the runtime scheme.
 	s := scheme.Scheme
-	//	s.AddKnownTypes(k8gbv1beta1.SchemeGroupVersion, gslb)
+	s.AddKnownTypes(k8gbv1beta1.GroupVersion, gslb)
 	// Register external-dns DNSEndpoint CRD
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	cl := fake.NewFakeClientWithScheme(s, objs...)
