@@ -27,6 +27,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/AbsaOSS/k8gb/controllers/internal/depresolver"
+
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
 

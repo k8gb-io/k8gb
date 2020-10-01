@@ -39,7 +39,7 @@ func Add(mgr manager.Manager) error {
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) (reconcile.Reconciler,error) {
+func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
 	var err error
 	reconciler := new(ReconcileGslb)
 	reconciler.client = mgr.GetClient()
@@ -47,10 +47,10 @@ func newReconciler(mgr manager.Manager) (reconcile.Reconciler,error) {
 	reconciler.depResolver = depresolver.NewDependencyResolver(context.TODO(), reconciler.client)
 	reconciler.config, err = reconciler.depResolver.ResolveOperatorConfig()
 	if err != nil {
-		log.Error(err,"reading config env variables")
-		return nil,err
+		log.Error(err, "reading config env variables")
+		return nil, err
 	}
-	return reconciler,nil
+	return reconciler, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -175,7 +175,7 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 
 	err = r.depResolver.ResolveGslbSpec(gslb)
 	if err != nil {
-		log.Error(err,"resolving spec.strategy")
+		log.Error(err, "resolving spec.strategy")
 		return reconcile.Result{}, err
 	}
 	// == Finalizer business ==
@@ -258,4 +258,5 @@ func (r *ReconcileGslb) Reconcile(request reconcile.Request) (reconcile.Result, 
 	// Everything went fine, requeue after some time to catch up
 	// with external Gslb status
 	// TODO: potentially enhance with smarter reaction to external Event
-	return reconcile.Result{RequeueAfter: time.Second * time.Duration(r.config.ReconcileRequeueSeconds)}, nil}
+	return reconcile.Result{RequeueAfter: time.Second * time.Duration(r.config.ReconcileRequeueSeconds)}, nil
+}

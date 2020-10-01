@@ -3,6 +3,8 @@ package depresolver
 import (
 	"fmt"
 	"regexp"
+
+	"github.com/AbsaOSS/k8gb/controllers/internal/env"
 )
 
 const (

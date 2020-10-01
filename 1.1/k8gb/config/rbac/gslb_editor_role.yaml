@@ -1,0 +1,24 @@
+# permissions for end users to edit gslbs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gslb-editor-role
+rules:
+- apiGroups:
+  - k8gb.absa.oss
+  resources:
+  - gslbs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - k8gb.absa.oss
+  resources:
+  - gslbs/status
+  verbs:
+  - get
