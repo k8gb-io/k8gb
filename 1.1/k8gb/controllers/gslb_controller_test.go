@@ -48,6 +48,10 @@ func TestGslbController(t *testing.T) {
 		t.Fatalf("Can't setup env var: (%v)", err)
 	}
 
+	_, err = os.Stat(crSampleYaml)
+	if os.IsNotExist(err) {
+		t.Fatalf("Sample CR yaml file not found at: %s", crSampleYaml)
+	}
 	gslbYaml, err := ioutil.ReadFile(crSampleYaml)
 	if err != nil {
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
