@@ -10,7 +10,7 @@ import (
 	"time"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"github.com/AbsaOSS/k8gb/controllers/internal/depresolver"
+	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 	"github.com/prometheus/client_golang/prometheus"
@@ -76,7 +76,13 @@ func TestGslbController(t *testing.T) {
 		t.Fatalf("config error: (%v)", err)
 	}
 	// Create a GslbReconciler object with the scheme and fake client.
-	r := &GslbReconciler{cl, nil, s, config, depresolver.NewDependencyResolver(context.TODO(), cl)}
+	r := &GslbReconciler{
+		Client: cl,
+		Log:    nil,
+		Scheme: s,
+	}
+	r.DepResolver = depresolver.NewDependencyResolver(context.TODO(), r.Client)
+	r.Config = config
 	// Mock request to simulate Reconcile() being called on an event for a
 	// watched resource .
 	req := reconcile.Request{
@@ -649,7 +655,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 		resolver := depresolver.NewDependencyResolver(context.TODO(), cl)
-		r.config, err = resolver.ResolveOperatorConfig()
+		r.Config, err = resolver.ResolveOperatorConfig()
 		if err != nil {
 			t.Fatalf("config error: (%v)", err)
 		}

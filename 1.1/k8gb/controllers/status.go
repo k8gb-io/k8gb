@@ -30,7 +30,7 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 		return err
 	}
 
-	gslb.Status.GeoTag = r.config.ClusterGeoTag
+	gslb.Status.GeoTag = r.Config.ClusterGeoTag
 
 	err = r.updateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
 	if err != nil {

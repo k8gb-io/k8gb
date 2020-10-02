@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/AbsaOSS/k8gb/controllers/internal/depresolver"
+	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -45,8 +45,8 @@ type GslbReconciler struct {
 	client.Client
 	Log         logr.Logger
 	Scheme      *runtime.Scheme
-	config      *depresolver.Config
-	depResolver *depresolver.DependencyResolver
+	Config      *depresolver.Config
+	DepResolver *depresolver.DependencyResolver
 }
 
 const gslbFinalizer = "finalizer.k8gb.absa.oss"
@@ -74,7 +74,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	var result *ctrl.Result
 
-	err = r.depResolver.ResolveGslbSpec(gslb)
+	err = r.DepResolver.ResolveGslbSpec(gslb)
 	if err != nil {
 		log.Error(err, "resolving spec.strategy")
 		return ctrl.Result{}, err
@@ -160,7 +160,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// with external Gslb status
 	// TODO: potentially enhance with smarter reaction to external Event
 
-	return ctrl.Result{RequeueAfter: time.Second * time.Duration(r.config.ReconcileRequeueSeconds)}, nil
+	return ctrl.Result{RequeueAfter: time.Second * time.Duration(r.Config.ReconcileRequeueSeconds)}, nil
 }
 
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {

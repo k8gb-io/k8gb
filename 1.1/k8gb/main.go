@@ -17,8 +17,11 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
+
+	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -81,11 +84,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.GslbReconciler{
+	reconciler := &controllers.GslbReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("Gslb"),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}
+	reconciler.DepResolver = depresolver.NewDependencyResolver(context.TODO(), reconciler.Client)
+	reconciler.Config, err = reconciler.DepResolver.ResolveOperatorConfig()
+	if err != nil {
+		setupLog.Error(err, "reading config env variables")
+	}
+	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Gslb")
 		os.Exit(1)
 	}
