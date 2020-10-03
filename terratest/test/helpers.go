@@ -79,7 +79,7 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 
 	helmRepoAdd := shell.Command{
 		Command: "helm",
-		Args:    []string{"repo", "add", "podinfo", "https://stefanprodan.github.io/podinfo"},
+		Args:    []string{"repo", "add", "--force-update", "podinfo", "https://stefanprodan.github.io/podinfo"},
 	}
 
 	helmRepoUpdate := shell.Command{
