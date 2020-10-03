@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  "53": k8gb/k8gb-coredns:53
-kind: ConfigMap
-metadata:
-  name: udp-services
-  namespace: {{ .Values.k8gb.ingressNamespace }}

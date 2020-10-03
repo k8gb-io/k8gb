@@ -1,4 +1,4 @@
-package gslb
+package controllers
 
 import (
 	"context"
@@ -9,11 +9,10 @@ import (
 	"testing"
 	"time"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/pkg/apis/k8gb/v1beta1"
-	"github.com/AbsaOSS/k8gb/pkg/controller/gslb/internal/depresolver"
-	"github.com/AbsaOSS/k8gb/pkg/controller/gslb/internal/utils"
+	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
-	externaldns "github.com/kubernetes-incubator/external-dns/endpoint"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	corev1 "k8s.io/api/core/v1"
@@ -24,14 +23,16 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	zap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-var crSampleYaml = "../../../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
+var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
 
 func TestGslbController(t *testing.T) {
 	// Start fakedns server for external dns tests
@@ -47,6 +48,10 @@ func TestGslbController(t *testing.T) {
 		t.Fatalf("Can't setup env var: (%v)", err)
 	}
 
+	_, err = os.Stat(crSampleYaml)
+	if os.IsNotExist(err) {
+		t.Fatalf("Sample CR yaml file not found at: %s", crSampleYaml)
+	}
 	gslbYaml, err := ioutil.ReadFile(crSampleYaml)
 	if err != nil {
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
@@ -65,7 +70,7 @@ func TestGslbController(t *testing.T) {
 
 	// Register operator types with the runtime scheme.
 	s := scheme.Scheme
-	s.AddKnownTypes(k8gbv1beta1.SchemeGroupVersion, gslb)
+	s.AddKnownTypes(k8gbv1beta1.GroupVersion, gslb)
 	// Register external-dns DNSEndpoint CRD
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	// Create a fake client to mock API calls.
@@ -75,8 +80,14 @@ func TestGslbController(t *testing.T) {
 	if err != nil {
 		t.Fatalf("config error: (%v)", err)
 	}
-	// Create a ReconcileGslb object with the scheme and fake client.
-	r := &ReconcileGslb{client: cl, scheme: s, config: config, depResolver: depresolver.NewDependencyResolver(context.TODO(), cl)}
+	// Create a GslbReconciler object with the scheme and fake client.
+	r := &GslbReconciler{
+		Client: cl,
+		Log:    ctrl.Log.WithName("setup"),
+		Scheme: s,
+	}
+	r.DepResolver = depresolver.NewDependencyResolver(context.TODO(), r.Client)
+	r.Config = config
 	// Mock request to simulate Reconcile() being called on an event for a
 	// watched resource .
 	req := reconcile.Request{
@@ -99,7 +110,6 @@ func TestGslbController(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get expected ingress: (%v)", err)
 	}
-
 	// Reconcile again so Reconcile() checks services and updates the Gslb
 	// resources' Status.
 	reconcileAndUpdateGslb(t, r, req, cl, gslb)
@@ -118,6 +128,7 @@ func TestGslbController(t *testing.T) {
 		unhealthyHost := "app2.cloud.example.com"
 
 		createUnhealthyService(t, serviceName, cl, gslb)
+		defer deleteUnhealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		expectedServiceStatus := "Unhealthy"
@@ -126,7 +137,6 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("expected %s service status to be %s, but got %s", unhealthyHost, expectedServiceStatus, actualServiceStatus)
 		}
 
-		deleteUnhealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 	})
@@ -135,6 +145,7 @@ func TestGslbController(t *testing.T) {
 		serviceName := "frontend-podinfo"
 
 		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		expectedServiceStatus := "Healthy"
@@ -143,7 +154,6 @@ func TestGslbController(t *testing.T) {
 		if expectedServiceStatus != actualServiceStatus {
 			t.Errorf("expected %s service status to be %s, but got %s", healthyHost, expectedServiceStatus, actualServiceStatus)
 		}
-		deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 	})
@@ -166,7 +176,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected gslb: (%v)", err)
 		}
 		healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus})
-		expectedHostsMetric := .0
+		expectedHostsMetric := 1.
 		actualHostsMetric := testutil.ToFloat64(healthyHosts)
 		if !reflect.DeepEqual(expectedHostsMetric, actualHostsMetric) {
 			t.Errorf("expected %v managed hosts with Healthy status, but got %v", expectedHostsMetric, actualHostsMetric)
@@ -174,6 +184,7 @@ func TestGslbController(t *testing.T) {
 
 		serviceName := "frontend-podinfo"
 		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		healthyHosts = ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus})
@@ -182,7 +193,6 @@ func TestGslbController(t *testing.T) {
 		if !reflect.DeepEqual(expectedHostsMetric, actualHostsMetric) {
 			t.Errorf("expected %v managed hosts with Healthy status, but got %v", expectedHostsMetric, actualHostsMetric)
 		}
-		deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 	})
 
@@ -200,6 +210,7 @@ func TestGslbController(t *testing.T) {
 
 		serviceName := "unhealthy-app"
 		createUnhealthyService(t, serviceName, cl, gslb)
+		defer deleteUnhealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 		unhealthyHosts = ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus})
@@ -208,7 +219,6 @@ func TestGslbController(t *testing.T) {
 		if !reflect.DeepEqual(expectedHostsMetricCount, actualHostsMetricCount) {
 			t.Errorf("expected %v managed hosts with Unhealthy status, but got %v", expectedHostsMetricCount, actualHostsMetricCount)
 		}
-		deleteUnhealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 	})
 
@@ -218,7 +228,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected gslb: (%v)", err)
 		}
 		unknownHosts, _ := ingressHostsPerStatusMetric.GetMetricWith(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus})
-		expectedHostsMetricCount := 3.0
+		expectedHostsMetricCount := 2.0
 		actualHostsMetricCount := testutil.ToFloat64(unknownHosts)
 		if !reflect.DeepEqual(expectedHostsMetricCount, actualHostsMetricCount) {
 			t.Errorf("expected %v managed hosts with NotFound status, but got %v", expectedHostsMetricCount, actualHostsMetricCount)
@@ -232,10 +242,15 @@ func TestGslbController(t *testing.T) {
 		}
 		serviceName := "frontend-podinfo"
 		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
 		ingressIPs := []corev1.LoadBalancerIngress{
 			{IP: "10.0.0.1"},
 			{IP: "10.0.0.2"},
 			{IP: "10.0.0.3"},
+		}
+		err = cl.Get(context.TODO(), req.NamespacedName, ingress)
+		if err != nil {
+			t.Fatalf("Failed to get expected ingress: (%v)", err)
 		}
 		ingress.Status.LoadBalancer.Ingress = append(ingress.Status.LoadBalancer.Ingress, ingressIPs...)
 		err := cl.Status().Update(context.TODO(), ingress)
@@ -249,7 +264,6 @@ func TestGslbController(t *testing.T) {
 		if !reflect.DeepEqual(expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount) {
 			t.Errorf("expected %v healthy records, but got %v", expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount)
 		}
-		deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		ingress.Status.LoadBalancer.Ingress = nil
 	})
@@ -274,20 +288,8 @@ func TestGslbController(t *testing.T) {
 		serviceName := "frontend-podinfo"
 
 		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
-
-		ingressIPs := []corev1.LoadBalancerIngress{
-			{IP: "10.0.0.1"},
-			{IP: "10.0.0.2"},
-			{IP: "10.0.0.3"},
-		}
-
-		ingress.Status.LoadBalancer.Ingress = append(ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-
-		err := cl.Status().Update(context.TODO(), ingress)
-		if err != nil {
-			t.Fatalf("Failed to update gslb Ingress Address: (%v)", err)
-		}
 
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
@@ -318,7 +320,6 @@ func TestGslbController(t *testing.T) {
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
-		deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 	})
 
@@ -369,6 +370,7 @@ func TestGslbController(t *testing.T) {
 	t.Run("Can get external targets from k8gb in another location", func(t *testing.T) {
 		serviceName := "frontend-podinfo"
 		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		err := os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
 		if err != nil {
@@ -416,7 +418,6 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
-		deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 	})
 
@@ -486,6 +487,7 @@ func TestGslbController(t *testing.T) {
 	t.Run("Returns own records using Failover strategy when Primary", func(t *testing.T) {
 		serviceName := "frontend-podinfo"
 		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		err := os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
 		if err != nil {
@@ -540,13 +542,13 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
-		deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 	})
 
 	t.Run("Returns external records using Failover strategy when Secondary", func(t *testing.T) {
 		serviceName := "frontend-podinfo"
 		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		err := os.Setenv("OVERRIDE_WITH_FAKE_EXT_DNS", "true")
 		if err != nil {
@@ -601,7 +603,6 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
-		deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
 	})
@@ -650,7 +651,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
 		resolver := depresolver.NewDependencyResolver(context.TODO(), cl)
-		r.config, err = resolver.ResolveOperatorConfig()
+		r.Config, err = resolver.ResolveOperatorConfig()
 		if err != nil {
 			t.Fatalf("config error: (%v)", err)
 		}
@@ -810,7 +811,7 @@ func deleteUnhealthyService(t *testing.T, serviceName string, cl client.Client, 
 }
 
 func reconcileAndUpdateGslb(t *testing.T,
-	r *ReconcileGslb,
+	r *GslbReconciler,
 	req reconcile.Request,
 	cl client.Client,
 	gslb *k8gbv1beta1.Gslb,

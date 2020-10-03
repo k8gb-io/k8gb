@@ -1,7 +1,0 @@
-apiVersion: k8gb.absa.oss/v1beta1
-kind: Gslb
-metadata:
-  name: gslb-sample
-spec:
-  # Add fields here
-  foo: bar
