@@ -176,7 +176,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected gslb: (%v)", err)
 		}
 		healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus})
-		expectedHostsMetric := .0
+		expectedHostsMetric := 1.
 		actualHostsMetric := testutil.ToFloat64(healthyHosts)
 		if !reflect.DeepEqual(expectedHostsMetric, actualHostsMetric) {
 			t.Errorf("expected %v managed hosts with Healthy status, but got %v", expectedHostsMetric, actualHostsMetric)
@@ -228,7 +228,7 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to get expected gslb: (%v)", err)
 		}
 		unknownHosts, _ := ingressHostsPerStatusMetric.GetMetricWith(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus})
-		expectedHostsMetricCount := 3.0
+		expectedHostsMetricCount := 2.0
 		actualHostsMetricCount := testutil.ToFloat64(unknownHosts)
 		if !reflect.DeepEqual(expectedHostsMetricCount, actualHostsMetricCount) {
 			t.Errorf("expected %v managed hosts with NotFound status, but got %v", expectedHostsMetricCount, actualHostsMetricCount)
