@@ -248,6 +248,10 @@ func TestGslbController(t *testing.T) {
 			{IP: "10.0.0.2"},
 			{IP: "10.0.0.3"},
 		}
+		err = cl.Get(context.TODO(), req.NamespacedName, ingress)
+		if err != nil {
+			t.Fatalf("Failed to get expected ingress: (%v)", err)
+		}
 		ingress.Status.LoadBalancer.Ingress = append(ingress.Status.LoadBalancer.Ingress, ingressIPs...)
 		err := cl.Status().Update(context.TODO(), ingress)
 		if err != nil {
@@ -286,19 +290,6 @@ func TestGslbController(t *testing.T) {
 		createHealthyService(t, serviceName, cl, gslb)
 		defer deleteHealthyService(t, serviceName, cl, gslb)
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
-
-		ingressIPs := []corev1.LoadBalancerIngress{
-			{IP: "10.0.0.1"},
-			{IP: "10.0.0.2"},
-			{IP: "10.0.0.3"},
-		}
-
-		ingress.Status.LoadBalancer.Ingress = append(ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-
-		err := cl.Status().Update(context.TODO(), ingress)
-		if err != nil {
-			t.Fatalf("Failed to update gslb Ingress Address: (%v)", err)
-		}
 
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 
