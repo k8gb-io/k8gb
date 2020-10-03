@@ -54,6 +54,7 @@ const gslbFinalizer = "finalizer.k8gb.absa.oss"
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs/status,verbs=get;update;patch
 
+// Reconcile runs main reconiliation loop
 func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	log := r.Log.WithValues("gslb", req.NamespacedName)
@@ -163,6 +164,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{RequeueAfter: time.Second * time.Duration(r.Config.ReconcileRequeueSeconds)}, nil
 }
 
+// SetupWithManager configures controller manager
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
 	mapFn := handler.ToRequestsFunc(
