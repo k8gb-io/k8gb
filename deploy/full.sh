@@ -14,7 +14,7 @@ if [ "$TEST_CURRENT_COMMIT" == "yes" ]
 then
     ./deploy/registry.sh
     commit_hash=$(git rev-parse --short HEAD)
-    operator-sdk build k8gb:${commit_hash}
+    docker build . -t k8gb:${commit_hash}
     docker tag k8gb:${commit_hash} localhost:5000/k8gb:v${commit_hash}
     docker push localhost:5000/k8gb:v${commit_hash}
     export K8GB_IMAGE_REPO=localhost:5000/k8gb
