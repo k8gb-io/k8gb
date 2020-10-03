@@ -1,0 +1,9 @@
+dependencies:
+- name: coredns
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 1.8.4
+- name: etcd-operator
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 0.11.0
+digest: sha256:6c29d06119687be6cf485787492891b98b4c518bbe2b208c9e86d122a54c85aa
+generated: "2020-08-06T16:01:59.445384+02:00"

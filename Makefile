@@ -11,12 +11,6 @@ K8GB_IMAGE_TAG  ?= v$(VERSION)
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 
-.PHONY: up-local
-up-local: create-test-ns
-	kubectl apply -f ./deploy/crds/k8gb.absa.oss_gslbs_crd.yaml
-	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml
-	operator-sdk run --local --namespace=test-gslb
-
 .PHONY: debug-local
 debug-local: create-test-ns
 	kubectl apply -f ./deploy/crds/k8gb.absa.oss_gslbs_crd.yaml
@@ -29,17 +23,9 @@ lint:
 	errcheck ./pkg/... ./cmd/...
 	golint '-set_exit_status=1' pkg/controller/... cmd/manager/...
 
-.PHONY: test
-test:
-	go test -v ./...
-
 .PHONY: terratest
 terratest:
 	cd terratest/test/ && go mod download && go test -v
-
-.PHONY: e2e-test
-e2e-test: deploy-gslb-operator
-	operator-sdk test local ./pkg/test --no-setup --namespace k8gb
 
 .PHONY: dns-tools
 dns-tools:
@@ -140,14 +126,6 @@ clean-test-apps:
 	kubectl delete -f deploy/test-apps
 	helm -n test-gslb uninstall backend
 	helm -n test-gslb uninstall frontend
-
-.PHONY: build
-build:
-	operator-sdk build $(K8GB_IMAGE_REPO):$(K8GB_IMAGE_TAG)
-
-.PHONY: push
-push:
-	docker push $(K8GB_IMAGE_REPO):$(K8GB_IMAGE_TAG)
 
 .PHONY: debug-test-etcd
 debug-test-etcd:
