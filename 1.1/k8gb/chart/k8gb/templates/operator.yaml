@@ -27,8 +27,6 @@ spec:
       containers:
         - name: k8gb
           image: {{ .Values.k8gb.imageRepo }}:v{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
-          command:
-          - k8gb
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
