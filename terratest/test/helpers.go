@@ -90,6 +90,7 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 	shell.RunCommand(t, helmRepoUpdate)
 	helmOptions := helm.Options{
 		KubectlOptions: options,
+		Version:        "4.0.6",
 	}
 	helm.Install(t, &helmOptions, "podinfo/podinfo", "frontend")
 
@@ -118,13 +119,15 @@ func assertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName string
 	t.Helper()
 
 	actualHealthStatus := func() ([]string, error) {
-		k8gbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o", "jsonpath='{.status.serviceHealth}'")
+		//-o custom-columns=SERVICESTATUS:.status.serviceHealth --no-headers
+		k8gbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o",
+			"custom-columns=SERVICESTATUS:.status.serviceHealth", "--no-headers")
 		if err != nil {
 			t.Errorf("Failed to get k8gb status with kubectl (%s)", err)
 		}
 		return []string{k8gbServiceHealth}, nil
 	}
-	expectedHealthStatus := []string{fmt.Sprintf("'map[%s]'", serviceStatus)}
+	expectedHealthStatus := []string{fmt.Sprintf("map[%s]", serviceStatus)}
 	_, err := DoWithRetryWaitingForValueE(
 		t,
 		"Wait for expected ServiceHealth status...",

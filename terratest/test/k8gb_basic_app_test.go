@@ -67,6 +67,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 	shell.RunCommand(t, helmRepoUpdate)
 	helmOptions := helm.Options{
 		KubectlOptions: options,
+		Version:        "4.0.6",
 	}
 	helm.Install(t, &helmOptions, "podinfo/podinfo", "frontend")
 
