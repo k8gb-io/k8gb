@@ -56,7 +56,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 
 	helmRepoAdd := shell.Command{
 		Command: "helm",
-		Args:    []string{"repo", "add", "podinfo", "https://stefanprodan.github.io/podinfo"},
+		Args:    []string{"repo", "add", "--force-update", "podinfo", "https://stefanprodan.github.io/podinfo"},
 	}
 
 	helmRepoUpdate := shell.Command{
@@ -67,6 +67,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 	shell.RunCommand(t, helmRepoUpdate)
 	helmOptions := helm.Options{
 		KubectlOptions: options,
+		Version:        "4.0.6",
 	}
 	helm.Install(t, &helmOptions, "podinfo/podinfo", "frontend")
 

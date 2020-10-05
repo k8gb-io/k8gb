@@ -1,5 +1,128 @@
 REPO ?= absaoss/k8gb
+# Current Operator version
 VERSION ?= $$(helm show chart chart/k8gb/|awk '/appVersion:/ {print $$2}')
+K8GB_IMAGE_TAG  ?= v$(VERSION)
+# Default bundle image tag
+BUNDLE_IMG ?= controller-bundle:$(VERSION)
+# Options for 'bundle-build'
+ifneq ($(origin CHANNELS), undefined)
+BUNDLE_CHANNELS := --channels=$(CHANNELS)
+endif
+ifneq ($(origin DEFAULT_CHANNEL), undefined)
+BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
+endif
+BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
+
+# Image URL to use all building/pushing image targets
+IMG ?= $(REPO):$(K8GB_IMAGE_TAG)
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
+
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
+all: manager
+
+# Run tests
+test: generate fmt vet manifests
+	go test ./... -coverprofile cover.out
+
+# Build manager binary
+manager: generate fmt vet
+	go build -o bin/manager main.go
+
+# Run against the configured Kubernetes cluster in ~/.kube/config
+run: generate fmt vet manifests
+	go run ./main.go
+
+# Install CRDs into a cluster
+install: manifests kustomize
+	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+
+# Uninstall CRDs from a cluster
+uninstall: manifests kustomize
+	$(KUSTOMIZE) build config/crd | kubectl delete -f -
+
+# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
+deploy: manifests kustomize
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/default | kubectl apply -f -
+
+# Generate manifests e.g. CRD, RBAC etc.
+manifests: controller-gen
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
+# Run go fmt against code
+fmt:
+	go fmt ./...
+
+# Run go vet against code
+vet:
+	go vet ./...
+
+# Generate code
+generate: controller-gen
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+# Build the docker image
+docker-build: test
+	docker build . -t ${IMG}
+
+# Push the docker image
+docker-push:
+	docker push ${IMG}
+
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
+
+kustomize:
+ifeq (, $(shell which kustomize))
+	@{ \
+	set -e ;\
+	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$KUSTOMIZE_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+	rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
+	}
+KUSTOMIZE=$(GOBIN)/kustomize
+else
+KUSTOMIZE=$(shell which kustomize)
+endif
+
+# Generate bundle manifests and metadata, then validate generated files.
+.PHONY: bundle
+bundle: manifests
+	operator-sdk generate kustomize manifests -q
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	operator-sdk bundle validate ./bundle
+
+# Build the bundle image.
+.PHONY: bundle-build
+bundle-build:
+	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+
+## Special k8gb make part
+
 VALUES_YAML ?= chart/k8gb/values.yaml
 HELM_ARGS ?=
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
@@ -11,12 +134,6 @@ K8GB_IMAGE_TAG  ?= v$(VERSION)
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 
-.PHONY: up-local
-up-local: create-test-ns
-	kubectl apply -f ./deploy/crds/k8gb.absa.oss_gslbs_crd.yaml
-	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml
-	operator-sdk run --local --namespace=test-gslb
-
 .PHONY: debug-local
 debug-local: create-test-ns
 	kubectl apply -f ./deploy/crds/k8gb.absa.oss_gslbs_crd.yaml
@@ -25,21 +142,13 @@ debug-local: create-test-ns
 
 .PHONY: lint
 lint:
-	staticcheck ./pkg/... ./cmd/...
-	errcheck ./pkg/... ./cmd/...
-	golint '-set_exit_status=1' pkg/controller/... cmd/manager/...
-
-.PHONY: test
-test:
-	go test -v ./...
+	staticcheck ./...
+	errcheck ./...
+	golint '-set_exit_status=1' ./...
 
 .PHONY: terratest
 terratest:
 	cd terratest/test/ && go mod download && go test -v
-
-.PHONY: e2e-test
-e2e-test: deploy-gslb-operator
-	operator-sdk test local ./pkg/test --no-setup --namespace k8gb
 
 .PHONY: dns-tools
 dns-tools:
@@ -101,7 +210,7 @@ create-test-ns:
 
 .PHONY: deploy-local-ingress
 deploy-local-ingress: create-k8gb-ns
-	helm repo add stable https://kubernetes-charts.storage.googleapis.com
+	helm repo add --force-update stable https://kubernetes-charts.storage.googleapis.com
 	helm repo update
 	helm -n k8gb upgrade -i nginx-ingress stable/nginx-ingress --version 1.41.1 -f deploy/ingress/nginx-ingress-values.yaml
 
@@ -140,14 +249,6 @@ clean-test-apps:
 	kubectl delete -f deploy/test-apps
 	helm -n test-gslb uninstall backend
 	helm -n test-gslb uninstall frontend
-
-.PHONY: build
-build:
-	operator-sdk build $(K8GB_IMAGE_REPO):$(K8GB_IMAGE_TAG)
-
-.PHONY: push
-push:
-	docker push $(K8GB_IMAGE_REPO):$(K8GB_IMAGE_TAG)
 
 .PHONY: debug-test-etcd
 debug-test-etcd:
