@@ -55,3 +55,16 @@ func GetEnvAsFloat64OrFallback(key string, defaultValue float64) (float64, error
 	}
 	return defaultValue, nil
 }
+
+// GetEnvAsBoolOrFallback returns the env variable for the given key,
+// parses it as boolean and falls back to the given defaultValue if not set
+func GetEnvAsBoolOrFallback(key string, defaultValue bool) bool {
+	if v := os.Getenv(key); v != "" {
+		val, err := strconv.ParseBool(v)
+		if err != nil {
+			return defaultValue
+		}
+		return val
+	}
+	return defaultValue
+}

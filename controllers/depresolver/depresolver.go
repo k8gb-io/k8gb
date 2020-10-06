@@ -20,6 +20,8 @@ type Config struct {
 	ReconcileRequeueSeconds int
 	// Cluster Geo Tag to determine specific location
 	ClusterGeoTag string
+	// Route53 switch
+	Route53Enabled bool
 }
 
 //DependencyResolver resolves configuration for GSLB

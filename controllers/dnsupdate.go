@@ -378,6 +378,9 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 	infobloxGridHost := os.Getenv("INFOBLOX_GRID_HOST")
+	if r.Config.Route53Enabled {
+		log.Info("Gonna rule route53")
+	}
 	if len(infobloxGridHost) > 0 {
 
 		objMgr, err := infobloxConnection()
