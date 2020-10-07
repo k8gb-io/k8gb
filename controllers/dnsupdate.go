@@ -231,6 +231,17 @@ func nsServerName(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
 	return fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
 }
 
+func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string {
+	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
+
+	var extNSServers []string
+	for _, clusterGeoTag := range strings.Split(extClusterGeoTags, ",") {
+		extNSServers = append(extNSServers, fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone))
+	}
+
+	return extNSServers
+}
+
 func heartbeatFQDN(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
 	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
 	if len(clusterGeoTag) == 0 {
@@ -377,9 +388,35 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 
 func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
+	extClusterGeoTags := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
 	infobloxGridHost := os.Getenv("INFOBLOX_GRID_HOST")
 	if r.Config.Route53Enabled {
+		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
+		gslbZoneName := os.Getenv("DNS_ZONE")
 		log.Info("Gonna rule route53")
+		var NSServerList []string
+		NSServerList = append(NSServerList, nsServerName(gslb, clusterGeoTag))
+		NSServerList = append(NSServerList, nsServerNameExt(gslb, extClusterGeoTags)...)
+		NSRecord := &externaldns.DNSEndpoint{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        fmt.Sprintf("%s-route53", gslb.Name),
+				Namespace:   gslb.Namespace,
+				Annotations: map[string]string{"k8gb.absa.oss/dnstype": "route53"},
+			},
+			Spec: externaldns.DNSEndpointSpec{
+				Endpoints: []*externaldns.Endpoint{
+					{
+						DNSName:    gslbZoneName,
+						RecordTTL:  ttl,
+						RecordType: "NS",
+						Targets: externaldns.Targets{
+							nsServerName(gslb, clusterGeoTag),
+						},
+					},
+				},
+			},
+		}
+		r.ensureDNSEndpoint(gslb, NSRecord)
 	}
 	if len(infobloxGridHost) > 0 {
 
@@ -465,7 +502,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 	return nil, nil
 }
 
-func (r *GslbReconciler) ensureDNSEndpoint(request reconcile.Request,
+func (r *GslbReconciler) ensureDNSEndpoint(
 	gslb *k8gbv1beta1.Gslb,
 	i *externaldns.DNSEndpoint,
 ) (*reconcile.Result, error) {
