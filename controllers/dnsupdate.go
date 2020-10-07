@@ -409,14 +409,15 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 						DNSName:    gslbZoneName,
 						RecordTTL:  ttl,
 						RecordType: "NS",
-						Targets: externaldns.Targets{
-							nsServerName(gslb, clusterGeoTag),
-						},
+						Targets:    NSServerList,
 					},
 				},
 			},
 		}
-		r.ensureDNSEndpoint(gslb, NSRecord)
+		res, err := r.ensureDNSEndpoint(gslb, NSRecord)
+		if err != nil {
+			return res, err
+		}
 	}
 	if len(infobloxGridHost) > 0 {
 
