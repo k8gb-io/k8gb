@@ -41,6 +41,10 @@ kind: ServiceAccount
 metadata:
   name: external-dns
   namespace: k8gb
+{{ if .Values.route53.enabled }}
+  annotations:
+    eks.amazonaws.com/role-arn: {{ .Values.route53.irsaRole }}
+{{ end }}
 imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
 ---
 apiVersion: apps/v1
