@@ -24,6 +24,7 @@ k8gb:
 externaldns:
   image: k8s.gcr.io/external-dns/external-dns:v0.7.4
   interval: "20s"
+  expose53onWorkers: true # open 53/udp on workers nodes with nginx controller
 
 etcd-operator:
   customResources:
