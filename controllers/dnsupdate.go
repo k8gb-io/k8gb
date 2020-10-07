@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -397,6 +398,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 		var NSServerList []string
 		NSServerList = append(NSServerList, nsServerName(gslb, clusterGeoTag))
 		NSServerList = append(NSServerList, nsServerNameExt(gslb, extClusterGeoTags)...)
+		sort.Strings(NSServerList)
 		NSRecord := &externaldns.DNSEndpoint{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:        fmt.Sprintf("%s-route53", gslb.Name),

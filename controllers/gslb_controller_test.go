@@ -734,8 +734,8 @@ func TestGslbController(t *testing.T) {
 				RecordType: "NS",
 				Targets: externaldns.Targets{
 					"test-gslb-ns-eu.example.com",
+					"test-gslb-ns-us.example.com",
 					"test-gslb-ns-za.example.com",
-					"test-gslb-ns-eu.example.com",
 				},
 			},
 		}
@@ -743,7 +743,7 @@ func TestGslbController(t *testing.T) {
 		prettyGot := prettyPrint(gotEp)
 		prettyWant := prettyPrint(wantEp)
 
-		if !reflect.DeepEqual(got, want) {
+		if !reflect.DeepEqual(gotEp, wantEp) {
 			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
 	})
