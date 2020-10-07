@@ -688,6 +688,65 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("expected controller to detect Ingress hostname and edgeDNSZone mismatch")
 		}
 	})
+
+	t.Run("Creates NS DNS records for route53", func(t *testing.T) {
+		err := os.Setenv("ROUTE53_ENABLED", "true")
+		if err != nil {
+			t.Fatalf("Can't set env var: (%v)", err)
+		}
+		err = os.Setenv("CLUSTER_GEO_TAG", "eu")
+		if err != nil {
+			t.Fatalf("Can't set env var: (%v)", err)
+		}
+		err = os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "za,us")
+		if err != nil {
+			t.Fatalf("Can't set env var: (%v)", err)
+		}
+		err = os.Setenv("DNS_ZONE", "cloud.example.com")
+		if err != nil {
+			t.Fatalf("Can't set env var: (%v)", err)
+		}
+		resolver := depresolver.NewDependencyResolver(context.TODO(), cl)
+		r.Config, err = resolver.ResolveOperatorConfig()
+		if err != nil {
+			t.Fatalf("config error: (%v)", err)
+		}
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+		dnsEndpoint := &externaldns.DNSEndpoint{}
+		err = cl.Get(context.TODO(), client.ObjectKey{Namespace: gslb.Namespace, Name: fmt.Sprintf("%s-route53", gslb.Name)}, dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+
+		got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+
+		want := "route53"
+		if got != want {
+			t.Errorf("got:\n %q annotation value,\n\n want:\n %q", got, want)
+		}
+
+		gotEp := dnsEndpoint.Spec.Endpoints
+
+		wantEp := []*externaldns.Endpoint{
+			{
+				DNSName:    os.Getenv("DNS_ZONE"),
+				RecordTTL:  30,
+				RecordType: "NS",
+				Targets: externaldns.Targets{
+					"test-gslb-ns-eu.example.com",
+					"test-gslb-ns-za.example.com",
+					"test-gslb-ns-eu.example.com",
+				},
+			},
+		}
+
+		prettyGot := prettyPrint(gotEp)
+		prettyWant := prettyPrint(wantEp)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		}
+	})
 }
 
 func createHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *k8gbv1beta1.Gslb) {
