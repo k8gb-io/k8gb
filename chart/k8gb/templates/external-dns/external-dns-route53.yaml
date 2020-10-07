@@ -1,14 +1,4 @@
 {{ if .Values.route53.enabled }}
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: external-dns
-  # If you're using Amazon EKS with IAM Roles for Service Accounts, specify the following annotation.
-  # Otherwise, you may safely omit it.
-  annotations:
-    # Substitute your account ID and IAM service role name below.
-    eks.amazonaws.com/role-arn: {{ .Values.route53.irsaRole }}
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,6 +26,7 @@ spec:
         - --aws-zone-type=public # only look at public hosted zones (valid values are public, private or no value for both)
         - --registry=txt
         - --txt-owner-id= {{ .Values.route53.hostedZoneID }}
+        - --log-level=debug # debug only
       securityContext:
         fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
 {{ end }}
