@@ -78,3 +78,7 @@ spec:
                   name: external-dns
                   key: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
             {{ end }}
+            {{ if .Values.route53.enabled }}
+            - name: ROUTE53_ENABLED
+              value: "true"
+            {{ end }}

@@ -19,7 +19,7 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-var defaultConfig = Config{30, "unset"}
+var defaultConfig = Config{30, "unset", false}
 
 func TestResolveSpecWithFilledFields(t *testing.T) {
 	//arrange
@@ -98,7 +98,7 @@ func TestResolveConfigWithOneValidEnv(t *testing.T) {
 	defer cleanup()
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
 	resolver := NewDependencyResolver(context.TODO(), cl)
-	expected := Config{50, "unset"}
+	expected := Config{50, "unset", false}
 	_ = os.Setenv(reconcileRequeueSecondsKey, strconv.Itoa(expected.ReconcileRequeueSeconds))
 	//act
 	config, err := resolver.ResolveOperatorConfig()
@@ -234,6 +234,32 @@ func TestConfigRunOnce(t *testing.T) {
 	//config2, err2 would be equal
 	assert.NoError(t, err2)
 	assert.Equal(t, *config1, *config2)
+}
+
+func TestResolveConfigWithMalformedRoute53Enabled(t *testing.T) {
+	//arrange
+	defer cleanup()
+	_ = os.Setenv(route53EnabledKey, "i.am.wrong??.")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(context.TODO(), cl)
+	//act
+	config, err := resolver.ResolveOperatorConfig()
+	//assert
+	assert.NoError(t, err)
+	assert.Equal(t, false, config.Route53Enabled)
+}
+
+func TestResolveConfigWithProperRoute53Enabled(t *testing.T) {
+	//arrange
+	defer cleanup()
+	_ = os.Setenv(route53EnabledKey, "true")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(context.TODO(), cl)
+	//act
+	config, err := resolver.ResolveOperatorConfig()
+	//assert
+	assert.NoError(t, err)
+	assert.Equal(t, true, config.Route53Enabled)
 }
 
 func cleanup() {

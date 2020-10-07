@@ -10,6 +10,7 @@ import (
 const (
 	reconcileRequeueSecondsKey = "RECONCILE_REQUEUE_SECONDS"
 	clusterGeoTagKey           = "CLUSTER_GEO_TAG"
+	route53EnabledKey          = "ROUTE53_ENABLED"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -20,6 +21,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		// set predefined values when not read from the environment variables
 		dr.config.ReconcileRequeueSeconds, _ = env.GetEnvAsIntOrFallback(reconcileRequeueSecondsKey, 30)
 		dr.config.ClusterGeoTag = env.GetEnvAsStringOrFallback(clusterGeoTagKey, "unset")
+		dr.config.Route53Enabled = env.GetEnvAsBoolOrFallback(route53EnabledKey, false)
 		dr.errorConfig = dr.validateConfig(dr.config)
 	})
 	return dr.config, dr.errorConfig

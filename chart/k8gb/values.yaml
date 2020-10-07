@@ -22,8 +22,9 @@ k8gb:
   reconcileRequeueSeconds: 30
 
 externaldns:
-  image: eu.gcr.io/k8s-artifacts-prod/external-dns/external-dns:v0.7.2
+  image: k8s.gcr.io/external-dns/external-dns:v0.7.4
   interval: "20s"
+  expose53onWorkers: true # open 53/udp on workers nodes with nginx controller
 
 etcd-operator:
   customResources:
@@ -87,3 +88,9 @@ infoblox:
   wapiVersion: 2.3.1
   wapiPort: 443
   sslVerify: true
+
+route53:
+  enabled: false
+  hostedZoneID: ZXXXSSS
+  domain: cloud.example.com
+  irsaRole: arn:aws:iam::111111:role/external-dns

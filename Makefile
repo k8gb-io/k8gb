@@ -76,6 +76,10 @@ docker-build: test
 docker-push:
 	docker push ${IMG}
 
+# Build and push the docker image exclusively for testing using commit hash
+docker-test-build-push: test
+	$(call docker-test-build-push)
+
 # find or download controller-gen
 # download controller-gen if necessary
 controller-gen:
@@ -133,6 +137,7 @@ K8GB_IMAGE_REPO ?= absaoss/k8gb
 K8GB_IMAGE_TAG  ?= v$(VERSION)
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
+COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
 
 .PHONY: debug-local
 debug-local: create-test-ns
@@ -327,4 +332,11 @@ define apply-cr
 	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
 	kubectl apply -f "$1"
 	git checkout -- "$1"
+endef
+
+define docker-test-build-push
+    docker build . -t k8gb:$(COMMIT_HASH)
+    docker tag k8gb:$(COMMIT_HASH) $(REPO):v$(COMMIT_HASH)
+    docker push $(REPO):v$(COMMIT_HASH)
+    sed -i "s/$(VERSION)/$(COMMIT_HASH)/g" chart/k8gb/Chart.yaml
 endef
