@@ -4,7 +4,6 @@
 // - provides predefined values when configuration is missing
 // - validates configuration
 // - executes once
-// TODO: Add the rest of configuration to be resolved
 package depresolver
 
 import (
@@ -14,17 +13,57 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-//Config holds operator configuration
-type Config struct {
-	//Reschedule of Reconcile loop to pickup external Gslb targets
-	ReconcileRequeueSeconds int
-	// Cluster Geo Tag to determine specific location
-	ClusterGeoTag string
-	// Route53 switch
-	Route53Enabled bool
+// EdgeDNSType specifies to which edge DNS is k8gb connecting
+type EdgeDNSType int
+
+const (
+	// DNSTypeNoEdgeDNS is default DNSType. Is used during integration testing when no edgeDNS provider exists
+	DNSTypeNoEdgeDNS EdgeDNSType = 1 << iota
+	// DNSTypeInfoblox type
+	DNSTypeInfoblox
+	// DNSTypeRoute53 type
+	DNSTypeRoute53
+)
+
+//Infoblox configuration
+// TODO: consider to make this private after refactor
+type Infoblox struct {
+	// Host
+	Host string
+	// Version
+	Version string
+	// Port
+	Port int
+	// Username
+	Username string
+	// Password
+	Password string
 }
 
-//DependencyResolver resolves configuration for GSLB
+// Config is operator configuration returned by depResolver
+type Config struct {
+	// Reschedule of Reconcile loop to pickup external Gslb targets
+	ReconcileRequeueSeconds int
+	// ClusterGeoTag to determine specific location
+	ClusterGeoTag string
+	// ExtClustersGeoTags to identify clusters in other locations in format separated by comma. i.e.: "eu,uk,us"
+	ExtClustersGeoTags []string
+	// EdgeDNSType is READONLY and is set automatically by configuration
+	EdgeDNSType EdgeDNSType
+	// EdgeDNSServer
+	EdgeDNSServer string
+	// EdgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
+	EdgeDNSZone string
+	// DNSZone controlled by gslb; e.g. cloud.example.com
+	DNSZone string
+	// DNSTypeRoute53 switch
+	// TODO: hide for depresolver subscriber as depresolver retrieves EdgeDNSType. Maybe we can change configuration and set EdgeDNSType directly instead of DNSTypeRoute53 boolean
+	Route53Enabled bool
+	// Infoblox configuration
+	Infoblox Infoblox
+}
+
+// DependencyResolver resolves configuration for GSLB
 type DependencyResolver struct {
 	client      client.Client
 	config      *Config
@@ -35,13 +74,7 @@ type DependencyResolver struct {
 	errorSpec   error
 }
 
-const (
-	lessOrEqualToZeroErrorMessage = "\"%s is less or equal to zero\""
-	lessThanZeroErrorMessage      = "\"%s is less than zero\""
-	doesNotMatchRegexMessage      = "\"%s does not match /%s/ regexp rule\""
-)
-
-//NewDependencyResolver returns a new depresolver.DependencyResolver
+// NewDependencyResolver returns a new depresolver.DependencyResolver
 func NewDependencyResolver(context context.Context, client client.Client) *DependencyResolver {
 	resolver := new(DependencyResolver)
 	resolver.client = client
