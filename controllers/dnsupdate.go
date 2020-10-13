@@ -229,7 +229,7 @@ func nsServerName(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
 	if len(clusterGeoTag) == 0 {
 		clusterGeoTag = "default"
 	}
-	return fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+	return fmt.Sprintf("ns-%s.%s", clusterGeoTag, edgeDNSZone)
 }
 
 func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string {
@@ -237,7 +237,7 @@ func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string 
 
 	var extNSServers []string
 	for _, clusterGeoTag := range strings.Split(extClusterGeoTags, ",") {
-		extNSServers = append(extNSServers, fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone))
+		extNSServers = append(extNSServers, fmt.Sprintf("ns-%s.%s", clusterGeoTag, edgeDNSZone))
 	}
 
 	return extNSServers
@@ -394,7 +394,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 	if r.Config.Route53Enabled {
 		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 		gslbZoneName := os.Getenv("DNS_ZONE")
-		log.Info("Gonna rule route53")
+		log.Info("Creating DNSEndpoint CRDs for Route53...")
 		var NSServerList []string
 		NSServerList = append(NSServerList, nsServerName(gslb, clusterGeoTag))
 		NSServerList = append(NSServerList, nsServerNameExt(gslb, extClusterGeoTags)...)

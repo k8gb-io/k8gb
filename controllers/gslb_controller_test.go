@@ -361,7 +361,7 @@ func TestGslbController(t *testing.T) {
 
 		got := getExternalClusterFQDNs(gslb)
 
-		want := []string{"test-gslb-ns-za.example.com"}
+		want := []string{"ns-za.example.com"}
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got:\n %q externalGslb NS records,\n\n want:\n %q", got, want)
 		}
@@ -455,20 +455,20 @@ func TestGslbController(t *testing.T) {
 		extClusters := getExternalClusterFQDNs(gslb)
 
 		delegateTo := []ibclient.NameServer{
-			{Address: "10.0.0.1", Name: "test-gslb-ns-eu.example.com"},
-			{Address: "10.0.0.2", Name: "test-gslb-ns-eu.example.com"},
-			{Address: "10.0.0.3", Name: "test-gslb-ns-eu.example.com"},
-			{Address: "10.1.0.1", Name: "test-gslb-ns-za.example.com"},
-			{Address: "10.1.0.2", Name: "test-gslb-ns-za.example.com"},
-			{Address: "10.1.0.3", Name: "test-gslb-ns-za.example.com"},
+			{Address: "10.0.0.1", Name: "ns-eu.example.com"},
+			{Address: "10.0.0.2", Name: "ns-eu.example.com"},
+			{Address: "10.0.0.3", Name: "ns-eu.example.com"},
+			{Address: "10.1.0.1", Name: "ns-za.example.com"},
+			{Address: "10.1.0.2", Name: "ns-za.example.com"},
+			{Address: "10.1.0.3", Name: "ns-za.example.com"},
 		}
 
 		got := filterOutDelegateTo(delegateTo, extClusters[0])
 
 		want := []ibclient.NameServer{
-			{Address: "10.0.0.1", Name: "test-gslb-ns-eu.example.com"},
-			{Address: "10.0.0.2", Name: "test-gslb-ns-eu.example.com"},
-			{Address: "10.0.0.3", Name: "test-gslb-ns-eu.example.com"},
+			{Address: "10.0.0.1", Name: "ns-eu.example.com"},
+			{Address: "10.0.0.2", Name: "ns-eu.example.com"},
+			{Address: "10.0.0.3", Name: "ns-eu.example.com"},
 		}
 
 		if !reflect.DeepEqual(got, want) {
@@ -733,9 +733,9 @@ func TestGslbController(t *testing.T) {
 				RecordTTL:  30,
 				RecordType: "NS",
 				Targets: externaldns.Targets{
-					"test-gslb-ns-eu.example.com",
-					"test-gslb-ns-us.example.com",
-					"test-gslb-ns-za.example.com",
+					"ns-eu.example.com",
+					"ns-us.example.com",
+					"ns-za.example.com",
 				},
 			},
 		}
