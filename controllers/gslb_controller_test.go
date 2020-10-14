@@ -690,6 +690,30 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Creates NS DNS records for route53", func(t *testing.T) {
+		err = os.Setenv("EDGE_DNS_SERVER", "1.1.1.1")
+		if err != nil {
+			t.Fatalf("Can't setup env var: (%v)", err)
+		}
+		coreDNSLBServiceName := "k8gb-coredns-lb"
+		coreDNSService := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      coreDNSLBServiceName,
+				Namespace: k8gbNamespace,
+			},
+		}
+		err = cl.Create(context.TODO(), coreDNSService)
+		if err != nil {
+			t.Fatalf("Failed to create testing %s service: (%v)", coreDNSLBServiceName, err)
+		}
+		serviceIPs := []corev1.LoadBalancerIngress{
+			{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
+		}
+		coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
+		err = cl.Status().Update(context.TODO(), coreDNSService)
+		if err != nil {
+			t.Fatalf("Failed to update coredns service lb hostname: (%v)", err)
+		}
+
 		err := os.Setenv("ROUTE53_ENABLED", "true")
 		if err != nil {
 			t.Fatalf("Can't set env var: (%v)", err)
@@ -711,6 +735,7 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("config error: (%v)", err)
 		}
+
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		dnsEndpoint := &externaldns.DNSEndpoint{}
 		err = cl.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpoint)
@@ -736,6 +761,15 @@ func TestGslbController(t *testing.T) {
 					"ns-eu.example.com",
 					"ns-us.example.com",
 					"ns-za.example.com",
+				},
+			},
+			{
+				DNSName:    "ns-eu.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets: externaldns.Targets{
+					"1.0.0.1",
+					"1.1.1.1",
 				},
 			},
 		}
