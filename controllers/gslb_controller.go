@@ -49,6 +49,7 @@ type GslbReconciler struct {
 	DepResolver *depresolver.DependencyResolver
 }
 
+const k8gbNamespace = "k8gb"
 const gslbFinalizer = "finalizer.k8gb.absa.oss"
 
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete

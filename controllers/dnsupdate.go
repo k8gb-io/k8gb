@@ -401,8 +401,8 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 		sort.Strings(NSServerList)
 		NSRecord := &externaldns.DNSEndpoint{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:        fmt.Sprintf("%s-route53", gslb.Name),
-				Namespace:   gslb.Namespace,
+				Name:        "k8gb-ns-route53",
+				Namespace:   k8gbNamespace,
 				Annotations: map[string]string{"k8gb.absa.oss/dnstype": "route53"},
 			},
 			Spec: externaldns.DNSEndpointSpec{

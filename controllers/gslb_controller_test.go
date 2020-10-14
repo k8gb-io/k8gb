@@ -713,7 +713,7 @@ func TestGslbController(t *testing.T) {
 		}
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		dnsEndpoint := &externaldns.DNSEndpoint{}
-		err = cl.Get(context.TODO(), client.ObjectKey{Namespace: gslb.Namespace, Name: fmt.Sprintf("%s-route53", gslb.Name)}, dnsEndpoint)
+		err = cl.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpoint)
 		if err != nil {
 			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
 		}
