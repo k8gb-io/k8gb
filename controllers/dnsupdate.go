@@ -416,7 +416,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 				},
 			},
 		}
-		res, err := r.ensureDNSEndpoint(gslb, NSRecord)
+		res, err := r.ensureDNSEndpoint(k8gbNamespace, gslb, NSRecord)
 		if err != nil {
 			return res, err
 		}
@@ -506,13 +506,14 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 }
 
 func (r *GslbReconciler) ensureDNSEndpoint(
+	namespace string,
 	gslb *k8gbv1beta1.Gslb,
 	i *externaldns.DNSEndpoint,
 ) (*reconcile.Result, error) {
 	found := &externaldns.DNSEndpoint{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      i.Name,
-		Namespace: gslb.Namespace,
+		Namespace: namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 

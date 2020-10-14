@@ -136,6 +136,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	result, err = r.ensureDNSEndpoint(
+		gslb.Namespace,
 		gslb,
 		dnsEndpoint)
 	if result != nil {
