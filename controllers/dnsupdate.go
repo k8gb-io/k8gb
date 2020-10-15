@@ -242,7 +242,7 @@ func nsServerName(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
 	if len(clusterGeoTag) == 0 {
 		clusterGeoTag = "default"
 	}
-	return fmt.Sprintf("ns-%s.%s", clusterGeoTag, edgeDNSZone)
+	return fmt.Sprintf("gslb-ns-%s.%s", clusterGeoTag, edgeDNSZone)
 }
 
 func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string {
@@ -250,7 +250,7 @@ func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string 
 
 	var extNSServers []string
 	for _, clusterGeoTag := range strings.Split(extClusterGeoTags, ",") {
-		extNSServers = append(extNSServers, fmt.Sprintf("ns-%s.%s", clusterGeoTag, edgeDNSZone))
+		extNSServers = append(extNSServers, fmt.Sprintf("gslb-ns-%s.%s", clusterGeoTag, edgeDNSZone))
 	}
 
 	return extNSServers
