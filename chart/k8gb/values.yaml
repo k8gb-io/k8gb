@@ -17,8 +17,7 @@ k8gb:
     enabled: false
     ip: "172.17.0.1"
     hostnames:
-     - "test-gslb-ns-us.example.com"
-     - "test-gslb-failover-ns-us.example.com"
+     - "gslb-ns-us.example.com"
   reconcileRequeueSeconds: 30
 
 externaldns:
