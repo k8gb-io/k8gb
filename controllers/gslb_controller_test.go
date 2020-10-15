@@ -737,20 +737,20 @@ func TestGslbController(t *testing.T) {
 		}
 
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
-		dnsEndpoint := &externaldns.DNSEndpoint{}
-		err = cl.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpoint)
+		dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
+		err = cl.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
 		if err != nil {
 			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
 		}
 
-		got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+		got := dnsEndpointRoute53.Annotations["k8gb.absa.oss/dnstype"]
 
 		want := "route53"
 		if got != want {
 			t.Errorf("got:\n %q annotation value,\n\n want:\n %q", got, want)
 		}
 
-		gotEp := dnsEndpoint.Spec.Endpoints
+		gotEp := dnsEndpointRoute53.Spec.Endpoints
 
 		wantEp := []*externaldns.Endpoint{
 			{
@@ -781,6 +781,55 @@ func TestGslbController(t *testing.T) {
 			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		}
 	})
+
+	t.Run("Resolves LoadBalancer hostname from Ingress status", func(t *testing.T) {
+		serviceName := "frontend-podinfo"
+		createHealthyService(t, serviceName, cl, gslb)
+		defer deleteHealthyService(t, serviceName, cl, gslb)
+		err = cl.Get(context.TODO(), req.NamespacedName, ingress)
+		if err != nil {
+			t.Fatalf("Failed to get expected ingress: (%v)", err)
+		}
+		ingress.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{{Hostname: "one.one.one.one"}}
+		err := cl.Status().Update(context.TODO(), ingress)
+		if err != nil {
+			t.Fatalf("Failed to update gslb Ingress Address: (%v)", err)
+		}
+		dnsEndpoint := &externaldns.DNSEndpoint{ObjectMeta: metav1.ObjectMeta{Namespace: gslb.Namespace, Name: gslb.Name}}
+		err = cl.Delete(context.Background(), dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to update DNSEndpoint: (%v)", err)
+		}
+
+		reconcileAndUpdateGslb(t, r, req, cl, gslb)
+		err = cl.Get(context.TODO(), req.NamespacedName, dnsEndpoint)
+		if err != nil {
+			t.Fatalf("Failed to get expected DNSEndpoint: (%v)", err)
+		}
+
+		got := dnsEndpoint.Spec.Endpoints
+
+		want := []*externaldns.Endpoint{
+			{
+				DNSName:    "localtargets-app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},
+			{
+				DNSName:    "app3.cloud.example.com",
+				RecordTTL:  30,
+				RecordType: "A",
+				Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},
+		}
+
+		prettyGot := prettyPrint(got)
+		prettyWant := prettyPrint(want)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		}
+	})
+
 }
 
 func createHealthyService(t *testing.T, serviceName string, cl client.Client, gslb *k8gbv1beta1.Gslb) {
