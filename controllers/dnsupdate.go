@@ -391,10 +391,15 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 	return delegateTo
 }
 
+// Dig digs
 func Dig(fqdn string) ([]string, error) {
 	var dig dnsutil.Dig
 	edgeDNSServer := os.Getenv("EDGE_DNS_SERVER")
-	dig.SetDNS(edgeDNSServer)
+	err := dig.SetDNS(edgeDNSServer)
+	if err != nil {
+		log.Info(fmt.Sprintf("Can't set query dns (%s) with error(%s)", edgeDNSServer, err))
+		return nil, err
+	}
 	a, err := dig.A(fqdn)
 	if err != nil {
 		log.Info(fmt.Sprintf("Can't dig fqdn(%s) with error(%s)", fqdn, err))
@@ -404,6 +409,7 @@ func Dig(fqdn string) ([]string, error) {
 	for _, ip := range a {
 		IPs = append(IPs, fmt.Sprint(ip.A))
 	}
+	sort.Strings(IPs)
 	return IPs, nil
 }
 
@@ -422,9 +428,9 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	if len(coreDNSService.Status.LoadBalancer.Ingress) > 0 {
 		lbHostname = coreDNSService.Status.LoadBalancer.Ingress[0].Hostname
 	} else {
-		errMessage := fmt.Sprintf("No Ingress LoadBalancer entries found for %s serice", coreDNSServiceName)
+		errMessage := fmt.Sprintf("no Ingress LoadBalancer entries found for %s serice", coreDNSServiceName)
 		log.Info(errMessage)
-		err := coreerrors.New("No Ingress LoadBalancer entries found")
+		err := coreerrors.New(errMessage)
 		return nil, err
 	}
 	IPs, err := Dig(lbHostname)
