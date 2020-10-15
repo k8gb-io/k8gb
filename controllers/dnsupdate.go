@@ -44,7 +44,16 @@ func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, er
 	var gslbIngressIPs []string
 
 	for _, ip := range gslbIngress.Status.LoadBalancer.Ingress {
-		gslbIngressIPs = append(gslbIngressIPs, ip.IP)
+		if len(ip.IP) > 0 {
+			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
+		}
+		if len(ip.Hostname) > 0 {
+			IPs, err := Dig(ip.Hostname)
+			if err != nil {
+				return nil, err
+			}
+			gslbIngressIPs = append(gslbIngressIPs, IPs...)
+		}
 	}
 
 	return gslbIngressIPs, nil
