@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	k8gbNamespace = "k8gb"
 	gslbSubsystem = "gslb"
 )
 const (

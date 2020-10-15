@@ -9,9 +9,13 @@ import (
 	"strings"
 	"time"
 
+	coreerrors "errors"
+
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
+	"github.com/lixiangzhong/dnsutil"
 	"github.com/miekg/dns"
+	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +44,16 @@ func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, er
 	var gslbIngressIPs []string
 
 	for _, ip := range gslbIngress.Status.LoadBalancer.Ingress {
-		gslbIngressIPs = append(gslbIngressIPs, ip.IP)
+		if len(ip.IP) > 0 {
+			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
+		}
+		if len(ip.Hostname) > 0 {
+			IPs, err := Dig(ip.Hostname)
+			if err != nil {
+				return nil, err
+			}
+			gslbIngressIPs = append(gslbIngressIPs, IPs...)
+		}
 	}
 
 	return gslbIngressIPs, nil
@@ -229,7 +242,7 @@ func nsServerName(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
 	if len(clusterGeoTag) == 0 {
 		clusterGeoTag = "default"
 	}
-	return fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+	return fmt.Sprintf("gslb-ns-%s.%s", clusterGeoTag, edgeDNSZone)
 }
 
 func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string {
@@ -237,7 +250,7 @@ func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string 
 
 	var extNSServers []string
 	for _, clusterGeoTag := range strings.Split(extClusterGeoTags, ",") {
-		extNSServers = append(extNSServers, fmt.Sprintf("%s-ns-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone))
+		extNSServers = append(extNSServers, fmt.Sprintf("gslb-ns-%s.%s", clusterGeoTag, edgeDNSZone))
 	}
 
 	return extNSServers
@@ -387,6 +400,56 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 	return delegateTo
 }
 
+// Dig digs
+func Dig(fqdn string) ([]string, error) {
+	var dig dnsutil.Dig
+	edgeDNSServer := os.Getenv("EDGE_DNS_SERVER")
+	err := dig.SetDNS(edgeDNSServer)
+	if err != nil {
+		log.Info(fmt.Sprintf("Can't set query dns (%s) with error(%s)", edgeDNSServer, err))
+		return nil, err
+	}
+	a, err := dig.A(fqdn)
+	if err != nil {
+		log.Info(fmt.Sprintf("Can't dig fqdn(%s) with error(%s)", fqdn, err))
+		return nil, err
+	}
+	IPs := []string{}
+	for _, ip := range a {
+		IPs = append(IPs, fmt.Sprint(ip.A))
+	}
+	sort.Strings(IPs)
+	return IPs, nil
+}
+
+func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
+	coreDNSService := &corev1.Service{}
+	coreDNSServiceName := "k8gb-coredns-lb"
+
+	err := r.Get(context.TODO(), types.NamespacedName{Namespace: k8gbNamespace, Name: coreDNSServiceName}, coreDNSService)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info("Can't find %s service", coreDNSServiceName)
+		}
+		return nil, err
+	}
+	var lbHostname string
+	if len(coreDNSService.Status.LoadBalancer.Ingress) > 0 {
+		lbHostname = coreDNSService.Status.LoadBalancer.Ingress[0].Hostname
+	} else {
+		errMessage := fmt.Sprintf("no Ingress LoadBalancer entries found for %s serice", coreDNSServiceName)
+		log.Info(errMessage)
+		err := coreerrors.New(errMessage)
+		return nil, err
+	}
+	IPs, err := Dig(lbHostname)
+	if err != nil {
+		log.Info(fmt.Sprintf("Can't dig k8gb-coredns-lb service loadbalancer fqdn %s", lbHostname))
+		return nil, err
+	}
+	return IPs, nil
+}
+
 func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 	extClusterGeoTags := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
@@ -394,15 +457,19 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 	if r.Config.Route53Enabled {
 		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 		gslbZoneName := os.Getenv("DNS_ZONE")
-		log.Info("Gonna rule route53")
+		log.Info("Creating/Updating DNSEndpoint CRDs for Route53...")
 		var NSServerList []string
 		NSServerList = append(NSServerList, nsServerName(gslb, clusterGeoTag))
 		NSServerList = append(NSServerList, nsServerNameExt(gslb, extClusterGeoTags)...)
 		sort.Strings(NSServerList)
+		NSServerIPs, err := r.coreDNSExposedIPs()
+		if err != nil {
+			return &reconcile.Result{}, err
+		}
 		NSRecord := &externaldns.DNSEndpoint{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:        fmt.Sprintf("%s-route53", gslb.Name),
-				Namespace:   gslb.Namespace,
+				Name:        "k8gb-ns-route53",
+				Namespace:   k8gbNamespace,
 				Annotations: map[string]string{"k8gb.absa.oss/dnstype": "route53"},
 			},
 			Spec: externaldns.DNSEndpointSpec{
@@ -413,10 +480,16 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 						RecordType: "NS",
 						Targets:    NSServerList,
 					},
+					{
+						DNSName:    nsServerName(gslb, clusterGeoTag),
+						RecordTTL:  ttl,
+						RecordType: "A",
+						Targets:    NSServerIPs,
+					},
 				},
 			},
 		}
-		res, err := r.ensureDNSEndpoint(gslb, NSRecord)
+		res, err := r.ensureDNSEndpoint(k8gbNamespace, gslb, NSRecord)
 		if err != nil {
 			return res, err
 		}
@@ -506,13 +579,14 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 }
 
 func (r *GslbReconciler) ensureDNSEndpoint(
+	namespace string,
 	gslb *k8gbv1beta1.Gslb,
 	i *externaldns.DNSEndpoint,
 ) (*reconcile.Result, error) {
 	found := &externaldns.DNSEndpoint{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      i.Name,
-		Namespace: gslb.Namespace,
+		Namespace: namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 

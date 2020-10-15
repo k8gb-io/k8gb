@@ -49,6 +49,7 @@ type GslbReconciler struct {
 	DepResolver *depresolver.DependencyResolver
 }
 
+const k8gbNamespace = "k8gb"
 const gslbFinalizer = "finalizer.k8gb.absa.oss"
 
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
@@ -135,6 +136,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	result, err = r.ensureDNSEndpoint(
+		gslb.Namespace,
 		gslb,
 		dnsEndpoint)
 	if result != nil {
