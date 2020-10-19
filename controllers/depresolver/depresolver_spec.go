@@ -1,8 +1,6 @@
 package depresolver
 
 import (
-	"fmt"
-
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
 
@@ -32,12 +30,14 @@ func (dr *DependencyResolver) ResolveGslbSpec(gslb *k8gbv1beta1.Gslb) error {
 	return dr.errorSpec
 }
 
-func (dr *DependencyResolver) validateSpec(strategy *k8gbv1beta1.Strategy) error {
-	if strategy.DNSTtlSeconds < 0 {
-		return fmt.Errorf(lessThanZeroErrorMessage, "DNSTtlSeconds")
+func (dr *DependencyResolver) validateSpec(strategy *k8gbv1beta1.Strategy) (err error) {
+	err = field("DNSTtlSeconds", strategy.DNSTtlSeconds).isHigherOrEqualToZero().err
+	if err != nil {
+		return
 	}
-	if strategy.SplitBrainThresholdSeconds < 0 {
-		return fmt.Errorf(lessThanZeroErrorMessage, "SplitBrainThresholdSeconds")
+	err = field("SplitBrainThresholdSeconds", strategy.SplitBrainThresholdSeconds).isHigherOrEqualToZero().err
+	if err != nil {
+		return
 	}
-	return nil
+	return
 }

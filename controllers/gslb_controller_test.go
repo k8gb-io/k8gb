@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -38,15 +40,29 @@ func TestGslbController(t *testing.T) {
 	// Start fakedns server for external dns tests
 	fakedns()
 	// Isolate the unit tests from interaction with real infoblox grid
-	err := os.Setenv("INFOBLOX_GRID_HOST", "fakeinfoblox.example.com")
+
+	err := os.Setenv("FAKE_INFOBLOX", "true")
 	if err != nil {
 		t.Fatalf("Can't setup env var: (%v)", err)
 	}
 
-	err = os.Setenv("FAKE_INFOBLOX", "true")
-	if err != nil {
-		t.Fatalf("Can't setup env var: (%v)", err)
+	predefinedConfig := depresolver.Config{
+		ReconcileRequeueSeconds: 30,
+		ClusterGeoTag:           "us-west-1",
+		ExtClustersGeoTags:      []string{"us-east-1"},
+		EdgeDNSServer:           "8.8.8.8",
+		EdgeDNSZone:             "example.com",
+		DNSZone:                 "cloud.example.com",
+		Route53Enabled:          false,
+		Infoblox: depresolver.Infoblox{
+			Host:     "fakeinfoblox.example.com",
+			Username: "foo",
+			Password: "blah",
+			Port:     443,
+			Version:  "0.0.0",
+		},
 	}
+	configureEnvVar(predefinedConfig)
 
 	_, err = os.Stat(crSampleYaml)
 	if os.IsNotExist(err) {
@@ -350,11 +366,11 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Generates proper external NS target FQDNs according to the geo tags", func(t *testing.T) {
-		err := os.Setenv("EDGE_DNS_ZONE", "example.com")
+		err := os.Setenv(depresolver.EdgeDNSZoneKey, "example.com")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
-		err = os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "za")
+		err = os.Setenv(depresolver.ExtClustersGeoTagsKey, "za")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
@@ -493,7 +509,7 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
-		err = os.Setenv("CLUSTER_GEO_TAG", "eu")
+		err = os.Setenv(depresolver.ClusterGeoTagKey, "eu")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
@@ -554,7 +570,7 @@ func TestGslbController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
-		err = os.Setenv("CLUSTER_GEO_TAG", "za")
+		err = os.Setenv(depresolver.ClusterGeoTagKey, "za")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
@@ -631,7 +647,7 @@ func TestGslbController(t *testing.T) {
 	t.Run("Reflect GeoTag in the Status as unset by default", func(t *testing.T) {
 		reconcileAndUpdateGslb(t, r, req, cl, gslb)
 		got := gslb.Status.GeoTag
-		want := "unset"
+		want := "us-west-1"
 
 		if got != want {
 			t.Errorf("got: '%s' GeoTag status, want:'%s'", got, want)
@@ -640,13 +656,13 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("Reflect GeoTag in the Status", func(t *testing.T) {
 		defer func() {
-			err = os.Unsetenv("CLUSTER_GEO_TAG")
+			err = os.Unsetenv(depresolver.ClusterGeoTagKey)
 			if err != nil {
 				t.Fatalf("Can't unset env var: (%v)", err)
 			}
 		}()
 
-		err = os.Setenv("CLUSTER_GEO_TAG", "eu")
+		err = os.Setenv(depresolver.ClusterGeoTagKey, "eu")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
@@ -666,12 +682,12 @@ func TestGslbController(t *testing.T) {
 
 	t.Run("Detects Ingress hostname mismatch", func(t *testing.T) {
 		defer func() {
-			err := os.Setenv("EDGE_DNS_ZONE", "example.com")
+			err := os.Setenv(depresolver.EdgeDNSZoneKey, "example.com")
 			if err != nil {
 				t.Fatalf("Can't set env var: (%v)", err)
 			}
 		}()
-		err := os.Setenv("EDGE_DNS_ZONE", "otherdnszone.com")
+		err := os.Setenv(depresolver.EdgeDNSZoneKey, "otherdnszone.com")
 		if err != nil {
 			t.Fatalf("Can't set env var: (%v)", err)
 		}
@@ -690,7 +706,7 @@ func TestGslbController(t *testing.T) {
 	})
 
 	t.Run("Creates NS DNS records for route53", func(t *testing.T) {
-		err = os.Setenv("EDGE_DNS_SERVER", "1.1.1.1")
+		err = os.Setenv(depresolver.EdgeDNSServerKey, "1.1.1.1")
 		if err != nil {
 			t.Fatalf("Can't setup env var: (%v)", err)
 		}
@@ -714,19 +730,19 @@ func TestGslbController(t *testing.T) {
 			t.Fatalf("Failed to update coredns service lb hostname: (%v)", err)
 		}
 
-		err := os.Setenv("ROUTE53_ENABLED", "true")
+		err := os.Setenv(depresolver.Route53EnabledKey, "true")
 		if err != nil {
 			t.Fatalf("Can't set env var: (%v)", err)
 		}
-		err = os.Setenv("CLUSTER_GEO_TAG", "eu")
+		err = os.Setenv(depresolver.ClusterGeoTagKey, "eu")
 		if err != nil {
 			t.Fatalf("Can't set env var: (%v)", err)
 		}
-		err = os.Setenv("EXT_GSLB_CLUSTERS_GEO_TAGS", "za,us")
+		err = os.Setenv(depresolver.ExtClustersGeoTagsKey, "za,us")
 		if err != nil {
 			t.Fatalf("Can't set env var: (%v)", err)
 		}
-		err = os.Setenv("DNS_ZONE", "cloud.example.com")
+		err = os.Setenv(depresolver.DNSZoneKey, "cloud.example.com")
 		if err != nil {
 			t.Fatalf("Can't set env var: (%v)", err)
 		}
@@ -754,7 +770,7 @@ func TestGslbController(t *testing.T) {
 
 		wantEp := []*externaldns.Endpoint{
 			{
-				DNSName:    os.Getenv("DNS_ZONE"),
+				DNSName:    os.Getenv(depresolver.DNSZoneKey),
 				RecordTTL:  30,
 				RecordType: "NS",
 				Targets: externaldns.Targets{
@@ -973,4 +989,19 @@ func reconcileAndUpdateGslb(t *testing.T,
 	if err != nil {
 		t.Fatalf("Failed to get expected gslb: (%v)", err)
 	}
+}
+
+func configureEnvVar(config depresolver.Config) {
+	_ = os.Setenv(depresolver.ReconcileRequeueSecondsKey, strconv.Itoa(config.ReconcileRequeueSeconds))
+	_ = os.Setenv(depresolver.ClusterGeoTagKey, config.ClusterGeoTag)
+	_ = os.Setenv(depresolver.ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
+	_ = os.Setenv(depresolver.EdgeDNSServerKey, config.EdgeDNSServer)
+	_ = os.Setenv(depresolver.EdgeDNSZoneKey, config.EdgeDNSZone)
+	_ = os.Setenv(depresolver.DNSZoneKey, config.DNSZone)
+	_ = os.Setenv(depresolver.Route53EnabledKey, strconv.FormatBool(config.Route53Enabled))
+	_ = os.Setenv(depresolver.InfobloxGridHostKey, config.Infoblox.Host)
+	_ = os.Setenv(depresolver.InfobloxVersionKey, config.Infoblox.Version)
+	_ = os.Setenv(depresolver.InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))
+	_ = os.Setenv(depresolver.InfobloxUsernameKey, config.Infoblox.Username)
+	_ = os.Setenv(depresolver.InfobloxPasswordKey, config.Infoblox.Password)
 }

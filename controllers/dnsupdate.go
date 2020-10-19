@@ -454,6 +454,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 	extClusterGeoTags := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
 	infobloxGridHost := os.Getenv("INFOBLOX_GRID_HOST")
+	// TODO: Rute53Enabled private, use `r.Config.EdgeDNSType==depresolver.Route53` instead.
 	if r.Config.Route53Enabled {
 		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 		gslbZoneName := os.Getenv("DNS_ZONE")
