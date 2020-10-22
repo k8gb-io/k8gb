@@ -21,6 +21,10 @@ const (
 	InfobloxUsernameKey        = "EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"
 	// #nosec G101; ignore false positive gosec; see: https://securego.io/docs/rules/g101.html
 	InfobloxPasswordKey = "EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"
+	// TODO: resolve, validations, tests
+	OverrideWithFakeDNSKey = "OVERRIDE_WITH_FAKE_EXT_DNS"
+	// TODO: resolve, validations, tests
+	FakeInfoblox = "FAKE_INFOBLOX"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
