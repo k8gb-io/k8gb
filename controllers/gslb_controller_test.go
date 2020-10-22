@@ -66,7 +66,6 @@ var predefinedConfig = depresolver.Config{
 }
 
 func TestNotFoundServiceStatus(t *testing.T) {
-	// "NotFound service status" independent
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
@@ -79,16 +78,15 @@ func TestNotFoundServiceStatus(t *testing.T) {
 }
 
 func TestUnhealthyServiceStatus(t *testing.T) {
-	// "Unhealthy service status" independent
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "unhealthy-app"
 	unhealthyHost := "app2.cloud.example.com"
 	expectedServiceStatus := "Unhealthy"
-	defer deleteUnhealthyService(t, serviceName, &settings)
+	defer deleteUnhealthyService(t, &settings, serviceName)
 	// act
-	createUnhealthyService(t, serviceName, &settings)
+	createUnhealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	// assert
 	actualServiceStatus := settings.gslb.Status.ServiceHealth[unhealthyHost]
@@ -96,15 +94,14 @@ func TestUnhealthyServiceStatus(t *testing.T) {
 }
 
 func TestHealthyServiceStatus(t *testing.T) {
-	// "Healthy service status" independent
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "frontend-podinfo"
 	expectedServiceStatus := "Healthy"
 	healthyHost := "app3.cloud.example.com"
-	defer deleteHealthyService(t, serviceName, &settings)
-	createHealthyService(t, serviceName, &settings)
+	defer deleteHealthyService(t, &settings, serviceName)
+	createHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	// act
 	actualServiceStatus := settings.gslb.Status.ServiceHealth[healthyHost]
@@ -113,7 +110,6 @@ func TestHealthyServiceStatus(t *testing.T) {
 }
 
 func TestIngressHostsPerStatusMetric(t *testing.T) {
-	// "ingress_hosts_per_status metric"
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
@@ -127,8 +123,6 @@ func TestIngressHostsPerStatusMetric(t *testing.T) {
 }
 
 func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
-	// "ingress_hosts_per_status metric reflection for Healthy status" was executed twice.
-	// Originally it reuse service "frontend-podinfo" from "Healthy service status" in and then it recreated the new instance of "frontend-podinfo"
 	// I'm running test multiple times to check that it work properly when healthy service is up and down multiple times
 	defer cleanup()
 	for i := 0; i < 4; i++ {
@@ -136,9 +130,9 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 			// arrange
 			settings := provideSettings(t, predefinedConfig)
 			serviceName := "frontend-podinfo"
-			defer deleteHealthyService(t, serviceName, &settings)
+			defer deleteHealthyService(t, &settings, serviceName)
 			expectedHostsMetric := 1.
-			createHealthyService(t, serviceName, &settings)
+			createHealthyService(t, &settings, serviceName)
 			reconcileAndUpdateGslb(t, settings)
 			// act
 			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
@@ -152,7 +146,6 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 }
 
 func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
-	//originally "ingress_hosts_per_status metric reflection for Unhealthy status"
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
@@ -167,8 +160,8 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 
 	// arrange
 	serviceName := "unhealthy-app"
-	createUnhealthyService(t, serviceName, &settings)
-	defer deleteUnhealthyService(t, serviceName, &settings)
+	createUnhealthyService(t, &settings, serviceName)
+	defer deleteUnhealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	expectedHostsMetricCount = 1
 	// act
@@ -179,19 +172,15 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 }
 
 func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
-	// originally "ingress_hosts_per_status metric reflection for NotFound status"
-	// dependent on "ingress_hosts_per_status metric reflection for Unhealthy status"
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	expectedHostsMetricCount := 2.0
 
-	// TODO: Ask Yury, what happens in this test. This block is legacy from dependent test "ingress_hosts_per_status metric reflection for Unhealthy status"
-	// If I remove it, there are 3 NotFound services. Why 3 ? By adding new services I'm reducing NotFound ?How does it work?
 	serviceName := "unhealthy-app"
-	createUnhealthyService(t, serviceName, &settings)
+	createUnhealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
-	deleteUnhealthyService(t, serviceName, &settings)
+	deleteUnhealthyService(t, &settings, serviceName)
 
 	// act
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
@@ -204,7 +193,6 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 }
 
 func TestHealthyRecordMetric(t *testing.T) {
-	// originally "healthy_records metric"; independent
 	// arrange
 	defer cleanup()
 	expectedHealthyRecordsMetricCount := 3.0
@@ -217,8 +205,8 @@ func TestHealthyRecordMetric(t *testing.T) {
 	settings := provideSettings(t, predefinedConfig)
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	require.NoError(t, err, "Failed to get expected gslb")
-	defer deleteHealthyService(t, serviceName, &settings)
-	createHealthyService(t, serviceName, &settings)
+	defer deleteHealthyService(t, &settings, serviceName)
+	createHealthyService(t, &settings, serviceName)
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 	require.NoError(t, err, "Failed to get expected ingress")
 	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
@@ -233,8 +221,6 @@ func TestHealthyRecordMetric(t *testing.T) {
 }
 
 func TestMetricLinterCheck(t *testing.T) {
-	// originally name+" metric linter check"
-	// TODO: ask Yury what is this test good for
 	// arrange
 	for name, scenario := range map[string]prometheus.Collector{
 		"healthy_records":          healthyRecordsMetric,
@@ -249,7 +235,6 @@ func TestMetricLinterCheck(t *testing.T) {
 }
 
 func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
-	// "Gslb creates DNSEndpoint CR for healthy ingress hosts" was depending on "healthy_records metric" ingress
 	// arrange
 	defer cleanup()
 	serviceName := "frontend-podinfo"
@@ -277,8 +262,8 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
 	err = settings.client.Status().Update(context.TODO(), settings.ingress)
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
-	createHealthyService(t, serviceName, &settings)
-	defer deleteHealthyService(t, serviceName, &settings)
+	createHealthyService(t, &settings, serviceName)
+	defer deleteHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 
 	// act
@@ -293,7 +278,6 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 }
 
 func TestDNSRecordReflectionInStatus(t *testing.T) {
-	// "DNS Record reflection in status" was depending on "Gslb creates DNSEndpoint CR for healthy ingress hosts"
 	// arrange
 	defer cleanup()
 	serviceName := "frontend-podinfo"
@@ -312,8 +296,8 @@ func TestDNSRecordReflectionInStatus(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 	// act
-	createHealthyService(t, serviceName, &settings)
-	defer deleteHealthyService(t, serviceName, &settings)
+	createHealthyService(t, &settings, serviceName)
+	defer deleteHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to load DNS endpoint")
@@ -324,7 +308,6 @@ func TestDNSRecordReflectionInStatus(t *testing.T) {
 }
 
 func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
-	// "Local DNS records has special annotation" was depending on "Gslb creates DNSEndpoint CR for healthy ingress hosts"
 	// arrange
 	defer cleanup()
 	serviceName := "frontend-podinfo"
@@ -343,8 +326,8 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 	// act
-	createHealthyService(t, serviceName, &settings)
-	defer deleteHealthyService(t, serviceName, &settings)
+	createHealthyService(t, &settings, serviceName)
+	defer deleteHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to load DNS endpoint")
@@ -355,7 +338,6 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 }
 
 func TestGeneratesProperExternalNSTargetFQDNsAccordingToTheGeoTags(t *testing.T) {
-	//"Generates proper external NS target FQDNs according to the geo tags" independent
 	// arrange
 	defer cleanup()
 	want := []string{"gslb-ns-za.example.com"}
@@ -370,7 +352,6 @@ func TestGeneratesProperExternalNSTargetFQDNsAccordingToTheGeoTags(t *testing.T)
 }
 
 func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
-	// "Can get external targets from k8gb in another location" was depending on "healthy_records metric"
 	// arrange
 	defer cleanup()
 	serviceName := "frontend-podinfo"
@@ -404,8 +385,8 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 	// act
-	createHealthyService(t, serviceName, &settings)
-	defer deleteHealthyService(t, serviceName, &settings)
+	createHealthyService(t, &settings, serviceName)
+	defer deleteHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
@@ -421,7 +402,6 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 }
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
-	// "Can check external Gslb TXT record for validity and fail if it is expired" independent
 	// arrange
 	defer cleanup()
 	err := os.Setenv(depresolver.OverrideWithFakeDNSKey, "true")
@@ -434,8 +414,6 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 }
 
 func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
-	// "Can filter out delegated zone entry according FQDN provided" depending
-	// on "Generates proper external NS target FQDNs according to the geo tags"
 	// arrange
 	defer cleanup()
 	delegateTo := []ibclient.NameServer{
@@ -463,8 +441,6 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 }
 
 func TestCanGenerateExternalHeartbeatFQDNs(t *testing.T) {
-	// "Can generate external heartbeat FQDNs" depending
-	// on "Generates proper external NS target FQDNs according to the geo tags"
 	// arrange
 	defer cleanup()
 	want := []string{"test-gslb-heartbeat-za.example.com"}
@@ -479,7 +455,6 @@ func TestCanGenerateExternalHeartbeatFQDNs(t *testing.T) {
 }
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
-	// "Can check external Gslb TXT record for validity and pass if it is not expired"
 	// arrange
 	err := os.Setenv(depresolver.OverrideWithFakeDNSKey, "true")
 	require.NoError(t, err, "Can't setup env var: (%v)", depresolver.OverrideWithFakeDNSKey)
@@ -490,8 +465,6 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *test
 }
 
 func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
-	//"Returns own records using Failover strategy when Primary" depends on "healthy_records metric"
-	// arrange
 	defer cleanup()
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
@@ -534,8 +507,8 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	require.NoError(t, err, "Can't update gslb")
 
 	// act
-	createHealthyService(t, serviceName, &settings)
-	defer deleteHealthyService(t, serviceName, &settings)
+	createHealthyService(t, &settings, serviceName)
+	defer deleteHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
@@ -548,7 +521,6 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 }
 
 func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
-	// "Returns external records using Failover strategy when Secondary" depends on "healthy_records metric"
 	// arrange
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
@@ -591,8 +563,8 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	require.NoError(t, err, "Can't update gslb")
 
 	// act
-	createHealthyService(t, serviceName, &settings)
-	defer deleteHealthyService(t, serviceName, &settings)
+	createHealthyService(t, &settings, serviceName)
+	defer deleteHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
@@ -605,7 +577,6 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 }
 
 func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
-	// "Gslb properly propagates annotation down to Ingress" independent
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
@@ -622,7 +593,6 @@ func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 }
 
 func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
-	// "Reflect GeoTag in the Status as unset by default" independent
 	// arrange
 	defer cleanup()
 	want := "us-west-1"
@@ -635,7 +605,6 @@ func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
 }
 
 func TestReflectGeoTagInTheStatus(t *testing.T) {
-	// "Reflect GeoTag in the Status" independent
 	// arrange
 	defer cleanup()
 	want := "eu"
@@ -650,7 +619,6 @@ func TestReflectGeoTagInTheStatus(t *testing.T) {
 }
 
 func TestDetectsIngressHostnameMismatch(t *testing.T) {
-	//"Detects Ingress hostname mismatch" independent
 	// arrange
 	defer cleanup()
 	//getting Gslb and Reconciler
@@ -672,7 +640,6 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 }
 
 func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
-	// "Creates NS DNS records for route53" independent
 	// arrange
 	defer cleanup()
 	const dnsZone = "cloud.example.com"
@@ -741,7 +708,6 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 }
 
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
-	// "Resolves LoadBalancer hostname from Ingress status" independent
 	// arrange
 	defer cleanup()
 	serviceName := "frontend-podinfo"
@@ -759,8 +725,8 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	}
 	settings := provideSettings(t, predefinedConfig)
 	dnsEndpoint := &externaldns.DNSEndpoint{ObjectMeta: metav1.ObjectMeta{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}}
-	createHealthyService(t, serviceName, &settings)
-	defer deleteHealthyService(t, serviceName, &settings)
+	createHealthyService(t, &settings, serviceName)
+	defer deleteHealthyService(t, &settings, serviceName)
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 	require.NoError(t, err, "Failed to get expected ingress")
 
@@ -791,7 +757,7 @@ func TestMain(m *testing.M) {
 	os.Exit(exitVal)
 }
 
-func createHealthyService(t *testing.T, serviceName string, s *testSettings) {
+func createHealthyService(t *testing.T, s *testSettings, serviceName string) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -823,7 +789,7 @@ func createHealthyService(t *testing.T, serviceName string, s *testSettings) {
 	}
 }
 
-func deleteHealthyService(t *testing.T, serviceName string, s *testSettings) {
+func deleteHealthyService(t *testing.T, s *testSettings, serviceName string) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -855,7 +821,7 @@ func deleteHealthyService(t *testing.T, serviceName string, s *testSettings) {
 	}
 }
 
-func createUnhealthyService(t *testing.T, serviceName string, s *testSettings) {
+func createUnhealthyService(t *testing.T, s *testSettings, serviceName string) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -880,11 +846,9 @@ func createUnhealthyService(t *testing.T, serviceName string, s *testSettings) {
 	if err != nil {
 		t.Fatalf("Failed to create testing endpoint: (%v)", err)
 	}
-
 }
 
-// TODO: refactor this to accept settings struct
-func deleteUnhealthyService(t *testing.T, serviceName string, s *testSettings) {
+func deleteUnhealthyService(t *testing.T, s *testSettings, serviceName string) {
 	t.Helper()
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -912,7 +876,6 @@ func deleteUnhealthyService(t *testing.T, serviceName string, s *testSettings) {
 
 }
 
-// TODO: refactor this to accept settings struct
 func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
 	t.Helper()
 	// Reconcile again so Reconcile() checks services and updates the Gslb
