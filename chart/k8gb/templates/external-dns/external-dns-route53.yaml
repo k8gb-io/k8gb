@@ -20,7 +20,7 @@ spec:
         image: {{ .Values.externaldns.image }}
         args:
         - --source=crd
-        - --domain-filter={{ .Values.route53.domain }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
+        - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
         - --annotation-filter=k8gb.absa.oss/dnstype=route53 # filter out only relevant DNSEntrypoints
         - --provider=aws
         - --txt-owner-id= {{ .Values.route53.hostedZoneID }}

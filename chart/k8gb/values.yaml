@@ -91,5 +91,4 @@ infoblox:
 route53:
   enabled: false
   hostedZoneID: ZXXXSSS
-  domain: cloud.example.com
   irsaRole: arn:aws:iam::111111:role/external-dns
