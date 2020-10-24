@@ -10,9 +10,9 @@
 [![Helm Publish](https://github.com/AbsaOSS/k8gb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3A%22Helm+Publish%22)
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 
-## Global Balancing with single CRD
+A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
-<- asciicinemademo to embed ->
+<< ascicinema / gif >>
 
 Global load balancing, commonly referred to as GSLB (Global Server Load Balancing) solutions, have typically been the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 
@@ -22,9 +22,12 @@ k8gb focuses on load balancing traffic across geographically dispersed Kubernete
 
 Global load balancing for any Kubernetes Service can now be enabled and managed by any operations or development teams in the same Kubernetes native way as any other custom resource.
 
-- [Motivation and Architecture](#motivation-and-architecture)
-- [Installation and Configuration](#installation-and-configuration-tutorials)
-- [Production Readiness](#production-readiness)
+## Key Differentiators
+
+* Load balancing is based on timeproof DNS protocol which is perfect for global scope and extremely reliable
+* No dedicated management cluster and no single point of failure
+* Kubernetes native application health checks utilizing status of Liveness and Readiness probes for load balancing decisions
+* Configuration with a single Kubernetes CRD of Gslb kind
 
 ## Motivation and Architecture
 
