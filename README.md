@@ -12,7 +12,8 @@
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
-<< ascicinema / gif >>
+
+![GSLB Failover Demo](https://github.com/AbsaOSS/k8gb/raw/gh-pages/gifs/failover-demo.gif)
 
 Global load balancing, commonly referred to as GSLB (Global Server Load Balancing) solutions, have typically been the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 
