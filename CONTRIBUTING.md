@@ -31,7 +31,7 @@ Thanks for contributing!
 
 ### Testing
 
-* Unit tests should be updated for any functional code change at [test suite location](/controllers/gslb_controller_test.go)
+* Unit tests should be updated for any functional code change at [test suite location](/controllers/gslb_controller_test.go).
 * Acceptance terratest suite is located [here](/terratest) and executable by `make terratest` target. These tests are changed only if the
   change is substantial enough to affect the main end-to-end flow
 
