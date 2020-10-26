@@ -42,7 +42,7 @@ cluster, we assume that you switch kubctl context and apply the same command to 
 make deploy-test-apps
 ```
 
-* Modify sample [Gslb CR](/docs/examples/route53/k8gb-failover.yaml) to reflect your
+* Modify sample [Gslb CR](/docs/examples/route53/k8gb/gslb-failover.yaml) to reflect your
 `dnsZone`, `edgeDNSZone`, valid `hostedZoneID` and `irsaRole` ARN.
 
 * Apply Gslb CR to *each* cluster
@@ -109,6 +109,7 @@ Notice that traffic is properly failed over to `us-east-1`
 
 * Experiment
 
-Now you can scale `eu-west-1` back and observe that traffic is routed back.
-In addition, you can test `roundRobin` load balancing strategy, which is spreading
-the traffic over the clusters in active-active mode.
+Now you can scale `eu-west-1` back and observe that traffic is routed back to the primary cluster.
+
+In addition, you can test `roundRobin` load balancing strategy, which is spreading the traffic
+over the clusters in active-active mode.
