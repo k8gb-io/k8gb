@@ -55,7 +55,7 @@ k8gb-etcd-operator-etcd-operator-765f655575-pgvbh          1/1     Running    0 
 k8gb-etcd-operator-etcd-restore-operator-8977cd5c8-k8l7l   1/1     Running    0          40s
 ```
 
-* As you can see one of the `etcd-cluster` pods is still in `Init` state. The embedded `etcd-operator` is automatically configuring isolated `etcd` cluster to act as a backend for `coredns` which is used as part of k8gb for coordinated DNS responses. Expected post installation result:
+* As you can see one of the `etcd-cluster` pods is still in `Init` state. The embedded `etcd-operator` is automatically configuring isolated `etcd` cluster to act as a backend for `coredns`, which is used as part of k8gb for coordinated DNS responses. Expected post installation result:
 ```sh
 kubectl -n k8gb get pod
 NAME                                                       READY   STATUS    RESTARTS   AGE
