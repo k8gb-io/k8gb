@@ -45,7 +45,7 @@ Run `make lint` to automatically check if your code is compliant.
 
 ### Format of the commit message
 
-We follow a rough convention for commit messages that is designed to answer two
+We follow a rough convention for commit messages that are designed to answer two
 questions: what changed and why. The subject line should feature the what and
 the body of the commit should describe the why.
 
