@@ -247,7 +247,7 @@ deploy-gslb-cr: create-test-ns
 deploy-test-apps: create-test-ns
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
-	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml --set ui.message="\"`$(call get-cluster-geo-tag)`\"" --set image.repository="$(PODINFO_IMAGE_REPO)" podinfo/podinfo
+	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml --set ui.message="`$(call get-cluster-geo-tag)`" --set image.repository="$(PODINFO_IMAGE_REPO)" podinfo/podinfo
 
 .PHONY: clean-test-apps
 clean-test-apps:

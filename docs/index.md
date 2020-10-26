@@ -44,7 +44,7 @@ At it's simplest, an HTTP request should be handled by a healthy service. This s
 
 In the use case above, the following resources are configured by the _application_ team:
 
-**A.** The Kubernetes `Gslb` CRD (Custom Resource Definition) is created which indicates to an Oh My GLB controller that it should create the necessary GSLB configuration for the cluster where the the `Gslb` resource is created and the Oh My GLB controller for that cluster.
+**A.** The Kubernetes `Gslb` CRD (Custom Resource Definition) is created which indicates to an  k8gb controller that it should create the necessary GSLB configuration for the cluster where the the `Gslb` resource is created and the k8gb controller for that cluster.
 
 A potential example of what this `Gslb` resource would look like:
 
@@ -66,7 +66,7 @@ spec:
     secretName: app-glsb-tls # Use this Secret to add to the TLS configuration for the new Ingress resource that will be created for the GSLB host
 ```
 
-On creating this `Gslb` resource, the Oh My GLB controller watching the cluster where this resource is created, will:
+On creating this `Gslb` resource, the k8gb controller watching the cluster where this resource is created, will:
 
 1. Create a new `Ingress` resource that will allow requests with the GSLB host (`app.cloud.example.com`) to be handled by the cluster's Ingress controller
 2. Configure a health check strategy on the underlying `app` Pods. The Pods here are the Pods matched by the Service configured by `serviceName`
@@ -77,7 +77,7 @@ On creating this `Gslb` resource, the Oh My GLB controller watching the cluster 
 In the use case above, the following would describe a client request:
 
 1. Client makes a request to <https://app.cloud.example.com>
-2. In resolving the IP for `app.cloud.example.com`, the Recursive Resolver forwards the requests to one of the instances of Oh My GLB
+2. In resolving the IP for `app.cloud.example.com`, the Recursive Resolver forwards the requests to one of the instances of k8gb
 3. One of the cluster Ingress node IPs is returned to the client. E.g. `10.0.100.20`
 4. The client, using the resolved IP of `10.0.100.20` now makes a connection and proceeds with the request. The request will be handled by one of the cluster's Ingress controllers and via the created GSLB Ingress resource, the request is proxied through to one of the available Pods as per the usual Kubernetes Ingress mechanics
 
@@ -93,9 +93,9 @@ In this use case, we create a second `Gslb` resource in _Kubernetes cluster Y_ m
 
 #### 2.1 Application team
 
-In this use case the same steps for [Application team](#11-application-team) are executed but on _Kubernetes cluster Y_. This means that the Oh My GLB instance for cluster **Y** (assuming healthy Pods) will have added the Ingress node's external IP addresses.
+In this use case the same steps for [Application team](#11-application-team) are executed but on _Kubernetes cluster Y_. This means that the k8gb instance for cluster **Y** (assuming healthy Pods) will have added the Ingress node's external IP addresses.
 
-This means that from an overall Oh My GLB perspective, there are now external IPs for *both* clusters, **X** and **Y**. This implies that all Oh My GLB instances **share common state** and contain IPs for all eligible ingress nodes across *all* clusters. This enables any instance of Oh My GLB to handle resolution for `Gslb` resource `hosts`'s.
+This means that from an overall k8gb perspective, there are now external IPs for *both* clusters, **X** and **Y**. This implies that all k8gb instances **share common state** and contain IPs for all eligible ingress nodes across *all* clusters. This enables any instance of k8gb to handle resolution for `Gslb` resource `hosts`'s.
 
 #### 2.2 Client
 
@@ -153,11 +153,11 @@ The above strategies are specified as part of the `Gslb` resource(s) `spec`.
 ## Configuration
 
 `Gslb` resources should contain all configuration options for the GSLB hosts they represent.
-However, any other global Oh My GLB specific configuration should be specified as arguments to the binary or by reading a specified YAML configuration file.
+However, any other global k8gb specific configuration should be specified as arguments to the binary or by reading a specified YAML configuration file.
 
 ## Runtime environments
 
-Oh My GLB instances should be able to run on any Linux based operating system but should run best within in a Kubernetes environment as a Deployment etc.
+k8gb instances should be able to run on any Linux based operating system but should run best within in a Kubernetes environment as a Deployment etc.
 
 ## Existing GSLB projects
 

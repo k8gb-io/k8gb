@@ -1,0 +1,14 @@
+k8gb:
+  dnsZone: "test.k8gb.io" # dnsZone controlled by gslb
+  edgeDNSZone: "k8gb.io" # main zone which would contain gslb zone to delegate
+  edgeDNSServer: "169.254.169.253" # use this DNS server as a main resolver to enable cross k8gb DNS based communication
+  clusterGeoTag: "eu-west-1" # used for places where we need to distinguish between differnet Gslb instances
+  extGslbClustersGeoTags: "us-east-1" # comma-separated list of external gslb geo tags to pair with
+
+externaldns:
+  expose53onWorkers: false # open 53/udp on workers nodes with nginx controller
+
+route53:
+  enabled: true
+  hostedZoneID: Z<zone-id>
+  irsaRole: arn:aws:iam::<account-id>:role/external-dns-k8gb-cluster-eu-west-1
