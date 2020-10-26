@@ -109,7 +109,7 @@ make destroy-full-local-setup
 
 ### Round Robin
 
-Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each
+Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - app3.cloud.example.com` and depending
 on region will podinfo return **us** or **eu**. In current round robin implementation are ip addresses randomly picked.
 See [Gslb manifest with round robin strategy](/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
