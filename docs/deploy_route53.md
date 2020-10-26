@@ -1,6 +1,6 @@
 # AWS based deployment with Route53 integration
 
-Here we provide example of k8gb deployment in AWS context with Route53 as edgeDNS provider
+Here we provide an example of k8gb deployment in AWS context with Route53 as edgeDNS provider
 
 ## Reference setup
 
@@ -21,7 +21,7 @@ You can use `helm` to deploy stable release from helm repo
 helm repo add k8gb https://absaoss.github.io/k8gb/
 ```
 
-Alternatively use make target to deploy right from the git repository
+Alternatively, use make target to deploy right from the git repository
 
 ```sh
 make deploy-gslb-operator VALUES_YAML=./docs/examples/route53/k8gb/k8gb-cluster-eu-west-1.yaml
@@ -34,7 +34,7 @@ make deploy-gslb-operator VALUES_YAML=./docs/examples/route53/k8gb/k8gb-cluster-
 ## Test
 
 *Note*: here and for all occurrences below whenever we speak about application to *each*
-cluster we assume that you switch kubctl context and apply the same command to all clusters.
+cluster, we assume that you switch kubctl context and apply the same command to all clusters.
 
 * Deploy test application to *each* cluster.
 
@@ -64,7 +64,7 @@ aws route53 list-resource-record-sets --hosted-zone-id $YOUR_HOSTED_ZONE_ID
 ```
 
 You should see that `gslb-ns-$geotag` NS and glue A records were created to
-automatically configure dns zone delegation.
+automatically configure DNS zone delegation.
 
 * Check test application availability.
 
@@ -77,13 +77,13 @@ curl -s failover.test.k8gb.io| grep message
 
 Notice that traffic was routed to `eu-west-1`.
 
-* Emulate failure in `eu-west-1`
+* Emulate the failure in `eu-west-1`
 
 ```sh
 kubectl -n test-gslb scale deploy frontend-podinfo --replicas=0
 ```
 
-* Observe Gslb status change
+* Observe Gslb status change.
 
 ```sh
 k -n test-gslb get gslb test-gslb-failover -o yaml | grep status -A6
@@ -96,7 +96,7 @@ status:
     failover.test.k8gb.io: Healthy
 ```
 
-IP in healthyRecords should change to the ip address of NLB in `us-east-1`
+IP in healthyRecords should change to the IP address of NLB in `us-east-1`
 
 * Check failover to `us-east-1`
 
@@ -110,5 +110,5 @@ Notice that traffic is properly failed over to `us-east-1`
 * Experiment
 
 Now you can scale `eu-west-1` back and observe that traffic is routed back.
-In addition you can test `roundRobin` load balancing strategy which is spreading
-the traffic over the clusters in active-active mode
+In addition, you can test `roundRobin` load balancing strategy, which is spreading
+the traffic over the clusters in active-active mode.

@@ -63,7 +63,7 @@ Example:
 gslb_info{namespace="test-gslb",gslb="test-gslb"} 1
 ```
 
-Served on `0.0.0.0:8686/metrics` endoint
+Served on `0.0.0.0:8686/metrics` endpoint
 
 [prometheus]: https://prometheus.io/
 [prometheus-operator]: https://github.com/coreos/prometheus-operator

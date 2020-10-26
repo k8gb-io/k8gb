@@ -35,6 +35,20 @@ Thanks for contributing!
 * Acceptance terratest suite is located [here](/terratest) and executable by `make terratest` target. These tests are changed only if the
  change is substantial enough to affect the main end-to-end flow.
 
+- [Debugging](#debugging)
+
+## Debugging
+
+Delve debugger needs to be installed first. Follow the [installation instructions](https://github.com/go-delve/delve/tree/master/Documentation/installation) for specific platforms from Delve's website.
+
+1. Run the following script
+
+```shell script
+> make debug-local
+```
+
+2. Attach debugger of your favourite IDE to port `2345`.
+
 ### Code style
 
 The coding style suggested by the Golang community is used in k8gb project. See the [style doc][golang-style-doc] for details.

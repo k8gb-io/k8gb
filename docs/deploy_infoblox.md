@@ -259,7 +259,7 @@ Events:                         <none>
 
 * Ideally you should already see that `Healthy Records` of `podinfo.cloud.example.com` return the records from __both__ of the clusters. Otherwise, give it a couple of minutes to sync up.
 
-* Now you can check the DNS repsonses the same way as before.
+* Now you can check the DNS responses the same way as before.
 ```sh
 dig +short podinfo.cloud.example.com
 172.17.0.8
