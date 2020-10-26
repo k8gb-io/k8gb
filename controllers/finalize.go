@@ -6,6 +6,8 @@ import (
 	"os"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
 func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) error {
@@ -15,6 +17,20 @@ func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) error {
 	// resources that are not owned by this CR, like a PVC.
 
 	gslbZoneName := os.Getenv("DNS_ZONE")
+
+	if r.Config.Route53Enabled {
+		log.Info("Removing Zone Delegation entries...")
+		dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
+		err := r.Get(context.Background(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
+		if err != nil {
+			return err
+		}
+		err = r.Delete(context.Background(), dnsEndpointRoute53)
+		if err != nil {
+			return err
+		}
+	}
+
 	if len(os.Getenv("INFOBLOX_GRID_HOST")) > 0 {
 		objMgr, err := infobloxConnection()
 		if err != nil {
