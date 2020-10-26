@@ -36,6 +36,10 @@ var predefinedConfig = Config{
 		"Infoblox",
 		"secret",
 	},
+	Override{
+		false,
+		false,
+	},
 }
 
 func TestResolveSpecWithFilledFields(t *testing.T) {
@@ -214,8 +218,8 @@ func TestResolveConfigWithoutReconcileRequeueSecondsKey(t *testing.T) {
 
 func TestResolveConfigWithMalformedGeoTag(t *testing.T) {
 	// arrange
+	defer cleanup()
 	for _, tag := range []string{"eu-west.1", "eu?", " ", "eu west1", "?/"} {
-		defer cleanup()
 		expected := predefinedConfig
 		expected.ClusterGeoTag = tag
 		// act,assert
@@ -225,8 +229,8 @@ func TestResolveConfigWithMalformedGeoTag(t *testing.T) {
 
 func TestResolveConfigWithProperGeoTag(t *testing.T) {
 	// arrange
+	defer cleanup()
 	for _, tag := range []string{"eu-west-1", "eu-west1", "us", "1", "US"} {
-		defer cleanup()
 		expected := predefinedConfig
 		expected.ClusterGeoTag = tag
 		// act,assert
@@ -466,8 +470,8 @@ func TestResolveUnsetExtGeoTags(t *testing.T) {
 
 func TestResolveInvalidExtGeoTags(t *testing.T) {
 	// arrange
+	defer cleanup()
 	for _, arr := range [][]string{{"good-tag", ".wrong.tag?"}, {"", ""}} {
-		defer cleanup()
 		expected := predefinedConfig
 		expected.ExtClustersGeoTags = arr
 		// act,assert
@@ -788,6 +792,85 @@ func TestUnsetInfobloxPassword(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxPasswordKey)
 }
 
+func TestResolveConfigEnableFakeDNSAsTrue(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Override.FakeInfobloxEnabled = true
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestResolveConfigEnableFakeDNSAsFalse(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Override.FakeInfobloxEnabled = false
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestResolveConfigEnableFakeDNSAsInvalidValue(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(OverrideWithFakeDNSKey, "i.am.wrong??.")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(context.TODO(), cl)
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, false, config.Override.FakeDNSEnabled)
+}
+
+func TestResolveConfigEnableFakeDNSAsUnsetEnvironmentVariable(t *testing.T) {
+	// arrange
+	defer cleanup()
+	// act,assert
+	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError, OverrideWithFakeDNSKey)
+}
+
+func TestResolveConfigEnableFakeInfobloxAsTrue(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Override.FakeInfobloxEnabled = true
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestResolveConfigEnableFakeInfobloxAsFalse(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Override.FakeInfobloxEnabled = false
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+
+}
+
+func TestResolveConfigEnableFakeInfobloxAsInvalidValue(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(OverrideFakeInfobloxKey, "i.am.wrong??.")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(context.TODO(), cl)
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, false, config.Override.FakeInfobloxEnabled)
+}
+
+func TestResolveConfigEnableFakeInfobloxAsUnsetEnvironmentVariable(t *testing.T) {
+	// arrange
+	defer cleanup()
+	// act,assert
+	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError, OverrideFakeInfobloxKey)
+}
+
 // arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with ResolveOperatorConfig() output. The last parameter unsets the values
 func arrangeVariablesAndAssert(t *testing.T, expected Config, errf func(t assert.TestingT, err error, msgAndArgs ...interface{}) bool, unset ...string) {
 	configureEnvVar(expected)
@@ -799,13 +882,17 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config, errf func(t assert
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
+	if config == nil {
+		t.Fatal("nil *config returned")
+	}
 	assert.Equal(t, expected, *config)
 	errf(t, err)
 }
 
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
-		Route53EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey} {
+		Route53EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey,
+		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -825,6 +912,8 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))
 	_ = os.Setenv(InfobloxUsernameKey, config.Infoblox.Username)
 	_ = os.Setenv(InfobloxPasswordKey, config.Infoblox.Password)
+	_ = os.Setenv(OverrideWithFakeDNSKey, strconv.FormatBool(config.Override.FakeDNSEnabled))
+	_ = os.Setenv(OverrideFakeInfobloxKey, strconv.FormatBool(config.Override.FakeInfobloxEnabled))
 }
 
 func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {

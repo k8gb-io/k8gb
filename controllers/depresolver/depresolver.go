@@ -40,6 +40,14 @@ type Infoblox struct {
 	Password string
 }
 
+// Override configuration
+type Override struct {
+	// FakeDNSEnabled; default=false
+	FakeDNSEnabled bool
+	// FakeInfobloxEnabled if true than Infoblox connection FQDN=`fakezone.example.com`; default = false
+	FakeInfobloxEnabled bool
+}
+
 // Config is operator configuration returned by depResolver
 type Config struct {
 	// Reschedule of Reconcile loop to pickup external Gslb targets
@@ -61,6 +69,8 @@ type Config struct {
 	Route53Enabled bool
 	// Infoblox configuration
 	Infoblox Infoblox
+	// Override the behavior of GSLB in the test environments
+	Override Override
 }
 
 // DependencyResolver resolves configuration for GSLB

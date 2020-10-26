@@ -63,6 +63,9 @@ var predefinedConfig = depresolver.Config{
 		Port:     443,
 		Version:  "0.0.0",
 	},
+	Override: depresolver.Override{
+		FakeInfobloxEnabled: true,
+	},
 }
 
 func TestNotFoundServiceStatus(t *testing.T) {
@@ -374,11 +377,11 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 		{IP: "10.0.0.3"},
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
-	settings := provideSettings(t, predefinedConfig)
-	err := os.Setenv(depresolver.OverrideWithFakeDNSKey, "true")
-	require.NoError(t, err, "Can't setup env var: (%v)", depresolver.OverrideWithFakeDNSKey)
+	customConfig := predefinedConfig
+	customConfig.Override.FakeDNSEnabled = true
+	settings := provideSettings(t, customConfig)
 
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 	require.NoError(t, err, "Failed to get expected ingress")
 	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
 	err = settings.client.Status().Update(context.TODO(), settings.ingress)
@@ -404,8 +407,9 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
 	// arrange
 	defer cleanup()
-	err := os.Setenv(depresolver.OverrideWithFakeDNSKey, "true")
-	require.NoError(t, err, "Can't setup env var: (%v)", depresolver.OverrideWithFakeDNSKey)
+	customConfig := predefinedConfig
+	customConfig.Override.FakeDNSEnabled = true
+	configureEnvVar(customConfig)
 	// act
 	got := checkAliveFromTXT("fake", "test-gslb-heartbeat-eu.example.com", time.Minute*5)
 	want := errors.NewGone("Split brain TXT record expired the time threshold: (5m0s)")
@@ -456,8 +460,9 @@ func TestCanGenerateExternalHeartbeatFQDNs(t *testing.T) {
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
 	// arrange
-	err := os.Setenv(depresolver.OverrideWithFakeDNSKey, "true")
-	require.NoError(t, err, "Can't setup env var: (%v)", depresolver.OverrideWithFakeDNSKey)
+	customConfig := predefinedConfig
+	customConfig.Override.FakeDNSEnabled = true
+	configureEnvVar(customConfig)
 	// act
 	err2 := checkAliveFromTXT("fake", "test-gslb-heartbeat-za.example.com", time.Minute*5)
 	// assert
@@ -489,12 +494,11 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "eu"
+	customConfig.Override.FakeDNSEnabled = true
 	settings := provideSettings(t, customConfig)
-	err := os.Setenv(depresolver.OverrideWithFakeDNSKey, "true")
-	require.NoError(t, err, "Can't setup env var: (%v)", depresolver.OverrideWithFakeDNSKey)
 
 	// ingress
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 	require.NoError(t, err, "Failed to get expected ingress")
 	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
 	err = settings.client.Status().Update(context.TODO(), settings.ingress)
@@ -545,12 +549,11 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
+	customConfig.Override.FakeDNSEnabled = true
 	settings := provideSettings(t, customConfig)
-	err := os.Setenv(depresolver.OverrideWithFakeDNSKey, "true")
-	require.NoError(t, err, "Can't setup env var: (%v)", depresolver.OverrideWithFakeDNSKey)
 
 	// ingress
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 	require.NoError(t, err, "Failed to get expected ingress")
 	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
 	err = settings.client.Status().Update(context.TODO(), settings.ingress)
@@ -972,7 +975,7 @@ func cleanup() {
 	for _, s := range []string{depresolver.ReconcileRequeueSecondsKey, depresolver.ClusterGeoTagKey, depresolver.ExtClustersGeoTagsKey,
 		depresolver.EdgeDNSZoneKey, depresolver.DNSZoneKey, depresolver.EdgeDNSServerKey,
 		depresolver.Route53EnabledKey, depresolver.InfobloxGridHostKey, depresolver.InfobloxVersionKey, depresolver.InfobloxPortKey,
-		depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.OverrideWithFakeDNSKey, depresolver.FakeInfoblox} {
+		depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.OverrideWithFakeDNSKey, depresolver.OverrideFakeInfobloxKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -992,6 +995,6 @@ func configureEnvVar(config depresolver.Config) {
 	_ = os.Setenv(depresolver.InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))
 	_ = os.Setenv(depresolver.InfobloxUsernameKey, config.Infoblox.Username)
 	_ = os.Setenv(depresolver.InfobloxPasswordKey, config.Infoblox.Password)
-	_ = os.Setenv(depresolver.OverrideWithFakeDNSKey, "false")
-	_ = os.Setenv(depresolver.FakeInfoblox, "true")
+	_ = os.Setenv(depresolver.OverrideWithFakeDNSKey, strconv.FormatBool(config.Override.FakeDNSEnabled))
+	_ = os.Setenv(depresolver.OverrideFakeInfobloxKey, strconv.FormatBool(config.Override.FakeInfobloxEnabled))
 }
