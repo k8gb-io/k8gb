@@ -289,6 +289,6 @@ curl -s podinfo.example.com||grep message
 
 Hope you enjoyed the ride!
 
-If anything unclear or is going wrong feel free to contact us at https://github.com/AbsaOSS/k8gb/issues. We will appreciate any feedback/bug report and Pull Requests are welcome.
+If anything unclear or is going wrong, feel free to contact us at https://github.com/AbsaOSS/k8gb/issues. We will appreciate any feedback/bug report and Pull Requests are welcome.
 
 For more advanced technical documentation and fully automated local installation steps, see below.
