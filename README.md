@@ -31,6 +31,21 @@ Global load balancing for any Kubernetes Service can now be enabled and managed 
 * Kubernetes native application health checks utilizing status of Liveness and Readiness probes for load balancing decisions
 * Configuration with a single Kubernetes CRD of Gslb kind
 
+## Quick Start
+
+Simply run
+
+```sh
+make deploy-full-local-setup
+```
+
+It will deploy two local [kind](https://kind.sigs.k8s.io/) clusters with
+k8gb, test application and two sample Gslb resources on top.
+
+This setup is adapted for local scenario and works without external DNS provider dependency.
+
+Consult with [local playground](/docs/local.md) documentation to learn all the details of experimenting with local setup.
+
 ## Motivation and Architecture
 
 k8gb was born out of need for an open source, cloud native GSLB solution at Absa bank in South Africa.
@@ -47,7 +62,7 @@ k8gb commoditises GSLB for Kubernetes, putting teams in complete control of expo
 
 k8gb requires no specialised software or hardware, relying completely on other OSS/CNCF projects, has no single point of failure and fits in with any existing Kubernetes deployment workflow (e.g. GitOps, Kustomize, Helm, etc.) or tools.
 
-Please see the extended acrhitecture documentation [here](/docs/index.md)
+Please see the extended architecture documentation [here](/docs/index.md)
 
 ## Installation and Configuration Tutorials
 
