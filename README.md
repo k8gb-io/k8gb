@@ -33,7 +33,7 @@ Global load balancing for any Kubernetes Service can now be enabled and managed 
 
 ## Motivation and Architecture
 
-k8gb was born out of need for a open source, cloud native GSLB solution at Absa bank in South Africa.
+k8gb was born out of need for an open source, cloud native GSLB solution at Absa bank in South Africa.
 
 As part of the bank's wider container adoption running multiple, geographically dispersed Kubernetes clusters, the need for a global load balancer that was driven from the health of Kubernetes Services was required and for which there did not seem to be an existing solution.
 
