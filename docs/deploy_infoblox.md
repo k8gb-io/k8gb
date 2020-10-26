@@ -257,7 +257,7 @@ Status:
 Events:                         <none>
 ```
 
-* Ideally you should already see that `Healthy Records` of `podinfo.cloud.example.com` return the records from __both__ of the clusters. Otherwise, give it couple of minutes to sync up
+* Ideally you should already see that `Healthy Records` of `podinfo.cloud.example.com` return the records from __both__ of the clusters. Otherwise, give it a couple of minutes to sync up.
 
 * Now you can check the DNS repsonses the same way as before.
 ```sh
