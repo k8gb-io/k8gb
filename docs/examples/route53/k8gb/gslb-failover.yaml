@@ -1,0 +1,18 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: test-gslb-failover
+  namespace: test-gslb
+spec:
+  ingress:
+    rules:
+      - host: failover.test.k8gb.io # Desired GSLB enabled FQDN
+        http:
+          paths:
+          - backend:
+              serviceName: frontend-podinfo # Service name to enable GSLB for
+              servicePort: http
+            path: /
+  strategy:
+    type: failover # Global load balancing strategy
+    primaryGeoTag: eu-west-1 # Primary cluster geo tag

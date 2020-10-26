@@ -64,8 +64,8 @@ eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkd
 ...
 ```
 
-Cluster [test-gslb1](deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
-while [test-gslb2](deploy/kind/cluster2.yaml) on port `:5054`.
+Cluster [test-gslb1](/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
+while [test-gslb2](/deploy/kind/cluster2.yaml) on port `:5054`.
 ```shell script
 dig @localhost localtargets.app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets.app3.cloud.example.com
 ```
@@ -91,8 +91,8 @@ curl localhost:80 -H "Host:app3.cloud.example.com" && curl localhost:81 -H "Host
 
 #### Run integration tests
 
-There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](terratest).
-To check whether everything is running properly execute [terratests](https://terratest.gruntwork.io/) :
+There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](/terratest).
+To check whether everything is running properly execute [terratest](https://terratest.gruntwork.io/) :
 
 ```shell script
 make terratest

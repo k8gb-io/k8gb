@@ -84,4 +84,4 @@ k8gb is very well tested with the following environment options
 
 ## Contributing
 
-See (CONTRIBUTING.md)[/CONTRIBUTING.md]
+See [CONTRIBUTING.md](/CONTRIBUTING.md)
