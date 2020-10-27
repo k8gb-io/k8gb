@@ -350,7 +350,7 @@ func TestGeneratesProperExternalNSTargetFQDNsAccordingToTheGeoTags(t *testing.T)
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	settings := provideSettings(t, customConfig)
 	// act
-	got := settings.reconciler.nsServerNameExt(settings.gslb)
+	got := settings.reconciler.nsServerNameExt()
 	// assert
 	assert.Equal(t, want, got, "got:\n %q externalGslb NS records,\n\n want:\n %q", got, want)
 }
@@ -439,7 +439,7 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	settings := provideSettings(t, customConfig)
 	// act
-	extClusters := settings.reconciler.nsServerNameExt(settings.gslb)
+	extClusters := settings.reconciler.nsServerNameExt()
 	got := filterOutDelegateTo(delegateTo, extClusters[0])
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)

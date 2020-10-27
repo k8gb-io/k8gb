@@ -79,7 +79,7 @@ func getExternalClusterHeartbeatFQDNs(gslb *k8gbv1beta1.Gslb) []string {
 
 func (r *GslbReconciler) getExternalTargets(gslb *k8gbv1beta1.Gslb, host string) ([]string, error) {
 
-	extGslbClusters := r.nsServerNameExt(gslb)
+	extGslbClusters := r.nsServerNameExt()
 
 	var targets []string
 
@@ -219,7 +219,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 	return dnsEndpoint, err
 }
 
-func (r *GslbReconciler) nsServerName(gslb *k8gbv1beta1.Gslb) string {
+func (r *GslbReconciler) nsServerName() string {
 	dnsZoneIntoNS := strings.ReplaceAll(r.Config.DNSZone, ".", "-")
 	return fmt.Sprintf("gslb-ns-%s-%s.%s",
 		dnsZoneIntoNS,
@@ -227,7 +227,7 @@ func (r *GslbReconciler) nsServerName(gslb *k8gbv1beta1.Gslb) string {
 		r.Config.EdgeDNSZone)
 }
 
-func (r *GslbReconciler) nsServerNameExt(gslb *k8gbv1beta1.Gslb) []string {
+func (r *GslbReconciler) nsServerNameExt() []string {
 
 	dnsZoneIntoNS := strings.ReplaceAll(r.Config.DNSZone, ".", "-")
 	var extNSServers []string
@@ -443,8 +443,8 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 		gslbZoneName := os.Getenv("DNS_ZONE")
 		log.Info("Creating/Updating DNSEndpoint CRDs for Route53...")
 		var NSServerList []string
-		NSServerList = append(NSServerList, r.nsServerName(gslb))
-		NSServerList = append(NSServerList, r.nsServerNameExt(gslb)...)
+		NSServerList = append(NSServerList, r.nsServerName())
+		NSServerList = append(NSServerList, r.nsServerNameExt()...)
 		sort.Strings(NSServerList)
 		NSServerIPs, err := r.coreDNSExposedIPs()
 		if err != nil {
@@ -465,7 +465,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 						Targets:    NSServerList,
 					},
 					{
-						DNSName:    r.nsServerName(gslb),
+						DNSName:    r.nsServerName(),
 						RecordTTL:  ttl,
 						RecordType: "A",
 						Targets:    NSServerIPs,
@@ -491,7 +491,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 		delegateTo := []ibclient.NameServer{}
 
 		for _, address := range addresses {
-			nameServer := ibclient.NameServer{Address: address, Name: r.nsServerName(gslb)}
+			nameServer := ibclient.NameServer{Address: address, Name: r.nsServerName()}
 			delegateTo = append(delegateTo, nameServer)
 		}
 
@@ -510,7 +510,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 			if len(findZone.Ref) > 0 {
 
 				// Drop own records for straight away update
-				existingDelegateTo := filterOutDelegateTo(findZone.DelegateTo, r.nsServerName(gslb))
+				existingDelegateTo := filterOutDelegateTo(findZone.DelegateTo, r.nsServerName())
 				existingDelegateTo = append(existingDelegateTo, delegateTo...)
 
 				// Drop external records if they are stale
