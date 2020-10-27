@@ -344,13 +344,13 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 func TestGeneratesProperExternalNSTargetFQDNsAccordingToTheGeoTags(t *testing.T) {
 	// arrange
 	defer cleanup()
-	want := []string{"gslb-ns-za.example.com"}
+	want := []string{"gslb-ns-cloud-example-com-za.example.com"}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	settings := provideSettings(t, customConfig)
 	// act
-	got := getExternalClusterFQDNs(settings.gslb)
+	got := settings.reconciler.nsServerNameExt()
 	// assert
 	assert.Equal(t, want, got, "got:\n %q externalGslb NS records,\n\n want:\n %q", got, want)
 }
@@ -422,24 +422,24 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	// arrange
 	defer cleanup()
 	delegateTo := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-eu.example.com"},
-		{Address: "10.1.0.1", Name: "gslb-ns-za.example.com"},
-		{Address: "10.1.0.2", Name: "gslb-ns-za.example.com"},
-		{Address: "10.1.0.3", Name: "gslb-ns-za.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
 	}
 	want := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-eu.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
 	}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	settings := provideSettings(t, customConfig)
 	// act
-	extClusters := getExternalClusterFQDNs(settings.gslb)
+	extClusters := settings.reconciler.nsServerNameExt()
 	got := filterOutDelegateTo(delegateTo, extClusters[0])
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
@@ -655,13 +655,13 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "NS",
 			Targets: externaldns.Targets{
-				"gslb-ns-eu.example.com",
-				"gslb-ns-us.example.com",
-				"gslb-ns-za.example.com",
+				"gslb-ns-cloud-example-com-eu.example.com",
+				"gslb-ns-cloud-example-com-us.example.com",
+				"gslb-ns-cloud-example-com-za.example.com",
 			},
 		},
 		{
-			DNSName:    "gslb-ns-eu.example.com",
+			DNSName:    "gslb-ns-cloud-example-com-eu.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{

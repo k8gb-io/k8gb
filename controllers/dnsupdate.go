@@ -59,24 +59,6 @@ func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, er
 	return gslbIngressIPs, nil
 }
 
-func getExternalClusterFQDNs(gslb *k8gbv1beta1.Gslb) []string {
-	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
-
-	if extGslbClustersGeoTagsVar == "" {
-		log.Info("No other Gslb enabled clusters are defined in the configuration...Working standalone")
-		return nil
-	}
-
-	extGslbClustersGeoTags := strings.Split(extGslbClustersGeoTagsVar, ",")
-
-	var extGslbClusters []string
-	for _, geoTag := range extGslbClustersGeoTags {
-		cluster := nsServerName(gslb, geoTag)
-		extGslbClusters = append(extGslbClusters, cluster)
-	}
-	return extGslbClusters
-}
-
 func getExternalClusterHeartbeatFQDNs(gslb *k8gbv1beta1.Gslb) []string {
 	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
 
@@ -95,9 +77,9 @@ func getExternalClusterHeartbeatFQDNs(gslb *k8gbv1beta1.Gslb) []string {
 	return extGslbClusters
 }
 
-func getExternalTargets(gslb *k8gbv1beta1.Gslb, host string) ([]string, error) {
+func (r *GslbReconciler) getExternalTargets(gslb *k8gbv1beta1.Gslb, host string) ([]string, error) {
 
-	extGslbClusters := getExternalClusterFQDNs(gslb)
+	extGslbClusters := r.nsServerNameExt()
 
 	var targets []string
 
@@ -173,7 +155,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		}
 
 		// Check if host is alive on external Gslb
-		externalTargets, err := getExternalTargets(gslb, host)
+		externalTargets, err := r.getExternalTargets(gslb, host)
 		if err != nil {
 			return nil, err
 		}
@@ -237,20 +219,24 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 	return dnsEndpoint, err
 }
 
-func nsServerName(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
-	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
-	if len(clusterGeoTag) == 0 {
-		clusterGeoTag = "default"
-	}
-	return fmt.Sprintf("gslb-ns-%s.%s", clusterGeoTag, edgeDNSZone)
+func (r *GslbReconciler) nsServerName() string {
+	dnsZoneIntoNS := strings.ReplaceAll(r.Config.DNSZone, ".", "-")
+	return fmt.Sprintf("gslb-ns-%s-%s.%s",
+		dnsZoneIntoNS,
+		r.Config.ClusterGeoTag,
+		r.Config.EdgeDNSZone)
 }
 
-func nsServerNameExt(gslb *k8gbv1beta1.Gslb, extClusterGeoTags string) []string {
-	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
+func (r *GslbReconciler) nsServerNameExt() []string {
 
+	dnsZoneIntoNS := strings.ReplaceAll(r.Config.DNSZone, ".", "-")
 	var extNSServers []string
-	for _, clusterGeoTag := range strings.Split(extClusterGeoTags, ",") {
-		extNSServers = append(extNSServers, fmt.Sprintf("gslb-ns-%s.%s", clusterGeoTag, edgeDNSZone))
+	for _, clusterGeoTag := range r.Config.ExtClustersGeoTags {
+		extNSServers = append(extNSServers,
+			fmt.Sprintf("gslb-ns-%s-%s.%s",
+				dnsZoneIntoNS,
+				clusterGeoTag,
+				r.Config.EdgeDNSZone))
 	}
 
 	return extNSServers
@@ -451,17 +437,14 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 }
 
 func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
-	clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
-	extClusterGeoTags := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
-	infobloxGridHost := os.Getenv("INFOBLOX_GRID_HOST")
 	// TODO: Rute53Enabled private, use `r.Config.EdgeDNSType==depresolver.Route53` instead.
 	if r.Config.Route53Enabled {
 		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 		gslbZoneName := os.Getenv("DNS_ZONE")
 		log.Info("Creating/Updating DNSEndpoint CRDs for Route53...")
 		var NSServerList []string
-		NSServerList = append(NSServerList, nsServerName(gslb, clusterGeoTag))
-		NSServerList = append(NSServerList, nsServerNameExt(gslb, extClusterGeoTags)...)
+		NSServerList = append(NSServerList, r.nsServerName())
+		NSServerList = append(NSServerList, r.nsServerNameExt()...)
 		sort.Strings(NSServerList)
 		NSServerIPs, err := r.coreDNSExposedIPs()
 		if err != nil {
@@ -482,7 +465,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 						Targets:    NSServerList,
 					},
 					{
-						DNSName:    nsServerName(gslb, clusterGeoTag),
+						DNSName:    r.nsServerName(),
 						RecordTTL:  ttl,
 						RecordType: "A",
 						Targets:    NSServerIPs,
@@ -495,7 +478,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 			return res, err
 		}
 	}
-	if len(infobloxGridHost) > 0 {
+	if len(r.Config.Infoblox.Host) > 0 {
 
 		objMgr, err := infobloxConnection()
 		if err != nil {
@@ -508,12 +491,11 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 		delegateTo := []ibclient.NameServer{}
 
 		for _, address := range addresses {
-			nameServer := ibclient.NameServer{Address: address, Name: nsServerName(gslb, clusterGeoTag)}
+			nameServer := ibclient.NameServer{Address: address, Name: r.nsServerName()}
 			delegateTo = append(delegateTo, nameServer)
 		}
 
 		gslbZoneName := os.Getenv("DNS_ZONE")
-		edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
 		edgeDNSServer := os.Getenv("EDGE_DNS_SERVER")
 		findZone, err := objMgr.GetZoneDelegated(gslbZoneName)
 		if err != nil {
@@ -528,7 +510,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 			if len(findZone.Ref) > 0 {
 
 				// Drop own records for straight away update
-				existingDelegateTo := filterOutDelegateTo(findZone.DelegateTo, nsServerName(gslb, clusterGeoTag))
+				existingDelegateTo := filterOutDelegateTo(findZone.DelegateTo, r.nsServerName())
 				existingDelegateTo = append(existingDelegateTo, delegateTo...)
 
 				// Drop external records if they are stale
@@ -557,7 +539,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 		}
 
 		edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
-		heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+		heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, r.Config.ClusterGeoTag, r.Config.EdgeDNSZone)
 		heartbeatTXTRecord, err := objMgr.GetTXTRecord(heartbeatTXTName)
 		if err != nil {
 			return &reconcile.Result{}, err
