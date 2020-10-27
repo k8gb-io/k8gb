@@ -429,7 +429,7 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	err := r.Get(context.TODO(), types.NamespacedName{Namespace: k8gbNamespace, Name: coreDNSServiceName}, coreDNSService)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("Can't find %s service", coreDNSServiceName)
+			log.Info(fmt.Sprintf("Can't find %s service", coreDNSServiceName))
 		}
 		return nil, err
 	}

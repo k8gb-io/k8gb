@@ -23,8 +23,8 @@ spec:
         - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
         - --annotation-filter=k8gb.absa.oss/dnstype=route53 # filter out only relevant DNSEntrypoints
         - --provider=aws
-        - --txt-owner-id= {{ .Values.route53.hostedZoneID }}
-        - --policy=upsert-only # would prevent ExternalDNS from deleting any records, critical for k8gb, otherwise multiple k8gb instances will try to delete each other records in the same zone
+        - --txt-owner-id=k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
+        - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
       securityContext:
         fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files

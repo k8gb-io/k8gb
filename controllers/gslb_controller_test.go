@@ -44,6 +44,7 @@ type testSettings struct {
 	config     depresolver.Config
 	client     client.Client
 	ingress    *v1beta1.Ingress
+	finalCall  bool
 }
 
 var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
@@ -751,6 +752,49 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 }
 
+func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
+	// arrange
+	defer cleanup()
+
+	const coreDNSLBServiceName = "k8gb-coredns-lb"
+	customConfig := predefinedConfig
+	settings := provideSettings(t, customConfig)
+	coreDNSService := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      coreDNSLBServiceName,
+			Namespace: k8gbNamespace,
+		},
+	}
+	serviceIPs := []corev1.LoadBalancerIngress{
+		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
+	}
+	err := settings.client.Create(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to create testing %s service", coreDNSLBServiceName)
+	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
+	err = settings.client.Status().Update(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to update coredns service lb hostname")
+
+	// act
+	customConfig.Route53Enabled = true
+	// apply new environment variables and update config only
+	configureEnvVar(customConfig)
+	settings.reconciler.Config = &customConfig
+	reconcileAndUpdateGslb(t, settings)
+
+	deletionTimestamp := metav1.Now()
+	settings.gslb.SetDeletionTimestamp(&deletionTimestamp)
+	err = settings.client.Update(context.Background(), settings.gslb)
+	require.NoError(t, err, "Failed to update Gslb")
+	settings.finalCall = true // Gslb is about to be deleted, no requeue expected
+	reconcileAndUpdateGslb(t, settings)
+
+	// assert
+	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
+	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
+	require.Error(t, err, "k8gb-ns-route53 DNSEndpoint should be garbage collected")
+
+}
+
 func TestMain(m *testing.M) {
 	// setup tests
 	fakedns()
@@ -887,8 +931,11 @@ func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
 	if err != nil {
 		return
 	}
-	if res != (reconcile.Result{RequeueAfter: time.Second * 30}) {
-		t.Error("reconcile did not return Result with Requeue")
+
+	if !s.finalCall {
+		if res != (reconcile.Result{RequeueAfter: time.Second * 30}) {
+			t.Error("reconcile did not return Result with Requeue")
+		}
 	}
 
 	err = s.client.Get(context.TODO(), s.request.NamespacedName, s.gslb)
@@ -966,6 +1013,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		request:    req,
 		client:     cl,
 		ingress:    ingress,
+		finalCall:  false,
 	}
 	reconcileAndUpdateGslb(t, settings)
 	return
