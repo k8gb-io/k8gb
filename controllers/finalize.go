@@ -6,6 +6,7 @@ import (
 	"os"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
@@ -23,6 +24,10 @@ func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) error {
 		dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 		err := r.Get(context.Background(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info(fmt.Sprint(err))
+				return nil
+			}
 			return err
 		}
 		err = r.Delete(context.Background(), dnsEndpointRoute53)
