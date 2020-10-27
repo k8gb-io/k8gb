@@ -63,7 +63,7 @@ kubectl -n test-gslb get gslb test-gslb-failover -o yaml
 aws route53 list-resource-record-sets --hosted-zone-id $YOUR_HOSTED_ZONE_ID
 ```
 
-You should see that `gslb-ns-$geotag` NS and glue A records were created to
+You should see that `gslb-ns-$dnsZone-$geotag` NS and glue A records were created to
 automatically configure DNS zone delegation.
 
 * Check test application availability.
