@@ -64,13 +64,12 @@ type Config struct {
 	EdgeDNSZone string
 	// DNSZone controlled by gslb; e.g. cloud.example.com
 	DNSZone string
-	// DNSTypeRoute53 switch
-	// TODO: hide for depresolver subscriber as depresolver retrieves EdgeDNSType. Maybe we can change configuration and set EdgeDNSType directly instead of DNSTypeRoute53 boolean
-	Route53Enabled bool
 	// Infoblox configuration
 	Infoblox Infoblox
 	// Override the behavior of GSLB in the test environments
 	Override Override
+	// route53Enabled hidden. EdgeDNSType defines all enabled Enabled types
+	route53Enabled bool
 }
 
 // DependencyResolver resolves configuration for GSLB

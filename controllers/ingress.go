@@ -29,10 +29,7 @@ func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, 
 	return ingress, err
 }
 
-func (r *GslbReconciler) ensureIngress(request reconcile.Request,
-	instance *k8gbv1beta1.Gslb,
-	i *v1beta1.Ingress,
-) (*reconcile.Result, error) {
+func (r *GslbReconciler) ensureIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingress) (*reconcile.Result, error) {
 	found := &v1beta1.Ingress{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      instance.Name,

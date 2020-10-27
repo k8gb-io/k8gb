@@ -21,22 +21,21 @@ import (
 )
 
 var predefinedConfig = Config{
-	30,
-	"us",
-	[]string{"uk", "eu"},
-	DNSTypeInfoblox,
-	"cloud.example.com",
-	"8.8.8.8",
-	"example.com",
-	false,
-	Infoblox{
+	ReconcileRequeueSeconds: 30,
+	ClusterGeoTag:           "us",
+	ExtClustersGeoTags:      []string{"uk", "eu"},
+	EdgeDNSType:             DNSTypeInfoblox,
+	EdgeDNSServer:           "cloud.example.com",
+	EdgeDNSZone:             "8.8.8.8",
+	DNSZone:                 "example.com",
+	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
 		443,
 		"Infoblox",
 		"secret",
 	},
-	Override{
+	Override: Override{
 		false,
 		false,
 	},
@@ -268,14 +267,14 @@ func TestResolveConfigWithMalformedRoute53Enabled(t *testing.T) {
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, false, config.Route53Enabled)
+	assert.Equal(t, false, config.route53Enabled)
 }
 
 func TestResolveConfigWithProperRoute53Enabled(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.Route53Enabled = true
+	expected.route53Enabled = true
 	expected.Infoblox.Host = ""
 	expected.EdgeDNSType = DNSTypeRoute53
 	// act,assert
@@ -286,7 +285,7 @@ func TestResolveConfigWithoutRoute53(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.Route53Enabled = false
+	expected.route53Enabled = false
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError, Route53EnabledKey)
 }
@@ -302,7 +301,7 @@ func TestResolveConfigWithEmptyRoute53(t *testing.T) {
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, false, config.Route53Enabled)
+	assert.Equal(t, false, config.route53Enabled)
 }
 
 func TestResolveConfigWithEmptyEdgeDnsServer(t *testing.T) {
@@ -503,7 +502,7 @@ func TestRoute53IsEnabledAndInfobloxIsConfigured(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.Route53Enabled = true
+	expected.route53Enabled = true
 	expected.EdgeDNSType = DNSTypeRoute53 | DNSTypeInfoblox
 	expected.Infoblox.Host = "Infoblox.domain"
 	expected.Infoblox.Version = "0.0.1"
@@ -519,7 +518,7 @@ func TestRoute53IsDisabledAndInfobloxIsNotConfigured(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeNoEdgeDNS
-	expected.Route53Enabled = false
+	expected.route53Enabled = false
 	expected.Infoblox.Host = ""
 	// act,assert
 	// that's how our integration tests are running
@@ -530,7 +529,7 @@ func TestRoute53IsDisabledButInfobloxIsConfigured(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.Route53Enabled = false
+	expected.route53Enabled = false
 	expected.EdgeDNSType = DNSTypeInfoblox
 	expected.Infoblox.Host = "Infoblox.domain"
 	expected.Infoblox.Version = "0.0.1"
@@ -545,7 +544,7 @@ func TestRoute53IsEnabledButInfobloxIsNotConfigured(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.Route53Enabled = true
+	expected.route53Enabled = true
 	expected.EdgeDNSType = DNSTypeRoute53
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = "0.0.1"
@@ -561,7 +560,7 @@ func TestInfobloxGridHostIsEmpty(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeRoute53
-	expected.Route53Enabled = true
+	expected.route53Enabled = true
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = ""
 	expected.Infoblox.Port = 0
@@ -604,7 +603,7 @@ func TestInfobloxGridHostIsEmptyButInfobloxPropsAreFilled(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeRoute53
-	expected.Route53Enabled = true
+	expected.route53Enabled = true
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = "0.0.1"
 	expected.Infoblox.Port = 443
@@ -619,7 +618,7 @@ func TestInfobloxGridHostIsUnset(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeNoEdgeDNS
-	expected.Route53Enabled = false
+	expected.route53Enabled = false
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = "0.0.1"
 	expected.Infoblox.Port = 443
@@ -635,7 +634,7 @@ func TestInfobloxGridHostIsInvalid(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Route53Enabled = false
+	expected.route53Enabled = false
 	expected.Infoblox.Host = "dnfkjdnf kj"
 	expected.Infoblox.Version = "0.0.1"
 	expected.Infoblox.Port = 443
@@ -906,7 +905,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(EdgeDNSServerKey, config.EdgeDNSServer)
 	_ = os.Setenv(EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.DNSZone)
-	_ = os.Setenv(Route53EnabledKey, strconv.FormatBool(config.Route53Enabled))
+	_ = os.Setenv(Route53EnabledKey, strconv.FormatBool(config.route53Enabled))
 	_ = os.Setenv(InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(InfobloxVersionKey, config.Infoblox.Version)
 	_ = os.Setenv(InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))

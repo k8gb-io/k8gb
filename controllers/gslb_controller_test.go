@@ -56,7 +56,6 @@ var predefinedConfig = depresolver.Config{
 	EdgeDNSServer:           "8.8.8.8",
 	EdgeDNSZone:             "example.com",
 	DNSZone:                 "cloud.example.com",
-	Route53Enabled:          false,
 	Infoblox: depresolver.Infoblox{
 		Host:     "fakeinfoblox.example.com",
 		Username: "foo",
@@ -410,9 +409,9 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 	defer cleanup()
 	customConfig := predefinedConfig
 	customConfig.Override.FakeDNSEnabled = true
-	configureEnvVar(customConfig)
+	customConfig.EdgeDNSServer = "fake"
 	// act
-	got := checkAliveFromTXT("fake", "test-gslb-heartbeat-eu.example.com", time.Minute*5)
+	got := checkAliveFromTXT("test-gslb-heartbeat-eu.example.com", &customConfig, time.Minute*5)
 	want := errors.NewGone("Split brain TXT record expired the time threshold: (5m0s)")
 	// assert
 	assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
@@ -454,7 +453,7 @@ func TestCanGenerateExternalHeartbeatFQDNs(t *testing.T) {
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	settings := provideSettings(t, customConfig)
 	// act
-	got := getExternalClusterHeartbeatFQDNs(settings.gslb)
+	got := getExternalClusterHeartbeatFQDNs(settings.gslb, &settings.config)
 	// assert
 	assert.Equal(t, want, got, "got:\n %s unexpected heartbeat records,\n\n want:\n %s", got, want)
 }
@@ -463,9 +462,9 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *test
 	// arrange
 	customConfig := predefinedConfig
 	customConfig.Override.FakeDNSEnabled = true
-	configureEnvVar(customConfig)
+	customConfig.EdgeDNSServer = "fake"
 	// act
-	err2 := checkAliveFromTXT("fake", "test-gslb-heartbeat-za.example.com", time.Minute*5)
+	err2 := checkAliveFromTXT("test-gslb-heartbeat-za.example.com", &customConfig, time.Minute*5)
 	// assert
 	assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
 }
@@ -626,17 +625,20 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 	// arrange
 	defer cleanup()
 	//getting Gslb and Reconciler
-	settings := provideSettings(t, predefinedConfig)
-	err := os.Setenv(depresolver.EdgeDNSZoneKey, "otherdnszone.com")
-	require.NoError(t, err, "Can't set env var: (%v)", depresolver.EdgeDNSZoneKey)
+	predefinedSettings := provideSettings(t, predefinedConfig)
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSZone = "otherdnszone.com"
+	predefinedSettings.config = customConfig
 	req := reconcile.Request{
 		NamespacedName: types.NamespacedName{
-			Name:      settings.gslb.Name,
-			Namespace: settings.gslb.Namespace,
+			Name:      predefinedSettings.gslb.Name,
+			Namespace: predefinedSettings.gslb.Namespace,
 		},
 	}
+	//injecting custom config to reconciler created from predefined config
+	predefinedSettings.reconciler.Config = &customConfig
 	// act
-	_, err = settings.reconciler.Reconcile(req)
+	_, err := predefinedSettings.reconciler.Reconcile(req)
 	log.Info(fmt.Sprintf("got an error from controller: %s", err))
 	// assert
 	assert.Error(t, err, "expected controller to detect Ingress hostname and edgeDNSZone mismatch")
@@ -690,12 +692,11 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	require.NoError(t, err, "Failed to update coredns service lb hostname")
 
 	// act
-	customConfig.Route53Enabled = true
+	customConfig.EdgeDNSType = depresolver.DNSTypeRoute53
 	customConfig.ClusterGeoTag = "eu"
 	customConfig.ExtClustersGeoTags = []string{"za", "us"}
 	customConfig.DNSZone = dnsZone
 	// apply new environment variables and update config only
-	configureEnvVar(customConfig)
 	settings.reconciler.Config = &customConfig
 
 	reconcileAndUpdateGslb(t, settings)
@@ -775,9 +776,8 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	require.NoError(t, err, "Failed to update coredns service lb hostname")
 
 	// act
-	customConfig.Route53Enabled = true
+	customConfig.EdgeDNSType = depresolver.DNSTypeRoute53
 	// apply new environment variables and update config only
-	configureEnvVar(customConfig)
 	settings.reconciler.Config = &customConfig
 	reconcileAndUpdateGslb(t, settings)
 
@@ -796,7 +796,7 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	// setup tests
-	fakedns()
+	fakeDNS()
 	// run tests
 	exitVal := m.Run()
 	// teardown
@@ -1036,7 +1036,7 @@ func configureEnvVar(config depresolver.Config) {
 	_ = os.Setenv(depresolver.EdgeDNSServerKey, config.EdgeDNSServer)
 	_ = os.Setenv(depresolver.EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(depresolver.DNSZoneKey, config.DNSZone)
-	_ = os.Setenv(depresolver.Route53EnabledKey, strconv.FormatBool(config.Route53Enabled))
+	_ = os.Setenv(depresolver.Route53EnabledKey, strconv.FormatBool(config.EdgeDNSType == depresolver.DNSTypeRoute53))
 	_ = os.Setenv(depresolver.InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(depresolver.InfobloxVersionKey, config.Infoblox.Version)
 	_ = os.Setenv(depresolver.InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))

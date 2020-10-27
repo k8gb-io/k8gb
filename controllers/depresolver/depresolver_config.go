@@ -33,7 +33,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.ReconcileRequeueSeconds, _ = env.GetEnvAsIntOrFallback(ReconcileRequeueSecondsKey, 30)
 		dr.config.ClusterGeoTag = env.GetEnvAsStringOrFallback(ClusterGeoTagKey, "")
 		dr.config.ExtClustersGeoTags = env.GetEnvAsArrayOfStringsOrFallback(ExtClustersGeoTagsKey, []string{})
-		dr.config.Route53Enabled = env.GetEnvAsBoolOrFallback(Route53EnabledKey, false)
+		dr.config.route53Enabled = env.GetEnvAsBoolOrFallback(Route53EnabledKey, false)
 		dr.config.EdgeDNSServer = env.GetEnvAsStringOrFallback(EdgeDNSServerKey, "")
 		dr.config.EdgeDNSZone = env.GetEnvAsStringOrFallback(EdgeDNSZoneKey, "")
 		dr.config.DNSZone = env.GetEnvAsStringOrFallback(DNSZoneKey, "")
@@ -110,7 +110,7 @@ func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 // getEdgeDNSType contains logic retrieving EdgeDNSType
 func getEdgeDNSType(config *Config) EdgeDNSType {
 	var t = DNSTypeNoEdgeDNS
-	if config.Route53Enabled {
+	if config.route53Enabled {
 		t = t | DNSTypeRoute53
 	}
 	if isNotEmpty(config.Infoblox.Host) {

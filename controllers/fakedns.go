@@ -19,9 +19,9 @@ func oldEdgeTimestamp(threshold string) string {
 }
 
 var records = map[string][]string{
-	"localtargets-app3.cloud.example.com.": []string{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
-	"test-gslb-heartbeat-eu.example.com.":  []string{oldEdgeTimestamp("10m")},
-	"test-gslb-heartbeat-za.example.com.":  []string{oldEdgeTimestamp("3m")},
+	"localtargets-app3.cloud.example.com.": {"10.1.0.1", "10.1.0.2", "10.1.0.3"},
+	"test-gslb-heartbeat-eu.example.com.":  {oldEdgeTimestamp("10m")},
+	"test-gslb-heartbeat-za.example.com.":  {oldEdgeTimestamp("3m")},
 }
 
 func parseQuery(m *dns.Msg) {
@@ -71,7 +71,7 @@ func handleDNSRequest(w dns.ResponseWriter, r *dns.Msg) {
 	}
 }
 
-func fakedns() {
+func fakeDNS() {
 	// attach request handler func
 	dns.HandleFunc("example.com.", handleDNSRequest)
 
@@ -84,12 +84,12 @@ func fakedns() {
 		defer func() {
 			err := server.Shutdown()
 			if err != nil {
-				log.Error(err, "Failed to shutdown fakedns server")
+				log.Error(err, "Failed to shutdown fakeDNS server")
 			}
 
 		}()
 		if err != nil {
-			log.Error(err, "Failed to start fakedns server")
+			log.Error(err, "Failed to start fakeDNS server")
 		}
 	}()
 }
