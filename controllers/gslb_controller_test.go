@@ -792,7 +792,6 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
 	require.Error(t, err, "k8gb-ns-route53 DNSEndpoint should be garbage collected")
-
 }
 
 func TestMain(m *testing.M) {
