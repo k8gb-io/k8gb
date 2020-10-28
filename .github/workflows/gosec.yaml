@@ -1,6 +1,12 @@
 name: Gosec
 
-on: push
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.svg'
+      - '**.drawio'
+      - '.spelling'
 
 jobs:
   security_tests:
