@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Install golang linting tools
+        run: |
+          go get github.com/kisielk/errcheck
+          go get honnef.co/go/tools/cmd/staticcheck
+          go get golang.org/x/lint/golint
       - name: Operator image build and push
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -34,4 +39,3 @@ jobs:
            helm repo add k8gb https://absaoss.github.io/k8gb/
            helm repo update
            helm -n k8gb upgrade -i k8gb k8gb/k8gb --wait --create-namespace --version=$(make version)
-
