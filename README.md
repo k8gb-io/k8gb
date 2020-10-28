@@ -64,6 +64,8 @@ k8gb requires no specialised software or hardware, relying completely on other O
 
 Please see the extended architecture documentation [here](/docs/index.md)
 
+Internal k8gb architecture and its components are described [here](/docs/components.md)
+
 ## Installation and Configuration Tutorials
 
 * [General deployment with Infoblox integration](/docs/deploy_infoblox.md)
@@ -75,12 +77,12 @@ Please see the extended architecture documentation [here](/docs/index.md)
 
 k8gb is very well tested with the following environment options
 
-| Type                            | Implementation                                     |
-|---------------------------------|----------------------------------------------------|
-| Kubernetes Version              | >= 1.14 (with install workaround) >= 1.15 (Stable) |
-| Ingress Controller              | Nginx                                              |
-| EdgeDNS                         | Infoblox                                           |
-| Number of k8gb enabled clusters | 2                                                  |
+| Type                             | Implementation                                     |
+|----------------------------------|----------------------------------------------------|
+| Kubernetes Version               | >= 1.14 (with install workaround) >= 1.15 (Stable) |
+| Environment                      | On-prem(vSphere), AWS(EKS)                         |
+| Ingress Controller               | NGINX                                              |
+| EdgeDNS                          | Infoblox, Route53                                  |
 
 ## Contributing
 
