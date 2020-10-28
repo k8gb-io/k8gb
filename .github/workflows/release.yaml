@@ -20,6 +20,7 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
+          export PATH=~/go/bin:$PATH
           docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
           make docker-build
           make docker-push
