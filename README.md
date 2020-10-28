@@ -77,12 +77,12 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 
 k8gb is very well tested with the following environment options
 
-| Type                             | Implementation                                     |
-|----------------------------------|----------------------------------------------------|
-| Kubernetes Version               | >= 1.14 (with install workaround) >= 1.15 (Stable) |
-| Environment                      | On-prem(vSphere), AWS(EKS)                         |
-| Ingress Controller               | NGINX                                              |
-| EdgeDNS                          | Infoblox, Route53                                  |
+| Type                             | Implementation                                                       |
+|----------------------------------|----------------------------------------------------------------------|
+| Kubernetes Version               | >= 1.14 (with [install workaround](/Makefile#L235)) >= 1.15 (Stable) |
+| Environment                      | On-prem(vSphere), AWS(EKS)                                           |
+| Ingress Controller               | NGINX                                                                |
+| EdgeDNS                          | Infoblox, Route53                                                    |
 
 ## Contributing
 
