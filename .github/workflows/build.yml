@@ -1,5 +1,11 @@
 name: Golang lint and test
-on: push
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.svg'
+      - '**.drawio'
+      - '.spelling'
 jobs:
   go-test:
     name: Go Test
