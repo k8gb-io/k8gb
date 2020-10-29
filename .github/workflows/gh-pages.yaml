@@ -20,6 +20,7 @@ jobs:
           git checkout gh-pages
           git checkout ${GITHUB_REF##*/} README.md
           git checkout ${GITHUB_REF##*/} CONTRIBUTING.md
+          git checkout ${GITHUB_REF##*/} CHANGELOG.md
           git checkout ${GITHUB_REF##*/} docs
       - name: Push to gh-pages
         uses: EndBug/add-and-commit@v5
