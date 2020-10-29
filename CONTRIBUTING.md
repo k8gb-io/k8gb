@@ -85,7 +85,7 @@ The first line is the subject and should be no longer than 70 characters, the se
 
 ## Documentation
 
-If the contribution changes the existing APIs or user interface it must include sufficient documentation to explain the use of the new or updated feature. Likewise the [CHANGELOG][changelog] should be updated with a summary of the change and link to the pull request.
+If the contribution changes the existing APIs or user interface it must include sufficient documentation to explain the use of the new or updated feature. Likewise the [CHANGELOG][/CHANGELOG.md] should be updated with a summary of the change and link to the pull request.
 
 
 [golang-style-doc]: https://github.com/golang/go/wiki/CodeReviewComments
