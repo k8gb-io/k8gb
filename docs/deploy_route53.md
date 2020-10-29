@@ -18,7 +18,7 @@ Example values.yaml override configs can be found [here](/docs/examples/route53/
 You can use `helm` to deploy stable release from helm repo
 
 ```sh
-helm repo add k8gb https://absaoss.github.io/k8gb/
+helm repo add k8gb https://www.k8gb.io
 ```
 
 Alternatively, use make target to deploy right from the git repository
