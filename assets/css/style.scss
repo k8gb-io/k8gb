@@ -8,3 +8,12 @@ $code-bg-color: #282a36 ;
 $code-text-color: #d8d8d8 ;
 
 @import 'jekyll-theme-cayman';
+
+.highlight .nt {
+    color: #1aaa2e;
+}
+
+.highlight .o {
+    color: #adb11b;
+}
+
