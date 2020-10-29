@@ -74,6 +74,10 @@ powergslb
 f5
 dtc
 vSphere
+AbsaOSS
+LGTM
+terratest
+golang
  - docs/index.md
 1.2
 1.3
@@ -86,3 +90,8 @@ vSphere
 3.3
 80
 20
+ - CONTRIBUTING.md
+kubernetes.slack.com
+local.md
+70
+80

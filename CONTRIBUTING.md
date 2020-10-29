@@ -37,7 +37,7 @@ Thanks for contributing!
 
 - [Debugging](#debugging)
 
-## Debugging
+### Debugging
 
 Delve debugger needs to be installed first. Follow the [installation instructions](https://github.com/go-delve/delve/tree/master/Documentation/installation) for specific platforms from Delve's website.
 
