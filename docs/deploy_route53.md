@@ -6,14 +6,14 @@ Here we provide an example of k8gb deployment in AWS context with Route53 as edg
 
 Two EKS clusters in `eu-west-1` and `us-east-1`.
 
-Terraform code for cluster reference setup can be found [here](/docs/examples/route53/)
+Terraform code for cluster reference setup can be found [here](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53)
 
 Feel free to reuse this code fully or partially and adapt for your existing scenario
 things like IRSA(IAM Roles for Service Accounts)
 
 ## Deploy k8gb
 
-Example values.yaml override configs can be found [here](/docs/examples/route53/k8gb)
+Example values.yaml override configs can be found [here](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53/k8gb)
 
 You can use `helm` to deploy stable release from helm repo
 
@@ -42,7 +42,7 @@ cluster, we assume that you switch kubctl context and apply the same command to 
 make deploy-test-apps
 ```
 
-* Modify sample [Gslb CR](/docs/examples/route53/k8gb/gslb-failover.yaml) to reflect your
+* Modify sample [Gslb CR](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53/k8gb/gslb-failover.yaml) to reflect your
 `dnsZone`, `edgeDNSZone`, valid `hostedZoneID` and `irsaRole` ARN.
 
 * Apply Gslb CR to *each* cluster
