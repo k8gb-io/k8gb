@@ -273,16 +273,16 @@ dig +short podinfo.cloud.example.com
 * And for the final end-to-end test, we can use `curl` to query the application
 ```sh
 curl -s podinfo.example.com|grep message
-  "message": "\"eu\"",
+  "message": "eu",
 
 curl -s podinfo.example.com|grep message
-  "message": "\"us\"",
+  "message": "us",
 
 curl -s podinfo.example.com|grep message
-  "message": "\"us\"",
+  "message": "us",
 
 curl -s podinfo.example.com||grep message
-  "message": "\"eu\"",
+  "message": "eu",
 ```
 
 * As you can see specially marked `podinfo` returns different geo tags showing us the Global Round Robin strategy is working as expected
