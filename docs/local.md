@@ -22,7 +22,7 @@
     - ensure you are able to push/pull from your docker registry
     - to run multiple clusters reserve 8GB of memory
 
-      ![](docs/images/docker_settings.png)
+      ![](/docs/images/docker_settings.png)
       <div>
         <sup>above screenshot is for <strong>Docker for Mac</strong> and that options for other Docker distributions may vary</sup>
       </div>
@@ -64,8 +64,8 @@ eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkd
 ...
 ```
 
-Cluster [test-gslb1](/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
-while [test-gslb2](/deploy/kind/cluster2.yaml) on port `:5054`.
+Cluster [test-gslb1](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
+while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster2.yaml) on port `:5054`.
 ```shell script
 dig @localhost localtargets.app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets.app3.cloud.example.com
 ```
@@ -91,7 +91,7 @@ curl localhost:80 -H "Host:app3.cloud.example.com" && curl localhost:81 -H "Host
 
 #### Run integration tests
 
-There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](/terratest).
+There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/AbsaOSS/k8gb/tree/master/terratest).
 To check whether everything is running properly execute [terratest](https://terratest.gruntwork.io/) :
 
 ```shell script
@@ -112,7 +112,7 @@ make destroy-full-local-setup
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - app3.cloud.example.com` and depending
 on region will podinfo return **us** or **eu**. In current round robin implementation are IP addresses randomly picked.
-See [Gslb manifest with round robin strategy](/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
+See [Gslb manifest with round robin strategy](https://github.com/AbsaOSS/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 
 Run several times command below and watch `message` field.
 ```shell script
@@ -142,7 +142,7 @@ As expected result you should see podinfo message changing
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending
 on whether podinfo is running inside the cluster it returns only **eu** or **us**.
-See [Gslb manifest with failover strategy](/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+See [Gslb manifest with failover strategy](https://github.com/AbsaOSS/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 Switch GLSB to failover mode:
 ```shell script
