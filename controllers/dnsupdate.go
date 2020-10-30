@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 
 	coreerrors "errors"
 
@@ -48,7 +50,7 @@ func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, er
 			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
 		}
 		if len(ip.Hostname) > 0 {
-			IPs, err := Dig(ip.Hostname)
+			IPs, err := Dig(r.Config.EdgeDNSServer, ip.Hostname)
 			if err != nil {
 				return nil, err
 			}
@@ -59,25 +61,14 @@ func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, er
 	return gslbIngressIPs, nil
 }
 
-func getExternalClusterHeartbeatFQDNs(gslb *k8gbv1beta1.Gslb) []string {
-	extGslbClustersGeoTagsVar := os.Getenv("EXT_GSLB_CLUSTERS_GEO_TAGS")
-
-	if extGslbClustersGeoTagsVar == "" {
-		log.Info("No other Gslb enabled clusters are defined in the configuration...Working standalone")
-		return nil
+func getExternalClusterHeartbeatFQDNs(gslb *k8gbv1beta1.Gslb, config *depresolver.Config) (extGslbClusters []string) {
+	for _, geoTag := range config.ExtClustersGeoTags {
+		extGslbClusters = append(extGslbClusters, fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, geoTag, config.EdgeDNSZone))
 	}
-
-	extGslbClustersGeoTags := strings.Split(extGslbClustersGeoTagsVar, ",")
-
-	var extGslbClusters []string
-	for _, geoTag := range extGslbClustersGeoTags {
-		cluster := heartbeatFQDN(gslb, geoTag)
-		extGslbClusters = append(extGslbClusters, cluster)
-	}
-	return extGslbClusters
+	return
 }
 
-func (r *GslbReconciler) getExternalTargets(gslb *k8gbv1beta1.Gslb, host string) ([]string, error) {
+func (r *GslbReconciler) getExternalTargets(host string) ([]string, error) {
 
 	extGslbClusters := r.nsServerNameExt()
 
@@ -89,15 +80,7 @@ func (r *GslbReconciler) getExternalTargets(gslb *k8gbv1beta1.Gslb, host string)
 		host = fmt.Sprintf("localtargets-%s.", host) //Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
 		g.SetQuestion(host, dns.TypeA)
 
-		localTestDNSinject := os.Getenv("OVERRIDE_WITH_FAKE_EXT_DNS")
-
-		var ns string
-
-		if localTestDNSinject == "true" {
-			ns = "127.0.0.1:7753"
-		} else {
-			ns = fmt.Sprintf("%s:53", cluster)
-		}
+		ns := overrideWithFakeDNS(r.Config.Override.FakeDNSEnabled, cluster)
 
 		a, err := dns.Exchange(g, ns)
 		if err != nil {
@@ -133,13 +116,11 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		return nil, err
 	}
 
-	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
-
 	for host, health := range serviceHealth {
 		var finalTargets []string
 
-		if !strings.Contains(host, edgeDNSZone) {
-			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", host, edgeDNSZone)
+		if !strings.Contains(host, r.Config.EdgeDNSZone) {
+			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", host, r.Config.EdgeDNSZone)
 		}
 
 		if health == "Healthy" {
@@ -155,7 +136,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		}
 
 		// Check if host is alive on external Gslb
-		externalTargets, err := r.getExternalTargets(gslb, host)
+		externalTargets, err := r.getExternalTargets(host)
 		if err != nil {
 			return nil, err
 		}
@@ -164,9 +145,8 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 			case "roundRobin":
 				finalTargets = append(finalTargets, externalTargets...)
 			case "failover":
-				clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
 				// If cluster is Primary
-				if gslb.Spec.Strategy.PrimaryGeoTag == clusterGeoTag {
+				if gslb.Spec.Strategy.PrimaryGeoTag == r.Config.ClusterGeoTag {
 					// If cluster is Primary and Healthy return only own targets
 					// If cluster is Primary and Unhealthy return Secondary external targets
 					if health != "Healthy" {
@@ -242,14 +222,6 @@ func (r *GslbReconciler) nsServerNameExt() []string {
 	return extNSServers
 }
 
-func heartbeatFQDN(gslb *k8gbv1beta1.Gslb, clusterGeoTag string) string {
-	edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
-	if len(clusterGeoTag) == 0 {
-		clusterGeoTag = "default"
-	}
-	return fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
-}
-
 type fakeInfobloxConnector struct {
 	//createObjectObj interface{}
 
@@ -266,42 +238,37 @@ type fakeInfobloxConnector struct {
 	fakeRefReturn string
 }
 
-func (c *fakeInfobloxConnector) CreateObject(obj ibclient.IBObject) (string, error) {
-
+func (c *fakeInfobloxConnector) CreateObject(ibclient.IBObject) (string, error) {
 	return c.fakeRefReturn, nil
 }
 
-func (c *fakeInfobloxConnector) GetObject(obj ibclient.IBObject, ref string, res interface{}) (err error) {
+func (c *fakeInfobloxConnector) GetObject(ibclient.IBObject, string, interface{}) (err error) {
 	return nil
 }
 
-func (c *fakeInfobloxConnector) DeleteObject(ref string) (string, error) {
-
+func (c *fakeInfobloxConnector) DeleteObject(string) (string, error) {
 	return c.fakeRefReturn, nil
 }
 
-func (c *fakeInfobloxConnector) UpdateObject(obj ibclient.IBObject, ref string) (string, error) {
-
+func (c *fakeInfobloxConnector) UpdateObject(ibclient.IBObject, string) (string, error) {
 	return c.fakeRefReturn, nil
 }
 
-func infobloxConnection() (*ibclient.ObjectManager, error) {
+func infobloxConnection(config *depresolver.Config) (*ibclient.ObjectManager, error) {
 	hostConfig := ibclient.HostConfig{
-		Host:     os.Getenv("INFOBLOX_GRID_HOST"),
-		Version:  os.Getenv("INFOBLOX_WAPI_VERSION"),
-		Port:     os.Getenv("INFOBLOX_WAPI_PORT"),
-		Username: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"),
-		Password: os.Getenv("EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"),
+		Host:     config.Infoblox.Host,
+		Version:  config.Infoblox.Version,
+		Port:     strconv.Itoa(config.Infoblox.Port),
+		Username: config.Infoblox.Username,
+		Password: config.Infoblox.Password,
 	}
 	transportConfig := ibclient.NewTransportConfig("false", 20, 10)
 	requestBuilder := &ibclient.WapiRequestBuilder{}
 	requestor := &ibclient.WapiHttpRequestor{}
 
-	fakeInfoblox := os.Getenv("FAKE_INFOBLOX")
-
 	var objMgr *ibclient.ObjectManager
 
-	if len(fakeInfoblox) > 0 {
+	if config.Override.FakeInfobloxEnabled {
 		fqdn := "fakezone.example.com"
 		fakeRefReturn := "zone_delegated/ZG5zLnpvbmUkLl9kZWZhdWx0LnphLmNvLmFic2EuY2Fhcy5vaG15Z2xiLmdzbGJpYmNsaWVudA:fakezone.example.com/default"
 		ohmyFakeConnector := &fakeInfobloxConnector{
@@ -326,19 +293,10 @@ func infobloxConnection() (*ibclient.ObjectManager, error) {
 	return objMgr, nil
 }
 
-func checkAliveFromTXT(dnsserver string, fqdn string, splitBrainThreshold time.Duration) error {
-	localTestDNSinject := os.Getenv("OVERRIDE_WITH_FAKE_EXT_DNS")
-
-	var ns string
-
-	if localTestDNSinject == "true" {
-		ns = "127.0.0.1:7753"
-	} else {
-		ns = fmt.Sprintf("%s:53", dnsserver)
-	}
-
+func checkAliveFromTXT(fqdn string, config *depresolver.Config, splitBrainThreshold time.Duration) error {
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(fqdn), dns.TypeTXT)
+	ns := overrideWithFakeDNS(config.Override.FakeDNSEnabled, config.EdgeDNSServer)
 	txt, err := dns.Exchange(m, ns)
 	if err != nil {
 		log.Info(fmt.Sprintf("Error contacting EdgeDNS server (%s) for TXT split brain record: (%s)", ns, err))
@@ -387,9 +345,11 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 }
 
 // Dig digs
-func Dig(fqdn string) ([]string, error) {
+func Dig(edgeDNSServer, fqdn string) ([]string, error) {
 	var dig dnsutil.Dig
-	edgeDNSServer := os.Getenv("EDGE_DNS_SERVER")
+	if edgeDNSServer == "" {
+		return nil, fmt.Errorf("empty edgeDNSServer")
+	}
 	err := dig.SetDNS(edgeDNSServer)
 	if err != nil {
 		log.Info(fmt.Sprintf("Can't set query dns (%s) with error(%s)", edgeDNSServer, err))
@@ -400,7 +360,7 @@ func Dig(fqdn string) ([]string, error) {
 		log.Info(fmt.Sprintf("Can't dig fqdn(%s) with error(%s)", fqdn, err))
 		return nil, err
 	}
-	IPs := []string{}
+	var IPs []string
 	for _, ip := range a {
 		IPs = append(IPs, fmt.Sprint(ip.A))
 	}
@@ -428,7 +388,7 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	IPs, err := Dig(lbHostname)
+	IPs, err := Dig(r.Config.EdgeDNSServer, lbHostname)
 	if err != nil {
 		log.Info(fmt.Sprintf("Can't dig k8gb-coredns-lb service loadbalancer fqdn %s", lbHostname))
 		return nil, err
@@ -437,10 +397,8 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 }
 
 func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
-	// TODO: Rute53Enabled private, use `r.Config.EdgeDNSType==depresolver.Route53` instead.
-	if r.Config.Route53Enabled {
+	if r.Config.EdgeDNSType == depresolver.DNSTypeRoute53 {
 		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
-		gslbZoneName := os.Getenv("DNS_ZONE")
 		log.Info("Creating/Updating DNSEndpoint CRDs for Route53...")
 		var NSServerList []string
 		NSServerList = append(NSServerList, r.nsServerName())
@@ -459,7 +417,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 			Spec: externaldns.DNSEndpointSpec{
 				Endpoints: []*externaldns.Endpoint{
 					{
-						DNSName:    gslbZoneName,
+						DNSName:    r.Config.DNSZone,
 						RecordTTL:  ttl,
 						RecordType: "NS",
 						Targets:    NSServerList,
@@ -473,14 +431,14 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 				},
 			},
 		}
-		res, err := r.ensureDNSEndpoint(k8gbNamespace, gslb, NSRecord)
+		res, err := r.ensureDNSEndpoint(k8gbNamespace, NSRecord)
 		if err != nil {
 			return res, err
 		}
 	}
-	if len(r.Config.Infoblox.Host) > 0 {
+	if r.Config.EdgeDNSType == depresolver.DNSTypeInfoblox {
 
-		objMgr, err := infobloxConnection()
+		objMgr, err := infobloxConnection(r.Config)
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
@@ -488,22 +446,20 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
-		delegateTo := []ibclient.NameServer{}
+		var delegateTo []ibclient.NameServer
 
 		for _, address := range addresses {
 			nameServer := ibclient.NameServer{Address: address, Name: r.nsServerName()}
 			delegateTo = append(delegateTo, nameServer)
 		}
 
-		gslbZoneName := os.Getenv("DNS_ZONE")
-		edgeDNSServer := os.Getenv("EDGE_DNS_SERVER")
-		findZone, err := objMgr.GetZoneDelegated(gslbZoneName)
+		findZone, err := objMgr.GetZoneDelegated(r.Config.DNSZone)
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
 
 		if findZone != nil {
-			err = checkZoneDelegated(findZone, gslbZoneName)
+			err = checkZoneDelegated(findZone, r.Config.DNSZone)
 			if err != nil {
 				return &reconcile.Result{}, err
 			}
@@ -514,16 +470,16 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 				existingDelegateTo = append(existingDelegateTo, delegateTo...)
 
 				// Drop external records if they are stale
-				extClusters := getExternalClusterHeartbeatFQDNs(gslb)
+				extClusters := getExternalClusterHeartbeatFQDNs(gslb, r.Config)
 				for _, extCluster := range extClusters {
-					err = checkAliveFromTXT(edgeDNSServer, extCluster, time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
+					err = checkAliveFromTXT(extCluster, r.Config, time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
 					if err != nil {
 						log.Error(err, "got the error from TXT based checkAlive")
 						log.Info(fmt.Sprintf("External cluster (%s) doesn't look alive, filtering it out from delegated zone configuration...", extCluster))
 						existingDelegateTo = filterOutDelegateTo(existingDelegateTo, extCluster)
 					}
 				}
-				log.Info(fmt.Sprintf("Updating delegated zone(%s) with the server list(%v)", gslbZoneName, existingDelegateTo))
+				log.Info(fmt.Sprintf("Updating delegated zone(%s) with the server list(%v)", r.Config.DNSZone, existingDelegateTo))
 
 				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, existingDelegateTo)
 				if err != nil {
@@ -531,8 +487,8 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 				}
 			}
 		} else {
-			log.Info(fmt.Sprintf("Creating delegated zone(%s)...", gslbZoneName))
-			_, err = objMgr.CreateZoneDelegated(gslbZoneName, delegateTo)
+			log.Info(fmt.Sprintf("Creating delegated zone(%s)...", r.Config.DNSZone))
+			_, err = objMgr.CreateZoneDelegated(r.Config.DNSZone, delegateTo)
 			if err != nil {
 				return &reconcile.Result{}, err
 			}
@@ -563,7 +519,6 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 
 func (r *GslbReconciler) ensureDNSEndpoint(
 	namespace string,
-	gslb *k8gbv1beta1.Gslb,
 	i *externaldns.DNSEndpoint,
 ) (*reconcile.Result, error) {
 	found := &externaldns.DNSEndpoint{}
@@ -609,6 +564,15 @@ func checkZoneDelegated(findZone *ibclient.ZoneDelegated, gslbZoneName string) e
 		return err
 	}
 	return nil
+}
+
+func overrideWithFakeDNS(fakeDNSEnabled bool, server string) (ns string) {
+	if fakeDNSEnabled {
+		ns = "127.0.0.1:7753"
+	} else {
+		ns = fmt.Sprintf("%s:53", server)
+	}
+	return
 }
 
 func prettyPrint(s interface{}) string {

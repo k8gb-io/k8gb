@@ -3,7 +3,8 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"os"
+
+	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -12,14 +13,11 @@ import (
 )
 
 func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) error {
-	// TODO(user): Add the cleanup steps that the operator
 	// needs to do before the CR can be deleted. Examples
 	// of finalizers include performing backups and deleting
 	// resources that are not owned by this CR, like a PVC.
 
-	gslbZoneName := os.Getenv("DNS_ZONE")
-
-	if r.Config.Route53Enabled {
+	if r.Config.EdgeDNSType == depresolver.DNSTypeRoute53 {
 		log.Info("Removing Zone Delegation entries...")
 		dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 		err := r.Get(context.Background(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
@@ -36,23 +34,23 @@ func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) error {
 		}
 	}
 
-	if len(os.Getenv("INFOBLOX_GRID_HOST")) > 0 {
-		objMgr, err := infobloxConnection()
+	if r.Config.EdgeDNSType == depresolver.DNSTypeInfoblox {
+		objMgr, err := infobloxConnection(r.Config)
 		if err != nil {
 			return err
 		}
-		findZone, err := objMgr.GetZoneDelegated(gslbZoneName)
+		findZone, err := objMgr.GetZoneDelegated(r.Config.DNSZone)
 		if err != nil {
 			return err
 		}
 
 		if findZone != nil {
-			err = checkZoneDelegated(findZone, gslbZoneName)
+			err = checkZoneDelegated(findZone, r.Config.DNSZone)
 			if err != nil {
 				return err
 			}
 			if len(findZone.Ref) > 0 {
-				log.Info(fmt.Sprintf("Deleting delegated zone(%s)...", gslbZoneName))
+				log.Info(fmt.Sprintf("Deleting delegated zone(%s)...", r.Config.DNSZone))
 				_, err := objMgr.DeleteZoneDelegated(findZone.Ref)
 				if err != nil {
 					return err
@@ -60,9 +58,7 @@ func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) error {
 			}
 		}
 
-		edgeDNSZone := os.Getenv("EDGE_DNS_ZONE")
-		clusterGeoTag := os.Getenv("CLUSTER_GEO_TAG")
-		heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, clusterGeoTag, edgeDNSZone)
+		heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, r.Config.ClusterGeoTag, r.Config.EdgeDNSZone)
 		findTXT, err := objMgr.GetTXTRecord(heartbeatTXTName)
 		if err != nil {
 			return err

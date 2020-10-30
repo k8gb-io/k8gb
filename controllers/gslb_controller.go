@@ -120,10 +120,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	result, err = r.ensureIngress(
-		req,
-		gslb,
-		ingress)
+	result, err = r.ensureIngress(gslb, ingress)
 	if result != nil {
 		return *result, err
 	}
@@ -135,10 +132,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	result, err = r.ensureDNSEndpoint(
-		gslb.Namespace,
-		gslb,
-		dnsEndpoint)
+	result, err = r.ensureDNSEndpoint(gslb.Namespace, dnsEndpoint)
 	if result != nil {
 		return *result, err
 	}
