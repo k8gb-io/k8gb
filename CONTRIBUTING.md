@@ -32,7 +32,7 @@ Thanks for contributing!
 ### Testing
 
 * Unit tests should be updated for any functional code change at [test suite location](https://github.com/AbsaOSS/k8gb/tree/master/controllers/gslb_controller_test.go).
-* Acceptance terratest suite is located [here](/terratest) and executable by `make terratest` target. These tests are changed only if the
+* Acceptance terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest) and executable by `make terratest` target. These tests are changed only if the
  change is substantial enough to affect the main end-to-end flow.
 
 - [Debugging](#debugging)
