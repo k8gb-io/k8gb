@@ -9,7 +9,7 @@ k8gb is MIT licensed and accepts contributions via GitHub pull requests. This do
 ## Getting started
 
 - Fork the repository on GitHub
-- See the [local playground guide][docs/local.md] for testing environment setup
+- See the [local playground guide](/docs/local.md) for testing environment setup
 
 ## Reporting bugs and creating issues
 
@@ -31,7 +31,7 @@ Thanks for contributing!
 
 ### Testing
 
-* Unit tests should be updated for any functional code change at [test suite location](/controllers/gslb_controller_test.go).
+* Unit tests should be updated for any functional code change at [test suite location](https://github.com/AbsaOSS/k8gb/tree/master/controllers/gslb_controller_test.go).
 * Acceptance terratest suite is located [here](/terratest) and executable by `make terratest` target. These tests are changed only if the
  change is substantial enough to affect the main end-to-end flow.
 
