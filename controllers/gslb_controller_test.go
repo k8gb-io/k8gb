@@ -77,7 +77,8 @@ func TestNotFoundServiceStatus(t *testing.T) {
 	// act
 	actualServiceStatus := settings.gslb.Status.ServiceHealth[notFoundHost]
 	// assert
-	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s", notFoundHost, expectedServiceStatus, actualServiceStatus)
+	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
+		notFoundHost, expectedServiceStatus, actualServiceStatus)
 }
 
 func TestUnhealthyServiceStatus(t *testing.T) {
@@ -93,7 +94,8 @@ func TestUnhealthyServiceStatus(t *testing.T) {
 	reconcileAndUpdateGslb(t, settings)
 	// assert
 	actualServiceStatus := settings.gslb.Status.ServiceHealth[unhealthyHost]
-	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s", unhealthyHost, expectedServiceStatus, actualServiceStatus)
+	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
+		unhealthyHost, expectedServiceStatus, actualServiceStatus)
 }
 
 func TestHealthyServiceStatus(t *testing.T) {
@@ -109,7 +111,8 @@ func TestHealthyServiceStatus(t *testing.T) {
 	// act
 	actualServiceStatus := settings.gslb.Status.ServiceHealth[healthyHost]
 	// assert
-	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s", healthyHost, expectedServiceStatus, actualServiceStatus)
+	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
+		healthyHost, expectedServiceStatus, actualServiceStatus)
 }
 
 func TestIngressHostsPerStatusMetric(t *testing.T) {
@@ -122,7 +125,8 @@ func TestIngressHostsPerStatusMetric(t *testing.T) {
 	actualHostsMetricCount := testutil.CollectAndCount(ingressHostsPerStatusMetric)
 	// assert
 	assert.NoError(t, err, "Failed to get expected gslb")
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v", expectedHostsMetricCount, actualHostsMetricCount)
+	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v",
+		expectedHostsMetricCount, actualHostsMetricCount)
 }
 
 func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
@@ -139,11 +143,13 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 			reconcileAndUpdateGslb(t, settings)
 			// act
 			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
-			healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": healthyStatus})
+			healthyHosts :=
+				ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": healthyStatus})
 			actualHostsMetric := testutil.ToFloat64(healthyHosts)
 			// assert
 			assert.NoError(t, err, "Failed to get expected gslb")
-			assert.Equal(t, expectedHostsMetric, actualHostsMetric, "expected %v managed hosts with Healthy status, but got %v", expectedHostsMetric, actualHostsMetric)
+			assert.Equal(t, expectedHostsMetric, actualHostsMetric, "expected %v managed hosts with Healthy status, but got %v",
+				expectedHostsMetric, actualHostsMetric)
 		}()
 	}
 }
@@ -155,11 +161,13 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	expectedHostsMetricCount := 0.
 	// act
-	unhealthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": unhealthyStatus})
+	unhealthyHosts :=
+		ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": unhealthyStatus})
 	actualHostsMetricCount := testutil.ToFloat64(unhealthyHosts)
 	// assert
 	assert.NoError(t, err, "Failed to get expected gslb")
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v", expectedHostsMetricCount, actualHostsMetricCount)
+	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v",
+		expectedHostsMetricCount, actualHostsMetricCount)
 
 	// arrange
 	serviceName := "unhealthy-app"
@@ -168,10 +176,12 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	reconcileAndUpdateGslb(t, settings)
 	expectedHostsMetricCount = 1
 	// act
-	unhealthyHosts = ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": unhealthyStatus})
+	unhealthyHosts =
+		ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": unhealthyStatus})
 	actualHostsMetricCount = testutil.ToFloat64(unhealthyHosts)
 	// assert
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with Healthy status, but got %v", expectedHostsMetricCount, actualHostsMetricCount)
+	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with Healthy status, but got %v",
+		expectedHostsMetricCount, actualHostsMetricCount)
 }
 
 func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
@@ -188,11 +198,13 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 	// act
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	require.NoError(t, err, "Failed to get expected gslb")
-	unknownHosts, err := ingressHostsPerStatusMetric.GetMetricWith(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": notFoundStatus})
+	unknownHosts, err := ingressHostsPerStatusMetric.GetMetricWith(
+		prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": notFoundStatus})
 	require.NoError(t, err, "Failed to get ingress metrics")
 	actualHostsMetricCount := testutil.ToFloat64(unknownHosts)
 	// assert
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with NotFound status, but got %v", expectedHostsMetricCount, actualHostsMetricCount)
+	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with NotFound status, but got %v",
+		expectedHostsMetricCount, actualHostsMetricCount)
 }
 
 func TestHealthyRecordMetric(t *testing.T) {
@@ -220,7 +232,8 @@ func TestHealthyRecordMetric(t *testing.T) {
 	actualHealthyRecordsMetricCount := testutil.ToFloat64(healthyRecordsMetric)
 	reconcileAndUpdateGslb(t, settings)
 	// assert
-	assert.Equal(t, expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount, "expected %v healthy records, but got %v", expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount)
+	assert.Equal(t, expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount, "expected %v healthy records, but got %v",
+		expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount)
 }
 
 func TestMetricLinterCheck(t *testing.T) {
@@ -624,7 +637,7 @@ func TestReflectGeoTagInTheStatus(t *testing.T) {
 func TestDetectsIngressHostnameMismatch(t *testing.T) {
 	// arrange
 	defer cleanup()
-	//getting Gslb and Reconciler
+	// getting Gslb and Reconciler
 	predefinedSettings := provideSettings(t, predefinedConfig)
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSZone = "otherdnszone.com"
@@ -635,7 +648,7 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 			Namespace: predefinedSettings.gslb.Namespace,
 		},
 	}
-	//injecting custom config to reconciler created from predefined config
+	// injecting custom config to reconciler created from predefined config
 	predefinedSettings.reconciler.Config = &customConfig
 	// act
 	_, err := predefinedSettings.reconciler.Reconcile(req)
@@ -1015,7 +1028,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		finalCall:  false,
 	}
 	reconcileAndUpdateGslb(t, settings)
-	return
+	return settings
 }
 
 func cleanup() {

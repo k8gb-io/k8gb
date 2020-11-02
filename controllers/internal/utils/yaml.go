@@ -1,4 +1,4 @@
-//Package utils implements common, reusable helpers
+// Package utils implements common, reusable helpers
 package utils
 
 import (
@@ -8,7 +8,7 @@ import (
 	yamlConv "github.com/ghodss/yaml"
 )
 
-//YamlToGslb takes yaml and returns Gslb object
+// YamlToGslb takes yaml and returns Gslb object
 func YamlToGslb(yaml []byte) (*k8gbv1beta1.Gslb, error) {
 	// yamlBytes contains a []byte of my yaml job spec
 	// convert the yaml to json

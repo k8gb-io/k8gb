@@ -870,8 +870,10 @@ func TestResolveConfigEnableFakeInfobloxAsUnsetEnvironmentVariable(t *testing.T)
 	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError, OverrideFakeInfobloxKey)
 }
 
-// arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with ResolveOperatorConfig() output. The last parameter unsets the values
-func arrangeVariablesAndAssert(t *testing.T, expected Config, errf func(t assert.TestingT, err error, msgAndArgs ...interface{}) bool, unset ...string) {
+// arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with
+// ResolveOperatorConfig() output. The last parameter unsets the values
+func arrangeVariablesAndAssert(t *testing.T, expected Config,
+	errf func(t assert.TestingT, err error, msgAndArgs ...interface{}) bool, unset ...string) {
 	configureEnvVar(expected)
 	for _, v := range unset {
 		_ = os.Unsetenv(v)
