@@ -3,7 +3,7 @@ package depresolver
 import (
 	"fmt"
 
-	"github.com/AbsaOSS/k8gb/controllers/internal/env"
+	"github.com/AbsaOSS/gopkg/env"
 )
 
 // Environment variables keys
