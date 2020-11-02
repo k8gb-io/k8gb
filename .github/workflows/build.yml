@@ -7,14 +7,15 @@ on:
       - '**.drawio'
       - '.spelling'
 jobs:
-  go-test:
-    name: Go Test
+  go-inspect:
+    name: Inspect packages
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: go1.13 linters
-      uses: AbsaOSS/golang-pipeline/go1.13/linter@master
-      with:
-        GOLINT: on
-    - name: go1.13 test
-      uses: AbsaOSS/golang-pipeline/go1.13/test@master
+      - uses: actions/checkout@v2
+      # see: https://golangci-lint.run/usage/configuration/#config-file
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.32
+      - name: go test
+        run: go test ./...

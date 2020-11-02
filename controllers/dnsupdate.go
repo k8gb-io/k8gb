@@ -77,7 +77,7 @@ func (r *GslbReconciler) getExternalTargets(host string) ([]string, error) {
 	for _, cluster := range extGslbClusters {
 		log.Info(fmt.Sprintf("Adding external Gslb targets from %s cluster...", cluster))
 		g := new(dns.Msg)
-		host = fmt.Sprintf("localtargets-%s.", host) //Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
+		host = fmt.Sprintf("localtargets-%s.", host) // Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
 		g.SetQuestion(host, dns.TypeA)
 
 		ns := overrideWithFakeDNS(r.Config.Override.FakeDNSEnabled, cluster)
@@ -223,15 +223,15 @@ func (r *GslbReconciler) nsServerNameExt() []string {
 }
 
 type fakeInfobloxConnector struct {
-	//createObjectObj interface{}
+	// createObjectObj interface{}
 
 	getObjectObj interface{}
 	getObjectRef string
 
-	//deleteObjectRef string
+	// deleteObjectRef string
 
-	//updateObjectObj interface{}
-	//updateObjectRef string
+	// updateObjectObj interface{}
+	// updateObjectRef string
 
 	resultObject interface{}
 

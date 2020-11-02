@@ -1,0 +1,22 @@
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - errcheck
+    - gocritic
+    - gocyclo
+    - goimports
+    - golint
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - lll
+run:
+  deadline: 3m
+linters-settings:
+  lll:
+    line-length: 150

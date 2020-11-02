@@ -100,7 +100,7 @@ func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][
 
 	healthyRecords := make(map[string][]string)
 
-	serviceRegex, _ := regexp.Compile("^localtargets")
+	serviceRegex := regexp.MustCompile("^localtargets")
 	for _, endpoint := range dnsEndpoint.Spec.Endpoints {
 		local := serviceRegex.Match([]byte(endpoint.DNSName))
 		if !local && endpoint.RecordType == "A" {

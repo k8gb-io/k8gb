@@ -60,8 +60,7 @@ func handleDNSRequest(w dns.ResponseWriter, r *dns.Msg) {
 	m.SetReply(r)
 	m.Compress = false
 
-	switch r.Opcode {
-	case dns.OpcodeQuery:
+	if r.Opcode == dns.OpcodeQuery {
 		parseQuery(m)
 	}
 

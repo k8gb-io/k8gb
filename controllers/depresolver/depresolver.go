@@ -25,7 +25,7 @@ const (
 	DNSTypeRoute53
 )
 
-//Infoblox configuration
+// Infoblox configuration
 // TODO: consider to make this private after refactor
 type Infoblox struct {
 	// Host

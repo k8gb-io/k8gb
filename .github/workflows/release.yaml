@@ -11,10 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install golang linting tools
-        run: |
-          go get github.com/kisielk/errcheck
-          go get honnef.co/go/tools/cmd/staticcheck
-          go get golang.org/x/lint/golint
+        run: GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.32.0
       - name: Operator image build and push
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}

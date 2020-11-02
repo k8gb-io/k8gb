@@ -147,9 +147,7 @@ debug-local: create-test-ns
 
 .PHONY: lint
 lint:
-	staticcheck ./...
-	errcheck ./...
-	golint '-set_exit_status=1' ./...
+	golangci-lint run
 
 .PHONY: terratest
 terratest:

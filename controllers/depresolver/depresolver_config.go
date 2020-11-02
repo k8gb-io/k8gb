@@ -111,13 +111,13 @@ func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 func getEdgeDNSType(config *Config) EdgeDNSType {
 	var t = DNSTypeNoEdgeDNS
 	if config.route53Enabled {
-		t = t | DNSTypeRoute53
+		t |= DNSTypeRoute53
 	}
 	if isNotEmpty(config.Infoblox.Host) {
-		t = t | DNSTypeInfoblox
+		t |= DNSTypeInfoblox
 	}
 	if t > DNSTypeNoEdgeDNS {
-		t = t - DNSTypeNoEdgeDNS
+		t -= DNSTypeNoEdgeDNS
 	}
 	return t
 }

@@ -49,9 +49,12 @@ func (r *GslbReconciler) updateIngressHostsPerStatusMetric(gslb *k8gbv1beta1.Gsl
 			notFoundHostsCount++
 		}
 	}
-	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus}).Set(float64(healthyHostsCount))
-	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus}).Set(float64(unhealthyHostsCount))
-	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus}).Set(float64(notFoundHostsCount))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": healthyStatus}).
+		Set(float64(healthyHostsCount))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": unhealthyStatus}).
+		Set(float64(unhealthyHostsCount))
+	ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": notFoundStatus}).
+		Set(float64(notFoundHostsCount))
 
 	return nil
 }
