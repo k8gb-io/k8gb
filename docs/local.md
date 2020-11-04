@@ -67,7 +67,7 @@ eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkd
 Cluster [test-gslb1](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
 while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster2.yaml) on port `:5054`.
 ```shell script
-dig @localhost localtargets.app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets.app3.cloud.example.com
+dig @localhost localtargets-app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-app3.cloud.example.com
 ```
 As expected result you should see **six A records** divided between nodes of both clusters.
 ```shell script

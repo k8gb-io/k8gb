@@ -25,14 +25,6 @@ jobs:
           config: deploy/kind/cluster2-terratest.yaml
           wait: 180s
       - name: K8GB deployment
-        env:
-          NODE_ROLE: control-plane
-          TEST_CURRENT_COMMIT: yes
-        run: |
-          export VERSION=$(make version)
-          ./deploy/full.sh
-          kubectl get pods -A
-          make use-second-context
-          kubectl get pods -A
+        run: make deploy-full-terratest-setup
       - name: Terratest
         run: make terratest
