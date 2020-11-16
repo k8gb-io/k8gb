@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
@@ -25,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	types "k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -162,7 +164,8 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 // SetupWithManager configures controller manager
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
-	mapFn := handler.ToRequestsFunc(
+
+	endpointMapFn := handler.ToRequestsFunc(
 		func(a handler.MapObject) []reconcile.Request {
 			gslbList := &k8gbv1beta1.GslbList{}
 			opts := []client.ListOption{
@@ -195,13 +198,78 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			return nil
 		})
 
+	createGslbFromIngress := func(annotationKey string, annotationValue string, a handler.MapObject, strategy string) {
+		log.Info(fmt.Sprintf("Detected strategy annotation(%s:%s) on Ingress(%s)",
+			annotationKey, annotationValue, a.Meta.GetName()))
+		c := mgr.GetClient()
+		ingressToReuse := &v1beta1.Ingress{}
+		err := c.Get(context.Background(), client.ObjectKey{
+			Namespace: a.Meta.GetNamespace(),
+			Name:      a.Meta.GetName(),
+		}, ingressToReuse)
+		if err != nil {
+			log.Info(fmt.Sprintf("Ingress(%s) does not exist anymore. Skipping...", a.Meta.GetName()))
+			return
+		}
+		gslbExist := &k8gbv1beta1.Gslb{}
+		err = c.Get(context.Background(), client.ObjectKey{
+			Namespace: a.Meta.GetNamespace(),
+			Name:      a.Meta.GetName(),
+		}, gslbExist)
+		if err == nil {
+			log.Info(fmt.Sprintf("Gslb(%s) already exists. Skipping...", gslbExist.Name))
+			return
+		}
+		gslb := &k8gbv1beta1.Gslb{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace:   a.Meta.GetNamespace(),
+				Name:        a.Meta.GetName(),
+				Annotations: a.Meta.GetAnnotations(),
+			},
+			Spec: k8gbv1beta1.GslbSpec{
+				Ingress: ingressToReuse.Spec,
+				Strategy: k8gbv1beta1.Strategy{
+					Type: strategy,
+				},
+			},
+		}
+
+		if strategy == "failover" {
+			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
+				if annotationKey == "k8gb.io/primarygeotag" {
+					gslb.Spec.Strategy.PrimaryGeoTag = annotationValue
+				}
+			}
+		}
+
+		log.Info(fmt.Sprintf("Creating new Gslb(%s) out of Ingress annotation", gslb.Name))
+		_ = c.Create(context.Background(), gslb)
+	}
+	ingressMapFn := handler.ToRequestsFunc(
+		func(a handler.MapObject) []reconcile.Request {
+			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
+				if annotationKey == "k8gb.io/strategy" {
+					switch annotationValue {
+					case "roundRobin":
+						createGslbFromIngress(annotationKey, annotationKey, a, "roundRobin")
+					case "failover":
+						createGslbFromIngress(annotationKey, annotationKey, a, "failover")
+					}
+				}
+			}
+			return nil
+		})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&v1beta1.Ingress{}).
 		Owns(&externaldns.DNSEndpoint{}).
 		Watches(&source.Kind{Type: &corev1.Endpoints{}},
 			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: mapFn}).
+				ToRequests: endpointMapFn}).
+		Watches(&source.Kind{Type: &v1beta1.Ingress{}},
+			&handler.EnqueueRequestsFromMapFunc{
+				ToRequests: ingressMapFn}).
 		Complete(r)
 
 }

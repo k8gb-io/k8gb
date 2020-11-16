@@ -807,6 +807,23 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	require.Error(t, err, "k8gb-ns-route53 DNSEndpoint should be garbage collected")
 }
 
+func TestGslbSetsAnnotationsOnTheIngress(t *testing.T) {
+	// arrange
+	defer cleanup()
+
+	settings := provideSettings(t, predefinedConfig)
+
+	// act
+	reconcileAndUpdateGslb(t, settings)
+
+	// assert
+	ingress := &v1beta1.Ingress{}
+	err := settings.client.Get(context.Background(), client.ObjectKey{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}, ingress)
+	require.NoError(t, err, "Gslb should be created from annotated Ingress")
+
+	assert.Equal(t, map[string]string{"k8gb.io/strategy": "roundRobin"}, ingress.Annotations)
+}
+
 func TestMain(m *testing.M) {
 	// setup tests
 	fakeDNS()
