@@ -89,7 +89,7 @@ func main() {
 		Log:    ctrl.Log.WithName("controllers").WithName("Gslb"),
 		Scheme: mgr.GetScheme(),
 	}
-	reconciler.DepResolver = depresolver.NewDependencyResolver(context.TODO(), reconciler.Client)
+	reconciler.DepResolver = depresolver.NewDependencyResolver(context.Background(), reconciler.Client)
 	reconciler.Config, err = reconciler.DepResolver.ResolveOperatorConfig()
 	if err != nil {
 		setupLog.Error(err, "reading config env variables")
