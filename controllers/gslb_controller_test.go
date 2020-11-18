@@ -983,7 +983,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	// Create a fake client to mock API calls.
 	cl := fake.NewFakeClientWithScheme(s, objs...)
 	// Create config
-	config, err := depresolver.NewDependencyResolver(context.TODO(), cl).ResolveOperatorConfig()
+	config, err := depresolver.NewDependencyResolver(cl).ResolveOperatorConfig()
 	if err != nil {
 		t.Fatalf("config error: (%v)", err)
 	}
@@ -993,7 +993,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		Log:    ctrl.Log.WithName("setup"),
 		Scheme: s,
 	}
-	r.DepResolver = depresolver.NewDependencyResolver(context.TODO(), r.Client)
+	r.DepResolver = depresolver.NewDependencyResolver(r.Client)
 	r.Config = config
 	// Mock request to simulate Reconcile() being called on an event for a
 	// watched resource .
