@@ -44,9 +44,9 @@ var predefinedConfig = Config{
 func TestResolveSpecWithFilledFields(t *testing.T) {
 	// arrange
 	cl, gslb := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
-	err := resolver.ResolveGslbSpec(gslb)
+	err := resolver.ResolveGslbSpec(context.TODO(), gslb)
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
@@ -56,9 +56,9 @@ func TestResolveSpecWithFilledFields(t *testing.T) {
 func TestResolveSpecWithoutFields(t *testing.T) {
 	// arrange
 	cl, gslb := getTestContext("./testdata/free_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
-	err := resolver.ResolveGslbSpec(gslb)
+	err := resolver.ResolveGslbSpec(context.TODO(), gslb)
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
@@ -68,9 +68,9 @@ func TestResolveSpecWithoutFields(t *testing.T) {
 func TestResolveSpecWithZeroSplitBrain(t *testing.T) {
 	// arrange
 	cl, gslb := getTestContext("./testdata/filled_omitempty_with_zero_splitbrain.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
-	err := resolver.ResolveGslbSpec(gslb)
+	err := resolver.ResolveGslbSpec(context.TODO(), gslb)
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
@@ -80,9 +80,9 @@ func TestResolveSpecWithZeroSplitBrain(t *testing.T) {
 func TestResolveSpecWithEmptyFields(t *testing.T) {
 	// arrange
 	cl, gslb := getTestContext("./testdata/invalid_omitempty_empty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
-	err := resolver.ResolveGslbSpec(gslb)
+	err := resolver.ResolveGslbSpec(context.TODO(), gslb)
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
@@ -92,9 +92,9 @@ func TestResolveSpecWithEmptyFields(t *testing.T) {
 func TestResolveSpecWithNegativeFields(t *testing.T) {
 	// arrange
 	cl, gslb := getTestContext("./testdata/invalid_omitempty_negative.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
-	err := resolver.ResolveGslbSpec(gslb)
+	err := resolver.ResolveGslbSpec(context.TODO(), gslb)
 	// assert
 	assert.Error(t, err)
 }
@@ -102,11 +102,12 @@ func TestResolveSpecWithNegativeFields(t *testing.T) {
 func TestSpecRunOnce(t *testing.T) {
 	// arrange
 	cl, gslb := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	ctx := context.Background()
+	resolver := NewDependencyResolver(cl)
 	// act
-	err1 := resolver.ResolveGslbSpec(gslb)
+	err1 := resolver.ResolveGslbSpec(ctx, gslb)
 	gslb.Spec.Strategy.DNSTtlSeconds = -100
-	err2 := resolver.ResolveGslbSpec(gslb)
+	err2 := resolver.ResolveGslbSpec(ctx, gslb)
 	// assert
 	assert.NoError(t, err1)
 	// err2 would not be empty
@@ -131,7 +132,7 @@ func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
 	defaultConfig.EdgeDNSType = DNSTypeNoEdgeDNS
 	defaultConfig.ExtClustersGeoTags = []string{}
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -154,7 +155,7 @@ func TestResolveConfigWithTextReconcileRequeueSecondsSync(t *testing.T) {
 	configureEnvVar(predefinedConfig)
 	_ = os.Setenv(ReconcileRequeueSecondsKey, "invalid")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -168,7 +169,7 @@ func TestResolveConfigWithEmptyReconcileRequeueSecondsSync(t *testing.T) {
 	configureEnvVar(predefinedConfig)
 	_ = os.Setenv(ReconcileRequeueSecondsKey, "")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -200,7 +201,7 @@ func TestResolveConfigWithEmptyReconcileRequeueSecondsKey(t *testing.T) {
 	configureEnvVar(predefinedConfig)
 	_ = os.Setenv(ReconcileRequeueSecondsKey, "")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -242,7 +243,7 @@ func TestConfigRunOnce(t *testing.T) {
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config1, err1 := resolver.ResolveOperatorConfig()
 	_ = os.Setenv(ReconcileRequeueSecondsKey, "100")
@@ -262,7 +263,7 @@ func TestResolveConfigWithMalformedRoute53Enabled(t *testing.T) {
 	configureEnvVar(predefinedConfig)
 	_ = os.Setenv(Route53EnabledKey, "i.am.wrong??.")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -296,7 +297,7 @@ func TestResolveConfigWithEmptyRoute53(t *testing.T) {
 	configureEnvVar(predefinedConfig)
 	_ = os.Setenv(Route53EnabledKey, "")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -815,7 +816,7 @@ func TestResolveConfigEnableFakeDNSAsInvalidValue(t *testing.T) {
 	configureEnvVar(predefinedConfig)
 	_ = os.Setenv(OverrideWithFakeDNSKey, "i.am.wrong??.")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -855,7 +856,7 @@ func TestResolveConfigEnableFakeInfobloxAsInvalidValue(t *testing.T) {
 	configureEnvVar(predefinedConfig)
 	_ = os.Setenv(OverrideFakeInfobloxKey, "i.am.wrong??.")
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
@@ -879,7 +880,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 		_ = os.Unsetenv(v)
 	}
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
-	resolver := NewDependencyResolver(context.TODO(), cl)
+	resolver := NewDependencyResolver(cl)
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert

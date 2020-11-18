@@ -57,12 +57,12 @@ const gslbFinalizer = "finalizer.k8gb.absa.oss"
 
 // Reconcile runs main reconiliation loop
 func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+	ctx := context.Background()
 	log := r.Log.WithValues("gslb", req.NamespacedName)
 
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
-	err := r.Get(context.TODO(), req.NamespacedName, gslb)
+	err := r.Get(ctx, req.NamespacedName, gslb)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -76,7 +76,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	var result *ctrl.Result
 
-	err = r.DepResolver.ResolveGslbSpec(gslb)
+	err = r.DepResolver.ResolveGslbSpec(ctx, gslb)
 	if err != nil {
 		log.Error(err, "resolving spec.strategy")
 		return ctrl.Result{}, err
@@ -98,7 +98,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			// Remove gslbFinalizer. Once all finalizers have been
 			// removed, the object will be deleted.
 			gslb.SetFinalizers(remove(gslb.GetFinalizers(), gslbFinalizer))
-			err := r.Update(context.TODO(), gslb)
+			err := r.Update(ctx, gslb)
 			if err != nil {
 				return ctrl.Result{}, err
 			}

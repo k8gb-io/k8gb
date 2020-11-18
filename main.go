@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 
@@ -89,7 +88,7 @@ func main() {
 		Log:    ctrl.Log.WithName("controllers").WithName("Gslb"),
 		Scheme: mgr.GetScheme(),
 	}
-	reconciler.DepResolver = depresolver.NewDependencyResolver(context.Background(), reconciler.Client)
+	reconciler.DepResolver = depresolver.NewDependencyResolver(reconciler.Client)
 	reconciler.Config, err = reconciler.DepResolver.ResolveOperatorConfig()
 	if err != nil {
 		setupLog.Error(err, "reading config env variables")
