@@ -1,6 +1,8 @@
 package depresolver
 
 import (
+	"context"
+
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
 
@@ -12,7 +14,7 @@ var predefinedStrategy = k8gbv1beta1.Strategy{
 // ResolveGslbSpec executes once during reconciliation. At first cycle it reads
 // omitempty properties and attach predefined values in case they are not defined.
 // ResolveGslbSpec returns error if any input is invalid
-func (dr *DependencyResolver) ResolveGslbSpec(gslb *k8gbv1beta1.Gslb) error {
+func (dr *DependencyResolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1beta1.Gslb) error {
 	dr.onceSpec.Do(func() {
 		strategy := &gslb.Spec.Strategy
 		// set predefined values if missing in the yaml
@@ -24,7 +26,7 @@ func (dr *DependencyResolver) ResolveGslbSpec(gslb *k8gbv1beta1.Gslb) error {
 		}
 		dr.errorSpec = dr.validateSpec(strategy)
 		if dr.errorSpec == nil {
-			dr.errorSpec = dr.client.Update(dr.context, gslb)
+			dr.errorSpec = dr.client.Update(ctx, gslb)
 		}
 	})
 	return dr.errorSpec

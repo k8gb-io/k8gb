@@ -7,7 +7,6 @@
 package depresolver
 
 import (
-	"context"
 	"sync"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -76,7 +75,6 @@ type Config struct {
 type DependencyResolver struct {
 	client      client.Client
 	config      *Config
-	context     context.Context
 	onceConfig  sync.Once
 	onceSpec    sync.Once
 	errorConfig error
@@ -84,9 +82,8 @@ type DependencyResolver struct {
 }
 
 // NewDependencyResolver returns a new depresolver.DependencyResolver
-func NewDependencyResolver(context context.Context, client client.Client) *DependencyResolver {
+func NewDependencyResolver(client client.Client) *DependencyResolver {
 	resolver := new(DependencyResolver)
 	resolver.client = client
-	resolver.context = context
 	return resolver
 }
