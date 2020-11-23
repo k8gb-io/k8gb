@@ -240,6 +240,10 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					gslb.Spec.Strategy.PrimaryGeoTag = annotationValue
 				}
 			}
+			if gslb.Spec.Strategy.PrimaryGeoTag == "" {
+				log.Info("k8gb.io/primarygeotag annotation is missing, skipping Gslb creation...")
+				return
+			}
 		}
 
 		log.Info(fmt.Sprintf("Creating new Gslb(%s) out of Ingress annotation", gslb.Name))
