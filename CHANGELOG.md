@@ -1,5 +1,38 @@
 # Changelog
 
+## [v0.7.1](https://github.com/absaoss/k8gb/tree/v0.7.1) (2020-11-23)
+
+[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.0...v0.7.1)
+
+**Implemented enhancements:**
+
+- Add ability to reuse existing Ingress [\#200](https://github.com/AbsaOSS/k8gb/issues/200)
+- split of pkg/internal/env into reusable pkg [\#185](https://github.com/AbsaOSS/k8gb/issues/185)
+- Add support for Route 53 as another edge DNS implementation [\#49](https://github.com/AbsaOSS/k8gb/issues/49)
+
+**Closed issues:**
+
+- switch linters to golang-ci [\#197](https://github.com/AbsaOSS/k8gb/issues/197)
+- Move input environment variables into depresolver [\#170](https://github.com/AbsaOSS/k8gb/issues/170)
+- Investigate the best place for initializing depresolver and consider it as internal [\#168](https://github.com/AbsaOSS/k8gb/issues/168)
+- Makefile refactoring [\#109](https://github.com/AbsaOSS/k8gb/issues/109)
+
+**Merged pull requests:**
+
+- Enable Gslb with Ingress Annotation [\#205](https://github.com/AbsaOSS/k8gb/pull/205) ([ytsarev](https://github.com/ytsarev))
+- Contexts complient with kube-builder [\#204](https://github.com/AbsaOSS/k8gb/pull/204) ([kuritka](https://github.com/kuritka))
+- Change context initialisation, fix helm upgrade [\#203](https://github.com/AbsaOSS/k8gb/pull/203) ([kuritka](https://github.com/kuritka))
+- Simplify Makefile [\#201](https://github.com/AbsaOSS/k8gb/pull/201) ([kuritka](https://github.com/kuritka))
+- use AbsaOSS/gopkg  [\#199](https://github.com/AbsaOSS/k8gb/pull/199) ([kuritka](https://github.com/kuritka))
+- switch to golangci-lint [\#198](https://github.com/AbsaOSS/k8gb/pull/198) ([kuritka](https://github.com/kuritka))
+- Make diagram image clickable for enlargement [\#196](https://github.com/AbsaOSS/k8gb/pull/196) ([ytsarev](https://github.com/ytsarev))
+- Fix last 404 [\#195](https://github.com/AbsaOSS/k8gb/pull/195) ([ytsarev](https://github.com/ytsarev))
+- Use absolute URLs in case of file reference [\#194](https://github.com/AbsaOSS/k8gb/pull/194) ([ytsarev](https://github.com/ytsarev))
+- Publish CHANGELOG.md to Github Pages [\#193](https://github.com/AbsaOSS/k8gb/pull/193) ([ytsarev](https://github.com/ytsarev))
+- Integrate depresolver [\#192](https://github.com/AbsaOSS/k8gb/pull/192) ([kuritka](https://github.com/kuritka))
+- Include CONTRIBUTING.md into gh-pages publishing [\#190](https://github.com/AbsaOSS/k8gb/pull/190) ([ytsarev](https://github.com/ytsarev))
+- Github Workflow to publish documentation [\#189](https://github.com/AbsaOSS/k8gb/pull/189) ([ytsarev](https://github.com/ytsarev))
+
 ## [v0.7.0](https://github.com/absaoss/k8gb/tree/v0.7.0) (2020-10-28)
 
 [Full Changelog](https://github.com/absaoss/k8gb/compare/v0.6.6...v0.7.0)
@@ -18,6 +51,8 @@
 
 **Merged pull requests:**
 
+- Fix Helm release pipeline [\#188](https://github.com/AbsaOSS/k8gb/pull/188) ([ytsarev](https://github.com/ytsarev))
+- Commit 'offline' Changelog [\#187](https://github.com/AbsaOSS/k8gb/pull/187) ([ytsarev](https://github.com/ytsarev))
 - Provide diagram of k8gb internal components [\#186](https://github.com/AbsaOSS/k8gb/pull/186) ([ytsarev](https://github.com/ytsarev))
 - Finalize Gslb if no route53 DNSEndpoint found [\#184](https://github.com/AbsaOSS/k8gb/pull/184) ([ytsarev](https://github.com/ytsarev))
 - Include GSLB dns zone into NS server names [\#183](https://github.com/AbsaOSS/k8gb/pull/183) ([ytsarev](https://github.com/ytsarev))
