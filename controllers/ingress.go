@@ -13,6 +13,13 @@ import (
 )
 
 func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, error) {
+	if gslb.Annotations == nil {
+		gslb.Annotations = make(map[string]string)
+	}
+	gslb.Annotations["k8gb.io/strategy"] = gslb.Spec.Strategy.Type
+	if gslb.Spec.Strategy.PrimaryGeoTag != "" {
+		gslb.Annotations["k8gb.io/primarygeotag"] = gslb.Spec.Strategy.PrimaryGeoTag
+	}
 	ingress := &v1beta1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        gslb.Name,

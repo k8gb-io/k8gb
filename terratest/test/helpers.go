@@ -13,12 +13,13 @@ import (
 	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/shell"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-//GetIngressIPs returns slice of IP's related to ingress
+// GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
 	var ingressIPs []string
 	ingress := k8s.GetIngress(t, options, ingressName)
@@ -28,7 +29,7 @@ func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string
 	return ingressIPs
 }
 
-//Dig gets sorted slice of records related to dnsName
+// Dig gets sorted slice of records related to dnsName
 func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string) ([]string, error) {
 	port := fmt.Sprintf("-p%v", dnsPort)
 	dnsServer = fmt.Sprintf("@%s", dnsServer)
@@ -136,4 +137,11 @@ func assertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName string
 		actualHealthStatus,
 		expectedHealthStatus)
 	require.NoError(t, err)
+}
+
+func assertGslbSpec(t *testing.T, options *k8s.KubectlOptions, gslbName string, specPath string, expectedValue string) {
+	t.Helper()
+	actualValue, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o", fmt.Sprintf("custom-columns=SERVICESTATUS:%s", specPath), "--no-headers")
+	require.NoError(t, err)
+	assert.Equal(t, expectedValue, actualValue)
 }

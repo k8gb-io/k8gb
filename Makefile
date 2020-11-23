@@ -130,6 +130,11 @@ deploy-full-terratest-setup:
 	kubectl config use-context kind-$(CLUSTER_GSLB1)
 	kubectl get pods -A
 
+.PHONY: deploy-gslb-operator
+deploy-gslb-operator:
+	cd chart/k8gb && helm dependency update
+	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS)
+
 # workaround until https://github.com/crossplaneio/crossplane/issues/1170 solved
 .PHONY: deploy-gslb-operator-14
 deploy-gslb-operator-14:

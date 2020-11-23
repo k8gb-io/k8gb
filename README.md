@@ -72,6 +72,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 * [AWS based deployment with Route53 integration](/docs/deploy_route53.md)
 * [Local playground for testing and development](/docs/local.md)
 * [Metrics](/docs/metrics.md)
+* [Ingress annotations](/docs/ingress_annotations.md)
 
 ## Production Readiness
 
