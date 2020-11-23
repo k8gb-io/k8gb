@@ -219,7 +219,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Name:      a.Meta.GetName(),
 		}, gslbExist)
 		if err == nil {
-			log.Info(fmt.Sprintf("Gslb(%s) already exists. Skipping...", gslbExist.Name))
+			log.Info(fmt.Sprintf("Gslb(%s) already exists. Skipping Gslb creation...", gslbExist.Name))
 			return
 		}
 		gslb := &k8gbv1beta1.Gslb{
