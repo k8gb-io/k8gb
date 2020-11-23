@@ -53,6 +53,8 @@ type GslbReconciler struct {
 
 const k8gbNamespace = "k8gb"
 const gslbFinalizer = "finalizer.k8gb.absa.oss"
+const roundRobinStrategy = "roundRobin"
+const failoverStrategy = "failover"
 
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs/status,verbs=get;update;patch
@@ -234,7 +236,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			},
 		}
 
-		if strategy == "failover" {
+		if strategy == failoverStrategy {
 			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
 				if annotationKey == "k8gb.io/primarygeotag" {
 					gslb.Spec.Strategy.PrimaryGeoTag = annotationValue
@@ -254,10 +256,10 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
 				if annotationKey == "k8gb.io/strategy" {
 					switch annotationValue {
-					case "roundRobin":
-						createGslbFromIngress(annotationKey, annotationKey, a, "roundRobin")
-					case "failover":
-						createGslbFromIngress(annotationKey, annotationKey, a, "failover")
+					case roundRobinStrategy:
+						createGslbFromIngress(annotationKey, annotationKey, a, roundRobinStrategy)
+					case failoverStrategy:
+						createGslbFromIngress(annotationKey, annotationKey, a, failoverStrategy)
 					}
 				}
 			}

@@ -142,9 +142,9 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		}
 		if len(externalTargets) > 0 {
 			switch gslb.Spec.Strategy.Type {
-			case "roundRobin":
+			case roundRobinStrategy:
 				finalTargets = append(finalTargets, externalTargets...)
-			case "failover":
+			case failoverStrategy:
 				// If cluster is Primary
 				if gslb.Spec.Strategy.PrimaryGeoTag == r.Config.ClusterGeoTag {
 					// If cluster is Primary and Healthy return only own targets
