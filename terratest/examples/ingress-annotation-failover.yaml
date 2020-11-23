@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    k8gb.io/strategy: failover
+    k8gb.io/primarygeotag: eu
+  name: test-gslb-annotation-failover
+spec:
+  rules:
+  - host: app1.cloud.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: non-existing-app
+          servicePort: http
+        path: /
+  - host: app2.cloud.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: unhealthy-app
+          servicePort: http
+        path: /
+  - host: app3.cloud.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: frontend-podinfo
+          servicePort: http
+        path: /
