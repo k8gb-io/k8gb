@@ -210,7 +210,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Name:      a.Meta.GetName(),
 		}, ingressToReuse)
 		if err != nil {
-			log.Info(fmt.Sprintf("Ingress(%s) does not exist anymore. Skipping...", a.Meta.GetName()))
+			log.Info(fmt.Sprintf("Ingress(%s) does not exist anymore. Skipping Glsb creation...", a.Meta.GetName()))
 			return
 		}
 		gslbExist := &k8gbv1beta1.Gslb{}
