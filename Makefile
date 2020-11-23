@@ -7,9 +7,11 @@ GSLB_DOMAIN ?= cloud.example.com
 REPO = absaoss/k8gb
 VALUES_YAML ?= chart/k8gb/values.yaml
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
-HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{test-gslb-ns-eu.example.com,test-gslb-failover-ns-eu.example.com}'
+HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
+CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{test-gslb-ns-eu.example.com,test-gslb-failover-ns-eu.example.com}'
+
 
 # terratest
 GITACTION_TERRATEST_DOCKER_REPO_PORT ?= 5000
@@ -105,7 +107,7 @@ deploy-full-local-setup:
 
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),worker,absaoss/k8gb,)
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),worker,absaoss/k8gb,$(HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),worker,absaoss/k8gb,$(CLUSTER_GSLB2_HELM_ARGS))
 
 # triggered by terraform GitHub Action. Clusters already exists. GO is not installed yet
 .PHONY: deploy-full-terratest-setup
@@ -122,7 +124,7 @@ deploy-full-terratest-setup:
 	sed -i "s/$(VERSION)/$(COMMIT_HASH)/g" chart/k8gb/Chart.yaml
 
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),control-plane,localhost:$(GITACTION_TERRATEST_DOCKER_REPO_PORT)/k8gb,)
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),control-plane,localhost:$(GITACTION_TERRATEST_DOCKER_REPO_PORT)/k8gb,$(HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),control-plane,localhost:$(GITACTION_TERRATEST_DOCKER_REPO_PORT)/k8gb,$(CLUSTER_GSLB2_HELM_ARGS))
 
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB2) $(NC)"
 	kubectl get pods -A
@@ -141,6 +143,11 @@ deploy-gslb-operator-14:
 	kubectl apply -f deploy/namespace.yaml
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb template k8gb chart/k8gb -f $(VALUES_YAML) | kubectl -n k8gb --validate=false apply -f -
+
+.PHONY: deploy-test-apps
+deploy-test-apps:
+	kubectl apply -f deploy/namespace.yaml
+	$(call deploy-test-apps)
 
 # destroy local test environment
 .PHONY: destroy-full-local-setup
