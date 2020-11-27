@@ -36,8 +36,8 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 	// - HOME/.kube/config for the kubectl config file
 	// - Current context of the kubectl config file
 	// - Random namespace
-	optionsContext1 := k8s.NewKubectlOptions("kind-test-gslb1", "", namespaceName)
-	optionsContext2 := k8s.NewKubectlOptions("kind-test-gslb2", "", namespaceName)
+	optionsContext1 := k8s.NewKubectlOptions("k3d-test-gslb1", "", namespaceName)
+	optionsContext2 := k8s.NewKubectlOptions("k3d-test-gslb2", "", namespaceName)
 
 	k8s.CreateNamespace(t, optionsContext1, namespaceName)
 	k8s.CreateNamespace(t, optionsContext2, namespaceName)

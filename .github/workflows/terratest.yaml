@@ -10,21 +10,42 @@ on:
 
 jobs:
   terratest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
-      - name: Create 1st k8s Kind Cluster
-        uses: helm/kind-action@v1.0.0-rc.1
+
+      - name: Create 1st k3s Cluster
+        uses: AbsaOSS/k3d-action@main
         with:
-          cluster_name: test-gslb1
-          config: deploy/kind/cluster-terratest.yaml
-      - name: Create 2nd k8s Kind Cluster
-        uses: helm/kind-action@v1.0.0-rc.1
+          cluster-name: "test-gslb1"
+          use-default-registry: true
+          args: >-
+            -p "80:80@agent[0]"
+            -p "443:443@agent[0]"
+            -p "5053:53/udp@agent[0]"
+            --agents 3
+            --no-lb
+            --network k3d-action-bridge-network
+            --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
+
+      - name: Create 2nd k3s Cluster
+        uses: AbsaOSS/k3d-action@main
         with:
-          cluster_name: test-gslb2
-          config: deploy/kind/cluster2-terratest.yaml
-          wait: 180s
+          cluster-name: "test-gslb2"
+          use-default-registry: true
+          args: >-
+            -p "81:80@agent[0]"
+            -p "444:443@agent[0]"
+            -p "5054:53/udp@agent[0]"
+            --network k3d-action-bridge-network
+            --agents 3
+            --no-lb
+            --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
+
       - name: K8GB deployment
-        run: make deploy-full-terratest-setup
+        run: |
+          GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.32.0
+          make deploy-to-AbsaOSS-k3d-action
+
       - name: Terratest
         run: make terratest

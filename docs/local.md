@@ -31,13 +31,13 @@
 
  - [install **Helm3**](https://helm.sh/docs/intro/install/) to get charts
 
- - [install **kind**](https://kind.sigs.k8s.io/) as tool for running local Kubernetes clusters
-    - follow https://kind.sigs.k8s.io/docs/user/quick-start/
+ - [install **k3d**](https://k3d.io/) as tool for running local [k3s](https://k3s.io/) clusters
+    - follow https://k3d.io/#installation
 
 
 #### Running project locally
 
-To spin-up a local environment using two Kind clusters and deploy a test application to both clusters, execute the command below:
+To spin-up a local environment using two k3s clusters and deploy a test application to both clusters, execute the command below:
 ```shell script
 make deploy-full-local-setup
 ```
@@ -47,7 +47,7 @@ make deploy-full-local-setup
 If local setup runs well, check if clusters are correctly installed
 
 ```shell script
-kubectl cluster-info --context kind-test-gslb1 && kubectl cluster-info --context kind-test-gslb2
+kubectl cluster-info --context k3d-test-gslb1 && kubectl cluster-info --context k3d-test-gslb2
 ```
 
 Check if Etcd cluster is healthy
@@ -69,19 +69,21 @@ while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/clust
 ```shell script
 dig @localhost localtargets-app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-app3.cloud.example.com
 ```
-As expected result you should see **six A records** divided between nodes of both clusters.
+As expected result you should see **eight A records** divided between nodes of both clusters.
 ```shell script
 ...
 ...
 ;; ANSWER SECTION:
-localtargets.app3.cloud.example.com. 30 IN A    172.17.0.2
-localtargets.app3.cloud.example.com. 30 IN A    172.17.0.5
-localtargets.app3.cloud.example.com. 30 IN A    172.17.0.3
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.3
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.4
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.2
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.5
 ...
 ...
-localtargets.app3.cloud.example.com. 30 IN A    172.17.0.8
-localtargets.app3.cloud.example.com. 30 IN A    172.17.0.6
-localtargets.app3.cloud.example.com. 30 IN A    172.17.0.7
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.8
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.6
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.7
+localtargets-app3.cloud.example.com. 30 IN A    172.16.0.9
 ```
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top.
 Run following command and check if you get two json responses.
