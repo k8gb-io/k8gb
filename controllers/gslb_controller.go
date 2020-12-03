@@ -51,10 +51,14 @@ type GslbReconciler struct {
 	DepResolver *depresolver.DependencyResolver
 }
 
-const k8gbNamespace = "k8gb"
-const gslbFinalizer = "finalizer.k8gb.absa.oss"
-const roundRobinStrategy = "roundRobin"
-const failoverStrategy = "failover"
+const (
+	k8gbNamespace           = "k8gb"
+	gslbFinalizer           = "finalizer.k8gb.absa.oss"
+	roundRobinStrategy      = "roundRobin"
+	failoverStrategy        = "failover"
+	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
+	strategyAnnotation      = "k8gb.io/strategy"
+)
 
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs/status,verbs=get;update;patch
@@ -238,12 +242,12 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 		if strategy == failoverStrategy {
 			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
-				if annotationKey == "k8gb.io/primarygeotag" {
+				if annotationKey == primaryGeoTagAnnotation {
 					gslb.Spec.Strategy.PrimaryGeoTag = annotationValue
 				}
 			}
 			if gslb.Spec.Strategy.PrimaryGeoTag == "" {
-				log.Info("k8gb.io/primarygeotag annotation is missing, skipping Gslb creation...")
+				log.Info(fmt.Sprintf("%s annotation is missing, skipping Gslb creation...", primaryGeoTagAnnotation))
 				return
 			}
 		}
@@ -254,7 +258,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	ingressMapFn := handler.ToRequestsFunc(
 		func(a handler.MapObject) []reconcile.Request {
 			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
-				if annotationKey == "k8gb.io/strategy" {
+				if annotationKey == strategyAnnotation {
 					switch annotationValue {
 					case roundRobinStrategy:
 						createGslbFromIngress(annotationKey, annotationKey, a, roundRobinStrategy)
