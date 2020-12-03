@@ -821,7 +821,7 @@ func TestGslbSetsAnnotationsOnTheIngress(t *testing.T) {
 	err := settings.client.Get(context.Background(), client.ObjectKey{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}, ingress)
 	require.NoError(t, err, "Gslb should be created from annotated Ingress")
 
-	assert.Equal(t, map[string]string{"k8gb.io/strategy": "roundRobin"}, ingress.Annotations)
+	assert.Equal(t, map[string]string{strategyAnnotation: "roundRobin"}, ingress.Annotations)
 }
 
 func TestMain(m *testing.M) {

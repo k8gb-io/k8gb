@@ -7,9 +7,7 @@ import (
 )
 
 const (
-	gslbSubsystem = "gslb"
-)
-const (
+	gslbSubsystem   = "gslb"
 	healthyStatus   = "Healthy"
 	unhealthyStatus = "Unhealthy"
 	notFoundStatus  = "NotFound"
