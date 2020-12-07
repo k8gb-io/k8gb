@@ -11,7 +11,7 @@ This tutorial covers local end-to-end integration quick start of two projects.
 
 Just follow https://admiralty.io/docs/quick_start
 
-## Deploy k8gb to target clusters
+## Deploy k8gb to Target clusters
 
 ```sh
 helm repo add k8gb https://www.k8gb.io
@@ -23,7 +23,7 @@ kubectl --context kind-us create ns k8gb
 helm --kube-context kind-us --namespace k8gb upgrade --install k8gb k8gb/k8gb --set k8gb.clusterGeoTag=us --set k8gb.extGslbClustersGeoTags=eu
 ```
 
-It will install k8gb instances to both target clusters.
+It will install k8gb instances to both Target clusters.
 
 Notice the GeoTag configuration.
 
