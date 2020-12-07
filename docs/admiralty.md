@@ -35,7 +35,7 @@ helm --kube-context kind-cd upgrade --install podinfo podinfo/podinfo --set repl
 
 ## Add pod annotations to enable multi-cluster scheduling
 
-Edit `podinfo` Deployment to add admiralty `multicluster.admiralty.io/elect` scheduling Annotation to Pod spec template
+Edit `podinfo` Deployment to add Admiralty `multicluster.admiralty.io/elect` scheduling Annotation to Pod spec template
 
 ```sh
 kubectl edit deploy podinfo
@@ -55,7 +55,7 @@ The Pod template spec part should look similar to
 ...
 ```
 
-Observe that pods were scheduled to Target cluster after then Annotation patch
+Observe that pods were scheduled to Target cluster the application of Annotation patch.
 
 ```sh
 kubectl --context kind-us get pod
