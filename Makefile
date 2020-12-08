@@ -134,6 +134,7 @@ deploy-full-terratest-setup:
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator:
+	kubectl apply -f deploy/namespace.yaml
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS)
 
@@ -144,9 +145,15 @@ deploy-gslb-operator-14:
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb template k8gb chart/k8gb -f $(VALUES_YAML) | kubectl -n k8gb --validate=false apply -f -
 
+.PHONY: deploy-gslb-cr
+deploy-gslb-cr:
+	kubectl apply -f deploy/crds/test-namespace.yaml
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+
 .PHONY: deploy-test-apps
 deploy-test-apps:
-	kubectl apply -f deploy/namespace.yaml
+	kubectl apply -f deploy/crds/test-namespace.yaml
 	$(call deploy-test-apps)
 
 # destroy local test environment
