@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
@@ -40,6 +41,7 @@ import (
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
 
+var k8gbNamespace = os.Getenv("POD_NAMESPACE")
 var log = logf.Log.WithName("controller_gslb")
 
 // GslbReconciler reconciles a Gslb object
@@ -52,7 +54,6 @@ type GslbReconciler struct {
 }
 
 const (
-	k8gbNamespace           = "k8gb"
 	gslbFinalizer           = "finalizer.k8gb.absa.oss"
 	roundRobinStrategy      = "roundRobin"
 	failoverStrategy        = "failover"

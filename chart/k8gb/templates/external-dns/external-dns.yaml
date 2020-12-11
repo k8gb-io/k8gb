@@ -34,13 +34,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: external-dns
-  namespace: k8gb
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: external-dns
-  namespace: k8gb
+  namespace: {{ .Release.Namespace }}
 {{ if .Values.route53.enabled }}
   annotations:
     eks.amazonaws.com/role-arn: {{ .Values.route53.irsaRole }}
@@ -51,7 +51,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
-  namespace: k8gb
+  namespace: {{ .Release.Namespace }}
 spec:
   strategy:
     type: Recreate

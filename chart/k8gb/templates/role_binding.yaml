@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: k8gb
-  namespace: k8gb
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: k8gb
