@@ -5,7 +5,7 @@ metadata:
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
   name: k8gb-coredns-lb
-  namespace: k8gb
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
   - name: udp-53

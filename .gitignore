@@ -104,6 +104,8 @@ tags
 ### JetBrains IDE ###
 .idea
 # End of idea tools
- 
 # Exclude chart tar.gz files
 chart/k8gb/charts/*.tgz
+
+# Ignore testing kubeconfigs
+kubeconfig*
