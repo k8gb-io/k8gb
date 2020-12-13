@@ -201,6 +201,12 @@ infoblox-secret:
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
 
+# creates ns1 secret in current cluster
+.PHONY: ns1-secret
+ns1-secret:
+	kubectl -n k8gb create secret generic ns1 \
+		--from-literal=apikey=$${NS1_APIKEY}
+
 # install CRDs into a cluster
 .PHONY: install
 install:

@@ -92,3 +92,6 @@ route53:
   enabled: false
   hostedZoneID: ZXXXSSS
   irsaRole: arn:aws:iam::111111:role/external-dns
+
+ns1:
+  enabled: true
