@@ -663,7 +663,6 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	defer cleanup()
 	const dnsZone = "cloud.example.com"
 	const want = "route53"
-	const coreDNSLBServiceName = "k8gb-coredns-lb"
 	wantEp := []*externaldns.Endpoint{
 		{
 			DNSName:    dnsZone,
@@ -690,7 +689,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	customConfig.EdgeDNSServer = "1.1.1.1"
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      coreDNSLBServiceName,
+			Name:      coreDNSExtServiceName,
 			Namespace: k8gbNamespace,
 		},
 	}
@@ -699,7 +698,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	}
 	settings := provideSettings(t, customConfig)
 	err := settings.client.Create(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to create testing %s service", coreDNSLBServiceName)
+	require.NoError(t, err, "Failed to create testing %s service", coreDNSExtServiceName)
 	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
 	err = settings.client.Status().Update(context.TODO(), coreDNSService)
 	require.NoError(t, err, "Failed to update coredns service lb hostname")
@@ -770,12 +769,11 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	// arrange
 	defer cleanup()
 
-	const coreDNSLBServiceName = "k8gb-coredns-lb"
 	customConfig := predefinedConfig
 	settings := provideSettings(t, customConfig)
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      coreDNSLBServiceName,
+			Name:      coreDNSExtServiceName,
 			Namespace: k8gbNamespace,
 		},
 	}
@@ -783,7 +781,7 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
 	}
 	err := settings.client.Create(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to create testing %s service", coreDNSLBServiceName)
+	require.NoError(t, err, "Failed to create testing %s service", coreDNSExtServiceName)
 	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
 	err = settings.client.Status().Update(context.TODO(), coreDNSService)
 	require.NoError(t, err, "Failed to update coredns service lb hostname")

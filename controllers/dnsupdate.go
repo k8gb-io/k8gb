@@ -27,6 +27,8 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
+const coreDNSExtServiceName = "k8gb-coredns-lb"
+
 func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 	nn := types.NamespacedName{
 		Name:      gslb.Name,
@@ -370,12 +372,11 @@ func Dig(edgeDNSServer, fqdn string) ([]string, error) {
 
 func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	coreDNSService := &corev1.Service{}
-	coreDNSServiceName := "k8gb-coredns-lb"
 
-	err := r.Get(context.TODO(), types.NamespacedName{Namespace: k8gbNamespace, Name: coreDNSServiceName}, coreDNSService)
+	err := r.Get(context.TODO(), types.NamespacedName{Namespace: k8gbNamespace, Name: coreDNSExtServiceName}, coreDNSService)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info(fmt.Sprintf("Can't find %s service", coreDNSServiceName))
+			log.Info(fmt.Sprintf("Can't find %s service", coreDNSExtServiceName))
 		}
 		return nil, err
 	}
@@ -383,7 +384,7 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	if len(coreDNSService.Status.LoadBalancer.Ingress) > 0 {
 		lbHostname = coreDNSService.Status.LoadBalancer.Ingress[0].Hostname
 	} else {
-		errMessage := fmt.Sprintf("no Ingress LoadBalancer entries found for %s serice", coreDNSServiceName)
+		errMessage := fmt.Sprintf("no Ingress LoadBalancer entries found for %s serice", coreDNSExtServiceName)
 		log.Info(errMessage)
 		err := coreerrors.New(errMessage)
 		return nil, err
@@ -438,11 +439,12 @@ func (r *GslbReconciler) createZoneDelegationRecordsForExternalDNS(gslb *k8gbv1b
 }
 
 func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
-	if r.Config.EdgeDNSType == depresolver.DNSTypeRoute53 {
+	switch r.Config.EdgeDNSType {
+	case depresolver.DNSTypeRoute53:
 		return r.createZoneDelegationRecordsForExternalDNS(gslb, "route53")
-	}
-	if r.Config.EdgeDNSType == depresolver.DNSTypeInfoblox {
-
+	case depresolver.DNSTypeNS1:
+		return r.createZoneDelegationRecordsForExternalDNS(gslb, "ns1")
+	case depresolver.DNSTypeInfoblox:
 		objMgr, err := infobloxConnection(r.Config)
 		if err != nil {
 			return &reconcile.Result{}, err
@@ -518,6 +520,7 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 				return &reconcile.Result{}, err
 			}
 		}
+
 	}
 	return nil, nil
 }
