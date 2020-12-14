@@ -1,4 +1,4 @@
-{{ if .Values.route53.enabled }}
+{{ if or .Values.route53.enabled .Values.ns1.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
