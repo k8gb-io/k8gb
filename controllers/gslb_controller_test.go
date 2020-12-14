@@ -724,6 +724,72 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 }
 
+func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
+	// arrange
+	defer cleanup()
+	const dnsZone = "cloud.example.com"
+	const want = "ns1"
+	wantEp := []*externaldns.Endpoint{
+		{
+			DNSName:    dnsZone,
+			RecordTTL:  30,
+			RecordType: "NS",
+			Targets: externaldns.Targets{
+				"gslb-ns-cloud-example-com-eu.example.com",
+				"gslb-ns-cloud-example-com-us.example.com",
+				"gslb-ns-cloud-example-com-za.example.com",
+			},
+		},
+		{
+			DNSName:    "gslb-ns-cloud-example-com-eu.example.com",
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets: externaldns.Targets{
+				"1.0.0.1",
+				"1.1.1.1",
+			},
+		},
+	}
+	dnsEndpointNS1 := &externaldns.DNSEndpoint{}
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSServer = "1.1.1.1"
+	coreDNSService := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      coreDNSExtServiceName,
+			Namespace: k8gbNamespace,
+		},
+	}
+	serviceIPs := []corev1.LoadBalancerIngress{
+		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
+	}
+	settings := provideSettings(t, customConfig)
+	err := settings.client.Create(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to create testing %s service", coreDNSExtServiceName)
+	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
+	err = settings.client.Status().Update(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to update coredns service lb hostname")
+
+	// act
+	customConfig.EdgeDNSType = depresolver.DNSTypeNS1
+	customConfig.ClusterGeoTag = "eu"
+	customConfig.ExtClustersGeoTags = []string{"za", "us"}
+	customConfig.DNSZone = dnsZone
+	// apply new environment variables and update config only
+	settings.reconciler.Config = &customConfig
+
+	reconcileAndUpdateGslb(t, settings)
+	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-ns1"}, dnsEndpointNS1)
+	require.NoError(t, err, "Failed to get expected DNSEndpoint")
+	got := dnsEndpointNS1.Annotations["k8gb.absa.oss/dnstype"]
+	gotEp := dnsEndpointNS1.Spec.Endpoints
+	prettyGot := prettyPrint(gotEp)
+	prettyWant := prettyPrint(wantEp)
+
+	// assert
+	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+	assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+}
+
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
 	defer cleanup()
