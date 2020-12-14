@@ -10,7 +10,7 @@ PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
-CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{test-gslb-ns-eu.example.com,test-gslb-failover-ns-eu.example.com}'
+CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-cloud-example-com-eu.example.com}'
 
 
 # terratest
