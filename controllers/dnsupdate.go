@@ -396,45 +396,50 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	return IPs, nil
 }
 
-func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
-	if r.Config.EdgeDNSType == depresolver.DNSTypeRoute53 {
-		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
-		log.Info("Creating/Updating DNSEndpoint CRDs for Route53...")
-		var NSServerList []string
-		NSServerList = append(NSServerList, r.nsServerName())
-		NSServerList = append(NSServerList, r.nsServerNameExt()...)
-		sort.Strings(NSServerList)
-		NSServerIPs, err := r.coreDNSExposedIPs()
-		if err != nil {
-			return &reconcile.Result{}, err
-		}
-		NSRecord := &externaldns.DNSEndpoint{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "k8gb-ns-route53",
-				Namespace:   k8gbNamespace,
-				Annotations: map[string]string{"k8gb.absa.oss/dnstype": "route53"},
-			},
-			Spec: externaldns.DNSEndpointSpec{
-				Endpoints: []*externaldns.Endpoint{
-					{
-						DNSName:    r.Config.DNSZone,
-						RecordTTL:  ttl,
-						RecordType: "NS",
-						Targets:    NSServerList,
-					},
-					{
-						DNSName:    r.nsServerName(),
-						RecordTTL:  ttl,
-						RecordType: "A",
-						Targets:    NSServerIPs,
-					},
+func (r *GslbReconciler) createZoneDelegationRecordsForExternalDNS(gslb *k8gbv1beta1.Gslb, dnsProvider string) (*reconcile.Result, error) {
+	ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
+	log.Info(fmt.Sprintf("Creating/Updating DNSEndpoint CRDs for %s...", dnsProvider))
+	var NSServerList []string
+	NSServerList = append(NSServerList, r.nsServerName())
+	NSServerList = append(NSServerList, r.nsServerNameExt()...)
+	sort.Strings(NSServerList)
+	NSServerIPs, err := r.coreDNSExposedIPs()
+	if err != nil {
+		return &reconcile.Result{}, err
+	}
+	NSRecord := &externaldns.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        fmt.Sprintf("k8gb-ns-%s", dnsProvider),
+			Namespace:   k8gbNamespace,
+			Annotations: map[string]string{"k8gb.absa.oss/dnstype": dnsProvider},
+		},
+		Spec: externaldns.DNSEndpointSpec{
+			Endpoints: []*externaldns.Endpoint{
+				{
+					DNSName:    r.Config.DNSZone,
+					RecordTTL:  ttl,
+					RecordType: "NS",
+					Targets:    NSServerList,
+				},
+				{
+					DNSName:    r.nsServerName(),
+					RecordTTL:  ttl,
+					RecordType: "A",
+					Targets:    NSServerIPs,
 				},
 			},
-		}
-		res, err := r.ensureDNSEndpoint(k8gbNamespace, NSRecord)
-		if err != nil {
-			return res, err
-		}
+		},
+	}
+	res, err := r.ensureDNSEndpoint(k8gbNamespace, NSRecord)
+	if err != nil {
+		return res, err
+	}
+	return nil, nil
+}
+
+func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
+	if r.Config.EdgeDNSType == depresolver.DNSTypeRoute53 {
+		return r.createZoneDelegationRecordsForExternalDNS(gslb, "route53")
 	}
 	if r.Config.EdgeDNSType == depresolver.DNSTypeInfoblox {
 

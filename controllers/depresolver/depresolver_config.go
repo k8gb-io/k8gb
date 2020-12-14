@@ -12,6 +12,7 @@ const (
 	ClusterGeoTagKey           = "CLUSTER_GEO_TAG"
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
 	Route53EnabledKey          = "ROUTE53_ENABLED"
+	NS1EnabledKey              = "NS1_ENABLED"
 	EdgeDNSServerKey           = "EDGE_DNS_SERVER"
 	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
 	DNSZoneKey                 = "DNS_ZONE"
@@ -34,6 +35,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.ClusterGeoTag = env.GetEnvAsStringOrFallback(ClusterGeoTagKey, "")
 		dr.config.ExtClustersGeoTags = env.GetEnvAsArrayOfStringsOrFallback(ExtClustersGeoTagsKey, []string{})
 		dr.config.route53Enabled = env.GetEnvAsBoolOrFallback(Route53EnabledKey, false)
+		dr.config.ns1Enabled = env.GetEnvAsBoolOrFallback(NS1EnabledKey, false)
 		dr.config.EdgeDNSServer = env.GetEnvAsStringOrFallback(EdgeDNSServerKey, "")
 		dr.config.EdgeDNSZone = env.GetEnvAsStringOrFallback(EdgeDNSZoneKey, "")
 		dr.config.DNSZone = env.GetEnvAsStringOrFallback(DNSZoneKey, "")
@@ -110,6 +112,9 @@ func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 // getEdgeDNSType contains logic retrieving EdgeDNSType
 func getEdgeDNSType(config *Config) EdgeDNSType {
 	var t = DNSTypeNoEdgeDNS
+	if config.ns1Enabled {
+		t |= DNSTypeNS1
+	}
 	if config.route53Enabled {
 		t |= DNSTypeRoute53
 	}
