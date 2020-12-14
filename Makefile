@@ -205,7 +205,7 @@ infoblox-secret:
 .PHONY: ns1-secret
 ns1-secret:
 	kubectl -n k8gb create secret generic ns1 \
-		--from-literal=apikey=$${NS1_APIKEY}
+		--from-literal=apiKey=$${NS1_APIKEY}
 
 # install CRDs into a cluster
 .PHONY: install

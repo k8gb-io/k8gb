@@ -31,7 +31,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: ns1
-              key: apikey
+              key: apiKey
       securityContext:
         fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
 {{ end }}
