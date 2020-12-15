@@ -14,7 +14,7 @@ The EKS setup is identical to [Route53 tutorial](/docs/deploy_route53.md)
 
 Example values.yaml override configs can be found [here](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/ns1/)
 
-You can use `helm` to deploy stable release from helm repo
+You can use `helm` to deploy stable release from Helm repo
 
 ```sh
 helm repo add k8gb https://www.k8gb.io
