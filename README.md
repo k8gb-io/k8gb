@@ -70,6 +70,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 
 * [General deployment with Infoblox integration](/docs/deploy_infoblox.md)
 * [AWS based deployment with Route53 integration](/docs/deploy_route53.md)
+* [AWS based deployment with NS1 integration](/docs/deploy_ns1.md)
 * [Local playground for testing and development](/docs/local.md)
 * [Metrics](/docs/metrics.md)
 * [Ingress annotations](/docs/ingress_annotations.md)
