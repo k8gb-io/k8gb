@@ -520,9 +520,10 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 				return &reconcile.Result{}, err
 			}
 		}
-
+	case depresolver.DNSTypeNoEdgeDNS:
+		return nil, nil
 	}
-	return nil, nil
+	return nil, coreerrors.New("unhandled DNS type...")
 }
 
 func (r *GslbReconciler) ensureDNSEndpoint(
