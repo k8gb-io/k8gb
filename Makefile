@@ -3,6 +3,7 @@
 ###############################
 CLUSTER_GSLB1 = test-gslb1
 CLUSTER_GSLB2 = test-gslb2
+CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
 GSLB_DOMAIN ?= cloud.example.com
 REPO = absaoss/k8gb
 VALUES_YAML ?= chart/k8gb/values.yaml
@@ -10,13 +11,9 @@ PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
+
 CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-cloud-example-com-eu.example.com}'
-
-
-# terratest
-GITACTION_TERRATEST_DOCKER_REPO_PORT ?= 5000
-GITACTION_TERRATEST_DOCKER_REPO_NAME ?= kind-registry
-GITACTION_TERRATEST_DOCKER_REPO_IMAGE ?= registry:2
+GITACTION_IMAGE_REPO ?=registry.localhost:5000/k8gb
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -30,9 +27,7 @@ NO_VALUE ?= no_value
 ###############################
 #		VARIABLES
 ###############################
-
-# shell script inspects whether kind registry is running or not
-KIND_REGISTRY_RUNNING ?= $(shell docker inspect -f '{{.State.Running}}' "test-gslb2-control-plane" || true)
+PWD ?=  $(shell pwd)
 
 VERSION ?= $(shell helm show chart chart/k8gb/|awk '/appVersion:/ {print $$2}')
 
@@ -102,34 +97,32 @@ deploy:
 # spin-up local environment
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup:
-	$(call create-local-cluster,$(CLUSTER_GSLB1),"deploy/kind/cluster.yaml")
-	$(call create-local-cluster,$(CLUSTER_GSLB2),"deploy/kind/cluster2.yaml")
+	docker network create --driver=bridge --subnet=172.16.0.0/24 $(CLUSTER_GSLB_NETWORK)
+	$(call create-local-cluster,$(CLUSTER_GSLB1),-p "80:80@agent[0]" -p "443:443@agent[0]" -p "5053:53/udp@agent[0]" )
+	$(call create-local-cluster,$(CLUSTER_GSLB2),-p "81:80@agent[0]" -p "444:443@agent[0]" -p "5054:53/udp@agent[0]" )
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),worker,absaoss/k8gb,)
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),absaoss/k8gb,)
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),absaoss/k8gb,$(CLUSTER_GSLB2_HELM_ARGS))
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),worker,absaoss/k8gb,$(CLUSTER_GSLB2_HELM_ARGS))
 
 # triggered by terraform GitHub Action. Clusters already exists. GO is not installed yet
-.PHONY: deploy-full-terratest-setup
-deploy-full-terratest-setup:
-	@echo "\n$(YELLOW)create docker registry$(NC) see: https://kind.sigs.k8s.io/docs/user/local-registry/"
-	docker run -d --restart=always -p "$(GITACTION_TERRATEST_DOCKER_REPO_PORT):5000" --name "$(GITACTION_TERRATEST_DOCKER_REPO_NAME)" "$(GITACTION_TERRATEST_DOCKER_REPO_IMAGE)"
-
+.PHONY: deploy-to-AbsaOSS-k3d-action
+deploy-to-AbsaOSS-k3d-action:
 	@echo "\n$(YELLOW)build k8gb docker and push to registry $(NC)"
 	docker build . -t k8gb:$(COMMIT_HASH)
-	docker tag k8gb:$(COMMIT_HASH) localhost:$(GITACTION_TERRATEST_DOCKER_REPO_PORT)/k8gb:v$(COMMIT_HASH)
-	docker push localhost:$(GITACTION_TERRATEST_DOCKER_REPO_PORT)/k8gb:v$(COMMIT_HASH)
+	docker tag k8gb:$(COMMIT_HASH) $(GITACTION_IMAGE_REPO):v$(COMMIT_HASH)
+	docker push $(GITACTION_IMAGE_REPO):v$(COMMIT_HASH)
 
 	@echo "\n$(YELLOW)Change version in Chart.yaml $(CYAN) $(VERSION) to $(COMMIT_HASH)$(NC)"
 	sed -i "s/$(VERSION)/$(COMMIT_HASH)/g" chart/k8gb/Chart.yaml
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),control-plane,localhost:$(GITACTION_TERRATEST_DOCKER_REPO_PORT)/k8gb,)
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),control-plane,localhost:$(GITACTION_TERRATEST_DOCKER_REPO_PORT)/k8gb,$(CLUSTER_GSLB2_HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(GITACTION_IMAGE_REPO),)
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(GITACTION_IMAGE_REPO),$(CLUSTER_GSLB2_HELM_ARGS))
 
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB2) $(NC)"
 	kubectl get pods -A
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1) $(NC)"
-	kubectl config use-context kind-$(CLUSTER_GSLB1)
+	kubectl config use-context k3d-$(CLUSTER_GSLB1)
 	kubectl get pods -A
 
 .PHONY: deploy-gslb-operator
@@ -159,8 +152,9 @@ deploy-test-apps:
 # destroy local test environment
 .PHONY: destroy-full-local-setup
 destroy-full-local-setup:
-	kind delete cluster --name $(CLUSTER_GSLB1)
-	kind delete cluster --name $(CLUSTER_GSLB2)
+	k3d cluster delete $(CLUSTER_GSLB1)
+	k3d cluster delete $(CLUSTER_GSLB2)
+	docker network rm $(CLUSTER_GSLB_NETWORK)
 
 .PHONY: dns-tools
 dns-tools:
@@ -285,22 +279,23 @@ version:
 
 define create-local-cluster
 	@echo "\n$(YELLOW)Deploy local cluster $(CYAN)$1 $(NC)"
-	kind create cluster --name=$1 --config=$2
+	k3d cluster create $1 $2 \
+	--agents 3 --no-lb --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server" --network $(CLUSTER_GSLB_NETWORK)
 endef
 
 define deploy-local-cluster
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$1 $(NC)"
-	kubectl config use-context kind-$1
+	kubectl config use-context k3d-$1
 
 	@echo "\n$(YELLOW)Create namespace $(NC)"
 	kubectl apply -f deploy/namespace.yaml
 
-	@echo "\n$(YELLOW)Deploy GSLB operator from $4 $(NC)"
+	@echo "\n$(YELLOW)Deploy GSLB operator from $3 $(NC)"
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) \
 		--set k8gb.hostAlias.enabled=true \
-		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,$1,$2,$3)`" \
-		--set k8gb.imageRepo=$4 $5
+		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
+		--set k8gb.imageRepo=$3 $4
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update stable https://charts.helm.sh/stable
@@ -316,7 +311,7 @@ define deploy-local-cluster
 	@echo "\n$(YELLOW)Deploy test apps $(NC)"
 	$(call deploy-test-apps)
 
-	@echo "\n$(YELLOW)Wait for GSLB, Ingress are ready $(NC)"
+	@echo "\n$(YELLOW)Wait until ETCD and Ingress controller are ready $(NC)"
 	$(call wait)
 
 	@echo "\n$(CYAN)$1 $(YELLOW)deployed! $(NC)"
@@ -344,9 +339,9 @@ endef
 # get-host-alias-ip switch to second context ($2), search for IP and switch back to first context ($1)
 # function returns one IP address
 define get-host-alias-ip
-	kubectl config use-context kind-$2 > /dev/null && \
-	kubectl get nodes $2-$3 -o custom-columns='IP:status.addresses[0].address' --no-headers && \
-	kubectl config use-context kind-$1 > /dev/null
+	kubectl config use-context $2 > /dev/null && \
+	kubectl get nodes $2-agent-0 -o custom-columns='IP:status.addresses[0].address' --no-headers && \
+	kubectl config use-context $1 > /dev/null
 endef
 
 define hit-testapp-host
@@ -356,9 +351,9 @@ define hit-testapp-host
 endef
 
 define init-test-strategy
- 	kubectl config use-context kind-test-gslb2
+ 	kubectl config use-context k3d-test-gslb2
  	kubectl apply -f $1
- 	kubectl config use-context kind-test-gslb1
+ 	kubectl config use-context k3d-test-gslb1
  	kubectl apply -f $1
  	$(call testapp-set-replicas,2)
 endef
