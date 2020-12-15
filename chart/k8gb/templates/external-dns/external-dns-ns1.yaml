@@ -1,0 +1,37 @@
+{{ if .Values.ns1.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-dns-ns1
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: external-dns-ns1
+  template:
+    metadata:
+      labels:
+        app: external-dns-ns1
+    spec:
+      serviceAccountName: external-dns
+      containers:
+      - name: external-dns
+        image: {{ .Values.externaldns.image }}
+        args:
+        - --source=crd
+        - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
+        - --annotation-filter=k8gb.absa.oss/dnstype=ns1 # filter out only relevant DNSEntrypoints
+        - --provider=ns1
+        - --txt-owner-id=k8gb-{{ .Values.k8gb.clusterGeoTag }}
+        - --policy=sync # enable full synchronization including record removal
+        - --log-level=debug # debug only
+        env:
+        - name: NS1_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: ns1
+              key: apiKey
+      securityContext:
+        fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+{{ end }}

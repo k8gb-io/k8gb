@@ -86,3 +86,7 @@ spec:
             - name: ROUTE53_ENABLED
               value: "true"
             {{ end }}
+            {{ if .Values.ns1.enabled }}
+            - name: NS1_ENABLED
+              value: "true"
+            {{ end }}

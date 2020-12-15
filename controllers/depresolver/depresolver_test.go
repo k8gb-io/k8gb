@@ -305,6 +305,40 @@ func TestResolveConfigWithEmptyRoute53(t *testing.T) {
 	assert.Equal(t, false, config.route53Enabled)
 }
 
+func TestResolveConfigWithProperNS1Enabled(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.ns1Enabled = true
+	expected.Infoblox.Host = ""
+	expected.EdgeDNSType = DNSTypeNS1
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestResolveConfigWithoutNS1(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.ns1Enabled = false
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError, NS1EnabledKey)
+}
+
+func TestResolveConfigWithEmptyNS1(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(NS1EnabledKey, "")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(cl)
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, false, config.ns1Enabled)
+}
+
 func TestResolveConfigWithEmptyEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -909,6 +943,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.DNSZone)
 	_ = os.Setenv(Route53EnabledKey, strconv.FormatBool(config.route53Enabled))
+	_ = os.Setenv(NS1EnabledKey, strconv.FormatBool(config.ns1Enabled))
 	_ = os.Setenv(InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(InfobloxVersionKey, config.Infoblox.Version)
 	_ = os.Setenv(InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))

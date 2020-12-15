@@ -22,6 +22,8 @@ const (
 	DNSTypeInfoblox
 	// DNSTypeRoute53 type
 	DNSTypeRoute53
+	// DNSTypeNS1 type
+	DNSTypeNS1
 )
 
 // Infoblox configuration
@@ -69,6 +71,8 @@ type Config struct {
 	Override Override
 	// route53Enabled hidden. EdgeDNSType defines all enabled Enabled types
 	route53Enabled bool
+	// ns1Enabled flag
+	ns1Enabled bool
 }
 
 // DependencyResolver resolves configuration for GSLB

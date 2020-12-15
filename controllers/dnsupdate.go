@@ -27,6 +27,8 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
+const coreDNSExtServiceName = "k8gb-coredns-lb"
+
 func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 	nn := types.NamespacedName{
 		Name:      gslb.Name,
@@ -370,12 +372,11 @@ func Dig(edgeDNSServer, fqdn string) ([]string, error) {
 
 func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	coreDNSService := &corev1.Service{}
-	coreDNSServiceName := "k8gb-coredns-lb"
 
-	err := r.Get(context.TODO(), types.NamespacedName{Namespace: k8gbNamespace, Name: coreDNSServiceName}, coreDNSService)
+	err := r.Get(context.TODO(), types.NamespacedName{Namespace: k8gbNamespace, Name: coreDNSExtServiceName}, coreDNSService)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info(fmt.Sprintf("Can't find %s service", coreDNSServiceName))
+			log.Info(fmt.Sprintf("Can't find %s service", coreDNSExtServiceName))
 		}
 		return nil, err
 	}
@@ -383,7 +384,7 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	if len(coreDNSService.Status.LoadBalancer.Ingress) > 0 {
 		lbHostname = coreDNSService.Status.LoadBalancer.Ingress[0].Hostname
 	} else {
-		errMessage := fmt.Sprintf("no Ingress LoadBalancer entries found for %s serice", coreDNSServiceName)
+		errMessage := fmt.Sprintf("no Ingress LoadBalancer entries found for %s serice", coreDNSExtServiceName)
 		log.Info(errMessage)
 		err := coreerrors.New(errMessage)
 		return nil, err
@@ -396,48 +397,54 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	return IPs, nil
 }
 
-func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
-	if r.Config.EdgeDNSType == depresolver.DNSTypeRoute53 {
-		ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
-		log.Info("Creating/Updating DNSEndpoint CRDs for Route53...")
-		var NSServerList []string
-		NSServerList = append(NSServerList, r.nsServerName())
-		NSServerList = append(NSServerList, r.nsServerNameExt()...)
-		sort.Strings(NSServerList)
-		NSServerIPs, err := r.coreDNSExposedIPs()
-		if err != nil {
-			return &reconcile.Result{}, err
-		}
-		NSRecord := &externaldns.DNSEndpoint{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        "k8gb-ns-route53",
-				Namespace:   k8gbNamespace,
-				Annotations: map[string]string{"k8gb.absa.oss/dnstype": "route53"},
-			},
-			Spec: externaldns.DNSEndpointSpec{
-				Endpoints: []*externaldns.Endpoint{
-					{
-						DNSName:    r.Config.DNSZone,
-						RecordTTL:  ttl,
-						RecordType: "NS",
-						Targets:    NSServerList,
-					},
-					{
-						DNSName:    r.nsServerName(),
-						RecordTTL:  ttl,
-						RecordType: "A",
-						Targets:    NSServerIPs,
-					},
+func (r *GslbReconciler) createZoneDelegationRecordsForExternalDNS(gslb *k8gbv1beta1.Gslb, dnsProvider string) (*reconcile.Result, error) {
+	ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
+	log.Info(fmt.Sprintf("Creating/Updating DNSEndpoint CRDs for %s...", dnsProvider))
+	var NSServerList []string
+	NSServerList = append(NSServerList, r.nsServerName())
+	NSServerList = append(NSServerList, r.nsServerNameExt()...)
+	sort.Strings(NSServerList)
+	NSServerIPs, err := r.coreDNSExposedIPs()
+	if err != nil {
+		return &reconcile.Result{}, err
+	}
+	NSRecord := &externaldns.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        fmt.Sprintf("k8gb-ns-%s", dnsProvider),
+			Namespace:   k8gbNamespace,
+			Annotations: map[string]string{"k8gb.absa.oss/dnstype": dnsProvider},
+		},
+		Spec: externaldns.DNSEndpointSpec{
+			Endpoints: []*externaldns.Endpoint{
+				{
+					DNSName:    r.Config.DNSZone,
+					RecordTTL:  ttl,
+					RecordType: "NS",
+					Targets:    NSServerList,
+				},
+				{
+					DNSName:    r.nsServerName(),
+					RecordTTL:  ttl,
+					RecordType: "A",
+					Targets:    NSServerIPs,
 				},
 			},
-		}
-		res, err := r.ensureDNSEndpoint(k8gbNamespace, NSRecord)
-		if err != nil {
-			return res, err
-		}
+		},
 	}
-	if r.Config.EdgeDNSType == depresolver.DNSTypeInfoblox {
+	res, err := r.ensureDNSEndpoint(k8gbNamespace, NSRecord)
+	if err != nil {
+		return res, err
+	}
+	return nil, nil
+}
 
+func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
+	switch r.Config.EdgeDNSType {
+	case depresolver.DNSTypeRoute53:
+		return r.createZoneDelegationRecordsForExternalDNS(gslb, "route53")
+	case depresolver.DNSTypeNS1:
+		return r.createZoneDelegationRecordsForExternalDNS(gslb, "ns1")
+	case depresolver.DNSTypeInfoblox:
 		objMgr, err := infobloxConnection(r.Config)
 		if err != nil {
 			return &reconcile.Result{}, err
@@ -513,8 +520,10 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 				return &reconcile.Result{}, err
 			}
 		}
+	case depresolver.DNSTypeNoEdgeDNS:
+		return nil, nil
 	}
-	return nil, nil
+	return nil, coreerrors.New("unhandled DNS type...")
 }
 
 func (r *GslbReconciler) ensureDNSEndpoint(
