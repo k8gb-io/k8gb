@@ -22,8 +22,8 @@ appVersion: 0.7.2
 
 dependencies:
   - name: coredns
-    repository: https://kubernetes-charts.storage.googleapis.com
-    version: 1.8.4
+    repository: https://coredns.github.io/helm
+    version: 1.14.0
   - name: etcd-operator
-    repository: https://kubernetes-charts.storage.googleapis.com
+    repository: https://charts.helm.sh/stable
     version: 0.11.0
