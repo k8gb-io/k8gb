@@ -29,3 +29,10 @@ make deploy-gslb-operator VALUES_YAML=./docs/examples/ns1/k8gb-cluster-ns1-eu-we
 
 make deploy-gslb-operator VALUES_YAML=./docs/examples/ns1/k8gb-cluster-ns1-us-east-1.yaml
 ```
+
+Create NS1 secret in each cluster
+
+```sh
+export NS1_APIKEY=<ns1-api-key>
+make ns1-secret
+```
