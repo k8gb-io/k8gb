@@ -1,12 +1,46 @@
 # Changelog
 
+## [v0.7.2](https://github.com/absaoss/k8gb/tree/v0.7.2) (2020-12-16)
+
+[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.1...v0.7.2)
+
+**Implemented enhancements:**
+
+- Support for NS1 Managed DNS [\#202](https://github.com/AbsaOSS/k8gb/issues/202)
+- Add ability to reuse existing Ingress [\#200](https://github.com/AbsaOSS/k8gb/issues/200)
+- Move crds from templates/ to crd/ [\#144](https://github.com/AbsaOSS/k8gb/issues/144)
+- Relax dependency on specific 'k8gb' namespace name [\#129](https://github.com/AbsaOSS/k8gb/issues/129)
+
+**Fixed bugs:**
+
+- JSON unmarshall error in ohmyglb logs/ohmyglb status update [\#108](https://github.com/AbsaOSS/k8gb/issues/108)
+
+**Closed issues:**
+
+- Replace k8gb.io/primarygeotag annotation with k8gb.io/primary-geotag [\#210](https://github.com/AbsaOSS/k8gb/issues/210)
+- Consider the switch from kind to k3d [\#141](https://github.com/AbsaOSS/k8gb/issues/141)
+
+**Merged pull requests:**
+
+- Switch to new chart repos for dependency charts [\#224](https://github.com/AbsaOSS/k8gb/pull/224) ([ytsarev](https://github.com/ytsarev))
+- Add missing NS1 api key propagation to the doc [\#223](https://github.com/AbsaOSS/k8gb/pull/223) ([ytsarev](https://github.com/ytsarev))
+- k3d migration [\#218](https://github.com/AbsaOSS/k8gb/pull/218) ([kuritka](https://github.com/kuritka))
+- NS1 support [\#217](https://github.com/AbsaOSS/k8gb/pull/217) ([ytsarev](https://github.com/ytsarev))
+- Fix cluster communication in full local setup [\#216](https://github.com/AbsaOSS/k8gb/pull/216) ([ytsarev](https://github.com/ytsarev))
+- Relax requirement on k8gb namespace name [\#215](https://github.com/AbsaOSS/k8gb/pull/215) ([ytsarev](https://github.com/ytsarev))
+- Fix makefile regressions [\#214](https://github.com/AbsaOSS/k8gb/pull/214) ([ytsarev](https://github.com/ytsarev))
+- Admiralty integration tutorial [\#213](https://github.com/AbsaOSS/k8gb/pull/213) ([ytsarev](https://github.com/ytsarev))
+- Primary geotag annotation fix [\#212](https://github.com/AbsaOSS/k8gb/pull/212) ([somaritane](https://github.com/somaritane))
+- regarding Helm Best Practices move CRDs from /templates/crds to /crds [\#209](https://github.com/AbsaOSS/k8gb/pull/209) ([kuritka](https://github.com/kuritka))
+- Makefile changes on demand [\#208](https://github.com/AbsaOSS/k8gb/pull/208) ([kuritka](https://github.com/kuritka))
+- Changelog for v0.7.1 [\#206](https://github.com/AbsaOSS/k8gb/pull/206) ([ytsarev](https://github.com/ytsarev))
+
 ## [v0.7.1](https://github.com/absaoss/k8gb/tree/v0.7.1) (2020-11-23)
 
 [Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.0...v0.7.1)
 
 **Implemented enhancements:**
 
-- Add ability to reuse existing Ingress [\#200](https://github.com/AbsaOSS/k8gb/issues/200)
 - split of pkg/internal/env into reusable pkg [\#185](https://github.com/AbsaOSS/k8gb/issues/185)
 - Add support for Route 53 as another edge DNS implementation [\#49](https://github.com/AbsaOSS/k8gb/issues/49)
 
