@@ -21,7 +21,7 @@ k8gb:
   reconcileRequeueSeconds: 30
 
 externaldns:
-  image: absaoss/external-dns:v0.7.1-401-gede9767c # temporary image containing NS record support before the merge of https://github.com/kubernetes-sigs/external-dns/pull/1813
+  image: k8s.gcr.io/external-dns/external-dns:v0.7.5
   interval: "20s"
   expose53onWorkers: true # open 53/udp on workers nodes with nginx controller
 
