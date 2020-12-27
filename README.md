@@ -82,13 +82,17 @@ k8gb is very well tested with the following environment options
 
 | Type                             | Implementation                                                          |
 |----------------------------------|-------------------------------------------------------------------------|
-| Kubernetes Version               | >= 1.14 (with [install workaround][install-workaround] >= 1.15 (Stable) |
-| Environment                      | On-prem(vSphere), AWS(EKS)                                              |
-| Ingress Controller               | NGINX                                                                   |
-| EdgeDNS                          | Infoblox, Route53                                                       |
+| Kubernetes Version               | >= 1.15                                                                 |
+| Environment                      | On-prem(vSphere), AWS(EKS) [*](#clarify)                                |
+| Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                       |
+| EdgeDNS                          | Infoblox, Route53, NS1                                                  |
+
+<a name="clarify"></a>* We explicitly mention solutions where we practically tested k8gb installation.
+If your environment or Ingress controller does not match this table it does not mean that k8gb will not be
+a fit for you. The k8gb is architected to be run on top of any Kubernetes cluster and Ingress controller
+without tight coupling with specific k8s distro and/or Ingress controller.
+
 
 ## Contributing
 
-See [CONTRIBUTING.md](/CONTRIBUTING.md)
-
-[install-workaround]: https://github.com/AbsaOSS/k8gb/tree/master/Makefile#L235
+See [CONTRIBUTING](/CONTRIBUTING.md)
