@@ -83,7 +83,7 @@ k8gb is very well tested with the following environment options
 | Type                             | Implementation                                                          |
 |----------------------------------|-------------------------------------------------------------------------|
 | Kubernetes Version               | >= 1.15                                                                 |
-| Environment                      | On-prem(vSphere), AWS(EKS) [*](#clarify)                                |
+| Environment                      | Self-managed, AWS(EKS) [*](#clarify)                                |
 | Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                       |
 | EdgeDNS                          | Infoblox, Route53, NS1                                                  |
 
