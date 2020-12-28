@@ -87,10 +87,8 @@ k8gb is very well tested with the following environment options
 | Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                       |
 | EdgeDNS                          | Infoblox, Route53, NS1                                                  |
 
-<a name="clarify"></a>* We explicitly mention solutions where we practically tested k8gb installation.
-If your environment or Ingress controller does not match this table it does not mean that k8gb will not be
-a fit for you. The k8gb is architected to be run on top of any Kubernetes cluster and Ingress controller
-without tight coupling with specific k8s distro and/or Ingress controller.
+<a name="clarify"></a>* We only mention solutions where we have tested and verified a k8gb installation.
+If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
 
 
 ## Contributing
