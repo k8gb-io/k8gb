@@ -56,8 +56,8 @@ func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetr
 
 		output, err = action()
 		if err != nil {
-			return output, nil
 			t.Logf("%s returned an error: %s. Sleeping for %s and will try again.", actionDescription, err.Error(), sleepBetweenRetries)
+			return output, nil
 		}
 
 		if reflect.DeepEqual(output, expectedResult) {
@@ -124,7 +124,7 @@ func assertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName string
 		k8gbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o",
 			"custom-columns=SERVICESTATUS:.status.serviceHealth", "--no-headers")
 		if err != nil {
-			t.Errorf("Failed to get k8gb status with kubectl (%s)", err)
+			t.Logf("Failed to get k8gb status with kubectl (%s)", err)
 		}
 		return []string{k8gbServiceHealth}, nil
 	}
