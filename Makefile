@@ -76,15 +76,15 @@ debug-idea:
 	$(call debug,debug --headless --listen=:2345 --api-version=2)
 
 .PHONY: debug-test-etcd
-debug-test-etcd:
+debug-test-etcd: ## Run temporary etcd pod for debug
 	kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace k8gb etcd-test --image "$(ETCD_DEBUG_IMAGE)" --restart=Never -- /bin/sh
 
 .PHONY: demo-roundrobin
-demo-roundrobin:
+demo-roundrobin: ## Execute round-robin demo
 	@$(call demo-host, "app3.cloud.example.com")
 
 .PHONY: demo-failover
-demo-failover:
+demo-failover: ## Execute failover demo
 	@$(call demo-host, "failover.cloud.example.com")
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
@@ -96,7 +96,7 @@ deploy:
 
 # spin-up local environment
 .PHONY: deploy-full-local-setup
-deploy-full-local-setup:
+deploy-full-local-setup: ## Deploy full local multicluster setup
 	docker network create --driver=bridge --subnet=172.16.0.0/24 $(CLUSTER_GSLB_NETWORK)
 	$(call create-local-cluster,$(CLUSTER_GSLB1),-p "80:80@agent[0]" -p "443:443@agent[0]" -p "5053:53/udp@agent[0]" )
 	$(call create-local-cluster,$(CLUSTER_GSLB2),-p "81:80@agent[0]" -p "444:443@agent[0]" -p "5054:53/udp@agent[0]" )
@@ -126,7 +126,7 @@ deploy-to-AbsaOSS-k3d-action:
 	kubectl get pods -A
 
 .PHONY: deploy-gslb-operator
-deploy-gslb-operator:
+deploy-gslb-operator: ## Deploy k8gb operator
 	kubectl apply -f deploy/namespace.yaml
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS)
@@ -139,25 +139,25 @@ deploy-gslb-operator-14:
 	helm -n k8gb template k8gb chart/k8gb -f $(VALUES_YAML) | kubectl -n k8gb --validate=false apply -f -
 
 .PHONY: deploy-gslb-cr
-deploy-gslb-cr:
+deploy-gslb-cr: ## Apply Gslb Custom Resources
 	kubectl apply -f deploy/crds/test-namespace.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 .PHONY: deploy-test-apps
-deploy-test-apps:
+deploy-test-apps: ## Deploy testing workloads
 	kubectl apply -f deploy/crds/test-namespace.yaml
 	$(call deploy-test-apps)
 
 # destroy local test environment
 .PHONY: destroy-full-local-setup
-destroy-full-local-setup:
+destroy-full-local-setup: ## Destroy full local multicluster setup
 	k3d cluster delete $(CLUSTER_GSLB1)
 	k3d cluster delete $(CLUSTER_GSLB2)
 	docker network rm $(CLUSTER_GSLB_NETWORK)
 
 .PHONY: dns-tools
-dns-tools:
+dns-tools: ## Run temporary dnstools pod for debugging DNS issues
 	@kubectl -n k8gb get svc k8gb-coredns
 	@kubectl -n k8gb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 
@@ -259,7 +259,7 @@ test-failover:
 
 # executes terra-tests
 .PHONY: terratest
-terratest:
+terratest: # Run terratest suite
 	cd terratest/test/ && go mod download && go test -v
 
 # uninstall CRDs from a cluster
@@ -272,6 +272,10 @@ uninstall:
 .PHONY: version
 version:
 	@echo $(VERSION)
+
+.PHONY: help
+help: ## Show this help
+	@egrep -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 ###############################
 #		FUNCTIONS
