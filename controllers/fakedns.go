@@ -19,9 +19,9 @@ func oldEdgeTimestamp(threshold string) string {
 }
 
 var records = map[string][]string{
-	"localtargets-app3.cloud.example.com.": {"10.1.0.1", "10.1.0.2", "10.1.0.3"},
-	"test-gslb-heartbeat-eu.example.com.":  {oldEdgeTimestamp("10m")},
-	"test-gslb-heartbeat-za.example.com.":  {oldEdgeTimestamp("3m")},
+	"localtargets-roundrobin.cloud.example.com.": {"10.1.0.1", "10.1.0.2", "10.1.0.3"},
+	"test-gslb-heartbeat-eu.example.com.":        {oldEdgeTimestamp("10m")},
+	"test-gslb-heartbeat-za.example.com.":        {oldEdgeTimestamp("3m")},
 }
 
 func parseQuery(m *dns.Msg) {

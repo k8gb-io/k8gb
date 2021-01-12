@@ -81,7 +81,7 @@ debug-test-etcd: ## Run temporary etcd pod for debug
 
 .PHONY: demo-roundrobin
 demo-roundrobin: ## Execute round-robin demo
-	@$(call demo-host, "app3.cloud.example.com")
+	@$(call demo-host, "roundrobin.cloud.example.com")
 
 .PHONY: demo-failover
 demo-failover: ## Execute failover demo
@@ -163,7 +163,7 @@ dns-tools: ## Run temporary dnstools pod for debugging DNS issues
 
 .PHONY: dns-smoke-test
 dns-smoke-test:
-	kubectl -n k8gb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @k8gb-coredns app3.cloud.example.com
+	kubectl -n k8gb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @k8gb-coredns roundrobin.cloud.example.com
 
 # build the docker image
 .PHONY: docker-build
@@ -251,7 +251,7 @@ test: lint
 
 .PHONY: test-round-robin
 test-round-robin:
-	@$(call hit-testapp-host, "app3.cloud.example.com")
+	@$(call hit-testapp-host, "roundrobin.cloud.example.com")
 
 .PHONY: test-failover
 test-failover:

@@ -41,6 +41,6 @@ func TestK8gbIngressAnnotationRR(t *testing.T) {
 
 	ingress := k8s.GetIngress(t, options, "test-gslb-annotation")
 	require.Equal(t, ingress.Name, "test-gslb-annotation")
-	assertGslbStatus(t, options, "test-gslb-annotation", "app1.cloud.example.com:NotFound app2.cloud.example.com:NotFound app3.cloud.example.com:NotFound")
+	assertGslbStatus(t, options, "test-gslb-annotation", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:NotFound unhealthy.cloud.example.com:NotFound")
 	assertGslbSpec(t, options, "test-gslb-annotation", ".spec.strategy.type", "roundRobin")
 }

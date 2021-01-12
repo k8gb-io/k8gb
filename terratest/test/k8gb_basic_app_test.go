@@ -87,6 +87,6 @@ func TestK8gbBasicAppExample(t *testing.T) {
 
 	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
 
-	assertGslbStatus(t, options, "test-gslb", "app1.cloud.example.com:NotFound app2.cloud.example.com:Unhealthy app3.cloud.example.com:Healthy")
+	assertGslbStatus(t, options, "test-gslb", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:Healthy unhealthy.cloud.example.com:Unhealthy")
 
 }

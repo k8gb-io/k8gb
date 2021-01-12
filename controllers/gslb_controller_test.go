@@ -73,7 +73,7 @@ func TestNotFoundServiceStatus(t *testing.T) {
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	expectedServiceStatus := "NotFound"
-	notFoundHost := "app1.cloud.example.com"
+	notFoundHost := "notfound.cloud.example.com"
 	// act
 	actualServiceStatus := settings.gslb.Status.ServiceHealth[notFoundHost]
 	// assert
@@ -86,7 +86,7 @@ func TestUnhealthyServiceStatus(t *testing.T) {
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "unhealthy-app"
-	unhealthyHost := "app2.cloud.example.com"
+	unhealthyHost := "unhealthy.cloud.example.com"
 	expectedServiceStatus := "Unhealthy"
 	defer deleteUnhealthyService(t, &settings, serviceName)
 	// act
@@ -104,7 +104,7 @@ func TestHealthyServiceStatus(t *testing.T) {
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "frontend-podinfo"
 	expectedServiceStatus := "Healthy"
-	healthyHost := "app3.cloud.example.com"
+	healthyHost := "roundrobin.cloud.example.com"
 	defer deleteHealthyService(t, &settings, serviceName)
 	createHealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
@@ -257,12 +257,12 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := []*externaldns.Endpoint{
 		{
-			DNSName:    "localtargets-app3.cloud.example.com",
+			DNSName:    "localtargets-roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
 		{
-			DNSName:    "app3.cloud.example.com",
+			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
@@ -298,7 +298,7 @@ func TestDNSRecordReflectionInStatus(t *testing.T) {
 	defer cleanup()
 	serviceName := "frontend-podinfo"
 	dnsEndpoint := &externaldns.DNSEndpoint{}
-	want := map[string][]string{"app3.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
+	want := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
 	ingressIPs := []corev1.LoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
@@ -373,17 +373,17 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
-			DNSName:    "localtargets-app3.cloud.example.com",
+			DNSName:    "localtargets-roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
 		{
-			DNSName:    "app3.cloud.example.com",
+			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}},
 	}
-	hrWant := map[string][]string{"app3.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}}
+	hrWant := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}}
 	ingressIPs := []corev1.LoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
@@ -487,13 +487,13 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
-			DNSName:    "localtargets-app3.cloud.example.com",
+			DNSName:    "localtargets-roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
 		},
 		{
-			DNSName:    "app3.cloud.example.com",
+			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
@@ -542,13 +542,13 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
-			DNSName:    "localtargets-app3.cloud.example.com",
+			DNSName:    "localtargets-roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
 		},
 		{
-			DNSName:    "app3.cloud.example.com",
+			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
@@ -796,12 +796,12 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
-			DNSName:    "localtargets-app3.cloud.example.com",
+			DNSName:    "localtargets-roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},
 		{
-			DNSName:    "app3.cloud.example.com",
+			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},

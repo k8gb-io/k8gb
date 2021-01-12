@@ -6,21 +6,21 @@ metadata:
   name: test-gslb-annotation
 spec:
   rules:
-  - host: app1.cloud.example.com
+  - host: notfound.cloud.example.com
     http:
       paths:
       - backend:
           serviceName: non-existing-app
           servicePort: http
         path: /
-  - host: app2.cloud.example.com
+  - host: unhealthy.cloud.example.com
     http:
       paths:
       - backend:
           serviceName: unhealthy-app
           servicePort: http
         path: /
-  - host: app3.cloud.example.com
+  - host: roundrobin.cloud.example.com
     http:
       paths:
       - backend:

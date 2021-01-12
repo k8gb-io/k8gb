@@ -67,28 +67,28 @@ eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkd
 Cluster [test-gslb1](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
 while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster2.yaml) on port `:5054`.
 ```shell script
-dig @localhost localtargets-app3.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-app3.cloud.example.com
+dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
 As expected result you should see **eight A records** divided between nodes of both clusters.
 ```shell script
 ...
 ...
 ;; ANSWER SECTION:
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.3
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.4
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.2
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.5
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.3
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.4
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.2
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.5
 ...
 ...
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.8
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.6
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.7
-localtargets-app3.cloud.example.com. 30 IN A    172.16.0.9
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.8
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.6
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.7
+localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.9
 ```
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top.
 Run following command and check if you get two json responses.
 ```shell script
-curl localhost:80 -H "Host:app3.cloud.example.com" && curl localhost:81 -H "Host:app3.cloud.example.com"
+curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H "Host:roundrobin.cloud.example.com"
 ```
 
 #### Run integration tests
@@ -112,7 +112,7 @@ make destroy-full-local-setup
 ### Round Robin
 
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each
-cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - app3.cloud.example.com` and depending
+cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - roundrobin.cloud.example.com` and depending
 on region will podinfo return **us** or **eu**. In current round robin implementation are IP addresses randomly picked.
 See [Gslb manifest with round robin strategy](https://github.com/AbsaOSS/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 
