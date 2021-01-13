@@ -65,6 +65,8 @@ type Config struct {
 	EdgeDNSZone string
 	// DNSZone controlled by gslb; e.g. cloud.example.com
 	DNSZone string
+	// K8gbNamespace k8gb namespace
+	K8gbNamespace string
 	// Infoblox configuration
 	Infoblox Infoblox
 	// Override the behavior of GSLB in the test environments

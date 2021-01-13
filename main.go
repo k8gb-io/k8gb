@@ -33,6 +33,7 @@ import (
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers"
+	"github.com/AbsaOSS/k8gb/controllers/metrics"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 	// +kubebuilder:scaffold:imports
 )
@@ -93,15 +94,22 @@ func main() {
 	if err != nil {
 		setupLog.Error(err, "reading config env variables")
 	}
+	setupLog.Info("starting metrics")
+	reconciler.Metrics = metrics.NewPrometheusMetrics(*reconciler.Config)
+	err = reconciler.Metrics.Register()
+	if err != nil {
+		setupLog.Error(err, "register metrics error")
+		os.Exit(1)
+	}
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Gslb")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
-
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+	reconciler.Metrics.Unregister()
 }

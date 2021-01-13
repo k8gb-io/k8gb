@@ -24,6 +24,7 @@ const (
 	InfobloxPasswordKey     = "EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"
 	OverrideWithFakeDNSKey  = "OVERRIDE_WITH_FAKE_EXT_DNS"
 	OverrideFakeInfobloxKey = "FAKE_INFOBLOX"
+	K8gbNamespaceKey        = "POD_NAMESPACE"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -39,6 +40,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.EdgeDNSServer = env.GetEnvAsStringOrFallback(EdgeDNSServerKey, "")
 		dr.config.EdgeDNSZone = env.GetEnvAsStringOrFallback(EdgeDNSZoneKey, "")
 		dr.config.DNSZone = env.GetEnvAsStringOrFallback(DNSZoneKey, "")
+		dr.config.K8gbNamespace = env.GetEnvAsStringOrFallback(K8gbNamespaceKey, "")
 		dr.config.Infoblox.Host = env.GetEnvAsStringOrFallback(InfobloxGridHostKey, "")
 		dr.config.Infoblox.Version = env.GetEnvAsStringOrFallback(InfobloxVersionKey, "")
 		dr.config.Infoblox.Port, _ = env.GetEnvAsIntOrFallback(InfobloxPortKey, 0)
@@ -53,6 +55,10 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 }
 
 func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
+	err = field("k8gbNamespace", config.K8gbNamespace).isNotEmpty().matchRegexp(k8sNamespaceRegex).err
+	if err != nil {
+		return err
+	}
 	err = field("reconcileRequeueSeconds", config.ReconcileRequeueSeconds).isHigherThanZero().err
 	if err != nil {
 		return err
