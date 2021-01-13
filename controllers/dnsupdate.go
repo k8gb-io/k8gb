@@ -9,13 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 
 	coreerrors "errors"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
-	"github.com/lixiangzhong/dnsutil"
 	"github.com/miekg/dns"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -52,8 +53,9 @@ func (r *GslbReconciler) getGslbIngressIPs(gslb *k8gbv1beta1.Gslb) ([]string, er
 			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
 		}
 		if len(ip.Hostname) > 0 {
-			IPs, err := Dig(r.Config.EdgeDNSServer, ip.Hostname)
+			IPs, err := utils.Dig(r.Config.EdgeDNSServer, ip.Hostname)
 			if err != nil {
+				log.Info("Dig error: %s", err)
 				return nil, err
 			}
 			gslbIngressIPs = append(gslbIngressIPs, IPs...)
@@ -346,30 +348,6 @@ func filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclie
 	return delegateTo
 }
 
-// Dig digs
-func Dig(edgeDNSServer, fqdn string) ([]string, error) {
-	var dig dnsutil.Dig
-	if edgeDNSServer == "" {
-		return nil, fmt.Errorf("empty edgeDNSServer")
-	}
-	err := dig.SetDNS(edgeDNSServer)
-	if err != nil {
-		log.Info(fmt.Sprintf("Can't set query dns (%s) with error(%s)", edgeDNSServer, err))
-		return nil, err
-	}
-	a, err := dig.A(fqdn)
-	if err != nil {
-		log.Info(fmt.Sprintf("Can't dig fqdn(%s) with error(%s)", fqdn, err))
-		return nil, err
-	}
-	var IPs []string
-	for _, ip := range a {
-		IPs = append(IPs, fmt.Sprint(ip.A))
-	}
-	sort.Strings(IPs)
-	return IPs, nil
-}
-
 func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	coreDNSService := &corev1.Service{}
 
@@ -389,9 +367,9 @@ func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	IPs, err := Dig(r.Config.EdgeDNSServer, lbHostname)
+	IPs, err := utils.Dig(r.Config.EdgeDNSServer, lbHostname)
 	if err != nil {
-		log.Info(fmt.Sprintf("Can't dig k8gb-coredns-lb service loadbalancer fqdn %s", lbHostname))
+		log.Info(fmt.Sprintf("Can't dig k8gb-coredns-lb service loadbalancer fqdn %s (%s)", lbHostname, err))
 		return nil, err
 	}
 	return IPs, nil
