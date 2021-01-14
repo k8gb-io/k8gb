@@ -1003,8 +1003,8 @@ sigs.k8s.io/controller-runtime v0.6.2 h1:jkAnfdTYBpFwlmBn3pS5HFO06SfxvnTZ1p5PeEF
 sigs.k8s.io/controller-runtime v0.6.2/go.mod h1:vhcq/rlnENJ09SIRp3EveTaZ0yqH526hjf9iJdbUJ/E=
 sigs.k8s.io/controller-tools v0.2.4/go.mod h1:m/ztfQNocGYBgTTCmFdnK94uVvgxeZeE3LtJvd/jIzA=
 sigs.k8s.io/controller-tools v0.2.9/go.mod h1:ArP7w60JQKkZf7UU2oWTVnEhoNGA+sOMyuSuS+JFNDQ=
-sigs.k8s.io/external-dns v0.7.5 h1:r3Qm6ftAY5ym1VI7enY3yR6N5GrDDEW66KQ8KqgOyQw=
-sigs.k8s.io/external-dns v0.7.5/go.mod h1:zidB3fhjdzbN9ATeFBmkAQsIKey+dJ8oap04EfxmBqY=
+sigs.k8s.io/external-dns v0.7.6 h1:+GFThD1k42GyrfWBsDHuXIrTRPETvV2z5jUHriS3cc8=
+sigs.k8s.io/external-dns v0.7.6/go.mod h1:zidB3fhjdzbN9ATeFBmkAQsIKey+dJ8oap04EfxmBqY=
 sigs.k8s.io/kustomize/kyaml v0.1.1/go.mod h1:/NdPPfrperSCGjm55cwEro1loBVtbtVIXSb7FguK6uk=
 sigs.k8s.io/service-apis v0.0.0-20200213014236-51691dd89266/go.mod h1:s6Cwc0sg5w4xxZ/HEr88qPkQ4CITr80lnMpYZUzL9VY=
 sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e/go.mod h1:wWxsB5ozmmv/SG7nM11ayaAW51xMvak/t1r0CSlcokI=
