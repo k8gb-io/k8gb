@@ -373,7 +373,7 @@ func Dig(edgeDNSServer, fqdn string) ([]string, error) {
 func (r *GslbReconciler) coreDNSExposedIPs() ([]string, error) {
 	coreDNSService := &corev1.Service{}
 
-	err := r.Get(context.TODO(), types.NamespacedName{Namespace: k8gbNamespace, Name: coreDNSExtServiceName}, coreDNSService)
+	err := r.Get(context.TODO(), types.NamespacedName{Namespace: r.Config.K8gbNamespace, Name: coreDNSExtServiceName}, coreDNSService)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info(fmt.Sprintf("Can't find %s service", coreDNSExtServiceName))
@@ -411,7 +411,7 @@ func (r *GslbReconciler) createZoneDelegationRecordsForExternalDNS(gslb *k8gbv1b
 	NSRecord := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        fmt.Sprintf("k8gb-ns-%s", dnsProvider),
-			Namespace:   k8gbNamespace,
+			Namespace:   r.Config.K8gbNamespace,
 			Annotations: map[string]string{"k8gb.absa.oss/dnstype": dnsProvider},
 		},
 		Spec: externaldns.DNSEndpointSpec{
@@ -431,7 +431,7 @@ func (r *GslbReconciler) createZoneDelegationRecordsForExternalDNS(gslb *k8gbv1b
 			},
 		},
 	}
-	res, err := r.ensureDNSEndpoint(k8gbNamespace, NSRecord)
+	res, err := r.ensureDNSEndpoint(r.Config.K8gbNamespace, NSRecord)
 	if err != nil {
 		return res, err
 	}

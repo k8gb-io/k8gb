@@ -15,6 +15,8 @@ const (
 	ipAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
 	// versionNumberRegex matches version in formats 0.1.2, v0.1.2, v0.1.2-alpha
 	versionNumberRegex = "^(v){0,1}(0|(?:[1-9]\\d*))(?:\\.(0|(?:[1-9]\\d*))(?:\\.(0|(?:[1-9]\\d*)))?(?:\\-([\\w][\\w\\.\\-_]*))?)?$"
+	// k8sNamespaceRegex matches valid kubernetes namespace
+	k8sNamespaceRegex = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
 )
 
 // validator wrapper against field to be verified

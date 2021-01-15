@@ -19,8 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
+
+	"github.com/AbsaOSS/k8gb/controllers/metrics"
 
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/go-logr/logr"
@@ -41,7 +42,6 @@ import (
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
 
-var k8gbNamespace = os.Getenv("POD_NAMESPACE")
 var log = logf.Log.WithName("controller_gslb")
 
 // GslbReconciler reconciles a Gslb object
@@ -51,6 +51,7 @@ type GslbReconciler struct {
 	Scheme      *runtime.Scheme
 	Config      *depresolver.Config
 	DepResolver *depresolver.DependencyResolver
+	Metrics     *metrics.PrometheusMetrics
 }
 
 const (

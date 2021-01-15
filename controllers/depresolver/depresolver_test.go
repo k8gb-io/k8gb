@@ -28,6 +28,7 @@ var predefinedConfig = Config{
 	EdgeDNSServer:           "cloud.example.com",
 	EdgeDNSZone:             "8.8.8.8",
 	DNSZone:                 "example.com",
+	K8gbNamespace:           "k8gb",
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
@@ -464,6 +465,37 @@ func TestResolveConfigWithoutDnsZone(t *testing.T) {
 	expected.DNSZone = ""
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, DNSZoneKey)
+}
+
+func TestResolveConfigWithEmptyK8gbNamespace(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.K8gbNamespace = ""
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error, K8gbNamespaceKey)
+}
+
+func TestResolveConfigWithInvalidK8gbNamespace(t *testing.T) {
+	// arrange
+	defer cleanup()
+	for _, ns := range []string{"-", "Op.", "kube/netes", "my-ns???", "123-MY", "MY-123"} {
+		expected := predefinedConfig
+		expected.K8gbNamespace = ns
+		// act,assert
+		arrangeVariablesAndAssert(t, expected, assert.Error)
+	}
+}
+
+func TestResolveConfigWithValidK8gbNamespace(t *testing.T) {
+	// arrange
+	defer cleanup()
+	for _, ns := range []string{"k8gb", "my-123", "123-my", "n"} {
+		expected := predefinedConfig
+		expected.K8gbNamespace = ns
+		// act,assert
+		arrangeVariablesAndAssert(t, expected, assert.NoError)
+	}
 }
 
 func TestResolveEmptyExtGeoTags(t *testing.T) {
@@ -928,7 +960,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
 		Route53EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey,
-		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey} {
+		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey, K8gbNamespaceKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -942,6 +974,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(EdgeDNSServerKey, config.EdgeDNSServer)
 	_ = os.Setenv(EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.DNSZone)
+	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)
 	_ = os.Setenv(Route53EnabledKey, strconv.FormatBool(config.route53Enabled))
 	_ = os.Setenv(NS1EnabledKey, strconv.FormatBool(config.ns1Enabled))
 	_ = os.Setenv(InfobloxGridHostKey, config.Infoblox.Host)

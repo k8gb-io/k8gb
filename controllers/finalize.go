@@ -20,7 +20,7 @@ func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) error {
 	if r.Config.EdgeDNSType == depresolver.DNSTypeRoute53 {
 		log.Info("Removing Zone Delegation entries...")
 		dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
-		err := r.Get(context.Background(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
+		err := r.Get(context.Background(), client.ObjectKey{Namespace: r.Config.K8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info(fmt.Sprint(err))

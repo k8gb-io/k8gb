@@ -10,6 +10,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
+
+	"github.com/AbsaOSS/k8gb/controllers/metrics"
+
 	"github.com/stretchr/testify/require"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client"
@@ -19,8 +24,6 @@ import (
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/testutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,6 +59,7 @@ var predefinedConfig = depresolver.Config{
 	EdgeDNSServer:           "8.8.8.8",
 	EdgeDNSZone:             "example.com",
 	DNSZone:                 "cloud.example.com",
+	K8gbNamespace:           "k8gb",
 	Infoblox: depresolver.Infoblox{
 		Host:     "fakeinfoblox.example.com",
 		Username: "foo",
@@ -119,9 +123,13 @@ func TestIngressHostsPerStatusMetric(t *testing.T) {
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
+	err := settings.reconciler.Metrics.Register()
+	require.NoError(t, err)
+	defer settings.reconciler.Metrics.Unregister()
 	expectedHostsMetricCount := 3
 	// act
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+	ingressHostsPerStatusMetric := settings.reconciler.Metrics.GetIngressHostsPerStatusMetric()
+	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	actualHostsMetricCount := testutil.CollectAndCount(ingressHostsPerStatusMetric)
 	// assert
 	assert.NoError(t, err, "Failed to get expected gslb")
@@ -136,15 +144,19 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 		func() {
 			// arrange
 			settings := provideSettings(t, predefinedConfig)
+			defer settings.reconciler.Metrics.Unregister()
+			err := settings.reconciler.Metrics.Register()
+			require.NoError(t, err)
 			serviceName := "frontend-podinfo"
 			defer deleteHealthyService(t, &settings, serviceName)
 			expectedHostsMetric := 1.
 			createHealthyService(t, &settings, serviceName)
 			reconcileAndUpdateGslb(t, settings)
 			// act
-			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
-			healthyHosts :=
-				ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": healthyStatus})
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+			ingressHostsPerStatusMetric := settings.reconciler.Metrics.GetIngressHostsPerStatusMetric()
+			healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
+				"name": settings.gslb.Name, "status": metrics.HealthyStatus})
 			actualHostsMetric := testutil.ToFloat64(healthyHosts)
 			// assert
 			assert.NoError(t, err, "Failed to get expected gslb")
@@ -158,11 +170,15 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+	defer settings.reconciler.Metrics.Unregister()
+	err := settings.reconciler.Metrics.Register()
+	require.NoError(t, err)
+	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	expectedHostsMetricCount := 0.
 	// act
-	unhealthyHosts :=
-		ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": unhealthyStatus})
+	ingressHostsPerStatusMetric := settings.reconciler.Metrics.GetIngressHostsPerStatusMetric()
+	unhealthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
+		"name": settings.gslb.Name, "status": metrics.UnhealthyStatus})
 	actualHostsMetricCount := testutil.ToFloat64(unhealthyHosts)
 	// assert
 	assert.NoError(t, err, "Failed to get expected gslb")
@@ -177,7 +193,8 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	expectedHostsMetricCount = 1
 	// act
 	unhealthyHosts =
-		ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": unhealthyStatus})
+		ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
+			"name": settings.gslb.Name, "status": metrics.UnhealthyStatus})
 	actualHostsMetricCount = testutil.ToFloat64(unhealthyHosts)
 	// assert
 	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with Healthy status, but got %v",
@@ -188,6 +205,9 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 	// arrange
 	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
+	defer settings.reconciler.Metrics.Unregister()
+	err := settings.reconciler.Metrics.Register()
+	require.NoError(t, err)
 	expectedHostsMetricCount := 2.0
 
 	serviceName := "unhealthy-app"
@@ -196,10 +216,11 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 	deleteUnhealthyService(t, &settings, serviceName)
 
 	// act
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	require.NoError(t, err, "Failed to get expected gslb")
+	ingressHostsPerStatusMetric := settings.reconciler.Metrics.GetIngressHostsPerStatusMetric()
 	unknownHosts, err := ingressHostsPerStatusMetric.GetMetricWith(
-		prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": notFoundStatus})
+		prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": metrics.NotFoundStatus})
 	require.NoError(t, err, "Failed to get ingress metrics")
 	actualHostsMetricCount := testutil.ToFloat64(unknownHosts)
 	// assert
@@ -218,7 +239,10 @@ func TestHealthyRecordMetric(t *testing.T) {
 	}
 	serviceName := "frontend-podinfo"
 	settings := provideSettings(t, predefinedConfig)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+	defer settings.reconciler.Metrics.Unregister()
+	err := settings.reconciler.Metrics.Register()
+	require.NoError(t, err)
+	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	require.NoError(t, err, "Failed to get expected gslb")
 	defer deleteHealthyService(t, &settings, serviceName)
 	createHealthyService(t, &settings, serviceName)
@@ -229,6 +253,7 @@ func TestHealthyRecordMetric(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 	reconcileAndUpdateGslb(t, settings)
 	// act
+	healthyRecordsMetric := settings.reconciler.Metrics.GetHealthyRecordsMetric()
 	actualHealthyRecordsMetricCount := testutil.ToFloat64(healthyRecordsMetric)
 	reconcileAndUpdateGslb(t, settings)
 	// assert
@@ -238,6 +263,12 @@ func TestHealthyRecordMetric(t *testing.T) {
 
 func TestMetricLinterCheck(t *testing.T) {
 	// arrange
+	settings := provideSettings(t, predefinedConfig)
+	defer settings.reconciler.Metrics.Unregister()
+	err := settings.reconciler.Metrics.Register()
+	require.NoError(t, err)
+	healthyRecordsMetric := settings.reconciler.Metrics.GetHealthyRecordsMetric()
+	ingressHostsPerStatusMetric := settings.reconciler.Metrics.GetIngressHostsPerStatusMetric()
 	for name, scenario := range map[string]prometheus.Collector{
 		"healthy_records":          healthyRecordsMetric,
 		"ingress_hosts_per_status": ingressHostsPerStatusMetric,
@@ -690,7 +721,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      coreDNSExtServiceName,
-			Namespace: k8gbNamespace,
+			Namespace: predefinedConfig.K8gbNamespace,
 		},
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
@@ -712,7 +743,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	settings.reconciler.Config = &customConfig
 
 	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
+	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
 	got := dnsEndpointRoute53.Annotations["k8gb.absa.oss/dnstype"]
 	gotEp := dnsEndpointRoute53.Spec.Endpoints
@@ -756,7 +787,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      coreDNSExtServiceName,
-			Namespace: k8gbNamespace,
+			Namespace: predefinedConfig.K8gbNamespace,
 		},
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
@@ -778,7 +809,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	settings.reconciler.Config = &customConfig
 
 	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-ns1"}, dnsEndpointNS1)
+	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-ns1"}, dnsEndpointNS1)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
 	got := dnsEndpointNS1.Annotations["k8gb.absa.oss/dnstype"]
 	gotEp := dnsEndpointNS1.Spec.Endpoints
@@ -840,7 +871,7 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      coreDNSExtServiceName,
-			Namespace: k8gbNamespace,
+			Namespace: predefinedConfig.K8gbNamespace,
 		},
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
@@ -867,7 +898,7 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 
 	// assert
 	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
-	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: k8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
+	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
 	require.Error(t, err, "k8gb-ns-route53 DNSEndpoint should be garbage collected")
 }
 
@@ -1078,6 +1109,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	r.Config = config
 	// Mock request to simulate Reconcile() being called on an event for a
 	// watched resource .
+	r.Metrics = metrics.NewPrometheusMetrics(*config)
 	req := reconcile.Request{
 		NamespacedName: types.NamespacedName{
 			Name:      gslb.Name,
@@ -1114,7 +1146,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 
 func cleanup() {
 	for _, s := range []string{depresolver.ReconcileRequeueSecondsKey, depresolver.ClusterGeoTagKey, depresolver.ExtClustersGeoTagsKey,
-		depresolver.EdgeDNSZoneKey, depresolver.DNSZoneKey, depresolver.EdgeDNSServerKey,
+		depresolver.EdgeDNSZoneKey, depresolver.DNSZoneKey, depresolver.EdgeDNSServerKey, depresolver.K8gbNamespaceKey,
 		depresolver.Route53EnabledKey, depresolver.InfobloxGridHostKey, depresolver.InfobloxVersionKey, depresolver.InfobloxPortKey,
 		depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.OverrideWithFakeDNSKey, depresolver.OverrideFakeInfobloxKey} {
 		if os.Unsetenv(s) != nil {
@@ -1130,6 +1162,7 @@ func configureEnvVar(config depresolver.Config) {
 	_ = os.Setenv(depresolver.EdgeDNSServerKey, config.EdgeDNSServer)
 	_ = os.Setenv(depresolver.EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(depresolver.DNSZoneKey, config.DNSZone)
+	_ = os.Setenv(depresolver.K8gbNamespaceKey, config.K8gbNamespace)
 	_ = os.Setenv(depresolver.Route53EnabledKey, strconv.FormatBool(config.EdgeDNSType == depresolver.DNSTypeRoute53))
 	_ = os.Setenv(depresolver.InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(depresolver.InfobloxVersionKey, config.Infoblox.Version)
