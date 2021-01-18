@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strconv"
@@ -516,7 +515,7 @@ func (r *GslbReconciler) ensureDNSEndpoint(
 	if err != nil && errors.IsNotFound(err) {
 
 		// Create the DNSEndpoint
-		log.Info(fmt.Sprintf("Creating a new DNSEndpoint:\n %s", prettyPrint(i)))
+		log.Info(fmt.Sprintf("Creating a new DNSEndpoint:\n %s", utils.ToString(i)))
 		err = r.Create(context.TODO(), i)
 
 		if err != nil {
@@ -560,12 +559,4 @@ func overrideWithFakeDNS(fakeDNSEnabled bool, server string) (ns string) {
 		ns = fmt.Sprintf("%s:53", server)
 	}
 	return
-}
-
-func prettyPrint(s interface{}) string {
-	prettyStruct, err := json.MarshalIndent(s, "", "\t")
-	if err != nil {
-		fmt.Println("can't convert struct to json")
-	}
-	return string(prettyStruct)
 }
