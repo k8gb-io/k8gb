@@ -381,7 +381,14 @@ func (r *GslbReconciler) createZoneDelegationRecordsForExternalDNS(gslb *k8gbv1b
 	NSServerList = append(NSServerList, r.nsServerName())
 	NSServerList = append(NSServerList, r.nsServerNameExt()...)
 	sort.Strings(NSServerList)
-	NSServerIPs, err := r.coreDNSExposedIPs()
+	var NSServerIPs []string
+	var err error
+	if r.Config.CoreDNSExposed {
+		NSServerIPs, err = r.coreDNSExposedIPs()
+	} else {
+		NSServerIPs, err = r.getGslbIngressIPs(gslb)
+
+	}
 	if err != nil {
 		return &reconcile.Result{}, err
 	}
@@ -459,7 +466,8 @@ func (r *GslbReconciler) configureZoneDelegation(gslb *k8gbv1beta1.Gslb) (*recon
 					err = checkAliveFromTXT(extCluster, r.Config, time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
 					if err != nil {
 						log.Error(err, "got the error from TXT based checkAlive")
-						log.Info(fmt.Sprintf("External cluster (%s) doesn't look alive, filtering it out from delegated zone configuration...", extCluster))
+						log.Info(fmt.Sprintf("External cluster (%s) doesn't look alive, filtering it out from delegated zone configuration...",
+							extCluster))
 						existingDelegateTo = filterOutDelegateTo(existingDelegateTo, extCluster)
 					}
 				}

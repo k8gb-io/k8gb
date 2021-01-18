@@ -74,12 +74,12 @@ spec:
             - name: EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: external-dns
+                  name: infoblox
                   key: EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME
             - name: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: external-dns
+                  name: infoblox
                   key: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
             {{ end }}
             {{ if .Values.route53.enabled }}
@@ -88,5 +88,9 @@ spec:
             {{ end }}
             {{ if .Values.ns1.enabled }}
             - name: NS1_ENABLED
+              value: "true"
+            {{ end }}
+            {{ if .Values.k8gb.exposeCoreDNS }}
+            - name: COREDNS_EXPOSED
               value: "true"
             {{ end }}

@@ -340,6 +340,38 @@ func TestResolveConfigWithEmptyNS1(t *testing.T) {
 	assert.Equal(t, false, config.ns1Enabled)
 }
 
+func TestResolveConfigWithProperCoreDNSExposed(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.CoreDNSExposed = true
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestResolveConfigWithoutCoreDNSExposed(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.CoreDNSExposed = false
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError, CoreDNSExposedKey)
+}
+
+func TestResolveConfigWithEmptyCoreDNSExposed(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(CoreDNSExposedKey, "")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(cl)
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, false, config.CoreDNSExposed)
+}
+
 func TestResolveConfigWithEmptyEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -959,8 +991,8 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
-		Route53EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey,
-		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey, K8gbNamespaceKey} {
+		Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey,
+		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -977,6 +1009,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)
 	_ = os.Setenv(Route53EnabledKey, strconv.FormatBool(config.route53Enabled))
 	_ = os.Setenv(NS1EnabledKey, strconv.FormatBool(config.ns1Enabled))
+	_ = os.Setenv(CoreDNSExposedKey, strconv.FormatBool(config.CoreDNSExposed))
 	_ = os.Setenv(InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(InfobloxVersionKey, config.Infoblox.Version)
 	_ = os.Setenv(InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))

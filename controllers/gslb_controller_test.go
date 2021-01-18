@@ -718,6 +718,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      coreDNSExtServiceName,
@@ -784,6 +785,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	dnsEndpointNS1 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      coreDNSExtServiceName,
