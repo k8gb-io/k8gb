@@ -75,6 +75,8 @@ type Config struct {
 	route53Enabled bool
 	// ns1Enabled flag
 	ns1Enabled bool
+	// CoreDNSExposed flag
+	CoreDNSExposed bool
 }
 
 // DependencyResolver resolves configuration for GSLB

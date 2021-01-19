@@ -25,6 +25,7 @@ const (
 	OverrideWithFakeDNSKey  = "OVERRIDE_WITH_FAKE_EXT_DNS"
 	OverrideFakeInfobloxKey = "FAKE_INFOBLOX"
 	K8gbNamespaceKey        = "POD_NAMESPACE"
+	CoreDNSExposedKey       = "COREDNS_EXPOSED"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -37,6 +38,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.ExtClustersGeoTags = env.GetEnvAsArrayOfStringsOrFallback(ExtClustersGeoTagsKey, []string{})
 		dr.config.route53Enabled = env.GetEnvAsBoolOrFallback(Route53EnabledKey, false)
 		dr.config.ns1Enabled = env.GetEnvAsBoolOrFallback(NS1EnabledKey, false)
+		dr.config.CoreDNSExposed = env.GetEnvAsBoolOrFallback(CoreDNSExposedKey, false)
 		dr.config.EdgeDNSServer = env.GetEnvAsStringOrFallback(EdgeDNSServerKey, "")
 		dr.config.EdgeDNSZone = env.GetEnvAsStringOrFallback(EdgeDNSZoneKey, "")
 		dr.config.DNSZone = env.GetEnvAsStringOrFallback(DNSZoneKey, "")

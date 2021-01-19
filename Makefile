@@ -191,7 +191,7 @@ init-round-robin:
 # creates infoblox secret in current cluster
 .PHONY: infoblox-secret
 infoblox-secret:
-	kubectl -n k8gb create secret generic external-dns \
+	kubectl -n k8gb create secret generic infoblox \
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
 
