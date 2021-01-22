@@ -28,7 +28,7 @@ jobs:
           destination-repo: absaoss/k8gb
           destination-branch: gh-pages
       - name: Create single node k3s cluster
-        uses: AbsaOSS/k3d-action@v1.0.0
+        uses: AbsaOSS/k3d-action@v1.1.0
         with:
           cluster-name: "test-gslb1"
           use-default-registry: false
