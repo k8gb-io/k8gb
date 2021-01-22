@@ -21,7 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/AbsaOSS/k8gb/controllers/metrics"
+	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
+
+	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
 
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/go-logr/logr"
@@ -52,6 +54,7 @@ type GslbReconciler struct {
 	Config      *depresolver.Config
 	DepResolver *depresolver.DependencyResolver
 	Metrics     *metrics.PrometheusMetrics
+	DNSProvider dns.IDnsProvider
 }
 
 const (
@@ -142,14 +145,14 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	result, err = r.ensureDNSEndpoint(gslb.Namespace, dnsEndpoint)
+	result, err = r.DNSProvider.SaveDNSEndpoint(gslb, dnsEndpoint)
 	if result != nil {
 		return *result, err
 	}
 
 	// == handle delegated zone in Edge DNS
-
-	result, err = r.configureZoneDelegation(gslb)
+	log.Info(fmt.Sprintf("Creating/Updating DNSEndpoint CRDs for %s...", r.DNSProvider))
+	result, err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
 	if result != nil {
 		return *result, err
 	}

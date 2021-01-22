@@ -18,7 +18,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
+
+	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
 
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 
@@ -33,7 +36,7 @@ import (
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers"
-	"github.com/AbsaOSS/k8gb/controllers/metrics"
+	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 	// +kubebuilder:scaffold:imports
 )
@@ -53,6 +56,7 @@ func init() {
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
+	var f *dns.ProviderFactory
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. "+
@@ -94,6 +98,14 @@ func main() {
 	if err != nil {
 		setupLog.Error(err, "reading config env variables")
 	}
+	setupLog.Info("starting DNS provider")
+	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config, reconciler.Log)
+	if err != nil {
+		setupLog.Error(err, "unable to create factory (%s)", err)
+		os.Exit(1)
+	}
+	reconciler.DNSProvider = f.Provider()
+	setupLog.Info(fmt.Sprintf("provider: %s", reconciler.DNSProvider))
 	setupLog.Info("starting metrics")
 	reconciler.Metrics = metrics.NewPrometheusMetrics(*reconciler.Config)
 	err = reconciler.Metrics.Register()

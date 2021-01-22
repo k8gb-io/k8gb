@@ -10,22 +10,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/testutil"
-
-	"github.com/AbsaOSS/k8gb/controllers/metrics"
-
-	"github.com/stretchr/testify/require"
-
-	ibclient "github.com/infobloxopen/infoblox-go-client"
-	"github.com/stretchr/testify/assert"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
+	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -48,6 +46,7 @@ type testSettings struct {
 	client     client.Client
 	ingress    *v1beta1.Ingress
 	finalCall  bool
+	assistant  assistant.IAssistant
 }
 
 var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
@@ -71,6 +70,8 @@ var predefinedConfig = depresolver.Config{
 		FakeInfobloxEnabled: true,
 	},
 }
+
+const coreDNSExtServiceName = "k8gb-coredns-lb"
 
 func TestNotFoundServiceStatus(t *testing.T) {
 	// arrange
@@ -384,20 +385,6 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 	assert.Equal(t, got, want, "got:\n %q annotation value,\n\n want:\n %q", got, want, got, want)
 }
 
-func TestGeneratesProperExternalNSTargetFQDNsAccordingToTheGeoTags(t *testing.T) {
-	// arrange
-	defer cleanup()
-	want := []string{"gslb-ns-cloud-example-com-za.example.com"}
-	customConfig := predefinedConfig
-	customConfig.EdgeDNSZone = "example.com"
-	customConfig.ExtClustersGeoTags = []string{"za"}
-	settings := provideSettings(t, customConfig)
-	// act
-	got := settings.reconciler.nsServerNameExt()
-	// assert
-	assert.Equal(t, want, got, "got:\n %q externalGslb NS records,\n\n want:\n %q", got, want)
-}
-
 func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -454,52 +441,13 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 	customConfig := predefinedConfig
 	customConfig.Override.FakeDNSEnabled = true
 	customConfig.EdgeDNSServer = "fake"
+	settings := provideSettings(t, customConfig)
 	// act
-	got := checkAliveFromTXT("test-gslb-heartbeat-eu.example.com", &customConfig, time.Minute*5)
-	want := errors.NewGone("Split brain TXT record expired the time threshold: (5m0s)")
+	got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com",
+		customConfig.Override.FakeDNSEnabled, time.Minute*5)
+	want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
 	// assert
 	assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
-}
-
-func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
-	// arrange
-	defer cleanup()
-	delegateTo := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
-	}
-	want := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-	}
-	customConfig := predefinedConfig
-	customConfig.EdgeDNSZone = "example.com"
-	customConfig.ExtClustersGeoTags = []string{"za"}
-	settings := provideSettings(t, customConfig)
-	// act
-	extClusters := settings.reconciler.nsServerNameExt()
-	got := filterOutDelegateTo(delegateTo, extClusters[0])
-	// assert
-	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
-}
-
-func TestCanGenerateExternalHeartbeatFQDNs(t *testing.T) {
-	// arrange
-	defer cleanup()
-	want := []string{"test-gslb-heartbeat-za.example.com"}
-	customConfig := predefinedConfig
-	customConfig.EdgeDNSZone = "example.com"
-	customConfig.ExtClustersGeoTags = []string{"za"}
-	settings := provideSettings(t, customConfig)
-	// act
-	got := getExternalClusterHeartbeatFQDNs(settings.gslb, &settings.config)
-	// assert
-	assert.Equal(t, want, got, "got:\n %s unexpected heartbeat records,\n\n want:\n %s", got, want)
 }
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
@@ -507,8 +455,10 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *test
 	customConfig := predefinedConfig
 	customConfig.Override.FakeDNSEnabled = true
 	customConfig.EdgeDNSServer = "fake"
+	settings := provideSettings(t, customConfig)
 	// act
-	err2 := checkAliveFromTXT("test-gslb-heartbeat-za.example.com", &customConfig, time.Minute*5)
+	err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com",
+		customConfig.Override.FakeDNSEnabled, time.Minute*5)
 	// assert
 	assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
 }
@@ -742,6 +692,10 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	customConfig.DNSZone = dnsZone
 	// apply new environment variables and update config only
 	settings.reconciler.Config = &customConfig
+	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
+	// configuration at another time than startup
+	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
+	settings.reconciler.DNSProvider = f.Provider()
 
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
@@ -809,6 +763,10 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	customConfig.DNSZone = dnsZone
 	// apply new environment variables and update config only
 	settings.reconciler.Config = &customConfig
+	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
+	// configuration at another time than startup
+	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
+	settings.reconciler.DNSProvider = f.Provider()
 
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-ns1"}, dnsEndpointNS1)
@@ -1118,6 +1076,14 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 			Namespace: gslb.Namespace,
 		},
 	}
+
+	var f *dns.ProviderFactory
+	f, err = dns.NewDNSProviderFactory(r.Client, *r.Config, r.Log)
+	if err != nil {
+		t.Fatalf("reconcile: (%v)", err)
+	}
+	r.DNSProvider = f.Provider()
+	a := assistant.NewGslbAssistant(r.Client, r.Log, r.Config.K8gbNamespace, r.Config.EdgeDNSServer)
 	res, err := r.Reconcile(req)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)
@@ -1131,6 +1097,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	if err != nil {
 		t.Fatalf("Failed to get expected ingress: (%v)", err)
 	}
+
 	// Reconcile again so Reconcile() checks services and updates the Gslb
 	// resources' Status.
 	settings = testSettings{
@@ -1141,6 +1108,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		client:     cl,
 		ingress:    ingress,
 		finalCall:  false,
+		assistant:  a,
 	}
 	reconcileAndUpdateGslb(t, settings)
 	return settings
