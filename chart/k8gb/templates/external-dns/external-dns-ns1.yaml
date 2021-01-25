@@ -26,6 +26,7 @@ spec:
         - --txt-owner-id=k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
+        - --managed-record-types=A,CNAME,NS
         env:
         - name: NS1_APIKEY
           valueFrom:
