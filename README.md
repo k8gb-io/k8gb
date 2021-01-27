@@ -9,6 +9,7 @@
 [![CodeQL](https://github.com/AbsaOSS/k8gb/workflows/CodeQL/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3ACodeQL)
 [![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/k8gb)](https://goreportcard.com/report/github.com/AbsaOSS/k8gb)
 [![Helm Publish](https://github.com/AbsaOSS/k8gb/workflows/Helm%20Publish/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3A%22Helm+Publish%22)
+[![KubeLinter](https://github.com/AbsaOSS/k8gb/workflows/KubeLinter/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3AKubeLinter)
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
