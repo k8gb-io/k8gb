@@ -1,0 +1,20 @@
+name: KubeLinter
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.svg'
+      - '**.drawio'
+      - '.spelling'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Scan repo
+        id: kube-lint-repo
+        uses: stackrox/kube-linter-action@v1.0.0
+        with:
+          directory: chart

@@ -33,6 +33,16 @@ spec:
             secretKeyRef:
               name: ns1
               key: apiKey
-      securityContext:
-        fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
 {{ end }}
