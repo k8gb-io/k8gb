@@ -28,6 +28,17 @@ spec:
         - name: k8gb
           image: {{ .Values.k8gb.imageRepo }}:v{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
           imagePullPolicy: Always
+          securityContext:
+            runAsUser: 1000
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
           env:
             - name: WATCH_NAMESPACE
               value: ""
