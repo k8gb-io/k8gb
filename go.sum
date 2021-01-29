@@ -347,6 +347,8 @@ github.com/infobloxopen/infoblox-go-client v0.0.0-20180606155407-61dc5f9b0a65 h1
 github.com/infobloxopen/infoblox-go-client v0.0.0-20180606155407-61dc5f9b0a65/go.mod h1:BXiw7S2b9qJoM8MS40vfgCNB2NLHGusk1DtO16BD9zI=
 github.com/infobloxopen/infoblox-go-client v1.1.0 h1:fw8q8USnngsoZxLploJ0LomBN+1SAhSyEjUZrSibKX4=
 github.com/infobloxopen/infoblox-go-client v1.1.0/go.mod h1:BXiw7S2b9qJoM8MS40vfgCNB2NLHGusk1DtO16BD9zI=
+github.com/jaswdr/faker v1.3.0 h1:zkSkC6+khN6Pf3H6nDfeErq0NenDKGnHowEtSDaXWwI=
+github.com/jaswdr/faker v1.3.0/go.mod h1:x7ZlyB1AZqwqKZgyQlnqEG8FDptmHlncA5u2zY/yi6w=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jmespath/go-jmespath v0.3.0/go.mod h1:9QtRXoHjLGCJ5IBSaohpXITPlowMeeYCZ7fLUTSywik=
