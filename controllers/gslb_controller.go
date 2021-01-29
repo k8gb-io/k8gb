@@ -151,7 +151,6 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	// == handle delegated zone in Edge DNS
-	log.Info(fmt.Sprintf("Creating/Updating DNSEndpoint CRDs for %s...", r.DNSProvider))
 	result, err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
 	if result != nil {
 		return *result, err

@@ -39,6 +39,7 @@ func NewExternalDNS(dnsType ExternalDNSType, config depresolver.Config, assistan
 
 func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
 	ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
+	p.assistant.Info("Creating/Updating DNSEndpoint CRDs for %s...", p)
 	var NSServerList []string
 	NSServerList = append(NSServerList, nsServerName(p.config))
 	NSServerList = append(NSServerList, nsServerNameExt(p.config)...)
