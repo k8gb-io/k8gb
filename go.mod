@@ -7,9 +7,8 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.1.0
 	github.com/infobloxopen/infoblox-go-client v1.1.0
-	github.com/jaswdr/faker v1.3.0
 	github.com/lixiangzhong/dnsutil v0.0.0-20191203032812-75ad39d2945a
-	github.com/miekg/dns v1.1.35
+	github.com/miekg/dns v1.1.37
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/prometheus/client_golang v1.9.0
 	github.com/stretchr/testify v1.7.0
