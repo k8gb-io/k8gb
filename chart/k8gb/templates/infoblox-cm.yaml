@@ -4,6 +4,8 @@ data:
   INFOBLOX_GRID_HOST: {{ quote .Values.infoblox.gridHost }}
   INFOBLOX_WAPI_VERSION: {{ quote .Values.infoblox.wapiVersion }}
   INFOBLOX_WAPI_PORT: {{ quote .Values.infoblox.wapiPort }}
+  INFOBLOX_HTTP_REQUEST_TIMEOUT: {{ quote .Values.infoblox.httpRequestTimeout }}
+  INFOBLOX_HTTP_POOL_CONNECTIONS: {{ quote .Values.infoblox.httpPoolConnections }}
 kind: ConfigMap
 metadata:
   name: infoblox

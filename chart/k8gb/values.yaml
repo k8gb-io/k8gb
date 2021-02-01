@@ -88,6 +88,8 @@ infoblox:
   wapiVersion: 2.3.1
   wapiPort: 443
   sslVerify: true
+  httpRequestTimeout: 20
+  httpPoolConnections: 10
 
 route53:
   enabled: false

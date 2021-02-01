@@ -82,6 +82,16 @@ spec:
                 configMapKeyRef:
                   name: infoblox
                   key: INFOBLOX_WAPI_PORT
+            - name: INFOBLOX_HTTP_REQUEST_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: infoblox
+                  key: INFOBLOX_HTTP_REQUEST_TIMEOUT
+            - name: INFOBLOX_HTTP_POOL_CONNECTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: infoblox
+                  key: INFOBLOX_HTTP_POOL_CONNECTIONS
             - name: EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME
               valueFrom:
                 secretKeyRef:

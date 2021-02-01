@@ -60,11 +60,13 @@ var predefinedConfig = depresolver.Config{
 	DNSZone:                 "cloud.example.com",
 	K8gbNamespace:           "k8gb",
 	Infoblox: depresolver.Infoblox{
-		Host:     "fakeinfoblox.example.com",
-		Username: "foo",
-		Password: "blah",
-		Port:     443,
-		Version:  "0.0.0",
+		Host:                "fakeinfoblox.example.com",
+		Username:            "foo",
+		Password:            "blah",
+		Port:                443,
+		Version:             "0.0.0",
+		HTTPPoolConnections: 20,
+		HTTPRequestTimeout:  10,
 	},
 	Override: depresolver.Override{
 		FakeInfobloxEnabled: true,
@@ -1118,7 +1120,8 @@ func cleanup() {
 	for _, s := range []string{depresolver.ReconcileRequeueSecondsKey, depresolver.ClusterGeoTagKey, depresolver.ExtClustersGeoTagsKey,
 		depresolver.EdgeDNSZoneKey, depresolver.DNSZoneKey, depresolver.EdgeDNSServerKey, depresolver.K8gbNamespaceKey,
 		depresolver.Route53EnabledKey, depresolver.InfobloxGridHostKey, depresolver.InfobloxVersionKey, depresolver.InfobloxPortKey,
-		depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.OverrideWithFakeDNSKey, depresolver.OverrideFakeInfobloxKey} {
+		depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.InfobloxHTTPRequestTimeoutKey,
+		depresolver.InfobloxHTTPPoolConnectionsKey, depresolver.OverrideWithFakeDNSKey, depresolver.OverrideFakeInfobloxKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1139,6 +1142,8 @@ func configureEnvVar(config depresolver.Config) {
 	_ = os.Setenv(depresolver.InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))
 	_ = os.Setenv(depresolver.InfobloxUsernameKey, config.Infoblox.Username)
 	_ = os.Setenv(depresolver.InfobloxPasswordKey, config.Infoblox.Password)
+	_ = os.Setenv(depresolver.InfobloxHTTPRequestTimeoutKey, strconv.Itoa(config.Infoblox.HTTPRequestTimeout))
+	_ = os.Setenv(depresolver.InfobloxHTTPPoolConnectionsKey, strconv.Itoa(config.Infoblox.HTTPPoolConnections))
 	_ = os.Setenv(depresolver.OverrideWithFakeDNSKey, strconv.FormatBool(config.Override.FakeDNSEnabled))
 	_ = os.Setenv(depresolver.OverrideFakeInfobloxKey, strconv.FormatBool(config.Override.FakeInfobloxEnabled))
 }

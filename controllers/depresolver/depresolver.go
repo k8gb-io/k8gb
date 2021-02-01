@@ -39,6 +39,10 @@ type Infoblox struct {
 	Username string
 	// Password
 	Password string
+	// HTTPRequestTimeout seconds; default = 20
+	HTTPRequestTimeout int
+	// HTTPPoolConnections seconds; default = 10
+	HTTPPoolConnections int
 }
 
 // Override configuration
