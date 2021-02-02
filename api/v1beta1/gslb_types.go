@@ -27,7 +27,9 @@ import (
 // Strategy defines Gslb behavior
 // +k8s:openapi-gen=true
 type Strategy struct {
-	Type          string `json:"type"`
+	// Load balancing strategy type:(roundRobin|failover)
+	Type string `json:"type"`
+	// Primary Geo Tag. Valid for failover strategy only
 	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
 	// Defines DNS record TTL in seconds
 	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty"`
@@ -38,20 +40,20 @@ type Strategy struct {
 // GslbSpec defines the desired state of Gslb
 // +k8s:openapi-gen=true
 type GslbSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	Ingress  v1beta1.IngressSpec `json:"ingress"`
-	Strategy Strategy            `json:"strategy"`
+	// Gslb-enabled Ingress Spec
+	Ingress v1beta1.IngressSpec `json:"ingress"`
+	// Gslb Strategy spec
+	Strategy Strategy `json:"strategy"`
 }
 
 // GslbStatus defines the observed state of Gslb
 type GslbStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	ServiceHealth  map[string]string   `json:"serviceHealth"`
+	// Associated Service status
+	ServiceHealth map[string]string `json:"serviceHealth"`
+	// Current Healthy DNS record structure
 	HealthyRecords map[string][]string `json:"healthyRecords"`
-	GeoTag         string              `json:"geoTag"`
+	// Cluster Geo Tag
+	GeoTag string `json:"geoTag"`
 }
 
 // +kubebuilder:object:root=true
