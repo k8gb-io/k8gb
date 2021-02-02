@@ -15,7 +15,7 @@ func (p *InfobloxProvider) infobloxConnection() (*ibclient.ObjectManager, error)
 		Username: p.config.Infoblox.Username,
 		Password: p.config.Infoblox.Password,
 	}
-	transportConfig := ibclient.NewTransportConfig("false", 20, 10)
+	transportConfig := ibclient.NewTransportConfig("false", p.config.Infoblox.HTTPRequestTimeout, p.config.Infoblox.HTTPPoolConnections)
 	requestBuilder := &ibclient.WapiRequestBuilder{}
 	requestor := &ibclient.WapiHttpRequestor{}
 

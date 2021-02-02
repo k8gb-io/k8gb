@@ -35,6 +35,8 @@ var predefinedConfig = Config{
 		443,
 		"Infoblox",
 		"secret",
+		21,
+		11,
 	},
 	Override: Override{
 		false,
@@ -130,6 +132,8 @@ func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
 	defer cleanup()
 	defaultConfig := Config{}
 	defaultConfig.ReconcileRequeueSeconds = 30
+	defaultConfig.Infoblox.HTTPRequestTimeout = 20
+	defaultConfig.Infoblox.HTTPPoolConnections = 10
 	defaultConfig.EdgeDNSType = DNSTypeNoEdgeDNS
 	defaultConfig.ExtClustersGeoTags = []string{}
 	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
@@ -890,6 +894,106 @@ func TestUnsetInfobloxPassword(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxPasswordKey)
 }
 
+func TestValidInfobloxHTTPPoolConnections(t *testing.T) {
+	// arrange
+	defer cleanup()
+	// act,assert
+	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError)
+}
+
+func TestInvalidInfobloxHTTPPoolConnections(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(InfobloxHTTPPoolConnectionsKey, "i.am.wrong??.")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(cl)
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, 10, config.Infoblox.HTTPPoolConnections)
+}
+
+func TestUnsetInfobloxHTTPPoolConnections(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Infoblox.HTTPPoolConnections = 10
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError, InfobloxHTTPPoolConnectionsKey)
+}
+
+func TestZeroInfobloxHTTPPoolConnections(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Infoblox.HTTPPoolConnections = 0
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+
+}
+
+func TestNegativeInfobloxHTTPPoolConnections(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Infoblox.HTTPPoolConnections = -1
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+
+}
+
+func TestValidInfobloxHTTPRequestTimeout(t *testing.T) {
+	// arrange
+	defer cleanup()
+	// act,assert
+	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError)
+}
+
+func TestInvalidInfobloxHTTPRequestTimeout(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(InfobloxHTTPRequestTimeoutKey, "i.am.wrong??.")
+	cl, _ := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver(cl)
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, 20, config.Infoblox.HTTPRequestTimeout)
+}
+
+func TestUnsetInfobloxHTTPRequestTimeout(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Infoblox.HTTPRequestTimeout = 20
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError, InfobloxHTTPRequestTimeoutKey)
+
+}
+
+func TestZeroInfobloxHTTPRequestTimeout(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Infoblox.HTTPRequestTimeout = 0
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestNegativeInfobloxHTTPRequestTimeout(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Infoblox.HTTPRequestTimeout = -1
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+
+}
+
 func TestResolveConfigEnableFakeDNSAsTrue(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -992,7 +1096,8 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
 		Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey,
-		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey} {
+		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
+		InfobloxHTTPPoolConnectionsKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1015,6 +1120,8 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))
 	_ = os.Setenv(InfobloxUsernameKey, config.Infoblox.Username)
 	_ = os.Setenv(InfobloxPasswordKey, config.Infoblox.Password)
+	_ = os.Setenv(InfobloxHTTPRequestTimeoutKey, strconv.Itoa(config.Infoblox.HTTPRequestTimeout))
+	_ = os.Setenv(InfobloxHTTPPoolConnectionsKey, strconv.Itoa(config.Infoblox.HTTPPoolConnections))
 	_ = os.Setenv(OverrideWithFakeDNSKey, strconv.FormatBool(config.Override.FakeDNSEnabled))
 	_ = os.Setenv(OverrideFakeInfobloxKey, strconv.FormatBool(config.Override.FakeInfobloxEnabled))
 }

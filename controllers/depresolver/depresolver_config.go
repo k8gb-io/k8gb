@@ -21,11 +21,13 @@ const (
 	InfobloxPortKey            = "INFOBLOX_WAPI_PORT"
 	InfobloxUsernameKey        = "EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"
 	// #nosec G101; ignore false positive gosec; see: https://securego.io/docs/rules/g101.html
-	InfobloxPasswordKey     = "EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"
-	OverrideWithFakeDNSKey  = "OVERRIDE_WITH_FAKE_EXT_DNS"
-	OverrideFakeInfobloxKey = "FAKE_INFOBLOX"
-	K8gbNamespaceKey        = "POD_NAMESPACE"
-	CoreDNSExposedKey       = "COREDNS_EXPOSED"
+	InfobloxPasswordKey            = "EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"
+	InfobloxHTTPRequestTimeoutKey  = "INFOBLOX_HTTP_REQUEST_TIMEOUT"
+	InfobloxHTTPPoolConnectionsKey = "INFOBLOX_HTTP_POOL_CONNECTIONS"
+	OverrideWithFakeDNSKey         = "OVERRIDE_WITH_FAKE_EXT_DNS"
+	OverrideFakeInfobloxKey        = "FAKE_INFOBLOX"
+	K8gbNamespaceKey               = "POD_NAMESPACE"
+	CoreDNSExposedKey              = "COREDNS_EXPOSED"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -48,6 +50,8 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Infoblox.Port, _ = env.GetEnvAsIntOrFallback(InfobloxPortKey, 0)
 		dr.config.Infoblox.Username = env.GetEnvAsStringOrFallback(InfobloxUsernameKey, "")
 		dr.config.Infoblox.Password = env.GetEnvAsStringOrFallback(InfobloxPasswordKey, "")
+		dr.config.Infoblox.HTTPPoolConnections, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPPoolConnectionsKey, 10)
+		dr.config.Infoblox.HTTPRequestTimeout, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPRequestTimeoutKey, 20)
 		dr.config.Override.FakeDNSEnabled = env.GetEnvAsBoolOrFallback(OverrideWithFakeDNSKey, false)
 		dr.config.Override.FakeInfobloxEnabled = env.GetEnvAsBoolOrFallback(OverrideFakeInfobloxKey, false)
 		dr.errorConfig = dr.validateConfig(dr.config)
@@ -110,6 +114,14 @@ func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 			return err
 		}
 		err = field("InfobloxPassword", config.Infoblox.Password).isNotEmpty().err
+		if err != nil {
+			return err
+		}
+		err = field("InfobloxHTTPPoolConnections", config.Infoblox.HTTPPoolConnections).isHigherOrEqualToZero().err
+		if err != nil {
+			return err
+		}
+		err = field("InfobloxHTTPRequestTimeout", config.Infoblox.HTTPRequestTimeout).isHigherThanZero().err
 		if err != nil {
 			return err
 		}
