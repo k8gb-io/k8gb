@@ -19,8 +19,9 @@ jobs:
         run: |
           export PATH=~/go/bin:$PATH
           docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
-          make docker-build
-          make docker-push
+          make docker-build-multi
+          make docker-push-multi
+          make docker-manifest
       - uses: dave-mcconnell/helm-gh-pages-microservices@master
         with:
           access-token: ${{ secrets.CR_TOKEN }}
