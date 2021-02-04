@@ -37,7 +37,7 @@ spec:
           description: GslbSpec defines the desired state of Gslb
           properties:
             ingress:
-              description: IngressSpec describes the Ingress the user wishes to exist.
+              description: Gslb-enabled Ingress Spec
               properties:
                 backend:
                   description: A default backend capable of servicing requests that
@@ -251,17 +251,19 @@ spec:
                   type: array
               type: object
             strategy:
-              description: Strategy defines Gslb behavior
+              description: Gslb Strategy spec
               properties:
                 dnsTtlSeconds:
                   description: Defines DNS record TTL in seconds
                   type: integer
                 primaryGeoTag:
+                  description: Primary Geo Tag. Valid for failover strategy only
                   type: string
                 splitBrainThresholdSeconds:
                   description: Split brain TXT record expiration in seconds
                   type: integer
                 type:
+                  description: Load balancing strategy type:(roundRobin|failover)
                   type: string
               required:
               - type
@@ -274,19 +276,19 @@ spec:
           description: GslbStatus defines the observed state of Gslb
           properties:
             geoTag:
+              description: Cluster Geo Tag
               type: string
             healthyRecords:
               additionalProperties:
                 items:
                   type: string
                 type: array
+              description: Current Healthy DNS record structure
               type: object
             serviceHealth:
               additionalProperties:
                 type: string
-              description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                of cluster Important: Run "make" to regenerate code after modifying
-                this file'
+              description: Associated Service status
               type: object
           required:
           - geoTag
