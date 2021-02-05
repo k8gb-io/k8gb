@@ -1,5 +1,69 @@
 # Changelog
 
+## [v0.7.4](https://github.com/absaoss/k8gb/tree/v0.7.4) (2021-02-05)
+
+[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.2...v0.7.4)
+
+**Implemented enhancements:**
+
+- Document Struct fields in CRD spec [\#273](https://github.com/AbsaOSS/k8gb/issues/273)
+- Upgrade to operator-sdk v1.3.0 [\#266](https://github.com/AbsaOSS/k8gb/issues/266)
+- Missing finalizer for NS1 [\#262](https://github.com/AbsaOSS/k8gb/issues/262)
+- Include kube-linter into k8gb pipelines [\#254](https://github.com/AbsaOSS/k8gb/issues/254)
+
+**Fixed bugs:**
+
+- terratests - Possible race condition [\#211](https://github.com/AbsaOSS/k8gb/issues/211)
+- Infoblox Zone Delegation not created under correct Auth Zone [\#99](https://github.com/AbsaOSS/k8gb/issues/99)
+
+**Closed issues:**
+
+- Split dnsupdate into provider pattern [\#255](https://github.com/AbsaOSS/k8gb/issues/255)
+- Move Infoblox provider logic to ExternalDNS [\#222](https://github.com/AbsaOSS/k8gb/issues/222)
+- Feature Request to Possibly Host more than one DNS Zones on K8gb [\#151](https://github.com/AbsaOSS/k8gb/issues/151)
+
+**Merged pull requests:**
+
+- Consolidate `v` part of version tag in the Chart metadata [\#284](https://github.com/AbsaOSS/k8gb/pull/284) ([ytsarev](https://github.com/ytsarev))
+- Enable docker experimental features in GHA [\#283](https://github.com/AbsaOSS/k8gb/pull/283) ([k0da](https://github.com/k0da))
+- Update CRD yaml metadata [\#282](https://github.com/AbsaOSS/k8gb/pull/282) ([ytsarev](https://github.com/ytsarev))
+- Prepare for 0.7.4 release [\#281](https://github.com/AbsaOSS/k8gb/pull/281) ([ytsarev](https://github.com/ytsarev))
+- fix dependabot version upgrade [\#279](https://github.com/AbsaOSS/k8gb/pull/279) ([kuritka](https://github.com/kuritka))
+- Upgrade to operator-sdk v1.3.0 [\#276](https://github.com/AbsaOSS/k8gb/pull/276) ([kuritka](https://github.com/kuritka))
+- Update embedded doc strings in CRD spec [\#275](https://github.com/AbsaOSS/k8gb/pull/275) ([ytsarev](https://github.com/ytsarev))
+- Bump github.com/miekg/dns from 1.1.37 to 1.1.38 [\#274](https://github.com/AbsaOSS/k8gb/pull/274) ([dependabot[bot]](https://github.com/apps/dependabot))
+- infoblox, extracting HTTPPoolConnections,HTTPRequestTimeout [\#272](https://github.com/AbsaOSS/k8gb/pull/272) ([kuritka](https://github.com/kuritka))
+- Bump github.com/miekg/dns from 1.1.35 to 1.1.37 [\#271](https://github.com/AbsaOSS/k8gb/pull/271) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Refactor to providers [\#270](https://github.com/AbsaOSS/k8gb/pull/270) ([kuritka](https://github.com/kuritka))
+- Extend pipelines with KubeLinter [\#269](https://github.com/AbsaOSS/k8gb/pull/269) ([ytsarev](https://github.com/ytsarev))
+- Enable docker multiarch build [\#267](https://github.com/AbsaOSS/k8gb/pull/267) ([k0da](https://github.com/k0da))
+- Upgrade external-dns to v0.7.6 [\#265](https://github.com/AbsaOSS/k8gb/pull/265) ([ytsarev](https://github.com/ytsarev))
+- Bump github.com/stretchr/testify from 1.6.1 to 1.7.0 [\#264](https://github.com/AbsaOSS/k8gb/pull/264) ([dependabot[bot]](https://github.com/apps/dependabot))
+- bump to k3d-action@v1.1.0 [\#263](https://github.com/AbsaOSS/k8gb/pull/263) ([kuritka](https://github.com/kuritka))
+- Fix badge link to Terratest action executions [\#261](https://github.com/AbsaOSS/k8gb/pull/261) ([ytsarev](https://github.com/ytsarev))
+- Update k8gb config samples with new exposeCoreDNS param [\#260](https://github.com/AbsaOSS/k8gb/pull/260) ([ytsarev](https://github.com/ytsarev))
+- Make CoreDNS exposure controllable [\#259](https://github.com/AbsaOSS/k8gb/pull/259) ([ytsarev](https://github.com/ytsarev))
+- refactor prettyPrint [\#258](https://github.com/AbsaOSS/k8gb/pull/258) ([kuritka](https://github.com/kuritka))
+- Refactor \#2, Dig  [\#257](https://github.com/AbsaOSS/k8gb/pull/257) ([kuritka](https://github.com/kuritka))
+- Extract prometheus metrics \#1 [\#256](https://github.com/AbsaOSS/k8gb/pull/256) ([kuritka](https://github.com/kuritka))
+- Bump sigs.k8s.io/external-dns from 0.7.5 to 0.7.6 [\#251](https://github.com/AbsaOSS/k8gb/pull/251) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Publish CodeQL status tag [\#248](https://github.com/AbsaOSS/k8gb/pull/248) ([ytsarev](https://github.com/ytsarev))
+- Explicit fqdns in roundrobin sample CR [\#247](https://github.com/AbsaOSS/k8gb/pull/247) ([ytsarev](https://github.com/ytsarev))
+- Makefile help [\#246](https://github.com/AbsaOSS/k8gb/pull/246) ([ytsarev](https://github.com/ytsarev))
+- fix terratests [\#245](https://github.com/AbsaOSS/k8gb/pull/245) ([kuritka](https://github.com/kuritka))
+- README support table update [\#242](https://github.com/AbsaOSS/k8gb/pull/242) ([ytsarev](https://github.com/ytsarev))
+- Bump github.com/stretchr/testify from 1.5.1 to 1.6.1 [\#241](https://github.com/AbsaOSS/k8gb/pull/241) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Preparation for artifacthub [\#240](https://github.com/AbsaOSS/k8gb/pull/240) ([ytsarev](https://github.com/ytsarev))
+- Bump github.com/prometheus/client\_golang from 1.7.1 to 1.9.0 [\#239](https://github.com/AbsaOSS/k8gb/pull/239) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Switch external-dns to upstream v0.7.5 image release [\#237](https://github.com/AbsaOSS/k8gb/pull/237) ([ytsarev](https://github.com/ytsarev))
+- Bump sigs.k8s.io/external-dns from 0.7.4 to 0.7.5 [\#235](https://github.com/AbsaOSS/k8gb/pull/235) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump github.com/miekg/dns from 1.1.30 to 1.1.35 [\#232](https://github.com/AbsaOSS/k8gb/pull/232) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump github.com/onsi/ginkgo from 1.12.1 to 1.14.2 [\#230](https://github.com/AbsaOSS/k8gb/pull/230) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add GitHub code scanning [\#228](https://github.com/AbsaOSS/k8gb/pull/228) ([donovanmuller](https://github.com/donovanmuller))
+- Add dependabot [\#227](https://github.com/AbsaOSS/k8gb/pull/227) ([donovanmuller](https://github.com/donovanmuller))
+- bump AbsaOSS/k3d-action to version v1.0.0 [\#226](https://github.com/AbsaOSS/k8gb/pull/226) ([kuritka](https://github.com/kuritka))
+- Changelog for v0.7.2 [\#225](https://github.com/AbsaOSS/k8gb/pull/225) ([ytsarev](https://github.com/ytsarev))
+
 ## [v0.7.2](https://github.com/absaoss/k8gb/tree/v0.7.2) (2020-12-16)
 
 [Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.1...v0.7.2)
