@@ -14,6 +14,9 @@
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8gb)](https://artifacthub.io/packages/search?repo=k8gb)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
+
+Just a single Gslb CRD to enable the Global Load Balancing:
+
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -34,7 +37,6 @@ spec:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag
 ```
-*Just a single Gslb CRD to enable the Global Load Balancing*
 
 Global load balancing, commonly referred to as GSLB (Global Server Load Balancing) solutions, have typically been the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 
