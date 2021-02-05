@@ -32,7 +32,7 @@ PWD ?=  $(shell pwd)
 VERSION ?= $(shell helm show chart chart/k8gb/|awk '/appVersion:/ {print $$2}')
 
 # image URL to use all building/pushing image targets
-IMG ?= $(REPO):v$(VERSION)
+IMG ?= $(REPO):$(VERSION)
 
 # default bundle image tag
 BUNDLE_IMG ?= controller-bundle:$(VERSION)
@@ -110,8 +110,8 @@ deploy-full-local-setup: ## Deploy full local multicluster setup
 deploy-to-AbsaOSS-k3d-action:
 	@echo "\n$(YELLOW)build k8gb docker and push to registry $(NC)"
 	docker build . -t k8gb:$(COMMIT_HASH)
-	docker tag k8gb:$(COMMIT_HASH) $(GITACTION_IMAGE_REPO):v$(COMMIT_HASH)
-	docker push $(GITACTION_IMAGE_REPO):v$(COMMIT_HASH)
+	docker tag k8gb:$(COMMIT_HASH) $(GITACTION_IMAGE_REPO):$(COMMIT_HASH)
+	docker push $(GITACTION_IMAGE_REPO):$(COMMIT_HASH)
 
 	@echo "\n$(YELLOW)Change version in Chart.yaml $(CYAN) $(VERSION) to $(COMMIT_HASH)$(NC)"
 	sed -i "s/$(VERSION)/$(COMMIT_HASH)/g" chart/k8gb/Chart.yaml

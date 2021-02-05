@@ -26,7 +26,7 @@ spec:
       serviceAccountName: k8gb
       containers:
         - name: k8gb
-          image: {{ .Values.k8gb.imageRepo }}:v{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
+          image: {{ .Values.k8gb.imageRepo }}:{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
           imagePullPolicy: Always
           securityContext:
             runAsUser: 1000
