@@ -13,9 +13,26 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
-
-
-![GSLB Failover Demo](https://github.com/AbsaOSS/k8gb/raw/gh-pages/img/gslb.png)
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metada:
+  name: test-gslb-failover
+  namespace: test-gslb
+spec:
+  ingress:
+    rules:
+      - host: failover.test.k8gb.io # Desired GSLB enabled FQDN
+        http:
+          paths:
+          - backend:
+              serviceName: frontend-podinfo # Service name to enable GSLB for
+              servicePort: http
+            path: /
+  strategy:
+    type: failover # Global load balancing strategy
+    primaryGeoTag: eu-west-1 # Primary cluster geo tag
+```
 *Just a single Gslb CRD to enable the Global Load Balancing*
 
 Global load balancing, commonly referred to as GSLB (Global Server Load Balancing) solutions, have typically been the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
@@ -42,7 +59,7 @@ make deploy-full-local-setup
 ```
 
 It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/) with
-k8gb, test application and two sample Gslb resources on top.    
+k8gb, test application and two sample Gslb resources on top.
 
 This setup is adapted for local scenario and works without external DNS provider dependency.
 
