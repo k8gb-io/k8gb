@@ -12,7 +12,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: 0.7.4
-    created: "2021-02-05T08:21:32.042047416Z"
+    created: "2021-02-05T11:45:38.767531386Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -27,9 +27,35 @@ entries:
     urls:
     - charts/k8gb-0.7.4.tgz
     version: 0.7.4
+  - annotations:
+      artifacthub.io/crds: |
+        - kind: Gslb
+          version: v1beta1
+          name: gslb
+          displayName: Gslb
+          description: Gslb resource for global load balancing strategy configuration
+      artifacthub.io/operator: "true"
+      artifacthub.io/operatorCapabilities: Seamless Upgrades
+    apiVersion: v2
+    appVersion: v0.7.4
+    created: "2021-02-05T11:45:38.771500311Z"
+    dependencies:
+    - name: coredns
+      repository: https://coredns.github.io/helm
+      version: 1.14.0
+    - name: etcd-operator
+      repository: https://charts.helm.sh/stable
+      version: 0.11.0
+    description: A Helm chart for Kubernetes Global Balancer
+    digest: f7bcc0c17a629e192d389975cc6a154413bbd915839bac3700c4e77dc78968fb
+    name: k8gb
+    type: application
+    urls:
+    - charts/k8gb-v0.7.4.tgz
+    version: v0.7.4
   - apiVersion: v2
     appVersion: 0.7.2
-    created: "2021-02-05T08:21:32.038990875Z"
+    created: "2021-02-05T11:45:38.763862762Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -44,4 +70,4 @@ entries:
     urls:
     - charts/k8gb-0.7.2.tgz
     version: 0.7.2
-generated: "2021-02-05T08:21:32.035810631Z"
+generated: "2021-02-05T11:45:38.759948237Z"
