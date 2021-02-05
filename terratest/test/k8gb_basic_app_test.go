@@ -88,5 +88,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
 
 	assertGslbStatus(t, options, "test-gslb", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:Healthy unhealthy.cloud.example.com:Unhealthy")
+	// Ensure controller labels DNSEndpoint objects
+	assertDNSEndpointLabel(t, options, "k8gb.absa.oss/dnstype")
 
 }

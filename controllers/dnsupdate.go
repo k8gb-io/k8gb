@@ -94,6 +94,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 			Name:        gslb.Name,
 			Namespace:   gslb.Namespace,
 			Annotations: map[string]string{"k8gb.absa.oss/dnstype": "local"},
+			Labels:      map[string]string{"k8gb.absa.oss/dnstype": "local"},
 		},
 		Spec: dnsEndpointSpec,
 	}

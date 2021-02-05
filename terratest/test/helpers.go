@@ -145,3 +145,9 @@ func assertGslbSpec(t *testing.T, options *k8s.KubectlOptions, gslbName string, 
 	require.NoError(t, err)
 	assert.Equal(t, expectedValue, actualValue)
 }
+
+func assertDNSEndpointLabel(t *testing.T, options *k8s.KubectlOptions, label string) {
+	t.Helper()
+	k8s.RunKubectl(t, options, "get", "dnsendpoint", "-l", label)
+}
+
