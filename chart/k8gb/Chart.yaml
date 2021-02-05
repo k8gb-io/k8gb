@@ -1,20 +1,8 @@
 apiVersion: v2
 name: k8gb
 description: A Helm chart for Kubernetes Global Balancer
-annotations:
-  artifacthub.io/operator: "true"
-  artifacthub.io/operatorCapabilities: Seamless Upgrades
-  artifacthub.io/crds: |
-    - kind: Gslb
-      version: v1beta1
-      name: gslb
-      displayName: Gslb
-      description: Gslb resource for global load balancing strategy configuration
-
 type: application
-
 version: v0.7.4
-
 appVersion: v0.7.4
 
 dependencies:
@@ -24,3 +12,43 @@ dependencies:
   - name: etcd-operator
     repository: https://charts.helm.sh/stable
     version: 0.11.0
+
+home: https://www.k8gb.io/
+sources:
+  - https://github.com/AbsaOSS/k8gb
+
+keywords:
+  - gslb
+  - dns-lb
+  - kuberneters-global-balancer
+  - kubernetes-operator
+  - balancer
+
+annotations:
+  artifacthub.io/operator: "true"
+  artifacthub.io/operatorCapabilities: Seamless Upgrades
+  artifacthub.io/crds: |
+    - kind: Gslb
+      version: v1beta1
+      name: gslb
+      displayName: Gslb
+      description: Gslb resource for global load balancing strategy configuration
+  artifacthub.io/crdsExamples: |
+    - apiVersion: k8gb.absa.oss/v1beta1
+      kind: Gslb
+      metada:
+        name: test-gslb-failover
+        namespace: test-gslb
+      spec:
+        ingress:
+          rules:
+            - host: failover.test.k8gb.io # Desired GSLB enabled FQDN
+              http:
+                paths:
+                - backend:
+                    serviceName: frontend-podinfo # Service name to enable GSLB for
+                    servicePort: http
+                  path: /
+        strategy:
+          type: failover # Global load balancing strategy
+          primaryGeoTag: eu-west-1 # Primary cluster geo tag
