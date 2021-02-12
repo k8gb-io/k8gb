@@ -141,8 +141,8 @@ deploy-gslb-operator-14:
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: ## Apply Gslb Custom Resources
 	kubectl apply -f deploy/crds/test-namespace.yaml
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+	$(call apply-cr)
+	$(call apply-cr)
 
 .PHONY: deploy-test-apps
 deploy-test-apps: ## Deploy testing workloads
@@ -332,8 +332,8 @@ define deploy-local-cluster
 
 	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace.yaml
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+	$(call apply-cr)
+	$(call apply-cr)
 
 	@echo "\n$(YELLOW)Deploy test apps $(NC)"
 	$(call deploy-test-apps)
@@ -345,9 +345,8 @@ define deploy-local-cluster
 endef
 
 define apply-cr
-	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
-	kubectl apply -f "$1"
-	git checkout -- "$1"
+	helm template testdata deploy/crds/testdata --set domain=$(GSLB_DOMAIN) | \
+	kubectl -n test-gslb apply -f -
 endef
 
 define deploy-test-apps

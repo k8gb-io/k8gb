@@ -2,11 +2,10 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: test-gslb-failover
-  namespace: test-gslb
 spec:
   ingress:
     rules:
-      - host: failover.cloud.example.com
+      - host: failover.{{ .Values.domain }}
         http:
           paths:
           - backend:

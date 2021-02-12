@@ -2,25 +2,25 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: test-gslb
-  namespace: test-gslb
 spec:
   ingress:
     rules:
-      - host: notfound.cloud.example.com # This is the GSLB enabled host that clients would use
+      # This is the GSLB enabled host that clients would use
+      - host: notfound.{{ .Values.domain }}
         http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
           paths:
             - backend:
                 serviceName: non-existing-app # Gslb should reflect NotFound status
                 servicePort: http
               path: /
-      - host: unhealthy.cloud.example.com
+      - host: unhealthy.{{ .Values.domain }}
         http:
           paths:
           - backend:
               serviceName: unhealthy-app # Gslb should reflect Unhealthy status
               servicePort: http
             path: /
-      - host: roundrobin.cloud.example.com
+      - host: roundrobin.{{ .Values.domain }}
         http:
           paths:
           - backend:
