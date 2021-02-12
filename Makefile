@@ -31,6 +31,9 @@ PWD ?=  $(shell pwd)
 
 VERSION ?= $(shell helm show chart chart/k8gb/|awk '/appVersion:/ {print $$2}')
 
+COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
+
+SEMVER ?= $(VERSION)-$(COMMIT_HASH)
 # image URL to use all building/pushing image targets
 IMG ?= $(REPO):$(VERSION)
 
@@ -55,7 +58,6 @@ CONTROLLER_GEN_PATH ?= $(shell which controller-gen || echo $(NO_VALUE))
 
 KUSTOMIZE_PATH ?= $(shell which kustomize || echo $(NO_VALUE))
 
-COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
 
 ###############################
 #		TARGETS
@@ -109,12 +111,11 @@ deploy-full-local-setup: ## Deploy full local multicluster setup
 .PHONY: deploy-to-AbsaOSS-k3d-action
 deploy-to-AbsaOSS-k3d-action:
 	@echo "\n$(YELLOW)build k8gb docker and push to registry $(NC)"
-	docker build . -t k8gb:$(COMMIT_HASH)
-	docker tag k8gb:$(COMMIT_HASH) $(GITACTION_IMAGE_REPO):$(COMMIT_HASH)
-	docker push $(GITACTION_IMAGE_REPO):$(COMMIT_HASH)
+	docker build . -t $(GITACTION_IMAGE_REPO):$(SEMVER)
+	docker push $(GITACTION_IMAGE_REPO):$(SEMVER)
 
-	@echo "\n$(YELLOW)Change version in Chart.yaml $(CYAN) $(VERSION) to $(COMMIT_HASH)$(NC)"
-	sed -i "s/$(VERSION)/$(COMMIT_HASH)/g" chart/k8gb/Chart.yaml
+	@echo "\n$(YELLOW)Change version in Chart.yaml $(CYAN) $(VERSION) to $(SEMVER)$(NC)"
+	sed -i "s/$(VERSION)/$(SEMVER)/g" chart/k8gb/Chart.yaml
 
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(GITACTION_IMAGE_REPO),)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(GITACTION_IMAGE_REPO),$(CLUSTER_GSLB2_HELM_ARGS))
