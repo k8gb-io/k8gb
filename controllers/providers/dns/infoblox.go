@@ -15,22 +15,20 @@ import (
 )
 
 type InfobloxProvider struct {
-	assistant assistant.IAssistant
-	config    depresolver.Config
+	assistant  assistant.IAssistant
+	config     depresolver.Config
+	connection *ibclient.ObjectManager
 }
 
-func NewInfobloxDNS(config depresolver.Config, assistant assistant.IAssistant) *InfobloxProvider {
-	return &InfobloxProvider{
-		assistant: assistant,
-		config:    config,
-	}
+func NewInfobloxDNS(config depresolver.Config, assistant assistant.IAssistant) (p *InfobloxProvider, err error) {
+	p = new(InfobloxProvider)
+	p.assistant = assistant
+	p.config = config
+	p.connection, err = p.infobloxConnection()
+	return
 }
 
 func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
-	objMgr, err := p.infobloxConnection()
-	if err != nil {
-		return &reconcile.Result{}, err
-	}
 	addresses, err := p.assistant.GslbIngressExposedIPs(gslb)
 	if err != nil {
 		return &reconcile.Result{}, err
@@ -42,7 +40,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		delegateTo = append(delegateTo, nameServer)
 	}
 
-	findZone, err := objMgr.GetZoneDelegated(p.config.DNSZone)
+	findZone, err := p.connection.GetZoneDelegated(p.config.DNSZone)
 	if err != nil {
 		return &reconcile.Result{}, err
 	}
@@ -74,14 +72,14 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 			}
 			p.assistant.Info("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, existingDelegateTo)
 
-			_, err = objMgr.UpdateZoneDelegated(findZone.Ref, existingDelegateTo)
+			_, err = p.connection.UpdateZoneDelegated(findZone.Ref, existingDelegateTo)
 			if err != nil {
 				return &reconcile.Result{}, err
 			}
 		}
 	} else {
 		p.assistant.Info("Creating delegated zone(%s)...", p.config.DNSZone)
-		_, err = objMgr.CreateZoneDelegated(p.config.DNSZone, delegateTo)
+		_, err = p.connection.CreateZoneDelegated(p.config.DNSZone, delegateTo)
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
@@ -89,19 +87,19 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 
 	edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
 	heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, p.config.ClusterGeoTag, p.config.EdgeDNSZone)
-	heartbeatTXTRecord, err := objMgr.GetTXTRecord(heartbeatTXTName)
+	heartbeatTXTRecord, err := p.connection.GetTXTRecord(heartbeatTXTName)
 	if err != nil {
 		return &reconcile.Result{}, err
 	}
 	if heartbeatTXTRecord == nil {
 		p.assistant.Info("Creating split brain TXT record(%s)...", heartbeatTXTName)
-		_, err := objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
+		_, err := p.connection.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
 	} else {
 		p.assistant.Info("Updating split brain TXT record(%s)...", heartbeatTXTName)
-		_, err := objMgr.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
+		_, err := p.connection.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
 		if err != nil {
 			return &reconcile.Result{}, err
 		}
@@ -110,11 +108,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 }
 
 func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
-	objMgr, err := p.infobloxConnection()
-	if err != nil {
-		return err
-	}
-	findZone, err := objMgr.GetZoneDelegated(p.config.DNSZone)
+	findZone, err := p.connection.GetZoneDelegated(p.config.DNSZone)
 	if err != nil {
 		return err
 	}
@@ -126,7 +120,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 		}
 		if len(findZone.Ref) > 0 {
 			p.assistant.Info("Deleting delegated zone(%s)...", p.config.DNSZone)
-			_, err := objMgr.DeleteZoneDelegated(findZone.Ref)
+			_, err := p.connection.DeleteZoneDelegated(findZone.Ref)
 			if err != nil {
 				return err
 			}
@@ -134,7 +128,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 	}
 
 	heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, p.config.ClusterGeoTag, p.config.EdgeDNSZone)
-	findTXT, err := objMgr.GetTXTRecord(heartbeatTXTName)
+	findTXT, err := p.connection.GetTXTRecord(heartbeatTXTName)
 	if err != nil {
 		return err
 	}
@@ -142,7 +136,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 	if findTXT != nil {
 		if len(findTXT.Ref) > 0 {
 			p.assistant.Info("Deleting split brain TXT record(%s)...", heartbeatTXTName)
-			_, err := objMgr.DeleteTXTRecord(findTXT.Ref)
+			_, err := p.connection.DeleteTXTRecord(findTXT.Ref)
 			if err != nil {
 				return err
 			}

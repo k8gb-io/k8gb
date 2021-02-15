@@ -14,24 +14,27 @@ type ProviderFactory struct {
 	config depresolver.Config
 	client client.Client
 	log    logr.Logger
+	err    error
 }
 
-func NewDNSProviderFactory(client client.Client, config depresolver.Config, log logr.Logger) (f *ProviderFactory, err error) {
+func NewDNSProviderFactory(client client.Client, config depresolver.Config, log logr.Logger) (f *ProviderFactory) {
+	f = new(ProviderFactory)
 	if log == nil {
-		err = fmt.Errorf("nil log")
+		f.err = fmt.Errorf("nil log")
 	}
 	if client == nil {
-		err = fmt.Errorf("nil client")
+		f.err = fmt.Errorf("nil client")
 	}
-	f = &ProviderFactory{
-		config: config,
-		log:    log,
-		client: client,
-	}
+	f.log = log
+	f.client = client
+	f.config = config
 	return
 }
 
-func (f *ProviderFactory) Provider() (provider IDnsProvider) {
+func (f *ProviderFactory) Provider() (provider IDnsProvider, err error) {
+	if f.err != nil {
+		return nil, f.err
+	}
 	a := assistant.NewGslbAssistant(f.client, f.log, f.config.K8gbNamespace, f.config.EdgeDNSServer)
 	switch f.config.EdgeDNSType {
 	case depresolver.DNSTypeNS1:
@@ -39,7 +42,7 @@ func (f *ProviderFactory) Provider() (provider IDnsProvider) {
 	case depresolver.DNSTypeRoute53:
 		provider = NewExternalDNS(externalDNSTypeRoute53, f.config, a)
 	case depresolver.DNSTypeInfoblox:
-		provider = NewInfobloxDNS(f.config, a)
+		provider, err = NewInfobloxDNS(f.config, a)
 	case depresolver.DNSTypeNoEdgeDNS:
 		provider = NewEmptyDNS(f.config, a)
 	}

@@ -99,12 +99,12 @@ func main() {
 		setupLog.Error(err, "reading config env variables")
 	}
 	setupLog.Info("starting DNS provider")
-	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config, reconciler.Log)
+	f = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config, reconciler.Log)
+	reconciler.DNSProvider, err = f.Provider()
 	if err != nil {
-		setupLog.Error(err, "unable to create factory (%s)", err)
+		setupLog.Error(err, "unable to create provider (%s)", err)
 		os.Exit(1)
 	}
-	reconciler.DNSProvider = f.Provider()
 	setupLog.Info(fmt.Sprintf("provider: %s", reconciler.DNSProvider))
 	setupLog.Info("starting metrics")
 	reconciler.Metrics = metrics.NewPrometheusMetrics(*reconciler.Config)

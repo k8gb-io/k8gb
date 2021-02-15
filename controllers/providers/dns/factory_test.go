@@ -21,9 +21,9 @@ func TestFactoryInfoblox(t *testing.T) {
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeInfoblox
 	// act
-	f, err := NewDNSProviderFactory(client, customConfig, log)
+	f := NewDNSProviderFactory(client, customConfig, log)
+	provider, err := f.Provider()
 	require.NoError(t, err)
-	provider := f.Provider()
 	// assert
 	assert.NotNil(t, provider)
 	assert.Equal(t, "*InfobloxProvider", utils.GetType(provider))
@@ -37,9 +37,9 @@ func TestFactoryNS1(t *testing.T) {
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeNS1
 	// act
-	f, err := NewDNSProviderFactory(client, customConfig, log)
+	f := NewDNSProviderFactory(client, customConfig, log)
+	provider, err := f.Provider()
 	require.NoError(t, err)
-	provider := f.Provider()
 	// assert
 	assert.NotNil(t, provider)
 	assert.Equal(t, "*ExternalDNSProvider", utils.GetType(provider))
@@ -53,9 +53,9 @@ func TestFactoryRoute53(t *testing.T) {
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeRoute53
 	// act
-	f, err := NewDNSProviderFactory(client, customConfig, log)
+	f := NewDNSProviderFactory(client, customConfig, log)
+	provider, err := f.Provider()
 	require.NoError(t, err)
-	provider := f.Provider()
 	// assert
 	assert.NotNil(t, provider)
 	assert.Equal(t, "*ExternalDNSProvider", utils.GetType(provider))
@@ -69,9 +69,9 @@ func TestFactoryNoEdgeDNS(t *testing.T) {
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeNoEdgeDNS
 	// act
-	f, err := NewDNSProviderFactory(client, customConfig, log)
+	f := NewDNSProviderFactory(client, customConfig, log)
+	provider, err := f.Provider()
 	require.NoError(t, err)
-	provider := f.Provider()
 	// assert
 	assert.Equal(t, "*EmptyDNSProvider", utils.GetType(provider))
 	assert.Equal(t, "EMPTY", fmt.Sprintf("%s", provider))
@@ -84,7 +84,7 @@ func TestFactoryNilLogger(t *testing.T) {
 	customConfig.EdgeDNSType = depresolver.DNSTypeNoEdgeDNS
 	// act
 	// assert
-	_, err := NewDNSProviderFactory(nil, customConfig, log)
+	_, err := NewDNSProviderFactory(nil, customConfig, log).Provider()
 	require.Error(t, err)
 }
 
@@ -95,6 +95,6 @@ func TestFactoryNilClient(t *testing.T) {
 	customConfig.EdgeDNSType = depresolver.DNSTypeNoEdgeDNS
 	// act
 	// assert
-	_, err := NewDNSProviderFactory(client, customConfig, nil)
+	_, err := NewDNSProviderFactory(client, customConfig, nil).Provider()
 	require.Error(t, err)
 }

@@ -3,6 +3,8 @@ package dns
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
 
@@ -49,7 +51,8 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	a := assistant.NewGslbAssistant(nil, nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer)
-	provider := NewInfobloxDNS(customConfig, a)
+	provider, err := NewInfobloxDNS(customConfig, a)
+	require.NoError(t, err)
 	// act
 	extClusters := nsServerNameExt(customConfig)
 	got := provider.filterOutDelegateTo(delegateTo, extClusters[0])

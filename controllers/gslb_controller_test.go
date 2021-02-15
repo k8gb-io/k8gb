@@ -696,8 +696,8 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	settings.reconciler.Config = &customConfig
 	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
 	// configuration at another time than startup
-	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
-	settings.reconciler.DNSProvider = f.Provider()
+	f := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
+	settings.reconciler.DNSProvider, _ = f.Provider()
 
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-route53"}, dnsEndpointRoute53)
@@ -767,8 +767,8 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	settings.reconciler.Config = &customConfig
 	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
 	// configuration at another time than startup
-	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
-	settings.reconciler.DNSProvider = f.Provider()
+	f := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
+	settings.reconciler.DNSProvider, _ = f.Provider()
 
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-ns1"}, dnsEndpointNS1)
@@ -1079,12 +1079,11 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		},
 	}
 
-	var f *dns.ProviderFactory
-	f, err = dns.NewDNSProviderFactory(r.Client, *r.Config, r.Log)
+	f := dns.NewDNSProviderFactory(r.Client, *r.Config, r.Log)
+	r.DNSProvider, err = f.Provider()
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)
 	}
-	r.DNSProvider = f.Provider()
 	a := assistant.NewGslbAssistant(r.Client, r.Log, r.Config.K8gbNamespace, r.Config.EdgeDNSServer)
 	res, err := r.Reconcile(req)
 	if err != nil {
