@@ -77,5 +77,4 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 
 		assert.Equal(t, afterFailoverResponse, expectedIPsAfterFailover)
 	})
-
 }

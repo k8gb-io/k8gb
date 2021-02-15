@@ -91,7 +91,7 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	err = r.DepResolver.ResolveGslbSpec(ctx, gslb)
 	if err != nil {
-		log.Error(err, "resolving spec.strategy")
+		log.Error(err, "resolving spec")
 		return ctrl.Result{}, err
 	}
 	// == Finalizer business ==
@@ -190,6 +190,10 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			gslbName := ""
 			for _, gslb := range gslbList.Items {
 				for _, rule := range gslb.Spec.Ingress.Rules {
+					if rule.HTTP == nil {
+						log.Info(fmt.Sprintf("spec.ingress.rules.http is missing on %s", gslb.Name))
+						continue
+					}
 					for _, path := range rule.HTTP.Paths {
 						if path.Backend.ServiceName == a.Meta.GetName() {
 							gslbName = gslb.Name

@@ -2,6 +2,7 @@ package depresolver
 
 import (
 	"context"
+	"errors"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
@@ -27,6 +28,11 @@ func (dr *DependencyResolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1b
 		dr.errorSpec = dr.validateSpec(strategy)
 		if dr.errorSpec == nil {
 			dr.errorSpec = dr.client.Update(ctx, gslb)
+		}
+		for _, rule := range gslb.Spec.Ingress.Rules {
+			if rule.HTTP == nil {
+				dr.errorSpec = errors.New("missing .spec.ingress.rules.http")
+			}
 		}
 	})
 	return dr.errorSpec
