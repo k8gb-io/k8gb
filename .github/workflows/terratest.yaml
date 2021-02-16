@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Create 1st k3s Cluster
-        uses: AbsaOSS/k3d-action@v1.1.0
+        uses: AbsaOSS/k3d-action@v1.2.0
         with:
           cluster-name: "test-gslb1"
           use-default-registry: true
@@ -29,7 +29,7 @@ jobs:
             --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
 
       - name: Create 2nd k3s Cluster
-        uses: AbsaOSS/k3d-action@v1.1.0
+        uses: AbsaOSS/k3d-action@v1.2.0
         with:
           cluster-name: "test-gslb2"
           use-default-registry: true
