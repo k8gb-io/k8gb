@@ -97,6 +97,7 @@ func main() {
 	reconciler.Config, err = reconciler.DepResolver.ResolveOperatorConfig()
 	if err != nil {
 		setupLog.Error(err, "reading config env variables")
+		os.Exit(1)
 	}
 	setupLog.Info("starting DNS provider")
 	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config, reconciler.Log)
