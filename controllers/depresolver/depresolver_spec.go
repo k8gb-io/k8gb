@@ -25,7 +25,7 @@ func (dr *DependencyResolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1b
 		if strategy.SplitBrainThresholdSeconds == 0 {
 			strategy.SplitBrainThresholdSeconds = predefinedStrategy.SplitBrainThresholdSeconds
 		}
-		dr.errorSpec = dr.validateSpec(strategy)
+		dr.errorSpec = dr.validateStrategy(strategy)
 		if dr.errorSpec == nil {
 			dr.errorSpec = dr.client.Update(ctx, gslb)
 		}
@@ -38,7 +38,7 @@ func (dr *DependencyResolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1b
 	return dr.errorSpec
 }
 
-func (dr *DependencyResolver) validateSpec(strategy *k8gbv1beta1.Strategy) (err error) {
+func (dr *DependencyResolver) validateStrategy(strategy *k8gbv1beta1.Strategy) (err error) {
 	err = field("DNSTtlSeconds", strategy.DNSTtlSeconds).isHigherOrEqualToZero().err
 	if err != nil {
 		return
