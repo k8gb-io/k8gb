@@ -4,7 +4,6 @@ import (
 	"time"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -16,7 +15,7 @@ type IAssistant interface {
 	// GetExternalTargets retrieves slice of targets from external clusters
 	GetExternalTargets(host string, fakeDNSEnabled bool, extGslbClusters []string) (targets []string)
 	// SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist
-	SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) (*reconcile.Result, error)
+	SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error
 	// RemoveEndpoint removes endpoint
 	RemoveEndpoint(endpointName string) error
 	// Info wraps private logger and provides log.Error()
