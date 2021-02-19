@@ -11,15 +11,15 @@ require (
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/prometheus/client_golang v1.9.0
 	github.com/stretchr/testify v1.7.0
-	sigs.k8s.io/controller-runtime v0.6.4
-	sigs.k8s.io/external-dns v0.7.6
 
 	// go-logr group
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0 // indirect
 
 	// operator sdk group
-	k8s.io/api v0.20.3
-	k8s.io/apimachinery v0.20.3
-	k8s.io/client-go v0.20.3
+	k8s.io/api v0.20.4
+	k8s.io/apimachinery v0.20.4
+	k8s.io/client-go v0.20.4
+	sigs.k8s.io/controller-runtime v0.6.4
+	sigs.k8s.io/external-dns v0.7.6
 )
