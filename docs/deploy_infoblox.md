@@ -45,29 +45,9 @@ make deploy-gslb-operator VALUES_YAML=~/k8gb/eu-cluster.yaml
 ```sh
  kubectl -n k8gb get pod
 NAME                                                       READY   STATUS     RESTARTS   AGE
-etcd-cluster-gnt7rslvvj                                    1/1     Running    0          20s
-etcd-cluster-n8b2rvhv5q                                    0/1     Init:0/1   0          3s
 external-dns-79d5ccd7fc-4bj74                              1/1     Running    0          39s
 k8gb-76cc56b55-t779s                                       1/1     Running    0          39s
 k8gb-coredns-799984c646-qz88m                              1/1     Running    0          41s
-k8gb-etcd-operator-etcd-backup-operator-fccb8fdd-bx8v5     1/1     Running    0          40s
-k8gb-etcd-operator-etcd-operator-765f655575-pgvbh          1/1     Running    0          40s
-k8gb-etcd-operator-etcd-restore-operator-8977cd5c8-k8l7l   1/1     Running    0          40s
-```
-
-* As you can see one of the `etcd-cluster` pods is still in `Init` state. The embedded `etcd-operator` is automatically configuring isolated `etcd` cluster to act as a backend for `coredns`, which is used as part of k8gb for coordinated DNS responses. Expected post installation result:
-```sh
-kubectl -n k8gb get pod
-NAME                                                       READY   STATUS    RESTARTS   AGE
-etcd-cluster-gnt7rslvvj                                    1/1     Running   0          7m39s
-etcd-cluster-n8b2rvhv5q                                    1/1     Running   0          7m22s
-etcd-cluster-xmkz8xsk7g                                    1/1     Running   0          6m41s
-external-dns-79d5ccd7fc-4bj74                              1/1     Running   0          7m58s
-k8gb-76cc56b55-t779s                                       1/1     Running   0          7m58s
-k8gb-coredns-799984c646-qz88m                              1/1     Running   0          8m
-k8gb-etcd-operator-etcd-backup-operator-fccb8fdd-bx8v5     1/1     Running   0          7m59s
-k8gb-etcd-operator-etcd-operator-765f655575-pgvbh          1/1     Running   0          7m59s
-k8gb-etcd-operator-etcd-restore-operator-8977cd5c8-k8l7l   1/1     Running   0          7m59s
 ```
 
 * Deploy k8gb to the second cluster by repeating the same steps with the exception of:

@@ -10,7 +10,6 @@ VALUES_YAML ?= chart/k8gb/values.yaml
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
-ETCD_DEBUG_IMAGE ?= quay.io/coreos/etcd:v3.2.25
 
 CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-cloud-example-com-eu.example.com}'
 GITACTION_IMAGE_REPO ?=registry.localhost:5000/k8gb
@@ -76,10 +75,6 @@ clean-test-apps:
 debug-idea: export WATCH_NAMESPACE=test-gslb
 debug-idea:
 	$(call debug,debug --headless --listen=:2345 --api-version=2)
-
-.PHONY: debug-test-etcd
-debug-test-etcd: ## Run temporary etcd pod for debug
-	kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace k8gb etcd-test --image "$(ETCD_DEBUG_IMAGE)" --restart=Never -- /bin/sh
 
 .PHONY: demo-roundrobin
 demo-roundrobin: ## Execute round-robin demo
@@ -339,7 +334,7 @@ define deploy-local-cluster
 	@echo "\n$(YELLOW)Deploy test apps $(NC)"
 	$(call deploy-test-apps)
 
-	@echo "\n$(YELLOW)Wait until ETCD and Ingress controller are ready $(NC)"
+	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait)
 
 	@echo "\n$(CYAN)$1 $(YELLOW)deployed! $(NC)"
@@ -404,7 +399,6 @@ endef
 # waits for NGINX, GSLB are ready
 define wait
 	kubectl -n k8gb wait --for=condition=Ready pod -l app=nginx-ingress --timeout=600s
-	kubectl -n k8gb wait --for=condition=Ready pod -l app=etcd --timeout=600s
 endef
 
 define generate

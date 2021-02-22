@@ -5,6 +5,10 @@ go 1.15
 require (
 	github.com/AbsaOSS/gopkg v0.0.1
 	github.com/ghodss/yaml v1.0.0
+
+	// go-logr group
+	github.com/go-logr/logr v0.4.0
+	github.com/go-logr/zapr v0.4.0 // indirect
 	github.com/infobloxopen/infoblox-go-client v1.1.0
 	github.com/lixiangzhong/dnsutil v0.0.0-20191203032812-75ad39d2945a
 	github.com/miekg/dns v1.1.38

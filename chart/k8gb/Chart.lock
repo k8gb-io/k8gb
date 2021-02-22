@@ -2,8 +2,5 @@ dependencies:
 - name: coredns
   repository: https://coredns.github.io/helm
   version: 1.14.0
-- name: etcd-operator
-  repository: https://charts.helm.sh/stable
-  version: 0.11.0
-digest: sha256:a424dc6f1d74fd5aa194629fcccb62a1ee02e9a5317ed20756245e66e80dfe5a
-generated: "2020-12-16T20:55:58.809683+01:00"
+digest: sha256:3a6b4ca5f4e2be5a9d5c65320b975001f14a02a7eb258f922e68a9f37013e4db
+generated: "2021-02-05T20:59:23.594399+01:00"

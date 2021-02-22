@@ -9,9 +9,6 @@ dependencies:
   - name: coredns
     repository: https://coredns.github.io/helm
     version: 1.14.0
-  - name: etcd-operator
-    repository: https://charts.helm.sh/stable
-    version: 0.11.0
 
 home: https://www.k8gb.io/
 sources:
