@@ -26,6 +26,11 @@ func TestK8gbBasicAppExample(t *testing.T) {
 	kubeResourcePath, err := filepath.Abs("../examples/roundrobin.yaml")
 	require.NoError(t, err)
 
+	brokenResourcePath, err := filepath.Abs("../examples/broken-gslb.yaml")
+	require.NoError(t, err)
+	brokenNoHTTPResourcePath, err := filepath.Abs("../examples/broken-gslb-no-http.yaml")
+	require.NoError(t, err)
+
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
@@ -90,5 +95,12 @@ func TestK8gbBasicAppExample(t *testing.T) {
 	assertGslbStatus(t, options, "test-gslb", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:Healthy unhealthy.cloud.example.com:Unhealthy")
 	// Ensure controller labels DNSEndpoint objects
 	assertDNSEndpointLabel(t, options, "k8gb.absa.oss/dnstype")
+
+	t.Run("Broken object rejected by API", func(t *testing.T) {
+		err := k8s.KubectlApplyE(t, options, brokenResourcePath)
+		require.Error(t, err)
+		err = k8s.KubectlApplyE(t, options, brokenNoHTTPResourcePath)
+		require.Error(t, err)
+	})
 
 }

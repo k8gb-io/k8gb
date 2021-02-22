@@ -257,7 +257,10 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}
 
 		log.Info(fmt.Sprintf("Creating new Gslb(%s) out of Ingress annotation", gslb.Name))
-		_ = c.Create(context.Background(), gslb)
+		err = c.Create(context.Background(), gslb)
+		if err != nil {
+			log.Error(err, "Glsb creation failed")
+		}
 	}
 	ingressMapFn := handler.ToRequestsFunc(
 		func(a handler.MapObject) []reconcile.Request {

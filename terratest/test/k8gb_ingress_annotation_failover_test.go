@@ -19,6 +19,8 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 	// Path to the Kubernetes resource config we will test
 	kubeResourcePath, err := filepath.Abs("../examples/ingress-annotation-failover.yaml")
 	require.NoError(t, err)
+	brokenResourcePath, err := filepath.Abs("../examples/broken-ingress-annotation.yaml")
+	require.NoError(t, err)
 
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
@@ -44,4 +46,10 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 	assertGslbStatus(t, options, "test-gslb-annotation-failover", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:NotFound unhealthy.cloud.example.com:NotFound")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.type", "failover")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.primaryGeoTag", "eu")
+
+	t.Run ("Broken ingress is not proccessed", func(t *testing.T) {
+		k8s.KubectlApply(t, options, brokenResourcePath)
+		err := k8s.RunKubectlE(t, options, "get", "gslb","broken-test-gslb-annotation-failover")
+		require.Error(t, err)
+	})
 }
