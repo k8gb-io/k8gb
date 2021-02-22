@@ -13,12 +13,9 @@ import (
 )
 
 func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, error) {
-	if gslb.Annotations == nil {
-		gslb.Annotations = make(map[string]string)
-	}
-	gslb.Annotations[strategyAnnotation] = gslb.Spec.Strategy.Type
+	metav1.SetMetaDataAnnotation(&gslb.ObjectMeta, strategyAnnotation, gslb.Spec.Strategy.Type)
 	if gslb.Spec.Strategy.PrimaryGeoTag != "" {
-		gslb.Annotations[primaryGeoTagAnnotation] = gslb.Spec.Strategy.PrimaryGeoTag
+		metav1.SetMetaDataAnnotation(&gslb.ObjectMeta, primaryGeoTagAnnotation, gslb.Spec.Strategy.PrimaryGeoTag)
 	}
 	ingress := &v1beta1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
