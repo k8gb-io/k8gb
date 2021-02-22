@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    k8gb.io/strategy: failover
+    k8gb.io/primary-geotag: eu
+  name: broken-test-gslb-annotation-failover
+spec:
+  rules:
+  - host: notfound.cloud.example.com
+    #http:
+    #  paths:
+    #  - backend:
+    #      serviceName: non-existing-app
+    #      servicePort: http
+    #    path: /
