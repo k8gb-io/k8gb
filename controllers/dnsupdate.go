@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
@@ -10,6 +11,12 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
+func sortTargets(targets []string) []string {
+	sort.Slice(targets, func(i, j int) bool {
+		return targets[i] < targets[j]
+	})
+	return targets
+}
 func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
 	var gslbHosts []*externaldns.Endpoint
 	var ttl = externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
@@ -45,6 +52,8 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 
 		// Check if host is alive on external Gslb
 		externalTargets := r.DNSProvider.GetExternalTargets(host)
+
+		sortTargets(externalTargets)
 
 		if len(externalTargets) > 0 {
 			switch gslb.Spec.Strategy.Type {
