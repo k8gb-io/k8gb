@@ -50,20 +50,6 @@ If local setup runs well, check if clusters are correctly installed
 kubectl cluster-info --context k3d-test-gslb1 && kubectl cluster-info --context k3d-test-gslb2
 ```
 
-Check if Etcd cluster is healthy
-```shell script
-kubectl run --rm -i --tty --env="ETCDCTL_API=3" --env="ETCDCTL_ENDPOINTS=http://etcd-cluster-client:2379" --namespace k8gb etcd-test --image quay.io/coreos/etcd --restart=Never -- /bin/sh -c 'etcdctl  member list'
-```
-as expected output you will see three started pods: `etcd-cluster`
-
-```shell script
-...
-c3261c079f6990a7, started, etcd-cluster-5bcpvf6ngz, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.k8gb.svc:2380, http://etcd-cluster-5bcpvf6ngz.etcd-cluster.k8gb.svc:2379
-eb6ead15c2b92606, started, etcd-cluster-6d8pxtpklm, http://etcd-cluster-6d8pxtpklm.etcd-cluster.k8gb.svc:2380, http://etcd-cluster-6d8pxtpklm.etcd-cluster.k8gb.svc:2379
-eed5a40bbfb6ee97, started, etcd-cluster-xsjmwdkdf8, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.k8gb.svc:2380, http://etcd-cluster-xsjmwdkdf8.etcd-cluster.k8gb.svc:2379
-...
-```
-
 Cluster [test-gslb1](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
 while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster2.yaml) on port `:5054`.
 ```shell script
