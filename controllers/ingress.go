@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -59,12 +61,13 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingr
 	}
 
 	// Update existing object with new spec and annotations
-	if !ingressCompare(found, i) {
+	if !ingressEqual(found, i) {
 		found.Spec = i.Spec
-		found.Annotations = i.Annotations
+		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations)
 		err = r.Update(context.TODO(), found)
 		if errors.IsConflict(err) {
-			r.Log.Info("CONFLICT, Ingress updated by third-party")
+			r.Log.Info("Ingress has been modified outside of controller, retrying reconciliation",
+				"Ingress.Namespace", found.Namespace, "Ingress.Name", found.Name)
 			return nil
 		}
 		if err != nil {
@@ -77,11 +80,11 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingr
 	return nil
 }
 
-func ingressCompare(found *v1beta1.Ingress, i *v1beta1.Ingress) bool {
-	for k, v := range i.Annotations {
-		if found.Annotations[k] != v {
+func ingressEqual(ing1 *v1beta1.Ingress, ing2 *v1beta1.Ingress) bool {
+	for k, v := range ing2.Annotations {
+		if ing1.Annotations[k] != v {
 			return false
 		}
 	}
-	return reflect.DeepEqual(found.Spec, i.Spec)
+	return reflect.DeepEqual(ing1.Spec, ing2.Spec)
 }
