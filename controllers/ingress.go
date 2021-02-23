@@ -2,6 +2,9 @@ package controllers
 
 import (
 	"context"
+	"reflect"
+
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -9,7 +12,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, error) {
@@ -33,7 +35,7 @@ func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, 
 	return ingress, err
 }
 
-func (r *GslbReconciler) ensureIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingress) (*reconcile.Result, error) {
+func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingress) error {
 	found := &v1beta1.Ingress{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      instance.Name,
@@ -48,26 +50,41 @@ func (r *GslbReconciler) ensureIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.In
 		if err != nil {
 			// Creation failed
 			log.Error(err, "Failed to create new Ingress", "Ingress.Namespace", i.Namespace, "Ingress.Name", i.Name)
-			return &reconcile.Result{}, err
+			return err
 		}
 		// Creation was successful
-		return nil, nil
+		return nil
 	} else if err != nil {
 		// Error that isn't due to the service not existing
 		log.Error(err, "Failed to get Ingress")
-		return &reconcile.Result{}, err
+		return err
 	}
 
 	// Update existing object with new spec and annotations
-	found.Spec = i.Spec
-	found.Annotations = i.Annotations
-	err = r.Update(context.TODO(), found)
-
-	if err != nil {
-		// Update failed
-		log.Error(err, "Failed to update Ingress", "Ingress.Namespace", found.Namespace, "Ingress.Name", found.Name)
-		return &reconcile.Result{}, err
+	if !ingressEqual(found, i) {
+		found.Spec = i.Spec
+		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations)
+		err = r.Update(context.TODO(), found)
+		if errors.IsConflict(err) {
+			r.Log.Info("Ingress has been modified outside of controller, retrying reconciliation",
+				"Ingress.Namespace", found.Namespace, "Ingress.Name", found.Name)
+			return nil
+		}
+		if err != nil {
+			// Update failed
+			log.Error(err, "Failed to update Ingress", "Ingress.Namespace", found.Namespace, "Ingress.Name", found.Name)
+			return err
+		}
 	}
 
-	return nil, nil
+	return nil
+}
+
+func ingressEqual(ing1 *v1beta1.Ingress, ing2 *v1beta1.Ingress) bool {
+	for k, v := range ing2.Annotations {
+		if ing1.Annotations[k] != v {
+			return false
+		}
+	}
+	return reflect.DeepEqual(ing1.Spec, ing2.Spec)
 }

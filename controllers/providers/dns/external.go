@@ -10,7 +10,6 @@ import (
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -37,7 +36,7 @@ func NewExternalDNS(dnsType ExternalDNSType, config depresolver.Config, assistan
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) (*reconcile.Result, error) {
+func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
 	ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 	p.assistant.Info("Creating/Updating DNSEndpoint CRDs for %s...", p)
 	var NSServerList []string
@@ -52,7 +51,7 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 		NSServerIPs, err = p.assistant.GslbIngressExposedIPs(gslb)
 	}
 	if err != nil {
-		return &reconcile.Result{}, err
+		return err
 	}
 	NSRecord := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
@@ -77,11 +76,11 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 			},
 		},
 	}
-	res, err := p.assistant.SaveDNSEndpoint(p.config.K8gbNamespace, NSRecord)
+	err = p.assistant.SaveDNSEndpoint(p.config.K8gbNamespace, NSRecord)
 	if err != nil {
-		return res, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
 
 func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb) error {
@@ -96,7 +95,7 @@ func (p *ExternalDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]s
 	return p.assistant.GslbIngressExposedIPs(gslb)
 }
 
-func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) (*reconcile.Result, error) {
+func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {
 	return p.assistant.SaveDNSEndpoint(gslb.Namespace, i)
 }
 

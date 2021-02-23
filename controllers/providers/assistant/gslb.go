@@ -10,7 +10,6 @@ import (
 	"github.com/miekg/dns"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
@@ -108,7 +107,7 @@ func (r *GslbLoggerAssistant) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]s
 }
 
 // SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist
-func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) (*reconcile.Result, error) {
+func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error {
 	found := &externaldns.DNSEndpoint{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{
 		Name:      i.Name,
@@ -124,14 +123,14 @@ func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.D
 			// Creation failed
 			r.Error(err, "Failed to create new DNSEndpoint DNSEndpoint.Namespace: %s DNSEndpoint.Name %s",
 				i.Namespace, i.Name)
-			return &reconcile.Result{}, err
+			return err
 		}
 		// Creation was successful
-		return nil, nil
+		return nil
 	} else if err != nil {
 		// Error that isn't due to the service not existing
 		r.Error(err, "Failed to get DNSEndpoint")
-		return &reconcile.Result{}, err
+		return err
 	}
 
 	// Update existing object with new spec
@@ -142,9 +141,9 @@ func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.D
 		// Update failed
 		r.Error(err, "Failed to update DNSEndpoint DNSEndpoint.Namespace %s DNSEndpoint.Name %s",
 			found.Namespace, found.Name)
-		return &reconcile.Result{}, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
 
 // RemoveEndpoint removes endpoint
