@@ -61,9 +61,9 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingr
 	}
 
 	// Update existing object with new spec and annotations
-	if !ingressEqual(found, i) {
+	if !(utils.ContainsAnnotations(&found.ObjectMeta, &i.ObjectMeta) && reflect.DeepEqual(found.Spec, i.Spec)) {
 		found.Spec = i.Spec
-		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations)
+		utils.MergeAnnotations(&found.ObjectMeta, &i.ObjectMeta)
 		err = r.Update(context.TODO(), found)
 		if errors.IsConflict(err) {
 			r.Log.Info("Ingress has been modified outside of controller, retrying reconciliation",
@@ -76,15 +76,5 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingr
 			return err
 		}
 	}
-
 	return nil
-}
-
-func ingressEqual(ing1 *v1beta1.Ingress, ing2 *v1beta1.Ingress) bool {
-	for k, v := range ing2.Annotations {
-		if ing1.Annotations[k] != v {
-			return false
-		}
-	}
-	return reflect.DeepEqual(ing1.Spec, ing2.Spec)
 }
