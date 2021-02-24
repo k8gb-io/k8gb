@@ -16,10 +16,6 @@ require (
 	github.com/prometheus/client_golang v1.9.0
 	github.com/stretchr/testify v1.7.0
 
-	// go-logr group
-	github.com/go-logr/logr v0.4.0
-	github.com/go-logr/zapr v0.4.0 // indirect
-
 	// operator sdk group
 	k8s.io/api v0.20.4
 	k8s.io/apimachinery v0.20.4
