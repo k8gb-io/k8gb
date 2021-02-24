@@ -1,5 +1,36 @@
 # Changelog
 
+## [v0.7.5](https://github.com/absaoss/k8gb/tree/v0.7.5) (2021-02-24)
+
+[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.4...v0.7.5)
+
+**Implemented enhancements:**
+
+- coredns CRD plugin [\#249](https://github.com/AbsaOSS/k8gb/issues/249)
+- Move away from coreos etcd-operator [\#220](https://github.com/AbsaOSS/k8gb/issues/220)
+
+**Fixed bugs:**
+
+- k8gb crashes on malformed spec section in `gslb` custom resource [\#296](https://github.com/AbsaOSS/k8gb/issues/296)
+
+**Merged pull requests:**
+
+- Release v0.7.5 preparation [\#318](https://github.com/AbsaOSS/k8gb/pull/318) ([somaritane](https://github.com/somaritane))
+- Use SetAnnotation helper [\#314](https://github.com/AbsaOSS/k8gb/pull/314) ([k0da](https://github.com/k0da))
+- Validate spec.ingress.http.path [\#313](https://github.com/AbsaOSS/k8gb/pull/313) ([k0da](https://github.com/k0da))
+- Infoblox, heavy load fixed [\#312](https://github.com/AbsaOSS/k8gb/pull/312) ([kuritka](https://github.com/kuritka))
+- Sort externalTargets queried from DNS [\#311](https://github.com/AbsaOSS/k8gb/pull/311) ([k0da](https://github.com/k0da))
+- Bump k8s.io/client-go group from 0.20.3 to 0.20.4 [\#310](https://github.com/AbsaOSS/k8gb/pull/310) ([kuritka](https://github.com/kuritka))
+- group version bump [\#306](https://github.com/AbsaOSS/k8gb/pull/306) ([kuritka](https://github.com/kuritka))
+- Fail on config error [\#302](https://github.com/AbsaOSS/k8gb/pull/302) ([kuritka](https://github.com/kuritka))
+- bump k3d-action to v 1.2.0 [\#295](https://github.com/AbsaOSS/k8gb/pull/295) ([kuritka](https://github.com/kuritka))
+- Switch to coredns with DNSendpoint plugin [\#292](https://github.com/AbsaOSS/k8gb/pull/292) ([k0da](https://github.com/k0da))
+- Additional chart tweaks for ArtifactHub [\#291](https://github.com/AbsaOSS/k8gb/pull/291) ([somaritane](https://github.com/somaritane))
+- Trying to please ArtifactHub markdown render [\#290](https://github.com/AbsaOSS/k8gb/pull/290) ([somaritane](https://github.com/somaritane))
+- Add artifact hub badge [\#288](https://github.com/AbsaOSS/k8gb/pull/288) ([ytsarev](https://github.com/ytsarev))
+- README: Replaced screenshot with code excerpt [\#287](https://github.com/AbsaOSS/k8gb/pull/287) ([somaritane](https://github.com/somaritane))
+- Offline v0.7.4 release notes [\#285](https://github.com/AbsaOSS/k8gb/pull/285) ([ytsarev](https://github.com/ytsarev))
+
 ## [v0.7.4](https://github.com/absaoss/k8gb/tree/v0.7.4) (2021-02-05)
 
 [Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.2...v0.7.4)
@@ -98,6 +129,7 @@
 - regarding Helm Best Practices move CRDs from /templates/crds to /crds [\#209](https://github.com/AbsaOSS/k8gb/pull/209) ([kuritka](https://github.com/kuritka))
 - Makefile changes on demand [\#208](https://github.com/AbsaOSS/k8gb/pull/208) ([kuritka](https://github.com/kuritka))
 - Changelog for v0.7.1 [\#206](https://github.com/AbsaOSS/k8gb/pull/206) ([ytsarev](https://github.com/ytsarev))
+- Make diagram image clickable for enlargement [\#196](https://github.com/AbsaOSS/k8gb/pull/196) ([ytsarev](https://github.com/ytsarev))
 
 ## [v0.7.1](https://github.com/absaoss/k8gb/tree/v0.7.1) (2020-11-23)
 
@@ -123,7 +155,6 @@
 - Simplify Makefile [\#201](https://github.com/AbsaOSS/k8gb/pull/201) ([kuritka](https://github.com/kuritka))
 - use AbsaOSS/gopkg  [\#199](https://github.com/AbsaOSS/k8gb/pull/199) ([kuritka](https://github.com/kuritka))
 - switch to golangci-lint [\#198](https://github.com/AbsaOSS/k8gb/pull/198) ([kuritka](https://github.com/kuritka))
-- Make diagram image clickable for enlargement [\#196](https://github.com/AbsaOSS/k8gb/pull/196) ([ytsarev](https://github.com/ytsarev))
 - Fix last 404 [\#195](https://github.com/AbsaOSS/k8gb/pull/195) ([ytsarev](https://github.com/ytsarev))
 - Use absolute URLs in case of file reference [\#194](https://github.com/AbsaOSS/k8gb/pull/194) ([ytsarev](https://github.com/ytsarev))
 - Publish CHANGELOG.md to Github Pages [\#193](https://github.com/AbsaOSS/k8gb/pull/193) ([ytsarev](https://github.com/ytsarev))
@@ -201,7 +232,6 @@
 - Fix ingress nginx failure in local env and pipelines [\#152](https://github.com/AbsaOSS/k8gb/pull/152) ([ytsarev](https://github.com/ytsarev))
 - Fix code markup in the readme [\#150](https://github.com/AbsaOSS/k8gb/pull/150) ([ytsarev](https://github.com/ytsarev))
 - Remove unnecessary infoblox variables from the guide [\#148](https://github.com/AbsaOSS/k8gb/pull/148) ([ytsarev](https://github.com/ytsarev))
-- An attempt to create step-by-step howto [\#146](https://github.com/AbsaOSS/k8gb/pull/146) ([ytsarev](https://github.com/ytsarev))
 - Update demo application version [\#145](https://github.com/AbsaOSS/k8gb/pull/145) ([ytsarev](https://github.com/ytsarev))
 - Increase test app installation timeout [\#143](https://github.com/AbsaOSS/k8gb/pull/143) ([ytsarev](https://github.com/ytsarev))
 - Switch back to upstream releases [\#142](https://github.com/AbsaOSS/k8gb/pull/142) ([ytsarev](https://github.com/ytsarev))
@@ -216,6 +246,7 @@
 
 **Merged pull requests:**
 
+- An attempt to create step-by-step howto [\#146](https://github.com/AbsaOSS/k8gb/pull/146) ([ytsarev](https://github.com/ytsarev))
 - Document currently tested configuration [\#140](https://github.com/AbsaOSS/k8gb/pull/140) ([ytsarev](https://github.com/ytsarev))
 - Mass rebranding to K8GB [\#139](https://github.com/AbsaOSS/k8gb/pull/139) ([ytsarev](https://github.com/ytsarev))
 - Mass rebranding to KGB [\#137](https://github.com/AbsaOSS/k8gb/pull/137) ([ytsarev](https://github.com/ytsarev))
@@ -225,12 +256,19 @@
 
 ## [v0.6.2](https://github.com/absaoss/k8gb/tree/v0.6.2) (2020-05-20)
 
-[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.6.0...v0.6.2)
+[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.6.1...v0.6.2)
 
 **Merged pull requests:**
 
 - Fix helm installation smoke test [\#130](https://github.com/AbsaOSS/k8gb/pull/130) ([ytsarev](https://github.com/ytsarev))
 - Fix issues with public release [\#128](https://github.com/AbsaOSS/k8gb/pull/128) ([ytsarev](https://github.com/ytsarev))
+
+## [v0.6.1](https://github.com/absaoss/k8gb/tree/v0.6.1) (2020-05-20)
+
+[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.6.0...v0.6.1)
+
+**Merged pull requests:**
+
 - Release 0.6.1 [\#127](https://github.com/AbsaOSS/k8gb/pull/127) ([ytsarev](https://github.com/ytsarev))
 - Simplify versioning process [\#126](https://github.com/AbsaOSS/k8gb/pull/126) ([ytsarev](https://github.com/ytsarev))
 
