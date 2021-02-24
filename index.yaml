@@ -8,11 +8,62 @@ entries:
           name: gslb
           displayName: Gslb
           description: Gslb resource for global load balancing strategy configuration
+      artifacthub.io/crdsExamples: |
+        - apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metada:
+            name: test-gslb-failover
+            namespace: test-gslb
+          spec:
+            ingress:
+              rules:
+                - host: failover.test.k8gb.io # Desired GSLB enabled FQDN
+                  http:
+                    paths:
+                    - backend:
+                        serviceName: frontend-podinfo # Service name to enable GSLB for
+                        servicePort: http
+                      path: /
+            strategy:
+              type: failover # Global load balancing strategy
+              primaryGeoTag: eu-west-1 # Primary cluster geo tag
+      artifacthub.io/operator: "true"
+      artifacthub.io/operatorCapabilities: Seamless Upgrades
+    apiVersion: v2
+    appVersion: v0.7.5
+    created: "2021-02-24T19:20:47.993498647Z"
+    dependencies:
+    - name: coredns
+      repository: https://coredns.github.io/helm
+      version: 1.14.0
+    description: A Helm chart for Kubernetes Global Balancer
+    digest: c581eec10137d7e519fb62c2ac3f07b166cb6a195b1989e89246c32e53c6451e
+    home: https://www.k8gb.io/
+    keywords:
+    - gslb
+    - dns-lb
+    - kuberneters-global-balancer
+    - kubernetes-operator
+    - balancer
+    name: k8gb
+    sources:
+    - https://github.com/AbsaOSS/k8gb
+    type: application
+    urls:
+    - charts/k8gb-v0.7.5.tgz
+    version: v0.7.5
+  - annotations:
+      artifacthub.io/crds: |
+        - kind: Gslb
+          version: v1beta1
+          name: gslb
+          displayName: Gslb
+          description: Gslb resource for global load balancing strategy configuration
       artifacthub.io/operator: "true"
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.4
-    created: "2021-02-05T13:02:49.896273+01:00"
+    created: "2021-02-24T19:20:47.991330116Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -29,7 +80,7 @@ entries:
     version: v0.7.4
   - apiVersion: v2
     appVersion: 0.7.2
-    created: "2021-02-05T13:02:49.892803+01:00"
+    created: "2021-02-24T19:20:47.988245671Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -44,4 +95,4 @@ entries:
     urls:
     - charts/k8gb-0.7.2.tgz
     version: 0.7.2
-generated: "2021-02-05T13:02:49.887326+01:00"
+generated: "2021-02-24T19:20:47.985014323Z"
