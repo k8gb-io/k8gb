@@ -150,4 +150,3 @@ func assertDNSEndpointLabel(t *testing.T, options *k8s.KubectlOptions, label str
 	t.Helper()
 	k8s.RunKubectl(t, options, "get", "dnsendpoint", "-l", label)
 }
-

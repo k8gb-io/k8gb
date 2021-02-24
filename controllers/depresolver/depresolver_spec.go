@@ -2,6 +2,7 @@ package depresolver
 
 import (
 	"context"
+	"reflect"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 )
@@ -11,28 +12,27 @@ var predefinedStrategy = k8gbv1beta1.Strategy{
 	SplitBrainThresholdSeconds: 300,
 }
 
-// ResolveGslbSpec executes once during reconciliation. At first cycle it reads
-// omitempty properties and attach predefined values in case they are not defined.
-// ResolveGslbSpec returns error if any input is invalid
+// ResolveGslbSpec fills Gslb by spec values. It executes always, when gslb is initialised.
+// If spec value is not defined, it will use the default value. Function returns error if input is invalid.
 func (dr *DependencyResolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1beta1.Gslb) error {
-	dr.onceSpec.Do(func() {
-		strategy := &gslb.Spec.Strategy
+	if !reflect.DeepEqual(gslb.Spec, dr.spec) {
 		// set predefined values if missing in the yaml
-		if strategy.DNSTtlSeconds == 0 {
-			strategy.DNSTtlSeconds = predefinedStrategy.DNSTtlSeconds
+		if gslb.Spec.Strategy.DNSTtlSeconds == 0 {
+			gslb.Spec.Strategy.DNSTtlSeconds = predefinedStrategy.DNSTtlSeconds
 		}
-		if strategy.SplitBrainThresholdSeconds == 0 {
-			strategy.SplitBrainThresholdSeconds = predefinedStrategy.SplitBrainThresholdSeconds
+		if gslb.Spec.Strategy.SplitBrainThresholdSeconds == 0 {
+			gslb.Spec.Strategy.SplitBrainThresholdSeconds = predefinedStrategy.SplitBrainThresholdSeconds
 		}
-		dr.errorSpec = dr.validateSpec(strategy)
+		dr.errorSpec = dr.validateSpec(gslb.Spec.Strategy)
 		if dr.errorSpec == nil {
 			dr.errorSpec = dr.client.Update(ctx, gslb)
 		}
-	})
+		dr.spec = gslb.Spec
+	}
 	return dr.errorSpec
 }
 
-func (dr *DependencyResolver) validateSpec(strategy *k8gbv1beta1.Strategy) (err error) {
+func (dr *DependencyResolver) validateSpec(strategy k8gbv1beta1.Strategy) (err error) {
 	err = field("DNSTtlSeconds", strategy.DNSTtlSeconds).isHigherOrEqualToZero().err
 	if err != nil {
 		return

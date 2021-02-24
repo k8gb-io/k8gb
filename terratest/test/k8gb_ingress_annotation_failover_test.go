@@ -47,9 +47,9 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.type", "failover")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.primaryGeoTag", "eu")
 
-	t.Run ("Broken ingress is not proccessed", func(t *testing.T) {
+	t.Run("Broken ingress is not proccessed", func(t *testing.T) {
 		k8s.KubectlApply(t, options, brokenResourcePath)
-		err := k8s.RunKubectlE(t, options, "get", "gslb","broken-test-gslb-annotation-failover")
+		err := k8s.RunKubectlE(t, options, "get", "gslb", "broken-test-gslb-annotation-failover")
 		require.Error(t, err)
 	})
 }

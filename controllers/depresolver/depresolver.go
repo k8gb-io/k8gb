@@ -9,6 +9,8 @@ package depresolver
 import (
 	"sync"
 
+	"github.com/AbsaOSS/k8gb/api/v1beta1"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -88,9 +90,9 @@ type DependencyResolver struct {
 	client      client.Client
 	config      *Config
 	onceConfig  sync.Once
-	onceSpec    sync.Once
 	errorConfig error
 	errorSpec   error
+	spec        v1beta1.GslbSpec
 }
 
 // NewDependencyResolver returns a new depresolver.DependencyResolver
