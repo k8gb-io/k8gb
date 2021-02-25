@@ -39,8 +39,6 @@ coredns:
     - zone: .
     port: 53
     plugins:
-    - name: cache
-      parameters: 30
     - name: errors
     # Serves a /health endpoint on :8080, required for livenessProbe
     - name: health
