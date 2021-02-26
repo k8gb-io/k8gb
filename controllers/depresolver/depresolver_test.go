@@ -102,19 +102,21 @@ func TestResolveSpecWithNegativeFields(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestSpecRunOnce(t *testing.T) {
+func TestSpecRunWhenChanged(t *testing.T) {
 	// arrange
 	cl, gslb := getTestContext("./testdata/filled_omitempty.yaml")
 	ctx := context.Background()
 	resolver := NewDependencyResolver(cl)
 	// act
 	err1 := resolver.ResolveGslbSpec(ctx, gslb)
-	gslb.Spec.Strategy.DNSTtlSeconds = -100
+	gslb.Spec.Strategy.SplitBrainThresholdSeconds = 0
 	err2 := resolver.ResolveGslbSpec(ctx, gslb)
 	// assert
 	assert.NoError(t, err1)
 	// err2 would not be empty
 	assert.NoError(t, err2)
+	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
+	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
 }
 
 func TestResolveConfigWithMultipleInvalidEnv(t *testing.T) {

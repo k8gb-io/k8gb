@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-gslb-failover-simple
+  annotations:
+    k8gb.io/strategy: failover
+    k8gb.io/primary-geotag: "eu"
+spec:
+  rules:
+    - host: failover.cloud.example.com
+      http:
+        paths:
+          - backend:
+              serviceName: frontend-podinfo # Service name to enable GSLB for
+              servicePort: http
+            path: /

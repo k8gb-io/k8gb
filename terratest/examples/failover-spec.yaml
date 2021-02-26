@@ -1,0 +1,19 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: test-gslb-failover-simple
+spec:
+  ingress:
+    rules:
+      - host: terratest-failover.cloud.example.com
+        http:
+          paths:
+          - backend:
+              serviceName: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
+              servicePort: http
+            path: /
+  strategy:
+    type: failover
+    primaryGeoTag: eu
+    splitBrainThresholdSeconds: 600
+    dnsTtlSeconds:  60
