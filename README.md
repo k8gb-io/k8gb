@@ -12,6 +12,7 @@
 [![KubeLinter](https://github.com/AbsaOSS/k8gb/workflows/KubeLinter/badge.svg)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3AKubeLinter)
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8gb)](https://artifacthub.io/packages/search?repo=k8gb)
+[![doc.crds.dev](https://img.shields.io/badge/doc-crds-purple)](https://doc.crds.dev/github.com/absaoss/k8gb)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
