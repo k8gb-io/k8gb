@@ -15,6 +15,7 @@ spec:
         app: external-dns-route53
     spec:
       serviceAccountName: external-dns
+      securityContext: {{- toYaml .Values.externaldns.securityContext | nindent 8 }}
       containers:
       - name: external-dns
         image: {{ .Values.externaldns.image }}
@@ -35,8 +36,5 @@ spec:
             memory: "128Mi"
             cpu: "500m"
         securityContext:
-          fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
-          runAsUser: 1000
-          runAsNonRoot: true
           readOnlyRootFilesystem: true
 {{ end }}
