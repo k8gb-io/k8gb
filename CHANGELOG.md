@@ -1,5 +1,31 @@
 # Changelog
 
+## [v0.7.6](https://github.com/absaoss/k8gb/tree/v0.7.6) (2021-03-01)
+
+[Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.5...v0.7.6)
+
+**Fixed bugs:**
+
+- edgeDNS external-dns pods are failing to start since v0.7.5 [\#328](https://github.com/AbsaOSS/k8gb/issues/328)
+- "Split brain TXT record expired the time threshold: \(0s\)"  when `gslb` CR gets recreated [\#317](https://github.com/AbsaOSS/k8gb/issues/317)
+
+**Closed issues:**
+
+- \[helm chart\] fsGroup not a valid securityContext field [\#293](https://github.com/AbsaOSS/k8gb/issues/293)
+
+**Merged pull requests:**
+
+- Release v0.7.6 preparation [\#333](https://github.com/AbsaOSS/k8gb/pull/333) ([somaritane](https://github.com/somaritane))
+- Make k8gb demo curl script ready for local invocation [\#332](https://github.com/AbsaOSS/k8gb/pull/332) ([ytsarev](https://github.com/ytsarev))
+- Bring back external-dns service account [\#329](https://github.com/AbsaOSS/k8gb/pull/329) ([k0da](https://github.com/k0da))
+- Solve fsGroup issue [\#327](https://github.com/AbsaOSS/k8gb/pull/327) ([ytsarev](https://github.com/ytsarev))
+- Update absaoss/k8s\_crd CoreDNS plugin to v0.0.2 [\#326](https://github.com/AbsaOSS/k8gb/pull/326) ([k0da](https://github.com/k0da))
+- Doc crds badge [\#325](https://github.com/AbsaOSS/k8gb/pull/325) ([ytsarev](https://github.com/ytsarev))
+- Fix \#317, depresolver load new values when GSLB recreated [\#322](https://github.com/AbsaOSS/k8gb/pull/322) ([kuritka](https://github.com/kuritka))
+- Bump github.com/miekg/dns from 1.1.39 to 1.1.40 [\#321](https://github.com/AbsaOSS/k8gb/pull/321) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Offline v0.7.5 release notes [\#320](https://github.com/AbsaOSS/k8gb/pull/320) ([somaritane](https://github.com/somaritane))
+- disable CoreDNS cache [\#315](https://github.com/AbsaOSS/k8gb/pull/315) ([k0da](https://github.com/k0da))
+
 ## [v0.7.5](https://github.com/absaoss/k8gb/tree/v0.7.5) (2021-02-24)
 
 [Full Changelog](https://github.com/absaoss/k8gb/compare/v0.7.4...v0.7.5)
@@ -129,7 +155,6 @@
 - regarding Helm Best Practices move CRDs from /templates/crds to /crds [\#209](https://github.com/AbsaOSS/k8gb/pull/209) ([kuritka](https://github.com/kuritka))
 - Makefile changes on demand [\#208](https://github.com/AbsaOSS/k8gb/pull/208) ([kuritka](https://github.com/kuritka))
 - Changelog for v0.7.1 [\#206](https://github.com/AbsaOSS/k8gb/pull/206) ([ytsarev](https://github.com/ytsarev))
-- Make diagram image clickable for enlargement [\#196](https://github.com/AbsaOSS/k8gb/pull/196) ([ytsarev](https://github.com/ytsarev))
 
 ## [v0.7.1](https://github.com/absaoss/k8gb/tree/v0.7.1) (2020-11-23)
 
@@ -155,10 +180,10 @@
 - Simplify Makefile [\#201](https://github.com/AbsaOSS/k8gb/pull/201) ([kuritka](https://github.com/kuritka))
 - use AbsaOSS/gopkg  [\#199](https://github.com/AbsaOSS/k8gb/pull/199) ([kuritka](https://github.com/kuritka))
 - switch to golangci-lint [\#198](https://github.com/AbsaOSS/k8gb/pull/198) ([kuritka](https://github.com/kuritka))
+- Make diagram image clickable for enlargement [\#196](https://github.com/AbsaOSS/k8gb/pull/196) ([ytsarev](https://github.com/ytsarev))
 - Fix last 404 [\#195](https://github.com/AbsaOSS/k8gb/pull/195) ([ytsarev](https://github.com/ytsarev))
 - Use absolute URLs in case of file reference [\#194](https://github.com/AbsaOSS/k8gb/pull/194) ([ytsarev](https://github.com/ytsarev))
 - Publish CHANGELOG.md to Github Pages [\#193](https://github.com/AbsaOSS/k8gb/pull/193) ([ytsarev](https://github.com/ytsarev))
-- Integrate depresolver [\#192](https://github.com/AbsaOSS/k8gb/pull/192) ([kuritka](https://github.com/kuritka))
 - Include CONTRIBUTING.md into gh-pages publishing [\#190](https://github.com/AbsaOSS/k8gb/pull/190) ([ytsarev](https://github.com/ytsarev))
 - Github Workflow to publish documentation [\#189](https://github.com/AbsaOSS/k8gb/pull/189) ([ytsarev](https://github.com/ytsarev))
 
@@ -180,6 +205,7 @@
 
 **Merged pull requests:**
 
+- Integrate depresolver [\#192](https://github.com/AbsaOSS/k8gb/pull/192) ([kuritka](https://github.com/kuritka))
 - Fix Helm release pipeline [\#188](https://github.com/AbsaOSS/k8gb/pull/188) ([ytsarev](https://github.com/ytsarev))
 - Commit 'offline' Changelog [\#187](https://github.com/AbsaOSS/k8gb/pull/187) ([ytsarev](https://github.com/ytsarev))
 - Provide diagram of k8gb internal components [\#186](https://github.com/AbsaOSS/k8gb/pull/186) ([ytsarev](https://github.com/ytsarev))
@@ -193,10 +219,10 @@
 - Simplify values.yaml [\#177](https://github.com/AbsaOSS/k8gb/pull/177) ([ytsarev](https://github.com/ytsarev))
 - Isolate controller tests [\#176](https://github.com/AbsaOSS/k8gb/pull/176) ([kuritka](https://github.com/kuritka))
 - gosec; ignore generated code [\#174](https://github.com/AbsaOSS/k8gb/pull/174) ([kuritka](https://github.com/kuritka))
-- Extending DepResolver [\#173](https://github.com/AbsaOSS/k8gb/pull/173) ([kuritka](https://github.com/kuritka))
 - Route53 support [\#172](https://github.com/AbsaOSS/k8gb/pull/172) ([ytsarev](https://github.com/ytsarev))
 - Fix external-dns SA definition [\#171](https://github.com/AbsaOSS/k8gb/pull/171) ([ytsarev](https://github.com/ytsarev))
 - Initial configuration layout for Route53 support [\#169](https://github.com/AbsaOSS/k8gb/pull/169) ([ytsarev](https://github.com/ytsarev))
+- Upgrade to operator-sdk 1.0 [\#167](https://github.com/AbsaOSS/k8gb/pull/167) ([ytsarev](https://github.com/ytsarev))
 
 ## [v0.6.6](https://github.com/absaoss/k8gb/tree/v0.6.6) (2020-10-05)
 
@@ -208,7 +234,7 @@
 
 **Merged pull requests:**
 
-- Upgrade to operator-sdk 1.0 [\#167](https://github.com/AbsaOSS/k8gb/pull/167) ([ytsarev](https://github.com/ytsarev))
+- Extending DepResolver [\#173](https://github.com/AbsaOSS/k8gb/pull/173) ([kuritka](https://github.com/kuritka))
 - Switch back to upstream etcd-operator chart [\#163](https://github.com/AbsaOSS/k8gb/pull/163) ([ytsarev](https://github.com/ytsarev))
 
 ## [v0.6.5](https://github.com/absaoss/k8gb/tree/v0.6.5) (2020-08-03)
@@ -232,6 +258,7 @@
 - Fix ingress nginx failure in local env and pipelines [\#152](https://github.com/AbsaOSS/k8gb/pull/152) ([ytsarev](https://github.com/ytsarev))
 - Fix code markup in the readme [\#150](https://github.com/AbsaOSS/k8gb/pull/150) ([ytsarev](https://github.com/ytsarev))
 - Remove unnecessary infoblox variables from the guide [\#148](https://github.com/AbsaOSS/k8gb/pull/148) ([ytsarev](https://github.com/ytsarev))
+- An attempt to create step-by-step howto [\#146](https://github.com/AbsaOSS/k8gb/pull/146) ([ytsarev](https://github.com/ytsarev))
 - Update demo application version [\#145](https://github.com/AbsaOSS/k8gb/pull/145) ([ytsarev](https://github.com/ytsarev))
 - Increase test app installation timeout [\#143](https://github.com/AbsaOSS/k8gb/pull/143) ([ytsarev](https://github.com/ytsarev))
 - Switch back to upstream releases [\#142](https://github.com/AbsaOSS/k8gb/pull/142) ([ytsarev](https://github.com/ytsarev))
@@ -246,7 +273,6 @@
 
 **Merged pull requests:**
 
-- An attempt to create step-by-step howto [\#146](https://github.com/AbsaOSS/k8gb/pull/146) ([ytsarev](https://github.com/ytsarev))
 - Document currently tested configuration [\#140](https://github.com/AbsaOSS/k8gb/pull/140) ([ytsarev](https://github.com/ytsarev))
 - Mass rebranding to K8GB [\#139](https://github.com/AbsaOSS/k8gb/pull/139) ([ytsarev](https://github.com/ytsarev))
 - Mass rebranding to KGB [\#137](https://github.com/AbsaOSS/k8gb/pull/137) ([ytsarev](https://github.com/ytsarev))
@@ -367,6 +393,7 @@
 - Split brain handling [\#44](https://github.com/AbsaOSS/k8gb/pull/44) ([ytsarev](https://github.com/ytsarev))
 - Disable `external-dns` ownership for local coredns [\#43](https://github.com/AbsaOSS/k8gb/pull/43) ([ytsarev](https://github.com/ytsarev))
 - Quote geo tag declaration [\#42](https://github.com/AbsaOSS/k8gb/pull/42) ([ytsarev](https://github.com/ytsarev))
+- Multi node local kind cluster [\#37](https://github.com/AbsaOSS/k8gb/pull/37) ([ytsarev](https://github.com/ytsarev))
 
 ## [v0.5.1](https://github.com/absaoss/k8gb/tree/v0.5.1) (2020-02-02)
 
@@ -375,7 +402,6 @@
 **Merged pull requests:**
 
 - CRUD gslb zone delegation in infoblox [\#39](https://github.com/AbsaOSS/k8gb/pull/39) ([ytsarev](https://github.com/ytsarev))
-- Multi node local kind cluster [\#37](https://github.com/AbsaOSS/k8gb/pull/37) ([ytsarev](https://github.com/ytsarev))
 - Initial Edge DNS support  [\#36](https://github.com/AbsaOSS/k8gb/pull/36) ([ytsarev](https://github.com/ytsarev))
 - Use `podinfo` as example test app [\#35](https://github.com/AbsaOSS/k8gb/pull/35) ([ytsarev](https://github.com/ytsarev))
 - Enable periodic reconciliation [\#34](https://github.com/AbsaOSS/k8gb/pull/34) ([ytsarev](https://github.com/ytsarev))
