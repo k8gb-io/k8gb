@@ -109,3 +109,6 @@ chart/k8gb/charts/*.tgz
 
 # Ignore testing kubeconfigs
 kubeconfig*
+
+# Ignore changes from github_changelog_generator action
+changes
