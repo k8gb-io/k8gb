@@ -27,8 +27,37 @@ import (
 
 	"github.com/AbsaOSS/k8gb/api/v1beta1"
 
+	"github.com/rs/zerolog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+// LogFormat specifies how the logger prints values
+type LogFormat int8
+
+const (
+	// JSON prints messages as single json record
+	JSON LogFormat = 1 << iota
+	// Simple prints messages in human readable way
+	Simple
+	// Unrecognised, returned in situation when format is not recognised
+	Unrecognised
+)
+
+const (
+	json         = "json"
+	simple       = "simple"
+	unrecognised = "unrecognised"
+)
+
+func (f LogFormat) String() string {
+	switch f {
+	case JSON:
+		return json
+	case Simple:
+		return simple
+	}
+	return unrecognised
+}
 
 // EdgeDNSType specifies to which edge DNS is k8gb connecting
 type EdgeDNSType int
@@ -44,8 +73,17 @@ const (
 	DNSTypeNS1
 )
 
+// Log configuration
+type Log struct {
+	// Level [panic, fatal, error,warn,info,debug,trace], defines level of logger, default: info
+	Level zerolog.Level
+	// Format [simple,json] specifies how the logger prints values
+	Format LogFormat
+	// NoColor prints colored output if Format == simple
+	NoColor bool
+}
+
 // Infoblox configuration
-// TODO: consider to make this private after refactor
 type Infoblox struct {
 	// Host
 	Host string
@@ -99,6 +137,8 @@ type Config struct {
 	ns1Enabled bool
 	// CoreDNSExposed flag
 	CoreDNSExposed bool
+	// Log configuration
+	Log Log
 }
 
 // DependencyResolver resolves configuration for GSLB
