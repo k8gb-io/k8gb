@@ -1,0 +1,55 @@
+name: Helm Publish
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: dave-mcconnell/helm-gh-pages-microservices@master
+        with:
+          access-token: ${{ secrets.CR_TOKEN }}
+          source-charts-folder: 'chart'
+          destination-repo: absaoss/k8gb
+          destination-branch: gh-pages
+      - name: Create single node k3s cluster
+        uses: AbsaOSS/k3d-action@v1.3.1
+        with:
+          cluster-name: "test-gslb1"
+          use-default-registry: false
+          args: >-
+            -p "80:80@agent[0]"
+            -p "443:443@agent[0]"
+            -p "5053:53/udp@agent[0]"
+            --agents 1
+            --no-lb
+            --network k3d-action-bridge-network
+            --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
+      - name: Smoke test helm installation
+        run: |
+          helm repo add k8gb https://absaoss.github.io/k8gb/
+          helm repo update
+          helm -n k8gb upgrade -i k8gb k8gb/k8gb --wait --create-namespace --version=$(make version)
+      - uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          project: k8gb
+      - name: Commit changelog
+        run: |
+          git config user.name 'Github Action'
+          git config user.email 'action@users.noreply.github.com'
+          git add CHANGELOG.md
+          git commit -m "Update Offline Changelog"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "Update Offline Changelog"
+          branch: offline_changelog
+          delete-branch: true
+          token: ${{ secrets.GITHUB_TOKEN }}

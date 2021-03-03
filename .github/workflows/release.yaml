@@ -1,49 +1,41 @@
-name: Helm Publish
+name: Release
 
 on:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - "v*"
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-20.04
+    env:
+      DOCKER_CLI_EXPERIMENTAL: "enabled"
     steps:
-      - uses: actions/checkout@v1
-      - name: Install golang linting tools
-        run: GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.32.0
-      - name: Operator image build and push
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Get previous tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1.0.1
+        id: previoustag
+      - uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          project: k8gb
+          sinceTag: ${{ steps.previoustag.outputs.previous-tag }}
+          output: changes
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+      - name: Login to Dockerhub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist --release-notes=changes
         env:
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_CLI_EXPERIMENTAL: "enabled"
-        run: |
-          export PATH=~/go/bin:$PATH
-          docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
-          make docker-build-multi
-          make docker-push-multi
-          make docker-manifest
-      - uses: dave-mcconnell/helm-gh-pages-microservices@master
-        with:
-          access-token: ${{ secrets.CR_TOKEN }}
-          source-charts-folder: 'chart'
-          destination-repo: absaoss/k8gb
-          destination-branch: gh-pages
-      - name: Create single node k3s cluster
-        uses: AbsaOSS/k3d-action@v1.3.1
-        with:
-          cluster-name: "test-gslb1"
-          use-default-registry: false
-          args: >-
-            -p "80:80@agent[0]"
-            -p "443:443@agent[0]"
-            -p "5053:53/udp@agent[0]"
-            --agents 1
-            --no-lb
-            --network k3d-action-bridge-network
-            --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
-      - name: Smoke test helm installation
-        run: |
-          helm repo add k8gb https://absaoss.github.io/k8gb/
-          helm repo update
-          helm -n k8gb upgrade -i k8gb k8gb/k8gb --wait --create-namespace --version=$(make version)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
