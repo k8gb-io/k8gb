@@ -113,6 +113,13 @@ k8gb is very well tested with the following environment options
 <a name="clarify"></a>* We only mention solutions where we have tested and verified a k8gb installation.
 If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
 
+## Presentations Featuring k8gb
+
+* Demo at Kubernetes SIG Multicluster<br>
+[![](http://img.youtube.com/vi/jeUeRQM-ZyM/0.jpg)](http://www.youtube.com/watch?v=jeUeRQM-ZyM "Kubernetes SIG Multicluster")
+
+* OpenShift Commons Briefings<br>
+[![](http://img.youtube.com/vi/5DhO9C2NCrk/0.jpg)](http://www.youtube.com/watch?v=5DhO9C2NCrk "OpenShift Commons Briefings")
 
 ## Contributing
 
