@@ -17,4 +17,5 @@ jobs:
         id: kube-lint-repo
         uses: stackrox/kube-linter-action@v1.0.0
         with:
+          config: .kube-linter.yaml
           directory: chart
