@@ -263,7 +263,7 @@ start-test-app:
 
 # run tests
 .PHONY: test
-test: lint
+test: license-headers lint
 	$(call generate)
 	$(call manifest)
 	go test ./... -coverprofile cover.out
@@ -287,6 +287,10 @@ uninstall:
 	$(call manifest)
 	$(call install-kustomize-if-not-exists)
 	$(KUSTOMIZE_PATH) build config/crd | kubectl delete -f -
+
+.PHONY: license-headers
+license-headers:
+	./hack/insert_headers.sh
 
 .PHONY: version
 version:
