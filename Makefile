@@ -263,7 +263,7 @@ start-test-app:
 
 # run tests
 .PHONY: test
-test: lint
+test: license-headers lint
 	$(call generate)
 	$(call manifest)
 	go test ./... -coverprofile cover.out

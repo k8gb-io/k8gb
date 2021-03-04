@@ -1,6 +1,6 @@
 for f in $(find . -name '*.go'); do
-  if grep "Apache License, Version 2.0" $f; then
-      echo "Skipping $f"
+  if grep -q "Apache License, Version 2.0" $f; then
+      echo "License header is already present. Skipping $f"
       continue
   fi
   echo "Adding header to $f"
