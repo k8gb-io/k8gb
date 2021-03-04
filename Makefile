@@ -288,6 +288,10 @@ uninstall:
 	$(call install-kustomize-if-not-exists)
 	$(KUSTOMIZE_PATH) build config/crd | kubectl delete -f -
 
+.PHONY: license-headers
+license-headers:
+	./hack/insert_headers.sh
+
 .PHONY: version
 version:
 	@echo $(VERSION)
