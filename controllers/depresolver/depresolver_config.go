@@ -18,8 +18,10 @@ package depresolver
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/AbsaOSS/gopkg/env"
+	"github.com/rs/zerolog"
 )
 
 // Environment variables keys
@@ -44,6 +46,9 @@ const (
 	OverrideFakeInfobloxKey        = "FAKE_INFOBLOX"
 	K8gbNamespaceKey               = "POD_NAMESPACE"
 	CoreDNSExposedKey              = "COREDNS_EXPOSED"
+	LogLevelKey                    = "LOG_LEVEL"
+	LogFormatKey                   = "LOG_FORMAT"
+	LogNoColorKey                  = "LOG_NO_COLOR"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -70,6 +75,9 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Infoblox.HTTPRequestTimeout, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPRequestTimeoutKey, 20)
 		dr.config.Override.FakeDNSEnabled = env.GetEnvAsBoolOrFallback(OverrideWithFakeDNSKey, false)
 		dr.config.Override.FakeInfobloxEnabled = env.GetEnvAsBoolOrFallback(OverrideFakeInfobloxKey, false)
+		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
+		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, simple)))
+		dr.config.Log.NoColor = env.GetEnvAsBoolOrFallback(LogNoColorKey, true)
 		dr.errorConfig = dr.validateConfig(dr.config)
 		dr.config.EdgeDNSType = getEdgeDNSType(dr.config)
 	})
@@ -77,6 +85,14 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 }
 
 func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
+	if config.Log.Level == zerolog.NoLevel {
+		return fmt.Errorf("invalid %s, allowed values ['','%s','%s','%s','%s','%s','%s','%s']", LogLevelKey,
+			zerolog.TraceLevel, zerolog.DebugLevel, zerolog.InfoLevel, zerolog.WarnLevel, zerolog.FatalLevel,
+			zerolog.DebugLevel, zerolog.PanicLevel)
+	}
+	if config.Log.Format == Unrecognised {
+		return fmt.Errorf("invalid %s, allowed values ['','%s','%s']", LogFormatKey, JSON, Simple)
+	}
 	err = field("k8gbNamespace", config.K8gbNamespace).isNotEmpty().matchRegexp(k8sNamespaceRegex).err
 	if err != nil {
 		return err
@@ -161,4 +177,14 @@ func getEdgeDNSType(config *Config) EdgeDNSType {
 		t -= DNSTypeNoEdgeDNS
 	}
 	return t
+}
+
+func parseLogOutputFormat(value string) LogFormat {
+	switch value {
+	case json:
+		return JSON
+	case simple:
+		return Simple
+	}
+	return Unrecognised
 }
