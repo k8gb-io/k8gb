@@ -224,7 +224,7 @@ ns1-secret:
 .PHONY: install
 install:
 	$(call manifest)
-	$(KUSTOMIZE_PATH) build config/crd | kubectl apply -f -
+	kubectl apply -f chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
 
 # run all linters from .golangci.yaml; see: https://golangci-lint.run/usage/install/#local-installation
 .PHONY: lint
@@ -410,7 +410,7 @@ define generate
 endef
 
 define manifest
-	$(call controller-gen,crd:crdVersions=v1 paths="./..." output:crd:artifacts:config=config/crd/bases)
+	$(call controller-gen,crd:crdVersions=v1 paths="./..." output:crd:artifacts:config=chart/k8gb/templates/)
 endef
 
 # function retrieves controller-gen path or installs controller-gen@v3.0.0 and retrieve new path in case it is not installed
@@ -452,7 +452,7 @@ endef
 define debug
 	$(call manifest)
 	kubectl apply -f deploy/crds/test-namespace.yaml
-	kubectl apply -f ./deploy/crds/k8gb.absa.oss_gslbs_crd.yaml
+	kubectl apply -f ./chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
 	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml
 	dlv $1
 endef
