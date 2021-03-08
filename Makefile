@@ -410,7 +410,7 @@ define generate
 endef
 
 define manifest
-	$(call controller-gen,crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases)
+	$(call controller-gen,crd:crdVersions=v1 paths="./..." output:crd:artifacts:config=config/crd/bases)
 endef
 
 # function retrieves controller-gen path or installs controller-gen@v3.0.0 and retrieve new path in case it is not installed
@@ -420,7 +420,7 @@ define controller-gen
 endef
 
 define install-controller-gen
-	GO111MODULE=on go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0
+	GO111MODULE=on go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.5.0
 	$(eval CONTROLLER_GEN_PATH = $(GOBIN)/controller-gen)
 endef
 
