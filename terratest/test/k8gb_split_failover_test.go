@@ -138,7 +138,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 
 	t.Run("serviceHealth becomes Healthy after scaling up", func(t *testing.T) {
 
-		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=2")
+		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=1")
 
 		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split.cloud.example.com:Healthy")
 	})

@@ -307,7 +307,7 @@ help: ## Show this help
 define create-local-cluster
 	@echo "\n$(YELLOW)Deploy local cluster $(CYAN)$1 $(NC)"
 	k3d cluster create $1 $2 \
-	--agents 3 --no-lb --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server" --network $(CLUSTER_GSLB_NETWORK)
+	--agents 1 --no-lb --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server" --network $(CLUSTER_GSLB_NETWORK)
 endef
 
 define deploy-local-cluster
