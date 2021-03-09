@@ -127,13 +127,6 @@ deploy-gslb-operator: ## Deploy k8gb operator
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS)
 
-# workaround until https://github.com/crossplaneio/crossplane/issues/1170 solved
-.PHONY: deploy-gslb-operator-14
-deploy-gslb-operator-14:
-	kubectl apply -f deploy/namespace.yaml
-	cd chart/k8gb && helm dependency update
-	helm -n k8gb template k8gb chart/k8gb -f $(VALUES_YAML) | kubectl -n k8gb --validate=false apply -f -
-
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: ## Apply Gslb Custom Resources
 	kubectl apply -f deploy/crds/test-namespace.yaml
