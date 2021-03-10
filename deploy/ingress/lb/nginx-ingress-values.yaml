@@ -1,0 +1,16 @@
+## nginx configuration
+## Ref: https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
+##
+controller:
+  admissionWebhooks:
+    enabled: false
+    patch:
+     enabled: false
+
+  kind: Deployment
+  service:
+    enabled: true
+    type: LoadBalancer
+    ports:
+      http: 80
+      https: 443

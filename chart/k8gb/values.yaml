@@ -45,6 +45,7 @@ coredns:
   servers:
   - zones:
     - zone: .
+      scheme: dns://
     port: 53
     plugins:
     - name: log

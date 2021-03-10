@@ -9,7 +9,7 @@ on:
       - '.spelling'
 
 jobs:
-  upgrade-testing:
+  upgrade-testing-lb:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
@@ -18,13 +18,41 @@ jobs:
         uses: AbsaOSS/k3d-action@v1.3.1
         with:
           cluster-name: "test-gslb1"
-          args: -c k3d/test-gslb1.yaml
+          args: -c k3d/lb/test-gslb1.yaml
 
       - name: Create 2nd k3s Cluster
         uses: AbsaOSS/k3d-action@v1.3.1
         with:
           cluster-name: "test-gslb2"
-          args: -c k3d/test-gslb2.yaml
+          args: -c k3d/lb/test-gslb2.yaml
+
+      - name: K8GB deploy stable
+        run: make deploy-stable
+
+      - name: K8GB deploy-candidate-with-helm
+        run: make deploy-candidate-with-helm
+
+      - name: Terratest
+        run: make terratest
+
+  upgrade-testing-ingress:
+    runs-on: ubuntu-20.04
+    env:
+      COREDNS_TYPE: ingress
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Create 1st k3s Cluster
+        uses: AbsaOSS/k3d-action@v1.3.1
+        with:
+          cluster-name: "test-gslb1"
+          args: -c k3d/ingress/test-gslb1.yaml
+
+      - name: Create 2nd k3s Cluster
+        uses: AbsaOSS/k3d-action@v1.3.1
+        with:
+          cluster-name: "test-gslb2"
+          args: -c k3d/ingress/test-gslb2.yaml
 
       - name: K8GB deploy stable
         run: make deploy-stable
