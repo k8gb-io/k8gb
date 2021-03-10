@@ -55,7 +55,7 @@ func (p *InfobloxProvider) infobloxConnection() (*ibclient.ObjectManager, error)
 		defer func() {
 			err = conn.Logout()
 			if err != nil {
-				p.assistant.Error(err, "Failed to close connection to infoblox")
+				log.Err(err).Msg("Failed to close connection to infoblox")
 			}
 		}()
 		objMgr = ibclient.NewObjectManager(conn, "ohmyclient", "")
