@@ -76,7 +76,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Override.FakeDNSEnabled = env.GetEnvAsBoolOrFallback(OverrideWithFakeDNSKey, false)
 		dr.config.Override.FakeInfobloxEnabled = env.GetEnvAsBoolOrFallback(OverrideFakeInfobloxKey, false)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
-		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, simple)))
+		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, JSONFormat.String())))
 		dr.config.Log.NoColor = env.GetEnvAsBoolOrFallback(LogNoColorKey, true)
 		dr.errorConfig = dr.validateConfig(dr.config)
 		dr.config.EdgeDNSType = getEdgeDNSType(dr.config)
@@ -90,8 +90,8 @@ func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 			zerolog.TraceLevel, zerolog.DebugLevel, zerolog.InfoLevel, zerolog.WarnLevel, zerolog.FatalLevel,
 			zerolog.DebugLevel, zerolog.PanicLevel)
 	}
-	if config.Log.Format == Unrecognised {
-		return fmt.Errorf("invalid %s, allowed values ['','%s','%s']", LogFormatKey, JSON, Simple)
+	if config.Log.Format == NoFormat {
+		return fmt.Errorf("invalid %s, allowed values ['','%s','%s']", LogFormatKey, JSONFormat, SimpleFormat)
 	}
 	err = field("k8gbNamespace", config.K8gbNamespace).isNotEmpty().matchRegexp(k8sNamespaceRegex).err
 	if err != nil {
@@ -182,9 +182,9 @@ func getEdgeDNSType(config *Config) EdgeDNSType {
 func parseLogOutputFormat(value string) LogFormat {
 	switch value {
 	case json:
-		return JSON
+		return JSONFormat
 	case simple:
-		return Simple
+		return SimpleFormat
 	}
-	return Unrecognised
+	return NoFormat
 }

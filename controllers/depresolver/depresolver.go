@@ -28,32 +28,31 @@ import (
 	"github.com/AbsaOSS/k8gb/api/v1beta1"
 
 	"github.com/rs/zerolog"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // LogFormat specifies how the logger prints values
 type LogFormat int8
 
 const (
-	// JSON prints messages as single json record
-	JSON LogFormat = 1 << iota
-	// Simple prints messages in human readable way
-	Simple
-	// Unrecognised, returned in situation when format is not recognised
-	Unrecognised
+	// JSONFormat prints messages as single json record
+	JSONFormat LogFormat = 1 << iota
+	// SimpleFormat prints messages in human readable way
+	SimpleFormat
+	// NoFormat, returned in situation when format is not recognised
+	NoFormat
 )
 
 const (
 	json         = "json"
 	simple       = "simple"
-	unrecognised = "unrecognised"
+	unrecognised = "noformat"
 )
 
 func (f LogFormat) String() string {
 	switch f {
-	case JSON:
+	case JSONFormat:
 		return json
-	case Simple:
+	case SimpleFormat:
 		return simple
 	}
 	return unrecognised
@@ -143,7 +142,6 @@ type Config struct {
 
 // DependencyResolver resolves configuration for GSLB
 type DependencyResolver struct {
-	client      client.Client
 	config      *Config
 	onceConfig  sync.Once
 	errorConfig error
@@ -152,8 +150,7 @@ type DependencyResolver struct {
 }
 
 // NewDependencyResolver returns a new depresolver.DependencyResolver
-func NewDependencyResolver(client client.Client) *DependencyResolver {
+func NewDependencyResolver() *DependencyResolver {
 	resolver := new(DependencyResolver)
-	resolver.client = client
 	return resolver
 }
