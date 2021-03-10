@@ -1,3 +1,0 @@
-checks:
-  exclude:
-  - "no-extensions-v1beta"
