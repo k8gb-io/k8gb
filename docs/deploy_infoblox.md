@@ -15,16 +15,15 @@ cp chart/k8gb/values.yaml ~/k8gb/eu-cluster.yaml
 ```
 
 * Modify the example configuration. Important parameters described below:
-  * `ingressNamespace` - modify it to the namespace where the Nginx ingress controller is installed. In case of Rancher provisioned cluster it is `ingress-nginx`. If you do not have Nginx ingress preinstalled you can use `make deploy-local-ingress` to install and leave this value as `k8gb`
   * `dnsZone` - this zone will be delegated to the `edgeDNS` in your environment. E.g. `yourzone.edgedns.com`
   * `edgeDNSZone` - this zone will be automatically configured by k8gb to delegate to `dnsZone` and will make k8gb controlled nodes act as authoritative server for this zone. E.g. `edgedns.com`
   * `edgeDNSServer` stable DNS server in your environment that is controlled by edgeDNS provider e.g. Infoblox so k8gb instances will be able to talk to each other through automatically created DNS names
   * `clusterGeoTag` to geographically tag your cluster. We are operating `eu` cluster in this example
   * `extGslbClustersGeoTags` contains Geo tag of the cluster(s) to talk with when k8gb is deployed to multiple clusters. Imagine your second cluster is `us` so we tag it accordingly
-  * `infoblox.enabled: true` to enable automated zone delegation configuration at edgeDNS provider. You don't need it for totally local test and can optionally skip it. Meanwhile in this how-to we will cover a fully operational end-to-end scenario. Support of other provider like Route53 is on our [Roadmap](https://github.com/AbsaOSS/k8gb/issues)
+  * `infoblox.enabled: true` to enable automated zone delegation configuration at edgeDNS provider. You don't need it for local testing and can optionally be skipped. Meanwhile, in this section we will cover a fully operational end-to-end scenario.
 The other parameters do not need to be modified unless you want to do something special. E.g. to use images from private registry
 
-* Export Infoblox related information in the shell. Instead of $ variables use the actual versions
+  * Export Infoblox related information in the shell.
 ```sh
 export WAPI_USERNAME=<WAPI_USERNAME>
 export WAPI_PASSWORD=<WAPI_PASSWORD>
@@ -36,6 +35,9 @@ kubectl create ns k8gb
 make infoblox-secret
 ```
 
+* Expose associated k8gb CoreDNS service for DNS traffic on worker nodes.
+  > Check [this document](./exposing_dns.md) for detailed information.
+
 * Let's deploy k8gb to the first cluster. Most of the helper commands are abstracted by GNU `make`. If you want to look under the hood please check the `Makefile`. In general, standard Kubernetes/Helm commands are used. Point deployment mechanism to your custom `values.yaml`
 ```sh
 make deploy-gslb-operator VALUES_YAML=~/k8gb/eu-cluster.yaml
@@ -45,7 +47,6 @@ make deploy-gslb-operator VALUES_YAML=~/k8gb/eu-cluster.yaml
 ```sh
  kubectl -n k8gb get pod
 NAME                                                       READY   STATUS     RESTARTS   AGE
-external-dns-79d5ccd7fc-4bj74                              1/1     Running    0          39s
 k8gb-76cc56b55-t779s                                       1/1     Running    0          39s
 k8gb-coredns-799984c646-qz88m                              1/1     Running    0          41s
 ```
