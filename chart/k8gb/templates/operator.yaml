@@ -27,7 +27,7 @@ spec:
       containers:
         - name: k8gb
           image: {{ .Values.k8gb.imageRepo }}:{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 1000
             runAsNonRoot: true
