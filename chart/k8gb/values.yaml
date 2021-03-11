@@ -7,7 +7,6 @@ global:
 
 k8gb:
   imageRepo: absaoss/k8gb # image tag is defined in Chart.AppVersion, see Chart.yaml
-  ingressNamespace: "k8gb"
   dnsZone: "cloud.example.com" # dnsZone controlled by gslb
   edgeDNSZone: "example.com" # main zone which would contain gslb zone to delegate
   edgeDNSServer: "1.1.1.1" # use this DNS server as a main resolver to enable cross k8gb DNS based communication
@@ -24,7 +23,6 @@ k8gb:
 externaldns:
   image: k8s.gcr.io/external-dns/external-dns:v0.7.6
   interval: "20s"
-  expose53onWorkers: true # open 53/udp on workers nodes with nginx controller
   securityContext:
     fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
     runAsUser: 1000

@@ -6,9 +6,6 @@ k8gb:
   extGslbClustersGeoTags: "us-east-1" # comma-separated list of external gslb geo tags to pair with
   exposeCoreDNS: true # Create Service type LoadBalancer to expose CoreDNS
 
-externaldns:
-  expose53onWorkers: false # open 53/udp on workers nodes with nginx controller
-
 route53:
   enabled: true
   hostedZoneID: Z<zone-id>

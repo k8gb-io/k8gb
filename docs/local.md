@@ -1,3 +1,4 @@
+<!-- omit in toc -->
 # Local playground for testing and development
 
 - [Environment prerequisites](#environment-prerequisites)
@@ -5,44 +6,47 @@
 - [Verify installation](#verify-installation)
 - [Run integration tests](#run-integration-tests)
 - [Cleaning](#cleaning)
+- [Sample demo](#sample-demo)
+  - [Round Robin](#round-robin)
+  - [Failover](#failover)
 
-#### Environment prerequisites
+## Environment prerequisites
 
- - [install **GO 1.14**](https://golang.org/dl/)
+- [Install **go 1.15**](https://golang.org/dl/)
 
- - [install **GIT**](https://git-scm.com/downloads)
+- [Install **git**](https://git-scm.com/downloads)
 
- - install **gnu-sed** if you don't have it
-    - If you are on a Mac, install sed by Homebrew
+- Install **gnu-sed** if you don't have it. If you are on a Mac, install sed by Homebrew
     ```shell script
     brew install gnu-sed
     ```
 
- - [install **Docker**](https://docs.docker.com/get-docker/)
-    - ensure you are able to push/pull from your docker registry
-    - to run multiple clusters reserve 8GB of memory
+- [Install **Docker**](https://docs.docker.com/get-docker/)
+  > Ensure you are able to push/pull from your docker registry
 
-      ![](/docs/images/docker_settings.png)
+  > To run multiple clusters, reserve 8GB of memory*
+    ![](/docs/images/docker_settings.png)
       <div>
-        <sup>above screenshot is for <strong>Docker for Mac</strong> and that options for other Docker distributions may vary</sup>
+        <sup><i>* above screenshot is provided for <strong>Docker for Mac</strong>, options for other Docker distributions may vary
+        </i></sup>
       </div>
 
- - [install **Kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to operate clusters
+ - [install **kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to operate clusters
 
- - [install **Helm3**](https://helm.sh/docs/intro/install/) to get charts
+ - [install **helm3**](https://helm.sh/docs/intro/install/) to get charts
 
- - [install **k3d**](https://k3d.io/) as tool for running local [k3s](https://k3s.io/) clusters
-    - follow https://k3d.io/#installation
+ - [install **k3d**](https://k3d.io/) as tool for running local [k3s](https://k3s.io/) clusters.<br>
+   > Follow https://k3d.io/#installation
 
 
-#### Running project locally
+## Running project locally
 
 To spin-up a local environment using two k3s clusters and deploy a test application to both clusters, execute the command below:
 ```shell script
 make deploy-full-local-setup
 ```
 
-#### Verify installation
+## Verify installation
 
 If local setup runs well, check if clusters are correctly installed
 
@@ -77,7 +81,7 @@ Run following command and check if you get two json responses.
 curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H "Host:roundrobin.cloud.example.com"
 ```
 
-#### Run integration tests
+## Run integration tests
 
 There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/AbsaOSS/k8gb/tree/master/terratest).
 To check whether everything is running properly execute [terratest](https://terratest.gruntwork.io/) :
@@ -86,7 +90,7 @@ To check whether everything is running properly execute [terratest](https://terr
 make terratest
 ```
 
-#### Cleaning
+## Cleaning
 
 Clean up your local development clusters with
 ```shell script
