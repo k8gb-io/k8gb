@@ -12,7 +12,6 @@ HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 
 CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-cloud-example-com-eu.example.com}'
-GITACTION_IMAGE_REPO ?=registry.localhost:5000/k8gb
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -98,22 +97,21 @@ deploy-full-local-setup: ## Deploy full local multicluster setup
 	$(call create-local-cluster,$(CLUSTER_GSLB1),-p "80:80@agent[0]" -p "443:443@agent[0]" -p "5053:53/udp@agent[0]" )
 	$(call create-local-cluster,$(CLUSTER_GSLB2),-p "81:80@agent[0]" -p "444:443@agent[0]" -p "5054:53/udp@agent[0]" )
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),absaoss/k8gb,)
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),absaoss/k8gb,$(CLUSTER_GSLB2_HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),)
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS))
 
 
 # triggered by terraform GitHub Action. Clusters already exists. GO is not installed yet
 .PHONY: deploy-to-AbsaOSS-k3d-action
 deploy-to-AbsaOSS-k3d-action:
 	@echo "\n$(YELLOW)build k8gb docker and push to registry $(NC)"
-	docker build . -t $(GITACTION_IMAGE_REPO):$(SEMVER)
-	docker push $(GITACTION_IMAGE_REPO):$(SEMVER)
+	docker build . -t $(REPO):$(SEMVER)
 
-	@echo "\n$(YELLOW)Change version in Chart.yaml $(CYAN) $(VERSION) to $(SEMVER)$(NC)"
-	sed -i "s/$(VERSION)/$(SEMVER)/g" chart/k8gb/Chart.yaml
+	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB1)
+	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB2)
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(GITACTION_IMAGE_REPO),)
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(GITACTION_IMAGE_REPO),$(CLUSTER_GSLB2_HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),)
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS))
 
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB2) $(NC)"
 	kubectl get pods -A
@@ -315,7 +313,7 @@ define deploy-local-cluster
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) \
 		--set k8gb.hostAlias.enabled=true \
 		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
-		--set k8gb.imageRepo=$3 $4
+		--set k8gb.imageTag=$3 $4
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update stable https://charts.helm.sh/stable
