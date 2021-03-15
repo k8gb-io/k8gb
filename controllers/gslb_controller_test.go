@@ -27,13 +27,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
-
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
 	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
 	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
@@ -46,7 +46,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -655,7 +654,6 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 	predefinedSettings.reconciler.Config = &customConfig
 	// act
 	_, err := predefinedSettings.reconciler.Reconcile(req)
-	log.Info(fmt.Sprintf("got an error from controller: %s", err))
 	// assert
 	assert.Error(t, err, "expected controller to detect Ingress hostname and edgeDNSZone mismatch")
 	assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone otherdnszone.com"))
@@ -716,7 +714,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	settings.reconciler.Config = &customConfig
 	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
 	// configuration at another time than startup
-	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
+	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
 	settings.reconciler.DNSProvider = f.Provider()
 
 	reconcileAndUpdateGslb(t, settings)
@@ -787,7 +785,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	settings.reconciler.Config = &customConfig
 	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
 	// configuration at another time than startup
-	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig, settings.reconciler.Log)
+	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
 	settings.reconciler.DNSProvider = f.Provider()
 
 	reconcileAndUpdateGslb(t, settings)
@@ -1060,7 +1058,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	if err != nil {
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
 	}
-	// Set the logger to development mode for verbose logs.
+	// Set the log to development mode for verbose logs.
 	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	gslb, err := utils.YamlToGslb(gslbYaml)
 	if err != nil {
@@ -1084,7 +1082,6 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	// Create a GslbReconciler object with the scheme and fake client.
 	r := &GslbReconciler{
 		Client: cl,
-		Log:    ctrl.Log.WithName("setup"),
 		Scheme: s,
 	}
 	r.DepResolver = depresolver.NewDependencyResolver()
@@ -1100,12 +1097,12 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	}
 
 	var f *dns.ProviderFactory
-	f, err = dns.NewDNSProviderFactory(r.Client, *r.Config, r.Log)
+	f, err = dns.NewDNSProviderFactory(r.Client, *r.Config)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)
 	}
 	r.DNSProvider = f.Provider()
-	a := assistant.NewGslbAssistant(r.Client, r.Log, r.Config.K8gbNamespace, r.Config.EdgeDNSServer)
+	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServer)
 	res, err := r.Reconcile(req)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)

@@ -21,16 +21,15 @@ import (
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/AbsaOSS/k8gb/controllers/logging"
 	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
 	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 	// +kubebuilder:scaffold:imports
@@ -59,14 +58,15 @@ func main() {
 
 	resolver := depresolver.NewDependencyResolver()
 	config, err := resolver.ResolveOperatorConfig()
-	// LoggerFactory creates logger ALWAYS - no matter what isn't resolved
-	logger := controllers.NewLogger(config).Get()
+	// Initialize desired log or default log in case of configuration failed.
+	logging.Init(config)
+	log := logging.Logger()
 	if err != nil {
-		logger.Err(err).Msg("can't resolve environment variables")
+		log.Err(err).Msg("can't resolve environment variables")
 		os.Exit(1)
 	}
 
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	ctrl.SetLogger(logging.NewLogrAdapter(log))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             runtimescheme,
@@ -76,18 +76,18 @@ func main() {
 		LeaderElectionID:   "8020e9ff.absa.oss",
 	})
 	if err != nil {
-		logger.Err(err).Msg("unable to start manager")
+		log.Err(err).Msg("unable to start manager")
 		os.Exit(1)
 	}
 
-	logger.Info().Msg("registering components.")
+	log.Info().Msg("registering components.")
 
 	// Add external-dns DNSEndpoints resource
 	// https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md#adding-3rd-party-resources-to-your-operator
 	schemeBuilder := &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}}
 	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
 	if err := schemeBuilder.AddToScheme(mgr.GetScheme()); err != nil {
-		logger.Err(err).Msg("")
+		log.Err(err).Msg("")
 		os.Exit(1)
 	}
 
@@ -95,33 +95,32 @@ func main() {
 		Config:      config,
 		Client:      mgr.GetClient(),
 		DepResolver: resolver,
-		Log:         ctrl.Log.WithName("controllers").WithName("Gslb"),
 		Scheme:      mgr.GetScheme(),
 	}
 
-	logger.Info().Msg("starting DNS provider")
-	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config, reconciler.Log)
+	log.Info().Msg("starting DNS provider")
+	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config)
 	if err != nil {
-		logger.Err(err).Msgf("unable to create factory (%s)", err)
+		log.Err(err).Msgf("unable to create factory (%s)", err)
 		os.Exit(1)
 	}
 	reconciler.DNSProvider = f.Provider()
-	logger.Info().Msgf("provider: %s", reconciler.DNSProvider)
-	logger.Info().Msg("starting metrics")
+	log.Info().Msgf("provider: %s", reconciler.DNSProvider)
+	log.Info().Msg("starting metrics")
 	reconciler.Metrics = metrics.NewPrometheusMetrics(*reconciler.Config)
 	err = reconciler.Metrics.Register()
 	if err != nil {
-		logger.Err(err).Msg("register metrics error")
+		log.Err(err).Msg("register metrics error")
 		os.Exit(1)
 	}
 	if err = reconciler.SetupWithManager(mgr); err != nil {
-		logger.Err(err).Msg("unable to create controller Gslb")
+		log.Err(err).Msg("unable to create controller Gslb")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
-	logger.Info().Msg("starting manager")
+	log.Info().Msg("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		logger.Err(err).Msg("problem running manager")
+		log.Err(err).Msg("problem running manager")
 		os.Exit(1)
 	}
 	reconciler.Metrics.Unregister()
