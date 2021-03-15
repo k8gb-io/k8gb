@@ -1,0 +1,13 @@
+# Ignore everything
+*
+
+# But inject license into these files...
+!Makefile
+!*.go
+!Dockerfile*
+
+# And skip generated files...
+/api/**
+main.go
+gslb_controller.go
+
