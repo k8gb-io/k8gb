@@ -25,8 +25,8 @@ VALUES_YAML ?= chart/k8gb/values.yaml
 PODINFO_IMAGE_REPO ?= stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
-
 CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-cloud-example-com-eu.example.com}'
+LOG_FORMAT ?= simple
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -280,7 +280,7 @@ reset:	destroy-full-local-setup deploy-full-local-setup
 run: lint
 	$(call generate)
 	$(call manifest)
-	go run ./main.go
+	LOG_FORMAT=$(LOG_FORMAT) go run ./main.go
 
 .PHONY: stop-test-app
 stop-test-app:
