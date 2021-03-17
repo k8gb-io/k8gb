@@ -365,6 +365,14 @@ define deploy-local-cluster
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 3.24.0 -f deploy/ingress/$(COREDNS_TYPE)/nginx-ingress-values.yaml
 
+	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
+	$(call wait-for-ingress)
+
+	@echo "\n$(CYAN)$1 $(YELLOW)deployed! $(NC)"
+endef
+
+define deploy-local-apps
+	kubectl config use-context k3d-$1
 	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
