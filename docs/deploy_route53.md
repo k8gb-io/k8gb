@@ -1,34 +1,44 @@
 # AWS based deployment with Route53 integration
 
-Here we provide an example of k8gb deployment in AWS context with Route53 as edgeDNS provider
+Here we provide an example of k8gb deployment in AWS context with Route53 as edgeDNS provider.
 
-## Reference setup
+## Reference Setup
 
 Two EKS clusters in `eu-west-1` and `us-east-1`.
 
 Terraform code for cluster reference setup can be found [here](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53)
 
 Feel free to reuse this code fully or partially and adapt for your existing scenario
-things like IRSA(IAM Roles for Service Accounts)
+things like IRSA(IAM Roles for Service Accounts).
+
+## Install Ingress Controller
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.40.2/deploy/static/provider/aws/deploy.yaml
+```
 
 ## Deploy k8gb
 
-Example `values.yaml` override configs can be found [here](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53/k8gb)
+Example helm configuration files can be found [here](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53/k8gb)
 
-You can use `helm` to deploy stable release from Helm repo
+Modify them to reflect your `dnsZone`, `edgeDNSZone`, valid `hostedZoneID` and `irsaRole` ARN.
+
+Clone k8gb repository and use `helm` with custom values
 
 ```sh
+git clone https://github.com/AbsaOSS/k8gb.git
+cd k8gb
+
 helm repo add k8gb https://www.k8gb.io
-```
+helm repo update
 
-Alternatively, use make target to deploy right from the git repository
+kubectl create ns k8gb
 
-```sh
-make deploy-gslb-operator VALUES_YAML=./docs/examples/route53/k8gb/k8gb-cluster-eu-west-1.yaml
+#switch kubectl context to eu-west-1
+helm -n k8gb upgrade -i k8gb k8gb/k8gb -f ./docs/examples/route53/k8gb/k8gb-cluster-eu-west-1.yaml
 
 #switch kubectl context to us-east-1
-
-make deploy-gslb-operator VALUES_YAML=./docs/examples/route53/k8gb/k8gb-cluster-us-east-1.yaml
+helm -n k8gb upgrade -i k8gb k8gb/k8gb -f ./docs/examples/route53/k8gb/k8gb-cluster-us-east-1.yaml
 ```
 
 ## Test
@@ -42,13 +52,12 @@ cluster, we assume that you switch kubctl context and apply the same command to 
 make deploy-test-apps
 ```
 
-* Modify sample [Gslb CR](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53/k8gb/gslb-failover.yaml) to reflect your
-`dnsZone`, `edgeDNSZone`, valid `hostedZoneID` and `irsaRole` ARN.
+* Modify sample [Gslb CR](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53/k8gb/gslb-failover.yaml) to reflect desired `.spec.ingress.rules[0].host` FQDN
 
 * Apply Gslb CR to *each* cluster
 
 ```sh
-kubectl apply -f examples/route53/k8gb-failover.yaml
+kubectl apply -f ./docs/examples/route53/k8gb-failover.yaml
 ```
 
 * Check Gslb status.
