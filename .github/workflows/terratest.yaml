@@ -42,7 +42,6 @@ jobs:
 
       - name: K8GB deployment
         run: |
-          GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.32.0
           make deploy-to-AbsaOSS-k3d-action
 
       - name: Terratest
