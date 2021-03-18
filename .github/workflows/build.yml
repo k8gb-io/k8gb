@@ -1,4 +1,4 @@
-name: Golang lint and test
+name: Golang lint, golic and test
 on:
   push:
     paths-ignore:
@@ -17,5 +17,9 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.32
+      - name: golic
+        run: |
+          go install github.com/AbsaOSS/golic@v0.4.4
+          golic inject -c "2021 Absa Group Limited" --dry -x
       - name: go test
         run: go test ./...

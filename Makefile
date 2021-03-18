@@ -215,7 +215,7 @@ ifeq (, $(shell which golic))
 	GOLIC_TMP_DIR=$$(mktemp -d) ;\
 	cd $$GOLIC_TMP_DIR ;\
 	go mod init tmp ;\
-	go get github.com/AbsaOSS/golic@v0.3.1 ;\
+	go get github.com/AbsaOSS/golic@v0.4.4 ;\
 	rm -rf $$GOLIC_TMP_DIR ;\
 	}
 GOLIC=$(GOBIN)/golic
@@ -292,7 +292,7 @@ start-test-app:
 
 # run tests
 .PHONY: test
-test: license lint
+test: lint
 	$(call generate)
 	$(call manifest)
 	go test ./... -coverprofile cover.out
