@@ -12,7 +12,7 @@
 
 ## Environment prerequisites
 
-- [Install **go 1.15**](https://golang.org/dl/)
+- [Install **go 1.16**](https://golang.org/dl/)
 
 - [Install **git**](https://git-scm.com/downloads)
 
