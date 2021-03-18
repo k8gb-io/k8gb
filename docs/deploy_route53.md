@@ -32,7 +32,6 @@ cd k8gb
 helm repo add k8gb https://www.k8gb.io
 helm repo update
 
-kubectl create ns k8gb
 
 #switch kubectl context to eu-west-1
 helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/route53/k8gb/k8gb-cluster-eu-west-1.yaml
