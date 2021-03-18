@@ -56,7 +56,7 @@ make deploy-test-apps
 * Apply Gslb CR to *each* cluster
 
 ```sh
-kubectl apply -f ./docs/examples/route53/k8gb-failover.yaml
+kubectl apply -f ./docs/examples/route53/k8gb/gslb-failover.yaml
 ```
 
 * Check Gslb status.
