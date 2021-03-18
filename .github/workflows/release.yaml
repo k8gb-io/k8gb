@@ -14,14 +14,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Get previous tag
-        uses: WyriHaximus/github-action-get-previous-tag@v1.0.1
-        id: previoustag
+      - name: Get tag
+        id: get_tag
+        run: |
+          previous_tag=$(git tag --sort=v:refname | tail -2 | head -1)
+          echo "::set-output name=previous_tag::${previous_tag}"
       - uses: heinrichreimer/github-changelog-generator-action@v2.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           project: k8gb
-          sinceTag: ${{ steps.previoustag.outputs.previous-tag }}
+          sinceTag: ${{ steps.get_tag.outputs.previous_tag }}
           output: changes
       - name: Set up Go
         uses: actions/setup-go@v2
