@@ -5,9 +5,9 @@
 !Makefile
 !*.go
 !Dockerfile*
+!hack/boilerplate.go.txt
 
 # And skip generated files...
 /api/**
 main.go
 gslb_controller.go
-

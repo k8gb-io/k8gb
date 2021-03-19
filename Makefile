@@ -27,6 +27,8 @@ HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-cloud-example-com-eu.example.com}'
 LOG_FORMAT ?= simple
+CONTROLLER_GEN_VERSION  ?= v0.4.1
+GOLIC_VERSION  ?= v0.4.7
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -41,11 +43,8 @@ NO_VALUE ?= no_value
 #		VARIABLES
 ###############################
 PWD ?=  $(shell pwd)
-
 VERSION ?= $(shell helm show chart chart/k8gb/|awk '/appVersion:/ {print $$2}')
-
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
-
 SEMVER ?= $(VERSION)-$(COMMIT_HASH)
 # image URL to use all building/pushing image targets
 IMG ?= $(REPO):$(VERSION)
@@ -67,16 +66,13 @@ ifndef GOBIN
 GOBIN=$(shell go env GOPATH)/bin
 endif
 
-CONTROLLER_GEN_PATH ?= $(shell which controller-gen || echo $(NO_VALUE))
-
 KUSTOMIZE_PATH ?= $(shell which kustomize || echo $(NO_VALUE))
-
 
 ###############################
 #		TARGETS
 ###############################
 
-all: manager
+all: help
 
 .PHONY: clean-test-apps
 clean-test-apps:
@@ -114,7 +110,6 @@ deploy-full-local-setup: ## Deploy full local multicluster setup
 
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS))
-
 
 # triggered by terraform GitHub Action. Clusters already exists. GO is not installed yet
 .PHONY: deploy-to-AbsaOSS-k3d-action
@@ -205,24 +200,6 @@ docker-push:
 docker-test-build-push: test
 	$(call docker-test-build-push)
 
-# find or download golic
-# download golic if necessary
-.PHONY: golic
-golic:
-ifeq (, $(shell which golic))
-	@{ \
-	set -e ;\
-	GOLIC_TMP_DIR=$$(mktemp -d) ;\
-	cd $$GOLIC_TMP_DIR ;\
-	go mod init tmp ;\
-	go get github.com/AbsaOSS/golic@v0.4.4 ;\
-	rm -rf $$GOLIC_TMP_DIR ;\
-	}
-GOLIC=$(GOBIN)/golic
-else
-GOLIC=$(shell which golic)
-endif
-
 .PHONY: init-failover
 init-failover:
 	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml")
@@ -240,8 +217,8 @@ infoblox-secret:
 
 .PHONY: license
 # updates source code with license headers
-license: golic
-	$(GOLIC) inject -c "2021 Absa Group Limited"
+license:
+	$(call golic,-t apache2)
 
 # creates ns1 secret in current cluster
 .PHONY: ns1-secret
@@ -438,15 +415,14 @@ define manifest
 	$(call controller-gen,crd:crdVersions=v1 paths="./..." output:crd:artifacts:config=chart/k8gb/templates/)
 endef
 
-# function retrieves controller-gen path or installs controller-gen@v3.0.0 and retrieve new path in case it is not installed
 define controller-gen
-	@$(if $(filter $(CONTROLLER_GEN_PATH),$(NO_VALUE)),$(call install-controller-gen),)
-	$(CONTROLLER_GEN_PATH) $1
+	@go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
+	$(GOBIN)/controller-gen $1
 endef
 
-define install-controller-gen
-	GO111MODULE=on go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.5.0
-	$(eval CONTROLLER_GEN_PATH = $(GOBIN)/controller-gen)
+define golic
+	@go install github.com/AbsaOSS/golic@$(GOLIC_VERSION)
+	$(GOBIN)/golic inject $1
 endef
 
 # installs kustomize and sets KUSTOMIZE_PATH if is not specified
