@@ -34,6 +34,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      # Hack around until https://github.com/goreleaser/goreleaser/pull/2119 is fixed
+      - name: Operator image build and push
+        run: |
+          export PATH=~/go/bin:$PATH
+          make docker-build-multi
+          make docker-push-multi
+          make docker-manifest
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
