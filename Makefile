@@ -218,7 +218,7 @@ infoblox-secret:
 .PHONY: license
 # updates source code with license headers
 license:
-	$(call golic,--dry -t apache2)
+	$(call golic,-t apache2)
 
 # creates ns1 secret in current cluster
 .PHONY: ns1-secret
