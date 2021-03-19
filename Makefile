@@ -417,14 +417,12 @@ endef
 
 define controller-gen
 	@go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
-	$(eval CONTROLLER_GEN_PATH = $(GOBIN)/controller-gen)
-	$(CONTROLLER_GEN_PATH) $1
+	$(GOBIN)/controller-gen $1
 endef
 
 define golic
 	@go install github.com/AbsaOSS/golic@$(GOLIC_VERSION)
-	$(eval GOLIC_PATH = $(GOBIN)/golic)
-	$(GOLIC_PATH) inject $1
+	$(GOBIN)/golic inject $1
 endef
 
 # installs kustomize and sets KUSTOMIZE_PATH if is not specified
