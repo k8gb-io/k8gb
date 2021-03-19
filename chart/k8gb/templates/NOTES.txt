@@ -1,9 +1,9 @@
 K8GB and all deps are installed
 
 1. Check if your DNS Zone is served by K8GB CoreDNS
-  $ kubectl -n {{ .Release.Namespace }} run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @{{ .Release.Name }}-coredns SOA {{ .Values.k8gb.dnsZone }} +short
+  $ kubectl -n {{ .Release.Namespace }} run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @{{ .Release.Name }}-coredns SOA . +short
 
 If everything is fine than you are expected to see similar output:
 ```
-ns.dns.{{ .Values.k8gb.dnsZone }}. hostmaster.{{ .Values.k8gb.dnsZone }}. 1579099788 7200 1800 86400 30
+ns1.dns. hostmaster.dns. 1616173200 7200 1800 86400 3600
 ```
