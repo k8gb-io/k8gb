@@ -1,7 +1,11 @@
 ## nginx configuration
-## Ref: https://github.com/kubernetes/ingress/blob/master/controllers/nginx/configuration.md
+## Ref: https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
 ##
 controller:
+  admissionWebhooks:
+    enabled: false
+    patch:
+     enabled: false
   hostNetwork: true
 
   ## Use host ports 80 and 443
