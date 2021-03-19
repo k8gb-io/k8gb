@@ -19,7 +19,7 @@ jobs:
           version: v1.32
       - name: golic
         run: |
-          go install github.com/AbsaOSS/golic@v0.4.4
+          go install github.com/AbsaOSS/golic@v0.4.7
           golic inject -c "2021 Absa Group Limited" --dry -x
       - name: go test
         run: go test ./...
