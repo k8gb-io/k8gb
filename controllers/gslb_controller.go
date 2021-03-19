@@ -229,7 +229,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				Annotations: a.Meta.GetAnnotations(),
 			},
 			Spec: k8gbv1beta1.GslbSpec{
-				Ingress: ingressToReuse.Spec,
+				Ingress: k8gbv1beta1.FromV1Beta1IngressSpec(ingressToReuse.Spec),
 				Strategy: k8gbv1beta1.Strategy{
 					Type: strategy,
 				},

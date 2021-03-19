@@ -17,7 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,7 +40,7 @@ type Strategy struct {
 // +k8s:openapi-gen=true
 type GslbSpec struct {
 	// Gslb-enabled Ingress Spec
-	Ingress v1beta1.IngressSpec `json:"ingress"`
+	Ingress IngressSpec `json:"ingress"`
 	// Gslb Strategy spec
 	Strategy Strategy `json:"strategy"`
 }
