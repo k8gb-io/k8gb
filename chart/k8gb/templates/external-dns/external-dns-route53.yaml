@@ -27,7 +27,6 @@ spec:
         - --txt-owner-id=k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
-        - --managed-record-types=A,CNAME,NS
         resources:
           requests:
             memory: "32Mi"
