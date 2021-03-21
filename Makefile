@@ -66,8 +66,6 @@ ifndef GOBIN
 GOBIN=$(shell go env GOPATH)/bin
 endif
 
-KUSTOMIZE_PATH ?= $(shell which kustomize || echo $(NO_VALUE))
-
 ###############################
 #		TARGETS
 ###############################
@@ -94,12 +92,6 @@ demo-roundrobin: ## Execute round-robin demo
 demo-failover: ## Execute failover demo
 	@$(call demo-host, "failover.cloud.example.com")
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-.PHONY: deploy
-deploy:
-	$(call manifest)
-	cd config/manager && $(KUSTOMIZE_PATH) edit set image controller=$(IMG)
-	$(KUSTOMIZE_PATH) build config/default | kubectl apply -f -
 
 # spin-up local environment
 .PHONY: deploy-full-local-setup
@@ -215,8 +207,8 @@ infoblox-secret:
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
 
-.PHONY: license
 # updates source code with license headers
+.PHONY: license
 license:
 	$(call golic,-t apache2)
 
@@ -226,11 +218,6 @@ ns1-secret:
 	kubectl -n k8gb create secret generic ns1 \
 		--from-literal=apiKey=$${NS1_APIKEY}
 
-# install CRDs into a cluster
-.PHONY: install
-install:
-	$(call manifest)
-	kubectl apply -f chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
 
 # run all linters from .golangci.yaml; see: https://golangci-lint.run/usage/install/#local-installation
 .PHONY: lint
@@ -286,13 +273,6 @@ test-failover:
 .PHONY: terratest
 terratest: # Run terratest suite
 	cd terratest/test/ && go mod download && go test -v
-
-# uninstall CRDs from a cluster
-.PHONY: uninstall
-uninstall:
-	$(call manifest)
-	$(call install-kustomize-if-not-exists)
-	$(KUSTOMIZE_PATH) build config/crd | kubectl delete -f -
 
 .PHONY: version
 version:
@@ -423,16 +403,6 @@ endef
 define golic
 	@go install github.com/AbsaOSS/golic@$(GOLIC_VERSION)
 	$(GOBIN)/golic inject $1
-endef
-
-# installs kustomize and sets KUSTOMIZE_PATH if is not specified
-define install-kustomize-if-not-exists
-	@$(if $(filter $(KUSTOMIZE_PATH),$(NO_VALUE)),$(call install-kustomize),)
-endef
-
-define install-kustomize
-	GO111MODULE=on go get sigs.k8s.io/kustomize/kustomize/v3@v3.8.6
-	$(eval KUSTOMIZE_PATH = $(GOBIN)/kustomize)
 endef
 
 define docker-build-arch
