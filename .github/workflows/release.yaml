@@ -23,9 +23,16 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           project: k8gb
-          pullRequests: true
           sinceTag: ${{ steps.get_tag.outputs.previous_tag }}
           output: changes
+          pullRequests: true
+          author: true
+          issues: true
+          issuesWoLabels: true
+          prWoLabels: true
+          compareLink: true
+          filterByMilestone: true
+          unreleased: true
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
