@@ -2,3 +2,8 @@ theme: jekyll-theme-cayman
 markdown: GFM
 include: CONTRIBUTING.md
 google_analytics: G-HMZ7QVHJH0
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
