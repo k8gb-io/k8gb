@@ -1,0 +1,39 @@
+name: Offline Changelog
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  chanagelog-pr:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: heinrichreimer/github-changelog-generator-action@v2.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          project: k8gb
+          pullRequests: true
+          author: true
+          issues: true
+          issuesWoLabels: true
+          prWoLabels: true
+          compareLink: true
+          filterByMilestone: true
+          unreleased: true
+      - name: Commit changelog
+        run: |
+          git config user.name 'Github Action'
+          git config user.email 'action@users.noreply.github.com'
+          git add CHANGELOG.md
+          git commit -m "Update Offline Changelog"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "Update Offline Changelog"
+          branch: offline_changelog
+          delete-branch: true
+          token: ${{ secrets.GITHUB_TOKEN }}
