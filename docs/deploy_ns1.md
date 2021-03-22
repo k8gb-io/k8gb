@@ -8,7 +8,7 @@ Two EKS clusters in `eu-west-1` and `us-east-1`.
 
 Terraform code for cluster reference setup can be found [here](https://github.com/AbsaOSS/k8gb/tree/master/docs/examples/route53)
 
-The EKS setup is identical to [Route53 tutorial](/docs/deploy_route53.md)
+The EKS setup is identical to [Route53 tutorial](./deploy_route53.md)
 
 ## Deploy k8gb
 
