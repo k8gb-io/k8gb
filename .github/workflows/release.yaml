@@ -19,10 +19,11 @@ jobs:
         run: |
           previous_tag=$(git tag --sort=v:refname | tail -2 | head -1)
           echo "::set-output name=previous_tag::${previous_tag}"
-      - uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+      - uses: heinrichreimer/github-changelog-generator-action@v2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           project: k8gb
+          pullRequests: true
           sinceTag: ${{ steps.get_tag.outputs.previous_tag }}
           output: changes
       - name: Set up Go
