@@ -18,6 +18,8 @@ import (
 	"flag"
 	"os"
 
+	str "github.com/AbsaOSS/gopkg/strings"
+
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
@@ -65,6 +67,9 @@ func main() {
 		log.Err(err).Msg("can't resolve environment variables")
 		os.Exit(1)
 	}
+	log.Debug().
+		Str("config", str.ToString(config)).
+		Msg("Resolved config")
 
 	ctrl.SetLogger(logging.NewLogrAdapter(log))
 
