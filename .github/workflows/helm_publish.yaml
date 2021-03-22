@@ -40,6 +40,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           project: k8gb
+          pullRequests: true
+          author: true
+          issues: true
+          issuesWoLabels: true
+          prWoLabels: true
+          compareLink: true
+          filterByMilestone: true
+          unreleased: true
       - name: Commit changelog
         run: |
           git config user.name 'Github Action'
