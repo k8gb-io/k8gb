@@ -28,6 +28,7 @@ import (
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	"github.com/AbsaOSS/k8gb/controllers/logging"
 
+	str "github.com/AbsaOSS/gopkg/strings"
 	"github.com/miekg/dns"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -131,7 +132,7 @@ func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.D
 	if err != nil && errors.IsNotFound(err) {
 
 		// Create the DNSEndpoint
-		log.Info().Msgf("Creating a new DNSEndpoint:\n %s", utils.ToString(i))
+		log.Info().Msgf("Creating a new DNSEndpoint:\n %s", str.ToString(i))
 		err = r.client.Create(context.TODO(), i)
 
 		if err != nil {

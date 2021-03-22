@@ -34,6 +34,7 @@ import (
 	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
 	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
 
+	str "github.com/AbsaOSS/gopkg/strings"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
@@ -339,8 +340,8 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to load DNS endpoint")
 	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := utils.ToString(got)
-	prettyWant := utils.ToString(want)
+	prettyGot := str.ToString(got)
+	prettyWant := str.ToString(want)
 
 	// assert
 	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
@@ -448,8 +449,8 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 
 	got := dnsEndpoint.Spec.Endpoints
 	hrGot := settings.gslb.Status.HealthyRecords
-	prettyGot := utils.ToString(got)
-	prettyWant := utils.ToString(want)
+	prettyGot := str.ToString(got)
+	prettyWant := str.ToString(want)
 
 	// assert
 	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
@@ -532,8 +533,8 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
 	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := utils.ToString(got)
-	prettyWant := utils.ToString(want)
+	prettyGot := str.ToString(got)
+	prettyWant := str.ToString(want)
 
 	// assert
 	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
@@ -587,8 +588,8 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
 	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := utils.ToString(got)
-	prettyWant := utils.ToString(want)
+	prettyGot := str.ToString(got)
+	prettyWant := str.ToString(want)
 
 	// assert
 	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
@@ -722,8 +723,8 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
 	got := dnsEndpointRoute53.Annotations["k8gb.absa.oss/dnstype"]
 	gotEp := dnsEndpointRoute53.Spec.Endpoints
-	prettyGot := utils.ToString(gotEp)
-	prettyWant := utils.ToString(wantEp)
+	prettyGot := str.ToString(gotEp)
+	prettyWant := str.ToString(wantEp)
 
 	// assert
 	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
@@ -793,8 +794,8 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
 	got := dnsEndpointNS1.Annotations["k8gb.absa.oss/dnstype"]
 	gotEp := dnsEndpointNS1.Spec.Endpoints
-	prettyGot := utils.ToString(gotEp)
-	prettyWant := utils.ToString(wantEp)
+	prettyGot := str.ToString(gotEp)
+	prettyWant := str.ToString(wantEp)
 
 	// assert
 	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
@@ -835,8 +836,8 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to get expected DNSEndpoint")
 	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := utils.ToString(got)
-	prettyWant := utils.ToString(want)
+	prettyGot := str.ToString(got)
+	prettyWant := str.ToString(want)
 
 	// assert
 	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
