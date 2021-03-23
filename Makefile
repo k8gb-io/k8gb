@@ -27,6 +27,7 @@ HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-cloud-example-com-eu.example.com}'
 LOG_FORMAT ?= simple
+LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.4.1
 GOLIC_VERSION  ?= v0.4.7
 
@@ -125,7 +126,9 @@ deploy-to-AbsaOSS-k3d-action:
 deploy-gslb-operator: ## Deploy k8gb operator
 	kubectl apply -f deploy/namespace.yaml
 	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS)
+	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS) \
+		--set k8gb.log.format=$(LOG_FORMAT)
+		--set k8gb.log.level=$(LOG_LEVEL)
 
 .PHONY: deploy-gslb-cr
 deploy-gslb-cr: ## Apply Gslb Custom Resources
@@ -305,6 +308,8 @@ define deploy-local-cluster
 		--set k8gb.hostAlias.enabled=true \
 		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
 		--set k8gb.imageTag=$3 $4
+		--set k8gb.log.format=$(LOG_FORMAT)
+		--set k8gb.log.level=$(LOG_LEVEL)
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update stable https://charts.helm.sh/stable

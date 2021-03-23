@@ -42,9 +42,8 @@ func newLogger(config *depresolver.Config) *loggerFactory {
 // In such case returns default logger
 func (l *loggerFactory) get() zerolog.Logger {
 	var logger zerolog.Logger
-	var dt = time.RFC822Z
 	if l.log.Format == depresolver.NoFormat {
-		l.log.Format = depresolver.JSONFormat
+		l.log.Format = depresolver.SimpleFormat
 	}
 	if l.log.Level == zerolog.NoLevel {
 		l.log.Level = zerolog.InfoLevel
@@ -52,31 +51,21 @@ func (l *loggerFactory) get() zerolog.Logger {
 	// We can retrieve stack in case of pkg/errors
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.SetGlobalLevel(l.log.Level)
-	if l.log.Level <= zerolog.DebugLevel {
-		dt = "15:04:05"
-	}
 	switch l.log.Format {
 	case depresolver.JSONFormat:
-		// JSONFormat time format as seconds timestamp
-		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-		// shortening field names timestamp=>@t, level=>@l , message=>@m, caller=>@c
-		zerolog.TimestampFieldName = "@t"
-		zerolog.LevelFieldName = "@l"
-		zerolog.MessageFieldName = "@m"
-		zerolog.CallerFieldName = "@c"
 		logger = zerolog.New(os.Stdout).
 			With().
 			Caller().
 			Timestamp().
 			Logger()
 	case depresolver.SimpleFormat:
-		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: dt, NoColor: l.log.NoColor}).
+		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339, NoColor: l.log.NoColor}).
 			With().
 			Caller().
 			Timestamp().
 			Logger()
 	}
 	logger.Info().Msg("Logger configured")
-	logger.Debug().Msgf("Logger settings: [%s, %s]", l.log.Format, l.log.Level)
+	logger.Debug().Msgf("Logger settings: [format=%s, level=%s]", l.log.Format, l.log.Level)
 	return logger
 }
