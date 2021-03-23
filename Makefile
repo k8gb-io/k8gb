@@ -222,7 +222,7 @@ ns1-secret:
 		--from-literal=apiKey=$${NS1_APIKEY}
 
 
-# run all linters from .golangci.yaml; see: https://golangci-lint.run/usage/install/#local-installation
+# runs golangci-lint aggregated linter; see .golangci.yaml for linter list
 .PHONY: lint
 lint:
 	golangci-lint run
