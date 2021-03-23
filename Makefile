@@ -219,7 +219,7 @@ ns1-secret:
 		--from-literal=apiKey=$${NS1_APIKEY}
 
 
-# runs golangci-lint aggregated linter
+# runs golangci-lint aggregated linter; see .golangci.yaml for linter list
 .PHONY: lint
 lint:
 	golangci-lint run
