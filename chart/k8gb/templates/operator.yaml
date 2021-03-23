@@ -115,3 +115,9 @@ spec:
             - name: COREDNS_EXPOSED
               value: "true"
             {{ end }}
+            - name: LOG_FORMAT
+              value: {{ quote .Values.k8gb.log.format }}
+            - name: LOG_LEVEL
+              value: {{ quote .Values.k8gb.log.level }}
+            - name: NO_COLOR
+              value: "true"

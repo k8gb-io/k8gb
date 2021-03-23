@@ -62,7 +62,7 @@ var predefinedConfig = Config{
 		false,
 	},
 	Log: Log{
-		Format: JSONFormat,
+		Format: SimpleFormat,
 	},
 }
 
@@ -171,8 +171,8 @@ func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
 	defaultConfig.EdgeDNSType = DNSTypeNoEdgeDNS
 	defaultConfig.ExtClustersGeoTags = []string{}
 	defaultConfig.Log.Level = zerolog.InfoLevel
-	defaultConfig.Log.Format = JSONFormat
-	defaultConfig.Log.NoColor = true
+	defaultConfig.Log.Format = SimpleFormat
+	defaultConfig.Log.NoColor = false
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
@@ -1104,7 +1104,7 @@ func TestResolveLoggerUseDefaultValue(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.Log.Level = zerolog.InfoLevel
-	expected.Log.NoColor = true
+	expected.Log.NoColor = false
 	// act
 	// assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError, LogLevelKey, LogFormatKey, LogNoColorKey)
@@ -1185,7 +1185,7 @@ func TestResolveLoggerLevelWithInvalidValue(t *testing.T) {
 	// assert
 	assert.Error(t, err)
 	assert.Equal(t, zerolog.NoLevel, config.Log.Level)
-	assert.Equal(t, JSONFormat, config.Log.Format)
+	assert.Equal(t, SimpleFormat, config.Log.Format)
 }
 
 func TestResolveLoggerNoColorInvalidValue(t *testing.T) {
@@ -1198,7 +1198,7 @@ func TestResolveLoggerNoColorInvalidValue(t *testing.T) {
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, true, config.Log.NoColor)
+	assert.Equal(t, false, config.Log.NoColor)
 }
 
 func TestResolveLoggerOutputWithInvalidValue(t *testing.T) {
@@ -1225,7 +1225,7 @@ func TestResolveLoggerWithEmptyValues(t *testing.T) {
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, JSONFormat, config.Log.Format)
+	assert.Equal(t, SimpleFormat, config.Log.Format)
 	assert.Equal(t, zerolog.InfoLevel, config.Log.Level)
 }
 
@@ -1241,7 +1241,7 @@ func TestResolveLoggerEmptyValues(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, zerolog.InfoLevel, config.Log.Level)
-	assert.Equal(t, JSONFormat, config.Log.Format)
+	assert.Equal(t, SimpleFormat, config.Log.Format)
 }
 
 // arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with

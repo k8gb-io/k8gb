@@ -22,6 +22,9 @@ k8gb:
      - "gslb-ns-cloud-example-com-us.example.com"
   reconcileRequeueSeconds: 30
   exposeCoreDNS: false # Create Service type LoadBalancer to expose CoreDNS
+  log:
+    format: simple # log format (simple,json)
+    level: info # log level (panic,fatal,error,warn,info,debug,trace)
 
 externaldns:
   image: k8s.gcr.io/external-dns/external-dns:v0.7.5
