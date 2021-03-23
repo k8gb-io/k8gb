@@ -12,11 +12,11 @@
 
 ## Environment prerequisites
 
-- [Install **go 1.16**](https://golang.org/dl/)
+- [Install **Go 1.16**](https://golang.org/dl/)
 
-- [Install **git**](https://git-scm.com/downloads)
+- [Install **Git**](https://git-scm.com/downloads)
 
-- Install **gnu-sed** if you don't have it. If you are on a Mac, install sed by Homebrew
+- Install **gnu-sed** if you don't have it. If you are on a Mac, install `gnu-sed` with Homebrew
     ```shell script
     brew install gnu-sed
     ```
@@ -31,12 +31,13 @@
         </i></sup>
       </div>
 
- - [install **kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to operate clusters
+ - [install **kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to operate k8s clusters
 
- - [install **helm3**](https://helm.sh/docs/intro/install/) to get charts
+ - [install **helm3**](https://helm.sh/docs/intro/install/) to deploy k8gb and related test workloads
 
- - [install **k3d**](https://k3d.io/) as tool for running local [k3s](https://k3s.io/) clusters.<br>
-   > Follow https://k3d.io/#installation
+ - [install **k3d**](https://k3d.io/#installation) to run local [k3s](https://k3s.io/) clusters
+
+ - [install **golangci-lint**](https://golangci-lint.run/usage/install/#local-installation) for code quality checks
 
 
 ## Running project locally
