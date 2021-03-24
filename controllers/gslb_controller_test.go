@@ -49,8 +49,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
@@ -1060,7 +1058,6 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
 	}
 	// Set the log to development mode for verbose logs.
-	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	gslb, err := utils.YamlToGslb(gslbYaml)
 	if err != nil {
 		t.Fatal(err)
@@ -1080,6 +1077,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	if err != nil {
 		t.Fatalf("config error: (%v)", err)
 	}
+
 	// Create a GslbReconciler object with the scheme and fake client.
 	r := &GslbReconciler{
 		Client: cl,
