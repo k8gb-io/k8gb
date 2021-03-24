@@ -114,11 +114,15 @@ If your Kubernetes version or Ingress controller is not included in the table ab
 
 ## Presentations Featuring k8gb
 
-* Demo at Kubernetes SIG Multicluster<br>
-[![](http://img.youtube.com/vi/jeUeRQM-ZyM/0.jpg)](http://www.youtube.com/watch?v=jeUeRQM-ZyM "Kubernetes SIG Multicluster")
+* AWS Containers from the Couch show<br>
+[![](http://img.youtube.com/vi/5pe3ezSnVI8/hqdefault.jpg)](https://www.youtube.com/watch?v=5pe3ezSnVI8 "AWS Containers from the Couch")
 
 * OpenShift Commons Briefings<br>
 [![](http://img.youtube.com/vi/5DhO9C2NCrk/0.jpg)](http://www.youtube.com/watch?v=5DhO9C2NCrk "OpenShift Commons Briefings")
+
+* Demo at Kubernetes SIG Multicluster<br>
+[![](http://img.youtube.com/vi/jeUeRQM-ZyM/0.jpg)](http://www.youtube.com/watch?v=jeUeRQM-ZyM "Kubernetes SIG Multicluster")
+
 
 ## Contributing
 
