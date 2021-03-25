@@ -33,8 +33,6 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9 h1:VpgP7xuJadIUu
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 git.blindage.org/21h/hcloud-dns v0.0.0-20200807003420-f768ffe03f8d h1:d6sdozgfqtgaOhjUn++lbo5siX3HELjcOUnbtrvVQi4=
 git.blindage.org/21h/hcloud-dns v0.0.0-20200807003420-f768ffe03f8d/go.mod h1:n26Twiii5jhkMC+Ocz/s8R73cBBcXRIwyTqQ+6bOZGo=
-github.com/AbsaOSS/gopkg v0.1.1 h1:niyt3qwnLWfZDKVWlQP6kiLOcvcjgK9aCRXIwuUBJwQ=
-github.com/AbsaOSS/gopkg v0.1.1/go.mod h1:6bJ9NNcX+xvAAv2c31HPGe+P04RKdm/NV/V+qqyJrlQ=
 github.com/AbsaOSS/gopkg v0.1.2 h1:jYLOqZC23vDi5cH4G2dnaQSzFO3RNb2V7NXa4yQ3vVY=
 github.com/AbsaOSS/gopkg v0.1.2/go.mod h1:6bJ9NNcX+xvAAv2c31HPGe+P04RKdm/NV/V+qqyJrlQ=
 github.com/Azure/azure-sdk-for-go v45.1.0+incompatible h1:kxtaPD8n2z5Za+9e3sKsYG2IX6PG2R6VXtgS7gAbh3A=
@@ -318,9 +316,8 @@ github.com/go-logr/logr v0.1.0/go.mod h1:ixOQHD9gLJUVQQ2ZOR7zLEifBX6tGkNJF4QyIY7
 github.com/go-logr/logr v0.2.0/go.mod h1:z6/tIYblkpsD+a4lm/fGIIU9mZ+XfAiaFtq7xTgseGU=
 github.com/go-logr/logr v0.4.0 h1:K7/B1jt6fIBQVd4Owv2MqGQClcgf0R266+7C/QjRcLc=
 github.com/go-logr/logr v0.4.0/go.mod h1:z6/tIYblkpsD+a4lm/fGIIU9mZ+XfAiaFtq7xTgseGU=
+github.com/go-logr/zapr v0.1.0 h1:h+WVe9j6HAA01niTJPA/kKH0i7e0rLZBCwauQFcRE54=
 github.com/go-logr/zapr v0.1.0/go.mod h1:tabnROwaDl0UNxkVeFRbY8bwB37GwRv0P8lg6aAiEnk=
-github.com/go-logr/zapr v0.4.0 h1:uc1uML3hRYL9/ZZPdgHS/n8Nzo+eaYL/Efxkkamf7OM=
-github.com/go-logr/zapr v0.4.0/go.mod h1:tabnROwaDl0UNxkVeFRbY8bwB37GwRv0P8lg6aAiEnk=
 github.com/go-martini/martini v0.0.0-20170121215854-22fa46961aab h1:xveKWz2iaueeTaUgdetzel+U7exyigDYBryyVfV/rZk=
 github.com/go-martini/martini v0.0.0-20170121215854-22fa46961aab/go.mod h1:/P9AEU963A2AYjv4d1V5eVL1CQbEJq6aCNHDDjibzu8=
 github.com/go-openapi/analysis v0.0.0-20180825180245-b006789cd277/go.mod h1:k70tL6pCuVxPJOHXQ+wIac1FUrvNkHolPie/cLEU6hI=
