@@ -27,6 +27,7 @@ import (
 	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
 	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
 
+	str "github.com/AbsaOSS/gopkg/strings"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -85,6 +86,9 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err != nil {
 		return result.RequeueError(fmt.Errorf("resolving spec (%s)", err))
 	}
+	log.Debug().
+		Str("Strategy", str.ToString(gslb.Spec.Strategy)).
+		Msg("Resolved strategy")
 	// == Finalizer business ==
 
 	// Check if the Gslb instance is marked to be deleted, which is

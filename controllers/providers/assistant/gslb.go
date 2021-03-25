@@ -189,32 +189,32 @@ func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, fakeDNSEnabled bo
 		log.Info().Msgf("Error contacting EdgeDNS server (%s) for TXT split brain record: (%s)", ns, err)
 		return err
 	}
-	var timestamp string
 	if len(txt.Answer) > 0 {
 		if t, ok := txt.Answer[0].(*dns.TXT); ok {
-			log.Info().Msgf("Split brain TXT raw record: %s", t.String())
-			timestamp = strings.Split(t.String(), "\t")[4]
+			timestamp := strings.Split(t.String(), "\t")[4]
 			timestamp = strings.Trim(timestamp, "\"") // Otherwise time.Parse() will miserably fail
+			timeFromTXT, err := time.Parse("2006-01-02T15:04:05", timestamp)
+			if err != nil {
+				log.Err(err).
+					Str("raw record", t.String()).
+					Str("raw timestamp", timestamp).
+					Msg("Split brain TXT: can't parse timestamp")
+				return err
+			}
+			now := time.Now().UTC()
+			diff := now.Sub(timeFromTXT)
+			log.Debug().
+				Str("raw record", t.String()).
+				Str("raw timestamp", timestamp).
+				Str("parsed", timeFromTXT.String()).
+				Str("diff", diff.String()).
+				Msg("Split brain TXT")
+
+			if diff > splitBrainThreshold {
+				return errors.NewResourceExpired(fmt.Sprintf("Split brain TXT record expired the time threshold: (%s)", splitBrainThreshold))
+			}
+			return nil
 		}
-	}
-
-	if len(timestamp) > 0 {
-		log.Info().Msgf("Split brain TXT raw time stamp: %s", timestamp)
-		timeFromTXT, err := time.Parse("2006-01-02T15:04:05", timestamp)
-		if err != nil {
-			return err
-		}
-
-		log.Info().Msgf("Split brain TXT parsed time stamp: %s", timeFromTXT)
-		now := time.Now().UTC()
-
-		diff := now.Sub(timeFromTXT)
-		log.Info().Msgf("Split brain TXT time diff: %s", diff)
-
-		if diff > splitBrainThreshold {
-			return errors.NewResourceExpired(fmt.Sprintf("Split brain TXT record expired the time threshold: (%s)", splitBrainThreshold))
-		}
-		return nil
 	}
 	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))
 }
