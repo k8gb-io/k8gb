@@ -30,6 +30,12 @@ LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.4.1
 GOLIC_VERSION  ?= v0.4.7
+POD_NAMESPACE ?= k8gb
+CLUSTER_GEO_TAG ?= eu
+EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
+EDGE_DNS_SERVER ?= 1.1.1.1
+EDGE_DNS_ZONE ?= example.com
+DNS_ZONE ?= cloud.example.com
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -247,7 +253,15 @@ reset:	destroy-full-local-setup deploy-full-local-setup
 run: lint
 	$(call generate)
 	$(call manifest)
-	LOG_FORMAT=$(LOG_FORMAT) go run ./main.go
+	LOG_FORMAT=$(LOG_FORMAT) \
+	LOG_LEVEL=$(LOG_LEVEL) \
+	POD_NAMESPACE=$(POD_NAMESPACE) \
+	CLUSTER_GEO_TAG=$(CLUSTER_GEO_TAG) \
+	EXT_GSLB_CLUSTERS_GEO_TAGS=$(EXT_GSLB_CLUSTERS_GEO_TAGS) \
+	EDGE_DNS_SERVER=$(EDGE_DNS_SERVER) \
+	EDGE_DNS_ZONE=$(EDGE_DNS_ZONE) \
+	DNS_ZONE=$(DNS_ZONE) \
+	go run ./main.go
 
 .PHONY: stop-test-app
 stop-test-app:

@@ -87,74 +87,75 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 
 func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 	if config.Log.Level == zerolog.NoLevel {
-		return fmt.Errorf("invalid %s, allowed values ['','%s','%s','%s','%s','%s','%s','%s']", LogLevelKey,
+		return fmt.Errorf("invalid '%s', allowed values ['','%s','%s','%s','%s','%s','%s','%s']", LogLevelKey,
 			zerolog.TraceLevel, zerolog.DebugLevel, zerolog.InfoLevel, zerolog.WarnLevel, zerolog.FatalLevel,
 			zerolog.DebugLevel, zerolog.PanicLevel)
 	}
 	if config.Log.Format == NoFormat {
-		return fmt.Errorf("invalid %s, allowed values ['','%s','%s']", LogFormatKey, JSONFormat, SimpleFormat)
+		return fmt.Errorf("invalid '%s', allowed values ['','%s','%s']", LogFormatKey, JSONFormat, SimpleFormat)
 	}
-	err = field("k8gbNamespace", config.K8gbNamespace).isNotEmpty().matchRegexp(k8sNamespaceRegex).err
+	err = field(K8gbNamespaceKey, config.K8gbNamespace).isNotEmpty().matchRegexp(k8sNamespaceRegex).err
 	if err != nil {
 		return err
 	}
-	err = field("reconcileRequeueSeconds", config.ReconcileRequeueSeconds).isHigherThanZero().err
+	err = field(ReconcileRequeueSecondsKey, config.ReconcileRequeueSeconds).isHigherThanZero().err
 	if err != nil {
 		return err
 	}
-	err = field("clusterGeoTag", config.ClusterGeoTag).isNotEmpty().matchRegexp(geoTagRegex).err
+	err = field(ClusterGeoTagKey, config.ClusterGeoTag).isNotEmpty().matchRegexp(geoTagRegex).err
 	if err != nil {
 		return err
 	}
-	err = field("extClusterGeoTags", config.ExtClustersGeoTags).hasItems().hasUniqueItems().err
+	err = field(ExtClustersGeoTagsKey, config.ExtClustersGeoTags).hasItems().hasUniqueItems().err
 	if err != nil {
 		return err
 	}
 	for i, geoTag := range config.ExtClustersGeoTags {
-		err = field(fmt.Sprintf("extClustersGeoTags[%v]", i), geoTag).isNotEmpty().matchRegexp(geoTagRegex).isNotEqualTo(config.ClusterGeoTag).err
+		err = field(fmt.Sprintf("%s[%v]", ExtClustersGeoTagsKey, i), geoTag).
+			isNotEmpty().matchRegexp(geoTagRegex).isNotEqualTo(config.ClusterGeoTag).err
 		if err != nil {
 			return err
 		}
 	}
-	err = field("edgeDNSServer", config.EdgeDNSServer).isNotEmpty().matchRegexps(hostNameRegex, ipAddressRegex).err
+	err = field(EdgeDNSServerKey, config.EdgeDNSServer).isNotEmpty().matchRegexps(hostNameRegex, ipAddressRegex).err
 	if err != nil {
 		return err
 	}
-	err = field("edgeDNSZone", config.EdgeDNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
+	err = field(EdgeDNSZoneKey, config.EdgeDNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
 	if err != nil {
 		return err
 	}
-	err = field("DNSZone", config.DNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
+	err = field(DNSZoneKey, config.DNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
 	if err != nil {
 		return err
 	}
 	// do full Infoblox validation only in case that Host exists
 	if isNotEmpty(config.Infoblox.Host) {
-		err = field("InfobloxGridHost", config.Infoblox.Host).matchRegexps(hostNameRegex, ipAddressRegex).err
+		err = field(InfobloxGridHostKey, config.Infoblox.Host).matchRegexps(hostNameRegex, ipAddressRegex).err
 		if err != nil {
 			return err
 		}
-		err = field("InfobloxVersion", config.Infoblox.Version).isNotEmpty().matchRegexp(versionNumberRegex).err
+		err = field(InfobloxVersionKey, config.Infoblox.Version).isNotEmpty().matchRegexp(versionNumberRegex).err
 		if err != nil {
 			return err
 		}
-		err = field("InfobloxPort", config.Infoblox.Port).isHigherThanZero().isLessOrEqualTo(65535).err
+		err = field(InfobloxPortKey, config.Infoblox.Port).isHigherThanZero().isLessOrEqualTo(65535).err
 		if err != nil {
 			return err
 		}
-		err = field("InfobloxUsername", config.Infoblox.Username).isNotEmpty().err
+		err = field(InfobloxUsernameKey, config.Infoblox.Username).isNotEmpty().err
 		if err != nil {
 			return err
 		}
-		err = field("InfobloxPassword", config.Infoblox.Password).isNotEmpty().err
+		err = field(InfobloxPasswordKey, config.Infoblox.Password).isNotEmpty().err
 		if err != nil {
 			return err
 		}
-		err = field("InfobloxHTTPPoolConnections", config.Infoblox.HTTPPoolConnections).isHigherOrEqualToZero().err
+		err = field(InfobloxHTTPPoolConnectionsKey, config.Infoblox.HTTPPoolConnections).isHigherOrEqualToZero().err
 		if err != nil {
 			return err
 		}
-		err = field("InfobloxHTTPRequestTimeout", config.Infoblox.HTTPRequestTimeout).isHigherThanZero().err
+		err = field(InfobloxHTTPRequestTimeoutKey, config.Infoblox.HTTPRequestTimeout).isHigherThanZero().err
 		if err != nil {
 			return err
 		}
