@@ -397,7 +397,7 @@ define generate
 endef
 
 define manifest
-	$(call controller-gen,crd:crdVersions=v1 paths="./..." output:crd:artifacts:config=chart/k8gb/templates/)
+	$(call controller-gen,crd:crdVersions=v1 paths="./..." output:crd:artifacts:config=chart/k8gb/templates/crds)
 endef
 
 define controller-gen
