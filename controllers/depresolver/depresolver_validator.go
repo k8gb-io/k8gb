@@ -66,7 +66,7 @@ func field(name string, value interface{}) *validator {
 		validator.strArr = v
 	default:
 		// float32, float64, bool, interface{}, maps, slices, Custom Types
-		validator.err = fmt.Errorf("can't parse %v of type %T as int or string", v, v)
+		validator.err = fmt.Errorf("can't parse '%v' of type '%T' as int or string", v, v)
 	}
 	return validator
 }
@@ -76,7 +76,7 @@ func (v *validator) isNotEmpty() *validator {
 		return v
 	}
 	if v.strValue == "" {
-		v.err = fmt.Errorf("%s is empty", v.name)
+		v.err = fmt.Errorf("'%s' is empty", v.name)
 	}
 	return v
 }
@@ -90,7 +90,7 @@ func (v *validator) matchRegexp(regex string) *validator {
 	}
 	r, _ := regexp.Compile(regex)
 	if !r.Match([]byte(v.strValue)) {
-		v.err = fmt.Errorf(`"%s" does not match given criteria. see: https://www.regextester.com (%s)`, v.strValue, regex)
+		v.err = fmt.Errorf(`'%s' does not match given criteria. see: https://www.regextester.com (%s)`, v.strValue, regex)
 	}
 	return v
 }
@@ -114,7 +114,7 @@ func (v *validator) isHigherThanZero() *validator {
 		return v
 	}
 	if v.intValue <= 0 {
-		v.err = fmt.Errorf(`"%s" is less or equal to zero`, v.name)
+		v.err = fmt.Errorf(`'%s' is less or equal to zero`, v.name)
 	}
 	return v
 }
@@ -124,7 +124,7 @@ func (v *validator) isHigherOrEqualToZero() *validator {
 		return v
 	}
 	if v.intValue < 0 {
-		v.err = fmt.Errorf(`"%s" is less than zero`, v.name)
+		v.err = fmt.Errorf(`'%s' is less than zero`, v.name)
 	}
 	return v
 }
@@ -134,7 +134,7 @@ func (v *validator) isLessOrEqualTo(num int) *validator {
 		return v
 	}
 	if v.intValue > num {
-		v.err = fmt.Errorf(`"%s" is higher than %v`, v.name, num)
+		v.err = fmt.Errorf(`'%s' is higher than '%v'`, v.name, num)
 	}
 	return v
 }
@@ -144,7 +144,7 @@ func (v *validator) isNotEqualTo(value string) *validator {
 		return v
 	}
 	if v.strValue == value {
-		v.err = fmt.Errorf(`"%s" can't be equal to "%s"`, v.name, value)
+		v.err = fmt.Errorf(`'%s' can't be equal to '%s'`, v.name, value)
 	}
 	return v
 }
@@ -154,7 +154,7 @@ func (v *validator) hasItems() *validator {
 		return v
 	}
 	if len(v.strArr) == 0 {
-		v.err = fmt.Errorf(`"%s" can't be empty`, v.name)
+		v.err = fmt.Errorf(`'%s' should contain at least one item`, v.name)
 	}
 	return v
 }
@@ -168,7 +168,7 @@ func (v *validator) hasUniqueItems() *validator {
 		m[s] = true
 	}
 	if len(m) != len(v.strArr) {
-		v.err = fmt.Errorf(`"%s" contains redundant values %s`, v.name, v.strArr)
+		v.err = fmt.Errorf(`'%s' contains redundant values '%s'`, v.name, v.strArr)
 	}
 	return v
 }
