@@ -1,4 +1,4 @@
-module ohmyterratest
+module k8gbterratest
 
 go 1.15
 
