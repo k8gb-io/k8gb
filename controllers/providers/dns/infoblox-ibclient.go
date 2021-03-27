@@ -41,12 +41,12 @@ func (p *InfobloxProvider) infobloxConnection() (*ibclient.ObjectManager, error)
 	if p.config.Override.FakeInfobloxEnabled {
 		fqdn := "fakezone.example.com"
 		fakeRefReturn := "zone_delegated/ZG5zLnpvbmUkLl9kZWZhdWx0LnphLmNvLmFic2EuY2Fhcy5vaG15Z2xiLmdzbGJpYmNsaWVudA:fakezone.example.com/default"
-		ohmyFakeConnector := &fakeInfobloxConnector{
+		k8gbFakeConnector := &fakeInfobloxConnector{
 			getObjectObj: ibclient.NewZoneDelegated(ibclient.ZoneDelegated{Fqdn: fqdn}),
 			getObjectRef: "",
 			resultObject: []ibclient.ZoneDelegated{*ibclient.NewZoneDelegated(ibclient.ZoneDelegated{Fqdn: fqdn, Ref: fakeRefReturn})},
 		}
-		objMgr = ibclient.NewObjectManager(ohmyFakeConnector, "ohmyclient", "")
+		objMgr = ibclient.NewObjectManager(k8gbFakeConnector, "k8gbclient", "")
 	} else {
 		conn, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
 		if err != nil {
@@ -58,7 +58,7 @@ func (p *InfobloxProvider) infobloxConnection() (*ibclient.ObjectManager, error)
 				log.Err(err).Msg("Failed to close connection to infoblox")
 			}
 		}()
-		objMgr = ibclient.NewObjectManager(conn, "ohmyclient", "")
+		objMgr = ibclient.NewObjectManager(conn, "k8gbclient", "")
 	}
 	return objMgr, nil
 }
