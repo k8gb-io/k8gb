@@ -29,7 +29,7 @@ CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClust
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.4.1
-GOLIC_VERSION  ?= v0.4.7
+GOLIC_VERSION  ?= v0.5.0
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
