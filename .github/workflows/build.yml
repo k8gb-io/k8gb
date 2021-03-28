@@ -19,7 +19,7 @@ jobs:
           version: v1.32
       - name: golic
         run: |
-          go install github.com/AbsaOSS/golic@v0.4.7
+          go install github.com/AbsaOSS/golic@v0.5.0
           golic inject --dry -x -t apache2
       - name: go test
         run: go test ./...
