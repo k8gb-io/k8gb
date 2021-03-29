@@ -42,7 +42,7 @@ func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, 
 			Namespace:   gslb.Namespace,
 			Annotations: gslb.Annotations,
 		},
-		Spec: gslb.Spec.Ingress,
+		Spec: k8gbv1beta1.ToV1Beta1IngressSpec(gslb.Spec.Ingress),
 	}
 
 	err := controllerutil.SetControllerReference(gslb, ingress, r.Scheme)
