@@ -114,6 +114,9 @@ If your Kubernetes version or Ingress controller is not included in the table ab
 
 ## Presentations Featuring k8gb
 
+* #29 DoK Community: How Absa Developed Cloud Native Global Load Balancer for Kubernetes<br>
+[![](http://img.youtube.com/vi/MluFlwPFZws/hqdefault.jpg)](https://www.youtube.com/watch?v=MluFlwPFZws "#29 DoK Community: How Absa Developed Cloud Native Global Load Balancer for Kubernetes")
+
 * AWS Containers from the Couch show<br>
 [![](http://img.youtube.com/vi/5pe3ezSnVI8/hqdefault.jpg)](https://www.youtube.com/watch?v=5pe3ezSnVI8 "AWS Containers from the Couch")
 
