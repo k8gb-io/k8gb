@@ -455,7 +455,7 @@ define golic
 endef
 
 define docker-build-arch
-	docker build --build-arg GOARCH=${1} . -t ${IMG}-${1}
+	docker build --build-arg GOARCH=${1} -t ${IMG}-${1} .
 endef
 
 define docker-push-arch

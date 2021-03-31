@@ -54,7 +54,7 @@ type GslbReconciler struct {
 }
 
 const (
-	gslbFinalizer           = "finalizer.k8gb.absa.oss"
+	gslbFinalizer           = "k8gb.absa.oss/finalizer"
 	roundRobinStrategy      = "roundRobin"
 	failoverStrategy        = "failover"
 	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
@@ -67,8 +67,7 @@ var log = logging.Logger()
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs/status,verbs=get;update;patch
 
 // Reconcile runs main reconiliation loop
-func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
@@ -96,20 +95,24 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// indicated by the deletion timestamp being set.
 	isGslbMarkedToBeDeleted := gslb.GetDeletionTimestamp() != nil
 	if isGslbMarkedToBeDeleted {
-		if contains(gslb.GetFinalizers(), gslbFinalizer) {
-			// Run finalization logic for gslbFinalizer. If the
-			// finalization logic fails, don't remove the finalizer so
-			// that we can retry during the next reconciliation.
-			if err := r.finalizeGslb(gslb); err != nil {
-				return result.RequeueError(err)
-			}
+		// For the legacy reasons, delete all finalizers that corresponds with the slice
+		// see: https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.4.0/#change-your-operators-finalizer-names
+		for _, f := range []string{gslbFinalizer, "finalizer.k8gb.absa.oss"} {
+			if contains(gslb.GetFinalizers(), f) {
+				// Run finalization logic for gslbFinalizer. If the
+				// finalization logic fails, don't remove the finalizer so
+				// that we can retry during the next reconciliation.
+				if err := r.finalizeGslb(gslb); err != nil {
+					return result.RequeueError(err)
+				}
 
-			// Remove gslbFinalizer. Once all finalizers have been
-			// removed, the object will be deleted.
-			gslb.SetFinalizers(remove(gslb.GetFinalizers(), gslbFinalizer))
-			err := r.Update(ctx, gslb)
-			if err != nil {
-				return result.RequeueError(err)
+				// Remove gslbFinalizer. Once all finalizers have been
+				// removed, the object will be deleted.
+				gslb.SetFinalizers(remove(gslb.GetFinalizers(), f))
+				err := r.Update(ctx, gslb)
+				if err != nil {
+					return result.RequeueError(err)
+				}
 			}
 		}
 		log.Info().Msg("reconciler exit")
@@ -168,11 +171,11 @@ func (r *GslbReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
 
-	endpointMapFn := handler.ToRequestsFunc(
-		func(a handler.MapObject) []reconcile.Request {
+	endpointMapHandler := handler.EnqueueRequestsFromMapFunc(
+		func(a client.Object) []reconcile.Request {
 			gslbList := &k8gbv1beta1.GslbList{}
 			opts := []client.ListOption{
-				client.InNamespace(a.Meta.GetNamespace()),
+				client.InNamespace(a.GetNamespace()),
 			}
 			c := mgr.GetClient()
 			err := c.List(context.TODO(), gslbList, opts...)
@@ -184,7 +187,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			for _, gslb := range gslbList.Items {
 				for _, rule := range gslb.Spec.Ingress.Rules {
 					for _, path := range rule.HTTP.Paths {
-						if path.Backend.ServiceName == a.Meta.GetName() {
+						if path.Backend.ServiceName == a.GetName() {
 							gslbName = gslb.Name
 						}
 					}
@@ -194,30 +197,30 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return []reconcile.Request{
 					{NamespacedName: types.NamespacedName{
 						Name:      gslbName,
-						Namespace: a.Meta.GetNamespace(),
+						Namespace: a.GetNamespace(),
 					}},
 				}
 			}
 			return nil
 		})
 
-	createGslbFromIngress := func(annotationKey string, annotationValue string, a handler.MapObject, strategy string) {
+	createGslbFromIngress := func(annotationKey string, annotationValue string, a client.Object, strategy string) {
 		log.Info().Msgf("Detected strategy annotation(%s:%s) on Ingress(%s)",
-			annotationKey, annotationValue, a.Meta.GetName())
+			annotationKey, annotationValue, a.GetName())
 		c := mgr.GetClient()
 		ingressToReuse := &v1beta1.Ingress{}
 		err := c.Get(context.Background(), client.ObjectKey{
-			Namespace: a.Meta.GetNamespace(),
-			Name:      a.Meta.GetName(),
+			Namespace: a.GetNamespace(),
+			Name:      a.GetName(),
 		}, ingressToReuse)
 		if err != nil {
-			log.Info().Msgf("Ingress(%s) does not exist anymore. Skipping Glsb creation...", a.Meta.GetName())
+			log.Info().Msgf("Ingress(%s) does not exist anymore. Skipping Glsb creation...", a.GetName())
 			return
 		}
 		gslbExist := &k8gbv1beta1.Gslb{}
 		err = c.Get(context.Background(), client.ObjectKey{
-			Namespace: a.Meta.GetNamespace(),
-			Name:      a.Meta.GetName(),
+			Namespace: a.GetNamespace(),
+			Name:      a.GetName(),
 		}, gslbExist)
 		if err == nil {
 			log.Info().Msgf("Gslb(%s) already exists. Skipping Gslb creation...", gslbExist.Name)
@@ -225,9 +228,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}
 		gslb := &k8gbv1beta1.Gslb{
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace:   a.Meta.GetNamespace(),
-				Name:        a.Meta.GetName(),
-				Annotations: a.Meta.GetAnnotations(),
+				Namespace:   a.GetNamespace(),
+				Name:        a.GetName(),
+				Annotations: a.GetAnnotations(),
 			},
 			Spec: k8gbv1beta1.GslbSpec{
 				Ingress: k8gbv1beta1.FromV1Beta1IngressSpec(ingressToReuse.Spec),
@@ -238,7 +241,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}
 
 		if strategy == failoverStrategy {
-			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
+			for annotationKey, annotationValue := range a.GetAnnotations() {
 				if annotationKey == primaryGeoTagAnnotation {
 					gslb.Spec.Strategy.PrimaryGeoTag = annotationValue
 				}
@@ -264,9 +267,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}
 	}
 
-	ingressMapFn := handler.ToRequestsFunc(
-		func(a handler.MapObject) []reconcile.Request {
-			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {
+	ingressMapHandler := handler.EnqueueRequestsFromMapFunc(
+		func(a client.Object) []reconcile.Request {
+			for annotationKey, annotationValue := range a.GetAnnotations() {
 				if annotationKey == strategyAnnotation {
 					switch annotationValue {
 					case roundRobinStrategy:
@@ -283,11 +286,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&v1beta1.Ingress{}).
 		Owns(&externaldns.DNSEndpoint{}).
-		Watches(&source.Kind{Type: &corev1.Endpoints{}},
-			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: endpointMapFn}).
-		Watches(&source.Kind{Type: &v1beta1.Ingress{}},
-			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: ingressMapFn}).
+		Watches(&source.Kind{Type: &corev1.Endpoints{}}, endpointMapHandler).
+		Watches(&source.Kind{Type: &v1beta1.Ingress{}}, ingressMapHandler).
 		Complete(r)
 }
