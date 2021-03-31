@@ -114,14 +114,11 @@ If your Kubernetes version or Ingress controller is not included in the table ab
 
 ## Presentations Featuring k8gb
 
-* AWS Containers from the Couch show<br>
-[![](http://img.youtube.com/vi/5pe3ezSnVI8/hqdefault.jpg)](https://www.youtube.com/watch?v=5pe3ezSnVI8 "AWS Containers from the Couch")
+[//]: # (Table is generated with the help of https://www.tablesgenerator.com/markdown_tables#)
 
-* OpenShift Commons Briefings<br>
-[![](http://img.youtube.com/vi/5DhO9C2NCrk/0.jpg)](http://www.youtube.com/watch?v=5DhO9C2NCrk "OpenShift Commons Briefings")
-
-* Demo at Kubernetes SIG Multicluster<br>
-[![](http://img.youtube.com/vi/jeUeRQM-ZyM/0.jpg)](http://www.youtube.com/watch?v=jeUeRQM-ZyM "Kubernetes SIG Multicluster")
+| **#29 DoK Community**<br> [![](http://img.youtube.com/vi/MluFlwPFZws/hqdefault.jpg)](https://www.youtube.com/watch?v=MluFlwPFZws "#29 DoK Community: How Absa Developed Cloud Native Global Load Balancer for Kubernetes") | **AWS Containers from the Couch show**<br> [![](http://img.youtube.com/vi/5pe3ezSnVI8/hqdefault.jpg)](https://www.youtube.com/watch?v=5pe3ezSnVI8 "AWS Containers from the Couch") |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **OpenShift Commons Briefings**<br> [![](http://img.youtube.com/vi/5DhO9C2NCrk/0.jpg)](http://www.youtube.com/watch?v=5DhO9C2NCrk "OpenShift Commons Briefings")                                                                                                                                | **Demo at Kubernetes SIG Multicluster**<br> [![](http://img.youtube.com/vi/jeUeRQM-ZyM/0.jpg)](http://www.youtube.com/watch?v=jeUeRQM-ZyM "Kubernetes SIG Multicluster")             |
 
 
 ## Contributing
