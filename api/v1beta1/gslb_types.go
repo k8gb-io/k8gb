@@ -59,6 +59,8 @@ type GslbStatus struct {
 // +kubebuilder:subresource:status
 
 // Gslb is the Schema for the gslbs API
+// +kubebuilder:printcolumn:name="strategy",type=string,JSONPath=`.spec.strategy.type`
+// +kubebuilder:printcolumn:name="geoTag",type=string,JSONPath=`.status.geoTag`
 type Gslb struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
