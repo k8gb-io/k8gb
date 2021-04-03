@@ -16,7 +16,14 @@ spec:
     singular: gslb
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.strategy.type
+      name: strategy
+      type: string
+    - jsonPath: .status.geoTag
+      name: geoTag
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: Gslb is the Schema for the gslbs API
@@ -98,8 +105,6 @@ spec:
                         under a specified host to the related backend services. Incoming
                         requests are first evaluated for a host match, then routed
                         to the backend associated with the matching IngressRuleValue.
-                      required:
-                      - "http"
                       properties:
                         host:
                           description: "Host is the fully qualified domain name of
@@ -225,6 +230,8 @@ spec:
                           required:
                           - paths
                           type: object
+                      required:
+                      - http
                       type: object
                     type: array
                   tls:
