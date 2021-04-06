@@ -36,6 +36,7 @@ import (
 	types "k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -248,12 +249,21 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			}
 		}
 
+		err = controllerutil.SetControllerReference(ingressToReuse, gslb, r.Scheme)
+		if err != nil {
+			log.Err(err).
+				Str("Ingress", ingressToReuse.Name).
+				Str("Gslb", gslb.Name).
+				Msg("Cannot set the Ingress as the owner of the Gslb")
+		}
+
 		log.Info().Msgf("Creating new Gslb(%s) out of Ingress annotation", gslb.Name)
 		err = c.Create(context.Background(), gslb)
 		if err != nil {
 			log.Err(err).Msg("Glsb creation failed")
 		}
 	}
+
 	ingressMapFn := handler.ToRequestsFunc(
 		func(a handler.MapObject) []reconcile.Request {
 			for annotationKey, annotationValue := range a.Meta.GetAnnotations() {

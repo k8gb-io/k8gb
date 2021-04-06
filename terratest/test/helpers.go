@@ -167,3 +167,21 @@ func assertDNSEndpointLabel(t *testing.T, options *k8s.KubectlOptions, label str
 	t.Helper()
 	k8s.RunKubectl(t, options, "get", "dnsendpoint", "-l", label)
 }
+
+func assertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName string) {
+	t.Helper()
+	deletionExpected := []string{fmt.Sprintf("Error from server (NotFound): gslbs.k8gb.absa.oss \"%s\" not found", gslbName)}
+	deletionActual, err := DoWithRetryWaitingForValueE(
+		t,
+		"Waiting for Gslb CR to be deleted...",
+		300,
+		1*time.Second,
+		func() ([]string, error) {
+			out, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName)
+			return []string{out}, err
+		},
+		deletionExpected)
+	require.NoError(t, err)
+
+	assert.Equal(t, deletionExpected, deletionActual)
+}
