@@ -54,8 +54,6 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 
 	defer k8s.DeleteNamespace(t, options, namespaceName)
 
-	defer k8s.KubectlDelete(t, options, kubeResourcePath)
-
 	k8s.KubectlApply(t, options, kubeResourcePath)
 
 	ingress := k8s.GetIngress(t, options, "test-gslb-annotation-failover")
@@ -68,5 +66,10 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 		k8s.KubectlApply(t, options, brokenResourcePath)
 		err := k8s.RunKubectlE(t, options, "get", "gslb", "broken-test-gslb-annotation-failover")
 		require.Error(t, err)
+	})
+
+	t.Run("Gslb is getting deleted together with the annotated Ingress", func(t *testing.T) {
+		k8s.KubectlDelete(t, options, kubeResourcePath)
+		assertGslbDeleted(t, options, ingress.Name)
 	})
 }

@@ -434,8 +434,8 @@ endef
 
 define docker-test-build-push
 	docker build . -t k8gb:$(COMMIT_HASH)
-	docker tag k8gb:$(COMMIT_HASH) $(REPO):v$(COMMIT_HASH)
-	docker push $(REPO):v$(COMMIT_HASH)
+	docker tag k8gb:$(COMMIT_HASH) $(REPO):$(COMMIT_HASH)
+	docker push $(REPO):$(COMMIT_HASH)
 	sed -i "s/$(VERSION)/$(COMMIT_HASH)/g" chart/k8gb/Chart.yaml
 endef
 
