@@ -321,8 +321,8 @@ define deploy-local-cluster
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) \
 		--set k8gb.hostAlias.enabled=true \
 		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
-		--set k8gb.imageTag=$3 $4
-		--set k8gb.log.format=$(LOG_FORMAT)
+		--set k8gb.imageTag=$3 $4 \
+		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL)
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
