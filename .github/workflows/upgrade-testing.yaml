@@ -1,4 +1,4 @@
-name: Terratest
+name: Upgrade Testing
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - '.spelling'
 
 jobs:
-  terratest:
+  upgrade-testing:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
@@ -40,8 +40,11 @@ jobs:
             --no-lb
             --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
 
-      - name: K8GB deployment
-        run: make deploy-candidate
+      - name: K8GB deploy stable
+        run: make deploy-stable
+
+      - name: K8GB deploy-candidate-with-helm
+        run: make deploy-candidate-with-helm
 
       - name: Terratest
         run: make terratest

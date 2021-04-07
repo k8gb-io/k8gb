@@ -110,9 +110,37 @@ deploy-full-local-setup: ## Deploy full local multicluster setup
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS))
 
+.PHONY: deploy-stable
+deploy-stable:
+	@echo "\n$(YELLOW) import $(CYAN)k8gb:$(VERSION) $(YELLOW)to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),)
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS))
+
+	$(call list-running-pods,$(CLUSTER_GSLB1))
+	$(call list-running-pods,$(CLUSTER_GSLB2))
+
+.PHONY: deploy-candidate-with-helm
+deploy-candidate-with-helm:
+	@echo "\n$(YELLOW)build k8gb docker and import to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
+	docker build . -t $(REPO):$(SEMVER)
+
+	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB1)
+	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB2)
+
+	@echo "\n$(YELLOW)Upgrade GSLB operator from $(VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB1) $(NC)"
+	kubectl config use-context k3d-$(CLUSTER_GSLB1)
+	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),)
+
+	@echo "\n$(YELLOW)Upgrade GSLB operator from $(VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB2) $(NC)"
+	kubectl config use-context k3d-$(CLUSTER_GSLB2)
+	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS))
+
+	$(call list-running-pods,$(CLUSTER_GSLB1))
+	$(call list-running-pods,$(CLUSTER_GSLB2))
+
 # triggered by terraform GitHub Action. Clusters already exists. GO is not installed yet
-.PHONY: deploy-to-AbsaOSS-k3d-action
-deploy-to-AbsaOSS-k3d-action:
+.PHONY: deploy-candidate
+deploy-candidate:
 	@echo "\n$(YELLOW)build k8gb docker and push to registry $(NC)"
 	docker build . -t $(REPO):$(SEMVER)
 
@@ -122,11 +150,8 @@ deploy-to-AbsaOSS-k3d-action:
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS))
 
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB2) $(NC)"
-	kubectl get pods -A
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1) $(NC)"
-	kubectl config use-context k3d-$(CLUSTER_GSLB1)
-	kubectl get pods -A
+	$(call list-running-pods,$(CLUSTER_GSLB1))
+	$(call list-running-pods,$(CLUSTER_GSLB2))
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: ## Deploy k8gb operator
@@ -309,6 +334,17 @@ define create-local-cluster
 	--agents 1 --no-lb --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server" --network $(CLUSTER_GSLB_NETWORK)
 endef
 
+define deploy-k8gb-with-helm
+	cd chart/k8gb && helm dependency update
+	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) \
+		--set k8gb.hostAlias.enabled=true \
+		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
+		--set k8gb.imageTag=$3 $4 \
+		--set k8gb.log.format=$(LOG_FORMAT) \
+		--set k8gb.log.level=$(LOG_LEVEL) \
+		--wait --timeout=2m0s
+endef
+
 define deploy-local-cluster
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$1 $(NC)"
 	kubectl config use-context k3d-$1
@@ -317,13 +353,7 @@ define deploy-local-cluster
 	kubectl apply -f deploy/namespace.yaml
 
 	@echo "\n$(YELLOW)Deploy GSLB operator from $3 $(NC)"
-	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) \
-		--set k8gb.hostAlias.enabled=true \
-		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
-		--set k8gb.imageTag=$3 $4 \
-		--set k8gb.log.format=$(LOG_FORMAT) \
-		--set k8gb.log.level=$(LOG_LEVEL)
+	$(call deploy-k8gb-with-helm,$1,$2,$3,$4)
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update stable https://charts.helm.sh/stable
@@ -340,7 +370,7 @@ define deploy-local-cluster
 	$(call deploy-test-apps)
 
 	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
-	$(call wait)
+	$(call wait-for-ingress)
 
 	@echo "\n$(CYAN)$1 $(YELLOW)deployed! $(NC)"
 endef
@@ -402,7 +432,7 @@ define demo-host
 endef
 
 # waits for NGINX, GSLB are ready
-define wait
+define wait-for-ingress
 	kubectl -n k8gb wait --for=condition=Ready pod -l app=nginx-ingress --timeout=600s
 endef
 
@@ -445,4 +475,9 @@ define debug
 	kubectl apply -f ./chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
 	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml
 	dlv $1
+endef
+
+define list-running-pods
+	@echo "\n$(YELLOW)Local cluster $(CYAN)$1 $(NC)"
+	kubectl get pods -A --context=k3d-$1
 endef
