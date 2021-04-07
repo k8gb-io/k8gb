@@ -5,7 +5,7 @@ metadata:
 spec:
   ingress:
     rules:
-      - host: terratest-failover.cloud.example.com
+      - host: broken-no-http.cloud.example.com
   strategy:
     type: failover
     primaryGeoTag: eu
