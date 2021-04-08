@@ -79,9 +79,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 
 	k8s.KubectlDelete(t, options, ingressResourcePath)
 
-	err = k8s.RunKubectlE(t, options, "delete", "gslb", name)
-
-	require.NoError(t, err)
+	assertGslbDeleted(t, options, ingress.Name)
 
 	// recreate ingress
 	k8s.KubectlApply(t, options, ingressResourcePath)
