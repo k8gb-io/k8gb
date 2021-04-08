@@ -100,7 +100,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 	t.Parallel()
 	// name of ingress and gslb
-	const name = "test-gslb-failover-simple"
+	const name = "test-gslb-lifecycle"
 
 	assertStrategy := func(t *testing.T, options *k8s.KubectlOptions) {
 		assertGslbSpec(t, options, name, "spec.strategy.splitBrainThresholdSeconds", "600")
@@ -109,7 +109,7 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 		assertGslbSpec(t, options, name, "spec.strategy.type", "failover")
 	}
 
-	kubeResourcePath, err := filepath.Abs("../examples/failover-spec.yaml")
+	kubeResourcePath, err := filepath.Abs("../examples/failover-lifecycle.yaml")
 	ingressResourcePath, err := filepath.Abs("../examples/ingress-annotation-failover.yaml")
 	require.NoError(t, err)
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique

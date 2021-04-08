@@ -1,11 +1,11 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: broken-test-gslb1
+  name: broken-test-gslb2
 spec:
   ingress:
     rules:
-      - host: terratest-failover.cloud.example.com
+      - host: terratest-broken.cloud.example.com
         https:
           paths:
           - backend:
