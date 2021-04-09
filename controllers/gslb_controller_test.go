@@ -652,7 +652,7 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 	// injecting custom config to reconciler created from predefined config
 	predefinedSettings.reconciler.Config = &customConfig
 	// act
-	_, err := predefinedSettings.reconciler.Reconcile(req)
+	_, err := predefinedSettings.reconciler.Reconcile(context.TODO(), req)
 	// assert
 	assert.Error(t, err, "expected controller to detect Ingress hostname and edgeDNSZone mismatch")
 	assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone otherdnszone.com"))
@@ -898,6 +898,62 @@ func TestGslbSetsAnnotationsOnTheIngress(t *testing.T) {
 	assert.Equal(t, map[string]string{strategyAnnotation: "roundRobin"}, ingress.Annotations)
 }
 
+func TestGslbGetFinalizer(t *testing.T) {
+	// arrange
+	defer cleanup()
+	gslb := &k8gbv1beta1.Gslb{}
+	settings := provideSettings(t, predefinedConfig)
+
+	// act
+	reconcileAndUpdateGslb(t, settings)
+
+	// assert
+	err := settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
+	require.NoError(t, err)
+	assert.Len(t, gslb.Finalizers, 1)
+}
+
+func TestGslbRemoveDefaultFinalizer(t *testing.T) {
+	// arrange
+	defer cleanup()
+	gslb := &k8gbv1beta1.Gslb{}
+	var dt = metav1.Now()
+	settings := provideSettings(t, predefinedConfig)
+	settings.gslb.SetDeletionTimestamp(&dt)
+	err := settings.reconciler.Update(context.Background(), settings.gslb)
+	require.NoError(t, err, "Failed to update Gslb")
+	settings.finalCall = true // Gslb is about to be deleted, no requeue expected
+
+	// act
+	reconcileAndUpdateGslb(t, settings)
+
+	// assert
+	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, gslb)
+	require.NoError(t, err)
+	assert.Len(t, gslb.Finalizers, 0)
+}
+
+func TestGslbRemoveBothFinalizers(t *testing.T) {
+	// arrange
+	defer cleanup()
+	gslb := &k8gbv1beta1.Gslb{}
+	var dt = metav1.Now()
+	settings := provideSettings(t, predefinedConfig)
+	settings.gslb.SetDeletionTimestamp(&dt)
+	settings.gslb.Finalizers = append(settings.gslb.Finalizers, "finalizer.k8gb.absa.oss")
+	err := settings.client.Update(context.Background(), settings.gslb)
+	require.NoError(t, err, "Failed to update Gslb")
+	settings.finalCall = true // Gslb is about to be deleted, no requeue expected
+
+	// act
+	reconcileAndUpdateGslb(t, settings)
+
+	// assert
+	err = settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
+	require.NoError(t, err)
+	assert.Len(t, gslb.Finalizers, 0)
+}
+
 func TestMain(m *testing.M) {
 	// setup tests
 	fakeDNS()
@@ -1030,7 +1086,7 @@ func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
 	t.Helper()
 	// Reconcile again so Reconcile() checks services and updates the Gslb
 	// resources' Status.
-	res, err := s.reconciler.Reconcile(s.request)
+	res, err := s.reconciler.Reconcile(context.TODO(), s.request)
 	if err != nil {
 		return
 	}
@@ -1041,7 +1097,7 @@ func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
 		}
 	}
 
-	err = s.client.Get(context.TODO(), s.request.NamespacedName, s.gslb)
+	err = s.reconciler.Get(context.TODO(), s.request.NamespacedName, s.gslb)
 	if err != nil {
 		t.Fatalf("Failed to get expected gslb: (%v)", err)
 	}
@@ -1071,7 +1127,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	// Register external-dns DNSEndpoint CRD
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	// Create a fake client to mock API calls.
-	cl := fake.NewFakeClientWithScheme(s, objs...)
+	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
 	// Create config
 	config, err := depresolver.NewDependencyResolver().ResolveOperatorConfig()
 	if err != nil {
@@ -1102,7 +1158,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	}
 	r.DNSProvider = f.Provider()
 	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServer)
-	res, err := r.Reconcile(req)
+	res, err := r.Reconcile(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)
 	}
