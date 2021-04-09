@@ -128,7 +128,7 @@ Kind:         Gslb
 Metadata:
   Creation Timestamp:  2020-06-24T22:51:09Z
   Finalizers:
-    finalizer.k8gb.absa.oss
+    k8gb.absa.oss/finalizer
   Generation:        1
   Resource Version:  14197
   Self Link:         /apis/k8gb.absa.oss/v1beta1/namespaces/test-gslb/gslbs/podinfo
@@ -206,7 +206,7 @@ Kind:         Gslb
 Metadata:
   Creation Timestamp:  2020-06-24T23:25:08Z
   Finalizers:
-    finalizer.k8gb.absa.oss
+    k8gb.absa.oss/finalizer
   Generation:        1
   Resource Version:  23881
   Self Link:         /apis/k8gb.absa.oss/v1beta1/namespaces/test-gslb/gslbs/podinfo
