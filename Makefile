@@ -141,7 +141,7 @@ deploy-candidate-with-helm:
 # triggered by terraform GitHub Action. Clusters already exists. GO is not installed yet
 .PHONY: deploy-candidate
 deploy-candidate:
-	@echo "\n$(YELLOW)build k8gb docker and push to registry $(NC)"
+	@echo "\n$(YELLOW)build k8gb docker and import to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
 	docker build . -t $(REPO):$(SEMVER)
 
 	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB1)
