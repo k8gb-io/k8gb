@@ -356,10 +356,10 @@ define deploy-local-cluster
 	$(call deploy-k8gb-with-helm,$1,$2,$3,$4)
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
-	helm repo add --force-update stable https://charts.helm.sh/stable
+	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
 	helm repo update
-	helm -n k8gb upgrade -i nginx-ingress stable/nginx-ingress \
-		--version 1.41.1 -f deploy/ingress/nginx-ingress-values.yaml
+	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
+		--version 3.24.0 -f deploy/ingress/nginx-ingress-values.yaml
 
 	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace.yaml
@@ -433,7 +433,7 @@ endef
 
 # waits for NGINX, GSLB are ready
 define wait-for-ingress
-	kubectl -n k8gb wait --for=condition=Ready pod -l app=nginx-ingress --timeout=600s
+	kubectl -n k8gb wait --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx --timeout=600s
 endef
 
 define generate
