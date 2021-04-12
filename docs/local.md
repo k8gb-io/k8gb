@@ -65,16 +65,12 @@ As expected result you should see **eight A records** divided between nodes of b
 ...
 ...
 ;; ANSWER SECTION:
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.3
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.4
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.2
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.5
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.3
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.2
 ...
 ...
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.8
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.6
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.7
-localtargets-roundrobin.cloud.example.com. 30 IN A    172.16.0.9
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.5
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.4
 ```
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top.
 Run following command and check if you get two json responses.
