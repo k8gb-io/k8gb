@@ -102,10 +102,9 @@ demo-failover: ## Execute failover demo
 
 # spin-up local environment
 .PHONY: deploy-full-local-setup
-deploy-full-local-setup: ## Deploy full local multicluster setup
-	docker network create --driver=bridge --subnet=172.16.0.0/24 $(CLUSTER_GSLB_NETWORK)
-	$(call create-local-cluster,$(CLUSTER_GSLB1),-p "80:80@agent[0]" -p "443:443@agent[0]" -p "5053:53/udp@agent[0]" )
-	$(call create-local-cluster,$(CLUSTER_GSLB2),-p "81:80@agent[0]" -p "444:443@agent[0]" -p "5054:53/udp@agent[0]" )
+deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
+	$(call create-local-cluster,$(CLUSTER_GSLB1))
+	$(call create-local-cluster,$(CLUSTER_GSLB2))
 
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS))
@@ -330,8 +329,7 @@ help: ## Show this help
 
 define create-local-cluster
 	@echo "\n$(YELLOW)Deploy local cluster $(CYAN)$1 $(NC)"
-	k3d cluster create $1 $2 \
-	--agents 1 --no-lb --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server" --network $(CLUSTER_GSLB_NETWORK)
+	k3d cluster create -c k3d/$1.yaml
 endef
 
 define deploy-k8gb-with-helm
