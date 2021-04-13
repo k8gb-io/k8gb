@@ -36,35 +36,14 @@ externaldns:
 
 coredns:
   isClusterService: false
+  deployment:
+    skipConfig: true
   image:
     repository: absaoss/k8s_crd
     tag: "v0.0.2"
   serviceAccount:
     create: true
     name: coredns
-  servers:
-  - zones:
-    - zone: .
-    port: 53
-    plugins:
-    - name: log
-    - name: errors
-    # Serves a /health endpoint on :8080, required for livenessProbe
-    - name: health
-    # Serves a /ready endpoint on :8181, required for readinessProbe
-    - name: ready
-    - name: loadbalance
-      parameters: round_robin
-    # Serves a /metrics endpoint on :9153, required for serviceMonitor
-    - name: prometheus
-      parameters: 0.0.0.0:9153
-    - name: forward
-      parameters: . /etc/resolv.conf
-    - name: k8s_crd
-      parameters: .
-      configBlock: |-
-        resources DNSEndpoint
-        filter k8gb.absa.oss/dnstype=local
 
 infoblox:
   enabled: false
