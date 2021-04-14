@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
@@ -54,11 +55,13 @@ type GslbReconciler struct {
 }
 
 const (
-	gslbFinalizer           = "k8gb.absa.oss/finalizer"
-	roundRobinStrategy      = "roundRobin"
-	failoverStrategy        = "failover"
-	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
-	strategyAnnotation      = "k8gb.io/strategy"
+	gslbFinalizer                        = "k8gb.absa.oss/finalizer"
+	roundRobinStrategy                   = "roundRobin"
+	failoverStrategy                     = "failover"
+	primaryGeoTagAnnotation              = "k8gb.io/primary-geotag"
+	strategyAnnotation                   = "k8gb.io/strategy"
+	dnsTTLSecondsAnnotation              = "k8gb.io/dns-ttl-seconds"
+	splitBrainThresholdSecondsAnnotation = "k8gb.io/splitbrain-threshold-seconds"
 )
 
 var log = logging.Logger()
@@ -238,6 +241,23 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					Type: strategy,
 				},
 			},
+		}
+
+		strToInt := func(str string) int {
+			intValue, err := strconv.Atoi(str)
+			if err != nil {
+				log.Err(err).Msgf("can't convert string to int (%s)", err)
+			}
+			return intValue
+		}
+
+		for annotationKey, annotationValue := range a.GetAnnotations() {
+			switch annotationKey {
+			case dnsTTLSecondsAnnotation:
+				gslb.Spec.Strategy.DNSTtlSeconds = strToInt(annotationValue)
+			case splitBrainThresholdSecondsAnnotation:
+				gslb.Spec.Strategy.SplitBrainThresholdSeconds = strToInt(annotationValue)
+			}
 		}
 
 		if strategy == failoverStrategy {
