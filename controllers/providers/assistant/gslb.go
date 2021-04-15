@@ -149,8 +149,10 @@ func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.D
 		return err
 	}
 
-	// Update existing object with new spec
+	// Update existing object with new spec, labels and annotations
 	found.Spec = i.Spec
+	found.ObjectMeta.Annotations = i.ObjectMeta.Annotations
+	found.ObjectMeta.Labels = i.ObjectMeta.Labels
 	err = r.client.Update(context.TODO(), found)
 
 	if err != nil {

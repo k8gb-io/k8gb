@@ -395,14 +395,18 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 
 	// act
 	createHealthyService(t, &settings, serviceName)
+	// delete DNSEndpoint so we can pretend it wasn't annotated before
+	deleteDNSEndpoint(t, &settings)
+	createDNSEndpoint(t, &settings)
 	defer deleteHealthyService(t, &settings, serviceName)
+	defer deleteDNSEndpoint(t, &settings)
 	reconcileAndUpdateGslb(t, settings)
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
 	require.NoError(t, err, "Failed to load DNS endpoint")
 	got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
 
 	// assert
-	assert.Equal(t, got, want, "got:\n %q annotation value,\n\n want:\n %q", got, want, got, want)
+	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
 }
 
 func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
@@ -1080,6 +1084,33 @@ func deleteUnhealthyService(t *testing.T, s *testSettings, serviceName string) {
 		t.Fatalf("Failed to delete testing endpoint: (%v)", err)
 	}
 
+}
+func createDNSEndpoint(t *testing.T, s *testSettings) {
+	t.Helper()
+	dnsEndpoint := &externaldns.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      s.gslb.Name,
+			Namespace: s.gslb.Namespace,
+		},
+	}
+	err := s.client.Create(context.TODO(), dnsEndpoint)
+	if err != nil {
+		t.Fatalf("Failed to create testing DNSEndpoint: (%v)", err)
+	}
+}
+
+func deleteDNSEndpoint(t *testing.T, s *testSettings) {
+	t.Helper()
+	endpoint := &externaldns.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      s.gslb.Name,
+			Namespace: s.gslb.Namespace,
+		},
+	}
+	err := s.client.Delete(context.TODO(), endpoint)
+	if err != nil {
+		t.Fatalf("Failed to delete testing DNSEndpoint: (%v)", err)
+	}
 }
 
 func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
