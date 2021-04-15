@@ -61,6 +61,8 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 	assertGslbStatus(t, options, "test-gslb-annotation-failover", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:NotFound unhealthy.cloud.example.com:NotFound")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.type", "failover")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.primaryGeoTag", "eu")
+	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.dnsTtlSeconds", "60")
+	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.splitBrainThresholdSeconds", "600")
 
 	t.Run("Broken ingress is not proccessed", func(t *testing.T) {
 		k8s.KubectlApply(t, options, brokenResourcePath)
