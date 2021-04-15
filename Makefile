@@ -106,20 +106,20 @@ deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
 	$(call create-local-cluster,$(CLUSTER_GSLB1))
 	$(call create-local-cluster,$(CLUSTER_GSLB2))
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),)
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),,'k8gb/k8gb')
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
 
 .PHONY: deploy-stable
 deploy-stable:
 	@echo "\n$(YELLOW) import $(CYAN)k8gb:$(VERSION) $(YELLOW)to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),)
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),,'k8gb/k8gb')
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
 
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
 
-.PHONY: deploy-candidate-with-helm
-deploy-candidate-with-helm:
+.PHONY: upgrade-candidate
+upgrade-candidate: ## Upgrade k8gb to the test version on existing clusters
 	@echo "\n$(YELLOW)build k8gb docker and import to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
 	docker build . -t $(REPO):$(SEMVER)
 
@@ -128,26 +128,25 @@ deploy-candidate-with-helm:
 
 	@echo "\n$(YELLOW)Upgrade GSLB operator from $(VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB1) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_GSLB1)
-	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),)
+	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),,'./chart/k8gb')
 
 	@echo "\n$(YELLOW)Upgrade GSLB operator from $(VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB2) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_GSLB2)
-	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS))
+	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
 
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
 
-# triggered by terraform GitHub Action. Clusters already exists. GO is not installed yet
 .PHONY: deploy-candidate
-deploy-candidate:
+deploy-candidate: ## Deploy test k8gb version together with CRs and test apps on top of existing clusters
 	@echo "\n$(YELLOW)build k8gb docker and import to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
 	docker build . -t $(REPO):$(SEMVER)
 
 	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB1)
 	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB2)
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),)
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS))
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),,'./chart/k8gb')
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
 
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
@@ -333,8 +332,9 @@ define create-local-cluster
 endef
 
 define deploy-k8gb-with-helm
+	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) \
+	helm -n k8gb upgrade -i k8gb $5 -f $(VALUES_YAML) \
 		--set k8gb.hostAlias.enabled=true \
 		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
 		--set k8gb.imageTag=$3 $4 \
@@ -351,7 +351,7 @@ define deploy-local-cluster
 	kubectl apply -f deploy/namespace.yaml
 
 	@echo "\n$(YELLOW)Deploy GSLB operator from $3 $(NC)"
-	$(call deploy-k8gb-with-helm,$1,$2,$3,$4)
+	$(call deploy-k8gb-with-helm,$1,$2,$3,$4,$5)
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx

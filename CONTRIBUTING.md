@@ -29,6 +29,25 @@ This is a rough outline of what a contributor's workflow looks like:
 
 Thanks for contributing!
 
+### Local setup
+
+```sh
+make deploy-full-local-setup
+```
+Deploys k8gb from scracth including:
+
+* 2 local clusters
+* Stable k8gb helm chart
+* Gslb Custom Resources examples
+* Test applications
+
+```sh
+make upgrade-candidate
+```
+Performs upgrade of k8gb helm chart and controller
+to the testing version that is built from your current
+development tree.
+
 ### Testing
 
 * Unit tests should be updated for any functional code change at [test suite location](https://github.com/AbsaOSS/k8gb/tree/master/controllers/gslb_controller_test.go).
@@ -85,7 +104,8 @@ The first line is the subject and should be no longer than 70 characters, the se
 
 ## Documentation
 
-If the contribution changes the existing APIs or user interface it must include sufficient documentation to explain the use of the new or updated feature. Likewise the [CHANGELOG][changelog] should be updated with a summary of the change and link to the pull request.
+If the contribution changes the existing APIs or user interface it must include sufficient documentation to explain the use of the new or updated feature.
+[CHANGELOG](CHANGELOG.md) is automatically generated from Github PRs and Issues. Please use special [keywords](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword) to link PR to and Issue for a clean changelog generation.
 
 
 [golang-style-doc]: https://github.com/golang/go/wiki/CodeReviewComments

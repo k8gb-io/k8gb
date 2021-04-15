@@ -29,8 +29,8 @@ jobs:
       - name: K8GB deploy stable
         run: make deploy-stable
 
-      - name: K8GB deploy-candidate-with-helm
-        run: make deploy-candidate-with-helm
+      - name: K8GB upgrade candidate
+        run: make upgrade-candidate
 
       - name: Terratest
         run: make terratest
