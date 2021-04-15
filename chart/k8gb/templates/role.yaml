@@ -7,54 +7,11 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - nodes
-  - services
-  - services/finalizers
   - endpoints
-  - persistentvolumeclaims
-  - events
-  - configmaps
-  - secrets
+  - services
   verbs:
-  - '*'
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  - daemonsets
-  - replicasets
-  - statefulsets
-  verbs:
-  - '*'
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - apps
-  resourceNames:
-  - k8gb
-  resources:
-  - deployments/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-- apiGroups:
-  - apps
-  resources:
-  - replicasets
-  - deployments
-  verbs:
-  - get
+  - 'get'
+  - 'list'
 - apiGroups:
   - k8gb.absa.oss
   resources:
@@ -75,7 +32,7 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - '*'
+  - ""
   resources:
   - namespaces
   verbs:
