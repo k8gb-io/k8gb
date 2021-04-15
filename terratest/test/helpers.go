@@ -185,3 +185,13 @@ func assertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName strin
 
 	assert.Equal(t, deletionExpected, deletionActual)
 }
+
+func waitForLocalGSLB(t *testing.T, host string, port int, expectedResult []string) (output []string, err error) {
+	return DoWithRetryWaitingForValueE(
+		t,
+		"Wait for failover to happen and coredns to pickup new values...",
+		100,
+		time.Second*1,
+		func() ([]string, error) { return Dig(t, "localhost", port, host) },
+		expectedResult)
+}
