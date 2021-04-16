@@ -60,17 +60,19 @@ func (f LogFormat) String() string {
 }
 
 // EdgeDNSType specifies to which edge DNS is k8gb connecting
-type EdgeDNSType int
+type EdgeDNSType string
 
 const (
 	// DNSTypeNoEdgeDNS is default DNSType. Is used during integration testing when no edgeDNS provider exists
-	DNSTypeNoEdgeDNS EdgeDNSType = 1 << iota
+	DNSTypeNoEdgeDNS EdgeDNSType = "NoEdgeDNS"
 	// DNSTypeInfoblox type
-	DNSTypeInfoblox
+	DNSTypeInfoblox EdgeDNSType = "Infoblox"
 	// DNSTypeRoute53 type
-	DNSTypeRoute53
+	DNSTypeRoute53 EdgeDNSType = "Route53"
 	// DNSTypeNS1 type
-	DNSTypeNS1
+	DNSTypeNS1 EdgeDNSType = "NS1"
+	// DNSTypeMultipleProviders type
+	DNSTypeMultipleProviders EdgeDNSType = "MultipleProviders"
 )
 
 // Log configuration
@@ -131,14 +133,14 @@ type Config struct {
 	Infoblox Infoblox
 	// Override the behavior of GSLB in the test environments
 	Override Override
-	// route53Enabled hidden. EdgeDNSType defines all enabled Enabled types
-	route53Enabled bool
-	// ns1Enabled flag
-	ns1Enabled bool
 	// CoreDNSExposed flag
 	CoreDNSExposed bool
 	// Log configuration
 	Log Log
+	// route53Enabled hidden. EdgeDNSType defines all enabled Enabled types
+	route53Enabled bool
+	// ns1Enabled flag
+	ns1Enabled bool
 }
 
 // DependencyResolver resolves configuration for GSLB

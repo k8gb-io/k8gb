@@ -1222,8 +1222,8 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 func cleanup() {
 	for _, s := range []string{depresolver.ReconcileRequeueSecondsKey, depresolver.ClusterGeoTagKey, depresolver.ExtClustersGeoTagsKey,
 		depresolver.EdgeDNSZoneKey, depresolver.DNSZoneKey, depresolver.EdgeDNSServerKey, depresolver.K8gbNamespaceKey,
-		depresolver.Route53EnabledKey, depresolver.InfobloxGridHostKey, depresolver.InfobloxVersionKey, depresolver.InfobloxPortKey,
-		depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.InfobloxHTTPRequestTimeoutKey,
+		depresolver.Route53EnabledKey, depresolver.NS1EnabledKey, depresolver.InfobloxGridHostKey, depresolver.InfobloxVersionKey,
+		depresolver.InfobloxPortKey, depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.InfobloxHTTPRequestTimeoutKey,
 		depresolver.InfobloxHTTPPoolConnectionsKey, depresolver.OverrideWithFakeDNSKey, depresolver.OverrideFakeInfobloxKey,
 		depresolver.LogLevelKey, depresolver.LogFormatKey, depresolver.LogNoColorKey} {
 		if os.Unsetenv(s) != nil {
@@ -1241,6 +1241,7 @@ func configureEnvVar(config depresolver.Config) {
 	_ = os.Setenv(depresolver.DNSZoneKey, config.DNSZone)
 	_ = os.Setenv(depresolver.K8gbNamespaceKey, config.K8gbNamespace)
 	_ = os.Setenv(depresolver.Route53EnabledKey, strconv.FormatBool(config.EdgeDNSType == depresolver.DNSTypeRoute53))
+	_ = os.Setenv(depresolver.NS1EnabledKey, strconv.FormatBool(config.EdgeDNSType == depresolver.DNSTypeNS1))
 	_ = os.Setenv(depresolver.InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(depresolver.InfobloxVersionKey, config.Infoblox.Version)
 	_ = os.Setenv(depresolver.InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))
