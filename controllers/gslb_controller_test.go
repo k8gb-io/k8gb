@@ -99,7 +99,7 @@ var fakeDNSSettings = utils.FakeDNSSettings{
 	DNSZoneFQDN:     "cloud.example.com.",
 }
 
-const coreDNSExtServiceName = "k8gb-coredns-lb"
+const coreDNSExtServiceName = "k8gb-coredns-randomname"
 
 func TestNotFoundServiceStatus(t *testing.T) {
 	// arrange
@@ -706,6 +706,9 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      coreDNSExtServiceName,
 			Namespace: predefinedConfig.K8gbNamespace,
+			Labels: map[string]string{
+				"app.kubernetes.io/name": "coredns",
+			},
 		},
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
@@ -777,6 +780,9 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      coreDNSExtServiceName,
 			Namespace: predefinedConfig.K8gbNamespace,
+			Labels: map[string]string{
+				"app.kubernetes.io/name": "coredns",
+			},
 		},
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
