@@ -29,7 +29,7 @@ CLUSTER_GSLB2 = test-gslb2
 CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
 GSLB_DOMAIN ?= cloud.example.com
 REPO = absaoss/k8gb
-VALUES_YAML ?= chart/k8gb/values.yaml
+VALUES_YAML ?= ""
 PODINFO_IMAGE_REPO ?= ghcr.io/stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
