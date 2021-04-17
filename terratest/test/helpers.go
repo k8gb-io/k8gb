@@ -19,6 +19,7 @@ package test
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -194,4 +195,11 @@ func waitForLocalGSLB(t *testing.T, host string, port int, expectedResult []stri
 		time.Second*1,
 		func() ([]string, error) { return Dig(t, "localhost", port, host) },
 		expectedResult)
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
