@@ -109,12 +109,15 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 	shell.RunCommand(t, helmRepoUpdate)
 	helmOptions := helm.Options{
 		KubectlOptions: options,
-		Version:        "4.0.6",
+		Version:        "5.2.0",
+		SetValues: map[string]string{
+			"image.repository": getEnv("PODINFO_IMAGE_REPO", "ghcr.io/stefanprodan/podinfo"),
+		},
 	}
 	helm.Install(t, &helmOptions, "podinfo/podinfo", "frontend")
 
 	testAppFilter := metav1.ListOptions{
-		LabelSelector: "app=frontend-podinfo",
+		LabelSelector: "app.kubernetes.io/name=frontend-podinfo",
 	}
 
 	k8s.WaitUntilNumPodsCreated(t, options, testAppFilter, 1, 60, 1*time.Second)
