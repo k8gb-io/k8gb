@@ -70,7 +70,7 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 		"Wait coredns to pickup dns values...",
 		300,
 		1*time.Second,
-		func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover."+dnsZone) },
+		func() ([]string, error) { return Dig(t, dnsServer1, dnsServer1Port, "terratest-failover."+dnsZone) },
 		expectedIPs)
 	require.NoError(t, err)
 
@@ -78,7 +78,7 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 
 	k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=0")
 
-	assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover.cloud.example.com:Unhealthy")
+	assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover."+dnsZone+":Unhealthy")
 
 	t.Run("failover happens as expected", func(t *testing.T) {
 		expectedIPsAfterFailover := GetIngressIPs(t, optionsContext2, gslbName)
@@ -88,7 +88,7 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 			"Wait for failover to happen and coredns to pickup new values...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover."+dnsZone) },
+			func() ([]string, error) { return Dig(t, dnsServer1, dnsServer1Port, "terratest-failover."+dnsZone) },
 			expectedIPsAfterFailover)
 		require.NoError(t, err)
 

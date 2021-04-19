@@ -40,6 +40,11 @@ import (
 )
 
 var dnsZone = getEnv("GSLB_DOMAIN", "cloud.example.com")
+var dnsServer1 = getEnv("DNS_SERVER1", "localhost")
+var dnsServer1Port = getEnv("DNS_SERVER1_PORT", "5053")
+var dnsServer2 = getEnv("DNS_SERVER2", "localhost")
+var dnsServer2Port = getEnv("DNS_SERVER2_PORT", "5054")
+var primaryGeoTag = getEnv("PRIMARY_GEO_TAG", "eu")
 
 // GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
@@ -52,8 +57,8 @@ func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string
 }
 
 // Dig gets sorted slice of records related to dnsName
-func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string) ([]string, error) {
-	port := fmt.Sprintf("-p%v", dnsPort)
+func Dig(t *testing.T, dnsServer string, dnsPort string, dnsName string) ([]string, error) {
+	port := fmt.Sprintf("-p%s", dnsPort)
 	dnsServer = fmt.Sprintf("@%s", dnsServer)
 
 	digApp := shell.Command{
@@ -100,7 +105,7 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 		log.Fatal(err)
 	}
 
-	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone)
+	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone, "eu", primaryGeoTag)
 
 	k8sManifestString := zoneReplacer.Replace(string(k8sManifestBytes))
 
@@ -204,7 +209,7 @@ func assertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName strin
 	assert.Equal(t, deletionExpected, deletionActual)
 }
 
-func waitForLocalGSLB(t *testing.T, host string, port int, expectedResult []string) (output []string, err error) {
+func waitForLocalGSLB(t *testing.T, host string, port string, expectedResult []string) (output []string, err error) {
 	return DoWithRetryWaitingForValueE(
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",

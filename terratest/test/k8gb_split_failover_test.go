@@ -77,7 +77,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
+				return Dig(t, "localhost", dnsServer1Port, "terratest-failover-split.cloud.example.com")
 			},
 			expectedIPsCluster1)
 		require.NoError(t, err)
@@ -90,7 +90,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, "localhost", 5054, "terratest-failover-split.cloud.example.com")
+				return Dig(t, dnsServer2, dnsServer2Port, "terratest-failover-split.cloud.example.com")
 			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
@@ -113,7 +113,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
+				return Dig(t, dnsServer1, dnsServer1Port, "terratest-failover-split.cloud.example.com")
 			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, "localhost", 5054, "terratest-failover-split.cloud.example.com")
+				return Dig(t, dnsServer2, dnsServer2Port, "terratest-failover-split.cloud.example.com")
 			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
@@ -152,7 +152,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
+				return Dig(t, "localhost", dnsServer1Port, "terratest-failover-split.cloud.example.com")
 			},
 			expectedIPsCluster1)
 		require.NoError(t, err)
