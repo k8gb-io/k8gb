@@ -98,8 +98,7 @@ func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetr
 	return output, retry.MaxRetriesExceeded{Description: actionDescription, MaxRetries: maxRetries}
 }
 
-func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
-
+func createGslb(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string) {
 	k8sManifestBytes, err := ioutil.ReadFile(kubeResourcePath)
 	if err != nil {
 		log.Fatal(err)
@@ -110,6 +109,11 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 	k8sManifestString := zoneReplacer.Replace(string(k8sManifestBytes))
 
 	k8s.KubectlApplyFromString(t, options, k8sManifestString)
+}
+
+func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
+
+	createGslb(t, options, kubeResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
 	ingress := k8s.GetIngress(t, options, gslbName)

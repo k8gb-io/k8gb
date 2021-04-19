@@ -41,7 +41,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	assertStrategy := func(t *testing.T, options *k8s.KubectlOptions) {
 		assertGslbSpec(t, options, name, "spec.strategy.splitBrainThresholdSeconds", "300")
 		assertGslbSpec(t, options, name, "spec.strategy.dnsTtlSeconds", "30")
-		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", "eu")
+		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", primaryGeoTag)
 		assertGslbSpec(t, options, name, "spec.strategy.type", "failover")
 	}
 
@@ -66,7 +66,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 
 	defer k8s.KubectlDelete(t, options, ingressResourcePath)
 
-	k8s.KubectlApply(t, options, ingressResourcePath)
+	createGslb(t, options, ingressResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 
@@ -82,7 +82,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	assertGslbDeleted(t, options, ingress.Name)
 
 	// recreate ingress
-	k8s.KubectlApply(t, options, ingressResourcePath)
+	createGslb(t, options, ingressResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 
@@ -125,13 +125,13 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 	defer k8s.DeleteNamespace(t, options, namespaceName)
 
 	// create gslb
-	k8s.KubectlApply(t, options, kubeResourcePath)
+	createGslb(t, options, kubeResourcePath)
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 
 	assertStrategy(t, options)
 
 	// reapply ingress
-	k8s.KubectlApply(t, options, ingressResourcePath)
+	createGslb(t, options, ingressResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 
