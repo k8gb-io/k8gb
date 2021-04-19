@@ -50,8 +50,8 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 	// - HOME/.kube/config for the kubectl config file
 	// - Current context of the kubectl config file
 	// - Random namespace
-	optionsContext1 := k8s.NewKubectlOptions("k3d-test-gslb1", "", namespaceName)
-	optionsContext2 := k8s.NewKubectlOptions("k3d-test-gslb2", "", namespaceName)
+	optionsContext1 := k8s.NewKubectlOptions(getEnv("K8GB_CLUSTER1", "k3d-test-gslb1"), "", namespaceName)
+	optionsContext2 := k8s.NewKubectlOptions(getEnv("K8GB_CLUSTER2", "k3d-test-gslb2"), "", namespaceName)
 
 	k8s.CreateNamespace(t, optionsContext1, namespaceName)
 	k8s.CreateNamespace(t, optionsContext2, namespaceName)
@@ -71,9 +71,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 	sort.Strings(expectedIPs)
 
 	t.Run("round-robin on two concurrent clusters with podinfo running", func(t *testing.T) {
-		resolvedIPsdnsServer1Port, err := waitForLocalGSLB(t, host, dnsServer1Port, expectedIPs)
+		resolvedIPsdnsServer1Port, err := waitForLocalGSLB(t, dnsServer1, dnsServer1Port, host, expectedIPs)
 		require.NoError(t, err)
-		resolvedIPsdnsServer2Port, err := waitForLocalGSLB(t, host, dnsServer2Port, expectedIPs)
+		resolvedIPsdnsServer2Port, err := waitForLocalGSLB(t, dnsServer2, dnsServer2Port, host, expectedIPs)
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, resolvedIPsdnsServer1Port)
@@ -90,9 +90,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 
 		assertGslbStatus(t, optionsContext1, gslbName, host+":Unhealthy")
 
-		resolvedIPsdnsServer1Port, err := waitForLocalGSLB(t, host, dnsServer1Port, ingressIPs2)
+		resolvedIPsdnsServer1Port, err := waitForLocalGSLB(t, dnsServer1, dnsServer1Port, host, ingressIPs2)
 		require.NoError(t, err)
-		resolvedIPsdnsServer2Port, err := waitForLocalGSLB(t, host, dnsServer2Port, ingressIPs2)
+		resolvedIPsdnsServer2Port, err := waitForLocalGSLB(t, dnsServer2, dnsServer2Port, host, ingressIPs2)
 		require.NoError(t, err)
 		assert.ElementsMatch(t, resolvedIPsdnsServer1Port, resolvedIPsdnsServer2Port)
 	})
@@ -103,9 +103,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 
 		assertGslbStatus(t, optionsContext2, gslbName, host+":Unhealthy")
 
-		_, err = waitForLocalGSLB(t, host, dnsServer1Port, []string{""})
+		_, err = waitForLocalGSLB(t, dnsServer1, dnsServer1Port, host, []string{""})
 		require.NoError(t, err)
-		_, err = waitForLocalGSLB(t, host, dnsServer2Port, []string{""})
+		_, err = waitForLocalGSLB(t, dnsServer2, dnsServer2Port, host, []string{""})
 		require.NoError(t, err)
 	})
 
@@ -117,9 +117,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 		assertGslbStatus(t, optionsContext1, gslbName, host+":Healthy")
 		assertGslbStatus(t, optionsContext2, gslbName, host+":Healthy")
 
-		resolvedIPsdnsServer1Port, err := waitForLocalGSLB(t, host, dnsServer1Port, expectedIPs)
+		resolvedIPsdnsServer1Port, err := waitForLocalGSLB(t, dnsServer1, dnsServer1Port, host, expectedIPs)
 		require.NoError(t, err)
-		resolvedIPsdnsServer2Port, err := waitForLocalGSLB(t, host, dnsServer2Port, expectedIPs)
+		resolvedIPsdnsServer2Port, err := waitForLocalGSLB(t, dnsServer2, dnsServer2Port, host, expectedIPs)
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, resolvedIPsdnsServer1Port)
