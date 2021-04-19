@@ -59,9 +59,9 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 
 	gslbName := "test-gslb"
 
-	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath, gslbName, "terratest-failover.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath, gslbName, "terratest-failover."+dnsZone)
 
-	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath, gslbName, "terratest-failover.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath, gslbName, "terratest-failover."+dnsZone)
 
 	expectedIPs := GetIngressIPs(t, optionsContext1, gslbName)
 
@@ -70,7 +70,7 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 		"Wait coredns to pickup dns values...",
 		300,
 		1*time.Second,
-		func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover.cloud.example.com") },
+		func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover."+dnsZone) },
 		expectedIPs)
 	require.NoError(t, err)
 
@@ -88,7 +88,7 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 			"Wait for failover to happen and coredns to pickup new values...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover.cloud.example.com") },
+			func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover."+dnsZone) },
 			expectedIPsAfterFailover)
 		require.NoError(t, err)
 

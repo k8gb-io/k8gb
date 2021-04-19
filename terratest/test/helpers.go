@@ -19,6 +19,8 @@ package test
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"reflect"
 	"sort"
@@ -36,6 +38,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+var dnsZone = getEnv("GSLB_DOMAIN", "cloud.example.com")
 
 // GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
@@ -90,7 +94,17 @@ func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetr
 }
 
 func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
-	k8s.KubectlApply(t, options, kubeResourcePath)
+
+	k8sManifestBytes, err := ioutil.ReadFile(kubeResourcePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone)
+
+	k8sManifestString := zoneReplacer.Replace(string(k8sManifestBytes))
+
+	k8s.KubectlApplyFromString(t, options, k8sManifestString)
 
 	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
 	ingress := k8s.GetIngress(t, options, gslbName)
