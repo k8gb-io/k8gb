@@ -34,7 +34,7 @@ import (
 // Relies on two local clusters deployed by `$make deploy-two-local-clusters`
 func TestK8gbBasicRoundRobinExample(t *testing.T) {
 	t.Parallel()
-	const host = "roundrobin-test.cloud.example.com"
+	var host = "roundrobin-test." + dnsZone
 	const gslbName = "roundrobin-test-gslb"
 
 	// Path to the Kubernetes resource config we will test

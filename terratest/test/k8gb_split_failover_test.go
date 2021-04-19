@@ -63,9 +63,9 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 
 	gslbName := "test-gslb"
 
-	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath1, gslbName, "terratest-failover-split.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath1, gslbName, "terratest-failover-split."+dnsZone)
 
-	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath2, gslbName, "terratest-failover-split.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath2, gslbName, "terratest-failover-split."+dnsZone)
 
 	expectedIPsCluster1 := GetIngressIPs(t, optionsContext1, gslbName)
 	expectedIPsCluster2 := GetIngressIPs(t, optionsContext2, gslbName)
@@ -77,7 +77,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, "localhost", dnsServer1Port, "terratest-failover-split.cloud.example.com")
+				return Dig(t, "localhost", dnsServer1Port, "terratest-failover-split."+dnsZone)
 			},
 			expectedIPsCluster1)
 		require.NoError(t, err)
@@ -90,7 +90,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, dnsServer2, dnsServer2Port, "terratest-failover-split.cloud.example.com")
+				return Dig(t, dnsServer2, dnsServer2Port, "terratest-failover-split."+dnsZone)
 			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
@@ -102,7 +102,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 
 		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=0")
 
-		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split.cloud.example.com:Unhealthy")
+		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split."+dnsZone+":Unhealthy")
 	})
 
 	t.Run("Cluster 1 failovers to Cluster 2", func(t *testing.T) {
@@ -113,7 +113,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, dnsServer1, dnsServer1Port, "terratest-failover-split.cloud.example.com")
+				return Dig(t, dnsServer1, dnsServer1Port, "terratest-failover-split."+dnsZone)
 			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, dnsServer2, dnsServer2Port, "terratest-failover-split.cloud.example.com")
+				return Dig(t, dnsServer2, dnsServer2Port, "terratest-failover-split."+dnsZone)
 			},
 			expectedIPsCluster2)
 		require.NoError(t, err)
@@ -141,7 +141,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 
 		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=1")
 
-		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split.cloud.example.com:Healthy")
+		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split."+dnsZone+":Healthy")
 	})
 
 	t.Run("Cluster 1 returns own entries again", func(t *testing.T) {
@@ -152,7 +152,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 			300,
 			1*time.Second,
 			func() ([]string, error) {
-				return Dig(t, "localhost", dnsServer1Port, "terratest-failover-split.cloud.example.com")
+				return Dig(t, "localhost", dnsServer1Port, "terratest-failover-split."+dnsZone)
 			},
 			expectedIPsCluster1)
 		require.NoError(t, err)
