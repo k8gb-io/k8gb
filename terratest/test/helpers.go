@@ -111,14 +111,7 @@ func createGslb(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath stri
 	k8s.KubectlApplyFromString(t, options, k8sManifestString)
 }
 
-func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
-
-	createGslb(t, options, kubeResourcePath)
-
-	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
-	ingress := k8s.GetIngress(t, options, gslbName)
-	require.Equal(t, ingress.Name, gslbName)
-
+func installPodinfo(t *testing.T, options *k8s.KubectlOptions) {
 	helmRepoAdd := shell.Command{
 		Command: "helm",
 		Args:    []string{"repo", "add", "--force-update", "podinfo", "https://stefanprodan.github.io/podinfo"},
@@ -154,6 +147,18 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 	}
 
 	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
+
+}
+
+func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
+
+	createGslb(t, options, kubeResourcePath)
+
+	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
+	ingress := k8s.GetIngress(t, options, gslbName)
+	require.Equal(t, ingress.Name, gslbName)
+
+	installPodinfo(t, options)
 
 	serviceHealthStatus := fmt.Sprintf("%s:Healthy", hostName)
 	assertGslbStatus(t, options, gslbName, serviceHealthStatus)

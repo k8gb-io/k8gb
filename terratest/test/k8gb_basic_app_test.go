@@ -26,13 +26,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/gruntwork-io/terratest/modules/helm"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
-	"github.com/gruntwork-io/terratest/modules/shell"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Basic k8gb deployment test that is verifying that associated ingress is getting created
@@ -65,7 +60,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 
 	defer k8s.KubectlDelete(t, options, kubeResourcePath)
 
-	k8s.KubectlApply(t, options, kubeResourcePath)
+	createGslb(t, options, kubeResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, "test-gslb", 60, 1*time.Second)
 	ingress := k8s.GetIngress(t, options, "test-gslb")
@@ -74,40 +69,9 @@ func TestK8gbBasicAppExample(t *testing.T) {
 	// Path to the Kubernetes resource config we will test
 	unhealthyAppPath, err := filepath.Abs("../examples/unhealthy-app.yaml")
 	require.NoError(t, err)
-	k8s.KubectlApply(t, options, unhealthyAppPath)
+	createGslb(t, options, unhealthyAppPath)
 
-	helmRepoAdd := shell.Command{
-		Command: "helm",
-		Args:    []string{"repo", "add", "--force-update", "podinfo", "https://stefanprodan.github.io/podinfo"},
-	}
-
-	helmRepoUpdate := shell.Command{
-		Command: "helm",
-		Args:    []string{"repo", "update"},
-	}
-	shell.RunCommand(t, helmRepoAdd)
-	shell.RunCommand(t, helmRepoUpdate)
-	helmOptions := helm.Options{
-		KubectlOptions: options,
-		Version:        "4.0.6",
-	}
-	helm.Install(t, &helmOptions, "podinfo/podinfo", "frontend")
-
-	testAppFilter := metav1.ListOptions{
-		LabelSelector: "app=frontend-podinfo",
-	}
-
-	k8s.WaitUntilNumPodsCreated(t, options, testAppFilter, 1, 60, 1*time.Second)
-
-	var testAppPods []corev1.Pod
-
-	testAppPods = k8s.ListPods(t, options, testAppFilter)
-
-	for _, pod := range testAppPods {
-		k8s.WaitUntilPodAvailable(t, options, pod.Name, 60, 1*time.Second)
-	}
-
-	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
+	installPodinfo(t, options)
 
 	assertGslbStatus(t, options, "test-gslb", "notfound."+dnsZone+":NotFound roundrobin."+dnsZone+":Healthy unhealthy."+dnsZone+":Unhealthy")
 	// Ensure controller labels DNSEndpoint objects
@@ -119,5 +83,4 @@ func TestK8gbBasicAppExample(t *testing.T) {
 		err = k8s.KubectlApplyE(t, options, brokenNoHTTPResourcePath)
 		require.Error(t, err)
 	})
-
 }
