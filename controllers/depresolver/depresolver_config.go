@@ -55,6 +55,7 @@ const (
 // ResolveOperatorConfig executes once. It reads operator's configuration
 // from environment variables into &Config and validates
 func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
+	var recognizedDNSTypes []EdgeDNSType
 	dr.onceConfig.Do(func() {
 		dr.config = &Config{}
 		dr.config.ReconcileRequeueSeconds, _ = env.GetEnvAsIntOrFallback(ReconcileRequeueSecondsKey, 30)
@@ -79,13 +80,13 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, SimpleFormat.String())))
 		dr.config.Log.NoColor = env.GetEnvAsBoolOrFallback(LogNoColorKey, false)
-		dr.errorConfig = dr.validateConfig(dr.config)
-		dr.config.EdgeDNSType = getEdgeDNSType(dr.config)
+		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
+		dr.errorConfig = dr.validateConfig(dr.config, recognizedDNSTypes)
 	})
 	return dr.config, dr.errorConfig
 }
 
-func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
+func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes []EdgeDNSType) (err error) {
 	if config.Log.Level == zerolog.NoLevel {
 		return fmt.Errorf("invalid '%s', allowed values ['','%s','%s','%s','%s','%s','%s','%s']", LogLevelKey,
 			zerolog.TraceLevel, zerolog.DebugLevel, zerolog.InfoLevel, zerolog.WarnLevel, zerolog.FatalLevel,
@@ -93,6 +94,9 @@ func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 	}
 	if config.Log.Format == NoFormat {
 		return fmt.Errorf("invalid '%s', allowed values ['','%s','%s']", LogFormatKey, JSONFormat, SimpleFormat)
+	}
+	if config.EdgeDNSType == DNSTypeMultipleProviders {
+		return fmt.Errorf("several EdgeDNS recognized %s", recognizedDNSTypes)
 	}
 	err = field(K8gbNamespaceKey, config.K8gbNamespace).isNotEmpty().matchRegexp(k8sNamespaceRegex).err
 	if err != nil {
@@ -163,22 +167,25 @@ func (dr *DependencyResolver) validateConfig(config *Config) (err error) {
 	return nil
 }
 
-// getEdgeDNSType contains logic retrieving EdgeDNSType
-func getEdgeDNSType(config *Config) EdgeDNSType {
-	var t = DNSTypeNoEdgeDNS
+// getEdgeDNSType contains logic retrieving EdgeDNSType.
+func getEdgeDNSType(config *Config) (EdgeDNSType, []EdgeDNSType) {
+	recognized := make([]EdgeDNSType, 0)
 	if config.ns1Enabled {
-		t |= DNSTypeNS1
+		recognized = append(recognized, DNSTypeNS1)
 	}
 	if config.route53Enabled {
-		t |= DNSTypeRoute53
+		recognized = append(recognized, DNSTypeRoute53)
 	}
 	if isNotEmpty(config.Infoblox.Host) {
-		t |= DNSTypeInfoblox
+		recognized = append(recognized, DNSTypeInfoblox)
 	}
-	if t > DNSTypeNoEdgeDNS {
-		t -= DNSTypeNoEdgeDNS
+	switch len(recognized) {
+	case 0:
+		return DNSTypeNoEdgeDNS, recognized
+	case 1:
+		return recognized[0], recognized
 	}
-	return t
+	return DNSTypeMultipleProviders, recognized
 }
 
 func parseLogOutputFormat(value string) LogFormat {

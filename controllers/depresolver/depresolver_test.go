@@ -629,19 +629,58 @@ func TestResolveGeoTagWithRepeatingExtGeoTags(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
 
-func TestRoute53IsEnabledAndInfobloxIsConfigured(t *testing.T) {
+func TestBothRoute53AndInfobloxAreEnabled(t *testing.T) {
 	// arrange
 	defer cleanup()
-	expected := predefinedConfig
-	expected.route53Enabled = true
-	expected.EdgeDNSType = DNSTypeRoute53 | DNSTypeInfoblox
-	expected.Infoblox.Host = "Infoblox.domain"
-	expected.Infoblox.Version = "0.0.1"
-	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
+	customConfig := predefinedConfig
+	customConfig.Infoblox.Host = "Infoblox.domain"
+	customConfig.Infoblox.Version = "0.0.1"
+	customConfig.Infoblox.Port = 443
+	customConfig.Infoblox.Username = "foo"
+	customConfig.Infoblox.Password = "blah"
+	configureEnvVar(customConfig)
+	_ = os.Setenv(Route53EnabledKey, "true")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Equal(t, DNSTypeMultipleProviders, config.EdgeDNSType)
+}
+
+func TestRoute53NS1AndInfobloxAreConfigured(t *testing.T) {
+	// arrange
+	defer cleanup()
+	// predefinedConfig has Infoblox preconfigured
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(Route53EnabledKey, "true")
+	_ = os.Setenv(NS1EnabledKey, "true")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	recognizedEdgeDNSType, recognizedEdgeDNSTypes := getEdgeDNSType(config)
+	// assert
+	assert.Error(t, err)
+	assert.Equal(t, DNSTypeMultipleProviders, config.EdgeDNSType)
+	assert.Equal(t, recognizedEdgeDNSType, config.EdgeDNSType)
+	assert.Equal(t, recognizedEdgeDNSTypes, []EdgeDNSType{DNSTypeNS1, DNSTypeRoute53, DNSTypeInfoblox})
+}
+
+func TestNoDNSIsConfigured(t *testing.T) {
+	// arrange
+	defer cleanup()
+	customConfig := predefinedConfig
+	customConfig.Infoblox.Host = ""
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	recognizedEdgeDNSType, recognizedEdgeDNSTypes := getEdgeDNSType(config)
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, DNSTypeNoEdgeDNS, config.EdgeDNSType)
+	assert.Equal(t, recognizedEdgeDNSType, config.EdgeDNSType)
+	assert.Equal(t, recognizedEdgeDNSTypes, []EdgeDNSType{})
 }
 
 func TestRoute53IsDisabledAndInfobloxIsNotConfigured(t *testing.T) {
