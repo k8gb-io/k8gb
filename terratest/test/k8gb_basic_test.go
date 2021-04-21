@@ -55,7 +55,7 @@ func TestK8gbBasicExample(t *testing.T) {
 
 	defer k8s.KubectlDelete(t, options, kubeResourcePath)
 
-	k8s.KubectlApply(t, options, kubeResourcePath)
+	createGslb(t, options, kubeResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, "test-gslb", 60, 1*time.Second)
 	ingress := k8s.GetIngress(t, options, "test-gslb")

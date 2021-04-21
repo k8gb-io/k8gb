@@ -1,4 +1,14 @@
 /*
+
+		afterFailoverResponse, err := DoWithRetryWaitingForValueE(
+			t,
+			"Wait for failover to happen and coredns to pickup new values(cluster1)...",
+			300,
+			1*time.Second,
+			func() ([]string, error) {
+				return Dig(t, "localhost", dnsServer1Port, "terratest-failover-split."+dnsZone)
+			},
+			expectedIPsCluster1)
 Copyright 2021 The k8gb Contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +55,7 @@ var dnsServer1Port = getEnv("DNS_SERVER1_PORT", "5053")
 var dnsServer2 = getEnv("DNS_SERVER2", "localhost")
 var dnsServer2Port = getEnv("DNS_SERVER2_PORT", "5054")
 var primaryGeoTag = getEnv("PRIMARY_GEO_TAG", "eu")
+var secondaryGeoTag = getEnv("SECONDARY_GEO_TAG", "us")
 
 // GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
@@ -104,7 +115,7 @@ func createGslb(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath stri
 		log.Fatal(err)
 	}
 
-	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone, "eu", primaryGeoTag)
+	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone, "eu", primaryGeoTag, "us", secondaryGeoTag)
 
 	k8sManifestString := zoneReplacer.Replace(string(k8sManifestBytes))
 

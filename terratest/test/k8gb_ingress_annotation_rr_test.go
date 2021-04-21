@@ -52,7 +52,7 @@ func TestK8gbIngressAnnotationRR(t *testing.T) {
 
 	defer k8s.DeleteNamespace(t, options, namespaceName)
 
-	k8s.KubectlApply(t, options, kubeResourcePath)
+	createGslb(t, options, kubeResourcePath)
 
 	ingress := k8s.GetIngress(t, options, "test-gslb-annotation")
 	require.Equal(t, ingress.Name, "test-gslb-annotation")
