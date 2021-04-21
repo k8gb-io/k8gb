@@ -312,7 +312,7 @@ test-failover:
 # executes terra-tests
 .PHONY: terratest
 terratest: # Run terratest suite
-	cd terratest/test/ && go mod download && go test -v
+	cd terratest/test/ && go mod download && go test -v -timeout 15m -parallel=12
 
 .PHONY: version
 version:
