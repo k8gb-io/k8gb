@@ -57,13 +57,13 @@ func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string
 }
 
 // Dig gets sorted slice of records related to dnsName
-func Dig(t *testing.T, dnsServer string, dnsPort string, dnsName string) ([]string, error) {
+func Dig(t *testing.T, dnsServer string, dnsPort string, dnsName string, additionalArgs ...string) ([]string, error) {
 	port := fmt.Sprintf("-p%s", dnsPort)
 	dnsServer = fmt.Sprintf("@%s", dnsServer)
 
 	digApp := shell.Command{
 		Command: "dig",
-		Args:    []string{port, dnsServer, dnsName, "+short"},
+		Args:    append([]string{port, dnsServer, dnsName, "+short"}, additionalArgs...),
 	}
 
 	digAppOut := shell.RunCommandAndGetOutput(t, digApp)
@@ -218,13 +218,23 @@ func assertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName strin
 	assert.Equal(t, deletionExpected, deletionActual)
 }
 
-func waitForLocalGSLB(t *testing.T, dnsServer string, dnsPort string, host string, expectedResult []string) (output []string, err error) {
+func waitForLocalGSLB(t *testing.T, options *k8s.KubectlOptions, dnsPort int, host string, expectedResult []string) (output []string, err error) {
+	keepNamespace := options.Namespace
+	options.Namespace = getEnv("K8GB_NAMESPACE", "k8gb")
+	restoreOptionsNamespace := func(options *k8s.KubectlOptions, namespace string) {
+		options.Namespace = namespace
+	}
+	defer restoreOptionsNamespace(options, keepNamespace)
+	tunnel := k8s.NewTunnel(options, k8s.ResourceTypeService, "k8gb-coredns", dnsPort, 53)
+	defer tunnel.Close()
+	tunnel.ForwardPort(t)
+
 	return DoWithRetryWaitingForValueE(
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
 		100,
 		time.Second*1,
-		func() ([]string, error) { return Dig(t, dnsServer, dnsPort, host) },
+		func() ([]string, error) { return Dig(t, "localhost", fmt.Sprint(dnsPort), host, "+tcp") },
 		expectedResult)
 }
 
