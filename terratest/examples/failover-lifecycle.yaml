@@ -14,6 +14,6 @@ spec:
             path: /
   strategy:
     type: failover
-    primaryGeoTag: eu
+    primaryGeoTag: "eu"
     splitBrainThresholdSeconds: 600
     dnsTtlSeconds:  60

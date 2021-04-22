@@ -105,7 +105,10 @@ func createGslb(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath stri
 		log.Fatal(err)
 	}
 
-	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone, "eu", primaryGeoTag, "us", secondaryGeoTag)
+	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone,
+		"primaryGeoTag: \"eu\"", fmt.Sprintf("primaryGeoTag: \"%s\"", primaryGeoTag),
+		"primaryGeoTag: \"us\"", fmt.Sprintf("primaryGeoTag: \"%s\"", secondaryGeoTag),
+		"k8gb.io/primary-geotag: \"eu\"", fmt.Sprintf("k8gb.io/primary-geotag: \"%s\"", primaryGeoTag))
 
 	k8sManifestString := zoneReplacer.Replace(string(k8sManifestBytes))
 

@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestK8gbRepeatedlyRecreatedFromIngress creates GSLB, than keeps operator live and than recreates GSLB again from Ingress.
+// TestK8gbRepeatedlyRecreatedFromIngress creates GSLB, then keeps operator live and than recreates GSLB again from Ingress.
 // This is usual lifecycle scenario and we are testing spec strategy has expected values.
 func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	t.Parallel()
@@ -103,7 +103,7 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 	assertStrategy := func(t *testing.T, options *k8s.KubectlOptions) {
 		assertGslbSpec(t, options, name, "spec.strategy.splitBrainThresholdSeconds", "600")
 		assertGslbSpec(t, options, name, "spec.strategy.dnsTtlSeconds", "60")
-		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", "eu")
+		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", primaryGeoTag)
 		assertGslbSpec(t, options, name, "spec.strategy.type", "failover")
 	}
 
