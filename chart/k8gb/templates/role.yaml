@@ -12,6 +12,7 @@ rules:
   verbs:
   - 'get'
   - 'list'
+  - 'watch'
 - apiGroups:
   - k8gb.absa.oss
   resources:
