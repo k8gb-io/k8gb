@@ -20,3 +20,5 @@ run:
 linters-settings:
   lll:
     line-length: 150
+  golint:
+    min-confidence: 0
