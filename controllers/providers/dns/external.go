@@ -61,8 +61,8 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 	ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 	log.Info().Msgf("Creating/Updating DNSEndpoint CRDs for %s...", p)
 	var NSServerList []string
-	NSServerList = append(NSServerList, nsServerName(p.config))
-	NSServerList = append(NSServerList, nsServerNameExt(p.config)...)
+	NSServerList = append(NSServerList, p.config.GetClusterNsName())
+	NSServerList = append(NSServerList, p.config.GetExtClusterNsNames()...)
 	sort.Strings(NSServerList)
 	var NSServerIPs []string
 	var err error
@@ -89,7 +89,7 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 					Targets:    NSServerList,
 				},
 				{
-					DNSName:    nsServerName(p.config),
+					DNSName:    p.config.GetClusterNsName(),
 					RecordTTL:  ttl,
 					RecordType: "A",
 					Targets:    NSServerIPs,
@@ -109,7 +109,7 @@ func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb) error {
 }
 
 func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, nsServerNameExt(p.config))
+	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, p.config.GetExtClusterNsNames())
 }
 
 func (p *ExternalDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {

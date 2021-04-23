@@ -68,8 +68,8 @@ var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
 
 var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
-	ClusterGeoTag:           "us-west-1",
-	ExtClustersGeoTags:      []string{"us-east-1"},
+	ClusterGeoTag:           "location-1",
+	ExtClustersGeoTags:      []string{"location-2"},
 	EdgeDNSServer:           "8.8.8.8",
 	EdgeDNSZone:             "example.com",
 	DNSZone:                 "cloud.example.com",
@@ -616,7 +616,7 @@ func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
 	// arrange
 	defer cleanup()
-	want := "us-west-1"
+	want := "location-1"
 	settings := provideSettings(t, predefinedConfig)
 	// act
 	reconcileAndUpdateGslb(t, settings)
@@ -673,13 +673,13 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "NS",
 			Targets: externaldns.Targets{
-				"gslb-ns-cloud-example-com-eu.example.com",
-				"gslb-ns-cloud-example-com-us.example.com",
-				"gslb-ns-cloud-example-com-za.example.com",
+				"gslb-ns-eu-cloud.example.com",
+				"gslb-ns-us-cloud.example.com",
+				"gslb-ns-za-cloud.example.com",
 			},
 		},
 		{
-			DNSName:    "gslb-ns-cloud-example-com-eu.example.com",
+			DNSName:    "gslb-ns-eu-cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{
@@ -744,13 +744,13 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "NS",
 			Targets: externaldns.Targets{
-				"gslb-ns-cloud-example-com-eu.example.com",
-				"gslb-ns-cloud-example-com-us.example.com",
-				"gslb-ns-cloud-example-com-za.example.com",
+				"gslb-ns-eu-cloud.example.com",
+				"gslb-ns-us-cloud.example.com",
+				"gslb-ns-za-cloud.example.com",
 			},
 		},
 		{
-			DNSName:    "gslb-ns-cloud-example-com-eu.example.com",
+			DNSName:    "gslb-ns-eu-cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{

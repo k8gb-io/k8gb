@@ -54,7 +54,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	var delegateTo []ibclient.NameServer
 
 	for _, address := range addresses {
-		nameServer := ibclient.NameServer{Address: address, Name: nsServerName(p.config)}
+		nameServer := ibclient.NameServer{Address: address, Name: p.config.GetClusterNsName()}
 		delegateTo = append(delegateTo, nameServer)
 	}
 
@@ -71,7 +71,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		if len(findZone.Ref) > 0 {
 
 			// Drop own records for straight away update
-			existingDelegateTo := p.filterOutDelegateTo(findZone.DelegateTo, nsServerName(p.config))
+			existingDelegateTo := p.filterOutDelegateTo(findZone.DelegateTo, p.config.GetClusterNsName())
 			existingDelegateTo = append(existingDelegateTo, delegateTo...)
 
 			// Drop external records if they are stale
@@ -167,7 +167,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 }
 
 func (p *InfobloxProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, nsServerNameExt(p.config))
+	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, p.config.GetExtClusterNsNames())
 }
 
 func (p *InfobloxProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {

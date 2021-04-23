@@ -87,6 +87,8 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 }
 
 func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes []EdgeDNSType) (err error) {
+	const dnsNameMax = 253
+	const dnsLabelMax = 63
 	if config.Log.Level == zerolog.NoLevel {
 		return fmt.Errorf("invalid '%s', allowed values ['','%s','%s','%s','%s','%s','%s','%s']", LogLevelKey,
 			zerolog.TraceLevel, zerolog.DebugLevel, zerolog.InfoLevel, zerolog.WarnLevel, zerolog.FatalLevel,
@@ -164,7 +166,46 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return err
 		}
 	}
+	validateLabels := func(label string) error {
+		labels := strings.Split(label, ".")
+		for _, l := range labels {
+			if len(l) > dnsLabelMax {
+				return fmt.Errorf("%s exceeds %v characters limit", l, dnsLabelMax)
+			}
+		}
+		return nil
+	}
+	clusterServerName, extClusterServerNames := getNsServerNames(*config)
+	if len(clusterServerName) > dnsNameMax {
+		return fmt.Errorf("nsServerName '%s' exceeds %v characters limit for [%s: '%s', %s: '%s', %s: '%s']",
+			config.GetClusterNsName(), dnsNameMax, ClusterGeoTagKey, config.ClusterGeoTag, EdgeDNSZoneKey,
+			config.EdgeDNSZone, DNSZoneKey, config.DNSZone)
+	}
+	if err := validateLabels(clusterServerName); err != nil {
+		return fmt.Errorf("nsServerName %s error: %s", config.GetClusterNsName(), err)
+	}
+	for i, ext := range extClusterServerNames {
+		if len(ext) > dnsNameMax {
+			return fmt.Errorf("nsServerNameExt '%s' exceeds %v charactes limit for [%s: '%s', %s: '%s', %s: '%s']",
+				ext, dnsLabelMax, ExtClustersGeoTagsKey, extClusterServerNames[i], EdgeDNSZoneKey, config.EdgeDNSZone, DNSZoneKey, config.DNSZone)
+		}
+		if err := validateLabels(ext); err != nil {
+			return fmt.Errorf("nsServerNameExt %s error: %s", ext, err)
+		}
+	}
 	return nil
+}
+
+// GetClusterNsName returns valid cluster NS name
+func (c *Config) GetClusterNsName() (nsName string) {
+	nsName, _ = getNsServerNames(*c)
+	return
+}
+
+// GetExtClusterNsNames returns list of external cluster NS names
+func (c *Config) GetExtClusterNsNames() (extNsNames []string) {
+	_, extNsNames = getNsServerNames(*c)
+	return
 }
 
 // getEdgeDNSType contains logic retrieving EdgeDNSType.
@@ -196,4 +237,28 @@ func parseLogOutputFormat(value string) LogFormat {
 		return SimpleFormat
 	}
 	return NoFormat
+}
+
+// getNsServerNames returns NS for cluster geotag and ex cluster geo tags.
+// The values are combination of DNSZone, EdgeDNSZone and (Ext)ClusterGeoTag, see:
+// DNS_ZONE k8gb-test.gslb.cloud.example.com
+// EDGE_DNS_ZONE: cloud.example.com
+// CLUSTER_GEOTAG: us
+// will generate "gslb-ns-us-k8gb-test-gslb.cloud.example.com"
+// The function is private and expects only valid inputs.
+func getNsServerNames(config Config) (nsServerName string, nsServerNamesExt []string) {
+	const prefix = "gslb-ns"
+	nsServerNamesExt = make([]string, 0)
+	ns := func(gt, domainX string) string {
+		return fmt.Sprintf("%s-%s-%s.%s", prefix, gt, domainX, config.EdgeDNSZone)
+	}
+
+	d := strings.TrimSuffix(config.DNSZone, "."+config.EdgeDNSZone)
+	domainX := strings.ReplaceAll(d, ".", "-")
+
+	nsServerName = ns(config.ClusterGeoTag, domainX)
+	for _, gt := range config.ExtClustersGeoTags {
+		nsServerNamesExt = append(nsServerNamesExt, ns(gt, domainX))
+	}
+	return
 }
