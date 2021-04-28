@@ -29,6 +29,4 @@ spec:
             path: /
   strategy:
     type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
-    splitBrainThresholdSeconds: 0
-    dnsTtlSeconds: 35
-
+    dnsTtlSeconds: 0

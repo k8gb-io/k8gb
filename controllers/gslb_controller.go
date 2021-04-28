@@ -55,13 +55,12 @@ type GslbReconciler struct {
 }
 
 const (
-	gslbFinalizer                        = "k8gb.absa.oss/finalizer"
-	roundRobinStrategy                   = "roundRobin"
-	failoverStrategy                     = "failover"
-	primaryGeoTagAnnotation              = "k8gb.io/primary-geotag"
-	strategyAnnotation                   = "k8gb.io/strategy"
-	dnsTTLSecondsAnnotation              = "k8gb.io/dns-ttl-seconds"
-	splitBrainThresholdSecondsAnnotation = "k8gb.io/splitbrain-threshold-seconds"
+	gslbFinalizer           = "k8gb.absa.oss/finalizer"
+	roundRobinStrategy      = "roundRobin"
+	failoverStrategy        = "failover"
+	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
+	strategyAnnotation      = "k8gb.io/strategy"
+	dnsTTLSecondsAnnotation = "k8gb.io/dns-ttl-seconds"
 )
 
 var log = logging.Logger()
@@ -252,11 +251,8 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}
 
 		for annotationKey, annotationValue := range a.GetAnnotations() {
-			switch annotationKey {
-			case dnsTTLSecondsAnnotation:
+			if annotationKey == dnsTTLSecondsAnnotation {
 				gslb.Spec.Strategy.DNSTtlSeconds = strToInt(annotationValue)
-			case splitBrainThresholdSecondsAnnotation:
-				gslb.Spec.Strategy.SplitBrainThresholdSeconds = strToInt(annotationValue)
 			}
 		}
 

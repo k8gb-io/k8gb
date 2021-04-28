@@ -1,7 +1,7 @@
 k8gb:
   dnsZone: "test.k8gb.io" # dnsZone controlled by gslb
   edgeDNSZone: "k8gb.io" # main zone which would contain gslb zone to delegate
-  edgeDNSServer: "169.254.169.253" # to handle splitbrain situation with TXT timestamp
+  edgeDNSServer: "169.254.169.253"
   clusterGeoTag: "us-east-1" # used for places where we need to distinguish between differnet Gslb instances
   extGslbClustersGeoTags: "eu-west-1" # comma-separated list of external gslb geo tags to pair with
   exposeCoreDNS: true # Create Service type LoadBalancer to expose CoreDNS

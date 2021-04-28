@@ -273,9 +273,6 @@ spec:
                   primaryGeoTag:
                     description: Primary Geo Tag. Valid for failover strategy only
                     type: string
-                  splitBrainThresholdSeconds:
-                    description: Split brain TXT record expiration in seconds
-                    type: integer
                   type:
                     description: Load balancing strategy type:(roundRobin|failover)
                     type: string

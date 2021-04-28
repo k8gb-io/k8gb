@@ -28,8 +28,7 @@ import (
 )
 
 var predefinedStrategy = k8gbv1beta1.Strategy{
-	DNSTtlSeconds:              30,
-	SplitBrainThresholdSeconds: 300,
+	DNSTtlSeconds: 30,
 }
 
 // ResolveGslbSpec fills Gslb by spec values. It executes always, when gslb is initialised.
@@ -43,9 +42,6 @@ func (dr *DependencyResolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1b
 		if gslb.Spec.Strategy.DNSTtlSeconds == 0 {
 			gslb.Spec.Strategy.DNSTtlSeconds = predefinedStrategy.DNSTtlSeconds
 		}
-		if gslb.Spec.Strategy.SplitBrainThresholdSeconds == 0 {
-			gslb.Spec.Strategy.SplitBrainThresholdSeconds = predefinedStrategy.SplitBrainThresholdSeconds
-		}
 		dr.errorSpec = dr.validateSpec(gslb.Spec.Strategy)
 		if dr.errorSpec == nil {
 			dr.errorSpec = client.Update(ctx, gslb)
@@ -57,12 +53,5 @@ func (dr *DependencyResolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1b
 
 func (dr *DependencyResolver) validateSpec(strategy k8gbv1beta1.Strategy) (err error) {
 	err = field("DNSTtlSeconds", strategy.DNSTtlSeconds).isHigherOrEqualToZero().err
-	if err != nil {
-		return
-	}
-	err = field("SplitBrainThresholdSeconds", strategy.SplitBrainThresholdSeconds).isHigherOrEqualToZero().err
-	if err != nil {
-		return
-	}
 	return
 }

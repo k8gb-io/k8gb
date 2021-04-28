@@ -75,7 +75,6 @@ func TestResolveSpecWithFilledFields(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, 305, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
 }
 
 func TestResolveSpecWithoutFields(t *testing.T) {
@@ -87,19 +86,17 @@ func TestResolveSpecWithoutFields(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
 }
 
-func TestResolveSpecWithZeroSplitBrain(t *testing.T) {
+func TestResolveSpecWithZeroDNSTTL(t *testing.T) {
 	// arrange
-	cl, gslb := getTestContext("./testdata/filled_omitempty_with_zero_splitbrain.yaml")
+	cl, gslb := getTestContext("./testdata/filled_omitempty_with_zero_dnsttlseconds.yaml")
 	resolver := NewDependencyResolver()
 	// act
 	err := resolver.ResolveGslbSpec(context.TODO(), gslb, cl)
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
+	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
 }
 
 func TestResolveSpecWithEmptyFields(t *testing.T) {
@@ -111,7 +108,6 @@ func TestResolveSpecWithEmptyFields(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
 }
 
 func TestResolveSpecWithNegativeFields(t *testing.T) {
@@ -131,14 +127,13 @@ func TestSpecRunWhenChanged(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	err1 := resolver.ResolveGslbSpec(ctx, gslb, cl)
-	gslb.Spec.Strategy.SplitBrainThresholdSeconds = 0
+	gslb.Spec.Strategy.DNSTtlSeconds = 0
 	err2 := resolver.ResolveGslbSpec(ctx, gslb, cl)
 	// assert
 	assert.NoError(t, err1)
 	// err2 would not be empty
 	assert.NoError(t, err2)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
-	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
+	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
 }
 
 func TestResolveSpecWithNilClient(t *testing.T) {

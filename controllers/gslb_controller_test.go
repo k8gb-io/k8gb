@@ -41,7 +41,6 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/networking/v1beta1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -457,34 +456,6 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	// assert
 	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 	assert.Equal(t, hrGot, hrWant, "got:\n %s Gslb Records status,\n\n want:\n %s", hrGot, hrWant)
-}
-
-func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
-	// arrange
-	defer cleanup()
-	customConfig := predefinedConfig
-	customConfig.Override.FakeDNSEnabled = true
-	customConfig.EdgeDNSServer = "fake"
-	settings := provideSettings(t, customConfig)
-	// act
-	got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com",
-		customConfig.Override.FakeDNSEnabled, time.Minute*5)
-	want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
-	// assert
-	assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
-}
-
-func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
-	// arrange
-	customConfig := predefinedConfig
-	customConfig.Override.FakeDNSEnabled = true
-	customConfig.EdgeDNSServer = "fake"
-	settings := provideSettings(t, customConfig)
-	// act
-	err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com",
-		customConfig.Override.FakeDNSEnabled, time.Minute*5)
-	// assert
-	assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
 }
 
 func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
