@@ -39,14 +39,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var dnsZone = getEnv("GSLB_DOMAIN", "cloud.example.com")
-var dnsServer1 = getEnv("DNS_SERVER1", "localhost")
-var dnsServer1Port = getEnv("DNS_SERVER1_PORT", "5053")
-var dnsServer2 = getEnv("DNS_SERVER2", "localhost")
-var dnsServer2Port = getEnv("DNS_SERVER2_PORT", "5054")
-var primaryGeoTag = getEnv("PRIMARY_GEO_TAG", "eu")
-var secondaryGeoTag = getEnv("SECONDARY_GEO_TAG", "us")
-
 // GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
 	var ingressIPs []string
@@ -55,7 +47,7 @@ func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string
 		if len(lb.IP) > 0 {
 			ingressIPs = append(ingressIPs, lb.IP)
 		} else if len(lb.Hostname) > 0 {
-			digLbHostnameIPs, _ := Dig(t, "1.1.1.1", "53", lb.Hostname)
+			digLbHostnameIPs, _ := Dig(t, "1.1.1.1", 53, lb.Hostname)
 			log.Printf("Digging LB hostname %s, got %v", lb.Hostname, digLbHostnameIPs)
 			ingressIPs = append(ingressIPs, digLbHostnameIPs...)
 		}
@@ -64,8 +56,8 @@ func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string
 }
 
 // Dig gets sorted slice of records related to dnsName
-func Dig(t *testing.T, dnsServer string, dnsPort string, dnsName string, additionalArgs ...string) ([]string, error) {
-	port := fmt.Sprintf("-p%s", dnsPort)
+func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string, additionalArgs ...string) ([]string, error) {
+	port := fmt.Sprintf("-p%d", dnsPort)
 	dnsServer = fmt.Sprintf("@%s", dnsServer)
 
 	digApp := shell.Command{
@@ -111,10 +103,10 @@ func createGslb(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath stri
 		log.Fatal(err)
 	}
 
-	zoneReplacer := strings.NewReplacer("cloud.example.com", dnsZone,
-		"primaryGeoTag: \"eu\"", fmt.Sprintf("primaryGeoTag: \"%s\"", primaryGeoTag),
-		"primaryGeoTag: \"us\"", fmt.Sprintf("primaryGeoTag: \"%s\"", secondaryGeoTag),
-		"k8gb.io/primary-geotag: \"eu\"", fmt.Sprintf("k8gb.io/primary-geotag: \"%s\"", primaryGeoTag))
+	zoneReplacer := strings.NewReplacer("cloud.example.com", settings.DNSZone,
+		"primaryGeoTag: \"eu\"", fmt.Sprintf("primaryGeoTag: \"%s\"", settings.PrimaryGeoTag),
+		"primaryGeoTag: \"us\"", fmt.Sprintf("primaryGeoTag: \"%s\"", settings.SecondaryGeoTag),
+		"k8gb.io/primary-geotag: \"eu\"", fmt.Sprintf("k8gb.io/primary-geotag: \"%s\"", settings.PrimaryGeoTag))
 
 	k8sManifestString := zoneReplacer.Replace(string(k8sManifestBytes))
 
@@ -234,7 +226,7 @@ func waitForLocalGSLB(t *testing.T, dnsServer string, dnsPort int, host string, 
 		"Wait for failover to happen and coredns to pickup new values...",
 		300,
 		time.Second*1,
-		func() ([]string, error) { return Dig(t, dnsServer, fmt.Sprint(dnsPort), host) },
+		func() ([]string, error) { return Dig(t, dnsServer, dnsPort, host) },
 		expectedResult)
 }
 

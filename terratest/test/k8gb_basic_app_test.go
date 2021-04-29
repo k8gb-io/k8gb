@@ -73,7 +73,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 
 	installPodinfo(t, options)
 
-	assertGslbStatus(t, options, "test-gslb", "notfound."+dnsZone+":NotFound roundrobin."+dnsZone+":Healthy unhealthy."+dnsZone+":Unhealthy")
+	assertGslbStatus(t, options, "test-gslb", "notfound."+settings.DNSZone+":NotFound roundrobin."+settings.DNSZone+":Healthy unhealthy."+settings.DNSZone+":Unhealthy")
 	// Ensure controller labels DNSEndpoint objects
 	assertDNSEndpointLabel(t, options, "k8gb.absa.oss/dnstype")
 

@@ -34,7 +34,7 @@ import (
 // Relies on two local clusters deployed by `$make deploy-two-local-clusters`
 func TestK8gbBasicRoundRobinExample(t *testing.T) {
 	t.Parallel()
-	var host = "roundrobin-test." + dnsZone
+	var host = "roundrobin-test." + settings.DNSZone
 	const gslbName = "roundrobin-test-gslb"
 
 	// Path to the Kubernetes resource config we will test
@@ -71,17 +71,17 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 	sort.Strings(expectedIPs)
 
 	t.Run("round-robin on two concurrent clusters with podinfo running", func(t *testing.T) {
-		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, dnsServer1, 53, host, expectedIPs)
+		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, settings.DNSServer1, settings.Port1, host, expectedIPs)
 		require.NoError(t, err)
-		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, dnsServer2, 53, host, expectedIPs)
+		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, settings.DNSServer2, settings.Port2, host, expectedIPs)
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, resolvedIPsCoreDNS1)
 		assert.NotEmpty(t, resolvedIPsCoreDNS2)
 		assert.Equal(t, len(resolvedIPsCoreDNS1), len(expectedIPs))
 		assert.Equal(t, len(resolvedIPsCoreDNS2), len(expectedIPs))
-		assert.ElementsMatch(t, resolvedIPsCoreDNS1, expectedIPs, "%s:%s", host, dnsServer1Port)
-		assert.ElementsMatch(t, resolvedIPsCoreDNS2, expectedIPs, "%s:%s", host, dnsServer2Port)
+		assert.ElementsMatch(t, resolvedIPsCoreDNS1, expectedIPs, "%s:%s", host, settings.Port1)
+		assert.ElementsMatch(t, resolvedIPsCoreDNS2, expectedIPs, "%s:%s", host, settings.Port2)
 	})
 
 	t.Run("kill podinfo on the first cluster", func(t *testing.T) {
@@ -90,9 +90,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 
 		assertGslbStatus(t, optionsContext1, gslbName, host+":Unhealthy")
 
-		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, dnsServer1, 53, host, ingressIPs2)
+		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, settings.DNSServer1, settings.Port1, host, ingressIPs2)
 		require.NoError(t, err)
-		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, dnsServer2, 53, host, ingressIPs2)
+		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, settings.DNSServer2, settings.Port2, host, ingressIPs2)
 		require.NoError(t, err)
 		assert.ElementsMatch(t, resolvedIPsCoreDNS1, resolvedIPsCoreDNS2)
 	})
@@ -103,9 +103,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 
 		assertGslbStatus(t, optionsContext2, gslbName, host+":Unhealthy")
 
-		_, err = waitForLocalGSLB(t, dnsServer1, 53, host, []string{""})
+		_, err = waitForLocalGSLB(t, settings.DNSServer1, settings.Port1, host, []string{""})
 		require.NoError(t, err)
-		_, err = waitForLocalGSLB(t, dnsServer2, 53, host, []string{""})
+		_, err = waitForLocalGSLB(t, settings.DNSServer2, settings.Port2, host, []string{""})
 		require.NoError(t, err)
 	})
 
@@ -117,16 +117,16 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 		assertGslbStatus(t, optionsContext1, gslbName, host+":Healthy")
 		assertGslbStatus(t, optionsContext2, gslbName, host+":Healthy")
 
-		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, dnsServer1, 53, host, expectedIPs)
+		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, settings.DNSServer1, settings.Port1, host, expectedIPs)
 		require.NoError(t, err)
-		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, dnsServer2, 53, host, expectedIPs)
+		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, settings.DNSServer2, settings.Port2, host, expectedIPs)
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, resolvedIPsCoreDNS1)
 		assert.NotEmpty(t, resolvedIPsCoreDNS2)
 		assert.Equal(t, len(resolvedIPsCoreDNS1), len(expectedIPs))
 		assert.Equal(t, len(resolvedIPsCoreDNS2), len(expectedIPs))
-		assert.ElementsMatch(t, resolvedIPsCoreDNS1, expectedIPs, "%s:%s", host, dnsServer1Port)
-		assert.ElementsMatch(t, resolvedIPsCoreDNS2, expectedIPs, "%s:%s", host, dnsServer2Port)
+		assert.ElementsMatch(t, resolvedIPsCoreDNS1, expectedIPs, "%s:%s", host, settings.Port1)
+		assert.ElementsMatch(t, resolvedIPsCoreDNS2, expectedIPs, "%s:%s", host, settings.Port2)
 	})
 }

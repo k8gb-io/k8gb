@@ -41,7 +41,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	assertStrategy := func(t *testing.T, options *k8s.KubectlOptions) {
 		assertGslbSpec(t, options, name, "spec.strategy.splitBrainThresholdSeconds", "300")
 		assertGslbSpec(t, options, name, "spec.strategy.dnsTtlSeconds", "30")
-		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", primaryGeoTag)
+		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", settings.PrimaryGeoTag)
 		assertGslbSpec(t, options, name, "spec.strategy.type", "failover")
 	}
 
@@ -103,7 +103,7 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 	assertStrategy := func(t *testing.T, options *k8s.KubectlOptions) {
 		assertGslbSpec(t, options, name, "spec.strategy.splitBrainThresholdSeconds", "600")
 		assertGslbSpec(t, options, name, "spec.strategy.dnsTtlSeconds", "60")
-		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", primaryGeoTag)
+		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", settings.PrimaryGeoTag)
 		assertGslbSpec(t, options, name, "spec.strategy.type", "failover")
 	}
 
