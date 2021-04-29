@@ -31,22 +31,26 @@ import (
 )
 
 type InfobloxProvider struct {
-	assistant assistant.IAssistant
-	config    depresolver.Config
+	assistant      assistant.IAssistant
+	config         depresolver.Config
+	infobloxClient *infobloxClient
 }
 
 func NewInfobloxDNS(config depresolver.Config, assistant assistant.IAssistant) *InfobloxProvider {
+	ibClient := newInfobloxClient(config)
 	return &InfobloxProvider{
-		assistant: assistant,
-		config:    config,
+		assistant:      assistant,
+		config:         config,
+		infobloxClient: ibClient,
 	}
 }
 
 func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
-	objMgr, err := p.infobloxConnection()
+	objMgr, err := p.infobloxClient.login()
 	if err != nil {
 		return err
 	}
+	defer p.infobloxClient.logout()
 	addresses, err := p.assistant.GslbIngressExposedIPs(gslb)
 	if err != nil {
 		return err
@@ -64,14 +68,14 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	}
 
 	if findZone != nil {
-		err = p.checkZoneDelegated(findZone)
+		err = p.infobloxClient.checkZoneDelegated(findZone)
 		if err != nil {
 			return err
 		}
 		if len(findZone.Ref) > 0 {
 
 			// Drop own records for straight away update
-			existingDelegateTo := p.filterOutDelegateTo(findZone.DelegateTo, nsServerName(p.config))
+			existingDelegateTo := p.infobloxClient.filterOutDelegateTo(findZone.DelegateTo, nsServerName(p.config))
 			existingDelegateTo = append(existingDelegateTo, delegateTo...)
 
 			// Drop external records if they are stale
@@ -84,7 +88,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 				if err != nil {
 					log.Err(err).Msgf("Got the error from TXT based checkAlive. External cluster (%s) doesn't "+
 						"look alive, filtering it out from delegated zone configuration...", extCluster)
-					existingDelegateTo = p.filterOutDelegateTo(existingDelegateTo, extCluster)
+					existingDelegateTo = p.infobloxClient.filterOutDelegateTo(existingDelegateTo, extCluster)
 				}
 			}
 			log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, existingDelegateTo)
@@ -125,17 +129,18 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 }
 
 func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
-	objMgr, err := p.infobloxConnection()
+	objMgr, err := p.infobloxClient.login()
 	if err != nil {
 		return err
 	}
+	defer p.infobloxClient.logout()
 	findZone, err := objMgr.GetZoneDelegated(p.config.DNSZone)
 	if err != nil {
 		return err
 	}
 
 	if findZone != nil {
-		err = p.checkZoneDelegated(findZone)
+		err = p.infobloxClient.checkZoneDelegated(findZone)
 		if err != nil {
 			return err
 		}

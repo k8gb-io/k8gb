@@ -69,7 +69,7 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	provider := NewInfobloxDNS(customConfig, a)
 	// act
 	extClusters := nsServerNameExt(customConfig)
-	got := provider.filterOutDelegateTo(delegateTo, extClusters[0])
+	got := provider.infobloxClient.filterOutDelegateTo(delegateTo, extClusters[0])
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 }

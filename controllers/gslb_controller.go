@@ -154,13 +154,15 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// == handle delegated zone in Edge DNS
 	err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
 	if err != nil {
-		return result.RequeueError(err)
+		log.Err(err).Msg("Create zone delegation")
+		return result.Requeue()
 	}
 
 	// == Status =
 	err = r.updateGslbStatus(gslb)
 	if err != nil {
-		return result.RequeueError(err)
+		log.Err(err).Msg("Update Gslb status")
+		return result.Requeue()
 	}
 
 	// == Finish ==========

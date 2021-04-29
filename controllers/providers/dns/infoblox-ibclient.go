@@ -21,24 +21,36 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 )
 
-func (p *InfobloxProvider) infobloxConnection() (*ibclient.ObjectManager, error) {
-	hostConfig := ibclient.HostConfig{
-		Host:     p.config.Infoblox.Host,
-		Version:  p.config.Infoblox.Version,
-		Port:     strconv.Itoa(p.config.Infoblox.Port),
-		Username: p.config.Infoblox.Username,
-		Password: p.config.Infoblox.Password,
+type infobloxClient struct {
+	config     depresolver.Config
+	connection *ibclient.Connector
+}
+
+func newInfobloxClient(config depresolver.Config) *infobloxClient {
+	return &infobloxClient{
+		config: config,
 	}
-	transportConfig := ibclient.NewTransportConfig("false", p.config.Infoblox.HTTPRequestTimeout, p.config.Infoblox.HTTPPoolConnections)
+}
+
+func (c *infobloxClient) login() (objectManager *ibclient.ObjectManager, err error) {
+	const cmdType = "k8gbclient"
+	hostConfig := ibclient.HostConfig{
+		Host:     c.config.Infoblox.Host,
+		Version:  c.config.Infoblox.Version,
+		Port:     strconv.Itoa(c.config.Infoblox.Port),
+		Username: c.config.Infoblox.Username,
+		Password: c.config.Infoblox.Password,
+	}
+	transportConfig := ibclient.NewTransportConfig("false", c.config.Infoblox.HTTPRequestTimeout, c.config.Infoblox.HTTPPoolConnections)
 	requestBuilder := &ibclient.WapiRequestBuilder{}
 	requestor := &ibclient.WapiHttpRequestor{}
 
-	var objMgr *ibclient.ObjectManager
-
-	if p.config.Override.FakeInfobloxEnabled {
+	if c.config.Override.FakeInfobloxEnabled {
 		fqdn := "fakezone.example.com"
 		fakeRefReturn := "zone_delegated/ZG5zLnpvbmUkLl9kZWZhdWx0LnphLmNvLmFic2EuY2Fhcy5vaG15Z2xiLmdzbGJpYmNsaWVudA:fakezone.example.com/default"
 		k8gbFakeConnector := &fakeInfobloxConnector{
@@ -46,32 +58,36 @@ func (p *InfobloxProvider) infobloxConnection() (*ibclient.ObjectManager, error)
 			getObjectRef: "",
 			resultObject: []ibclient.ZoneDelegated{*ibclient.NewZoneDelegated(ibclient.ZoneDelegated{Fqdn: fqdn, Ref: fakeRefReturn})},
 		}
-		objMgr = ibclient.NewObjectManager(k8gbFakeConnector, "k8gbclient", "")
+		objectManager = ibclient.NewObjectManager(k8gbFakeConnector, cmdType, "")
 	} else {
-		conn, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
+		c.connection, err = ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, requestor)
 		if err != nil {
-			return nil, err
+			return
 		}
-		defer func() {
-			err = conn.Logout()
-			if err != nil {
-				log.Err(err).Msg("Failed to close connection to infoblox")
-			}
-		}()
-		objMgr = ibclient.NewObjectManager(conn, "k8gbclient", "")
+		objectManager = ibclient.NewObjectManager(c.connection, cmdType, "")
 	}
-	return objMgr, nil
+	return
 }
 
-func (p *InfobloxProvider) checkZoneDelegated(findZone *ibclient.ZoneDelegated) error {
-	if findZone.Fqdn != p.config.DNSZone {
-		err := fmt.Errorf("delegated zone returned from infoblox(%s) does not match requested gslb zone(%s)", findZone.Fqdn, p.config.DNSZone)
-		return err
+func (c *infobloxClient) logout() {
+	if c.config.Override.FakeInfobloxEnabled {
+		return
 	}
-	return nil
+	log.Debug().Msgf("Infoblox logout")
+	err := c.connection.Logout()
+	if err != nil {
+		log.Err(err).Msg("Failed to close connection to infoblox")
+	}
 }
 
-func (p *InfobloxProvider) filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclient.NameServer {
+func (c *infobloxClient) checkZoneDelegated(findZone *ibclient.ZoneDelegated) (err error) {
+	if findZone.Fqdn != c.config.DNSZone {
+		return fmt.Errorf("delegated zone returned from infoblox(%s) does not match requested gslb zone(%s)", findZone.Fqdn, c.config.DNSZone)
+	}
+	return
+}
+
+func (c *infobloxClient) filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclient.NameServer {
 	for i := 0; i < len(delegateTo); i++ {
 		if delegateTo[i].Name == fqdn {
 			delegateTo = append(delegateTo[:i], delegateTo[i+1:]...)
