@@ -70,12 +70,12 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 	expectedIPsCluster2 := GetIngressIPs(t, optionsContext2, gslbName)
 
 	t.Run("Each cluster resolves its own set of IP addresses", func(t *testing.T) {
-		beforeFailoverResponseCluster1, err := waitForLocalGSLB(t, optionsContext1, 5253, "terratest-failover-split."+dnsZone, expectedIPsCluster1)
+		beforeFailoverResponseCluster1, err := waitForLocalGSLB(t, dnsServer1, 53, "terratest-failover-split."+dnsZone, expectedIPsCluster1)
 		require.NoError(t, err)
 
 		assert.Equal(t, beforeFailoverResponseCluster1, expectedIPsCluster1)
 
-		beforeFailoverResponseCluster2, err := waitForLocalGSLB(t, optionsContext2, 5254, "terratest-failover-split."+dnsZone, expectedIPsCluster2)
+		beforeFailoverResponseCluster2, err := waitForLocalGSLB(t, dnsServer2, 53, "terratest-failover-split."+dnsZone, expectedIPsCluster2)
 		require.NoError(t, err)
 
 		assert.Equal(t, beforeFailoverResponseCluster2, expectedIPsCluster2)
@@ -89,14 +89,14 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 	})
 
 	t.Run("Cluster 1 failovers to Cluster 2", func(t *testing.T) {
-		afterFailoverResponse, err := waitForLocalGSLB(t, optionsContext1, 5253, "terratest-failover-split."+dnsZone, expectedIPsCluster2)
+		afterFailoverResponse, err := waitForLocalGSLB(t, dnsServer1, 53, "terratest-failover-split."+dnsZone, expectedIPsCluster2)
 		require.NoError(t, err)
 
 		assert.Equal(t, afterFailoverResponse, expectedIPsCluster2)
 	})
 
 	t.Run("Cluster 2 still returns own entries", func(t *testing.T) {
-		afterFailoverResponse, err := waitForLocalGSLB(t, optionsContext2, 5254, "terratest-failover-split."+dnsZone, expectedIPsCluster2)
+		afterFailoverResponse, err := waitForLocalGSLB(t, dnsServer2, 53, "terratest-failover-split."+dnsZone, expectedIPsCluster2)
 		require.NoError(t, err)
 
 		assert.Equal(t, afterFailoverResponse, expectedIPsCluster2)
@@ -110,7 +110,7 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 	})
 
 	t.Run("Cluster 1 returns own entries again", func(t *testing.T) {
-		afterFailoverResponse, err := waitForLocalGSLB(t, optionsContext1, 5253, "terratest-failover-split."+dnsZone, expectedIPsCluster1)
+		afterFailoverResponse, err := waitForLocalGSLB(t, dnsServer1, 53, "terratest-failover-split."+dnsZone, expectedIPsCluster1)
 		require.NoError(t, err)
 
 		assert.Equal(t, afterFailoverResponse, expectedIPsCluster1)

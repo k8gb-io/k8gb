@@ -71,9 +71,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 	sort.Strings(expectedIPs)
 
 	t.Run("round-robin on two concurrent clusters with podinfo running", func(t *testing.T) {
-		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, optionsContext1, 5153, host, expectedIPs)
+		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, dnsServer1, 53, host, expectedIPs)
 		require.NoError(t, err)
-		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, optionsContext2, 5154, host, expectedIPs)
+		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, dnsServer2, 53, host, expectedIPs)
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, resolvedIPsCoreDNS1)
@@ -90,9 +90,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 
 		assertGslbStatus(t, optionsContext1, gslbName, host+":Unhealthy")
 
-		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, optionsContext1, 5153, host, ingressIPs2)
+		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, dnsServer1, 53, host, ingressIPs2)
 		require.NoError(t, err)
-		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, optionsContext2, 5154, host, ingressIPs2)
+		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, dnsServer2, 53, host, ingressIPs2)
 		require.NoError(t, err)
 		assert.ElementsMatch(t, resolvedIPsCoreDNS1, resolvedIPsCoreDNS2)
 	})
@@ -103,9 +103,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 
 		assertGslbStatus(t, optionsContext2, gslbName, host+":Unhealthy")
 
-		_, err = waitForLocalGSLB(t, optionsContext1, 5153, host, []string{""})
+		_, err = waitForLocalGSLB(t, dnsServer1, 53, host, []string{""})
 		require.NoError(t, err)
-		_, err = waitForLocalGSLB(t, optionsContext2, 5154, host, []string{""})
+		_, err = waitForLocalGSLB(t, dnsServer2, 53, host, []string{""})
 		require.NoError(t, err)
 	})
 
@@ -117,9 +117,9 @@ func TestK8gbBasicRoundRobinExample(t *testing.T) {
 		assertGslbStatus(t, optionsContext1, gslbName, host+":Healthy")
 		assertGslbStatus(t, optionsContext2, gslbName, host+":Healthy")
 
-		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, optionsContext1, 5153, host, expectedIPs)
+		resolvedIPsCoreDNS1, err := waitForLocalGSLB(t, dnsServer1, 53, host, expectedIPs)
 		require.NoError(t, err)
-		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, optionsContext2, 5154, host, expectedIPs)
+		resolvedIPsCoreDNS2, err := waitForLocalGSLB(t, dnsServer2, 53, host, expectedIPs)
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, resolvedIPsCoreDNS1)

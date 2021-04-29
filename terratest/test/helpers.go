@@ -51,8 +51,14 @@ var secondaryGeoTag = getEnv("SECONDARY_GEO_TAG", "us")
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
 	var ingressIPs []string
 	ingress := k8s.GetIngress(t, options, ingressName)
-	for _, ip := range ingress.Status.LoadBalancer.Ingress {
-		ingressIPs = append(ingressIPs, ip.IP)
+	for _, lb := range ingress.Status.LoadBalancer.Ingress {
+		if len(lb.IP) > 0 {
+			ingressIPs = append(ingressIPs, lb.IP)
+		} else if len(lb.Hostname) > 0 {
+			digLbHostnameIPs, _ := Dig(t, "1.1.1.1", "53", lb.Hostname)
+			log.Printf("Digging LB hostname %s, got %v", lb.Hostname, digLbHostnameIPs)
+			ingressIPs = append(ingressIPs, digLbHostnameIPs...)
+		}
 	}
 	return ingressIPs
 }
@@ -222,23 +228,13 @@ func assertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName strin
 	assert.Equal(t, deletionExpected, deletionActual)
 }
 
-func waitForLocalGSLB(t *testing.T, options *k8s.KubectlOptions, dnsPort int, host string, expectedResult []string) (output []string, err error) {
-	keepNamespace := options.Namespace
-	options.Namespace = getEnv("K8GB_NAMESPACE", "k8gb")
-	restoreOptionsNamespace := func(options *k8s.KubectlOptions, namespace string) {
-		options.Namespace = namespace
-	}
-	defer restoreOptionsNamespace(options, keepNamespace)
-	tunnel := k8s.NewTunnel(options, k8s.ResourceTypeService, "k8gb-coredns", dnsPort, 53)
-	defer tunnel.Close()
-	tunnel.ForwardPort(t)
-
+func waitForLocalGSLB(t *testing.T, dnsServer string, dnsPort int, host string, expectedResult []string) (output []string, err error) {
 	return DoWithRetryWaitingForValueE(
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
-		100,
+		300,
 		time.Second*1,
-		func() ([]string, error) { return Dig(t, "localhost", fmt.Sprint(dnsPort), host, "+tcp") },
+		func() ([]string, error) { return Dig(t, dnsServer, fmt.Sprint(dnsPort), host) },
 		expectedResult)
 }
 
