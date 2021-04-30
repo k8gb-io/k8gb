@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -129,7 +128,7 @@ func installPodinfo(t *testing.T, options *k8s.KubectlOptions) {
 		KubectlOptions: options,
 		Version:        "5.2.0",
 		SetValues: map[string]string{
-			"image.repository": getEnv("PODINFO_IMAGE_REPO", "ghcr.io/stefanprodan/podinfo"),
+			"image.repository": settings.PodinfoImage,
 		},
 	}
 	helm.Install(t, &helmOptions, "podinfo/podinfo", "frontend")
@@ -228,11 +227,4 @@ func waitForLocalGSLB(t *testing.T, dnsServer string, dnsPort int, host string, 
 		time.Second*1,
 		func() ([]string, error) { return Dig(t, dnsServer, dnsPort, host) },
 		expectedResult)
-}
-
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
 }

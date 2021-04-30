@@ -49,8 +49,8 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 	// - HOME/.kube/config for the kubectl config file
 	// - Current context of the kubectl config file
 	// - Random namespace
-	optionsContext1 := k8s.NewKubectlOptions(getEnv("K8GB_CLUSTER1", "k3d-test-gslb1"), "", namespaceName)
-	optionsContext2 := k8s.NewKubectlOptions(getEnv("K8GB_CLUSTER2", "k3d-test-gslb2"), "", namespaceName)
+	optionsContext1 := k8s.NewKubectlOptions(settings.Cluster1, "", namespaceName)
+	optionsContext2 := k8s.NewKubectlOptions(settings.Cluster2, "", namespaceName)
 
 	k8s.CreateNamespace(t, optionsContext1, namespaceName)
 	k8s.CreateNamespace(t, optionsContext2, namespaceName)
