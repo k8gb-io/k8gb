@@ -19,6 +19,8 @@ package test
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"reflect"
 	"sort"
 	"strings"
@@ -40,20 +42,26 @@ import (
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
 	var ingressIPs []string
 	ingress := k8s.GetIngress(t, options, ingressName)
-	for _, ip := range ingress.Status.LoadBalancer.Ingress {
-		ingressIPs = append(ingressIPs, ip.IP)
+	for _, lb := range ingress.Status.LoadBalancer.Ingress {
+		if len(lb.IP) > 0 {
+			ingressIPs = append(ingressIPs, lb.IP)
+		} else if len(lb.Hostname) > 0 {
+			digLbHostnameIPs, _ := Dig(t, "1.1.1.1", 53, lb.Hostname)
+			log.Printf("Digging LB hostname %s, got %v", lb.Hostname, digLbHostnameIPs)
+			ingressIPs = append(ingressIPs, digLbHostnameIPs...)
+		}
 	}
 	return ingressIPs
 }
 
 // Dig gets sorted slice of records related to dnsName
-func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string) ([]string, error) {
-	port := fmt.Sprintf("-p%v", dnsPort)
+func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string, additionalArgs ...string) ([]string, error) {
+	port := fmt.Sprintf("-p%d", dnsPort)
 	dnsServer = fmt.Sprintf("@%s", dnsServer)
 
 	digApp := shell.Command{
 		Command: "dig",
-		Args:    []string{port, dnsServer, dnsName, "+short"},
+		Args:    append([]string{port, dnsServer, dnsName, "+short"}, additionalArgs...),
 	}
 
 	digAppOut := shell.RunCommandAndGetOutput(t, digApp)
@@ -88,13 +96,23 @@ func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetr
 	return output, retry.MaxRetriesExceeded{Description: actionDescription, MaxRetries: maxRetries}
 }
 
-func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
-	k8s.KubectlApply(t, options, kubeResourcePath)
+func createGslb(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string) {
+	k8sManifestBytes, err := ioutil.ReadFile(kubeResourcePath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
-	ingress := k8s.GetIngress(t, options, gslbName)
-	require.Equal(t, ingress.Name, gslbName)
+	zoneReplacer := strings.NewReplacer("cloud.example.com", settings.DNSZone,
+		"primaryGeoTag: \"eu\"", fmt.Sprintf("primaryGeoTag: \"%s\"", settings.PrimaryGeoTag),
+		"primaryGeoTag: \"us\"", fmt.Sprintf("primaryGeoTag: \"%s\"", settings.SecondaryGeoTag),
+		"k8gb.io/primary-geotag: \"eu\"", fmt.Sprintf("k8gb.io/primary-geotag: \"%s\"", settings.PrimaryGeoTag))
 
+	k8sManifestString := zoneReplacer.Replace(string(k8sManifestBytes))
+
+	k8s.KubectlApplyFromString(t, options, k8sManifestString)
+}
+
+func installPodinfo(t *testing.T, options *k8s.KubectlOptions) {
 	helmRepoAdd := shell.Command{
 		Command: "helm",
 		Args:    []string{"repo", "add", "--force-update", "podinfo", "https://stefanprodan.github.io/podinfo"},
@@ -108,12 +126,15 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 	shell.RunCommand(t, helmRepoUpdate)
 	helmOptions := helm.Options{
 		KubectlOptions: options,
-		Version:        "4.0.6",
+		Version:        "5.2.0",
+		SetValues: map[string]string{
+			"image.repository": settings.PodinfoImage,
+		},
 	}
 	helm.Install(t, &helmOptions, "podinfo/podinfo", "frontend")
 
 	testAppFilter := metav1.ListOptions{
-		LabelSelector: "app=frontend-podinfo",
+		LabelSelector: "app.kubernetes.io/name=frontend-podinfo",
 	}
 
 	k8s.WaitUntilNumPodsCreated(t, options, testAppFilter, 1, 60, 1*time.Second)
@@ -127,6 +148,18 @@ func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeRes
 	}
 
 	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
+
+}
+
+func createGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, kubeResourcePath string, gslbName string, hostName string) {
+
+	createGslb(t, options, kubeResourcePath)
+
+	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
+	ingress := k8s.GetIngress(t, options, gslbName)
+	require.Equal(t, ingress.Name, gslbName)
+
+	installPodinfo(t, options)
 
 	serviceHealthStatus := fmt.Sprintf("%s:Healthy", hostName)
 	assertGslbStatus(t, options, gslbName, serviceHealthStatus)
@@ -186,12 +219,12 @@ func assertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName strin
 	assert.Equal(t, deletionExpected, deletionActual)
 }
 
-func waitForLocalGSLB(t *testing.T, host string, port int, expectedResult []string) (output []string, err error) {
+func waitForLocalGSLB(t *testing.T, dnsServer string, dnsPort int, host string, expectedResult []string) (output []string, err error) {
 	return DoWithRetryWaitingForValueE(
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
-		100,
+		300,
 		time.Second*1,
-		func() ([]string, error) { return Dig(t, "localhost", port, host) },
+		func() ([]string, error) { return Dig(t, dnsServer, dnsPort, host) },
 		expectedResult)
 }

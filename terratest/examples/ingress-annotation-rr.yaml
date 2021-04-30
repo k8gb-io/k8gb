@@ -6,21 +6,21 @@ metadata:
   name: test-gslb-annotation
 spec:
   rules:
-  - host: notfound.cloud.example.com
+  - host: ingress-rr-notfound.cloud.example.com
     http:
       paths:
       - backend:
           serviceName: non-existing-app
           servicePort: http
         path: /
-  - host: unhealthy.cloud.example.com
+  - host: ingress-rr-unhealthy.cloud.example.com
     http:
       paths:
       - backend:
           serviceName: unhealthy-app
           servicePort: http
         path: /
-  - host: roundrobin.cloud.example.com
+  - host: ingress-roundrobin.cloud.example.com
     http:
       paths:
       - backend:

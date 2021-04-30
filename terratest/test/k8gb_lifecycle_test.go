@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestK8gbRepeatedlyRecreatedFromIngress creates GSLB, than keeps operator live and than recreates GSLB again from Ingress.
+// TestK8gbRepeatedlyRecreatedFromIngress creates GSLB, then keeps operator live and than recreates GSLB again from Ingress.
 // This is usual lifecycle scenario and we are testing spec strategy has expected values.
 func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	t.Parallel()
@@ -41,7 +41,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	assertStrategy := func(t *testing.T, options *k8s.KubectlOptions) {
 		assertGslbSpec(t, options, name, "spec.strategy.splitBrainThresholdSeconds", "300")
 		assertGslbSpec(t, options, name, "spec.strategy.dnsTtlSeconds", "30")
-		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", "eu")
+		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", settings.PrimaryGeoTag)
 		assertGslbSpec(t, options, name, "spec.strategy.type", "failover")
 	}
 
@@ -52,7 +52,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("k8gb-basic-example-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("k8gb-test-repeatedly-recreated-from-ingress-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file
@@ -66,7 +66,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 
 	defer k8s.KubectlDelete(t, options, ingressResourcePath)
 
-	k8s.KubectlApply(t, options, ingressResourcePath)
+	createGslb(t, options, ingressResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 
@@ -82,7 +82,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	assertGslbDeleted(t, options, ingress.Name)
 
 	// recreate ingress
-	k8s.KubectlApply(t, options, ingressResourcePath)
+	createGslb(t, options, ingressResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 
@@ -103,7 +103,7 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 	assertStrategy := func(t *testing.T, options *k8s.KubectlOptions) {
 		assertGslbSpec(t, options, name, "spec.strategy.splitBrainThresholdSeconds", "600")
 		assertGslbSpec(t, options, name, "spec.strategy.dnsTtlSeconds", "60")
-		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", "eu")
+		assertGslbSpec(t, options, name, "spec.strategy.primaryGeoTag", settings.PrimaryGeoTag)
 		assertGslbSpec(t, options, name, "spec.strategy.type", "failover")
 	}
 
@@ -113,7 +113,7 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("k8gb-test-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("k8gb-test-spec-keeps-stable-after-ingress-updates-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file
@@ -125,13 +125,13 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 	defer k8s.DeleteNamespace(t, options, namespaceName)
 
 	// create gslb
-	k8s.KubectlApply(t, options, kubeResourcePath)
+	createGslb(t, options, kubeResourcePath)
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 
 	assertStrategy(t, options)
 
 	// reapply ingress
-	k8s.KubectlApply(t, options, ingressResourcePath)
+	createGslb(t, options, ingressResourcePath)
 
 	k8s.WaitUntilIngressAvailable(t, options, name, 60, 1*time.Second)
 

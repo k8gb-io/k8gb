@@ -40,7 +40,7 @@ func TestK8gbIngressAnnotationRR(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("k8gb-basic-example-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("k8gb-test-ingress-annotation-rr-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file
@@ -52,11 +52,11 @@ func TestK8gbIngressAnnotationRR(t *testing.T) {
 
 	defer k8s.DeleteNamespace(t, options, namespaceName)
 
-	k8s.KubectlApply(t, options, kubeResourcePath)
+	createGslb(t, options, kubeResourcePath)
 
 	ingress := k8s.GetIngress(t, options, "test-gslb-annotation")
 	require.Equal(t, ingress.Name, "test-gslb-annotation")
-	assertGslbStatus(t, options, "test-gslb-annotation", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:NotFound unhealthy.cloud.example.com:NotFound")
+	assertGslbStatus(t, options, "test-gslb-annotation", "ingress-roundrobin."+settings.DNSZone+":NotFound ingress-rr-notfound."+settings.DNSZone+":NotFound ingress-rr-unhealthy."+settings.DNSZone+":NotFound")
 	assertGslbSpec(t, options, "test-gslb-annotation", ".spec.strategy.type", "roundRobin")
 
 	t.Run("Gslb is getting deleted together with the annotated Ingress", func(t *testing.T) {

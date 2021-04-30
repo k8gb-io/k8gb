@@ -8,4 +8,4 @@ spec:
       - host: broken-no-http.cloud.example.com
   strategy:
     type: failover
-    primaryGeoTag: eu
+    primaryGeoTag: "eu"

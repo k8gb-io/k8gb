@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,14 +46,14 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("k8gb-test-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("k8gb-test-split-failover-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file
 	// - Current context of the kubectl config file
 	// - Random namespace
-	optionsContext1 := k8s.NewKubectlOptions("k3d-test-gslb1", "", namespaceName)
-	optionsContext2 := k8s.NewKubectlOptions("k3d-test-gslb2", "", namespaceName)
+	optionsContext1 := k8s.NewKubectlOptions(settings.Cluster1, "", namespaceName)
+	optionsContext2 := k8s.NewKubectlOptions(settings.Cluster2, "", namespaceName)
 
 	k8s.CreateNamespace(t, optionsContext1, namespaceName)
 	k8s.CreateNamespace(t, optionsContext2, namespaceName)
@@ -63,36 +62,20 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 
 	gslbName := "test-gslb"
 
-	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath1, gslbName, "terratest-failover-split.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath1, gslbName, "terratest-failover-split."+settings.DNSZone)
 
-	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath2, gslbName, "terratest-failover-split.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath2, gslbName, "terratest-failover-split."+settings.DNSZone)
 
 	expectedIPsCluster1 := GetIngressIPs(t, optionsContext1, gslbName)
 	expectedIPsCluster2 := GetIngressIPs(t, optionsContext2, gslbName)
 
 	t.Run("Each cluster resolves its own set of IP addresses", func(t *testing.T) {
-		beforeFailoverResponseCluster1, err := DoWithRetryWaitingForValueE(
-			t,
-			"Wait 1st cluster coredns to pickup dns values...",
-			300,
-			1*time.Second,
-			func() ([]string, error) {
-				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
-			},
-			expectedIPsCluster1)
+		beforeFailoverResponseCluster1, err := waitForLocalGSLB(t, settings.DNSServer1, settings.Port1, "terratest-failover-split."+settings.DNSZone, expectedIPsCluster1)
 		require.NoError(t, err)
 
 		assert.Equal(t, beforeFailoverResponseCluster1, expectedIPsCluster1)
 
-		beforeFailoverResponseCluster2, err := DoWithRetryWaitingForValueE(
-			t,
-			"Wait 2nd cluster coredns to pickup dns values...",
-			300,
-			1*time.Second,
-			func() ([]string, error) {
-				return Dig(t, "localhost", 5054, "terratest-failover-split.cloud.example.com")
-			},
-			expectedIPsCluster2)
+		beforeFailoverResponseCluster2, err := waitForLocalGSLB(t, settings.DNSServer2, settings.Port2, "terratest-failover-split."+settings.DNSZone, expectedIPsCluster2)
 		require.NoError(t, err)
 
 		assert.Equal(t, beforeFailoverResponseCluster2, expectedIPsCluster2)
@@ -102,36 +85,18 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 
 		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=0")
 
-		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split.cloud.example.com:Unhealthy")
+		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split."+settings.DNSZone+":Unhealthy")
 	})
 
 	t.Run("Cluster 1 failovers to Cluster 2", func(t *testing.T) {
-
-		afterFailoverResponse, err := DoWithRetryWaitingForValueE(
-			t,
-			"Wait for failover to happen and coredns to pickup new values(cluster1)...",
-			300,
-			1*time.Second,
-			func() ([]string, error) {
-				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
-			},
-			expectedIPsCluster2)
+		afterFailoverResponse, err := waitForLocalGSLB(t, settings.DNSServer1, settings.Port1, "terratest-failover-split."+settings.DNSZone, expectedIPsCluster2)
 		require.NoError(t, err)
 
 		assert.Equal(t, afterFailoverResponse, expectedIPsCluster2)
 	})
 
 	t.Run("Cluster 2 still returns own entries", func(t *testing.T) {
-
-		afterFailoverResponse, err := DoWithRetryWaitingForValueE(
-			t,
-			"Wait for failover to happen and coredns to pickup new values(cluster2)...",
-			300,
-			1*time.Second,
-			func() ([]string, error) {
-				return Dig(t, "localhost", 5054, "terratest-failover-split.cloud.example.com")
-			},
-			expectedIPsCluster2)
+		afterFailoverResponse, err := waitForLocalGSLB(t, settings.DNSServer2, settings.Port2, "terratest-failover-split."+settings.DNSZone, expectedIPsCluster2)
 		require.NoError(t, err)
 
 		assert.Equal(t, afterFailoverResponse, expectedIPsCluster2)
@@ -141,20 +106,11 @@ func TestK8gbSplitFailoverExample(t *testing.T) {
 
 		k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=1")
 
-		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split.cloud.example.com:Healthy")
+		assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover-split."+settings.DNSZone+":Healthy")
 	})
 
 	t.Run("Cluster 1 returns own entries again", func(t *testing.T) {
-
-		afterFailoverResponse, err := DoWithRetryWaitingForValueE(
-			t,
-			"Wait for failover to happen and coredns to pickup new values(cluster1)...",
-			300,
-			1*time.Second,
-			func() ([]string, error) {
-				return Dig(t, "localhost", 5053, "terratest-failover-split.cloud.example.com")
-			},
-			expectedIPsCluster1)
+		afterFailoverResponse, err := waitForLocalGSLB(t, settings.DNSServer1, settings.Port1, "terratest-failover-split."+settings.DNSZone, expectedIPsCluster1)
 		require.NoError(t, err)
 
 		assert.Equal(t, afterFailoverResponse, expectedIPsCluster1)

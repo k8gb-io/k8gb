@@ -3,27 +3,27 @@ kind: Ingress
 metadata:
   annotations:
     k8gb.io/strategy: failover
-    k8gb.io/primary-geotag: eu
+    k8gb.io/primary-geotag: "eu"
     k8gb.io/dns-ttl-seconds: "60"
     k8gb.io/splitbrain-threshold-seconds: "600"
   name: test-gslb-annotation-failover
 spec:
   rules:
-  - host: notfound.cloud.example.com
+  - host: ingress-failover-notfound.cloud.example.com
     http:
       paths:
       - backend:
           serviceName: non-existing-app
           servicePort: http
         path: /
-  - host: unhealthy.cloud.example.com
+  - host: ingress-failover-unhealthy.cloud.example.com
     http:
       paths:
       - backend:
           serviceName: unhealthy-app
           servicePort: http
         path: /
-  - host: roundrobin.cloud.example.com
+  - host: ingress-failover.cloud.example.com
     http:
       paths:
       - backend:

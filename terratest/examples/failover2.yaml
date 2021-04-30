@@ -14,4 +14,4 @@ spec:
             path: /
   strategy:
     type: failover
-    primaryGeoTag: us
+    primaryGeoTag: "us"

@@ -5,21 +5,21 @@ metadata:
 spec:
   ingress:
     rules:
-      - host: notfound.cloud.example.com # This is the GSLB enabled host that clients would use
+      - host: terratest-notfound.cloud.example.com # This is the GSLB enabled host that clients would use
         http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
           paths:
             - backend:
                 serviceName: non-existing-app # Gslb should reflect NotFound status
                 servicePort: http
               path: /
-      - host: unhealthy.cloud.example.com
+      - host: terratest-unhealthy.cloud.example.com
         http:
           paths:
           - backend:
               serviceName: unhealthy-app # Gslb should reflect Unhealthy status
               servicePort: http
             path: /
-      - host: roundrobin.cloud.example.com
+      - host: terratest-roundrobin.cloud.example.com
         http:
           paths:
           - backend:

@@ -51,8 +51,23 @@ development tree.
 ### Testing
 
 * Unit tests should be updated for any functional code change at [test suite location](https://github.com/AbsaOSS/k8gb/tree/master/controllers/gslb_controller_test.go).
-* Acceptance terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest) and executable by `make terratest` target. These tests are changed only if the
- change is substantial enough to affect the main end-to-end flow.
+* Acceptance terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest) and executable by `make terratest` target.
+  These tests are updated only if the change is substantial enough to affect the main end-to-end flow.
+
+* There is possibility to execute terratest suite over the real clusters.
+For this you need to override the set of test settings as in example below.
+```sh
+PRIMARY_GEO_TAG=af-south-1 \
+SECONDARY_GEO_TAG=eu-west-1 \
+DNS_SERVER1=a377095726f1845fb85b95c2afef8ac0-9a1a10f24e634e28.elb.af-south-1.amazonaws.com \
+DNS_SERVER1_PORT=53 \
+DNS_SERVER2=a873f5c83be624a0a84c05a743d598a8-443f7e0285e4a28f.elb.eu-west-1.amazonaws.com \
+DNS_SERVER2_PORT=53 \
+GSLB_DOMAIN=test.k8gb.io \
+K8GB_CLUSTER1=arn:aws:eks:af-south-1:<aws-account-id>:cluster/k8gb-cluster-af-south-1 \
+K8GB_CLUSTER2=arn:aws:eks:eu-west-1:<aws-account-id>:cluster/k8gb-cluster-eu-west-1 \
+make terratest
+```
 
 - [Debugging](#debugging)
 

@@ -43,14 +43,14 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("k8gb-test-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("k8gb-test-failover-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file
 	// - Current context of the kubectl config file
 	// - Random namespace
-	optionsContext1 := k8s.NewKubectlOptions("k3d-test-gslb1", "", namespaceName)
-	optionsContext2 := k8s.NewKubectlOptions("k3d-test-gslb2", "", namespaceName)
+	optionsContext1 := k8s.NewKubectlOptions(settings.Cluster1, "", namespaceName)
+	optionsContext2 := k8s.NewKubectlOptions(settings.Cluster2, "", namespaceName)
 
 	k8s.CreateNamespace(t, optionsContext1, namespaceName)
 	k8s.CreateNamespace(t, optionsContext2, namespaceName)
@@ -59,9 +59,9 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 
 	gslbName := "test-gslb"
 
-	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath, gslbName, "terratest-failover.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext1, kubeResourcePath, gslbName, "terratest-failover."+settings.DNSZone)
 
-	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath, gslbName, "terratest-failover.cloud.example.com")
+	createGslbWithHealthyApp(t, optionsContext2, kubeResourcePath, gslbName, "terratest-failover."+settings.DNSZone)
 
 	expectedIPs := GetIngressIPs(t, optionsContext1, gslbName)
 
@@ -70,7 +70,9 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 		"Wait coredns to pickup dns values...",
 		300,
 		1*time.Second,
-		func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover.cloud.example.com") },
+		func() ([]string, error) {
+			return Dig(t, settings.DNSServer1, settings.Port1, "terratest-failover."+settings.DNSZone)
+		},
 		expectedIPs)
 	require.NoError(t, err)
 
@@ -78,7 +80,7 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 
 	k8s.RunKubectl(t, optionsContext1, "scale", "deploy", "frontend-podinfo", "--replicas=0")
 
-	assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover.cloud.example.com:Unhealthy")
+	assertGslbStatus(t, optionsContext1, gslbName, "terratest-failover."+settings.DNSZone+":Unhealthy")
 
 	t.Run("failover happens as expected", func(t *testing.T) {
 		expectedIPsAfterFailover := GetIngressIPs(t, optionsContext2, gslbName)
@@ -88,7 +90,9 @@ func TestK8gbBasicFailoverExample(t *testing.T) {
 			"Wait for failover to happen and coredns to pickup new values...",
 			300,
 			1*time.Second,
-			func() ([]string, error) { return Dig(t, "localhost", 5053, "terratest-failover.cloud.example.com") },
+			func() ([]string, error) {
+				return Dig(t, settings.DNSServer1, settings.Port1, "terratest-failover."+settings.DNSZone)
+			},
 			expectedIPsAfterFailover)
 		require.NoError(t, err)
 

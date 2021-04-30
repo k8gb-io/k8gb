@@ -42,7 +42,7 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 	// To ensure we can reuse the resource config on the same cluster to test different scenarios, we setup a unique
 	// namespace for the resources for this test.
 	// Note that namespaces must be lowercase.
-	namespaceName := fmt.Sprintf("k8gb-basic-example-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("k8gb-test-ingress-annotation-failover-%s", strings.ToLower(random.UniqueId()))
 
 	// Here we choose to use the defaults, which is:
 	// - HOME/.kube/config for the kubectl config file
@@ -54,18 +54,18 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 
 	defer k8s.DeleteNamespace(t, options, namespaceName)
 
-	k8s.KubectlApply(t, options, kubeResourcePath)
+	createGslb(t, options, kubeResourcePath)
 
 	ingress := k8s.GetIngress(t, options, "test-gslb-annotation-failover")
 	require.Equal(t, ingress.Name, "test-gslb-annotation-failover")
-	assertGslbStatus(t, options, "test-gslb-annotation-failover", "notfound.cloud.example.com:NotFound roundrobin.cloud.example.com:NotFound unhealthy.cloud.example.com:NotFound")
+	assertGslbStatus(t, options, "test-gslb-annotation-failover", "ingress-failover-notfound."+settings.DNSZone+":NotFound ingress-failover-unhealthy."+settings.DNSZone+":NotFound ingress-failover."+settings.DNSZone+":NotFound")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.type", "failover")
-	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.primaryGeoTag", "eu")
+	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.primaryGeoTag", settings.PrimaryGeoTag)
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.dnsTtlSeconds", "60")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.splitBrainThresholdSeconds", "600")
 
 	t.Run("Broken ingress is not proccessed", func(t *testing.T) {
-		k8s.KubectlApply(t, options, brokenResourcePath)
+		createGslb(t, options, brokenResourcePath)
 		err := k8s.RunKubectlE(t, options, "get", "gslb", "broken-test-gslb-annotation-failover")
 		require.Error(t, err)
 	})
