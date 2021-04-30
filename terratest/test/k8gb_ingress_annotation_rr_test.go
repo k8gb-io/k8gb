@@ -56,7 +56,7 @@ func TestK8gbIngressAnnotationRR(t *testing.T) {
 
 	ingress := k8s.GetIngress(t, options, "test-gslb-annotation")
 	require.Equal(t, ingress.Name, "test-gslb-annotation")
-	assertGslbStatus(t, options, "test-gslb-annotation", "notfound."+settings.DNSZone+":NotFound roundrobin."+settings.DNSZone+":NotFound unhealthy."+settings.DNSZone+":NotFound")
+	assertGslbStatus(t, options, "test-gslb-annotation", "ingress-roundrobin."+settings.DNSZone+":NotFound ingress-rr-notfound."+settings.DNSZone+":NotFound ingress-rr-unhealthy."+settings.DNSZone+":NotFound")
 	assertGslbSpec(t, options, "test-gslb-annotation", ".spec.strategy.type", "roundRobin")
 
 	t.Run("Gslb is getting deleted together with the annotated Ingress", func(t *testing.T) {

@@ -58,7 +58,7 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 
 	ingress := k8s.GetIngress(t, options, "test-gslb-annotation-failover")
 	require.Equal(t, ingress.Name, "test-gslb-annotation-failover")
-	assertGslbStatus(t, options, "test-gslb-annotation-failover", "notfound."+settings.DNSZone+":NotFound roundrobin."+settings.DNSZone+":NotFound unhealthy."+settings.DNSZone+":NotFound")
+	assertGslbStatus(t, options, "test-gslb-annotation-failover", "ingress-failover-notfound."+settings.DNSZone+":NotFound ingress-failover-unhealthy."+settings.DNSZone+":NotFound ingress-failover."+settings.DNSZone+":NotFound")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.type", "failover")
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.primaryGeoTag", settings.PrimaryGeoTag)
 	assertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.dnsTtlSeconds", "60")
