@@ -71,12 +71,13 @@ func (p *InfobloxProvider) checkZoneDelegated(findZone *ibclient.ZoneDelegated) 
 	return nil
 }
 
-func (p *InfobloxProvider) filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) []ibclient.NameServer {
-	for i := 0; i < len(delegateTo); i++ {
-		if delegateTo[i].Name == fqdn {
-			delegateTo = append(delegateTo[:i], delegateTo[i+1:]...)
-			i--
+func (p *InfobloxProvider) filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) (result []ibclient.NameServer) {
+	result = make([]ibclient.NameServer, 0)
+
+	for _, v := range delegateTo {
+		if v.Name != fqdn {
+			result = append(result, v)
 		}
 	}
-	return delegateTo
+	return
 }
