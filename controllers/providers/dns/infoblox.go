@@ -63,11 +63,16 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		return err
 	}
 
+	if !p.config.SplitBrainCheck {
+		log.Info().Msg("Split-brain handling is disabled")
+	}
+
 	if findZone != nil {
 		err = p.checkZoneDelegated(findZone)
 		if err != nil {
 			return err
 		}
+
 		if len(findZone.Ref) > 0 {
 
 			// Drop own records for straight away update
@@ -75,20 +80,22 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 			existingDelegateTo = append(existingDelegateTo, delegateTo...)
 
 			// Drop external records if they are stale
-			extClusters := getExternalClusterHeartbeatFQDNs(gslb, p.config)
-			for _, extCluster := range extClusters {
-				err = p.assistant.InspectTXTThreshold(
-					extCluster,
-					p.config.Override.FakeDNSEnabled,
-					time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
-				if err != nil {
-					log.Err(err).Msgf("Got the error from TXT based checkAlive. External cluster (%s) doesn't "+
-						"look alive, filtering it out from delegated zone configuration...", extCluster)
-					existingDelegateTo = p.filterOutDelegateTo(existingDelegateTo, extCluster)
+			if p.config.SplitBrainCheck {
+				for _, extCluster := range p.config.ExtClustersGeoTags {
+					nsServerNameExt := getNSServerName(extCluster, p.config.DNSZone, p.config.EdgeDNSZone)
+					err = p.assistant.InspectTXTThreshold(
+						getExternalClusterHeartbeatFQDN(gslb, extCluster, p.config.EdgeDNSZone),
+						p.config.Override.FakeDNSEnabled,
+						time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
+					if err != nil {
+						log.Err(err).Msgf("Got the error from TXT based checkAlive. External cluster (%s) doesn't "+
+							"look alive, filtering it out from delegated zone configuration...", nsServerNameExt)
+						existingDelegateTo = p.filterOutDelegateTo(existingDelegateTo, nsServerNameExt)
+					}
 				}
 			}
-			log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, existingDelegateTo)
 
+			log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, existingDelegateTo)
 			_, err = objMgr.UpdateZoneDelegated(findZone.Ref, existingDelegateTo)
 			if err != nil {
 				return err
@@ -101,25 +108,8 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 			return err
 		}
 	}
-
-	edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
-	heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, p.config.ClusterGeoTag, p.config.EdgeDNSZone)
-	heartbeatTXTRecord, err := objMgr.GetTXTRecord(heartbeatTXTName)
-	if err != nil {
-		return err
-	}
-	if heartbeatTXTRecord == nil {
-		log.Info().Msgf("Creating split brain TXT record(%s)...", heartbeatTXTName)
-		_, err := objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
-		if err != nil {
-			return err
-		}
-	} else {
-		log.Info().Msgf("Updating split brain TXT record(%s)...", heartbeatTXTName)
-		_, err := objMgr.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
-		if err != nil {
-			return err
-		}
+	if p.config.SplitBrainCheck {
+		return p.saveHeartbeatTXTRecord(objMgr, gslb)
 	}
 	return nil
 }
@@ -180,4 +170,28 @@ func (p *InfobloxProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldn
 
 func (p *InfobloxProvider) String() string {
 	return "Infoblox"
+}
+
+func (p *InfobloxProvider) saveHeartbeatTXTRecord(objMgr *ibclient.ObjectManager, gslb *k8gbv1beta1.Gslb) (err error) {
+	var heartbeatTXTRecord *ibclient.RecordTXT
+	edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
+	heartbeatTXTName := getExternalClusterHeartbeatFQDN(gslb, p.config.ClusterGeoTag, p.config.EdgeDNSZone)
+	heartbeatTXTRecord, err = objMgr.GetTXTRecord(heartbeatTXTName)
+	if err != nil {
+		return
+	}
+	if heartbeatTXTRecord == nil {
+		log.Info().Str("HeartbeatTXTName", heartbeatTXTName).Msg("Creating split brain TXT record")
+		_, err = objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
+		if err != nil {
+			return
+		}
+	} else {
+		log.Info().Str("HeartbeatTXTName", heartbeatTXTName).Msg("Updating split brain TXT record")
+		_, err = objMgr.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
+		if err != nil {
+			return
+		}
+	}
+	return
 }
