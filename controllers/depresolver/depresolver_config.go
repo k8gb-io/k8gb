@@ -50,6 +50,7 @@ const (
 	LogLevelKey                    = "LOG_LEVEL"
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
+	SplitBrainCheckKey             = "SPLIT_BRAIN_CHECK"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -80,6 +81,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, SimpleFormat.String())))
 		dr.config.Log.NoColor = env.GetEnvAsBoolOrFallback(LogNoColorKey, false)
+		dr.config.SplitBrainCheck = env.GetEnvAsBoolOrFallback(SplitBrainCheckKey, false)
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
 		dr.errorConfig = dr.validateConfig(dr.config, recognizedDNSTypes)
 	})

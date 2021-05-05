@@ -141,6 +141,8 @@ type Config struct {
 	route53Enabled bool
 	// ns1Enabled flag
 	ns1Enabled bool
+	// SplitBrainCheck flag decides whether split brain TXT records will be stored in edge DNS
+	SplitBrainCheck bool
 }
 
 // DependencyResolver resolves configuration for GSLB

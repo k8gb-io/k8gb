@@ -25,6 +25,7 @@ k8gb:
   log:
     format: simple # log format (simple,json)
     level: info # log level (panic,fatal,error,warn,info,debug,trace)
+  splitBrainCheck: false
 
 externaldns:
   image: k8s.gcr.io/external-dns/external-dns:v0.7.5

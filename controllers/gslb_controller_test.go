@@ -1225,7 +1225,7 @@ func cleanup() {
 		depresolver.Route53EnabledKey, depresolver.NS1EnabledKey, depresolver.InfobloxGridHostKey, depresolver.InfobloxVersionKey,
 		depresolver.InfobloxPortKey, depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.InfobloxHTTPRequestTimeoutKey,
 		depresolver.InfobloxHTTPPoolConnectionsKey, depresolver.OverrideWithFakeDNSKey, depresolver.OverrideFakeInfobloxKey,
-		depresolver.LogLevelKey, depresolver.LogFormatKey, depresolver.LogNoColorKey} {
+		depresolver.LogLevelKey, depresolver.LogFormatKey, depresolver.LogNoColorKey, depresolver.SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1254,4 +1254,5 @@ func configureEnvVar(config depresolver.Config) {
 	_ = os.Setenv(depresolver.LogLevelKey, config.Log.Level.String())
 	_ = os.Setenv(depresolver.LogFormatKey, config.Log.Format.String())
 	_ = os.Setenv(depresolver.LogNoColorKey, strconv.FormatBool(config.Log.NoColor))
+	_ = os.Setenv(depresolver.SplitBrainCheckKey, strconv.FormatBool(config.SplitBrainCheck))
 }

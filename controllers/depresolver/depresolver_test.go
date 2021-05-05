@@ -48,6 +48,7 @@ var predefinedConfig = Config{
 	EdgeDNSZone:             "8.8.8.8",
 	DNSZone:                 "example.com",
 	K8gbNamespace:           "k8gb",
+	SplitBrainCheck:         true,
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
@@ -1283,6 +1284,39 @@ func TestResolveLoggerEmptyValues(t *testing.T) {
 	assert.Equal(t, SimpleFormat, config.Log.Format)
 }
 
+func TestResolveConfigSplitBrainCheckEnabled(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.SplitBrainCheck = true
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestResolveConfigSplitBrainCheckNotSet(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.SplitBrainCheck = false
+	// act
+	// assert
+	// SplitBrainCheck is not set and expecting to resolve SplitBrainCheck = true and NoError
+	arrangeVariablesAndAssert(t, expected, assert.NoError, SplitBrainCheckKey)
+}
+
+func TestResolveConfigSplitBrainCheckDisabledInvalid(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(SplitBrainCheckKey, "i.am.wrong??.")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, false, config.SplitBrainCheck)
+}
+
 // arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with
 // ResolveOperatorConfig() output. The last parameter unsets the values
 func arrangeVariablesAndAssert(t *testing.T, expected Config,
@@ -1306,7 +1340,7 @@ func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
 		Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey,
 		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
-		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey} {
+		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1336,7 +1370,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(LogLevelKey, config.Log.Level.String())
 	_ = os.Setenv(LogFormatKey, config.Log.Format.String())
 	_ = os.Setenv(LogNoColorKey, strconv.FormatBool(config.Log.NoColor))
-
+	_ = os.Setenv(SplitBrainCheckKey, strconv.FormatBool(config.SplitBrainCheck))
 }
 
 func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {

@@ -32,19 +32,25 @@ func nsServerName(config depresolver.Config) string {
 }
 
 func nsServerNameExt(config depresolver.Config) (extNSServers []string) {
-	dnsZoneIntoNS := strings.ReplaceAll(config.DNSZone, ".", "-")
-	extNSServers = []string{}
+	extNSServers = make([]string, 0)
 	for _, clusterGeoTag := range config.ExtClustersGeoTags {
-
-		extNSServers = append(extNSServers,
-			fmt.Sprintf("gslb-ns-%s-%s.%s", dnsZoneIntoNS, clusterGeoTag, config.EdgeDNSZone))
+		extNSServers = append(extNSServers, getNSServerName(clusterGeoTag, config.DNSZone, config.EdgeDNSZone))
 	}
 	return extNSServers
 }
 
 func getExternalClusterHeartbeatFQDNs(gslb *k8gbv1beta1.Gslb, config depresolver.Config) (extGslbClusters []string) {
 	for _, geoTag := range config.ExtClustersGeoTags {
-		extGslbClusters = append(extGslbClusters, fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, geoTag, config.EdgeDNSZone))
+		extGslbClusters = append(extGslbClusters, getExternalClusterHeartbeatFQDN(gslb, geoTag, config.EdgeDNSZone))
 	}
 	return
+}
+
+func getNSServerName(geoTag, dnsZone, edgeDNSZone string) string {
+	dnsZoneIntoNS := strings.ReplaceAll(dnsZone, ".", "-")
+	return fmt.Sprintf("gslb-ns-%s-%s.%s", dnsZoneIntoNS, geoTag, edgeDNSZone)
+}
+
+func getExternalClusterHeartbeatFQDN(gslb *k8gbv1beta1.Gslb, geoTag, edgeDNSZone string) string {
+	return fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, geoTag, edgeDNSZone)
 }
