@@ -73,3 +73,72 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 }
+func TestCanSanitizeDelegatedZone(t *testing.T) {
+	// arrange
+	local := []ibclient.NameServer{
+		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+	}
+	upstream := []ibclient.NameServer{
+		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
+	}
+	want := []ibclient.NameServer{
+		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
+	}
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSZone = "example.com"
+	customConfig.ExtClustersGeoTags = []string{"za"}
+	customConfig.ClusterGeoTag = "eu"
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer)
+	provider := NewInfobloxDNS(customConfig, a)
+	// act
+	got := provider.sanitizeDelegateZone(local, upstream)
+	// assert
+	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
+}
+
+func TestSortNameServer(t *testing.T) {
+	delegateTo := []ibclient.NameServer{
+		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
+	}
+	want := []ibclient.NameServer{
+		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
+	}
+	sortZones(delegateTo)
+	assert.Equal(t, want, delegateTo, "got:\n %q \n\n want:\n %q", delegateTo, want)
+}
+
+func TestEmptySort(t *testing.T) {
+	delegateTo := make([]ibclient.NameServer, 0)
+
+	sortZones(delegateTo)
+	assert.Equal(t, 0, len(delegateTo))
+}
+
+func TestNilSort(t *testing.T) {
+	delegateTo := []ibclient.NameServer(nil)
+
+	sortZones(delegateTo)
+	assert.Nil(t, delegateTo)
+}

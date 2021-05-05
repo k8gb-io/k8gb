@@ -19,6 +19,7 @@ package dns
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	externaldns "sigs.k8s.io/external-dns/endpoint"
@@ -40,6 +41,17 @@ func NewInfobloxDNS(config depresolver.Config, assistant assistant.IAssistant) *
 		assistant: assistant,
 		config:    config,
 	}
+}
+
+func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibclient.NameServer) []ibclient.NameServer {
+	// Drop own records for straight away update
+	// And ensure local entries are up to date
+	// And final list is sorted
+	remote := p.filterOutDelegateTo(upstream, nsServerName(p.config))
+	final := append(local, remote...)
+	sortZones(final)
+
+	return final
 }
 
 func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
@@ -75,9 +87,8 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 
 		if len(findZone.Ref) > 0 {
 
-			// Drop own records for straight away update
-			existingDelegateTo := p.filterOutDelegateTo(findZone.DelegateTo, nsServerName(p.config))
-			existingDelegateTo = append(existingDelegateTo, delegateTo...)
+			sortZones(findZone.DelegateTo)
+			currentList := p.sanitizeDelegateZone(delegateTo, findZone.DelegateTo)
 
 			// Drop external records if they are stale
 			if p.config.SplitBrainCheck {
@@ -90,19 +101,22 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 					if err != nil {
 						log.Err(err).Msgf("Got the error from TXT based checkAlive. External cluster (%s) doesn't "+
 							"look alive, filtering it out from delegated zone configuration...", nsServerNameExt)
-						existingDelegateTo = p.filterOutDelegateTo(existingDelegateTo, nsServerNameExt)
+						currentList = p.filterOutDelegateTo(currentList, nsServerNameExt)
 					}
 				}
 			}
 
-			log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, existingDelegateTo)
-			_, err = objMgr.UpdateZoneDelegated(findZone.Ref, existingDelegateTo)
-			if err != nil {
-				return err
+			if !reflect.DeepEqual(findZone.DelegateTo, currentList) {
+				log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, currentList)
+				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, currentList)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	} else {
 		log.Info().Msgf("Creating delegated zone(%s)...", p.config.DNSZone)
+		sortZones(delegateTo)
 		_, err = objMgr.CreateZoneDelegated(p.config.DNSZone, delegateTo)
 		if err != nil {
 			return err
