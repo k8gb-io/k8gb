@@ -27,6 +27,12 @@ spec:
         - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
         - --annotation-filter=k8gb.absa.oss/dnstype=ns1 # filter out only relevant DNSEntrypoints
         - --provider=ns1
+{{- if .Values.ns1.endpoint }}
+        - --ns1-endpoint={{ .Values.ns1.endpoint }}
+{{- end }}
+{{- if .Values.ns1.ignoreSSL }}
+        - --ns1-ignoressl={{ .Values.ns1.ignoreSSL }}
+{{- end }}
         - --txt-owner-id=k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only

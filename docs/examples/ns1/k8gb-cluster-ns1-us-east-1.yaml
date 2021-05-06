@@ -8,3 +8,4 @@ k8gb:
 
 ns1:
   enabled: true
+  ignoreSSL: false

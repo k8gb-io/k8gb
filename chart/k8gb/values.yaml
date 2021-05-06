@@ -62,3 +62,6 @@ route53:
 
 ns1:
   enabled: false
+  # optional custom NS1 API endpoint for on-prem setups
+  # endpoint: https://api.nsone.net/v1/
+  ignoreSSL: false
