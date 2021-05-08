@@ -13,10 +13,10 @@ require (
 	github.com/prometheus/client_golang v1.10.0
 	github.com/rs/zerolog v1.21.0
 	github.com/stretchr/testify v1.7.0
-	k8s.io/api v0.20.5
+	k8s.io/api v0.20.6
 	k8s.io/apiextensions-apiserver v0.20.2 // indirect
-	k8s.io/apimachinery v0.20.5
-	k8s.io/client-go v0.20.5
+	k8s.io/apimachinery v0.20.6
+	k8s.io/client-go v0.20.6
 	sigs.k8s.io/controller-runtime v0.7.2
 	sigs.k8s.io/external-dns v0.7.6
 )
