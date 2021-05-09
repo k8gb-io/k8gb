@@ -18,5 +18,5 @@ require (
 	k8s.io/apimachinery v0.20.6
 	k8s.io/client-go v0.20.6
 	sigs.k8s.io/controller-runtime v0.7.2
-	sigs.k8s.io/external-dns v0.7.6
+	sigs.k8s.io/external-dns v0.8.0
 )
