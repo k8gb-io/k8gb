@@ -6,6 +6,8 @@ $header-bg-color-secondary: #ee6363 ;
 $section-headings-color: #b60124;
 $code-bg-color: #282a36 ;
 $code-text-color: #d8d8d8 ;
+$k8gb-logo-width: 150px ;
+$k8gb-logo-height: 200px ;
 
 @import 'jekyll-theme-cayman';
 
@@ -25,3 +27,15 @@ a.header-url:hover {
     text-decoration: none;
 }
 
+.k8gb-logo {
+  width: $k8gb-logo-width;
+  height: $k8gb-logo-height;
+  margin: 0 auto;
+}
+
+@media (max-width: 42em) {
+  .k8gb-logo {
+      width: $k8gb-logo-width / 2;
+      height: $k8gb-logo-height / 2;
+  }
+}
