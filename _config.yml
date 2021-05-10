@@ -1,6 +1,10 @@
 theme: jekyll-theme-cayman
 markdown: GFM
-include: CONTRIBUTING.md
+include:
+  - CONTRIBUTING.md
+exclude:
+  - Gemfile
+  - Gemfile.lock
 google_analytics: G-HMZ7QVHJH0
 plugins:
   - jekyll-relative-links
