@@ -55,7 +55,7 @@ COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
 SEMVER ?= $(VERSION)-$(COMMIT_HASH)
 # image URL to use all building/pushing image targets
 IMG ?= $(REPO):$(VERSION)
-
+STABLE_VERSION := "stable"
 # default bundle image tag
 BUNDLE_IMG ?= controller-bundle:$(VERSION)
 
@@ -111,9 +111,9 @@ deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
 
 .PHONY: deploy-stable
 deploy-stable:
-	@echo "\n$(YELLOW) import $(CYAN)k8gb:$(VERSION) $(YELLOW)to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),,'k8gb/k8gb')
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
+	@echo "\n$(YELLOW) import $(CYAN)k8gb:$(STABLE_VERSION) $(YELLOW)to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(STABLE_VERSION),,'k8gb/k8gb')
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(STABLE_VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
 
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
@@ -126,11 +126,11 @@ upgrade-candidate: ## Upgrade k8gb to the test version on existing clusters
 	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB1)
 	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB2)
 
-	@echo "\n$(YELLOW)Upgrade GSLB operator from $(VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB1) $(NC)"
+	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB1) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_GSLB1)
 	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),,'./chart/k8gb')
 
-	@echo "\n$(YELLOW)Upgrade GSLB operator from $(VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB2) $(NC)"
+	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB2) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_GSLB2)
 	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
 
@@ -350,8 +350,8 @@ define deploy-local-cluster
 	@echo "\n$(YELLOW)Create namespace $(NC)"
 	kubectl apply -f deploy/namespace.yaml
 
-	@echo "\n$(YELLOW)Deploy GSLB operator from $3 $(NC)"
-	$(call deploy-k8gb-with-helm,$1,$2,$3,$4,$5)
+	@echo "\n$(YELLOW)Deploy GSLB operator from ${3} $(NC)"
+	$(call deploy-k8gb-with-helm,$1,$2,${3:"stable"=""},$4,$5)
 
 	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
