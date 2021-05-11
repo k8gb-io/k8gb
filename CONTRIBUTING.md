@@ -148,7 +148,7 @@ ci = commit -s
 ### Changelog
 The [CHANGELOG](CHANGELOG.md) is automatically generated from Github PRs and Issues during release.
 Use dedicated [keywords](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword) in PR message or [manual PR and Issue linking](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue) for clean changelog generation.
-Issues and PRs should be also properly tagged with valid project tags ("bug", "enhancement", "won't fix", etc )
+Issues and PRs should be also properly tagged with valid project tags ("bug", "enhancement", "wontfix", etc )
 
 ## Documentation
 
