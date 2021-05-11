@@ -11,7 +11,7 @@
 - [Testing](#testing)
 - [Debugging](#debugging)
 - [Code style](#code-style)
-- [Pull Request message](#pull-request-message)
+- [Commit and Pull Request message](#commit-and-pull-request-message)
   - [Signature](#signature)
   - [Changelog](#changelog)
 - [Documentation](#documentation)
@@ -70,7 +70,7 @@ performs upgrade of k8gb helm chart and controller to the testing version built 
 
 - Any functional GSLB controller code change should be secured by the corresponding [unit tests](https://github.com/AbsaOSS/k8gb/tree/master/controllers/gslb_controller_test.go).
 
-- Acceptance terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest) and executable by `make terratest` target.
+- Acceptance terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest) and executable by the `make terratest` target.
   These tests are updated only if the change is substantial enough to affect the main end-to-end flow.
 
 - There is a possibility to execute the terratest suite over the real clusters.
@@ -92,13 +92,15 @@ For this, you need to override the set of test settings as in the example below.
 
 1. Install Delve debugger first. Follow the [installation instructions](https://github.com/go-delve/delve/tree/master/Documentation/installation) for specific platforms from Delve's website.
 
-2. Run the following script
+2. Run delve with options specific to IDE of choice.
+There is a dedicated make target available for Goland:
 
-    ```shell script
-    > make debug-local
+    ```sh
+    make debug-idea
     ```
+    [This article](https://dev4devs.com/2019/05/04/operator-framework-how-to-debug-golang-operator-projects/) describes possible option examples for Goland and VS Code.
 
-3. Attach debugger of your favorite IDE to port `2345`.
+3. Attach debugger of your IDE to port `2345`.
 
 ## Code style
 
@@ -107,9 +109,9 @@ k8gb project is using the coding style suggested by the Golang community. See th
 Please follow this style to make k8gb easy to review, maintain and develop.
 Run `make lint` to automatically check if your code is compliant.
 
-## Pull Request message
+## Commit and Pull Request message
 
-We follow a rough convention for PR messages designed to answer two questions: what changed and why.
+We follow a rough convention for PR and commit messages, which is designed to answer two questions: what changed and why.
 The subject line should feature the what, and the body of the message should describe the why.
 The format can be described more formally as follows:
 
@@ -134,18 +136,31 @@ This command uses "k3d" to set up a test cluster for debugging.
 Fixes #38
 ```
 
+Commit message can be made lightweight unless it is the only commit forming the PR.
+In that case, the message can follow the simplified convention:
+
+```
+<what was changed and why>
+```
+This convention is useful when several minimalistic commit messages are going to form PR descriptions as bullet points of what was done during the final squash and merge for PR.
+
 ### Signature
 
-As a CNCF project, k8gb must comply with [Developer Certificate of Origin (DCO)](https://developercertificate.org/).
+As a CNCF project, k8gb must comply with [Developer Certificate of Origin (DCO)](https://developercertificate.org/) requirement.
 [DCO GitHub Check](https://github.com/apps/dco) automatically enforces DCO for all commits.
-Contributors are required to ensure that every commit message contains the signature:
-`Signed-off-by: NAME SURNAME <email@address.example.org>`
-The best way to achieve this automatically is to specify the following alias in the `~/.gitconfig` file:
+Contributors are required to ensure that every commit message contains the following signature:
+```txt
+Signed-off-by: NAME SURNAME <email@address.example.org>
+```
+The best way to achieve this automatically for local development is to create the following alias in the `~/.gitconfig` file:
 ```.gitconfig
 [alias]
 ci = commit -s
 ```
+When a commit is created in GitHub UI as a result of [accepted suggested change](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request#applying-suggested-changes), the signature should be manually added to the "optional extended description" field.
+
 ### Changelog
+
 The [CHANGELOG](CHANGELOG.md) is automatically generated from Github PRs and Issues during release.
 Use dedicated [keywords](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword) in PR message or [manual PR and Issue linking](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue) for clean changelog generation.
 Issues and PRs should be also properly tagged with valid project tags ("bug", "enhancement", "wontfix", etc )
@@ -171,7 +186,7 @@ These instructions will help you to set up and use local website authoring and t
   JEKYLL_GITHUB_TOKEN=<GITHUB_PAT_TOKEN> exec jekyll serve --watch --livereload
   ```
   where `<GITHUB_PAT_TOKEN>` is the previously generated GitHub PAT token
-- Open `http://127.0.0.1:4000/` page in your browser
+- Open the `http://127.0.0.1:4000/` page in your browser
 
 ---
 Thanks for contributing!
