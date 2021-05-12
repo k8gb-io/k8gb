@@ -9,6 +9,7 @@
   - [Deploy k8gb locally](#deploy-k8gb-locally)
   - [Upgrade k8gb to local candidate](#upgrade-k8gb-to-local-candidate)
 - [Testing](#testing)
+  - [Testing against real k8s clusters](#testing-against-real-k8s-clusters)
 - [Debugging](#debugging)
 - [Code style](#code-style)
 - [Commit and Pull Request message](#commit-and-pull-request-message)
@@ -24,7 +25,7 @@ This document outlines the resources and guidelines necessary to follow by contr
 ## Getting started
 
 - Fork the repository on GitHub
-- See the [local playground guide](/docs/local.md) for testing environment setup
+- See the [local playground guide](/docs/local.md) for local dev environment setup
 
 ## Getting help
 
@@ -72,24 +73,25 @@ performs upgrade of k8gb helm chart and controller to the testing version built 
 ## Testing
 
 - Any functional GSLB controller code change should be secured by the corresponding [unit tests](https://github.com/AbsaOSS/k8gb/tree/master/controllers/gslb_controller_test.go).
-
-- Acceptance terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest) and executable by the `make terratest` target.
+- Integration terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest).
   These tests are updated only if the change is substantial enough to affect the main end-to-end flow.
+- See the [local playground guide](https://github.com/k8gb-io/k8gb/blob/master/docs/local.md) for local testing environment setup and integration test execution.
 
-- There is a possibility to execute the terratest suite over the real clusters.
+### Testing against real k8s clusters
+There is a possibility to execute the integration terratest suite over the real clusters.
 For this, you need to override the set of test settings as in the example below.
-  ```sh
-  PRIMARY_GEO_TAG=af-south-1 \
-  SECONDARY_GEO_TAG=eu-west-1 \
-  DNS_SERVER1=a377095726f1845fb85b95c2afef8ac0-9a1a10f24e634e28.elb.af-south-1.amazonaws.com \
-  DNS_SERVER1_PORT=53 \
-  DNS_SERVER2=a873f5c83be624a0a84c05a743d598a8-443f7e0285e4a28f.elb.eu-west-1.amazonaws.com \
-  DNS_SERVER2_PORT=53 \
-  GSLB_DOMAIN=test.k8gb.io \
-  K8GB_CLUSTER1=arn:aws:eks:af-south-1:<aws-account-id>:cluster/k8gb-cluster-af-south-1 \
-  K8GB_CLUSTER2=arn:aws:eks:eu-west-1:<aws-account-id>:cluster/k8gb-cluster-eu-west-1 \
-  make terratest
-  ```
+```sh
+PRIMARY_GEO_TAG=af-south-1 \
+SECONDARY_GEO_TAG=eu-west-1 \
+DNS_SERVER1=a377095726f1845fb85b95c2afef8ac0-9a1a10f24e634e28.elb.af-south-1.amazonaws.com \
+DNS_SERVER1_PORT=53 \
+DNS_SERVER2=a873f5c83be624a0a84c05a743d598a8-443f7e0285e4a28f.elb.eu-west-1.amazonaws.com \
+DNS_SERVER2_PORT=53 \
+GSLB_DOMAIN=test.k8gb.io \
+K8GB_CLUSTER1=arn:aws:eks:af-south-1:<aws-account-id>:cluster/k8gb-cluster-af-south-1 \
+K8GB_CLUSTER2=arn:aws:eks:eu-west-1:<aws-account-id>:cluster/k8gb-cluster-eu-west-1 \
+make terratest
+```
 
 ## Debugging
 
