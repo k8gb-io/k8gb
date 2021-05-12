@@ -28,8 +28,9 @@ This document outlines the resources and guidelines necessary to follow by contr
 
 ## Getting help
 
-Feel free to ask for help and join the discussions on [k8gb community discussions forum](https://github.com/k8gb-io/k8gb/discussions).
-You can also find project members at [`#sig-multicluster` channel on kubernetes.slack.com](https://app.slack.com/client/T09NY5SBT/C09R1PJR3).
+Feel free to ask for help and join the discussions at [k8gb community discussions forum](https://github.com/k8gb-io/k8gb/discussions).
+We have [dedicated `#k8gb` channel on Cloud Native Computing Foundation (CNCF) Slack](https://cloud-native.slack.com/archives/C021P656HGB),
+and we can also actively monitoring [`#sig-multicluster` channel on Kubernetes Slack](https://kubernetes.slack.com/archives/C09R1PJR3).
 
 ## Reporting issues
 
