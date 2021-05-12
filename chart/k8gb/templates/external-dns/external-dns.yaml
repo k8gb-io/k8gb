@@ -1,32 +1,56 @@
-{{ if .Values.route53.enabled }}
+{{ if or .Values.ns1.enabled .Values.route53.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: external-dns-route53
+  name: external-dns
 spec:
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: external-dns-route53
+      app: external-dns
   template:
     metadata:
       labels:
-        app: external-dns-route53
+        app: external-dns
     spec:
       serviceAccountName: external-dns
-      securityContext: {{- toYaml .Values.externaldns.securityContext | nindent 8 }}
+      securityContext:
+        fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+        runAsUser: 1000
+        runAsNonRoot: true
       containers:
       - name: external-dns
         image: {{ .Values.externaldns.image }}
         args:
         - --source=crd
         - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
+{{- if .Values.ns1.enabled }}
+        - --annotation-filter=k8gb.absa.oss/dnstype=ns1 # filter out only relevant DNSEntrypoints
+        - --provider=ns1
+        - --txt-owner-id=k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
+{{- if .Values.ns1.endpoint }}
+        - --ns1-endpoint={{ .Values.ns1.endpoint }}
+{{- end }}
+{{- if .Values.ns1.ignoreSSL }}
+        - --ns1-ignoressl
+{{- end }}
+{{- end }}
+{{- if .Values.route53.enabled }}
         - --annotation-filter=k8gb.absa.oss/dnstype=route53 # filter out only relevant DNSEntrypoints
         - --provider=aws
         - --txt-owner-id=k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
+{{- end }}
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
+{{- if .Values.ns1.enabled }}
+        env:
+        - name: NS1_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: ns1
+              key: apiKey
+{{- end }}
         resources:
           requests:
             memory: "32Mi"
