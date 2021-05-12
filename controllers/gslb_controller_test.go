@@ -673,13 +673,13 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "NS",
 			Targets: externaldns.Targets{
-				"gslb-ns-cloud-example-com-eu.example.com",
-				"gslb-ns-cloud-example-com-us.example.com",
-				"gslb-ns-cloud-example-com-za.example.com",
+				"gslb-ns-eu-cloud.example.com",
+				"gslb-ns-us-cloud.example.com",
+				"gslb-ns-za-cloud.example.com",
 			},
 		},
 		{
-			DNSName:    "gslb-ns-cloud-example-com-eu.example.com",
+			DNSName:    "gslb-ns-eu-cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{
@@ -744,13 +744,13 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "NS",
 			Targets: externaldns.Targets{
-				"gslb-ns-cloud-example-com-eu.example.com",
-				"gslb-ns-cloud-example-com-us.example.com",
-				"gslb-ns-cloud-example-com-za.example.com",
+				"gslb-ns-eu-cloud.example.com",
+				"gslb-ns-us-cloud.example.com",
+				"gslb-ns-za-cloud.example.com",
 			},
 		},
 		{
-			DNSName:    "gslb-ns-cloud-example-com-eu.example.com",
+			DNSName:    "gslb-ns-eu-cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{

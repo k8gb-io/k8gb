@@ -19,7 +19,7 @@ k8gb:
     enabled: false
     ip: "172.17.0.1"
     hostnames:
-     - "gslb-ns-cloud-example-com-us.example.com"
+     - "gslb-ns-us-cloud.example.com"
   reconcileRequeueSeconds: 30
   exposeCoreDNS: false # Create Service type LoadBalancer to expose CoreDNS
   log:

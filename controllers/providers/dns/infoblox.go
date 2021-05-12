@@ -47,7 +47,7 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibclient.NameS
 	// Drop own records for straight away update
 	// And ensure local entries are up to date
 	// And final list is sorted
-	remote := p.filterOutDelegateTo(upstream, nsServerName(p.config))
+	remote := p.filterOutDelegateTo(upstream, p.config.GetClusterNSName())
 	final := append(local, remote...)
 	sortZones(final)
 
@@ -66,7 +66,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	var delegateTo []ibclient.NameServer
 
 	for _, address := range addresses {
-		nameServer := ibclient.NameServer{Address: address, Name: nsServerName(p.config)}
+		nameServer := ibclient.NameServer{Address: address, Name: p.config.GetClusterNSName()}
 		delegateTo = append(delegateTo, nameServer)
 	}
 
@@ -91,11 +91,11 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 			currentList := p.sanitizeDelegateZone(delegateTo, findZone.DelegateTo)
 
 			// Drop external records if they are stale
+			extClusterHeartbeatFQDNs := p.config.GetExternalClusterHeartbeatFQDNs(gslb.Name)
 			if p.config.SplitBrainCheck {
-				for _, extCluster := range p.config.ExtClustersGeoTags {
-					nsServerNameExt := getNSServerName(extCluster, p.config.DNSZone, p.config.EdgeDNSZone)
+				for extClusterGeoTag, nsServerNameExt := range p.config.GetExternalClusterNSNames() {
 					err = p.assistant.InspectTXTThreshold(
-						getExternalClusterHeartbeatFQDN(gslb, extCluster, p.config.EdgeDNSZone),
+						extClusterHeartbeatFQDNs[extClusterGeoTag],
 						p.config.Override.FakeDNSEnabled,
 						time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
 					if err != nil {
@@ -152,7 +152,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 		}
 	}
 
-	heartbeatTXTName := fmt.Sprintf("%s-heartbeat-%s.%s", gslb.Name, p.config.ClusterGeoTag, p.config.EdgeDNSZone)
+	heartbeatTXTName := p.config.GetClusterHeartbeatFQDN(gslb.Name)
 	findTXT, err := objMgr.GetTXTRecord(heartbeatTXTName)
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 }
 
 func (p *InfobloxProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, nsServerNameExt(p.config))
+	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, p.config.GetExternalClusterNSNames())
 }
 
 func (p *InfobloxProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
@@ -189,7 +189,7 @@ func (p *InfobloxProvider) String() string {
 func (p *InfobloxProvider) saveHeartbeatTXTRecord(objMgr *ibclient.ObjectManager, gslb *k8gbv1beta1.Gslb) (err error) {
 	var heartbeatTXTRecord *ibclient.RecordTXT
 	edgeTimestamp := fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05"))
-	heartbeatTXTName := getExternalClusterHeartbeatFQDN(gslb, p.config.ClusterGeoTag, p.config.EdgeDNSZone)
+	heartbeatTXTName := p.config.GetClusterHeartbeatFQDN(gslb.Name)
 	heartbeatTXTRecord, err = objMgr.GetTXTRecord(heartbeatTXTName)
 	if err != nil {
 		return

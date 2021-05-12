@@ -221,9 +221,9 @@ func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, fakeDNSEnabled bo
 	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))
 }
 
-func (r *GslbLoggerAssistant) GetExternalTargets(host string, fakeDNSEnabled bool, extGslbClusters []string) (targets []string) {
+func (r *GslbLoggerAssistant) GetExternalTargets(host string, fakeDNSEnabled bool, extClusterNsNames map[string]string) (targets []string) {
 	targets = []string{}
-	for _, cluster := range extGslbClusters {
+	for _, cluster := range extClusterNsNames {
 		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
 		g := new(dns.Msg)
 		host = fmt.Sprintf("localtargets-%s.", host) // Convert to true FQDN with dot at the end. Otherwise dns lib freaks out

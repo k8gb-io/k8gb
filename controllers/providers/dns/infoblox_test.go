@@ -50,17 +50,17 @@ var predefinedConfig = depresolver.Config{
 func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	// arrange
 	delegateTo := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	want := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
 	}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSZone = "example.com"
@@ -68,33 +68,33 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer)
 	provider := NewInfobloxDNS(customConfig, a)
 	// act
-	extClusters := nsServerNameExt(customConfig)
-	got := provider.filterOutDelegateTo(delegateTo, extClusters[0])
+	extClusters := customConfig.GetExternalClusterNSNames()
+	got := provider.filterOutDelegateTo(delegateTo, extClusters["za"])
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 }
 func TestCanSanitizeDelegatedZone(t *testing.T) {
 	// arrange
 	local := []ibclient.NameServer{
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-eu-cloud.example.com"},
 	}
 	upstream := []ibclient.NameServer{
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	want := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSZone = "example.com"
@@ -110,20 +110,20 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 
 func TestSortNameServer(t *testing.T) {
 	delegateTo := []ibclient.NameServer{
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	want := []ibclient.NameServer{
-		{Address: "10.0.0.1", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.2", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.0.0.3", Name: "gslb-ns-cloud-example-com-eu.example.com"},
-		{Address: "10.1.0.1", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.2", Name: "gslb-ns-cloud-example-com-za.example.com"},
-		{Address: "10.1.0.3", Name: "gslb-ns-cloud-example-com-za.example.com"},
+		{Address: "10.0.0.1", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.2", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
+		{Address: "10.1.0.1", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.1.0.2", Name: "gslb-ns-za-cloud.example.com"},
+		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	sortZones(delegateTo)
 	assert.Equal(t, want, delegateTo, "got:\n %q \n\n want:\n %q", delegateTo, want)
