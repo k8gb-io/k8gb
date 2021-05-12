@@ -34,6 +34,6 @@ jobs:
             --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
       - name: Smoke test helm installation
         run: |
-          helm repo add k8gb https://absaoss.github.io/k8gb/
+          helm repo add k8gb https://k8gb.io/
           helm repo update
           helm -n k8gb upgrade -i k8gb k8gb/k8gb --wait --create-namespace --version=$(make version)
