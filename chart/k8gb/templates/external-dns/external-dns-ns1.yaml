@@ -31,12 +31,11 @@ spec:
         - --ns1-endpoint={{ .Values.ns1.endpoint }}
 {{- end }}
 {{- if .Values.ns1.ignoreSSL }}
-        - --ns1-ignoressl={{ .Values.ns1.ignoreSSL }}
+        - --ns1-ignoressl
 {{- end }}
         - --txt-owner-id=k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
-        - --managed-record-types=A,CNAME,NS
         env:
         - name: NS1_APIKEY
           valueFrom:
