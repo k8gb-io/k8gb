@@ -28,7 +28,9 @@ This document outlines the resources and guidelines necessary to follow by contr
 
 ## Getting help
 
-Find us at `#sig-multicluster` on kubernetes.slack.com
+Feel free to ask for help and join the discussions on [k8gb community discussions forum](https://github.com/k8gb-io/k8gb/discussions).
+You can also find project members at [`#sig-multicluster` channel on kubernetes.slack.com](https://app.slack.com/client/T09NY5SBT/C09R1PJR3).
+
 ## Reporting issues
 
 Reporting bugs is one of the best ways to contribute.
@@ -174,7 +176,7 @@ If contribution changes the existing APIs or user interface, it must include suf
 k8gb.io website is a Jekyll-based static website generated from project markdown documentation and hosted by GitHub Pages.
 `gh-pages` branch contains the website source, including configuration, website layout, and styling.
 Markdown documents are automatically populated to `gh-pages` from the main branch and should be authored there.
-Changes to the k8gb.io website layout and styling should be checked out from `gh-pages` branch and  PRs should be created against `gh-pages`.
+Changes to the k8gb.io website layout and styling should be checked out from the `gh-pages` branch and  PRs should be created against `gh-pages`.
 
 ### Local website authoring and testing
 
