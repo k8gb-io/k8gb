@@ -36,4 +36,5 @@ jobs:
           title: "Update Offline Changelog"
           branch: offline_changelog
           delete-branch: true
+          base: master
           token: ${{ secrets.GITHUB_TOKEN }}
