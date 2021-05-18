@@ -22,7 +22,7 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-type IDnsProvider interface {
+type Provider interface {
 	// CreateZoneDelegationForExternalDNS handles delegated zone in Edge DNS
 	CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb) error
 	// GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses

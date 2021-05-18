@@ -32,11 +32,11 @@ import (
 )
 
 type InfobloxProvider struct {
-	assistant assistant.IAssistant
+	assistant assistant.Assistant
 	config    depresolver.Config
 }
 
-func NewInfobloxDNS(config depresolver.Config, assistant assistant.IAssistant) *InfobloxProvider {
+func NewInfobloxDNS(config depresolver.Config, assistant assistant.Assistant) *InfobloxProvider {
 	return &InfobloxProvider{
 		assistant: assistant,
 		config:    config,
