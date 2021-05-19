@@ -79,6 +79,10 @@ endif
 
 all: help
 
+# check integrity
+.PHONY: check
+check: license lint test ## Check project integrity
+
 .PHONY: clean-test-apps
 clean-test-apps:
 	kubectl delete -f deploy/test-apps
@@ -296,7 +300,7 @@ start-test-app:
 
 # run tests
 .PHONY: test
-test: license lint
+test:
 	$(call generate)
 	$(call manifest)
 	go test ./... -coverprofile cover.out
