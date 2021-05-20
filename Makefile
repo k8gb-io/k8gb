@@ -424,12 +424,6 @@ define testapp-set-replicas
 	kubectl scale deployment frontend-podinfo -n test-gslb --replicas=$1
 endef
 
-define hit-testapp-host
-	kubectl run -it --rm busybox --restart=Never --image=busybox -- sh -c \
-	"echo 'nameserver `$(K8GB_COREDNS_IP)`' > /etc/resolv.conf && \
-	wget -qO - $1"
-endef
-
 define demo-host
 	kubectl run -it --rm k8gbdemo --restart=Never --image=absaoss/k8gbdemocurl  \
 	"`$(K8GB_COREDNS_IP)`" $1
