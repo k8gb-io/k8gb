@@ -8,6 +8,7 @@
 - [Local setup](#local-setup)
   - [Deploy k8gb locally](#deploy-k8gb-locally)
   - [Upgrade k8gb to local candidate](#upgrade-k8gb-to-local-candidate)
+- [Overriding dev environment settings](#overriding-dev-environment-settings)
 - [Testing](#testing)
   - [Testing against real k8s clusters](#testing-against-real-k8s-clusters)
 - [Debugging](#debugging)
@@ -69,6 +70,19 @@ deploys k8gb from scratch, including:
 make upgrade-candidate
 ```
 performs upgrade of k8gb helm chart and controller to the testing version built from your current development tree.
+
+## Overriding dev environment settings
+
+Sometimes there is a need to override environment variables used by `make` targets for local k8gb development.
+This can be easily achieved by providing the list of environment variables with respective values in the `.env` file at the local repository root:
+```sh
+cat .env
+
+# .env:
+LOG_LEVEL=info
+LOG_FORMAT=json
+```
+Overrides done this way can persist between terminal sessions and can be used as a single point of configuration for development in terminal and IDE of choice.
 
 ## Testing
 
