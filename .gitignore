@@ -112,3 +112,6 @@ kubeconfig*
 
 # Ignore changes from github_changelog_generator action
 changes
+
+# dotenv file
+.env
