@@ -185,7 +185,7 @@ Changes to the k8gb.io website layout and styling should be checked out from the
 ### Local website authoring and testing
 
 These instructions will help you to set up and use local website authoring and testing environment:
-- Check-out from the `\gh-pages` branch
+- Check-out from the `gh-pages` branch
 - Create dedicated [GitHub Personal Access Token](https://github.com/settings/tokens/new) with `public_repo` permission and assign it to the `JEKYLL_GITHUB_TOKEN` environment variable:
   ```sh
 - Run the following `make` target to build and serve the local copy of the k8gb.io website.
