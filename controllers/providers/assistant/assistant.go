@@ -24,7 +24,7 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-type IAssistant interface {
+type Assistant interface {
 	// CoreDNSExposedIPs retrieves list of exposed IP by CoreDNS
 	CoreDNSExposedIPs() ([]string, error)
 	// GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses

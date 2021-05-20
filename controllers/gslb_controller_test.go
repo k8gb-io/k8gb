@@ -61,7 +61,7 @@ type testSettings struct {
 	client     client.Client
 	ingress    *v1beta1.Ingress
 	finalCall  bool
-	assistant  assistant.IAssistant
+	assistant  assistant.Assistant
 }
 
 var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"

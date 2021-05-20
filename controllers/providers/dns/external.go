@@ -40,7 +40,7 @@ const (
 )
 
 type ExternalDNSProvider struct {
-	assistant    assistant2.IAssistant
+	assistant    assistant2.Assistant
 	dnsType      ExternalDNSType
 	config       depresolver.Config
 	endpointName string
@@ -48,7 +48,7 @@ type ExternalDNSProvider struct {
 
 var log = logging.Logger()
 
-func NewExternalDNS(dnsType ExternalDNSType, config depresolver.Config, assistant assistant2.IAssistant) *ExternalDNSProvider {
+func NewExternalDNS(dnsType ExternalDNSType, config depresolver.Config, assistant assistant2.Assistant) *ExternalDNSProvider {
 	return &ExternalDNSProvider{
 		assistant:    assistant,
 		dnsType:      dnsType,

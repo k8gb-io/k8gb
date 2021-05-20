@@ -26,11 +26,11 @@ import (
 
 // EmptyDNSProvider is executed when fakeDNSEnabled is true.
 type EmptyDNSProvider struct {
-	assistant assistant.IAssistant
+	assistant assistant.Assistant
 	config    depresolver.Config
 }
 
-func NewEmptyDNS(config depresolver.Config, assistant assistant.IAssistant) *EmptyDNSProvider {
+func NewEmptyDNS(config depresolver.Config, assistant assistant.Assistant) *EmptyDNSProvider {
 	return &EmptyDNSProvider{
 		config:    config,
 		assistant: assistant,

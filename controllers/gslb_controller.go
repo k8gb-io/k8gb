@@ -51,7 +51,7 @@ type GslbReconciler struct {
 	Config      *depresolver.Config
 	DepResolver *depresolver.DependencyResolver
 	Metrics     *metrics.PrometheusMetrics
-	DNSProvider dns.IDnsProvider
+	DNSProvider dns.Provider
 }
 
 const (
