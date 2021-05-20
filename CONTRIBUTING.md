@@ -78,6 +78,7 @@ performs upgrade of k8gb helm chart and controller to the testing version built 
 - See the [local playground guide](https://github.com/k8gb-io/k8gb/blob/master/docs/local.md) for local testing environment setup and integration test execution.
 
 ### Testing against real k8s clusters
+
 There is a possibility to execute the integration terratest suite over the real clusters.
 For this, you need to override the set of test settings as in the example below.
 ```sh
@@ -184,14 +185,17 @@ Changes to the k8gb.io website layout and styling should be checked out from the
 ### Local website authoring and testing
 
 These instructions will help you to set up and use local website authoring and testing environment:
-- Install Jekyll and Bundler following the [instructions](https://jekyllrb.com/docs/installation/).
-- Create dedicated [GitHub Personal Access Token](https://github.com/settings/tokens/new) with `public_repo` permission.
-- Run the following command to generate and run the local copy of the k8gb.io website:
+- Check-out from the `\gh-pages` branch
+- Create dedicated [GitHub Personal Access Token](https://github.com/settings/tokens/new) with `public_repo` permission and assign it to the `JEKYLL_GITHUB_TOKEN` environment variable:
   ```sh
-  JEKYLL_GITHUB_TOKEN=<GITHUB_PAT_TOKEN> exec jekyll serve --watch --livereload
+- Run the following `make` target to build and serve the local copy of the k8gb.io website.
+  ```sh
+  make serve
   ```
-  where `<GITHUB_PAT_TOKEN>` is the previously generated GitHub PAT token
-- Open the `http://127.0.0.1:4000/` page in your browser
+  *The target utilizes the `jekyll/jekyll` docker container to avoid unnecessary installation of local GitHub page authoring dependencies.*
+
+- Open the `http://localhost:4000/` page in your browser.
+- Website will automatically rebuild and refresh in the browser to accommodate the related code changes.
 
 ---
 Thanks for contributing!
