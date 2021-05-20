@@ -89,6 +89,8 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 }
 
 func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes []EdgeDNSType) (err error) {
+	const dnsNameMax = 253
+	const dnsLabelMax = 63
 	if config.Log.Level == zerolog.NoLevel {
 		return fmt.Errorf("invalid '%s', allowed values ['','%s','%s','%s','%s','%s','%s','%s']", LogLevelKey,
 			zerolog.TraceLevel, zerolog.DebugLevel, zerolog.InfoLevel, zerolog.WarnLevel, zerolog.FatalLevel,
@@ -166,6 +168,27 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return err
 		}
 	}
+	validateLabels := func(label string) error {
+		labels := strings.Split(label, ".")
+		for _, l := range labels {
+			if len(l) > dnsLabelMax {
+				return fmt.Errorf("%s exceeds %v characters limit", l, dnsLabelMax)
+			}
+		}
+		return nil
+	}
+
+	serverNames := config.GetExternalClusterNSNames()
+	serverNames[config.ClusterGeoTag] = config.GetClusterNSName()
+	for geoTag, nsName := range serverNames {
+		if len(nsName) > dnsNameMax {
+			return fmt.Errorf("ns name '%s' exceeds %v charactes limit for [GeoTag: '%s', %s: '%s', %s: '%s']",
+				nsName, dnsLabelMax, geoTag, EdgeDNSZoneKey, config.EdgeDNSZone, DNSZoneKey, config.DNSZone)
+		}
+		if err := validateLabels(nsName); err != nil {
+			return fmt.Errorf("error for geo tag: %s. %s in ns name %s", geoTag, err, nsName)
+		}
+	}
 	return nil
 }
 
@@ -198,4 +221,53 @@ func parseLogOutputFormat(value string) LogFormat {
 		return SimpleFormat
 	}
 	return NoFormat
+}
+
+func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
+	m = make(map[string]string, len(c.ExtClustersGeoTags))
+	for _, tag := range c.ExtClustersGeoTags {
+		m[tag] = getNsName(tag, c.DNSZone, c.EdgeDNSZone)
+	}
+	return
+}
+
+func (c *Config) GetClusterNSName() string {
+	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone)
+}
+
+func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string) (m map[string]string) {
+	m = make(map[string]string, len(c.ExtClustersGeoTags))
+	for _, tag := range c.ExtClustersGeoTags {
+		m[tag] = getHeartbeatFQDN(gslbName, tag, c.EdgeDNSZone)
+	}
+	return
+}
+
+func (c *Config) GetClusterHeartbeatFQDN(gslbName string) string {
+	return getHeartbeatFQDN(gslbName, c.ClusterGeoTag, c.EdgeDNSZone)
+}
+
+// getNsName returns NS for geo tag.
+// The values is combination of DNSZone, EdgeDNSZone and (Ext)ClusterGeoTag, see:
+// DNS_ZONE k8gb-test.gslb.cloud.example.com
+// EDGE_DNS_ZONE: cloud.example.com
+// CLUSTER_GEOTAG: us
+// will generate "gslb-ns-us-k8gb-test-gslb.cloud.example.com"
+// The function is private and expects only valid inputs.
+func getNsName(tag, dnsZone, edgeDNSZone string) string {
+	const prefix = "gslb-ns"
+	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
+	domainX := strings.ReplaceAll(d, ".", "-")
+	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edgeDNSZone)
+}
+
+// getHeartbeatFQDN returns heartbeat for geo tag.
+// The values is combination of EdgeDNSZone and (Ext)ClusterGeoTag, and GSLB name see:
+// EDGE_DNS_ZONE: cloud.example.com
+// CLUSTER_GEOTAG: us
+// gslb.Name: test-gslb-1
+// will generate "test-gslb-1-heartbeat-us.cloud.example.com"
+// The function is private and expects only valid inputs.
+func getHeartbeatFQDN(name, geoTag, edgeDNSZone string) string {
+	return fmt.Sprintf("%s-heartbeat-%s.%s", name, geoTag, edgeDNSZone)
 }

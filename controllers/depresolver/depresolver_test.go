@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -44,9 +45,9 @@ var predefinedConfig = Config{
 	ClusterGeoTag:           "us",
 	ExtClustersGeoTags:      []string{"uk", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
-	EdgeDNSServer:           "cloud.example.com",
-	EdgeDNSZone:             "8.8.8.8",
-	DNSZone:                 "example.com",
+	EdgeDNSServer:           "8.8.8.8",
+	EdgeDNSZone:             "example.com",
+	DNSZone:                 "cloud.example.com",
 	K8gbNamespace:           "k8gb",
 	SplitBrainCheck:         true,
 	Infoblox: Infoblox{
@@ -1315,6 +1316,203 @@ func TestResolveConfigSplitBrainCheckDisabledInvalid(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, false, config.SplitBrainCheck)
+}
+
+func TestHeartBeatWithMultipleExtClusterGeoTag(t *testing.T) {
+	const geoTag = "test-gslb-1"
+	// arrange
+	defer cleanup()
+	customConfig := predefinedConfig
+	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
+	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.ClusterGeoTag = "location-1"
+	customConfig.ExtClustersGeoTags = []string{"location-2", "location-3"}
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.NoError(t, err)
+	assert.Len(t, config.GetExternalClusterHeartbeatFQDNs(geoTag), 2)
+	assert.Equal(t, "test-gslb-1-heartbeat-location-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
+
+	for k, v := range map[string]string{"location-2": "test-gslb-1-heartbeat-location-2.cloud.example.com",
+		"location-3": "test-gslb-1-heartbeat-location-3.cloud.example.com"} {
+		assert.Equal(t, config.GetExternalClusterHeartbeatFQDNs(geoTag)[k], v)
+	}
+}
+
+func TestHeartBeatWithOneExtClusterGeoTag(t *testing.T) {
+	const geoTag = "test-gslb-1"
+	// arrange
+	defer cleanup()
+	customConfig := predefinedConfig
+	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
+	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.ClusterGeoTag = "location-1"
+	customConfig.ExtClustersGeoTags = []string{"location-2"}
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.NoError(t, err)
+	assert.Len(t, config.GetExternalClusterHeartbeatFQDNs(geoTag), 1)
+	assert.Equal(t, "test-gslb-1-heartbeat-location-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
+	assert.Equal(t, config.GetExternalClusterHeartbeatFQDNs(geoTag)["location-2"], "test-gslb-1-heartbeat-location-2.cloud.example.com")
+}
+
+func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
+	// arrange
+	defer cleanup()
+	customConfig := predefinedConfig
+	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
+	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.ClusterGeoTag = "location-1"
+	customConfig.ExtClustersGeoTags = []string{"location-2", "location-3"}
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.NoError(t, err)
+	assert.Len(t, config.GetExternalClusterNSNames(), 2)
+	assert.Equal(t, "gslb-ns-location-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	for k, v := range map[string]string{"location-2": "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com",
+		"location-3": "gslb-ns-location-3-k8gb-test-preprod-gslb.cloud.example.com"} {
+		assert.Equal(t, config.GetExternalClusterNSNames()[k], v)
+	}
+}
+
+func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
+	// arrange
+	defer cleanup()
+	customConfig := predefinedConfig
+	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
+	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.ClusterGeoTag = "location-1"
+	customConfig.ExtClustersGeoTags = []string{"location-2"}
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.NoError(t, err)
+	assert.Len(t, config.GetExternalClusterNSNames(), 1)
+	assert.Equal(t, "gslb-ns-location-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	assert.Equal(t, config.GetExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
+}
+
+func TestNsServerNamesLargeDNSZone(t *testing.T) {
+	defer cleanup()
+	// arrange DNSZone exceeds
+	customConfig := predefinedConfig
+	customConfig.DNSZone = "k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah.gslb.cloud.example.com"
+	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.ClusterGeoTag = "us"
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.Error(t, err)
+	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com", config.GetClusterNSName())
+	extNsNames := config.GetExternalClusterNSNames()
+	expectedExtNsNames := map[string]string{"uk": "gslb-ns-uk-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com",
+		"eu": "gslb-ns-eu-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com"}
+	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
+}
+
+func TestNsServerNamesWithLargeExtClusterGeoTag(t *testing.T) {
+	const largeGeoTag = "uk-lorem-ipsum-donor-b-blah-lorem"
+	defer cleanup()
+	// arrange
+	customConfig := predefinedConfig
+	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
+	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.ClusterGeoTag = "us"
+	customConfig.ExtClustersGeoTags = []string{}
+	customConfig.ExtClustersGeoTags = append(customConfig.ExtClustersGeoTags, predefinedConfig.ExtClustersGeoTags...)
+	customConfig.ExtClustersGeoTags[0] = largeGeoTag
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.Error(t, err)
+	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	extNsNames := config.GetExternalClusterNSNames()
+	expectedExtNsNames := map[string]string{largeGeoTag: "gslb-ns-uk-lorem-ipsum-donor-b-blah-lorem-k8gb-test-preprod-gslb.cloud.example.com",
+		"eu": "gslb-ns-eu-k8gb-test-preprod-gslb.cloud.example.com"}
+	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
+
+}
+
+func TestNsServerNamesWithLargeClusterGeoTag(t *testing.T) {
+	defer cleanup()
+	// arrange
+	customConfig := predefinedConfig
+	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
+	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.ClusterGeoTag = "us-lorem-ipsum-donor-blah-blah-blah-blah"
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.Error(t, err)
+	assert.Equal(t, "gslb-ns-us-lorem-ipsum-donor-blah-blah-blah-blah-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	extNsNames := config.GetExternalClusterNSNames()
+	expectedExtNsNames := map[string]string{"uk": "gslb-ns-uk-k8gb-test-preprod-gslb.cloud.example.com",
+		"eu": "gslb-ns-eu-k8gb-test-preprod-gslb.cloud.example.com"}
+	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
+
+}
+
+func TestNsServerNamesWithExceededDNSNameSize(t *testing.T) {
+	// arrange
+	defer cleanup()
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSZone = "seo.cloud.example01.lorem.ipsum.alfa.bravo.charlie.delta.echo.foxtrot.golf.hotel.india." +
+		"juliett.kilo.lima.mike.november.oscar.papa.quebec.romeo.sierra.tango.uniform.victor.whiskey.x-ray.yenkee.zulu." +
+		"zero.cloud.example.com"
+	customConfig.DNSZone = "k8gb-test-preprod.gslb." + customConfig.EdgeDNSZone
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Len(t, config.GetClusterNSName(), 253)
+	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
+	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
+
+	// arrange
+	// extend cluster geo tag with one character so NsServerName exceeds length limit
+	customConfig.ClusterGeoTag += "1"
+	configureEnvVar(customConfig)
+	resolver = NewDependencyResolver()
+	// act
+	config, err = resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Len(t, config.GetClusterNSName(), 254)
+	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
+	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
 }
 
 // arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with

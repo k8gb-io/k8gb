@@ -30,7 +30,7 @@ type IAssistant interface {
 	// GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses
 	GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error)
 	// GetExternalTargets retrieves slice of targets from external clusters
-	GetExternalTargets(host string, fakeDNSEnabled bool, extGslbClusters []string) (targets []string)
+	GetExternalTargets(host string, fakeDNSEnabled bool, extClusterNsNames map[string]string) (targets []string)
 	// SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist
 	SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error
 	// RemoveEndpoint removes endpoint
