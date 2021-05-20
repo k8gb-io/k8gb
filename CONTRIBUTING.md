@@ -91,6 +91,12 @@ Overrides done this way can persist between terminal sessions and can be used as
   These tests are updated only if the change is substantial enough to affect the main end-to-end flow.
 - See the [local playground guide](https://github.com/k8gb-io/k8gb/blob/master/docs/local.md) for local testing environment setup and integration test execution.
 
+### Unit testing
+- Include unit tests when you contribute new features, as they help to a) prove that your code works correctly, and b) guard against future breaking changes to lower the maintenance cost.
+- Bug fixes also generally require unit tests, because the presence of bugs usually indicates insufficient test coverage.
+
+Use `make test` to check your implementation changes.
+
 ### Testing against real k8s clusters
 
 There is a possibility to execute the integration terratest suite over the real clusters.
@@ -127,7 +133,7 @@ There is a dedicated make target available for Goland:
 k8gb project is using the coding style suggested by the Golang community. See the [golang-style-doc](https://github.com/golang/go/wiki/CodeReviewComments) for details.
 
 Please follow this style to make k8gb easy to review, maintain and develop.
-Run `make lint` to automatically check if your code is compliant.
+Run `make check` to automatically check if your code is compliant.
 
 ## Commit and Pull Request message
 
