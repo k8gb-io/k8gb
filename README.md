@@ -14,6 +14,7 @@
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8gb)](https://artifacthub.io/packages/search?repo=k8gb)
 [![doc.crds.dev](https://img.shields.io/badge/doc-crds-purple)](https://doc.crds.dev/github.com/absaoss/k8gb)
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2FAbsaOSS%2Fk8gb.svg?type=shield)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2FAbsaOSS%2Fk8gb?ref=badge_shield)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4866/badge)](https://bestpractices.coreinfrastructure.org/projects/4866)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
@@ -40,7 +41,7 @@ spec:
     primaryGeoTag: eu-west-1 # Primary cluster geo tag
 ```
 
-Global load balancing, commonly referred to as GSLB (Global Server Load Balancing) solutions, have typically been the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
+Global load balancing, commonly referred to as GSLB (Global Server Load Balancing) solutions, has been typically the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 
 k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.
 
@@ -65,25 +66,25 @@ make deploy-full-local-setup
 
 It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](./docs/exposing_dns.md)), and install k8gb with test applications and two sample Gslb resources on top.
 
-This setup is adapted for local scenario and works without external DNS provider dependency.
+This setup is adapted for local scenarios and works without external DNS provider dependency.
 
 Consult with [local playground](/docs/local.md) documentation to learn all the details of experimenting with local setup.
 
 ## Motivation and Architecture
 
-k8gb was born out of need for an open source, cloud native GSLB solution at Absa bank in South Africa.
+k8gb was born out of the need for an open source, cloud native GSLB solution at Absa Group in South Africa.
 
 As part of the bank's wider container adoption running multiple, geographically dispersed Kubernetes clusters, the need for a global load balancer that was driven from the health of Kubernetes Services was required and for which there did not seem to be an existing solution.
 
-Yes, there are proprietary network software and hardware vendors with GSLB solutions and products, however, these were costly, heavy weight in terms of complexity and adoption and in most cases were not Kubernetes native, requiring dedicated hardware or software to be run outside of Kubernetes.
+Yes, there are proprietary network software and hardware vendors with GSLB solutions and products, however, these were costly, heavyweight in terms of complexity and adoption, and were not Kubernetes native in most cases, requiring dedicated hardware or software to be run outside of Kubernetes.
 
 This was the problem we set out to solve with k8gb.
 
 Born as a completely open source project and following the popular Kubernetes operator pattern, k8gb can be installed in a Kubernetes cluster and via a Gslb custom resource, can provide independent GSLB capability to any Ingress or Service in the cluster, without the need for handoffs and coordination between dedicated network teams.
 
-k8gb commoditises GSLB for Kubernetes, putting teams in complete control of exposing Services across geographically dispersed Kubernetes clusters across public and private clouds.
+k8gb commoditizes GSLB for Kubernetes, putting teams in complete control of exposing Services across geographically dispersed Kubernetes clusters across public and private clouds.
 
-k8gb requires no specialised software or hardware, relying completely on other OSS/CNCF projects, has no single point of failure and fits in with any existing Kubernetes deployment workflow (e.g. GitOps, Kustomize, Helm, etc.) or tools.
+k8gb requires no specialized software or hardware, relying completely on other OSS/CNCF projects, has no single point of failure, and fits in with any existing Kubernetes deployment workflow (e.g. GitOps, Kustomize, Helm, etc.) or tools.
 
 Please see the extended architecture documentation [here](/docs/index.md)
 
