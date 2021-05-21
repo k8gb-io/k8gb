@@ -94,7 +94,6 @@ check: license lint test ## Check project integrity
 .PHONY: clean-test-apps
 clean-test-apps:
 	kubectl delete -f deploy/test-apps
-	helm -n test-gslb uninstall backend
 	helm -n test-gslb uninstall frontend
 
 # see: https://dev4devs.com/2019/05/04/operator-framework-how-to-debug-golang-operator-projects/
