@@ -19,10 +19,8 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -95,7 +93,6 @@ const coreDNSExtServiceName = "k8gb-coredns-lb"
 
 func TestNotFoundServiceStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	expectedServiceStatus := "NotFound"
 	notFoundHost := "notfound.cloud.example.com"
@@ -108,7 +105,6 @@ func TestNotFoundServiceStatus(t *testing.T) {
 
 func TestUnhealthyServiceStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "unhealthy-app"
 	unhealthyHost := "unhealthy.cloud.example.com"
@@ -125,7 +121,6 @@ func TestUnhealthyServiceStatus(t *testing.T) {
 
 func TestHealthyServiceStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "frontend-podinfo"
 	expectedServiceStatus := "Healthy"
@@ -142,7 +137,6 @@ func TestHealthyServiceStatus(t *testing.T) {
 
 func TestIngressHostsPerStatusMetric(t *testing.T) {
 	// arrange
-	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	err := settings.reconciler.Metrics.Register()
 	require.NoError(t, err)
@@ -160,7 +154,6 @@ func TestIngressHostsPerStatusMetric(t *testing.T) {
 
 func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 	// I'm running test multiple times to check that it work properly when healthy service is up and down multiple times
-	defer cleanup()
 	for i := 0; i < 4; i++ {
 		func() {
 			// arrange
@@ -189,7 +182,6 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 
 func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	defer settings.reconciler.Metrics.Unregister()
 	err := settings.reconciler.Metrics.Register()
@@ -224,7 +216,6 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 
 func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	defer settings.reconciler.Metrics.Unregister()
 	err := settings.reconciler.Metrics.Register()
@@ -251,7 +242,6 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 
 func TestHealthyRecordMetric(t *testing.T) {
 	// arrange
-	defer cleanup()
 	expectedHealthyRecordsMetricCount := 3.0
 	ingressIPs := []corev1.LoadBalancerIngress{
 		{IP: "10.0.0.1"},
@@ -304,7 +294,6 @@ func TestMetricLinterCheck(t *testing.T) {
 
 func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 	// arrange
-	defer cleanup()
 	serviceName := "frontend-podinfo"
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := []*externaldns.Endpoint{
@@ -347,7 +336,6 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 
 func TestDNSRecordReflectionInStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	serviceName := "frontend-podinfo"
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
@@ -377,7 +365,6 @@ func TestDNSRecordReflectionInStatus(t *testing.T) {
 
 func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 	// arrange
-	defer cleanup()
 	serviceName := "frontend-podinfo"
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := "local"
@@ -411,7 +398,6 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 
 func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	// arrange
-	defer cleanup()
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
@@ -461,7 +447,6 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
 	// arrange
-	defer cleanup()
 	customConfig := predefinedConfig
 	customConfig.Override.FakeDNSEnabled = true
 	customConfig.EdgeDNSServer = "fake"
@@ -488,7 +473,6 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *test
 }
 
 func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
-	defer cleanup()
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
@@ -599,7 +583,6 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 
 func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 	// arrange
-	defer cleanup()
 	settings := provideSettings(t, predefinedConfig)
 	expectedAnnotations := map[string]string{"annotation": "test"}
 	settings.gslb.Annotations = expectedAnnotations
@@ -615,7 +598,6 @@ func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 
 func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
 	// arrange
-	defer cleanup()
 	want := "us-west-1"
 	settings := provideSettings(t, predefinedConfig)
 	// act
@@ -627,7 +609,6 @@ func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
 
 func TestReflectGeoTagInTheStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	want := "eu"
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "eu"
@@ -641,7 +622,6 @@ func TestReflectGeoTagInTheStatus(t *testing.T) {
 
 func TestDetectsIngressHostnameMismatch(t *testing.T) {
 	// arrange
-	defer cleanup()
 	// getting Gslb and Reconciler
 	predefinedSettings := provideSettings(t, predefinedConfig)
 	customConfig := predefinedConfig
@@ -664,7 +644,6 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 
 func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	// arrange
-	defer cleanup()
 	const dnsZone = "cloud.example.com"
 	const want = "route53"
 	wantEp := []*externaldns.Endpoint{
@@ -735,7 +714,6 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 
 func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	// arrange
-	defer cleanup()
 	const dnsZone = "cloud.example.com"
 	const want = "ns1"
 	wantEp := []*externaldns.Endpoint{
@@ -806,7 +784,6 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
-	defer cleanup()
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
@@ -847,8 +824,6 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 
 func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	// arrange
-	defer cleanup()
-
 	customConfig := predefinedConfig
 	settings := provideSettings(t, customConfig)
 	coreDNSService := &corev1.Service{
@@ -887,8 +862,6 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 
 func TestGslbSetsAnnotationsOnTheIngress(t *testing.T) {
 	// arrange
-	defer cleanup()
-
 	settings := provideSettings(t, predefinedConfig)
 
 	// act
@@ -904,7 +877,6 @@ func TestGslbSetsAnnotationsOnTheIngress(t *testing.T) {
 
 func TestGslbGetFinalizer(t *testing.T) {
 	// arrange
-	defer cleanup()
 	gslb := &k8gbv1beta1.Gslb{}
 	settings := provideSettings(t, predefinedConfig)
 
@@ -919,7 +891,6 @@ func TestGslbGetFinalizer(t *testing.T) {
 
 func TestGslbRemoveDefaultFinalizer(t *testing.T) {
 	// arrange
-	defer cleanup()
 	gslb := &k8gbv1beta1.Gslb{}
 	var dt = metav1.Now()
 	settings := provideSettings(t, predefinedConfig)
@@ -939,7 +910,6 @@ func TestGslbRemoveDefaultFinalizer(t *testing.T) {
 
 func TestGslbRemoveBothFinalizers(t *testing.T) {
 	// arrange
-	defer cleanup()
 	gslb := &k8gbv1beta1.Gslb{}
 	var dt = metav1.Now()
 	settings := provideSettings(t, predefinedConfig)
@@ -1135,7 +1105,6 @@ func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
 }
 
 func provideSettings(t *testing.T, expected depresolver.Config) (settings testSettings) {
-	configureEnvVar(expected)
 	_, err := os.Stat(crSampleYaml)
 	if os.IsNotExist(err) {
 		t.Fatalf("Sample CR yaml file not found at: %s", crSampleYaml)
@@ -1159,22 +1128,16 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	// Create a fake client to mock API calls.
 	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
-	// Create config
-	config, err := depresolver.NewDependencyResolver().ResolveOperatorConfig()
-	if err != nil {
-		t.Fatalf("config error: (%v)", err)
-	}
-
 	// Create a GslbReconciler object with the scheme and fake client.
 	r := &GslbReconciler{
 		Client: cl,
 		Scheme: s,
 	}
 	r.DepResolver = depresolver.NewDependencyResolver()
-	r.Config = config
+	r.Config = &expected
 	// Mock request to simulate Reconcile() being called on an event for a
 	// watched resource .
-	r.Metrics = metrics.NewPrometheusMetrics(*config)
+	r.Metrics = metrics.NewPrometheusMetrics(expected)
 	req := reconcile.Request{
 		NamespacedName: types.NamespacedName{
 			Name:      gslb.Name,
@@ -1217,42 +1180,4 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	}
 	reconcileAndUpdateGslb(t, settings)
 	return settings
-}
-
-func cleanup() {
-	for _, s := range []string{depresolver.ReconcileRequeueSecondsKey, depresolver.ClusterGeoTagKey, depresolver.ExtClustersGeoTagsKey,
-		depresolver.EdgeDNSZoneKey, depresolver.DNSZoneKey, depresolver.EdgeDNSServerKey, depresolver.K8gbNamespaceKey,
-		depresolver.Route53EnabledKey, depresolver.NS1EnabledKey, depresolver.InfobloxGridHostKey, depresolver.InfobloxVersionKey,
-		depresolver.InfobloxPortKey, depresolver.InfobloxUsernameKey, depresolver.InfobloxPasswordKey, depresolver.InfobloxHTTPRequestTimeoutKey,
-		depresolver.InfobloxHTTPPoolConnectionsKey, depresolver.OverrideWithFakeDNSKey, depresolver.OverrideFakeInfobloxKey,
-		depresolver.LogLevelKey, depresolver.LogFormatKey, depresolver.LogNoColorKey, depresolver.SplitBrainCheckKey} {
-		if os.Unsetenv(s) != nil {
-			panic(fmt.Errorf("cleanup %s", s))
-		}
-	}
-}
-
-func configureEnvVar(config depresolver.Config) {
-	_ = os.Setenv(depresolver.ReconcileRequeueSecondsKey, strconv.Itoa(config.ReconcileRequeueSeconds))
-	_ = os.Setenv(depresolver.ClusterGeoTagKey, config.ClusterGeoTag)
-	_ = os.Setenv(depresolver.ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
-	_ = os.Setenv(depresolver.EdgeDNSServerKey, config.EdgeDNSServer)
-	_ = os.Setenv(depresolver.EdgeDNSZoneKey, config.EdgeDNSZone)
-	_ = os.Setenv(depresolver.DNSZoneKey, config.DNSZone)
-	_ = os.Setenv(depresolver.K8gbNamespaceKey, config.K8gbNamespace)
-	_ = os.Setenv(depresolver.Route53EnabledKey, strconv.FormatBool(config.EdgeDNSType == depresolver.DNSTypeRoute53))
-	_ = os.Setenv(depresolver.NS1EnabledKey, strconv.FormatBool(config.EdgeDNSType == depresolver.DNSTypeNS1))
-	_ = os.Setenv(depresolver.InfobloxGridHostKey, config.Infoblox.Host)
-	_ = os.Setenv(depresolver.InfobloxVersionKey, config.Infoblox.Version)
-	_ = os.Setenv(depresolver.InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))
-	_ = os.Setenv(depresolver.InfobloxUsernameKey, config.Infoblox.Username)
-	_ = os.Setenv(depresolver.InfobloxPasswordKey, config.Infoblox.Password)
-	_ = os.Setenv(depresolver.InfobloxHTTPRequestTimeoutKey, strconv.Itoa(config.Infoblox.HTTPRequestTimeout))
-	_ = os.Setenv(depresolver.InfobloxHTTPPoolConnectionsKey, strconv.Itoa(config.Infoblox.HTTPPoolConnections))
-	_ = os.Setenv(depresolver.OverrideWithFakeDNSKey, strconv.FormatBool(config.Override.FakeDNSEnabled))
-	_ = os.Setenv(depresolver.OverrideFakeInfobloxKey, strconv.FormatBool(config.Override.FakeInfobloxEnabled))
-	_ = os.Setenv(depresolver.LogLevelKey, config.Log.Level.String())
-	_ = os.Setenv(depresolver.LogFormatKey, config.Log.Format.String())
-	_ = os.Setenv(depresolver.LogNoColorKey, strconv.FormatBool(config.Log.NoColor))
-	_ = os.Setenv(depresolver.SplitBrainCheckKey, strconv.FormatBool(config.SplitBrainCheck))
 }

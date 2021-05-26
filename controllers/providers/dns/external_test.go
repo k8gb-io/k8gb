@@ -103,7 +103,7 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 	const dnsType = externalDNSTypeRoute53
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	m := assistant.NewMockIAssistant(ctrl)
+	m := assistant.NewMockAssistant(ctrl)
 	p := NewExternalDNS(dnsType, a.Config, m)
 	m.EXPECT().GslbIngressExposedIPs(a.Gslb).Return(a.TargetIPs, nil).Times(1)
 	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(expectedDNSEndpoint)).Return(nil).Times(1)
