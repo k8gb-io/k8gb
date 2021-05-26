@@ -43,9 +43,10 @@ import (
 var predefinedConfig = Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us",
-	ExtClustersGeoTags:      []string{"uk", "eu"},
+	ExtClustersGeoTags:      []string{"za", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
-	EdgeDNSServer:           "8.8.8.8",
+	EdgeDNSServer:           "dns.cloud.example.com",
+	EdgeDNSServerPort:       53,
 	EdgeDNSZone:             "example.com",
 	DNSZone:                 "cloud.example.com",
 	K8gbNamespace:           "k8gb",
@@ -60,7 +61,6 @@ var predefinedConfig = Config{
 		11,
 	},
 	Override: Override{
-		false,
 		false,
 	},
 	Log: Log{
@@ -170,6 +170,7 @@ func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
 	defaultConfig.ReconcileRequeueSeconds = 30
 	defaultConfig.Infoblox.HTTPRequestTimeout = 20
 	defaultConfig.Infoblox.HTTPPoolConnections = 10
+	defaultConfig.EdgeDNSServerPort = 53
 	defaultConfig.EdgeDNSType = DNSTypeNoEdgeDNS
 	defaultConfig.ExtClustersGeoTags = []string{}
 	defaultConfig.Log.Level = zerolog.InfoLevel
@@ -457,6 +458,50 @@ func TestResolveConfigWithInvalidIpAddressEdgeDnsServer(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSServer = "22.147.90.2."
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestResolveConfigWithNoEdgeDnsServerPort(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServerPortKey, "")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, 53, config.EdgeDNSServerPort)
+}
+
+func TestResolveConfigWithEdgeDnsServerPort(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.EdgeDNSServerPort = 7753
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestResolveConfigWithInvalidEdgeDnsServerPort(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServerPortKey, "invalid")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, 53, config.EdgeDNSServerPort)
+}
+
+func TestResolveConfigWithZeroOrNegativeEdgeDnsServerPort(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.EdgeDNSServerPort = 0
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -1079,26 +1124,6 @@ func TestResolveConfigEnableFakeDNSAsFalse(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
 
-func TestResolveConfigEnableFakeDNSAsInvalidValue(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(OverrideWithFakeDNSKey, "i.am.wrong??.")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.Override.FakeDNSEnabled)
-}
-
-func TestResolveConfigEnableFakeDNSAsUnsetEnvironmentVariable(t *testing.T) {
-	// arrange
-	defer cleanup()
-	// act,assert
-	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError, OverrideWithFakeDNSKey)
-}
-
 func TestResolveConfigEnableFakeInfobloxAsTrue(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1390,6 +1415,23 @@ func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
 	}
 }
 
+func TestNsServerNamesForLocalEdgeDNS(t *testing.T) {
+	// arrange
+	defer cleanup()
+	for _, edgeDNSServer := range []string{"127.0.0.1", "localhost"} {
+		customConfig := predefinedConfig
+		customConfig.EdgeDNSServer = edgeDNSServer
+		configureEnvVar(customConfig)
+		resolver := NewDependencyResolver()
+		// act
+		config, err := resolver.ResolveOperatorConfig()
+		// assert
+		assert.NoError(t, err)
+		assert.Equal(t, config.GetClusterNSName(), edgeDNSServer)
+		assert.True(t, reflect.DeepEqual(config.GetExternalClusterNSNames(), map[string]string{"za": edgeDNSServer, "eu": edgeDNSServer}))
+	}
+}
+
 func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1428,13 +1470,13 @@ func TestNsServerNamesLargeDNSZone(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com", config.GetClusterNSName())
 	extNsNames := config.GetExternalClusterNSNames()
-	expectedExtNsNames := map[string]string{"uk": "gslb-ns-uk-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com",
+	expectedExtNsNames := map[string]string{"za": "gslb-ns-za-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com",
 		"eu": "gslb-ns-eu-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com"}
 	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
 }
 
 func TestNsServerNamesWithLargeExtClusterGeoTag(t *testing.T) {
-	const largeGeoTag = "uk-lorem-ipsum-donor-b-blah-lorem"
+	const largeGeoTag = "za-lorem-ipsum-donor-b-blah-lorem"
 	defer cleanup()
 	// arrange
 	customConfig := predefinedConfig
@@ -1454,7 +1496,7 @@ func TestNsServerNamesWithLargeExtClusterGeoTag(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
 	extNsNames := config.GetExternalClusterNSNames()
-	expectedExtNsNames := map[string]string{largeGeoTag: "gslb-ns-uk-lorem-ipsum-donor-b-blah-lorem-k8gb-test-preprod-gslb.cloud.example.com",
+	expectedExtNsNames := map[string]string{largeGeoTag: "gslb-ns-za-lorem-ipsum-donor-b-blah-lorem-k8gb-test-preprod-gslb.cloud.example.com",
 		"eu": "gslb-ns-eu-k8gb-test-preprod-gslb.cloud.example.com"}
 	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
 
@@ -1477,7 +1519,7 @@ func TestNsServerNamesWithLargeClusterGeoTag(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "gslb-ns-us-lorem-ipsum-donor-blah-blah-blah-blah-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
 	extNsNames := config.GetExternalClusterNSNames()
-	expectedExtNsNames := map[string]string{"uk": "gslb-ns-uk-k8gb-test-preprod-gslb.cloud.example.com",
+	expectedExtNsNames := map[string]string{"za": "gslb-ns-za-k8gb-test-preprod-gslb.cloud.example.com",
 		"eu": "gslb-ns-eu-k8gb-test-preprod-gslb.cloud.example.com"}
 	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
 
@@ -1536,8 +1578,8 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
-		Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey, InfobloxPasswordKey,
-		OverrideWithFakeDNSKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
+		EdgeDNSServerPortKey, Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
+		InfobloxPasswordKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
@@ -1550,6 +1592,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(ClusterGeoTagKey, config.ClusterGeoTag)
 	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
 	_ = os.Setenv(EdgeDNSServerKey, config.EdgeDNSServer)
+	_ = os.Setenv(EdgeDNSServerPortKey, strconv.Itoa(config.EdgeDNSServerPort))
 	_ = os.Setenv(EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.DNSZone)
 	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)
@@ -1563,7 +1606,6 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(InfobloxPasswordKey, config.Infoblox.Password)
 	_ = os.Setenv(InfobloxHTTPRequestTimeoutKey, strconv.Itoa(config.Infoblox.HTTPRequestTimeout))
 	_ = os.Setenv(InfobloxHTTPPoolConnectionsKey, strconv.Itoa(config.Infoblox.HTTPPoolConnections))
-	_ = os.Setenv(OverrideWithFakeDNSKey, strconv.FormatBool(config.Override.FakeDNSEnabled))
 	_ = os.Setenv(OverrideFakeInfobloxKey, strconv.FormatBool(config.Override.FakeInfobloxEnabled))
 	_ = os.Setenv(LogLevelKey, config.Log.Level.String())
 	_ = os.Setenv(LogFormatKey, config.Log.Format.String())

@@ -33,6 +33,7 @@ const (
 	Route53EnabledKey          = "ROUTE53_ENABLED"
 	NS1EnabledKey              = "NS1_ENABLED"
 	EdgeDNSServerKey           = "EDGE_DNS_SERVER"
+	EdgeDNSServerPortKey       = "EDGE_DNS_SERVER_PORT"
 	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
 	DNSZoneKey                 = "DNS_ZONE"
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
@@ -43,7 +44,6 @@ const (
 	InfobloxPasswordKey            = "EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"
 	InfobloxHTTPRequestTimeoutKey  = "INFOBLOX_HTTP_REQUEST_TIMEOUT"
 	InfobloxHTTPPoolConnectionsKey = "INFOBLOX_HTTP_POOL_CONNECTIONS"
-	OverrideWithFakeDNSKey         = "OVERRIDE_WITH_FAKE_EXT_DNS"
 	OverrideFakeInfobloxKey        = "FAKE_INFOBLOX"
 	K8gbNamespaceKey               = "POD_NAMESPACE"
 	CoreDNSExposedKey              = "COREDNS_EXPOSED"
@@ -66,6 +66,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.ns1Enabled = env.GetEnvAsBoolOrFallback(NS1EnabledKey, false)
 		dr.config.CoreDNSExposed = env.GetEnvAsBoolOrFallback(CoreDNSExposedKey, false)
 		dr.config.EdgeDNSServer = env.GetEnvAsStringOrFallback(EdgeDNSServerKey, "")
+		dr.config.EdgeDNSServerPort, _ = env.GetEnvAsIntOrFallback(EdgeDNSServerPortKey, 53)
 		dr.config.EdgeDNSZone = env.GetEnvAsStringOrFallback(EdgeDNSZoneKey, "")
 		dr.config.DNSZone = env.GetEnvAsStringOrFallback(DNSZoneKey, "")
 		dr.config.K8gbNamespace = env.GetEnvAsStringOrFallback(K8gbNamespaceKey, "")
@@ -76,7 +77,6 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Infoblox.Password = env.GetEnvAsStringOrFallback(InfobloxPasswordKey, "")
 		dr.config.Infoblox.HTTPPoolConnections, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPPoolConnectionsKey, 10)
 		dr.config.Infoblox.HTTPRequestTimeout, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPRequestTimeoutKey, 20)
-		dr.config.Override.FakeDNSEnabled = env.GetEnvAsBoolOrFallback(OverrideWithFakeDNSKey, false)
 		dr.config.Override.FakeInfobloxEnabled = env.GetEnvAsBoolOrFallback(OverrideFakeInfobloxKey, false)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, SimpleFormat.String())))
@@ -126,6 +126,10 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 		}
 	}
 	err = field(EdgeDNSServerKey, config.EdgeDNSServer).isNotEmpty().matchRegexps(hostNameRegex, ipAddressRegex).err
+	if err != nil {
+		return err
+	}
+	err = field(EdgeDNSServerPortKey, config.EdgeDNSServerPort).isHigherThanZero().err
 	if err != nil {
 		return err
 	}
@@ -226,13 +230,13 @@ func parseLogOutputFormat(value string) LogFormat {
 func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
 	m = make(map[string]string, len(c.ExtClustersGeoTags))
 	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getNsName(tag, c.DNSZone, c.EdgeDNSZone)
+		m[tag] = getNsName(tag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServer)
 	}
 	return
 }
 
 func (c *Config) GetClusterNSName() string {
-	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone)
+	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServer)
 }
 
 func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string) (m map[string]string) {
@@ -253,8 +257,12 @@ func (c *Config) GetClusterHeartbeatFQDN(gslbName string) string {
 // EDGE_DNS_ZONE: cloud.example.com
 // CLUSTER_GEOTAG: us
 // will generate "gslb-ns-us-k8gb-test-gslb.cloud.example.com"
+// If edgeDNSServer == localhost or 127.0.0.1 than edgeDNSServer is returned.
 // The function is private and expects only valid inputs.
-func getNsName(tag, dnsZone, edgeDNSZone string) string {
+func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
+	if edgeDNSServer == "127.0.0.1" || edgeDNSServer == "localhost" {
+		return edgeDNSServer
+	}
 	const prefix = "gslb-ns"
 	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
 	domainX := strings.ReplaceAll(d, ".", "-")
