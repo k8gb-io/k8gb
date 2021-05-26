@@ -110,7 +110,7 @@ func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb) error {
 }
 
 func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, p.config.GetExternalClusterNSNames())
+	return p.assistant.GetExternalTargets(host, p.config.EdgeDNSServerPort, p.config.GetExternalClusterNSNames())
 }
 
 func (p *ExternalDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {

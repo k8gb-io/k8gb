@@ -69,17 +69,17 @@ func (mr *MockAssistantMockRecorder) CoreDNSExposedIPs() *gomock.Call {
 }
 
 // GetExternalTargets mocks base method.
-func (m *MockAssistant) GetExternalTargets(host string, fakeDNSEnabled bool, extClusterNsNames map[string]string) []string {
+func (m *MockAssistant) GetExternalTargets(host string, edgeDNSServerPort int, extClusterNsNames map[string]string) []string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetExternalTargets", host, fakeDNSEnabled, extClusterNsNames)
+	ret := m.ctrl.Call(m, "GetExternalTargets", host, edgeDNSServerPort, extClusterNsNames)
 	ret0, _ := ret[0].([]string)
 	return ret0
 }
 
 // GetExternalTargets indicates an expected call of GetExternalTargets.
-func (mr *MockAssistantMockRecorder) GetExternalTargets(host, fakeDNSEnabled, extClusterNsNames interface{}) *gomock.Call {
+func (mr *MockAssistantMockRecorder) GetExternalTargets(host, edgeDNSServerPort, extClusterNsNames interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalTargets", reflect.TypeOf((*MockAssistant)(nil).GetExternalTargets), host, fakeDNSEnabled, extClusterNsNames)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalTargets", reflect.TypeOf((*MockAssistant)(nil).GetExternalTargets), host, edgeDNSServerPort, extClusterNsNames)
 }
 
 // GslbIngressExposedIPs mocks base method.
@@ -98,17 +98,17 @@ func (mr *MockAssistantMockRecorder) GslbIngressExposedIPs(gslb interface{}) *go
 }
 
 // InspectTXTThreshold mocks base method.
-func (m *MockAssistant) InspectTXTThreshold(fqdn string, fakeDNSEnabled bool, splitBrainThreshold time.Duration) error {
+func (m *MockAssistant) InspectTXTThreshold(fqdn string, edgeDNSServerPort int, splitBrainThreshold time.Duration) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InspectTXTThreshold", fqdn, fakeDNSEnabled, splitBrainThreshold)
+	ret := m.ctrl.Call(m, "InspectTXTThreshold", fqdn, edgeDNSServerPort, splitBrainThreshold)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // InspectTXTThreshold indicates an expected call of InspectTXTThreshold.
-func (mr *MockAssistantMockRecorder) InspectTXTThreshold(fqdn, fakeDNSEnabled, splitBrainThreshold interface{}) *gomock.Call {
+func (mr *MockAssistantMockRecorder) InspectTXTThreshold(fqdn, edgeDNSServerPort, splitBrainThreshold interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InspectTXTThreshold", reflect.TypeOf((*MockAssistant)(nil).InspectTXTThreshold), fqdn, fakeDNSEnabled, splitBrainThreshold)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InspectTXTThreshold", reflect.TypeOf((*MockAssistant)(nil).InspectTXTThreshold), fqdn, edgeDNSServerPort, splitBrainThreshold)
 }
 
 // RemoveEndpoint mocks base method.
