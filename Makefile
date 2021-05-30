@@ -433,7 +433,7 @@ define testapp-set-replicas
 endef
 
 define demo-host
-	kubectl run -it --rm k8gbdemo --restart=Never --image=absaoss/k8gbdemocurl --env="DEBUG=$(DEMO_DEBUG)" \
+	kubectl run -it --rm k8gb-demo --restart=Never --image=absaoss/k8gb-demo-curl --env="DEBUG=$(DEMO_DEBUG)" \
 	"`$(K8GB_COREDNS_IP)`" $1
 endef
 

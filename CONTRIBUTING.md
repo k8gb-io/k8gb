@@ -217,7 +217,7 @@ These instructions will help you to set up and use local website authoring and t
 - Open the `http://localhost:4000/` page in your browser.
 - Website will automatically rebuild and refresh in the browser to accommodate the related code changes.
 
-### End-to-end demo helper
+## End-to-end demo helper
 
 The demo helper is designed to work with `podinfo` that was deployed by
 
@@ -225,7 +225,7 @@ The demo helper is designed to work with `podinfo` that was deployed by
 make deploy-test-apps
 ```
 
-It will configure `podinfo` to expose geo tag as part of http response.
+It will configure `podinfo` to expose geotag as part of an HTTP response.
 
 To test and/or demonstrate continuous query to GSLB enabled endpoint execute
 
@@ -247,7 +247,7 @@ The happy path will look like:
 [Thu May 27 15:35:36 UTC 2021] ...
 ```
 
-The sources for demo helper images can be found [here](./deploy/test-apps/curldemo/)
+The sources for demo helper images can be found [here](deploy/test-apps/curldemo/)
 
 To enable verbose debug output declare `DEMO_DEBUG=1` like
 ```sh
