@@ -60,7 +60,7 @@ while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/clust
 ```shell script
 dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
-As expected result you should see **eight A records** divided between nodes of both clusters.
+As expected result you should see **four A records** divided between nodes of both clusters.
 ```shell script
 ...
 ...
