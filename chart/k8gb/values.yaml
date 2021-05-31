@@ -41,7 +41,7 @@ coredns:
     skipConfig: true
   image:
     repository: absaoss/k8s_crd
-    tag: "v0.0.2"
+    tag: "v0.0.4"
   serviceAccount:
     create: true
     name: coredns
