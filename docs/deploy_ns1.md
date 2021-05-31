@@ -8,8 +8,7 @@ Two EKS clusters in `eu-west-1` and `us-east-1`.
 
 The EKS setup is identical to [Route53 tutorial](../docs/deploy_route53.md)
 
-Terraform code for cluster reference setup can be found [here](../docs/examples/route53)
-
+Terraform code for cluster reference setup can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53)
 
 ## Deploy k8gb
 
@@ -19,7 +18,7 @@ Use `helm` to deploy stable release from Helm repo
 helm repo add k8gb https://www.k8gb.io
 ```
 
-Example `values.yaml` configuration files can be found [here](../docs/examples/ns1/)
+Example `values.yaml` configuration files can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/ns1)
 
 In `eu-west-1` cluster execute
 ```sh
