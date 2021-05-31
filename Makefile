@@ -44,6 +44,8 @@ EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
 EDGE_DNS_SERVER ?= 1.1.1.1
 EDGE_DNS_ZONE ?= example.com
 DNS_ZONE ?= cloud.example.com
+DEMO_URL ?= http://failover.cloud.example.com
+DEMO_DEBUG ?=0
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -102,14 +104,9 @@ debug-idea: export WATCH_NAMESPACE=test-gslb
 debug-idea:
 	$(call debug,debug --headless --listen=:2345 --api-version=2)
 
-.PHONY: demo-roundrobin
-demo-roundrobin: ## Execute round-robin demo
-	@$(call demo-host, "roundrobin.cloud.example.com")
-
-.PHONY: demo-failover
-demo-failover: ## Execute failover demo
-	@$(call demo-host, "failover.cloud.example.com")
-
+.PHONY: demo
+demo: ## Execute end-to-end demo
+	@$(call demo-host, $(DEMO_URL))
 
 # spin-up local environment
 .PHONY: deploy-full-local-setup
@@ -436,7 +433,7 @@ define testapp-set-replicas
 endef
 
 define demo-host
-	kubectl run -it --rm k8gbdemo --restart=Never --image=absaoss/k8gbdemocurl  \
+	kubectl run -it --rm k8gb-demo --restart=Never --image=absaoss/k8gb-demo-curl --env="DEBUG=$(DEMO_DEBUG)" \
 	"`$(K8GB_COREDNS_IP)`" $1
 endef
 

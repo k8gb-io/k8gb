@@ -217,5 +217,42 @@ These instructions will help you to set up and use local website authoring and t
 - Open the `http://localhost:4000/` page in your browser.
 - Website will automatically rebuild and refresh in the browser to accommodate the related code changes.
 
+## End-to-end demo helper
+
+The demo helper is designed to work with `podinfo` that was deployed by
+
+```sh
+make deploy-test-apps
+```
+
+It will configure `podinfo` to expose geotag as part of an HTTP response.
+
+To test and/or demonstrate continuous query to GSLB enabled endpoint execute
+
+```sh
+make demo DEMO_URL=https://failover.test.exampledns.tk
+```
+
+The happy path will look like:
+
+```sh
+[Thu May 27 15:35:26 UTC 2021] ...
+
+200  "message": "eu-west-1",
+
+[Thu May 27 15:35:31 UTC 2021] ...
+
+200
+  "message": "eu-west-1",
+[Thu May 27 15:35:36 UTC 2021] ...
+```
+
+The sources for demo helper images can be found [here](deploy/test-apps/curldemo/)
+
+To enable verbose debug output declare `DEMO_DEBUG=1` like
+```sh
+make demo DEMO_URL=https://failover.test.exampledns.tk DEMO_DEBUG=1
+```
+
 ---
 Thanks for contributing!
