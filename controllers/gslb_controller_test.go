@@ -19,7 +19,9 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -88,6 +90,12 @@ var predefinedConfig = depresolver.Config{
 	Log: depresolver.Log{
 		Format: depresolver.SimpleFormat,
 	},
+}
+
+var fakeDNSSettings = utils.FakeDNSSettings{
+	FakeDNSPort:     7753,
+	EdgeDNSZoneFQDN: "example.com.",
+	DNSZoneFQDN:     "cloud.example.com.",
 }
 
 const coreDNSExtServiceName = "k8gb-coredns-lb"
@@ -374,27 +382,34 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
 	}
-	settings := provideSettings(t, predefinedConfig)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
-	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, predefinedConfig)
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
-	// act
-	createHealthyService(t, &settings, serviceName)
-	// delete DNSEndpoint so we can pretend it wasn't annotated before
-	deleteDNSEndpoint(t, &settings)
-	createDNSEndpoint(t, &settings)
-	defer deleteHealthyService(t, &settings, serviceName)
-	defer deleteDNSEndpoint(t, &settings)
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
-	require.NoError(t, err, "Failed to load DNS endpoint")
-	got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+			// act
+			createHealthyService(t, &settings, serviceName)
+			// delete DNSEndpoint so we can pretend it wasn't annotated before
+			deleteDNSEndpoint(t, &settings)
+			createDNSEndpoint(t, &settings)
+			defer deleteHealthyService(t, &settings, serviceName)
+			defer deleteDNSEndpoint(t, &settings)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to load DNS endpoint")
+			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+			// assert
+			assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+		}).RequireNoError(t)
 }
 
 func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
@@ -421,54 +436,71 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "localhost"
-	settings := provideSettings(t, customConfig)
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
 
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
-	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
-	// act
-	createHealthyService(t, &settings, serviceName)
-	defer deleteHealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
-	require.NoError(t, err, "Failed to get expected DNSEndpoint")
+			// act
+			createHealthyService(t, &settings, serviceName)
+			defer deleteHealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to get expected DNSEndpoint")
 
-	got := dnsEndpoint.Spec.Endpoints
-	hrGot := settings.gslb.Status.HealthyRecords
-	prettyGot := str.ToString(got)
-	prettyWant := str.ToString(want)
+			got := dnsEndpoint.Spec.Endpoints
+			hrGot := settings.gslb.Status.HealthyRecords
+			prettyGot := str.ToString(got)
+			prettyWant := str.ToString(want)
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
-	assert.Equal(t, hrGot, hrWant, "got:\n %s Gslb Records status,\n\n want:\n %s", hrGot, hrWant)
+			// assert
+			assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			assert.Equal(t, hrGot, hrWant, "got:\n %s Gslb Records status,\n\n want:\n %s", hrGot, hrWant)
+		}).RequireNoError(t)
 }
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "localhost"
-	settings := provideSettings(t, customConfig)
-	// act
-	got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com",
-		customConfig.EdgeDNSServerPort, time.Minute*5)
-	want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
-	// assert
-	assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddTXTRecord("test-gslb-heartbeat-eu.example.com.", oldEdgeTimestamp("10m")).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
+			// act
+			got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com",
+				customConfig.EdgeDNSServerPort, time.Minute*5)
+			want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
+			// assert
+			assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
+		}).RequireNoError(t)
 }
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "localhost"
-	settings := provideSettings(t, customConfig)
-	// act
-	err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com",
-		customConfig.EdgeDNSServerPort, time.Minute*5)
-	// assert
-	assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddTXTRecord("test-gslb-heartbeat-za.example.com.", oldEdgeTimestamp("3m")).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
+			// act
+			err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com",
+				customConfig.EdgeDNSServerPort, time.Minute*5)
+			// assert
+			assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
+		}).RequireNoError(t)
 }
 
 func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
@@ -550,33 +582,40 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
 	customConfig.EdgeDNSServer = "localhost"
-	settings := provideSettings(t, customConfig)
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
 
-	// ingress
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
-	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
+			// ingress
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
-	// enable failover strategy
-	settings.gslb.Spec.Strategy.Type = "failover"
-	settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
-	err = settings.client.Update(context.TODO(), settings.gslb)
-	require.NoError(t, err, "Can't update gslb")
+			// enable failover strategy
+			settings.gslb.Spec.Strategy.Type = "failover"
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
+			err = settings.client.Update(context.TODO(), settings.gslb)
+			require.NoError(t, err, "Can't update gslb")
 
-	// act
-	createHealthyService(t, &settings, serviceName)
-	defer deleteHealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
-	require.NoError(t, err, "Failed to get expected DNSEndpoint")
-	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := str.ToString(got)
-	prettyWant := str.ToString(want)
+			// act
+			createHealthyService(t, &settings, serviceName)
+			defer deleteHealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to get expected DNSEndpoint")
+			got := dnsEndpoint.Spec.Endpoints
+			prettyGot := str.ToString(got)
+			prettyWant := str.ToString(want)
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			// assert
+			assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		}).RequireNoError(t)
 }
 
 func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
@@ -926,15 +965,6 @@ func TestGslbRemoveBothFinalizers(t *testing.T) {
 	assert.Len(t, gslb.Finalizers, 0)
 }
 
-func TestMain(m *testing.M) {
-	// setup tests
-	fakeDNS()
-	// run tests
-	exitVal := m.Run()
-	// teardown
-	os.Exit(exitVal)
-}
-
 func createHealthyService(t *testing.T, s *testSettings, serviceName string) {
 	t.Helper()
 	service := &corev1.Service{
@@ -1178,4 +1208,12 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	}
 	reconcileAndUpdateGslb(t, settings)
 	return settings
+}
+
+func oldEdgeTimestamp(threshold string) string {
+	now := time.Now()
+	duration, _ := time.ParseDuration(threshold)
+	before := now.Add(-duration)
+	edgeTimestamp := fmt.Sprint(before.UTC().Format("2006-01-02T15:04:05"))
+	return edgeTimestamp
 }
