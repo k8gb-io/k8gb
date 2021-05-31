@@ -105,8 +105,6 @@ type Infoblox struct {
 
 // Override configuration
 type Override struct {
-	// FakeDNSEnabled; default=false
-	FakeDNSEnabled bool
 	// FakeInfobloxEnabled if true than Infoblox connection FQDN=`fakezone.example.com`; default = false
 	FakeInfobloxEnabled bool
 }
@@ -123,6 +121,8 @@ type Config struct {
 	EdgeDNSType EdgeDNSType
 	// EdgeDNSServer
 	EdgeDNSServer string
+	// EdgeDNSServerPort
+	EdgeDNSServerPort int
 	// EdgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
 	EdgeDNSZone string
 	// DNSZone controlled by gslb; e.g. cloud.example.com

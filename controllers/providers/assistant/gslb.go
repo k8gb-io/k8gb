@@ -181,11 +181,11 @@ func (r *GslbLoggerAssistant) RemoveEndpoint(endpointName string) error {
 }
 
 // InspectTXTThreshold inspects fqdn TXT record from edgeDNSServer. If record doesn't exists or timestamp is greater than
-// splitBrainThreshold the error is returned. In case fakeDNSEnabled is true, 127.0.0.1:7753 is used as edgeDNSServer
-func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, fakeDNSEnabled bool, splitBrainThreshold time.Duration) error {
+// splitBrainThreshold the error is returned.
+func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, edgeDNSServerPort int, splitBrainThreshold time.Duration) error {
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(fqdn), dns.TypeTXT)
-	ns := overrideWithFakeDNS(fakeDNSEnabled, r.edgeDNSServer)
+	ns := fmt.Sprintf("%s:%v", r.edgeDNSServer, edgeDNSServerPort)
 	txt, err := dns.Exchange(m, ns)
 	if err != nil {
 		log.Info().Msgf("Error contacting EdgeDNS server (%s) for TXT split brain record: (%s)", ns, err)
@@ -221,16 +221,14 @@ func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, fakeDNSEnabled bo
 	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))
 }
 
-func (r *GslbLoggerAssistant) GetExternalTargets(host string, fakeDNSEnabled bool, extClusterNsNames map[string]string) (targets []string) {
+func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort int, extClusterNsNames map[string]string) (targets []string) {
 	targets = []string{}
 	for _, cluster := range extClusterNsNames {
 		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
 		g := new(dns.Msg)
 		host = fmt.Sprintf("localtargets-%s.", host) // Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
 		g.SetQuestion(host, dns.TypeA)
-
-		ns := overrideWithFakeDNS(fakeDNSEnabled, cluster)
-
+		ns := fmt.Sprintf("%s:%v", cluster, edgeDNSServerPort)
 		a, err := dns.Exchange(g, ns)
 		if err != nil {
 			log.Warn().Msgf("Trying to contact external Gslb cluster(%s) : (%v)", cluster, err)
@@ -246,15 +244,6 @@ func (r *GslbLoggerAssistant) GetExternalTargets(host string, fakeDNSEnabled boo
 			targets = append(targets, clusterTargets...)
 			log.Info().Msgf("Added external %s Gslb targets from %s cluster", clusterTargets, cluster)
 		}
-	}
-	return
-}
-
-func overrideWithFakeDNS(fakeDNSEnabled bool, server string) (ns string) {
-	if fakeDNSEnabled {
-		ns = "127.0.0.1:7753"
-	} else {
-		ns = fmt.Sprintf("%s:53", server)
 	}
 	return
 }

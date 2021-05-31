@@ -50,8 +50,8 @@ var a = struct {
 	Config: depresolver.Config{
 		ReconcileRequeueSeconds: 30,
 		ClusterGeoTag:           "us",
-		ExtClustersGeoTags:      []string{"uk", "eu"},
-		EdgeDNSServer:           "8.8.8.8",
+		ExtClustersGeoTags:      []string{"za", "eu"},
+		EdgeDNSServer:           "dns.cloud.example.com",
 		EdgeDNSZone:             "example.com",
 		DNSZone:                 "cloud.example.com",
 		K8gbNamespace:           "k8gb",
@@ -69,8 +69,8 @@ var a = struct {
 	},
 	TargetNSNamesSorted: []string{
 		"gslb-ns-eu-cloud.example.com",
-		"gslb-ns-uk-cloud.example.com",
 		"gslb-ns-us-cloud.example.com",
+		"gslb-ns-za-cloud.example.com",
 	},
 }
 

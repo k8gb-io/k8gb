@@ -69,6 +69,7 @@ var predefinedConfig = depresolver.Config{
 	ClusterGeoTag:           "us-west-1",
 	ExtClustersGeoTags:      []string{"us-east-1"},
 	EdgeDNSServer:           "8.8.8.8",
+	EdgeDNSServerPort:       7753,
 	EdgeDNSZone:             "example.com",
 	DNSZone:                 "cloud.example.com",
 	K8gbNamespace:           "k8gb",
@@ -419,7 +420,7 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.Override.FakeDNSEnabled = true
+	customConfig.EdgeDNSServer = "localhost"
 	settings := provideSettings(t, customConfig)
 
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
@@ -448,12 +449,11 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
-	customConfig.Override.FakeDNSEnabled = true
-	customConfig.EdgeDNSServer = "fake"
+	customConfig.EdgeDNSServer = "localhost"
 	settings := provideSettings(t, customConfig)
 	// act
 	got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com",
-		customConfig.Override.FakeDNSEnabled, time.Minute*5)
+		customConfig.EdgeDNSServerPort, time.Minute*5)
 	want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
 	// assert
 	assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
@@ -462,12 +462,11 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
-	customConfig.Override.FakeDNSEnabled = true
-	customConfig.EdgeDNSServer = "fake"
+	customConfig.EdgeDNSServer = "localhost"
 	settings := provideSettings(t, customConfig)
 	// act
 	err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com",
-		customConfig.Override.FakeDNSEnabled, time.Minute*5)
+		customConfig.EdgeDNSServerPort, time.Minute*5)
 	// assert
 	assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
 }
@@ -496,7 +495,6 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "eu"
-	customConfig.Override.FakeDNSEnabled = true
 	settings := provideSettings(t, customConfig)
 
 	// ingress
@@ -551,7 +549,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
-	customConfig.Override.FakeDNSEnabled = true
+	customConfig.EdgeDNSServer = "localhost"
 	settings := provideSettings(t, customConfig)
 
 	// ingress

@@ -96,7 +96,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 				for extClusterGeoTag, nsServerNameExt := range p.config.GetExternalClusterNSNames() {
 					err = p.assistant.InspectTXTThreshold(
 						extClusterHeartbeatFQDNs[extClusterGeoTag],
-						p.config.Override.FakeDNSEnabled,
+						p.config.EdgeDNSServerPort,
 						time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
 					if err != nil {
 						log.Err(err).Msgf("Got the error from TXT based checkAlive. External cluster (%s) doesn't "+
@@ -171,7 +171,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 }
 
 func (p *InfobloxProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.Override.FakeDNSEnabled, p.config.GetExternalClusterNSNames())
+	return p.assistant.GetExternalTargets(host, p.config.EdgeDNSServerPort, p.config.GetExternalClusterNSNames())
 }
 
 func (p *InfobloxProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {

@@ -62,6 +62,8 @@ spec:
               value: {{ .Values.k8gb.edgeDNSZone }}
             - name: EDGE_DNS_SERVER
               value: {{ .Values.k8gb.edgeDNSServer }}
+            - name: EDGE_DNS_SERVER_PORT
+              value: "53"
             - name: DNS_ZONE
               value: {{ .Values.k8gb.dnsZone }}
             - name: RECONCILE_REQUEUE_SECONDS
