@@ -60,17 +60,15 @@ while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/clust
 ```shell script
 dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
-As expected result you should see **four A records** divided between nodes of both clusters.
+As expected result you should see **two A records** divided between both clusters (IP addresses may differ).
 ```shell script
 ...
 ...
 ;; ANSWER SECTION:
-localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.3
-localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.2
+localtargets-roundrobin.cloud.example.com. 30 IN A 10.43.178.134
 ...
 ...
-localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.5
-localtargets-roundrobin.cloud.example.com. 30 IN A 172.16.0.4
+localtargets-roundrobin.cloud.example.com. 30 IN A 10.43.75.137
 ```
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top.
 Run following command and check if you get two json responses.
