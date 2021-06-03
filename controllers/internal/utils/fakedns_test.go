@@ -41,8 +41,9 @@ var testSettings = FakeDNSSettings{
 
 func TestFakeDNSPortIsAlreadyInUse(t *testing.T) {
 	s := &dns.Server{Addr: fmt.Sprintf("[::]:%v", port), Net: "udp", TsigSecret: nil, ReusePort: false}
-	defer func() { _ = s.Shutdown() }()
+	defer func() { require.NoError(t, s.Shutdown(), "can't shutdown listener") }()
 	go func() { _ = s.ListenAndServe() }()
+	// wait until listener starts on concurrent thread
 	time.Sleep(100 * time.Millisecond)
 	err := NewFakeDNS(testSettings).
 		Start().
@@ -113,7 +114,7 @@ func TestFakeDNSStress(t *testing.T) {
 			AddTXTRecord("localtargets-heartbeat-us.cloud.example.com.", "5m").
 			Start().
 			RunTestFunc(func() {
-				fmt.Println("FakeDNS test: ", i)
+				t.Log("FakeDNS test: ", i)
 				g := new(dns.Msg)
 				g.SetQuestion("localtargets-roundrobin.cloud.example.com.", dns.TypeA)
 				// put server under load....
