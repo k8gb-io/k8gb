@@ -30,6 +30,7 @@ import (
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+	"github.com/AbsaOSS/k8gb/controllers/logging"
 	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
 	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
 	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
@@ -1207,6 +1208,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		assistant:  a,
 	}
 	reconcileAndUpdateGslb(t, settings)
+	logging.Init(&expected)
 	return settings
 }
 

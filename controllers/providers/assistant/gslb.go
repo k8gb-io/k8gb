@@ -225,13 +225,36 @@ func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort 
 	targets = []string{}
 	for _, cluster := range extClusterNsNames {
 		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
-		g := new(dns.Msg)
-		host = fmt.Sprintf("localtargets-%s.", host) // Convert to true FQDN with dot at the end. Otherwise dns lib freaks out
-		g.SetQuestion(host, dns.TypeA)
-		ns := fmt.Sprintf("%s:%v", cluster, edgeDNSServerPort)
-		a, err := dns.Exchange(g, ns)
+		//
+		resolveNS := new(dns.Msg)
+		edgeDNSServer := fmt.Sprintf("%s:%v", r.edgeDNSServer, edgeDNSServerPort)
+		clusterFQDN := fmt.Sprintf("%s.", cluster) // Convert to true FQDN with dot at the end
+		resolveNS.SetQuestion(clusterFQDN, dns.TypeA)
+		glueA, err := dns.Exchange(resolveNS, edgeDNSServer)
 		if err != nil {
-			log.Warn().Msgf("Trying to contact external Gslb cluster(%s) : (%v)", cluster, err)
+			log.Warn().Msgf("Can't resolve glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", clusterFQDN, edgeDNSServer, err)
+			return
+		}
+		log.Info().Msgf("Resolved glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", clusterFQDN, edgeDNSServer, glueA.Answer)
+		var glueARecords []string
+
+		for _, nsA := range glueA.Answer {
+			IP := strings.Split(nsA.String(), "\t")[4]
+			glueARecords = append(glueARecords, IP)
+		}
+		//
+		g := new(dns.Msg)
+		host = fmt.Sprintf("localtargets-%s.", host) // Convert to true FQDN with dot at the end
+		g.SetQuestion(host, dns.TypeA)
+		var nameServerToUse string
+		if len(glueARecords) > 0 {
+			nameServerToUse = fmt.Sprintf("%s:%d", glueARecords[0], edgeDNSServerPort)
+		} else {
+			nameServerToUse = fmt.Sprintf("%s:%v", cluster, edgeDNSServerPort)
+		}
+		a, err := dns.Exchange(g, nameServerToUse)
+		if err != nil {
+			log.Warn().Msgf("Trying to contact external Gslb cluster(%s) : (%v)", nameServerToUse, err)
 			return
 		}
 		var clusterTargets []string
