@@ -221,11 +221,19 @@ func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, edgeDNSServerPort
 	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))
 }
 
+func GetARecords(msg *dns.Msg) []string {
+	var ARecords []string
+	for _, nsA := range msg.Answer {
+		IP := strings.Split(nsA.String(), "\t")[4]
+		ARecords = append(ARecords, IP)
+	}
+	return ARecords
+}
+
 func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort int, extClusterNsNames map[string]string) (targets []string) {
 	targets = []string{}
 	for _, cluster := range extClusterNsNames {
 		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
-		//
 		resolveNS := new(dns.Msg)
 		edgeDNSServer := fmt.Sprintf("%s:%v", r.edgeDNSServer, edgeDNSServerPort)
 		clusterFQDN := fmt.Sprintf("%s.", cluster) // Convert to true FQDN with dot at the end
@@ -236,13 +244,7 @@ func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort 
 			return
 		}
 		log.Info().Msgf("Resolved glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", clusterFQDN, edgeDNSServer, glueA.Answer)
-		var glueARecords []string
-
-		for _, nsA := range glueA.Answer {
-			IP := strings.Split(nsA.String(), "\t")[4]
-			glueARecords = append(glueARecords, IP)
-		}
-		//
+		glueARecords := GetARecords(glueA)
 		g := new(dns.Msg)
 		host = fmt.Sprintf("localtargets-%s.", host) // Convert to true FQDN with dot at the end
 		g.SetQuestion(host, dns.TypeA)
@@ -257,12 +259,7 @@ func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort 
 			log.Warn().Msgf("Trying to contact external Gslb cluster(%s) : (%v)", nameServerToUse, err)
 			return
 		}
-		var clusterTargets []string
-
-		for _, A := range a.Answer {
-			IP := strings.Split(A.String(), "\t")[4]
-			clusterTargets = append(clusterTargets, IP)
-		}
+		clusterTargets := GetARecords(a)
 		if len(clusterTargets) > 0 {
 			targets = append(targets, clusterTargets...)
 			log.Info().Msgf("Added external %s Gslb targets from %s cluster", clusterTargets, cluster)
