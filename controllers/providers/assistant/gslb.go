@@ -230,33 +230,38 @@ func GetARecords(msg *dns.Msg) []string {
 	return ARecords
 }
 
+func DNSQuery(fqdn string, nameserver string, nameserverport int) (*dns.Msg, error) {
+	dnsMsg := new(dns.Msg)
+	edgeDNSServer := fmt.Sprintf("%s:%v", nameserver, nameserverport)
+	fqdn = fmt.Sprintf("%s.", fqdn) // Convert to true FQDN with dot at the end
+	dnsMsg.SetQuestion(fqdn, dns.TypeA)
+	dnsMsgA, err := dns.Exchange(dnsMsg, edgeDNSServer)
+	if err != nil {
+		log.Warn().Msgf("Can't resolve FQDN(%s) using edgeDNSServer(%s) : (%v)", fqdn, nameserver, err)
+	}
+	return dnsMsgA, err
+}
+
 func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort int, extClusterNsNames map[string]string) (targets []string) {
 	targets = []string{}
 	for _, cluster := range extClusterNsNames {
+		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
-		resolveNS := new(dns.Msg)
-		edgeDNSServer := fmt.Sprintf("%s:%v", r.edgeDNSServer, edgeDNSServerPort)
-		clusterFQDN := fmt.Sprintf("%s.", cluster) // Convert to true FQDN with dot at the end
-		resolveNS.SetQuestion(clusterFQDN, dns.TypeA)
-		glueA, err := dns.Exchange(resolveNS, edgeDNSServer)
+		glueA, err := DNSQuery(cluster, r.edgeDNSServer, edgeDNSServerPort)
 		if err != nil {
-			log.Warn().Msgf("Can't resolve glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", clusterFQDN, edgeDNSServer, err)
 			return
 		}
-		log.Info().Msgf("Resolved glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", clusterFQDN, edgeDNSServer, glueA.Answer)
+		log.Info().Msgf("Resolved glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", cluster, r.edgeDNSServer, glueA.Answer)
 		glueARecords := GetARecords(glueA)
-		g := new(dns.Msg)
-		host = fmt.Sprintf("localtargets-%s.", host) // Convert to true FQDN with dot at the end
-		g.SetQuestion(host, dns.TypeA)
 		var nameServerToUse string
 		if len(glueARecords) > 0 {
-			nameServerToUse = fmt.Sprintf("%s:%d", glueARecords[0], edgeDNSServerPort)
+			nameServerToUse = glueARecords[0]
 		} else {
-			nameServerToUse = fmt.Sprintf("%s:%v", cluster, edgeDNSServerPort)
+			nameServerToUse = cluster
 		}
-		a, err := dns.Exchange(g, nameServerToUse)
+		host = fmt.Sprintf("localtargets-%s", host)
+		a, err := DNSQuery(host, nameServerToUse, edgeDNSServerPort)
 		if err != nil {
-			log.Warn().Msgf("Trying to contact external Gslb cluster(%s) : (%v)", nameServerToUse, err)
 			return
 		}
 		clusterTargets := GetARecords(a)
