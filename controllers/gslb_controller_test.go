@@ -71,7 +71,7 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us-west-1",
 	ExtClustersGeoTags:      []string{"us-east-1"},
-	EdgeDNSServer:           "8.8.8.8",
+	EdgeDNSServer:           "127.0.0.1",
 	EdgeDNSServerPort:       7753,
 	EdgeDNSZone:             "example.com",
 	DNSZone:                 "cloud.example.com",
@@ -708,6 +708,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServerPort = 53
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -778,6 +779,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	dnsEndpointNS1 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServerPort = 53
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -822,6 +824,9 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServerPort = 53
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
@@ -835,7 +840,7 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 			RecordType: "A",
 			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},
 	}
-	settings := provideSettings(t, predefinedConfig)
+	settings := provideSettings(t, customConfig)
 	dnsEndpoint := &externaldns.DNSEndpoint{ObjectMeta: metav1.ObjectMeta{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}}
 	createHealthyService(t, &settings, serviceName)
 	defer deleteHealthyService(t, &settings, serviceName)
