@@ -230,10 +230,10 @@ func getARecords(msg *dns.Msg) []string {
 	return ARecords
 }
 
-func dnsQuery(fqdn string, nameserver string, nameserverport int) (*dns.Msg, error) {
+func dnsQuery(host string, nameserver string, nameserverport int) (*dns.Msg, error) {
 	dnsMsg := new(dns.Msg)
 	edgeDNSServer := fmt.Sprintf("%s:%v", nameserver, nameserverport)
-	fqdn = fmt.Sprintf("%s.", fqdn) // Convert to true FQDN with dot at the end
+	fqdn := fmt.Sprintf("%s.", host) // Convert to true FQDN with dot at the end
 	dnsMsg.SetQuestion(fqdn, dns.TypeA)
 	dnsMsgA, err := dns.Exchange(dnsMsg, edgeDNSServer)
 	if err != nil {
