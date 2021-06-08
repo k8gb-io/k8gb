@@ -475,8 +475,7 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 		RunTestFunc(func() {
 			settings := provideSettings(t, predefinedConfig)
 			// act
-			got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com",
-				predefinedConfig.EdgeDNSServerPort, time.Minute*5)
+			got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com", time.Minute*5)
 			want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
 			// assert
 			assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
@@ -491,8 +490,7 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *test
 		RunTestFunc(func() {
 			settings := provideSettings(t, predefinedConfig)
 			// act
-			err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com",
-				predefinedConfig.EdgeDNSServerPort, time.Minute*5)
+			err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com", time.Minute*5)
 			// assert
 			assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
 		}).RequireNoError(t)
@@ -1179,7 +1177,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		t.Fatalf("reconcile: (%v)", err)
 	}
 	r.DNSProvider = f.Provider()
-	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServer)
+	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServer, r.Config.EdgeDNSServerPort)
 	res, err := r.Reconcile(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)

@@ -65,7 +65,7 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer)
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer, customConfig.EdgeDNSServerPort)
 	provider := NewInfobloxDNS(customConfig, a)
 	// act
 	extClusters := customConfig.GetExternalClusterNSNames()
@@ -100,7 +100,7 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	customConfig.ClusterGeoTag = "eu"
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer)
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer, customConfig.EdgeDNSServerPort)
 	provider := NewInfobloxDNS(customConfig, a)
 	// act
 	got := provider.sanitizeDelegateZone(local, upstream)
