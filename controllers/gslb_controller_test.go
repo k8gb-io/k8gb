@@ -30,6 +30,7 @@ import (
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+	"github.com/AbsaOSS/k8gb/controllers/logging"
 	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
 	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
 	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
@@ -70,7 +71,7 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us-west-1",
 	ExtClustersGeoTags:      []string{"us-east-1"},
-	EdgeDNSServer:           "8.8.8.8",
+	EdgeDNSServer:           "127.0.0.1",
 	EdgeDNSServerPort:       7753,
 	EdgeDNSZone:             "example.com",
 	DNSZone:                 "cloud.example.com",
@@ -434,15 +435,13 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 		{IP: "10.0.0.3"},
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
-	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = "localhost"
 	utils.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
 		Start().
 		RunTestFunc(func() {
-			settings := provideSettings(t, customConfig)
+			settings := provideSettings(t, predefinedConfig)
 
 			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 			require.NoError(t, err, "Failed to get expected ingress")
@@ -470,16 +469,14 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
 	// arrange
-	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = "localhost"
 	utils.NewFakeDNS(fakeDNSSettings).
 		AddTXTRecord("test-gslb-heartbeat-eu.example.com.", oldEdgeTimestamp("10m")).
 		Start().
 		RunTestFunc(func() {
-			settings := provideSettings(t, customConfig)
+			settings := provideSettings(t, predefinedConfig)
 			// act
 			got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com",
-				customConfig.EdgeDNSServerPort, time.Minute*5)
+				predefinedConfig.EdgeDNSServerPort, time.Minute*5)
 			want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
 			// assert
 			assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
@@ -488,16 +485,14 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
 	// arrange
-	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = "localhost"
 	utils.NewFakeDNS(fakeDNSSettings).
 		AddTXTRecord("test-gslb-heartbeat-za.example.com.", oldEdgeTimestamp("3m")).
 		Start().
 		RunTestFunc(func() {
-			settings := provideSettings(t, customConfig)
+			settings := provideSettings(t, predefinedConfig)
 			// act
 			err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com",
-				customConfig.EdgeDNSServerPort, time.Minute*5)
+				predefinedConfig.EdgeDNSServerPort, time.Minute*5)
 			// assert
 			assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
 		}).RequireNoError(t)
@@ -707,6 +702,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServerPort = 53
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -777,6 +773,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	dnsEndpointNS1 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServerPort = 53
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -821,6 +818,9 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServerPort = 53
 	serviceName := "frontend-podinfo"
 	want := []*externaldns.Endpoint{
 		{
@@ -834,7 +834,7 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 			RecordType: "A",
 			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},
 	}
-	settings := provideSettings(t, predefinedConfig)
+	settings := provideSettings(t, customConfig)
 	dnsEndpoint := &externaldns.DNSEndpoint{ObjectMeta: metav1.ObjectMeta{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}}
 	createHealthyService(t, &settings, serviceName)
 	defer deleteHealthyService(t, &settings, serviceName)
@@ -1207,6 +1207,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		assistant:  a,
 	}
 	reconcileAndUpdateGslb(t, settings)
+	logging.Init(&expected)
 	return settings
 }
 
