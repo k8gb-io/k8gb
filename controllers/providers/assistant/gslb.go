@@ -221,16 +221,16 @@ func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, edgeDNSServerPort
 	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))
 }
 
-func GetARecords(msg *dns.Msg) []string {
+func getARecords(msg *dns.Msg) []string {
 	var ARecords []string
 	for _, nsA := range msg.Answer {
-		IP := strings.Split(nsA.String(), "\t")[4]
-		ARecords = append(ARecords, IP)
+		ip := nsA.(*dns.A).A.String()
+		ARecords = append(ARecords, ip)
 	}
 	return ARecords
 }
 
-func DNSQuery(fqdn string, nameserver string, nameserverport int) (*dns.Msg, error) {
+func dnsQuery(fqdn string, nameserver string, nameserverport int) (*dns.Msg, error) {
 	dnsMsg := new(dns.Msg)
 	edgeDNSServer := fmt.Sprintf("%s:%v", nameserver, nameserverport)
 	fqdn = fmt.Sprintf("%s.", fqdn) // Convert to true FQDN with dot at the end
@@ -247,12 +247,12 @@ func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort 
 	for _, cluster := range extClusterNsNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
-		glueA, err := DNSQuery(cluster, r.edgeDNSServer, edgeDNSServerPort)
+		glueA, err := dnsQuery(cluster, r.edgeDNSServer, edgeDNSServerPort)
 		if err != nil {
 			return
 		}
 		log.Info().Msgf("Resolved glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", cluster, r.edgeDNSServer, glueA.Answer)
-		glueARecords := GetARecords(glueA)
+		glueARecords := getARecords(glueA)
 		var nameServerToUse string
 		if len(glueARecords) > 0 {
 			nameServerToUse = glueARecords[0]
@@ -260,11 +260,11 @@ func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort 
 			nameServerToUse = cluster
 		}
 		host = fmt.Sprintf("localtargets-%s", host)
-		a, err := DNSQuery(host, nameServerToUse, edgeDNSServerPort)
+		a, err := dnsQuery(host, nameServerToUse, edgeDNSServerPort)
 		if err != nil {
 			return
 		}
-		clusterTargets := GetARecords(a)
+		clusterTargets := getARecords(a)
 		if len(clusterTargets) > 0 {
 			targets = append(targets, clusterTargets...)
 			log.Info().Msgf("Added external %s Gslb targets from %s cluster", clusterTargets, cluster)
