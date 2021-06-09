@@ -40,26 +40,28 @@ import (
 
 const coreDNSExtServiceName = "k8gb-coredns-lb"
 
-// GslbLoggerAssistant is common wrapper operating on GSLB instance.
+// Gslb is common wrapper operating on GSLB instance.
 // It uses apimachinery client to call kubernetes API
-type GslbLoggerAssistant struct {
-	client        client.Client
-	k8gbNamespace string
-	edgeDNSServer string
+type Gslb struct {
+	client            client.Client
+	k8gbNamespace     string
+	edgeDNSServer     string
+	edgeDNSServerPort int
 }
 
 var log = logging.Logger()
 
-func NewGslbAssistant(client client.Client, k8gbNamespace, edgeDNSServer string) *GslbLoggerAssistant {
-	return &GslbLoggerAssistant{
-		client:        client,
-		k8gbNamespace: k8gbNamespace,
-		edgeDNSServer: edgeDNSServer,
+func NewGslbAssistant(client client.Client, k8gbNamespace, edgeDNSServer string, edgeDNSServerPort int) *Gslb {
+	return &Gslb{
+		client:            client,
+		k8gbNamespace:     k8gbNamespace,
+		edgeDNSServer:     edgeDNSServer,
+		edgeDNSServerPort: edgeDNSServerPort,
 	}
 }
 
 // CoreDNSExposedIPs retrieves list of IP's exposed by CoreDNS
-func (r *GslbLoggerAssistant) CoreDNSExposedIPs() ([]string, error) {
+func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	coreDNSService := &corev1.Service{}
 	err := r.client.Get(context.TODO(),
 		types.NamespacedName{Namespace: r.k8gbNamespace, Name: coreDNSExtServiceName}, coreDNSService)
@@ -87,7 +89,7 @@ func (r *GslbLoggerAssistant) CoreDNSExposedIPs() ([]string, error) {
 }
 
 // GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses
-func (r *GslbLoggerAssistant) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
+func (r *Gslb) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 	nn := types.NamespacedName{
 		Name:      gslb.Name,
 		Namespace: gslb.Namespace,
@@ -123,7 +125,7 @@ func (r *GslbLoggerAssistant) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]s
 }
 
 // SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist
-func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error {
+func (r *Gslb) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error {
 	found := &externaldns.DNSEndpoint{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{
 		Name:      i.Name,
@@ -165,7 +167,7 @@ func (r *GslbLoggerAssistant) SaveDNSEndpoint(namespace string, i *externaldns.D
 }
 
 // RemoveEndpoint removes endpoint
-func (r *GslbLoggerAssistant) RemoveEndpoint(endpointName string) error {
+func (r *Gslb) RemoveEndpoint(endpointName string) error {
 	log.Info().Msgf("Removing endpoint %s.%s", r.k8gbNamespace, endpointName)
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	err := r.client.Get(context.Background(), client.ObjectKey{Namespace: r.k8gbNamespace, Name: endpointName}, dnsEndpoint)
@@ -182,10 +184,10 @@ func (r *GslbLoggerAssistant) RemoveEndpoint(endpointName string) error {
 
 // InspectTXTThreshold inspects fqdn TXT record from edgeDNSServer. If record doesn't exists or timestamp is greater than
 // splitBrainThreshold the error is returned.
-func (r *GslbLoggerAssistant) InspectTXTThreshold(fqdn string, edgeDNSServerPort int, splitBrainThreshold time.Duration) error {
+func (r *Gslb) InspectTXTThreshold(fqdn string, splitBrainThreshold time.Duration) error {
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(fqdn), dns.TypeTXT)
-	ns := fmt.Sprintf("%s:%v", r.edgeDNSServer, edgeDNSServerPort)
+	ns := fmt.Sprintf("%s:%v", r.edgeDNSServer, r.edgeDNSServerPort)
 	txt, err := dns.Exchange(m, ns)
 	if err != nil {
 		log.Info().Msgf("Error contacting EdgeDNS server (%s) for TXT split brain record: (%s)", ns, err)
@@ -242,12 +244,12 @@ func dnsQuery(host string, nameserver string, nameserverport int) (*dns.Msg, err
 	return dnsMsgA, err
 }
 
-func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort int, extClusterNsNames map[string]string) (targets []string) {
+func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]string) (targets []string) {
 	targets = []string{}
 	for _, cluster := range extClusterNsNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
-		glueA, err := dnsQuery(cluster, r.edgeDNSServer, edgeDNSServerPort)
+		glueA, err := dnsQuery(cluster, r.edgeDNSServer, r.edgeDNSServerPort)
 		if err != nil {
 			return
 		}
@@ -260,7 +262,7 @@ func (r *GslbLoggerAssistant) GetExternalTargets(host string, edgeDNSServerPort 
 			nameServerToUse = cluster
 		}
 		host = fmt.Sprintf("localtargets-%s", host)
-		a, err := dnsQuery(host, nameServerToUse, edgeDNSServerPort)
+		a, err := dnsQuery(host, nameServerToUse, r.edgeDNSServerPort)
 		if err != nil {
 			return
 		}

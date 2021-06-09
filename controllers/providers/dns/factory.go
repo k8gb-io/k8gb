@@ -43,7 +43,7 @@ func NewDNSProviderFactory(client client.Client, config depresolver.Config) (f *
 }
 
 func (f *ProviderFactory) Provider() Provider {
-	a := assistant.NewGslbAssistant(f.client, f.config.K8gbNamespace, f.config.EdgeDNSServer)
+	a := assistant.NewGslbAssistant(f.client, f.config.K8gbNamespace, f.config.EdgeDNSServer, f.config.EdgeDNSServerPort)
 	switch f.config.EdgeDNSType {
 	case depresolver.DNSTypeNS1:
 		return NewExternalDNS(externalDNSTypeNS1, f.config, a)
