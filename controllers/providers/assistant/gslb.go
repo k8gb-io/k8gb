@@ -239,7 +239,7 @@ func dnsQuery(host string, nameserver string, nameserverport int) (*dns.Msg, err
 	dnsMsg.SetQuestion(fqdn, dns.TypeA)
 	dnsMsgA, err := dns.Exchange(dnsMsg, edgeDNSServer)
 	if err != nil {
-		log.Warn().Msgf("Can't resolve FQDN(%s) using edgeDNSServer(%s) : (%v)", fqdn, nameserver, err)
+		log.Warn().Msgf("Can't resolve FQDN(%s) using nameserver(%s) : (%v)", fqdn, nameserver, err)
 	}
 	return dnsMsgA, err
 }
