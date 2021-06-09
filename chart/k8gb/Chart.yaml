@@ -24,6 +24,9 @@ keywords:
 annotations:
   artifacthub.io/operator: "true"
   artifacthub.io/operatorCapabilities: Seamless Upgrades
+  artifacthub.io/images: |
+    - name: k8gb
+      image: absaoss/k8gb
   artifacthub.io/crds: |
     - kind: Gslb
       version: v1beta1
