@@ -316,7 +316,8 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
-			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
+			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
 		{IP: "10.0.0.1"},
@@ -426,7 +427,8 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
-			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}},
+			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"},
+			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
 	}
 	hrWant := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -510,6 +512,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+			Labels:     externaldns.Labels{"strategy": "failover"},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -564,6 +567,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
+			Labels:     externaldns.Labels{"strategy": "failover"},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -830,7 +834,8 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
-			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},
+			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"},
+			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
 	}
 	settings := provideSettings(t, customConfig)
 	dnsEndpoint := &externaldns.DNSEndpoint{ObjectMeta: metav1.ObjectMeta{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}}

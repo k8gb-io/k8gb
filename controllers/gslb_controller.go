@@ -56,6 +56,7 @@ type GslbReconciler struct {
 
 const (
 	gslbFinalizer                        = "k8gb.absa.oss/finalizer"
+	geoStrategy                          = "geoip"
 	roundRobinStrategy                   = "roundRobin"
 	failoverStrategy                     = "failover"
 	primaryGeoTagAnnotation              = "k8gb.io/primary-geotag"

@@ -74,7 +74,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 
 		if len(externalTargets) > 0 {
 			switch gslb.Spec.Strategy.Type {
-			case roundRobinStrategy:
+			case roundRobinStrategy, geoStrategy:
 				finalTargets = append(finalTargets, externalTargets...)
 			case failoverStrategy:
 				// If cluster is Primary
@@ -107,6 +107,9 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 				RecordTTL:  ttl,
 				RecordType: "A",
 				Targets:    finalTargets,
+				Labels: externaldns.Labels{
+					"strategy": gslb.Spec.Strategy.Type,
+				},
 			}
 			gslbHosts = append(gslbHosts, dnsRecord)
 		}
