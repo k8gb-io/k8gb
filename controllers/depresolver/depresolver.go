@@ -137,6 +137,8 @@ type Config struct {
 	CoreDNSExposed bool
 	// Log configuration
 	Log Log
+	// MetricsAddress in format address:port where address can be empty, IP address, or hostname, default: 0.0.0.0:8080
+	MetricsAddress string
 	// route53Enabled hidden. EdgeDNSType defines all enabled Enabled types
 	route53Enabled bool
 	// ns1Enabled flag

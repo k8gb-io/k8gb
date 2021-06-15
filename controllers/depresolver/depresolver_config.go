@@ -19,6 +19,7 @@ package depresolver
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/AbsaOSS/gopkg/env"
@@ -51,6 +52,7 @@ const (
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
 	SplitBrainCheckKey             = "SPLIT_BRAIN_CHECK"
+	MetricsAddressKey              = "METRICS_ADDRESS"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -81,6 +83,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, SimpleFormat.String())))
 		dr.config.Log.NoColor = env.GetEnvAsBoolOrFallback(LogNoColorKey, false)
+		dr.config.MetricsAddress = env.GetEnvAsStringOrFallback(MetricsAddressKey, "0.0.0.0:8080")
 		dr.config.SplitBrainCheck = env.GetEnvAsBoolOrFallback(SplitBrainCheckKey, false)
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
 		dr.errorConfig = dr.validateConfig(dr.config, recognizedDNSTypes)
@@ -193,7 +196,31 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return fmt.Errorf("error for geo tag: %s. %s in ns name %s", geoTag, err, nsName)
 		}
 	}
+
+	mHost, mPort, err := parseMetricsAddr(config.MetricsAddress)
+	if err != nil {
+		return fmt.Errorf("invalid %s: expecting MetricsAddress in form {host}:port (%s)", MetricsAddressKey, err)
+	}
+	err = field(MetricsAddressKey, mHost).matchRegexps(hostNameRegex, ipAddressRegex).err
+	if err != nil {
+		return err
+	}
+	err = field(MetricsAddressKey, mPort).isLessOrEqualTo(65535).isHigherThan(1024).err
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func parseMetricsAddr(metricsAddr string) (host string, port int, err error) {
+	ma := strings.Split(metricsAddr, ":")
+	if len(ma) != 2 {
+		err = fmt.Errorf("invalid format {host}:port (%s)", metricsAddr)
+		return
+	}
+	host = ma[0]
+	port, err = strconv.Atoi(ma[1])
+	return
 }
 
 // getEdgeDNSType contains logic retrieving EdgeDNSType.
