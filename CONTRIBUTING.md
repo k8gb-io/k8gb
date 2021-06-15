@@ -19,6 +19,8 @@
 - [Documentation](#documentation)
 - [k8gb.io website](#k8gbio-website)
   - [Local website authoring and testing](#local-website-authoring-and-testing)
+- [End-to-end demo helper](#end-to-end-demo-helper)
+- [Release process](#release-process)
 
 k8gb is licensed under [Apache 2 License](./LICENSE) and accepts contributions via GitHub pull requests.
 This document outlines the resources and guidelines necessary to follow by contributors to the k8gb project.
@@ -253,6 +255,21 @@ To enable verbose debug output declare `DEMO_DEBUG=1` like
 ```sh
 make demo DEMO_URL=https://failover.test.exampledns.tk DEMO_DEBUG=1
 ```
+
+## Release process
+
+* Bump the version in `Chart.yaml`, see [example PR](https://github.com/k8gb-io/k8gb/pull/521).
+* Merge the Pull Request after the review approval
+* Create release tag (replace `v0.8.1` with an actual version)
+```sh
+git tag v0.8.1
+```
+* Push release tag
+```sh
+git push origin refs/tags/v0.8.1
+```
+* Watch the [release pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/release.yaml) status
+* Check the [offline changelog](https://github.com/k8gb-io/k8gb/actions/workflows/changelog_pr.yaml) creation
 
 ---
 Thanks for contributing!
