@@ -51,6 +51,7 @@ var predefinedConfig = Config{
 	DNSZone:                 "cloud.example.com",
 	K8gbNamespace:           "k8gb",
 	SplitBrainCheck:         true,
+	MetricsAddress:          "0.0.0.0:8080",
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
@@ -176,6 +177,7 @@ func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
 	defaultConfig.Log.Level = zerolog.InfoLevel
 	defaultConfig.Log.Format = SimpleFormat
 	defaultConfig.Log.NoColor = false
+	defaultConfig.MetricsAddress = "0.0.0.0:8080"
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
@@ -1557,6 +1559,99 @@ func TestNsServerNamesWithExceededDNSNameSize(t *testing.T) {
 	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
 }
 
+func TestMetricsAddressIsValid(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "0.0.0.0:9091"
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestMetricsAddressPortLimitExceed(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "0.0.0.0:80091"
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestMetricsAddressPortLimitUnder(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "0.0.0.0:1024"
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestMetricsAddressInvalidPort(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "0.0.0.0:808x"
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestMetricsAddressInvalidHost(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "x.y.z??:8080"
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestMetricsAddressWrongFormatMultipleParts(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "0.0.0.0:8080:9090"
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestMetricsAddressWrongFormatSinglePart(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "0.0.0.08080"
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestMetricsAddressInvalidEnvVariable(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "invalid"
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestMetricsAddressEmptyHost(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = ":8080"
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestMetricsAddressWithValidHostName(t *testing.T) {
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "address.com:8080"
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestMetricsAddressEmptyEnvVariable(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = ""
+	configureEnvVar(expected)
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, "0.0.0.0:8080", config.MetricsAddress)
+}
+
+func TestMetricsAddressEnvVarIsUnset(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.MetricsAddress = "0.0.0.0:8080"
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError, MetricsAddressKey)
+}
+
 // arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with
 // ResolveOperatorConfig() output. The last parameter unsets the values
 func arrangeVariablesAndAssert(t *testing.T, expected Config,
@@ -1580,7 +1675,7 @@ func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
 		EdgeDNSServerPortKey, Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
-		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, SplitBrainCheckKey} {
+		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1610,6 +1705,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(LogLevelKey, config.Log.Level.String())
 	_ = os.Setenv(LogFormatKey, config.Log.Format.String())
 	_ = os.Setenv(LogNoColorKey, strconv.FormatBool(config.Log.NoColor))
+	_ = os.Setenv(MetricsAddressKey, config.MetricsAddress)
 	_ = os.Setenv(SplitBrainCheckKey, strconv.FormatBool(config.SplitBrainCheck))
 }
 

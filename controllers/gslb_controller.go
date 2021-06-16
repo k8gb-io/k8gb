@@ -173,7 +173,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 // SetupWithManager configures controller manager
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	// Figure out Gslb resource name to Reconcile when non controlled Endpoint is updated
+	// Figure out Gslb resource name to Reconcile when non controlled Name is updated
 
 	endpointMapHandler := handler.EnqueueRequestsFromMapFunc(
 		func(a client.Object) []reconcile.Request {

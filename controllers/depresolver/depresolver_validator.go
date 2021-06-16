@@ -139,6 +139,16 @@ func (v *validator) isLessOrEqualTo(num int) *validator {
 	return v
 }
 
+func (v *validator) isHigherThan(num int) *validator {
+	if v.err != nil {
+		return v
+	}
+	if v.intValue <= num {
+		v.err = fmt.Errorf(`'%s' is higher than '%v'`, v.name, num)
+	}
+	return v
+}
+
 func (v *validator) isNotEqualTo(value string) *validator {
 	if v.err != nil {
 		return v

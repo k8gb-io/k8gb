@@ -15,7 +15,6 @@ limitations under the License.
 package main
 
 import (
-	"flag"
 	"os"
 
 	str "github.com/AbsaOSS/gopkg/strings"
@@ -49,15 +48,7 @@ func init() {
 }
 
 func main() {
-	var metricsAddr string
-	var enableLeaderElection bool
 	var f *dns.ProviderFactory
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
-		"Enable leader election for controller manager. "+
-			"Enabling this will ensure there is only one active controller manager.")
-	flag.Parse()
-
 	resolver := depresolver.NewDependencyResolver()
 	config, err := resolver.ResolveOperatorConfig()
 	// Initialize desired log or default log in case of configuration failed.
@@ -75,9 +66,9 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             runtimescheme,
-		MetricsBindAddress: metricsAddr,
+		MetricsBindAddress: config.MetricsAddress,
 		Port:               9443,
-		LeaderElection:     enableLeaderElection,
+		LeaderElection:     false,
 		LeaderElectionID:   "8020e9ff.absa.oss",
 	})
 	if err != nil {
