@@ -399,7 +399,8 @@ define deploy-test-apps
 	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
 		--set ui.message="`$(call get-cluster-geo-tag)`" \
 		--set image.repository="$(PODINFO_IMAGE_REPO)" \
-		podinfo/podinfo
+		podinfo/podinfo \
+		--version 5.1.1
 endef
 
 define get-cluster-geo-tag
