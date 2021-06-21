@@ -7,7 +7,8 @@ controller:
     patch:
      enabled: false
   hostNetwork: true
-
+  publishService:
+    enabled: false
   ## Use host ports 80 and 443
   daemonset:
     useHostPort: false
@@ -19,21 +20,7 @@ controller:
   kind: DaemonSet
 
   service:
-    enabled: true
-
-    enableHttp: true
-    enableHttps: true
-
-    ports:
-      http: 80
-      https: 443
-
-    targetPorts:
-      http: http
-      https: https
-
-    type: NodePort
-
+    enabled: false
 
 # UDP service key:value pairs
 # Ref: https://github.com/kubernetes/contrib/tree/master/ingress/controllers/nginx/examples/udp
