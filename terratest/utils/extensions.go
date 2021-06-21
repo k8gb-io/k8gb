@@ -271,6 +271,19 @@ func (i *Instance) GetLocalTargets() []string {
 	return dig
 }
 
+func (i *Instance) GetInternalNodeIPs() (result []string) {
+	result = make([]string,0)
+	nodes := k8s.GetNodes(i.w.t,i.w.k8sOptions)
+	for _,n := range nodes {
+		for _, a := range n.Status.Addresses {
+			if a.Type == corev1.NodeInternalIP {
+				result = append(result, a.Address)
+			}
+		}
+	}
+	return
+}
+
 func waitForLocalGSLBNew(t *testing.T, host string, port int, expectedResult []string) (output []string, err error) {
 	return DoWithRetryWaitingForValueE(
 		t,
