@@ -34,7 +34,7 @@ in the test cluster.
 ```go
 instance, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
     WithGslb(gslbPath, host).
-    WithTestApp().
+    WithTestApp("us").
     Start()
 require.NoError(t, err)
 defer instance1.Kill()
@@ -43,9 +43,16 @@ defer instance1.Kill()
 #### Workflow functions
 Once the instance is created, we can change the state of the test application `instance.StopTestApp()`, 
 `instance.StartTestApp()`. We can also read the ingress IPs `GetIngressIPs` local targets `GetLocalTargets()`, or call `Dig()` 
-against the CoreDNS cluster where the instance is running. 
+against the CoreDNS cluster where the instance is running. Finally, I would like to mention `HitTestApp` which is a function 
+that makes an http request to a test application and returns its status.
 
-#### WaitForGSLB, WaitForExpected
+### Workflow status
+Terratests are difficult in principle due to race conditions. For example, it may happen that the test application 
+has not started yet and you read invalid localtargets (see `WaitForAppIsRunning` in the following section).
+For this reason, the instance has a `GetStatus` function that returns various information about the running instance.
+`GetStatus(annotation).String()` returns formatted json.
+
+#### WaitForGSLB, WaitForExpected, WaitForAppIsRunning
 **WaitForGSLB()** and **WaitForExpected** do basically the same thing. They wait for the state on the called instance 
 to match the expected state. If this doesn't happen within some time, it returns an error. If the function succeeds, 
 it returns the expected (unordered) slice of IP addresses.
@@ -56,50 +63,63 @@ it returns the expected (unordered) slice of IP addresses.
   - `WaitForGSLB(instances ...*Instance) ([]string, error)` - The function works similarly to `WaitForExpected`, but instead 
     of receiving the IP address slice, it receives the slice of other workflow instances and then calculates the expected IP 
     address slice from their LocalTargets. In practice it looks like this: `instance1.WaitForGSLB(instance2, instance3)` produces: 
-    `desiredIPList := instance1.GetLocalTargets() + instance2.GetLocalTargets() + instance3.GetLocalTargets()`
+    `desiredIPList := instance1.GetLocalTargets() + instance2.GetLocalTargets() + instance3.GetLocalTargets()`.
 
+  - `WaitForAppIsRunning()` - The function is usually used during initialization, when you need to make sure that the test application is actually running. 
+    After that you can read the cluster values to be used for further assertion. 
 
 ### Demo
 As a demo we use a short test that prepares two clusters with a test application. Then it kills the application on the
 first cluster and examines what happens.
 ```go
-func TestExample(t *testing.T) {
+// common_framework_test.go
+func TestCommonFramework(t *testing.T) {
 	t.Parallel()
 	const host = "terratest-failover.cloud.example.com"
 	const gslbPath = "../examples/failover.yaml"
 
 	// create namespace with failover Gslb on k3d-test-gslb1
-	instanceFailover1, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
+	instanceFailoverEU, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
 		WithGslb(gslbPath, host).
-		WithTestApp().
+		WithTestApp("eu").
 		Start()
 	require.NoError(t, err)
-	defer instanceFailover1.Kill()
+	defer instanceFailoverEU.Kill()
 
 	// create namespace with failover Gslb on k3d-test-gslb2
-	instanceFailover2, err := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
+	instanceFailoverUS, err := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
 		WithGslb(gslbPath, host).
-		WithTestApp().
+		WithTestApp("us").
 		Start()
 	require.NoError(t, err)
-	defer instanceFailover2.Kill()
+	defer instanceFailoverUS.Kill()
+
+	t.Run("ensure clusters are ready", func(t *testing.T) {
+		err = instanceFailoverEU.WaitForAppIsRunning()
+		require.NoError(t, err)
+		err = instanceFailoverUS.WaitForAppIsRunning()
+		require.NoError(t, err)
+	})
+
+	localTargetsEU := instanceFailoverEU.GetLocalTargets() // e.g: [10.43.78.154, 10.43.78.155]
+	localTargetsUS := instanceFailoverUS.GetLocalTargets() // e.g: [10.43.150.206, 10.43.150.207]
 
 	t.Run("stop podinfo on the first cluster", func(t *testing.T) {
-		localTargets1 := instanceFailover1.GetLocalTargets()	// e.g: [10.43.78.154, 10.43.78.155]
-		localTargets2 := instanceFailover2.GetLocalTargets()	// e.g: [10.43.150.206, 10.43.150.207]
-		require.True(t, utils.EqualStringSlices(instanceFailover1.Dig(), localTargets1))
-		require.True(t, utils.EqualStringSlices(instanceFailover2.Dig(), localTargets1))
+		// digging EU, US cluster returns EU localtargets
+		require.True(t, utils.EqualStringSlices(instanceFailoverEU.Dig(), localTargetsEU))
+		require.True(t, utils.EqualStringSlices(instanceFailoverUS.Dig(), localTargetsEU))
 
-		instanceFailover1.StopTestApp()
-		_, err = instanceFailover1.WaitForExpected(localTargets2)
+		instanceFailoverEU.StopTestApp()
+		err = instanceFailoverEU.WaitForExpected(localTargetsUS)
 		require.NoError(t, err)
-		_, err = instanceFailover2.WaitForExpected(localTargets2)
+		err = instanceFailoverUS.WaitForExpected(localTargetsUS)
 		require.NoError(t, err)
-		
-		require.Empty(t, instanceFailover1.GetLocalTargets())
-		require.True(t, utils.EqualStringSlices(instanceFailover2.GetLocalTargets(), localTargets2))
-		require.True(t, utils.EqualStringSlices(instanceFailover1.Dig(), localTargets2))
-		require.True(t, utils.EqualStringSlices(instanceFailover2.Dig(), localTargets2))
+
+		// digging EU, US cluster returns US localtargets
+		require.True(t, utils.EqualStringSlices(instanceFailoverEU.Dig(), localTargetsUS))
+		require.True(t, utils.EqualStringSlices(instanceFailoverUS.Dig(), localTargetsUS))
+		require.Empty(t, instanceFailoverEU.GetLocalTargets())
+		require.True(t, utils.EqualStringSlices(instanceFailoverUS.GetLocalTargets(), localTargetsUS))
 	})
 }
 ```

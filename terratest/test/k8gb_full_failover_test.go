@@ -29,58 +29,58 @@ func TestFullFailover(t *testing.T) {
 	const host = "terratest-failover.cloud.example.com"
 	const gslbPath = "../examples/failover.yaml"
 
-	instance1, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
+	instanceEU, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
 		WithGslb(gslbPath, host).
-		WithTestApp().
+		WithTestApp("eu").
 		Start()
 	require.NoError(t, err)
-	defer instance1.Kill()
-	instance2, err := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
+	defer instanceEU.Kill()
+	instanceUS, err := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
 		WithGslb(gslbPath, host).
-		WithTestApp().
+		WithTestApp("us").
 		Start()
 	require.NoError(t, err)
-	defer instance2.Kill()
-
-	instance1LocalTargets := instance1.GetLocalTargets()
-	instance2LocalTargets := instance2.GetLocalTargets()
+	defer instanceUS.Kill()
 
 	t.Run("failover on two concurrent clusters with podinfo running", func(t *testing.T) {
-		err = instance1.WaitForExpected(instance1LocalTargets)
+		err = instanceEU.WaitForAppIsRunning()
 		require.NoError(t, err)
-		err = instance2.WaitForExpected(instance1LocalTargets)
+		err = instanceUS.WaitForAppIsRunning()
 		require.NoError(t, err)
 	})
 
+	euLocalTargets := instanceEU.GetLocalTargets()
+	usLocalTargets := instanceUS.GetLocalTargets()
+
 	t.Run("kill podinfo on the second cluster", func(t *testing.T) {
-		instance2.StopTestApp()
-		err = instance2.WaitForExpected(instance1LocalTargets)
+		instanceUS.StopTestApp()
+		err = instanceUS.WaitForExpected(euLocalTargets)
 		require.NoError(t, err)
-		err = instance1.WaitForExpected(instance1LocalTargets)
+		err = instanceEU.WaitForExpected(euLocalTargets)
 		require.NoError(t, err)
 	})
 
 	t.Run("kill podinfo on the first cluster", func(t *testing.T) {
-		instance1.StopTestApp()
-		err = instance1.WaitForExpected([]string{})
+		instanceEU.StopTestApp()
+		err = instanceEU.WaitForExpected([]string{})
 		require.NoError(t, err)
-		err = instance2.WaitForExpected([]string{})
+		err = instanceUS.WaitForExpected([]string{})
 		require.NoError(t, err)
 	})
 
 	t.Run("start podinfo on the second cluster", func(t *testing.T) {
-		instance2.StartTestApp()
-		err = instance2.WaitForExpected(instance2LocalTargets)
+		instanceUS.StartTestApp()
+		err = instanceUS.WaitForExpected(usLocalTargets)
 		require.NoError(t, err)
-		err = instance1.WaitForExpected(instance2LocalTargets)
+		err = instanceEU.WaitForExpected(usLocalTargets)
 		require.NoError(t, err)
 	})
 
 	t.Run("start podinfo on the first cluster", func(t *testing.T) {
-		instance1.StartTestApp()
-		err = instance1.WaitForExpected(instance1LocalTargets)
+		instanceEU.StartTestApp()
+		err = instanceEU.WaitForExpected(euLocalTargets)
 		require.NoError(t, err)
-		err = instance2.WaitForExpected(instance1LocalTargets)
+		err = instanceUS.WaitForExpected(euLocalTargets)
 		require.NoError(t, err)
 	})
 }

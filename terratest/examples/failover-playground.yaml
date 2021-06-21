@@ -1,0 +1,17 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: test-gslb
+spec:
+  ingress:
+    rules:
+      - host: playground-failover.cloud.example.com
+        http:
+          paths:
+          - backend:
+              serviceName: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
+              servicePort: http
+            path: /
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
