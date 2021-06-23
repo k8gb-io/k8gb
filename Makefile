@@ -185,6 +185,16 @@ destroy-full-local-setup: ## Destroy full local multicluster setup
 	k3d cluster delete $(CLUSTER_GSLB2)
 	docker network rm $(CLUSTER_GSLB_NETWORK)
 
+.PHONY: deploy-prometheus
+deploy-prometheus:
+	$(call deploy-prometheus,$(CLUSTER_GSLB1))
+	$(call deploy-prometheus,$(CLUSTER_GSLB2))
+
+.PHONY: uninstall-prometheus
+uninstall-prometheus:
+	$(call uninstall-prometheus,$(CLUSTER_GSLB1))
+	$(call uninstall-prometheus,$(CLUSTER_GSLB2))
+
 .PHONY: dns-tools
 dns-tools: ## Run temporary dnstools pod for debugging DNS issues
 	@kubectl -n k8gb get svc k8gb-coredns
@@ -487,4 +497,29 @@ endef
 define list-running-pods
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$1 $(NC)"
 	kubectl get pods -A --context=k3d-$1
+endef
+
+define deploy-prometheus
+	@echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)"
+
+	@echo "\n$(YELLOW)Set annotations on pods that will be scraped by prometheus$(NC)"
+	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/scrape="true" --context=k3d-$1
+	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/port="8080" --context=k3d-$1
+
+	@echo "\n$(YELLOW)install prometheus $(NC)"
+	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+	helm repo update
+	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
+		--version 14.2.0 \
+		--wait --timeout=2m0s \
+		--kube-context=k3d-$1
+endef
+
+define uninstall-prometheus
+	@echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)"
+
+	@echo "\n$(YELLOW)uninstall prometheus $(NC)"
+	helm uninstall prometheus -n k8gb --kube-context=k3d-$1
+	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/scrape- --context=k3d-$1
+	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/port- --context=k3d-$1
 endef

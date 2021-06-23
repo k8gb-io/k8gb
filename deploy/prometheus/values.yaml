@@ -1,0 +1,20 @@
+server:
+  enabled: true
+  service:
+    nodePort: 30090 # allowed port range between 30000 and 32768
+    servicePort: 9090
+    type: NodePort
+
+alertmanager:
+  enabled: false
+#  service:
+#    nodePort: 30091 # allowed port range between 30000 and 32768
+#    servicePort: 9091
+#    type: NodePort
+
+pushgateway:
+  enabled: false
+#  service:
+#    nodePort: 30092 # allowed port range between 30000 and 32768
+#    servicePort: 9092
+#    type: NodePort

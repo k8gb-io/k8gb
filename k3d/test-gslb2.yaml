@@ -10,7 +10,10 @@ ports:
   - agent[0] 
 - port: 444:443
   nodeFilters:
-  - agent[0] 
+  - agent[0]
+- port: 8081:30090
+  nodeFilters:
+    - agent[0]
 - port: 5054:53/udp
   nodeFilters:
   - agent[0] 
