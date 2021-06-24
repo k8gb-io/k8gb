@@ -1,35 +1,35 @@
 # K8GB terratests
-Terratests are another layer in k8gb testing. They test the state of k8gb on tuple of clusters and examine the behavior 
-for individual use cases. They replace manual tests; install GSLB in a separate namespace and check if everything 
+Terratests are another layer in k8gb testing. They test the state of k8gb on tuple of clusters and examine the behavior
+for individual use cases. They replace manual tests; install GSLB in a separate namespace and check if everything
 behaves as expected.
 
-Terratest is basically a separate project inside k8gb. The tests are running as GitHub Actions when interacting 
-with remote repo, or you can run them locally with `make terratest`. To run it locally, you must have k3d clusters 
+Terratest is basically a separate project inside k8gb. The tests are running as GitHub Actions when interacting
+with remote repo, or you can run them locally with `make terratest`. To run it locally, you must have k3d clusters
 with the k8gb operator installed. Read [Quick Start](../README.md#quick-start) if you have not already done so.
 
 Terratests consist of three directories:
 
-- `/test/` contains the individual tests. Each test usually creates its own namespace where it installs its own 
-  version of GSLB. The test then runs against such instance. For optimization reasons, all tests are running 
+- `/test/` contains the individual tests. Each test usually creates its own namespace where it installs its own
+  version of GSLB. The test then runs against such instance. For optimization reasons, all tests are running
   in parallel. Keep this on mind!
 - `/examples/` contains yaml configurations (GSLB, ingresses) for individual tests.
 - `/utils/` contains a common framework that makes writing tests easier.
 
 ## Terratest Common Framework
-First of all, nothing forces you to use the framework. There are certainly many cases where it is better not to use 
+First of all, nothing forces you to use the framework. There are certainly many cases where it is better not to use
 the framework and instead interact with the cluster directly using terratest (which is itself a powerful framework).
-On the other hand, the ability to quickly spin up clusters with test applications and then easily read ip addresses 
+On the other hand, the ability to quickly spin up clusters with test applications and then easily read ip addresses
 from DNS, without a deeper knowledge of k8gb or terratest is not a bad thing either.
 
 The terratest framework is located in `/utils/` and contains a fluent-style configuration of the GSLB cluster instance.
 
 ### Workflows
-First of all, we create a workflow instance that includes a namespace, and may include a test application or a GSLB object. 
+First of all, we create a workflow instance that includes a namespace, and may include a test application or a GSLB object.
 We create the instance by calling the `NewWorkflow` function with the name of the cluster where the instance will run and t
-he port from which the cluster is accessed. If you followed [Quick Start](../README.md#quick-start), the clusters will 
-be `k3d-test-gslb1:5053` and `k3d-test-gslb2:5054`. This is optionally followed by the GSLB configuration from the yaml 
-file and the test application [podinfo](https://github.com/stefanprodan/podinfo). The `Start` function creates the 
-cluster resources and returns the workflow instance, the `Kill` function deletes the instance along with all resources 
+he port from which the cluster is accessed. If you followed [Quick Start](../README.md#quick-start), the clusters will
+be `k3d-test-gslb1:5053` and `k3d-test-gslb2:5054`. This is optionally followed by the GSLB configuration from the yaml
+file and the test application [podinfo](https://github.com/stefanprodan/podinfo). The `Start` function creates the
+cluster resources and returns the workflow instance, the `Kill` function deletes the instance along with all resources
 in the test cluster.
 ```go
 instance, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
