@@ -171,7 +171,6 @@ func AssertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName, servi
 	t.Helper()
 
 	actualHealthStatus := func() ([]string, error) {
-		//-o custom-columns=SERVICESTATUS:.status.serviceHealth --no-headers
 		k8gbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o",
 			"custom-columns=SERVICESTATUS:.status.serviceHealth", "--no-headers")
 		if err != nil {
@@ -248,4 +247,14 @@ func EqualStringSlices(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+// RunBusyBoxCommand the command argument is executed inside the busybox pod. It can be for example an HTTP request etc.
+func RunBusyBoxCommand(t *testing.T, options *k8s.KubectlOptions, command string) (out string, err error) {
+	cmd := shell.Command{
+		Command: "kubectl",
+		Args:    []string{"--context", options.ContextName, "-n", options.Namespace, "run", "-i", "--rm", "busybox", "--restart", "Never", "--image", "busybox", "--", "sh", "-c", command},
+		Env:     options.Env,
+	}
+	return shell.RunCommandAndGetOutputE(t, cmd)
 }

@@ -21,28 +21,46 @@ import (
 	"k8gbterratest/utils"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFullRoundRobin(t *testing.T) {
+// TestFailoverPlayground is equal to k8gb failover test running on local playground.
+// see: https://github.com/k8gb-io/k8gb/blob/master/docs/local.md#failover
+func TestFailoverPlayground(t *testing.T) {
 	t.Parallel()
-	const host = "roundrobin-test.cloud.example.com"
-	const gslbPath = "../examples/roundrobin2.yaml"
+	const host = "playground-failover.cloud.example.com"
+	const gslbPath = "../examples/failover-playground.yaml"
+	const euGeoTag = "eu"
+	const usGeoTag = "us"
 
 	instanceEU, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
 		WithGslb(gslbPath, host).
-		WithTestApp("eu").
+		WithTestApp(euGeoTag).
 		Start()
 	require.NoError(t, err)
 	defer instanceEU.Kill()
 	instanceUS, err := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
 		WithGslb(gslbPath, host).
-		WithTestApp("us").
+		WithTestApp(usGeoTag).
 		Start()
 	require.NoError(t, err)
 	defer instanceUS.Kill()
 
-	t.Run("round-robin on two concurrent clusters with podinfo running", func(t *testing.T) {
+	actAndAssert := func(test, geoTag string, localTargets []string) {
+		// waiting for DNS sync
+		err = instanceEU.WaitForExpected(localTargets)
+		require.NoError(t, err)
+		err = instanceUS.WaitForExpected(localTargets)
+		require.NoError(t, err)
+		// hit testApp from both clusters
+		httpResult := instanceEU.HitTestApp()
+		assert.Equal(t, geoTag, httpResult.Message)
+		httpResult = instanceUS.HitTestApp()
+		assert.Equal(t, geoTag, httpResult.Message)
+	}
+
+	t.Run("failover on two concurrent clusters with TestApp running", func(t *testing.T) {
 		err = instanceEU.WaitForAppIsRunning()
 		require.NoError(t, err)
 		err = instanceUS.WaitForAppIsRunning()
@@ -51,38 +69,14 @@ func TestFullRoundRobin(t *testing.T) {
 
 	euLocalTargets := instanceEU.GetLocalTargets()
 	usLocalTargets := instanceUS.GetLocalTargets()
-	expectedIPs := append(euLocalTargets, usLocalTargets...)
 
-	t.Run("kill podinfo on the second cluster", func(t *testing.T) {
-		instanceUS.StopTestApp()
-		err = instanceEU.WaitForExpected(euLocalTargets)
-		require.NoError(t, err)
-		err = instanceUS.WaitForExpected(euLocalTargets)
-		require.NoError(t, err)
-	})
-
-	t.Run("kill podinfo on the first cluster", func(t *testing.T) {
+	t.Run("stop podinfo on eu cluster", func(t *testing.T) {
 		instanceEU.StopTestApp()
-		err = instanceUS.WaitForExpected([]string{})
-		require.NoError(t, err)
-		err = instanceEU.WaitForExpected([]string{})
-		require.NoError(t, err)
+		actAndAssert(t.Name(), usGeoTag, usLocalTargets)
 	})
 
-	t.Run("start podinfo on the second cluster", func(t *testing.T) {
-		instanceUS.StartTestApp()
-		err = instanceEU.WaitForExpected(usLocalTargets)
-		require.NoError(t, err)
-		err = instanceUS.WaitForExpected(usLocalTargets)
-		require.NoError(t, err)
-	})
-
-	t.Run("start podinfo on the first cluster", func(t *testing.T) {
-		// start app in the both clusters
+	t.Run("start podinfo again on eu cluster", func(t *testing.T) {
 		instanceEU.StartTestApp()
-		err = instanceEU.WaitForExpected(expectedIPs)
-		require.NoError(t, err)
-		err = instanceUS.WaitForExpected(expectedIPs)
-		require.NoError(t, err)
+		actAndAssert(t.Name(), euGeoTag, euLocalTargets)
 	})
 }
