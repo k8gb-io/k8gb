@@ -266,6 +266,11 @@ func (c *Config) GetClusterNSName() string {
 	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServer)
 }
 
+func (c *Config) GetClusterOldNSName() string {
+	dnsZoneIntoNS := strings.ReplaceAll(c.DNSZone, ".", "-")
+	return fmt.Sprintf("gslb-ns-%s-%s.%s", dnsZoneIntoNS, c.ClusterGeoTag, c.EdgeDNSZone)
+}
+
 func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string) (m map[string]string) {
 	m = make(map[string]string, len(c.ExtClustersGeoTags))
 	for _, tag := range c.ExtClustersGeoTags {

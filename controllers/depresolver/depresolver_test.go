@@ -1452,6 +1452,7 @@ func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, config.GetExternalClusterNSNames(), 1)
 	assert.Equal(t, "gslb-ns-location-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	assert.Equal(t, "gslb-ns-k8gb-test-preprod-gslb-cloud-example-com-location-1.cloud.example.com", config.GetClusterOldNSName())
 	assert.Equal(t, config.GetExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
 }
 
