@@ -106,6 +106,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 			}
 
 			if !reflect.DeepEqual(findZone.DelegateTo, currentList) {
+				log.Info().Msgf("Found delegated zone records (%v)", findZone.DelegateTo)
 				log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, currentList)
 				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, currentList)
 				if err != nil {
@@ -116,6 +117,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	} else {
 		log.Info().Msgf("Creating delegated zone(%s)...", p.config.DNSZone)
 		sortZones(delegateTo)
+		log.Debug().Msgf("Delegated records (%v)", delegateTo)
 		_, err = objMgr.CreateZoneDelegated(p.config.DNSZone, delegateTo)
 		if err != nil {
 			return err
