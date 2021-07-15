@@ -21,6 +21,8 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
+
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -37,7 +39,7 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 		return err
 	}
 
-	r.Metrics.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
+	m.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
 
 	gslb.Status.HealthyRecords, err = r.getHealthyRecords(gslb)
 	if err != nil {
@@ -46,7 +48,7 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 
 	gslb.Status.GeoTag = r.Config.ClusterGeoTag
 
-	r.Metrics.UpdateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
+	metrics.Metrics().UpdateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
 
 	err = r.Status().Update(context.TODO(), gslb)
 	return err

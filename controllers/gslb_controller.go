@@ -21,14 +21,14 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
+
+	str "github.com/AbsaOSS/gopkg/strings"
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	"github.com/AbsaOSS/k8gb/controllers/logging"
 	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
-	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
-
-	str "github.com/AbsaOSS/gopkg/strings"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -50,7 +50,6 @@ type GslbReconciler struct {
 	Scheme      *runtime.Scheme
 	Config      *depresolver.Config
 	DepResolver *depresolver.DependencyResolver
-	Metrics     metrics.Metrics
 	DNSProvider dns.Provider
 }
 
@@ -66,6 +65,8 @@ const (
 )
 
 var log = logging.Logger()
+
+var m = metrics.Metrics()
 
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs/status,verbs=get;update;patch
@@ -169,6 +170,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// Everything went fine, requeue after some time to catch up
 	// with external Gslb status
 	// TODO: potentially enhance with smarter reaction to external Event
+	m.ReconciliationIncrement()
 	return result.Requeue()
 }
 

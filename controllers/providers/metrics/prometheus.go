@@ -20,10 +20,13 @@ package metrics
 import (
 	"fmt"
 	"reflect"
+	"regexp"
+	"strings"
 	"sync"
 
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	crm "sigs.k8s.io/controller-runtime/pkg/metrics"
 )
@@ -38,7 +41,8 @@ const (
 type collectors struct {
 	HealthyRecords        *prometheus.GaugeVec
 	IngressHostsPerStatus *prometheus.GaugeVec
-	DelegatedZoneUpdate   *prometheus.GaugeVec
+	ZoneUpdateTotal       prometheus.Counter
+	ReconciliationTotal   prometheus.Counter
 }
 
 type PrometheusMetrics struct {
@@ -47,8 +51,10 @@ type PrometheusMetrics struct {
 	metrics collectors
 }
 
-// NewPrometheusMetrics creates new prometheus metrics instance
-func NewPrometheusMetrics(config depresolver.Config) (metrics *PrometheusMetrics) {
+var regex = regexp.MustCompile("[A-Z]")
+
+// newPrometheusMetrics creates new prometheus metrics instance
+func newPrometheusMetrics(config depresolver.Config) (metrics *PrometheusMetrics) {
 	metrics = new(PrometheusMetrics)
 	metrics.config = config
 	metrics.init()
@@ -83,8 +89,12 @@ func (m *PrometheusMetrics) UpdateHealthyRecordsMetric(gslb *k8gbv1beta1.Gslb, h
 	m.metrics.HealthyRecords.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsCount))
 }
 
-func (m *PrometheusMetrics) UpdateDelegatedZone(gslb *k8gbv1beta1.Gslb, zone string, count int) {
-	m.metrics.DelegatedZoneUpdate.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "zone": zone}).Set(float64(count))
+func (m *PrometheusMetrics) ZoneUpdateIncrement() {
+	m.metrics.ZoneUpdateTotal.Inc()
+}
+
+func (m *PrometheusMetrics) ReconciliationIncrement() {
+	m.metrics.ReconciliationTotal.Inc()
 }
 
 // Register prometheus metrics. Read register documentation, but shortly:
@@ -110,16 +120,6 @@ func (m *PrometheusMetrics) Unregister() {
 	}
 }
 
-// GetHealthyRecordsMetric retrieves actual copy of healthy record metric
-func (m *PrometheusMetrics) GetHealthyRecordsMetric() prometheus.GaugeVec {
-	return *m.metrics.HealthyRecords
-}
-
-// GetIngressHostsPerStatusMetric retrieves actual copy of ingress host metric
-func (m *PrometheusMetrics) GetIngressHostsPerStatusMetric() prometheus.GaugeVec {
-	return *m.metrics.IngressHostsPerStatus
-}
-
 // init instantiates particular metrics
 func (m *PrometheusMetrics) init() {
 	m.metrics.HealthyRecords = prometheus.NewGaugeVec(
@@ -142,26 +142,36 @@ func (m *PrometheusMetrics) init() {
 		[]string{"namespace", "name", "status"},
 	)
 
-	m.metrics.DelegatedZoneUpdate = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
+	m.metrics.ZoneUpdateTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
 			Namespace: m.config.K8gbNamespace,
 			Subsystem: gslbSubsystem,
 			Name:      "delegated_zone_update",
-			Help:      "Number of delegated zone updates.",
+			Help:      "Number of delegated zone updates. Is hit for create as well",
 		},
-		[]string{"namespace", "name"},
 	)
+
+	m.metrics.ReconciliationTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: m.config.K8gbNamespace,
+			Subsystem: gslbSubsystem,
+			Name:      "reconciliation_total",
+			Help:      "Number of successful reconciliation loops.",
+		})
 }
 
-// registry is helper function reading fields from m.metrics and provides metrics list
-func (m *PrometheusMetrics) registry() (r []prometheus.Collector) {
-	r = make([]prometheus.Collector, 0)
+// registry is helper function reading fields from m.metrics structure and builds metrics map
+// The key is metric name while value is metric instance
+func (m *PrometheusMetrics) registry() (r map[string]prometheus.Collector) {
+	r = make(map[string]prometheus.Collector)
 	val := reflect.Indirect(reflect.ValueOf(m.metrics))
 	for i := 0; i < val.Type().NumField(); i++ {
 		n := val.Type().Field(i).Name
-		var v = val.FieldByName(n).Interface().(prometheus.Collector)
 		if !val.Field(i).IsNil() {
-			r = append(r, v)
+			var v = val.FieldByName(n).Interface().(prometheus.Collector)
+			name := fmt.Sprintf("%s_%s_%s", m.config.K8gbNamespace, gslbSubsystem,
+				strings.ToLower(strings.Join(utils.SplitAfter(n, regex), "_")))
+			r[name] = v
 		}
 	}
 	return
