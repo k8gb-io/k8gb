@@ -72,11 +72,13 @@ func TestFailoverPlayground(t *testing.T) {
 
 	t.Run("stop podinfo on eu cluster", func(t *testing.T) {
 		instanceEU.StopTestApp()
+		require.NoError(t, instanceEU.WaitForAppIsStopped())
 		actAndAssert(t.Name(), usGeoTag, usLocalTargets)
 	})
 
 	t.Run("start podinfo again on eu cluster", func(t *testing.T) {
 		instanceEU.StartTestApp()
+		require.NoError(t, instanceEU.WaitForAppIsRunning())
 		actAndAssert(t.Name(), euGeoTag, euLocalTargets)
 	})
 }
