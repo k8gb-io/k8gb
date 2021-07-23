@@ -14,7 +14,7 @@ spec:
       labels:
         app: external-dns
     spec:
-      serviceAccountName: external-dns
+      serviceAccountName: k8gb-external-dns
       securityContext:
         fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
         runAsUser: 1000
