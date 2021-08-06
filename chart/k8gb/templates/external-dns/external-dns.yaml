@@ -25,25 +25,19 @@ spec:
         args:
         - --source=crd
         - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
-{{- if .Values.ns1.enabled }}
-        - --annotation-filter=k8gb.absa.oss/dnstype=ns1 # filter out only relevant DNSEntrypoints
-        - --provider=ns1
-        - --txt-owner-id=k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
-{{- if .Values.ns1.endpoint }}
-        - --ns1-endpoint={{ .Values.ns1.endpoint }}
-{{- end }}
-{{- if .Values.ns1.ignoreSSL }}
-        - --ns1-ignoressl
-{{- end }}
-{{- end }}
-{{- if .Values.route53.enabled }}
-        - --annotation-filter=k8gb.absa.oss/dnstype=route53 # filter out only relevant DNSEntrypoints
-        - --provider=aws
-        - --txt-owner-id=k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
-{{- end }}
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
-{{- if .Values.ns1.enabled }}
+        - --managed-record-types=A,CNAME,NS
+        - --annotation-filter=k8gb.absa.oss/dnstype={{ include "k8gb.extdnsAnnotation" . }} # filter out only relevant DNSEntrypoints
+        - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
+        - --provider={{ include "k8gb.extdnsProvider" . }}
+{{- if .Values.ns1.enabled -}}
+{{- if .Values.ns1.endpoint -}}
+        - --ns1-endpoint={{ .Values.ns1.endpoint }}
+{{- end -}}
+{{- if .Values.ns1.ignoreSSL -}}
+        - --ns1-ignoressl
+{{- end -}}
         env:
         - name: NS1_APIKEY
           valueFrom:

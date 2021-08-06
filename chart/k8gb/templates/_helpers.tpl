@@ -61,3 +61,30 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{- define "k8gb.extdnsAnnotation" -}}
+{{- if .Values.ns1.enabled -}}
+{{- print "ns1" -}}
+{{- end -}}
+{{- if .Values.route53.enabled }}
+{{- print "route53" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "k8gb.extdnsProvider" -}}
+{{- if .Values.ns1.enabled -}}
+{{- print "ns1" -}}
+{{- end -}}
+{{- if .Values.route53.enabled }}
+{{- print "aws" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "k8gb.extdnsOwnerID" -}}
+{{- if .Values.ns1.enabled -}}
+k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
+{{- end -}}
+{{- if .Values.route53.enabled -}}
+k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
+{{- end -}}
+{{- end -}}
