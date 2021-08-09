@@ -944,7 +944,7 @@ func TestGslbRemoveDefaultFinalizer(t *testing.T) {
 
 	// assert
 	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, gslb)
-	require.NoError(t, err)
+	require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
 	assert.Len(t, gslb.Finalizers, 0)
 }
 
@@ -964,7 +964,7 @@ func TestGslbRemoveBothFinalizers(t *testing.T) {
 
 	// assert
 	err = settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
-	require.NoError(t, err)
+	require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
 	assert.Len(t, gslb.Finalizers, 0)
 }
 
@@ -1127,12 +1127,12 @@ func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
 		if res != (reconcile.Result{RequeueAfter: time.Second * 30}) {
 			t.Error("reconcile did not return Result with Requeue")
 		}
+		err = s.reconciler.Get(context.TODO(), s.request.NamespacedName, s.gslb)
+		if err != nil {
+			t.Fatalf("Failed to get expected gslb: (%v)", err)
+		}
 	}
 
-	err = s.reconciler.Get(context.TODO(), s.request.NamespacedName, s.gslb)
-	if err != nil {
-		t.Fatalf("Failed to get expected gslb: (%v)", err)
-	}
 }
 
 func provideSettings(t *testing.T, expected depresolver.Config) (settings testSettings) {

@@ -1,6 +1,6 @@
 module github.com/AbsaOSS/k8gb
 
-go 1.15
+go 1.16
 
 require (
 	github.com/AbsaOSS/gopkg v0.1.2
@@ -10,15 +10,13 @@ require (
 	github.com/infobloxopen/infoblox-go-client v1.1.0
 	github.com/lixiangzhong/dnsutil v0.0.0-20191203032812-75ad39d2945a
 	github.com/miekg/dns v1.1.42
-	github.com/onsi/ginkgo v1.14.2 // indirect
-	github.com/prometheus/client_golang v1.10.0
+	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.21.0
 	github.com/stretchr/testify v1.7.0
-	k8s.io/api v0.20.6
-	k8s.io/apiextensions-apiserver v0.20.2 // indirect
-	k8s.io/apimachinery v0.20.6
-	k8s.io/client-go v0.20.6
-	sigs.k8s.io/controller-runtime v0.7.2
+	k8s.io/api v0.21.2
+	k8s.io/apimachinery v0.21.2
+	k8s.io/client-go v0.21.2
+	sigs.k8s.io/controller-runtime v0.9.2
 	sigs.k8s.io/external-dns v0.8.0
 )
 
