@@ -363,11 +363,20 @@ func (i *Instance) HitTestApp() (result *TestAppResult) {
 	result = new(TestAppResult)
 	coreDDNSIP := i.GetCoreDNSIP()
 	command := fmt.Sprintf("echo nameserver %s > /etc/resolv.conf && wget -qO - %s", coreDDNSIP, i.w.state.gslb.host)
-	result.Body, err = RunBusyBoxCommand(i.w.t, i.w.k8sOptions, command)
-	require.NoError(i.w.t, err, "busybox", command, result.Body)
+	for t := 0; t < 3; t++ {
+		result.Body, err = RunBusyBoxCommand(i.w.t, i.w.k8sOptions, command)
+		require.NoError(i.w.t, err, "busybox", command, result.Body)
+		if strings.HasPrefix(result.Body, "{") {
+			break
+		}
+		i.w.t.Log("podinfo didn't start yet, waiting....")
+		time.Sleep(time.Second * 1)
+	}
 	// unwrap json from busybox messages
 	parsedJson := strings.Split(result.Body, "}")[0]
-	parsedJson = strings.Split(parsedJson, "{")[1]
+	s := strings.Split(parsedJson, "{")
+	require.Len(i.w.t,s,2, "invalid busybox response", result.Body)
+	parsedJson = s[1]
 
 	err = json.Unmarshal([]byte("{"+parsedJson+"}"), result)
 	require.NoError(i.w.t, err, "unmarshall json", result.Body)
