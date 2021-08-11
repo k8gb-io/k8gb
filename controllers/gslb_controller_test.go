@@ -27,6 +27,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+
 	str "github.com/AbsaOSS/gopkg/strings"
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
@@ -150,7 +152,7 @@ func TestIngressHostsPerStatusMetric(t *testing.T) {
 	settings := provideSettings(t, predefinedConfig)
 	expectedHostsMetricCount := 3
 	// act
-	ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
+	ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbStatusPerIngressHosts).AsGaugeVec()
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	actualHostsMetricCount := testutil.CollectAndCount(ingressHostsPerStatusMetric)
 	// assert
@@ -172,7 +174,7 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 			reconcileAndUpdateGslb(t, settings)
 			// act
 			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
-			ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
+			ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbStatusPerIngressHosts).AsGaugeVec()
 			healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
 				"name": settings.gslb.Name, "status": k8gbv1beta1.Healthy.String()})
 			actualHostsMetric := testutil.ToFloat64(healthyHosts)
@@ -190,7 +192,7 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	expectedHostsMetricCount := 0.
 	// act
-	ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
+	ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbStatusPerIngressHosts).AsGaugeVec()
 	unhealthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
 		"name": settings.gslb.Name, "status": k8gbv1beta1.Unhealthy.String()})
 	actualHostsMetricCount := testutil.ToFloat64(unhealthyHosts)
@@ -228,7 +230,7 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 	// act
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	require.NoError(t, err, "Failed to get expected gslb")
-	ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
+	ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbStatusPerIngressHosts).AsGaugeVec()
 	unknownHosts, err := ingressHostsPerStatusMetric.GetMetricWith(
 		prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": k8gbv1beta1.NotFound.String()})
 	require.NoError(t, err, "Failed to get ingress metrics")
@@ -259,7 +261,7 @@ func TestHealthyRecordMetric(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 	reconcileAndUpdateGslb(t, settings)
 	// act
-	healthyRecordsMetric := metrics.Metrics().Get("k8gb_gslb_healthy_records").AsGaugeVec()
+	healthyRecordsMetric := metrics.Metrics().Get(metrics.K8gbGslbHealthyRecords).AsGaugeVec()
 	actualHealthyRecordsMetricCount := testutil.ToFloat64(healthyRecordsMetric)
 	reconcileAndUpdateGslb(t, settings)
 	// assert
@@ -269,9 +271,9 @@ func TestHealthyRecordMetric(t *testing.T) {
 
 func TestMetricLinterCheck(t *testing.T) {
 	// arrange
-	healthyRecordsMetric := metrics.Metrics().Get("k8gb_gslb_healthy_records").AsGaugeVec()
-	ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
-	reconciliationTotal := metrics.Metrics().Get("k8gb_gslb_reconciliation_total").AsCounter()
+	healthyRecordsMetric := metrics.Metrics().Get(metrics.K8gbGslbHealthyRecords).AsGaugeVec()
+	ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbStatusPerIngressHosts).AsGaugeVec()
+	reconciliationTotal := metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounter()
 	for name, scenario := range map[string]prometheus.Collector{
 		"healthy_records":          healthyRecordsMetric,
 		"ingress_hosts_per_status": ingressHostsPerStatusMetric,
@@ -287,15 +289,40 @@ func TestMetricLinterCheck(t *testing.T) {
 
 func TestGslbReconciliationTotalIncrement(t *testing.T) {
 	// arrange
-	const key = "k8gb_gslb_reconciliation_total"
 	settings := provideSettings(t, predefinedConfig)
-	cnt := testutil.ToFloat64(metrics.Metrics().Get(key).AsCounter())
+	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounter())
 	// act
 	_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
-	cnt2 := testutil.ToFloat64(metrics.Metrics().Get(key).AsCounter())
+	cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounter())
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, cnt+1, cnt2)
+}
+
+func TestGslbErrorsIncrement(t *testing.T) {
+	// arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	settings := provideSettings(t, predefinedConfig)
+	var label = prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name}
+	m := dns.NewMockProvider(ctrl)
+	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
+	m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
+	m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(fmt.Errorf("save DNS error")).Times(1)
+	m.EXPECT().GetExternalTargets(gomock.Any()).Return([]string{}).AnyTimes()
+	m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
+	settings.reconciler.DNSProvider = m
+	// act
+	_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
+	require.Error(t, err)
+	// let's break it on different place
+	m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, fmt.Errorf("exposed IP's error")).AnyTimes()
+	_, err = settings.reconciler.Reconcile(context.TODO(), settings.request)
+	cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
+	// assert
+	assert.Error(t, err)
+	assert.Equal(t, cnt+2, cnt2)
 }
 
 func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {

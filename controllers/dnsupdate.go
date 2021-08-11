@@ -34,6 +34,7 @@ func sortTargets(targets []string) []string {
 	})
 	return targets
 }
+
 func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
 	var gslbHosts []*externaldns.Endpoint
 	var ttl = externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
@@ -102,6 +103,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 			log.Info().Msgf("No external targets have been found for host %s", host)
 		}
 
+		r.updateRuntimeStatus(gslb, isPrimary, health, finalTargets)
 		log.Info().Msgf("Final target list for %s Gslb: %v", gslb.Name, finalTargets)
 
 		if len(finalTargets) > 0 {
@@ -136,4 +138,15 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		return nil, err
 	}
 	return dnsEndpoint, err
+}
+
+func (r *GslbReconciler) updateRuntimeStatus(gslb *k8gbv1beta1.Gslb, isPrimary bool, isHealthy k8gbv1beta1.HealthStatus, finalTargets []string) {
+	switch gslb.Spec.Strategy.Type {
+	case roundRobinStrategy:
+		m.UpdateRoundrobinStatus(gslb, isHealthy, finalTargets)
+	case geoStrategy:
+		m.UpdateGeoIPStatus(gslb, isHealthy, finalTargets)
+	case failoverStrategy:
+		m.UpdateFailoverStatus(gslb, isPrimary, isHealthy, finalTargets)
+	}
 }
