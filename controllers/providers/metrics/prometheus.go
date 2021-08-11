@@ -33,12 +33,18 @@ import (
 
 const (
 	gslbSubsystem = "gslb"
+	primary       = "primary"
+	secondary     = "secondary"
 )
 
 type collectors struct {
 	HealthyRecords        *prometheus.GaugeVec
-	IngressHostsPerStatus *prometheus.GaugeVec
-	ZoneUpdateTotal       prometheus.Counter
+	StatusPerIngressHosts *prometheus.GaugeVec
+	StatusFailover        *prometheus.GaugeVec
+	StatusRoundRobin      *prometheus.GaugeVec
+	StatusGeoIP           *prometheus.GaugeVec
+	ZoneUpdateTotal       *prometheus.CounterVec
+	ErrorTotal            *prometheus.CounterVec
 	ReconciliationTotal   prometheus.Counter
 }
 
@@ -70,11 +76,11 @@ func (m *PrometheusMetrics) UpdateIngressHostsPerStatusMetric(gslb *k8gbv1beta1.
 			notFoundHostsCount++
 		}
 	}
-	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.Healthy.String()}).
+	m.metrics.StatusPerIngressHosts.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.Healthy.String()}).
 		Set(float64(healthyHostsCount))
-	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.Unhealthy.String()}).
+	m.metrics.StatusPerIngressHosts.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.Unhealthy.String()}).
 		Set(float64(unhealthyHostsCount))
-	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.NotFound.String()}).
+	m.metrics.StatusPerIngressHosts.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.NotFound.String()}).
 		Set(float64(notFoundHostsCount))
 }
 
@@ -86,8 +92,28 @@ func (m *PrometheusMetrics) UpdateHealthyRecordsMetric(gslb *k8gbv1beta1.Gslb, h
 	m.metrics.HealthyRecords.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsCount))
 }
 
-func (m *PrometheusMetrics) ZoneUpdateIncrement() {
-	m.metrics.ZoneUpdateTotal.Inc()
+func (m *PrometheusMetrics) UpdateFailoverStatus(gslb *k8gbv1beta1.Gslb, isPrimary bool, healthy k8gbv1beta1.HealthStatus, targets []string) {
+	t := secondary
+	if isPrimary {
+		t = primary
+	}
+	m.updateRuntimeStatus(gslb, m.metrics.StatusFailover, healthy, targets, "_"+t)
+}
+
+func (m *PrometheusMetrics) UpdateRoundrobinStatus(gslb *k8gbv1beta1.Gslb, healthy k8gbv1beta1.HealthStatus, targets []string) {
+	m.updateRuntimeStatus(gslb, m.metrics.StatusRoundRobin, healthy, targets, "")
+}
+
+func (m *PrometheusMetrics) UpdateGeoIPStatus(gslb *k8gbv1beta1.Gslb, healthy k8gbv1beta1.HealthStatus, targets []string) {
+	m.updateRuntimeStatus(gslb, m.metrics.StatusGeoIP, healthy, targets, "")
+}
+
+func (m *PrometheusMetrics) ZoneUpdateIncrement(gslb *k8gbv1beta1.Gslb) {
+	m.metrics.ZoneUpdateTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
+}
+
+func (m *PrometheusMetrics) ErrorIncrement(gslb *k8gbv1beta1.Gslb) {
+	m.metrics.ErrorTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
 }
 
 func (m *PrometheusMetrics) ReconciliationIncrement() {
@@ -129,23 +155,34 @@ func (m *PrometheusMetrics) init() {
 		[]string{"namespace", "name"},
 	)
 
-	m.metrics.IngressHostsPerStatus = prometheus.NewGaugeVec(
+	m.metrics.StatusPerIngressHosts = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: m.config.K8gbNamespace,
 			Subsystem: gslbSubsystem,
-			Name:      "ingress_hosts_per_status",
+			Name:      "status_per_ingress_hosts",
 			Help:      "Number of managed hosts observed by K8GB.",
 		},
 		[]string{"namespace", "name", "status"},
 	)
 
-	m.metrics.ZoneUpdateTotal = prometheus.NewCounter(
+	m.metrics.ZoneUpdateTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: m.config.K8gbNamespace,
 			Subsystem: gslbSubsystem,
-			Name:      "delegated_zone_update",
-			Help:      "Number of delegated zone updates. Is hit for create as well",
+			Name:      "zone_update_total",
+			Help:      "Number of delegated zone updates",
 		},
+		[]string{"namespace", "name"},
+	)
+
+	m.metrics.ErrorTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: m.config.K8gbNamespace,
+			Subsystem: gslbSubsystem,
+			Name:      "error_total",
+			Help:      "Number of errors",
+		},
+		[]string{"namespace", "name"},
 	)
 
 	m.metrics.ReconciliationTotal = prometheus.NewCounter(
@@ -155,6 +192,34 @@ func (m *PrometheusMetrics) init() {
 			Name:      "reconciliation_total",
 			Help:      "Number of successful reconciliation loops.",
 		})
+
+	m.metrics.StatusFailover = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: m.config.K8gbNamespace,
+			Subsystem: gslbSubsystem,
+			Name:      "status_failover",
+			Help:      "K8GB Failover status.",
+		},
+		[]string{"namespace", "name", "status"},
+	)
+	m.metrics.StatusRoundRobin = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: m.config.K8gbNamespace,
+			Subsystem: gslbSubsystem,
+			Name:      "status_roundrobin",
+			Help:      "K8GB RoundRobin status.",
+		},
+		[]string{"namespace", "name", "status"},
+	)
+	m.metrics.StatusGeoIP = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: m.config.K8gbNamespace,
+			Subsystem: gslbSubsystem,
+			Name:      "status_geoip",
+			Help:      "K8GB GeoIP status.",
+		},
+		[]string{"namespace", "name", "status"},
+	)
 }
 
 // registry is helper function reading fields from m.metrics structure and builds metrics map
@@ -172,4 +237,27 @@ func (m *PrometheusMetrics) registry() (r map[string]prometheus.Collector) {
 		}
 	}
 	return
+}
+
+func (m *PrometheusMetrics) updateRuntimeStatus(
+	gslb *k8gbv1beta1.Gslb,
+	vec *prometheus.GaugeVec,
+	healthStatus k8gbv1beta1.HealthStatus,
+	targets []string,
+	tag string) {
+	var h, u, n int
+	switch healthStatus {
+	case k8gbv1beta1.Healthy:
+		h = len(targets)
+	case k8gbv1beta1.Unhealthy:
+		u = len(targets)
+	case k8gbv1beta1.NotFound:
+		n = len(targets)
+	}
+	vec.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": fmt.Sprintf("%s%s", k8gbv1beta1.Healthy, tag)}).
+		Set(float64(h))
+	vec.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": fmt.Sprintf("%s%s", k8gbv1beta1.Unhealthy, tag)}).
+		Set(float64(u))
+	vec.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": fmt.Sprintf("%s%s", k8gbv1beta1.NotFound, tag)}).
+		Set(float64(n))
 }

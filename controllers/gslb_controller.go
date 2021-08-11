@@ -84,11 +84,13 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 			// Return and don't requeue
 			return result.Stop()
 		}
+		m.ErrorIncrement(gslb)
 		return result.RequeueError(fmt.Errorf("error reading the object (%s)", err))
 	}
 
 	err = r.DepResolver.ResolveGslbSpec(ctx, gslb, r.Client)
 	if err != nil {
+		m.ErrorIncrement(gslb)
 		return result.RequeueError(fmt.Errorf("resolving spec (%s)", err))
 	}
 	log.Debug().
@@ -127,6 +129,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// Add finalizer for this CR
 	if !contains(gslb.GetFinalizers(), gslbFinalizer) {
 		if err := r.addFinalizer(gslb); err != nil {
+			m.ErrorIncrement(gslb)
 			return result.RequeueError(err)
 		}
 	}
@@ -134,22 +137,26 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// == Ingress ==========
 	ingress, err := r.gslbIngress(gslb)
 	if err != nil {
+		m.ErrorIncrement(gslb)
 		return result.RequeueError(err)
 	}
 
 	err = r.saveIngress(gslb, ingress)
 	if err != nil {
+		m.ErrorIncrement(gslb)
 		return result.RequeueError(err)
 	}
 
 	// == external-dns dnsendpoints CRs ==
 	dnsEndpoint, err := r.gslbDNSEndpoint(gslb)
 	if err != nil {
+		m.ErrorIncrement(gslb)
 		return result.RequeueError(err)
 	}
 
 	err = r.DNSProvider.SaveDNSEndpoint(gslb, dnsEndpoint)
 	if err != nil {
+		m.ErrorIncrement(gslb)
 		return result.RequeueError(err)
 	}
 
@@ -157,12 +164,14 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
 	if err != nil {
 		log.Err(err).Msg("Unable to create zone delegation")
+		m.ErrorIncrement(gslb)
 		return result.Requeue()
 	}
 
 	// == Status =
 	err = r.updateGslbStatus(gslb)
 	if err != nil {
+		m.ErrorIncrement(gslb)
 		return result.RequeueError(err)
 	}
 
