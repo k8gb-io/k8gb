@@ -142,11 +142,11 @@ If the Pods in cluster **Y** were to once again become healthy (liveness and rea
 ## Load balancing strategies
 
 The following load balancing strategies, as it relates to resolving Ingress node IPs, should be provided as part of the initial implementation:
+* **roundRobin**
+* **failover**
+* **geoip**
 
-* **Round robin** - The default strategy
-* **Weighted round robin** - Specialisation of the above strategy but where a percentage weighting is applied to determine which cluster's Ingress node IPs to resolve. E.g. 80% cluster **X** and 20% cluster **Y**
-* **Failover** - Pinned to a specified primary cluster until that cluster has no available Pods, upon which the next available cluster's Ingress node IPs will be resolved. When Pods are again available on the primary cluster, the primary cluster will once again be the only eligible cluster for which cluster Ingress node IPs will be resolved
-* **Manual** - Eligibility is manually specified as to which cluster(s) are eligible. If there are no available Pods in the specified clusters, then no cluster Ingress node IPs will be resolved and the client will get a [`NXDOMAIN`](https://www.dnsknowledge.com/whatis/nxdomain-non-existent-domain-2/) response
+see [strategies](strategy.md) for details.
 
 The above strategies are specified as part of the `Gslb` resource(s) `spec`.
 
