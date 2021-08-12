@@ -24,12 +24,6 @@ jobs:
           compareLink: true
           filterByMilestone: true
           unreleased: true
-      - name: Commit changelog
-        run: |
-          git config user.name 'Github Action'
-          git config user.email 'action@users.noreply.github.com'
-          git add CHANGELOG.md
-          git commit -m "Update Offline Changelog"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
