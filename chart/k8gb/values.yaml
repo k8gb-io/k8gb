@@ -66,3 +66,6 @@ ns1:
   # optional custom NS1 API endpoint for on-prem setups
   # endpoint: https://api.nsone.net/v1/
   ignoreSSL: false
+
+openshift:
+  enabled: false
