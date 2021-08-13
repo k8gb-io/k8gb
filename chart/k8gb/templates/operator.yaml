@@ -29,7 +29,7 @@ spec:
           image: {{ .Values.k8gb.imageRepo }}:{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
           imagePullPolicy: IfNotPresent
           securityContext:
-            runAsUser: 1000
+            runAsUser: {{ .Values.k8gb.runAsUser }}
             runAsNonRoot: true
             readOnlyRootFilesystem: true
           resources:
