@@ -11,6 +11,7 @@ k8gb:
   # but can be overrided with imageTag key
   # imageTag:
   dnsZone: "cloud.example.com" # dnsZone controlled by gslb
+  dnsZoneNegTTL: 300 # Negative TTL for SOA record
   edgeDNSZone: "example.com" # main zone which would contain gslb zone to delegate
   edgeDNSServer: "1.1.1.1" # use this DNS server as a main resolver to enable cross k8gb DNS based communication
   clusterGeoTag: "eu" # used for places where we need to distinguish between differnet Gslb instances
@@ -43,7 +44,7 @@ coredns:
     skipConfig: true
   image:
     repository: absaoss/k8s_crd
-    tag: "v0.0.4"
+    tag: "v0.0.6"
   serviceAccount:
     create: true
     name: coredns

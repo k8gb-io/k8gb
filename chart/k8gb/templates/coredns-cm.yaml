@@ -16,5 +16,6 @@ data:
         k8s_crd {
             resources DNSEndpoint
             filter k8gb.absa.oss/dnstype=local
+            negttl {{ .Values.k8gb.dnsZoneNegTTL }}
         }
     }
