@@ -15,7 +15,8 @@ spec:
         app: external-dns
     spec:
       serviceAccountName: k8gb-external-dns
-      securityContext: {{ .Values.externaldns.securityContext }}
+      securityContext:
+{{ toYaml .Values.externaldns.securityContext  | indent 8 }}
       containers:
       - name: external-dns
         image: {{ .Values.externaldns.image }}
