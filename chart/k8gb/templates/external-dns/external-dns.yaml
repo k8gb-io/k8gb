@@ -25,7 +25,9 @@ spec:
         - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
-        - --managed-record-types=A,CNAME,NS
+        - --managed-record-types=A
+        - --managed-record-types=CNAME
+        - --managed-record-types=NS
         - --annotation-filter=k8gb.absa.oss/dnstype={{ include "k8gb.extdnsAnnotation" . }} # filter out only relevant DNSEntrypoints
         - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
         - --provider={{ include "k8gb.extdnsProvider" . }}
