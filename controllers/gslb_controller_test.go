@@ -104,7 +104,7 @@ const coreDNSExtServiceName = "k8gb-coredns-lb"
 func TestNotFoundServiceStatus(t *testing.T) {
 	// arrange
 	settings := provideSettings(t, predefinedConfig)
-	expectedServiceStatus := "NotFound"
+	expectedServiceStatus := k8gbv1beta1.NotFound
 	notFoundHost := "notfound.cloud.example.com"
 	// act
 	actualServiceStatus := settings.gslb.Status.ServiceHealth[notFoundHost]
@@ -118,7 +118,7 @@ func TestUnhealthyServiceStatus(t *testing.T) {
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "unhealthy-app"
 	unhealthyHost := "unhealthy.cloud.example.com"
-	expectedServiceStatus := "Unhealthy"
+	expectedServiceStatus := k8gbv1beta1.Unhealthy
 	defer deleteUnhealthyService(t, &settings, serviceName)
 	// act
 	createUnhealthyService(t, &settings, serviceName)
@@ -133,7 +133,7 @@ func TestHealthyServiceStatus(t *testing.T) {
 	// arrange
 	settings := provideSettings(t, predefinedConfig)
 	serviceName := "frontend-podinfo"
-	expectedServiceStatus := "Healthy"
+	expectedServiceStatus := k8gbv1beta1.Healthy
 	healthyHost := "roundrobin.cloud.example.com"
 	defer deleteHealthyService(t, &settings, serviceName)
 	createHealthyService(t, &settings, serviceName)
@@ -174,7 +174,7 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 			ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
 			healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
-				"name": settings.gslb.Name, "status": metrics.HealthyStatus})
+				"name": settings.gslb.Name, "status": k8gbv1beta1.Healthy.String()})
 			actualHostsMetric := testutil.ToFloat64(healthyHosts)
 			// assert
 			assert.NoError(t, err, "Failed to get expected gslb")
@@ -192,7 +192,7 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	// act
 	ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
 	unhealthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
-		"name": settings.gslb.Name, "status": metrics.UnhealthyStatus})
+		"name": settings.gslb.Name, "status": k8gbv1beta1.Unhealthy.String()})
 	actualHostsMetricCount := testutil.ToFloat64(unhealthyHosts)
 	// assert
 	assert.NoError(t, err, "Failed to get expected gslb")
@@ -208,7 +208,7 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 	// act
 	unhealthyHosts =
 		ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
-			"name": settings.gslb.Name, "status": metrics.UnhealthyStatus})
+			"name": settings.gslb.Name, "status": k8gbv1beta1.Unhealthy.String()})
 	actualHostsMetricCount = testutil.ToFloat64(unhealthyHosts)
 	// assert
 	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with Healthy status, but got %v",
@@ -230,7 +230,7 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 	require.NoError(t, err, "Failed to get expected gslb")
 	ingressHostsPerStatusMetric := metrics.Metrics().Get("k8gb_gslb_ingress_hosts_per_status").AsGaugeVec()
 	unknownHosts, err := ingressHostsPerStatusMetric.GetMetricWith(
-		prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": metrics.NotFoundStatus})
+		prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": k8gbv1beta1.NotFound.String()})
 	require.NoError(t, err, "Failed to get ingress metrics")
 	actualHostsMetricCount := testutil.ToFloat64(unknownHosts)
 	// assert

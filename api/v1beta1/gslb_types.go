@@ -48,7 +48,7 @@ type GslbSpec struct {
 // GslbStatus defines the observed state of Gslb
 type GslbStatus struct {
 	// Associated Service status
-	ServiceHealth map[string]string `json:"serviceHealth"`
+	ServiceHealth map[string]HealthStatus `json:"serviceHealth"`
 	// Current Healthy DNS record structure
 	HealthyRecords map[string][]string `json:"healthyRecords"`
 	// Cluster Geo Tag
@@ -76,6 +76,18 @@ type GslbList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Gslb `json:"items"`
+}
+
+type HealthStatus string
+
+const (
+	Healthy   HealthStatus = "Healthy"
+	Unhealthy HealthStatus = "Unhealthy"
+	NotFound  HealthStatus = "NotFound"
+)
+
+func (h HealthStatus) String() string {
+	return string(h)
 }
 
 func init() {

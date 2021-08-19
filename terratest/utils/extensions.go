@@ -375,7 +375,7 @@ func (i *Instance) HitTestApp() (result *TestAppResult) {
 	// unwrap json from busybox messages
 	parsedJson := strings.Split(result.Body, "}")[0]
 	s := strings.Split(parsedJson, "{")
-	require.Len(i.w.t,s,2, "invalid busybox response", result.Body)
+	require.Len(i.w.t, s, 2, "invalid busybox response", result.Body)
 	parsedJson = s[1]
 
 	err = json.Unmarshal([]byte("{"+parsedJson+"}"), result)

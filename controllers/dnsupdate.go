@@ -55,7 +55,10 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", host, r.Config.EdgeDNSZone)
 		}
 
-		if health == "Healthy" {
+		isPrimary := gslb.Spec.Strategy.PrimaryGeoTag == r.Config.ClusterGeoTag
+		isHealthy := health == k8gbv1beta1.Healthy
+
+		if isHealthy {
 			finalTargets = append(finalTargets, localTargets...)
 			localTargetsHost := fmt.Sprintf("localtargets-%s", host)
 			dnsRecord := &externaldns.Endpoint{
@@ -78,10 +81,10 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 				finalTargets = append(finalTargets, externalTargets...)
 			case failoverStrategy:
 				// If cluster is Primary
-				if gslb.Spec.Strategy.PrimaryGeoTag == r.Config.ClusterGeoTag {
+				if isPrimary {
 					// If cluster is Primary and Healthy return only own targets
 					// If cluster is Primary and Unhealthy return Secondary external targets
-					if health != "Healthy" {
+					if !isHealthy {
 						finalTargets = externalTargets
 						log.Info().Msgf("Executing failover strategy for %s Gslb on Primary. Workload on primary %s cluster is unhealthy, targets are %v",
 							gslb.Name, gslb.Spec.Strategy.PrimaryGeoTag, finalTargets)

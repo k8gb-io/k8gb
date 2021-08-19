@@ -54,8 +54,8 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 	return err
 }
 
-func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[string]string, error) {
-	serviceHealth := make(map[string]string)
+func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[string]k8gbv1beta1.HealthStatus, error) {
+	serviceHealth := make(map[string]k8gbv1beta1.HealthStatus)
 	for _, rule := range gslb.Spec.Ingress.Rules {
 		for _, path := range rule.HTTP.Paths {
 			service := &corev1.Service{}
@@ -66,7 +66,7 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 			err := r.Get(context.TODO(), finder, service)
 			if err != nil {
 				if errors.IsNotFound(err) {
-					serviceHealth[rule.Host] = "NotFound"
+					serviceHealth[rule.Host] = k8gbv1beta1.NotFound
 					continue
 				}
 				return serviceHealth, err
@@ -84,11 +84,11 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 				return serviceHealth, err
 			}
 
-			serviceHealth[rule.Host] = "Unhealthy"
+			serviceHealth[rule.Host] = k8gbv1beta1.Unhealthy
 			if len(endpoints.Subsets) > 0 {
 				for _, subset := range endpoints.Subsets {
 					if len(subset.Addresses) > 0 {
-						serviceHealth[rule.Host] = "Healthy"
+						serviceHealth[rule.Host] = k8gbv1beta1.Healthy
 					}
 				}
 			}
