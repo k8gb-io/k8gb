@@ -146,26 +146,26 @@ func TestUpgradeIngressHost(t *testing.T) {
 	// arrange
 	name := fmt.Sprintf("%s_%s_ingress_hosts_per_status", namespace, gslbSubsystem)
 	m := newPrometheusMetrics(defaultConfig)
-	var serviceHealth = map[string]string{
-		"roundrobin.cloud.example.com": HealthyStatus,
-		"failover.cloud.example.com":   HealthyStatus,
-		"unhealthy.cloud.example.com":  UnhealthyStatus,
-		"notfound.cloud.example.com":   NotFoundStatus,
+	var serviceHealth = map[string]k8gbv1beta1.HealthStatus{
+		"roundrobin.cloud.example.com": k8gbv1beta1.Healthy,
+		"failover.cloud.example.com":   k8gbv1beta1.Healthy,
+		"unhealthy.cloud.example.com":  k8gbv1beta1.Unhealthy,
+		"notfound.cloud.example.com":   k8gbv1beta1.NotFound,
 	}
 	// act
 	cntHealthy1 := testutil.ToFloat64(m.Get(name).AsGaugeVec().With(
-		prometheus.Labels{"namespace": namespace, "name": gslbName, "status": HealthyStatus}))
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
 	cntUnhealthy1 := testutil.ToFloat64(
-		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": UnhealthyStatus}))
+		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
 	cntNotFound1 := testutil.ToFloat64(
-		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": NotFoundStatus}))
+		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
 	m.UpdateIngressHostsPerStatusMetric(defaultGslb, serviceHealth)
 	cntHealthy2 := testutil.ToFloat64(
-		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": HealthyStatus}))
+		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
 	ctnUnhealthy2 := testutil.ToFloat64(
-		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": UnhealthyStatus}))
+		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
 	cntNotFound2 := testutil.ToFloat64(
-		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": NotFoundStatus}))
+		m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
 	// assert
 	assert.Equal(t, .0, cntHealthy1)
 	assert.Equal(t, .0, cntUnhealthy1)

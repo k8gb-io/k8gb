@@ -32,10 +32,7 @@ import (
 )
 
 const (
-	gslbSubsystem   = "gslb"
-	HealthyStatus   = "Healthy"
-	UnhealthyStatus = "Unhealthy"
-	NotFoundStatus  = "NotFound"
+	gslbSubsystem = "gslb"
 )
 
 type collectors struct {
@@ -61,23 +58,23 @@ func newPrometheusMetrics(config depresolver.Config) (metrics *PrometheusMetrics
 	return
 }
 
-func (m *PrometheusMetrics) UpdateIngressHostsPerStatusMetric(gslb *k8gbv1beta1.Gslb, serviceHealth map[string]string) {
+func (m *PrometheusMetrics) UpdateIngressHostsPerStatusMetric(gslb *k8gbv1beta1.Gslb, serviceHealth map[string]k8gbv1beta1.HealthStatus) {
 	var healthyHostsCount, unhealthyHostsCount, notFoundHostsCount int
 	for _, hs := range serviceHealth {
 		switch hs {
-		case HealthyStatus:
+		case k8gbv1beta1.Healthy:
 			healthyHostsCount++
-		case UnhealthyStatus:
+		case k8gbv1beta1.Unhealthy:
 			unhealthyHostsCount++
 		default:
 			notFoundHostsCount++
 		}
 	}
-	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": HealthyStatus}).
+	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.Healthy.String()}).
 		Set(float64(healthyHostsCount))
-	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": UnhealthyStatus}).
+	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.Unhealthy.String()}).
 		Set(float64(unhealthyHostsCount))
-	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": NotFoundStatus}).
+	m.metrics.IngressHostsPerStatus.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name, "status": k8gbv1beta1.NotFound.String()}).
 		Set(float64(notFoundHostsCount))
 }
 
