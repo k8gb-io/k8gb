@@ -115,3 +115,7 @@ changes
 
 # dotenv file
 .env
+
+# gh-pages | Jekyll generated files
+_site
+.jekyll-metadata
