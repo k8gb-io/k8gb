@@ -130,18 +130,6 @@ func TestEmptyHealthyRecords(t *testing.T) {
 	assert.Equal(t, 0.0, cnt2)
 }
 
-func TestZoneUpdate(t *testing.T) {
-	// arrange
-	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_zone_update_total", k8gb, gslbSubsystem)
-	cnt1 := testutil.ToFloat64(m.Get(name).AsCounterVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
-	// act
-	m.ZoneUpdateIncrement(defaultGslb)
-	// assert
-	cnt2 := testutil.ToFloat64(m.Get(name).AsCounterVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
-	assert.Equal(t, cnt1+1.0, cnt2)
-}
-
 func TestErrorIncrement(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)

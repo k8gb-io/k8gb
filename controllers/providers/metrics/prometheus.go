@@ -44,7 +44,6 @@ type collectors struct {
 	StatusFailover        *prometheus.GaugeVec
 	StatusRoundRobin      *prometheus.GaugeVec
 	StatusGeoIP           *prometheus.GaugeVec
-	ZoneUpdateTotal       *prometheus.CounterVec
 	ErrorTotal            *prometheus.CounterVec
 	ReconciliationTotal   prometheus.Counter
 }
@@ -109,10 +108,6 @@ func (m *PrometheusMetrics) UpdateGeoIPStatus(gslb *k8gbv1beta1.Gslb, healthy k8
 	m.updateRuntimeStatus(gslb, m.metrics.StatusGeoIP, healthy, targets, "")
 }
 
-func (m *PrometheusMetrics) ZoneUpdateIncrement(gslb *k8gbv1beta1.Gslb) {
-	m.metrics.ZoneUpdateTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
-}
-
 func (m *PrometheusMetrics) ErrorIncrement(gslb *k8gbv1beta1.Gslb) {
 	m.metrics.ErrorTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
 }
@@ -164,16 +159,6 @@ func (m *PrometheusMetrics) init() {
 			Help:      "Number of managed hosts observed by K8GB.",
 		},
 		[]string{"namespace", "name", "status"},
-	)
-
-	m.metrics.ZoneUpdateTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: m.config.K8gbNamespace,
-			Subsystem: gslbSubsystem,
-			Name:      "zone_update_total",
-			Help:      "Number of delegated zone updates",
-		},
-		[]string{"namespace", "name"},
 	)
 
 	m.metrics.ErrorTotal = prometheus.NewCounterVec(

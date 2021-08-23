@@ -32,8 +32,6 @@ import (
 func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 	var err error
 
-	m.ZoneUpdateIncrement(gslb)
-
 	gslb.Status.ServiceHealth, err = r.getServiceHealthStatus(gslb)
 	if err != nil {
 		return err
