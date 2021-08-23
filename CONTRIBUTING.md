@@ -156,9 +156,10 @@ Run `make check` to automatically check if your code is compliant.
 ### Logging
 
 k8gb project is using the [zerolog](https://github.com/rs/zerolog) library for logging.
-Please make sure to follow the zerolog library concepts and conventions in the code.
-Try to use [contextual logging](https://github.com/rs/zerolog#contextual-logging) whenever possible.
-Pay attention to [error logging](https://github.com/rs/zerolog#error-logging) recommendations.
+
+- Please make sure to follow the zerolog library concepts and conventions in the code.
+- Try to use [contextual logging](https://github.com/rs/zerolog#contextual-logging) whenever possible.
+- Pay attention to [error logging](https://github.com/rs/zerolog#error-logging) recommendations.
 
 ## Commit and Pull Request message
 
