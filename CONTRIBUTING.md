@@ -10,6 +10,7 @@
   - [Upgrade k8gb to local candidate](#upgrade-k8gb-to-local-candidate)
 - [Overriding dev environment settings](#overriding-dev-environment-settings)
 - [Testing](#testing)
+  - [Unit testing](#unit-testing)
   - [Testing against real k8s clusters](#testing-against-real-k8s-clusters)
 - [Debugging](#debugging)
 - [Metrics](#metrics)
@@ -48,10 +49,11 @@ Following is a rough outline for the contributor's workflow:
 
 - Create a topic branch from where to base the contribution.
 - Make commits of logical units.
-- Make sure commit messages are in the proper format (see below).
+- Make sure the commit messages are in the [proper format](#commit-and-pull-request-message).
+- Make sure the changes are covered by [reasonable amount of testing](#testing).
 - Push changes in a topic branch to a personal fork of the repository.
 - Submit a pull request to AbsaOSS/k8gb GitHub repository.
-- Resolve review comments
+- Resolve review comments.
 - PR must receive an "LGTM" approval from at least one maintainer listed in the `CODEOWNERS` file.
 
 ## Local setup
@@ -132,7 +134,7 @@ There is a dedicated make target available for Goland:
 3. Attach debugger of your IDE to port `2345`.
 
 ## Metrics
-More info about k8gb metrics can be found in the [metrics.md](/docs/metrics.md) document. 
+More info about k8gb metrics can be found in the [metrics.md](/docs/metrics.md) document.
 If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the `make deploy-prometheus` command.
 
 The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:
