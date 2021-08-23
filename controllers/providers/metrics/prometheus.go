@@ -32,6 +32,7 @@ import (
 )
 
 const (
+	k8gb          = "k8gb"
 	gslbSubsystem = "gslb"
 	primary       = "primary"
 	secondary     = "secondary"
@@ -231,7 +232,7 @@ func (m *PrometheusMetrics) registry() (r map[string]prometheus.Collector) {
 		n := val.Type().Field(i).Name
 		if !val.Field(i).IsNil() {
 			var v = val.FieldByName(n).Interface().(prometheus.Collector)
-			name := fmt.Sprintf("%s_%s_%s", m.config.K8gbNamespace, gslbSubsystem,
+			name := fmt.Sprintf("%s_%s_%s", k8gb, gslbSubsystem,
 				strings.ToLower(strings.Join(utils.SplitAfter(n, regex), "_")))
 			r[name] = v
 		}

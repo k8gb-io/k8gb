@@ -72,7 +72,7 @@ func TestPrometheusRegistry(t *testing.T) {
 	// assert
 	assert.Equal(t, len(registry), fieldCnt, "not all metrics are initialised, check init() function")
 	for n, i := range registry {
-		assert.True(t, strings.HasPrefix(n, namespace+"_"+gslbSubsystem+"_"))
+		assert.True(t, strings.HasPrefix(n, k8gb+"_"+gslbSubsystem+"_"))
 		assert.NotNil(t, i, n, "is declared but not initialized. Check init() function")
 	}
 }
@@ -90,7 +90,7 @@ func TestMetricsRegister(t *testing.T) {
 func TestReconciliationTotal(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_reconciliation_total", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_reconciliation_total", k8gb, gslbSubsystem)
 	cnt1 := testutil.ToFloat64(m.Get(name).AsCounter())
 	// act
 	m.ReconciliationIncrement()
@@ -102,7 +102,7 @@ func TestReconciliationTotal(t *testing.T) {
 func TestHealthyRecords(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_healthy_records", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_healthy_records", k8gb, gslbSubsystem)
 	data := map[string][]string{
 		"roundrobin.cloud.example.com":      {"10.0.0.1", "10.0.0.2", "10.0.0.3"},
 		"roundrobin-test.cloud.example.com": {"10.0.0.4", "10.0.0.5", "10.0.0.6"},
@@ -120,7 +120,7 @@ func TestEmptyHealthyRecords(t *testing.T) {
 	// arrange
 	var data map[string][]string
 	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_healthy_records", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_healthy_records", k8gb, gslbSubsystem)
 	// act
 	cnt1 := testutil.ToFloat64(m.Get(name).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
 	m.UpdateHealthyRecordsMetric(defaultGslb, data)
@@ -133,7 +133,7 @@ func TestEmptyHealthyRecords(t *testing.T) {
 func TestZoneUpdate(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_zone_update_total", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_zone_update_total", k8gb, gslbSubsystem)
 	cnt1 := testutil.ToFloat64(m.Get(name).AsCounterVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
 	// act
 	m.ZoneUpdateIncrement(defaultGslb)
@@ -145,7 +145,7 @@ func TestZoneUpdate(t *testing.T) {
 func TestErrorIncrement(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_error_total", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_error_total", k8gb, gslbSubsystem)
 	cnt1 := testutil.ToFloat64(m.Get(name).AsCounterVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
 	// act
 	m.ErrorIncrement(defaultGslb)
@@ -156,7 +156,7 @@ func TestErrorIncrement(t *testing.T) {
 
 func TestUpgradeIngressHost(t *testing.T) {
 	// arrange
-	name := fmt.Sprintf("%s_%s_status_per_ingress_hosts", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_status_per_ingress_hosts", k8gb, gslbSubsystem)
 	m := newPrometheusMetrics(defaultConfig)
 	var serviceHealth = map[string]k8gbv1beta1.HealthStatus{
 		"roundrobin.cloud.example.com": k8gbv1beta1.Healthy,
@@ -190,7 +190,7 @@ func TestUpgradeIngressHost(t *testing.T) {
 func TestUpdateFailover(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_status_failover", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_status_failover", k8gb, gslbSubsystem)
 
 	// act
 	m.UpdateFailoverStatus(defaultGslb, true, k8gbv1beta1.Healthy, []string{"10.0.0.1", "10.0.0.2"})
@@ -222,7 +222,7 @@ func TestUpdateFailover(t *testing.T) {
 func TestUpdateRoundRobin(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	name := fmt.Sprintf("%s_%s_status_round_robin", namespace, gslbSubsystem)
+	name := fmt.Sprintf("%s_%s_status_round_robin", k8gb, gslbSubsystem)
 
 	// act
 	m.UpdateRoundrobinStatus(defaultGslb, k8gbv1beta1.Healthy, []string{"10.0.0.1", "10.0.0.2"})
