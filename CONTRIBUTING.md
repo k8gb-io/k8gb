@@ -15,6 +15,7 @@
 - [Debugging](#debugging)
 - [Metrics](#metrics)
 - [Code style](#code-style)
+  - [Logging](#logging)
 - [Commit and Pull Request message](#commit-and-pull-request-message)
   - [Signature](#signature)
   - [Changelog](#changelog)
@@ -49,6 +50,7 @@ Following is a rough outline for the contributor's workflow:
 
 - Create a topic branch from where to base the contribution.
 - Make commits of logical units.
+- Make sure your code is clean and follows the [code style and logging guidelines](#code-style).
 - Make sure the commit messages are in the [proper format](#commit-and-pull-request-message).
 - Make sure the changes are covered by [reasonable amount of testing](#testing).
 - Push changes in a topic branch to a personal fork of the repository.
@@ -150,6 +152,14 @@ k8gb project is using the coding style suggested by the Golang community. See th
 
 Please follow this style to make k8gb easy to review, maintain and develop.
 Run `make check` to automatically check if your code is compliant.
+
+### Logging
+
+k8gb project is using the [zerolog](https://github.com/rs/zerolog) library for logging.
+
+- Please make sure to follow the zerolog library concepts and conventions in the code.
+- Try to use [contextual logging](https://github.com/rs/zerolog#contextual-logging) whenever possible.
+- Pay attention to [error logging](https://github.com/rs/zerolog#error-logging) recommendations.
 
 ## Commit and Pull Request message
 
