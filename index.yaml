@@ -31,13 +31,13 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.8.2
-    created: "2021-08-25T11:13:22.89491858Z"
+    created: "2021-08-25T11:34:32.545049181Z"
     dependencies:
     - name: coredns
       repository: https://absaoss.github.io/coredns-helm
       version: 1.15.2
     description: A Helm chart for Kubernetes Global Balancer
-    digest: 662a56926bb9a9d37cd685b074db65187299a1ffc419b72ffef4e124d18d430e
+    digest: b33f52df77230099ee62537267b48859e78f2f8da7bece35458e7fd5885640a0
     home: https://www.k8gb.io/
     keywords:
     - gslb
@@ -85,7 +85,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.8.1
-    created: "2021-08-25T11:13:22.89238218Z"
+    created: "2021-08-25T11:34:32.542125271Z"
     dependencies:
     - name: coredns
       repository: https://absaoss.github.io/coredns-helm
@@ -136,7 +136,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.8.0
-    created: "2021-08-25T11:13:22.890021987Z"
+    created: "2021-08-25T11:34:32.537012004Z"
     dependencies:
     - name: coredns
       repository: https://absaoss.github.io/coredns-helm
@@ -187,7 +187,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.7
-    created: "2021-08-25T11:13:22.887465086Z"
+    created: "2021-08-25T11:34:32.532898408Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -238,7 +238,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.6
-    created: "2021-08-25T11:13:22.884036851Z"
+    created: "2021-08-25T11:34:32.529133438Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -289,7 +289,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.5
-    created: "2021-08-25T11:13:22.881163538Z"
+    created: "2021-08-25T11:34:32.526262232Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -321,7 +321,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.4
-    created: "2021-08-25T11:13:22.871954176Z"
+    created: "2021-08-25T11:34:32.523485733Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -338,7 +338,7 @@ entries:
     version: v0.7.4
   - apiVersion: v2
     appVersion: 0.7.2
-    created: "2021-08-25T11:13:22.86900486Z"
+    created: "2021-08-25T11:34:32.518315861Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -353,4 +353,4 @@ entries:
     urls:
     - charts/k8gb-0.7.2.tgz
     version: 0.7.2
-generated: "2021-08-25T11:13:22.865861936Z"
+generated: "2021-08-25T11:34:32.512042311Z"
