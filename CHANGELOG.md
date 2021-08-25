@@ -1,5 +1,122 @@
 # Changelog
 
+## [v0.8.2](https://github.com/k8gb-io/k8gb/tree/v0.8.2) (2021-08-25)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.1...v0.8.2)
+
+**Implemented enhancements:**
+
+- Upgrade to latest operator-sdk [\#527](https://github.com/k8gb-io/k8gb/issues/527)
+- Add favicon to k8gb.io website [\#498](https://github.com/k8gb-io/k8gb/issues/498)
+- Add test coverage requirements to contribution flow in CONTRIBUTING.md [\#497](https://github.com/k8gb-io/k8gb/issues/497)
+- CodeQL GH workflow should be scoped only for source code changes [\#482](https://github.com/k8gb-io/k8gb/issues/482)
+- \[openshift-support\] k8gb does not have the permissions to set the ingress name [\#422](https://github.com/k8gb-io/k8gb/issues/422)
+- \[openshift-support\] runAsUser=1000 preventing from running pods [\#421](https://github.com/k8gb-io/k8gb/issues/421)
+- Add topology/location based load balancing strategy [\#244](https://github.com/k8gb-io/k8gb/issues/244)
+- Try to mitigate DNS protocol limitations with ingress controller custom error [\#134](https://github.com/k8gb-io/k8gb/issues/134)
+
+**Fixed bugs:**
+
+- 'test-round-robin' often fails [\#528](https://github.com/k8gb-io/k8gb/issues/528)
+
+**Closed issues:**
+
+- Updates components diagram [\#569](https://github.com/k8gb-io/k8gb/issues/569)
+- Document breifly new geoip strategy and other strategies in general [\#548](https://github.com/k8gb-io/k8gb/issues/548)
+- Can't deploy K8GB in a Cluster that has an Existing ExternalDNS Deployment [\#542](https://github.com/k8gb-io/k8gb/issues/542)
+- Fix security vulnerability in golang.org/x/crypto [\#539](https://github.com/k8gb-io/k8gb/issues/539)
+- Extend terratest suite with http end-to-end test. [\#533](https://github.com/k8gb-io/k8gb/issues/533)
+- Enable DCO for all of k8gb \(CNCF requirement\) [\#523](https://github.com/k8gb-io/k8gb/issues/523)
+- Update CONTRIBUTING.md with logging recommendations [\#468](https://github.com/k8gb-io/k8gb/issues/468)
+
+**Merged pull requests:**
+
+- Sign-off changelog PR [\#579](https://github.com/k8gb-io/k8gb/pull/579) ([k0da](https://github.com/k0da))
+- fix helm publish [\#578](https://github.com/k8gb-io/k8gb/pull/578) ([kuritka](https://github.com/kuritka))
+- release v0.8.2 [\#575](https://github.com/k8gb-io/k8gb/pull/575) ([kuritka](https://github.com/kuritka))
+- Update contribution flow with code style and logging recommendations [\#573](https://github.com/k8gb-io/k8gb/pull/573) ([somaritane](https://github.com/somaritane))
+- Metrics \(4/4\) [\#572](https://github.com/k8gb-io/k8gb/pull/572) ([kuritka](https://github.com/kuritka))
+- Mention testing in the contribution flow [\#571](https://github.com/k8gb-io/k8gb/pull/571) ([somaritane](https://github.com/somaritane))
+- Fix k8gb-components.svg image [\#570](https://github.com/k8gb-io/k8gb/pull/570) ([k0da](https://github.com/k0da))
+- Ignore gh-pages | Jekyll generated output [\#568](https://github.com/k8gb-io/k8gb/pull/568) ([somaritane](https://github.com/somaritane))
+- Health status enum [\#564](https://github.com/k8gb-io/k8gb/pull/564) ([kuritka](https://github.com/kuritka))
+- Fix external-dns managed records option usage [\#563](https://github.com/k8gb-io/k8gb/pull/563) ([k0da](https://github.com/k0da))
+- Fix external-dns securityContext identation [\#562](https://github.com/k8gb-io/k8gb/pull/562) ([k0da](https://github.com/k0da))
+- Propogate DNS Zone Negative TTL down to CoreDNS [\#561](https://github.com/k8gb-io/k8gb/pull/561) ([k0da](https://github.com/k0da))
+- Make CodeQL workflow to react to Go files change only [\#560](https://github.com/k8gb-io/k8gb/pull/560) ([ytsarev](https://github.com/ytsarev))
+- Parametrize security settings for k8gb and externaldns pods [\#559](https://github.com/k8gb-io/k8gb/pull/559) ([ytsarev](https://github.com/ytsarev))
+- Openshift support: flagged rbac for the Routes [\#558](https://github.com/k8gb-io/k8gb/pull/558) ([ytsarev](https://github.com/ytsarev))
+- create-pull-request creates commit [\#557](https://github.com/k8gb-io/k8gb/pull/557) ([k0da](https://github.com/k0da))
+- Add initial strategies document [\#556](https://github.com/k8gb-io/k8gb/pull/556) ([k0da](https://github.com/k0da))
+- \[Fix\] busybox HitTestApp [\#555](https://github.com/k8gb-io/k8gb/pull/555) ([kuritka](https://github.com/kuritka))
+- Upgrade to latest operator-sdk v1.10.1 [\#554](https://github.com/k8gb-io/k8gb/pull/554) ([ytsarev](https://github.com/ytsarev))
+- Update to external-dns v0.9.0 [\#553](https://github.com/k8gb-io/k8gb/pull/553) ([k0da](https://github.com/k0da))
+- Use `k8gb` prefix for external dns rbac [\#551](https://github.com/k8gb-io/k8gb/pull/551) ([ytsarev](https://github.com/ytsarev))
+- Metrics \(3/4\) [\#550](https://github.com/k8gb-io/k8gb/pull/550) ([kuritka](https://github.com/kuritka))
+- http failover, wait for app [\#546](https://github.com/k8gb-io/k8gb/pull/546) ([kuritka](https://github.com/kuritka))
+- Handling error code for defer functions [\#545](https://github.com/k8gb-io/k8gb/pull/545) ([kuritka](https://github.com/kuritka))
+- logging delegated records [\#544](https://github.com/k8gb-io/k8gb/pull/544) ([kuritka](https://github.com/kuritka))
+- Cleanup old NS name format [\#543](https://github.com/k8gb-io/k8gb/pull/543) ([k0da](https://github.com/k0da))
+- upgrade to k3d-action v1.5.0 [\#541](https://github.com/k8gb-io/k8gb/pull/541) ([kuritka](https://github.com/kuritka))
+- Fix x/crypto vulnerability [\#540](https://github.com/k8gb-io/k8gb/pull/540) ([ytsarev](https://github.com/ytsarev))
+- Failover HTTP test [\#538](https://github.com/k8gb-io/k8gb/pull/538) ([kuritka](https://github.com/kuritka))
+- Temporarly downgrade GitHub runner to Ubuntu 18.04 [\#537](https://github.com/k8gb-io/k8gb/pull/537) ([kuritka](https://github.com/kuritka))
+- Trailing whitespace busting [\#536](https://github.com/k8gb-io/k8gb/pull/536) ([ytsarev](https://github.com/ytsarev))
+- simplifying Failover and RoundRobin tests [\#535](https://github.com/k8gb-io/k8gb/pull/535) ([kuritka](https://github.com/kuritka))
+- Fix local playground setup [\#532](https://github.com/k8gb-io/k8gb/pull/532) ([k0da](https://github.com/k0da))
+- Fix version of podinfo test sample chart [\#531](https://github.com/k8gb-io/k8gb/pull/531) ([ytsarev](https://github.com/ytsarev))
+- Label dnsendpoints with strategy label [\#530](https://github.com/k8gb-io/k8gb/pull/530) ([k0da](https://github.com/k0da))
+- Install prometheus on local clusters \(2/4\) [\#529](https://github.com/k8gb-io/k8gb/pull/529) ([kuritka](https://github.com/kuritka))
+- Metrics configuration \#\(1/4\) [\#525](https://github.com/k8gb-io/k8gb/pull/525) ([kuritka](https://github.com/kuritka))
+- Revert "Scan k8gb image by Artifacthub.io \(\#519\)" [\#524](https://github.com/k8gb-io/k8gb/pull/524) ([k0da](https://github.com/k0da))
+- Document release process [\#522](https://github.com/k8gb-io/k8gb/pull/522) ([ytsarev](https://github.com/ytsarev))
+- terratest abstraction [\#514](https://github.com/k8gb-io/k8gb/pull/514) ([kuritka](https://github.com/kuritka))
+- Refactor CoreDNS service [\#453](https://github.com/k8gb-io/k8gb/pull/453) ([k0da](https://github.com/k0da))
+
+## [v0.8.1](https://github.com/k8gb-io/k8gb/tree/v0.8.1) (2021-06-14)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.0...v0.8.1)
+
+**Implemented enhancements:**
+
+- edgeDNSServer is not used for remote k8gb NS record resolution [\#513](https://github.com/k8gb-io/k8gb/issues/513)
+- Containerized local authoring environment for k8gb.io website [\#483](https://github.com/k8gb-io/k8gb/issues/483)
+- Shorten NS names for zone delegation [\#456](https://github.com/k8gb-io/k8gb/issues/456)
+
+**Fixed bugs:**
+
+- Fix for k8gb.io mixed content warnings [\#488](https://github.com/k8gb-io/k8gb/pull/488) ([somaritane](https://github.com/somaritane))
+
+**Merged pull requests:**
+
+- Prepare for v0.8.1 release [\#521](https://github.com/k8gb-io/k8gb/pull/521) ([ytsarev](https://github.com/ytsarev))
+- Point Github Actions based badges to master branch [\#520](https://github.com/k8gb-io/k8gb/pull/520) ([ytsarev](https://github.com/ytsarev))
+- Scan k8gb image by Artifacthub.io [\#519](https://github.com/k8gb-io/k8gb/pull/519) ([k0da](https://github.com/k0da))
+- Fix DNS query logging message [\#518](https://github.com/k8gb-io/k8gb/pull/518) ([ytsarev](https://github.com/ytsarev))
+- refactoring suggestions [\#517](https://github.com/k8gb-io/k8gb/pull/517) ([kuritka](https://github.com/kuritka))
+- Use edgeDNSServer for NS name resolution [\#516](https://github.com/k8gb-io/k8gb/pull/516) ([ytsarev](https://github.com/ytsarev))
+- fakeDNS testupdate [\#515](https://github.com/k8gb-io/k8gb/pull/515) ([kuritka](https://github.com/kuritka))
+- fix local playground, list of local-targets [\#512](https://github.com/k8gb-io/k8gb/pull/512) ([kuritka](https://github.com/kuritka))
+- fix number of addresses in local.md [\#511](https://github.com/k8gb-io/k8gb/pull/511) ([kuritka](https://github.com/kuritka))
+- Bump coredns plugin version [\#510](https://github.com/k8gb-io/k8gb/pull/510) ([k0da](https://github.com/k0da))
+- Fix Github repo links in NS1 docs [\#509](https://github.com/k8gb-io/k8gb/pull/509) ([ytsarev](https://github.com/ytsarev))
+- Enhance and simplify NS1 reference deployment example [\#508](https://github.com/k8gb-io/k8gb/pull/508) ([ytsarev](https://github.com/ytsarev))
+- refactor \(3/3\): Introducing local FakeDNS [\#507](https://github.com/k8gb-io/k8gb/pull/507) ([kuritka](https://github.com/kuritka))
+- Update k8gb curl demo to be usable for real deployments [\#506](https://github.com/k8gb-io/k8gb/pull/506) ([ytsarev](https://github.com/ytsarev))
+- refactor \(2/3\): Remove responsibility for target DNS from GSLB assistant [\#505](https://github.com/k8gb-io/k8gb/pull/505) ([kuritka](https://github.com/kuritka))
+- refactor \(1/3\): simplify controller tests [\#503](https://github.com/k8gb-io/k8gb/pull/503) ([kuritka](https://github.com/kuritka))
+- Add Crossplane Day recording [\#502](https://github.com/k8gb-io/k8gb/pull/502) ([ytsarev](https://github.com/ytsarev))
+- Add k8gb CII Best Practices status badge [\#501](https://github.com/k8gb-io/k8gb/pull/501) ([somaritane](https://github.com/somaritane))
+- Fix failing `clean-test-apps` make target [\#500](https://github.com/k8gb-io/k8gb/pull/500) ([somaritane](https://github.com/somaritane))
+- Remove duplicated hit-testapp-host make function [\#496](https://github.com/k8gb-io/k8gb/pull/496) ([somaritane](https://github.com/somaritane))
+- Add override for dev env variables with "dotenv" file [\#495](https://github.com/k8gb-io/k8gb/pull/495) ([somaritane](https://github.com/somaritane))
+- Update docs for containerized website authoring [\#494](https://github.com/k8gb-io/k8gb/pull/494) ([somaritane](https://github.com/somaritane))
+- Refactor test target [\#492](https://github.com/k8gb-io/k8gb/pull/492) ([kuritka](https://github.com/kuritka))
+- refactor: interface rename [\#491](https://github.com/k8gb-io/k8gb/pull/491) ([kuritka](https://github.com/kuritka))
+- Shrink NS names [\#490](https://github.com/k8gb-io/k8gb/pull/490) ([kuritka](https://github.com/kuritka))
+- Fix for k8gb.io mixed content warnings [\#489](https://github.com/k8gb-io/k8gb/pull/489) ([somaritane](https://github.com/somaritane))
+- Bump sigs.k8s.io/external-dns from 0.7.6 to 0.8.0 [\#466](https://github.com/k8gb-io/k8gb/pull/466) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.8.0](https://github.com/k8gb-io/k8gb/tree/v0.8.0) (2021-05-13)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.7.7...v0.8.0)
@@ -262,7 +379,6 @@
 - Bump github.com/stretchr/testify from 1.5.1 to 1.6.1 [\#241](https://github.com/k8gb-io/k8gb/pull/241) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Preparation for artifacthub [\#240](https://github.com/k8gb-io/k8gb/pull/240) ([ytsarev](https://github.com/ytsarev))
 - Bump github.com/prometheus/client\_golang from 1.7.1 to 1.9.0 [\#239](https://github.com/k8gb-io/k8gb/pull/239) ([dependabot[bot]](https://github.com/apps/dependabot))
-- Switch external-dns to upstream v0.7.5 image release [\#237](https://github.com/k8gb-io/k8gb/pull/237) ([ytsarev](https://github.com/ytsarev))
 - Bump sigs.k8s.io/external-dns from 0.7.4 to 0.7.5 [\#235](https://github.com/k8gb-io/k8gb/pull/235) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump github.com/miekg/dns from 1.1.30 to 1.1.35 [\#232](https://github.com/k8gb-io/k8gb/pull/232) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump github.com/onsi/ginkgo from 1.12.1 to 1.14.2 [\#230](https://github.com/k8gb-io/k8gb/pull/230) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -293,6 +409,7 @@
 
 **Merged pull requests:**
 
+- Switch external-dns to upstream v0.7.5 image release [\#237](https://github.com/k8gb-io/k8gb/pull/237) ([ytsarev](https://github.com/ytsarev))
 - Switch to new chart repos for dependency charts [\#224](https://github.com/k8gb-io/k8gb/pull/224) ([ytsarev](https://github.com/ytsarev))
 - Add missing NS1 api key propagation to the doc [\#223](https://github.com/k8gb-io/k8gb/pull/223) ([ytsarev](https://github.com/ytsarev))
 - k3d migration [\#218](https://github.com/k8gb-io/k8gb/pull/218) ([kuritka](https://github.com/kuritka))
