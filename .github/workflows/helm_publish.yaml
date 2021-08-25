@@ -18,20 +18,11 @@ jobs:
           source-charts-folder: 'chart'
           destination-repo: absaoss/k8gb
           destination-branch: gh-pages
-      - name: Create single node k3s cluster
+      - name: Create k3s cluster
         uses: AbsaOSS/k3d-action@v1.5.0
         with:
           cluster-name: "test-gslb1"
-          use-default-registry: false
-          args: >-
-            -p "80:80@agent[0]"
-            -p "443:443@agent[0]"
-            -p "5053:53/udp@agent[0]"
-            --agents 1
-            --no-lb
-            --network k3d-action-bridge-network
-            --image docker.io/rancher/k3s:v1.20.5-k3s1
-            --k3s-server-arg "--no-deploy=traefik,servicelb,metrics-server"
+          args: -c k3d/test-gslb1.yaml
       - name: Smoke test helm installation
         run: |
           helm repo add k8gb https://k8gb.io/
