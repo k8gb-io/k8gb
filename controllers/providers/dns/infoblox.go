@@ -24,10 +24,10 @@ import (
 
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
-	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
-
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
+	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 )
 
@@ -35,6 +35,8 @@ type InfobloxProvider struct {
 	assistant assistant.Assistant
 	config    depresolver.Config
 }
+
+var m = metrics.Metrics()
 
 func NewInfobloxDNS(config depresolver.Config, assistant assistant.Assistant) *InfobloxProvider {
 	return &InfobloxProvider{
@@ -58,10 +60,12 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibclient.NameS
 func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
 	objMgr, err := p.infobloxConnection()
 	if err != nil {
+		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
 	}
 	addresses, err := p.assistant.GslbIngressExposedIPs(gslb)
 	if err != nil {
+		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
 	}
 	var delegateTo []ibclient.NameServer
@@ -73,6 +77,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 
 	findZone, err := objMgr.GetZoneDelegated(p.config.DNSZone)
 	if err != nil {
+		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
 	}
 
@@ -83,6 +88,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	if findZone != nil {
 		err = p.checkZoneDelegated(findZone)
 		if err != nil {
+			m.InfobloxIncrementZoneUpdateError(gslb)
 			return err
 		}
 
@@ -111,8 +117,10 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 				log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, currentList)
 				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, currentList)
 				if err != nil {
+					m.InfobloxIncrementZoneUpdateError(gslb)
 					return err
 				}
+				m.InfobloxIncrementZoneUpdate(gslb)
 			}
 		}
 	} else {
@@ -121,8 +129,10 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		log.Debug().Msgf("Delegated records (%v)", delegateTo)
 		_, err = objMgr.CreateZoneDelegated(p.config.DNSZone, delegateTo)
 		if err != nil {
+			m.InfobloxIncrementZoneUpdateError(gslb)
 			return err
 		}
+		m.InfobloxIncrementZoneUpdate(gslb)
 	}
 	if p.config.SplitBrainCheck {
 		return p.saveHeartbeatTXTRecord(objMgr, gslb)
@@ -200,14 +210,17 @@ func (p *InfobloxProvider) saveHeartbeatTXTRecord(objMgr *ibclient.ObjectManager
 		log.Info().Str("HeartbeatTXTName", heartbeatTXTName).Msg("Creating split brain TXT record")
 		_, err = objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
 		if err != nil {
+			m.InfobloxIncrementHeartbeatError(gslb)
 			return
 		}
 	} else {
 		log.Info().Str("HeartbeatTXTName", heartbeatTXTName).Msg("Updating split brain TXT record")
 		_, err = objMgr.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
 		if err != nil {
+			m.InfobloxIncrementHeartbeatError(gslb)
 			return
 		}
 	}
+	m.InfobloxIncrementHeartbeat(gslb)
 	return
 }

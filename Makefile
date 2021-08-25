@@ -289,6 +289,7 @@ manager: lint
 mocks:
 	go install github.com/golang/mock/mockgen@v1.5.0
 	mockgen -source=controllers/providers/assistant/assistant.go -destination=controllers/providers/assistant/assistant_mock.go -package=assistant
+	mockgen -source=controllers/providers/dns/dns.go -destination=controllers/providers/dns/dns_mock.go -package=dns
 	$(call golic)
 
 # remove clusters and redeploy
