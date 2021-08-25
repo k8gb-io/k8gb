@@ -16,6 +16,7 @@
 - [Metrics](#metrics)
 - [Code style](#code-style)
   - [Logging](#logging)
+  - [Error handling](#error-handling)
 - [Commit and Pull Request message](#commit-and-pull-request-message)
   - [Signature](#signature)
   - [Changelog](#changelog)
@@ -160,6 +161,25 @@ k8gb project is using the [zerolog](https://github.com/rs/zerolog) library for l
 - Please make sure to follow the zerolog library concepts and conventions in the code.
 - Try to use [contextual logging](https://github.com/rs/zerolog#contextual-logging) whenever possible.
 - Pay attention to [error logging](https://github.com/rs/zerolog#error-logging) recommendations.
+
+### Error handling
+See [effective go errors](https://golang.org/doc/effective_go.html#errors) first. Do not discard errors using `_` variables except
+tests, or, in truly exceptional situations. If a function returns an error, check it to make sure the function succeeded.
+If the function fails, consider logging the error and recording errors in metrics (see: [logging recommendations](#logging)). 
+
+The following example demonstrates error handling inside the reconciliation loop:
+```go
+	var log = logging.Logger()
+
+	var m = metrics.Metrics()
+	...
+	err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
+	if err != nil {
+		log.Err(err).Msg("Unable to create zone delegation")
+		m.ErrorIncrement(gslb)
+		return result.Requeue()
+	}
+```
 
 ## Commit and Pull Request message
 
