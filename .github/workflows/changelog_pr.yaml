@@ -31,4 +31,5 @@ jobs:
           branch: offline_changelog
           delete-branch: true
           base: master
+          signoff: true
           token: ${{ secrets.GITHUB_TOKEN }}
