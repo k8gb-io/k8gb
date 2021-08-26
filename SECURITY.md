@@ -5,6 +5,7 @@ We're always looking for ways to improve our security posture and taking securit
 ## Reporting a Vulnerability
 
 To report a vulnerability, send an email to the official k8gb maintainers list [cncf-k8gb-maintainers@lists.cncf.io](mailto:cncf-k8gb-maintainers@lists.cncf.io).
+
 Please make sure to provide the following information:
 - vulnerability description
 - version of the k8gb package
@@ -12,6 +13,8 @@ Please make sure to provide the following information:
 - steps to reproduce the vulnerability
 
 ## Review Process
+
+The standard response time from k8gb project maintainers for a vulnerability report is less than 14 days.
 
 Once k8gb project maintainers have confirmed the relevance of the report, a [draft security advisory](https://github.com/k8gb-io/k8gb/security/advisories) will be created on Github. Please provide Github username to k8gb project maintainers if you wish to be invited to participate in advisory discussions. You can also request to be updated about advisory discussions directly via email.
 
