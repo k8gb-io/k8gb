@@ -1,0 +1,23 @@
+name: Terrascan
+
+on:
+  push:
+#    paths:
+#     - 'chart/k8gb/**'
+
+jobs:
+  terrascan:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Run Terrascan
+      id: terrascan
+      uses: accurics/terrascan-action@fad2372c88bb11afccc0b682bffbeffd443b56ed
+      with:
+        iac_type: helm
+        iac_version: v3
+        only_warn: true
+        verbose: true
+        sarif_upload: true
+        iac_dir: chart/k8gb
