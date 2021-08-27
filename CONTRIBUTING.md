@@ -304,16 +304,20 @@ make demo DEMO_URL=https://failover.test.exampledns.tk DEMO_DEBUG=1
 
 * Bump the version in `Chart.yaml`, see [example PR](https://github.com/k8gb-io/k8gb/pull/521).
 * Merge the Pull Request after the review approval
-* Create release tag (replace `v0.8.1` with an actual version)
+* Create release tag (make sure you do the following steps on the up to date `master` branch)
 ```sh
-git tag v0.8.1
+export RELEASE_TAG=<tag, e.g.: v0.8.2>
+git tag $RELEASE_TAG -s -m "Release $RELEASE_TAG"
+git push origin refs/tags/$RELEASE_TAG
 ```
-* Push release tag
-```sh
-git push origin refs/tags/v0.8.1
-```
-* Watch the [release pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/release.yaml) status
-* Check the [offline changelog](https://github.com/k8gb-io/k8gb/actions/workflows/changelog_pr.yaml) creation
+* At this point a DRAFT release will be created on GitHub. After the [release pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/release.yaml) 
+has been successfully completed, you check the [release DRAFT](https://github.com/k8gb-io/k8gb/releases) and if it is OK, you click on the **"Publish release"** button.
+
+* Check the [helm publish pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml) status
+* Check the [offline changelog](https://github.com/k8gb-io/k8gb/actions/workflows/changelog_pr.yaml) status. This pipeline creates 
+a pull request with an offline changelog. Do a review and if everything is ok, merge it.
+
+Congratulations, the release is complete!
 
 ---
 Thanks for contributing!
