@@ -37,7 +37,7 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 		return err
 	}
 
-	m.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
+	m.UpdateHealthStatusMetric(gslb, gslb.Status.ServiceHealth)
 
 	gslb.Status.HealthyRecords, err = r.getHealthyRecords(gslb)
 	if err != nil {
