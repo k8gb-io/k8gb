@@ -38,6 +38,7 @@ import (
 
 var (
 	runtimescheme = runtime.NewScheme()
+	version       = "development"
 )
 
 func init() {
@@ -58,6 +59,7 @@ func main() {
 	// Initialize desired log or default log in case of configuration failed.
 	logging.Init(config)
 	log := logging.Logger()
+	log.Info().Str("version", version).Msg("k8gb:")
 	if err != nil {
 		log.Err(err).Msg("can't resolve environment variables")
 		return
