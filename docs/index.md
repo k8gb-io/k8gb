@@ -44,7 +44,7 @@ At it's simplest, an HTTP request should be handled by a healthy service. This s
 
 In the use case above, the following resources are configured by the _application_ team:
 
-**A.** The Kubernetes `Gslb` CRD (Custom Resource Definition) is created which indicates to an  k8gb controller that it should create the necessary GSLB configuration for the cluster where the the `Gslb` resource is created and the k8gb controller for that cluster.
+**A.** The Kubernetes `Gslb` CRD (Custom Resource Definition) is created which indicates to an  k8gb controller that it should create the necessary GSLB configuration for the cluster.
 
 A potential example of what this `Gslb` resource would look like:
 
@@ -157,7 +157,7 @@ However, any other global k8gb specific configuration should be specified as arg
 
 ## Runtime environments
 
-k8gb instances should be able to run on any Linux based operating system but should run best within in a Kubernetes environment as a Deployment etc.
+k8gb instances should be able to run on any Linux based operating system but should run best within a Kubernetes environment as a Deployment etc.
 
 ## Existing GSLB projects
 

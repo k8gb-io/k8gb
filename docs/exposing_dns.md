@@ -1,6 +1,6 @@
 # Exposing DNS UDP traffic for k8gb
 
-In order for k8gb to function properly, associated CoreDNS service deployed with k8gb needs be exposed for external DNS UDP traffic on cluster worker nodes.
+In order for k8gb to function properly, associated CoreDNS service deployed with k8gb needs to be exposed for external DNS UDP traffic on cluster worker nodes.
 
 Actual ways to achieve this depend on many factors, such as underlying infrastructure (cloud, on-prem, managed vs bare-metal setup), means to expose CoreDNS service (ClusterIP, LoadBalancer),
 type of load balancer or ingress controller used etc.
@@ -41,14 +41,14 @@ kubectl create -n ingress-nginx cm udp-services --from-literal="53"="k8gb/k8gb-c
 [Local project setup](./local.md) does this patching automatically.
 
 ## CoreDNS service lookup
-k8gb is trying to find a service annotated with `app.kubernetes.io/name=coredns` within the same namespace where controller itself is deployed into. If service has `Status.LoadBalancer.Ingress[0].Hostname`, k8gb will use the resolved IPs to reach CoreDNS on this cluster.
+k8gb is trying to find a service annotated with `app.kubernetes.io/name=coredns` within the same namespace where controller itself is deployed into. If the service has `Status.LoadBalancer.Ingress[0].Hostname`, k8gb will use the resolved IPs to reach CoreDNS on this cluster.
 
 ## External load balancer
 
 CoreDNS can be also exposed for DNS UDP traffic via external load balancer,
 if underlying infrastructure supports that.<br>
 [AWS EKS](https://aws.amazon.com/eks) with [NLB](https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html) and [k3d](https://www.k3d.io) with [ServiceLB](https://rancher.com/docs/k3s/latest/en/networking/#service-load-balancer) are good examples of such an infrastructure proven to work for k8gb deployments.<br>
-We're using this approach in our [AWS+Route53](deploy_route53.md) reference setup, with [k8gb helm chart](https://artifacthub.io/packages/helm/k8gb/k8gb) providing out of the box support for external load balancer scenario. CoreDNS service is configured by setting `coredns.serviceType` helm chart value to `LoadBalancer`:
+We're using this approach in our [AWS+Route53](deploy_route53.md) reference setup with [k8gb helm chart](https://artifacthub.io/packages/helm/k8gb/k8gb) providing out-of-the-box support for external load balancer scenario. CoreDNS service is configured by setting `coredns.serviceType` helm chart value to `LoadBalancer`:
 ```yaml
 # k8gb helm chart values.yaml example:
 
