@@ -33,4 +33,6 @@ type Provider interface {
 	SaveDNSEndpoint(*k8gbv1beta1.Gslb, *externaldns.DNSEndpoint) error
 	// Finalize finalize gslb in k8gbNamespace
 	Finalize(*k8gbv1beta1.Gslb) error
+	// String see: Stringer interface
+	String() string
 }

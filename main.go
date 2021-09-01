@@ -59,7 +59,9 @@ func main() {
 	// Initialize desired log or default log in case of configuration failed.
 	logging.Init(config)
 	log := logging.Logger()
-	log.Info().Str("version", version).Msg("k8gb:")
+	log.Info().
+		Str("version", version).
+		Msg("K8gb status")
 	if err != nil {
 		log.Err(err).Msg("can't resolve environment variables")
 		return
@@ -78,18 +80,18 @@ func main() {
 		LeaderElectionID:   "8020e9ff.absa.oss",
 	})
 	if err != nil {
-		log.Err(err).Msg("unable to start manager")
+		log.Err(err).Msg("Unable to start manager")
 		return
 	}
 
-	log.Info().Msg("registering components.")
+	log.Info().Msg("Registering components")
 
 	// Add external-dns DNSEndpoints resource
 	// https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md#adding-3rd-party-resources-to-your-operator
 	schemeBuilder := &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}}
 	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
 	if err := schemeBuilder.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Err(err).Msg("")
+		log.Err(err).Msg("Extending scheme")
 		return
 	}
 
@@ -100,32 +102,32 @@ func main() {
 		Scheme:      mgr.GetScheme(),
 	}
 
-	log.Info().Msg("starting metrics")
+	log.Info().Msg("Starting metrics")
 	metrics.Init(config)
 	defer metrics.Metrics().Unregister()
 	err = metrics.Metrics().Register()
 	if err != nil {
-		log.Err(err).Msg("register metrics error")
+		log.Err(err).Msg("Register metrics error")
 		return
 	}
 
-	log.Info().Msg("starting DNS provider")
+	log.Info().Msg("Resolving DNS provider")
 	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config)
 	if err != nil {
-		log.Err(err).Msgf("unable to create factory (%s)", err)
+		log.Err(err).Msg("Unable to create factory")
 		return
 	}
 	reconciler.DNSProvider = f.Provider()
-	log.Info().Msgf("provider: %s", reconciler.DNSProvider)
+	log.Info().Str("provider", reconciler.DNSProvider.String()).Msg("Started")
 
 	if err = reconciler.SetupWithManager(mgr); err != nil {
-		log.Err(err).Msg("unable to create controller Gslb")
+		log.Err(err).Msg("Unable to create controller Gslb")
 		return
 	}
 	// +kubebuilder:scaffold:builder
-	log.Info().Msg("starting manager")
+	log.Info().Msg("Starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		log.Err(err).Msg("problem running manager")
+		log.Err(err).Msg("Problem running manager")
 		return
 	}
 	// time to call deferred functions including the exit one with code=0

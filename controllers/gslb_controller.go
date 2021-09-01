@@ -94,6 +94,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return result.RequeueError(fmt.Errorf("resolving spec (%s)", err))
 	}
 	log.Debug().
+		Str("gslb", gslb.Name).
 		Str("Strategy", str.ToString(gslb.Spec.Strategy)).
 		Msg("Resolved strategy")
 	// == Finalizer business ==
@@ -221,8 +222,10 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		})
 
 	createGslbFromIngress := func(annotationKey string, annotationValue string, a client.Object, strategy string) {
-		log.Info().Msgf("Detected strategy annotation(%s:%s) on Ingress(%s)",
-			annotationKey, annotationValue, a.GetName())
+		log.Info().
+			Str("annotation", fmt.Sprintf("(%s:%s)", annotationKey, annotationValue)).
+			Str("ingress", a.GetName()).
+			Msg("Detected strategy annotation on ingress")
 		c := mgr.GetClient()
 		ingressToReuse := &v1beta1.Ingress{}
 		err := c.Get(context.Background(), client.ObjectKey{
@@ -230,7 +233,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Name:      a.GetName(),
 		}, ingressToReuse)
 		if err != nil {
-			log.Info().Msgf("Ingress(%s) does not exist anymore. Skipping Glsb creation...", a.GetName())
+			log.Info().
+				Str("ingress", a.GetName()).
+				Msg("Ingress does not exist anymore. Skipping Glsb creation...")
 			return
 		}
 		gslbExist := &k8gbv1beta1.Gslb{}
@@ -239,7 +244,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Name:      a.GetName(),
 		}, gslbExist)
 		if err == nil {
-			log.Info().Msgf("Gslb(%s) already exists. Skipping Gslb creation...", gslbExist.Name)
+			log.Info().
+				Str("gslb", gslbExist.Name).
+				Msg("Gslb already exists. Skipping Gslb creation...")
 			return
 		}
 		gslb := &k8gbv1beta1.Gslb{
@@ -259,7 +266,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		strToInt := func(str string) int {
 			intValue, err := strconv.Atoi(str)
 			if err != nil {
-				log.Err(err).Msgf("can't convert string to int (%s)", err)
+				log.Err(err).Msg("can't convert string to int")
 			}
 			return intValue
 		}
@@ -280,7 +287,10 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				}
 			}
 			if gslb.Spec.Strategy.PrimaryGeoTag == "" {
-				log.Info().Msgf("%s annotation is missing, skipping Gslb creation...", primaryGeoTagAnnotation)
+				log.Info().
+					Str("annotation", primaryGeoTagAnnotation).
+					Str("gslb", gslb.Name).
+					Msg("Annotation is missing, skipping Gslb creation...")
 				return
 			}
 		}
@@ -289,11 +299,13 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		if err != nil {
 			log.Err(err).
 				Str("Ingress", ingressToReuse.Name).
-				Str("Gslb", gslb.Name).
+				Str("gslb", gslb.Name).
 				Msg("Cannot set the Ingress as the owner of the Gslb")
 		}
 
-		log.Info().Msgf("Creating new Gslb(%s) out of Ingress annotation", gslb.Name)
+		log.Info().
+			Str("gslb", gslb.Name).
+			Msg("Creating new Gslb out of Ingress annotation")
 		err = c.Create(context.Background(), gslb)
 		if err != nil {
 			log.Err(err).Msg("Glsb creation failed")
