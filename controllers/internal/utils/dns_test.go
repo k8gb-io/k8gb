@@ -30,9 +30,10 @@ func TestValidDig(t *testing.T) {
 		t.Skipf("no connectivity, skipping")
 	}
 	edgeDNSServer := "8.8.8.8"
+	backupDNSServer := "dns.google"
 	fqdn := "google.com"
 	// act
-	result, err := Dig(edgeDNSServer, fqdn)
+	result, err := DigWithBackup(edgeDNSServer, backupDNSServer, fqdn)
 	// assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
@@ -45,9 +46,10 @@ func TestEmptyFQDNButValidEdgeDNS(t *testing.T) {
 		t.Skipf("no connectivity, skipping")
 	}
 	edgeDNSServer := "8.8.8.8"
+	backupDNSServer := "dns.google"
 	fqdn := ""
 	// act
-	result, err := Dig(edgeDNSServer, fqdn)
+	result, err := DigWithBackup(edgeDNSServer, backupDNSServer, fqdn)
 	// assert
 	assert.NoError(t, err)
 	assert.Nil(t, result)

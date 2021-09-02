@@ -26,6 +26,10 @@ import (
 
 // Dig retrieves list of tuple <IP address, A record > from edge DNS server for specific FQDN
 func Dig(edgeDNSServer, fqdn string) ([]string, error) {
+	return DigWithBackup(edgeDNSServer, "", fqdn)
+}
+
+func DigWithBackup(edgeDNSServer, backupDNSServer, fqdn string) ([]string, error) {
 	var dig dnsutil.Dig
 	if edgeDNSServer == "" {
 		return nil, fmt.Errorf("empty edgeDNSServer")
@@ -34,6 +38,13 @@ func Dig(edgeDNSServer, fqdn string) ([]string, error) {
 	if err != nil {
 		err = fmt.Errorf("dig error: can't set query dns (%s) with error(%s)", edgeDNSServer, err)
 		return nil, err
+	}
+	if backupDNSServer != "" {
+		err := dig.SetBackupDNS(backupDNSServer)
+		if err != nil {
+			err = fmt.Errorf("dig error: can't set dns backup server (%s) with error(%s)", backupDNSServer, err)
+			return nil, err
+		}
 	}
 	a, err := dig.A(fqdn)
 	if err != nil {
