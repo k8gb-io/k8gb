@@ -157,7 +157,7 @@ However, any other global k8gb specific configuration should be specified as arg
 
 ## Runtime environments
 
-k8gb instances should be able to run on any Linux based operating system but should run best within a Kubernetes environment as a Deployment etc.
+k8gb instances are deployed to Kubernetes target clusters, next to GSLB-enabled workloads. Zero control clusters required.
 
 ## Existing GSLB projects
 
