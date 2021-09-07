@@ -38,6 +38,7 @@ LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.4.1
 GOLIC_VERSION  ?= v0.5.0
+GOKART_VERSION ?= v0.2.0
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -91,7 +92,7 @@ all: help
 
 # check integrity
 .PHONY: check
-check: license lint test ## Check project integrity
+check: license lint gokart test ## Check project integrity
 
 .PHONY: clean-test-apps
 clean-test-apps:
@@ -256,6 +257,12 @@ infoblox-secret:
 	kubectl -n k8gb create secret generic infoblox \
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
 		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
+
+# GoKart - Go Security Static Analysis
+# see: https://github.com/praetorian-inc/gokart
+.PHONY: gokart
+gokart:
+	$(call gokart,--globalsTainted --verbose)
 
 # updates source code with license headers
 .PHONY: license
@@ -465,6 +472,11 @@ endef
 define controller-gen
 	@go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 	$(GOBIN)/controller-gen $1
+endef
+
+define gokart
+	@go install github.com/praetorian-inc/gokart@$(GOKART_VERSION)
+	$(GOBIN)/gokart scan $1
 endef
 
 define golic
