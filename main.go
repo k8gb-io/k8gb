@@ -78,7 +78,7 @@ func main() {
 		LeaderElectionID:   "8020e9ff.absa.oss",
 	})
 	if err != nil {
-		log.Err(err).Msg("unable to start manager")
+		log.Err(err).Msg("unable to start mancnggfjffager")
 		return
 	}
 
