@@ -6,6 +6,14 @@ on:
       - '**.svg'
       - '**.drawio'
       - '.spelling'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - '**.svg'
+      - '**.drawio'
+      - '.spelling'
 jobs:
   go-inspect:
     name: Inspect packages
