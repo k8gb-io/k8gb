@@ -7,7 +7,7 @@ linters:
     - gocritic
     - gocyclo
     - goimports
-    - golint
+    - revive
     - gosec
     - gosimple
     - govet
@@ -15,10 +15,47 @@ linters:
     - misspell
     - nakedret
     - lll
+    - noctx
+    - rowserrcheck
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - depguard
+    - dogsled
+    - exportloopref
+    - goconst
+    - goprintffuncname
+    - nolintlint
+    - dupl
+    - gochecknoinits
+
+ # don't enable:
+ #  - golint        # deprecated
+ #  - whitespace
+ #  - funlen
+ #  - exhaustive
+ #  - gomnd
+ #  - gofmt
+
 run:
   deadline: 3m
 linters-settings:
   lll:
     line-length: 150
-  golint:
-    min-confidence: 0
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+    - path: main.go
+      linters:
+        - gochecknoinits
+    - path: gslb_types.go
+      linters:
+        - gochecknoinits

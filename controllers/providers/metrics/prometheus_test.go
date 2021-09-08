@@ -19,6 +19,7 @@ package metrics
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -291,5 +292,5 @@ func TestUpdateRoundRobin(t *testing.T) {
 func TestMain(m *testing.M) {
 	defaultGslb.Name = gslbName
 	defaultGslb.Namespace = namespace
-	m.Run()
+	os.Exit(m.Run())
 }

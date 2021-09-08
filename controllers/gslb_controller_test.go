@@ -101,7 +101,13 @@ var fakeDNSSettings = utils.FakeDNSSettings{
 	DNSZoneFQDN:     "cloud.example.com.",
 }
 
-const coreDNSExtServiceName = "k8gb-coredns-randomname"
+const (
+	defaultCoreDNSExtServiceName = "k8gb-coredns-randomname"
+	defaultUnhealthyServiceName  = "unhealthy-app"
+	defaultPodinfoServiceName    = "frontend-podinfo"
+	defaultEdgeDNS0              = "1.0.0.1"
+	defaultEdgeDNS1              = "1.1.1.1"
+)
 
 func TestNotFoundServiceStatus(t *testing.T) {
 	// arrange
@@ -118,7 +124,7 @@ func TestNotFoundServiceStatus(t *testing.T) {
 func TestUnhealthyServiceStatus(t *testing.T) {
 	// arrange
 	settings := provideSettings(t, predefinedConfig)
-	serviceName := "unhealthy-app"
+	serviceName := defaultUnhealthyServiceName
 	unhealthyHost := "unhealthy.cloud.example.com"
 	expectedServiceStatus := k8gbv1beta1.Unhealthy
 	defer deleteUnhealthyService(t, &settings, serviceName)
@@ -134,7 +140,7 @@ func TestUnhealthyServiceStatus(t *testing.T) {
 func TestHealthyServiceStatus(t *testing.T) {
 	// arrange
 	settings := provideSettings(t, predefinedConfig)
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	expectedServiceStatus := k8gbv1beta1.Healthy
 	healthyHost := "roundrobin.cloud.example.com"
 	defer deleteHealthyService(t, &settings, serviceName)
@@ -167,7 +173,7 @@ func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
 		func() {
 			// arrange
 			settings := provideSettings(t, predefinedConfig)
-			serviceName := "frontend-podinfo"
+			serviceName := defaultPodinfoServiceName
 			defer deleteHealthyService(t, &settings, serviceName)
 			expectedHostsMetric := 1.
 			createHealthyService(t, &settings, serviceName)
@@ -202,7 +208,7 @@ func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
 		expectedHostsMetricCount, actualHostsMetricCount)
 
 	// arrange
-	serviceName := "unhealthy-app"
+	serviceName := defaultUnhealthyServiceName
 	createUnhealthyService(t, &settings, serviceName)
 	defer deleteUnhealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
@@ -222,7 +228,7 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 	settings := provideSettings(t, predefinedConfig)
 	expectedHostsMetricCount := 2.0
 
-	serviceName := "unhealthy-app"
+	serviceName := defaultUnhealthyServiceName
 	createUnhealthyService(t, &settings, serviceName)
 	reconcileAndUpdateGslb(t, settings)
 	deleteUnhealthyService(t, &settings, serviceName)
@@ -248,7 +254,7 @@ func TestHealthyRecordMetric(t *testing.T) {
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
 	}
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	settings := provideSettings(t, predefinedConfig)
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
 	require.NoError(t, err, "Failed to get expected gslb")
@@ -327,7 +333,7 @@ func TestGslbErrorsIncrement(t *testing.T) {
 
 func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 	// arrange
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := []*externaldns.Endpoint{
 		{
@@ -370,7 +376,7 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 
 func TestDNSRecordReflectionInStatus(t *testing.T) {
 	// arrange
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -399,7 +405,7 @@ func TestDNSRecordReflectionInStatus(t *testing.T) {
 
 func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 	// arrange
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := "local"
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -439,7 +445,7 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 
 func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 	// arrange
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	want := []*externaldns.Endpoint{
 		{
 			DNSName:    "localtargets-roundrobin.cloud.example.com",
@@ -522,7 +528,7 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *test
 }
 
 func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	want := []*externaldns.Endpoint{
 		{
 			DNSName:    "localtargets-roundrobin.cloud.example.com",
@@ -577,7 +583,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 
 func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	// arrange
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	want := []*externaldns.Endpoint{
 		{
 			DNSName:    "localtargets-roundrobin.cloud.example.com",
@@ -719,19 +725,19 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{
-				"1.0.0.1",
-				"1.1.1.1",
+				defaultEdgeDNS0,
+				defaultEdgeDNS1,
 			},
 		},
 	}
 	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServer = defaultEdgeDNS1
 	customConfig.EdgeDNSServerPort = 53
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      coreDNSExtServiceName,
+			Name:      defaultCoreDNSExtServiceName,
 			Namespace: predefinedConfig.K8gbNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name": "coredns",
@@ -743,7 +749,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	}
 	settings := provideSettings(t, customConfig)
 	err := settings.client.Create(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to create testing %s service", coreDNSExtServiceName)
+	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
 	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
 	err = settings.client.Status().Update(context.TODO(), coreDNSService)
 	require.NoError(t, err, "Failed to update coredns service lb hostname")
@@ -793,19 +799,19 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{
-				"1.0.0.1",
-				"1.1.1.1",
+				defaultEdgeDNS0,
+				defaultEdgeDNS1,
 			},
 		},
 	}
 	dnsEndpointNS1 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServer = defaultEdgeDNS1
 	customConfig.EdgeDNSServerPort = 53
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      coreDNSExtServiceName,
+			Name:      defaultCoreDNSExtServiceName,
 			Namespace: predefinedConfig.K8gbNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name": "coredns",
@@ -817,7 +823,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	}
 	settings := provideSettings(t, customConfig)
 	err := settings.client.Create(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to create testing %s service", coreDNSExtServiceName)
+	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
 	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
 	err = settings.client.Status().Update(context.TODO(), coreDNSService)
 	require.NoError(t, err, "Failed to update coredns service lb hostname")
@@ -850,20 +856,20 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = "1.1.1.1"
+	customConfig.EdgeDNSServer = defaultEdgeDNS1
 	customConfig.EdgeDNSServerPort = 53
-	serviceName := "frontend-podinfo"
+	serviceName := defaultPodinfoServiceName
 	want := []*externaldns.Endpoint{
 		{
 			DNSName:    "localtargets-roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
-			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"}},
+			Targets:    externaldns.Targets{defaultEdgeDNS0, defaultEdgeDNS1}},
 		{
 			DNSName:    "roundrobin.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
-			Targets:    externaldns.Targets{"1.0.0.1", "1.1.1.1"},
+			Targets:    externaldns.Targets{defaultEdgeDNS0, defaultEdgeDNS1},
 			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
 	}
 	settings := provideSettings(t, customConfig)
@@ -897,7 +903,7 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	settings := provideSettings(t, customConfig)
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      coreDNSExtServiceName,
+			Name:      defaultCoreDNSExtServiceName,
 			Namespace: predefinedConfig.K8gbNamespace,
 		},
 	}
@@ -905,7 +911,7 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
 	}
 	err := settings.client.Create(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to create testing %s service", coreDNSExtServiceName)
+	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
 	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
 	err = settings.client.Status().Update(context.TODO(), coreDNSService)
 	require.NoError(t, err, "Failed to update coredns service lb hostname")
@@ -1250,12 +1256,16 @@ func oldEdgeTimestamp(threshold string) string {
 }
 
 func TestMain(m *testing.M) {
+	var exitCode int
+	defer func() {
+		metrics.Metrics().Unregister()
+		os.Exit(exitCode)
+	}()
 	logging.Init(&predefinedConfig)
 	metrics.Init(&predefinedConfig)
-	defer metrics.Metrics().Unregister()
 	err := metrics.Metrics().Register()
 	if err != nil {
 		logging.Logger().Fatal().Err(err).Msg("metrics register")
 	}
-	m.Run()
+	exitCode = m.Run()
 }
