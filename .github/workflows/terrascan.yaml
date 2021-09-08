@@ -4,6 +4,9 @@ on:
   push:
 #    paths:
 #     - 'chart/k8gb/**'
+  pull_request:
+    branches:
+      - master
 
 jobs:
   terrascan:
