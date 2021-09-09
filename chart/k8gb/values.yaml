@@ -65,6 +65,7 @@ infoblox:
 route53:
   enabled: false
   hostedZoneID: ZXXXSSS
+  # specify IRSA Role in AWS ARN format or disable it by setting to `false`
   irsaRole: arn:aws:iam::111111:role/external-dns
 
 ns1:
