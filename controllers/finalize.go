@@ -29,21 +29,29 @@ func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) (err error) {
 	// resources that are not owned by this CR, like a PVC.
 	err = r.DNSProvider.Finalize(gslb)
 	if err != nil {
-		log.Err(err).Msg("Can't finalize GSLB")
+		log.Err(err).
+			Str("gslb", gslb.Name).
+			Msg("Can't finalize GSLB")
 		return
 	}
-	log.Info().Msg("Successfully finalized Gslb")
+	log.Info().
+		Str("gslb", gslb.Name).
+		Msg("Successfully finalized Gslb")
 	return
 }
 
 func (r *GslbReconciler) addFinalizer(gslb *k8gbv1beta1.Gslb) error {
-	log.Info().Msg("Adding Finalizer for the Gslb")
+	log.Info().
+		Str("gslb", gslb.Name).
+		Msg("Adding Finalizer for the Gslb")
 	gslb.SetFinalizers(append(gslb.GetFinalizers(), gslbFinalizer))
 
 	// Update CR
 	err := r.Update(context.TODO(), gslb)
 	if err != nil {
-		log.Err(err).Msg("Failed to update Gslb with finalizer")
+		log.Err(err).
+			Str("gslb", gslb.Name).
+			Msg("Failed to update Gslb with finalizer")
 		return err
 	}
 	return nil

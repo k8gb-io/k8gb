@@ -84,7 +84,9 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	if len(serviceList.Items) != 1 {
 		log.Warn().Msg("More than 1 CoreDNS service was found")
 		for _, service := range serviceList.Items {
-			log.Info().Str("ServiceName", service.Name).Msg("Found CoreDNS service")
+			log.Info().
+				Str("ServiceName", service.Name).
+				Msg("Found CoreDNS service")
 		}
 		err := coreerrors.New("more than 1 CoreDNS service was found. Check if CoreDNS exposed correctly")
 		return nil, err
@@ -96,13 +98,16 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		lbHostname = coreDNSService.Status.LoadBalancer.Ingress[0].Hostname
 	} else {
 		errMessage := "no LoadBalancer ExternalIPs are found"
-		log.Warn().Str("ServiceName", coreDNSService.Name).Msg(errMessage)
+		log.Warn().
+			Str("ServiceName", coreDNSService.Name).
+			Msg(errMessage)
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
 	IPs, err := utils.Dig(r.edgeDNSServer, lbHostname)
 	if err != nil {
-		log.Warn().Err(err).Str("LoadBalancerHostname", lbHostname).
+		log.Warn().Err(err).
+			Str("LoadBalancerHostname", lbHostname).
 			Msg("Can't dig CoreDNS service LoadBalancer FQDN")
 		return nil, err
 	}
@@ -121,7 +126,9 @@ func (r *Gslb) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 	err := r.client.Get(context.TODO(), nn, gslbIngress)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info().Msgf("Can't find gslb Ingress: %s", gslb.Name)
+			log.Info().
+				Str("gslb", gslb.Name).
+				Msg("Can't find gslb Ingress")
 		}
 		return nil, err
 	}
@@ -135,7 +142,7 @@ func (r *Gslb) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 		if len(ip.Hostname) > 0 {
 			IPs, err := utils.Dig(r.edgeDNSServer, ip.Hostname)
 			if err != nil {
-				log.Warn().Msgf("Dig error: %s", err)
+				log.Warn().Err(err).Msg("Dig error")
 				return nil, err
 			}
 			gslbIngressIPs = append(gslbIngressIPs, IPs...)
@@ -160,8 +167,10 @@ func (r *Gslb) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) err
 
 		if err != nil {
 			// Creation failed
-			log.Err(err).Msgf("Failed to create new DNSEndpoint DNSEndpoint.Namespace: %s DNSEndpoint.Name %s",
-				i.Namespace, i.Name)
+			log.Err(err).
+				Str("namespace", i.Namespace).
+				Str("name", i.Name).
+				Msg("Failed to create new DNSEndpoint")
 			return err
 		}
 		// Creation was successful
@@ -180,8 +189,10 @@ func (r *Gslb) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) err
 
 	if err != nil {
 		// Update failed
-		log.Err(err).Msgf("Failed to update DNSEndpoint DNSEndpoint.Namespace %s DNSEndpoint.Name %s",
-			found.Namespace, found.Name)
+		log.Err(err).
+			Str("namespace", found.Namespace).
+			Str("name", found.Name).
+			Msg("Failed to update DNSEndpoint")
 		return err
 	}
 	return nil
@@ -189,12 +200,19 @@ func (r *Gslb) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) err
 
 // RemoveEndpoint removes endpoint
 func (r *Gslb) RemoveEndpoint(endpointName string) error {
-	log.Info().Msgf("Removing endpoint %s.%s", r.k8gbNamespace, endpointName)
+	log.Info().
+		Str("namespace", r.k8gbNamespace).
+		Str("name", endpointName).
+		Msg("Removing endpoint")
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	err := r.client.Get(context.Background(), client.ObjectKey{Namespace: r.k8gbNamespace, Name: endpointName}, dnsEndpoint)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Warn().Msgf("%s", err)
+			log.Warn().
+				Str("namespace", r.k8gbNamespace).
+				Str("name", endpointName).
+				Err(err).
+				Msg("Endpoint not found")
 			return nil
 		}
 		return err
@@ -211,7 +229,10 @@ func (r *Gslb) InspectTXTThreshold(fqdn string, splitBrainThreshold time.Duratio
 	ns := fmt.Sprintf("%s:%v", r.edgeDNSServer, r.edgeDNSServerPort)
 	txt, err := dns.Exchange(m, ns)
 	if err != nil {
-		log.Info().Msgf("Error contacting EdgeDNS server (%s) for TXT split brain record: (%s)", ns, err)
+		log.Info().
+			Str("edgeDNS", ns).
+			Err(err).
+			Msg("Contacting EdgeDNS server for TXT split brain record")
 		return err
 	}
 	if len(txt.Answer) > 0 {
@@ -260,7 +281,11 @@ func dnsQuery(host string, nameserver string, nameserverport int) (*dns.Msg, err
 	dnsMsg.SetQuestion(fqdn, dns.TypeA)
 	dnsMsgA, err := dns.Exchange(dnsMsg, edgeDNSServer)
 	if err != nil {
-		log.Warn().Msgf("Can't resolve FQDN(%s) using nameserver(%s) : (%v)", fqdn, nameserver, err)
+		log.Warn().
+			Str("fqdn", fqdn).
+			Str("nameserver", nameserver).
+			Err(err).
+			Msg("Can't resolve FQDN using nameserver")
 	}
 	return dnsMsgA, err
 }
@@ -269,12 +294,18 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 	targets = []string{}
 	for _, cluster := range extClusterNsNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
-		log.Info().Msgf("Adding external Gslb targets from %s cluster...", cluster)
+		log.Info().
+			Str("cluster", cluster).
+			Msg("Adding external Gslb targets from cluster")
 		glueA, err := dnsQuery(cluster, r.edgeDNSServer, r.edgeDNSServerPort)
 		if err != nil {
 			return
 		}
-		log.Info().Msgf("Resolved glue A record for NS(%s) using edgeDNSServer(%s) : (%v)", cluster, r.edgeDNSServer, glueA.Answer)
+		log.Info().
+			Str("nameserver", cluster).
+			Str("edgeDNS", fmt.Sprintf("%s:%v", r.edgeDNSServer, r.edgeDNSServerPort)).
+			Str("glue A record", fmt.Sprintf("%v", glueA.Answer)).
+			Msg("Resolved glue A record for NS")
 		glueARecords := getARecords(glueA)
 		var nameServerToUse string
 		if len(glueARecords) > 0 {
@@ -290,8 +321,11 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		clusterTargets := getARecords(a)
 		if len(clusterTargets) > 0 {
 			targets = append(targets, clusterTargets...)
-			log.Info().Msgf("Added external %s Gslb targets from %s cluster", clusterTargets, cluster)
+			log.Info().
+				Str("cluster targets", fmt.Sprintf("%s", clusterTargets)).
+				Str("cluster", cluster).
+				Msg("Extend Gslb targets by targets from cluster")
 		}
 	}
-	return
+	return targets
 }

@@ -105,16 +105,23 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 						extClusterHeartbeatFQDNs[extClusterGeoTag],
 						time.Second*time.Duration(gslb.Spec.Strategy.SplitBrainThresholdSeconds))
 					if err != nil {
-						log.Err(err).Msgf("Got the error from TXT based checkAlive. External cluster (%s) doesn't "+
-							"look alive, filtering it out from delegated zone configuration...", nsServerNameExt)
+						log.Err(err).
+							Str("cluster", nsServerNameExt).
+							Msg("Got the error from TXT based checkAlive. External cluster doesn't " +
+								"look alive, filtering it out from delegated zone configuration.")
 						currentList = p.filterOutDelegateTo(currentList, nsServerNameExt)
 					}
 				}
 			}
 
 			if !reflect.DeepEqual(findZone.DelegateTo, currentList) {
-				log.Info().Msgf("Found delegated zone records (%v)", findZone.DelegateTo)
-				log.Info().Msgf("Updating delegated zone(%s) with the server list(%v)", p.config.DNSZone, currentList)
+				log.Info().
+					Str("records", fmt.Sprintf("(%v)", findZone.DelegateTo)).
+					Msg("Found delegated zone records")
+				log.Info().
+					Str("DNS zone", p.config.DNSZone).
+					Str("server list", fmt.Sprintf("%v", currentList)).
+					Msg("Updating delegated zone with the server list")
 				_, err = objMgr.UpdateZoneDelegated(findZone.Ref, currentList)
 				if err != nil {
 					m.InfobloxIncrementZoneUpdateError(gslb)
@@ -124,9 +131,13 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 			}
 		}
 	} else {
-		log.Info().Msgf("Creating delegated zone(%s)...", p.config.DNSZone)
+		log.Info().
+			Str("DNS zone", p.config.DNSZone).
+			Msg("Creating delegated zone")
 		sortZones(delegateTo)
-		log.Debug().Msgf("Delegated records (%v)", delegateTo)
+		log.Debug().
+			Str("records", fmt.Sprintf("%v", delegateTo)).
+			Msg("Delegated records")
 		_, err = objMgr.CreateZoneDelegated(p.config.DNSZone, delegateTo)
 		if err != nil {
 			m.InfobloxIncrementZoneUpdateError(gslb)
@@ -156,7 +167,9 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 			return err
 		}
 		if len(findZone.Ref) > 0 {
-			log.Info().Msgf("Deleting delegated zone(%s)...", p.config.DNSZone)
+			log.Info().
+				Str("DNS zone", p.config.DNSZone).
+				Msg("Deleting delegated zone")
 			_, err := objMgr.DeleteZoneDelegated(findZone.Ref)
 			if err != nil {
 				return err
@@ -172,7 +185,9 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 
 	if findTXT != nil {
 		if len(findTXT.Ref) > 0 {
-			log.Info().Msgf("Deleting split brain TXT record(%s)...", heartbeatTXTName)
+			log.Info().
+				Str("TXT records", heartbeatTXTName).
+				Msg("Deleting split brain TXT record")
 			_, err := objMgr.DeleteTXTRecord(findTXT.Ref)
 			if err != nil {
 				return err
@@ -207,14 +222,18 @@ func (p *InfobloxProvider) saveHeartbeatTXTRecord(objMgr *ibclient.ObjectManager
 		return
 	}
 	if heartbeatTXTRecord == nil {
-		log.Info().Str("HeartbeatTXTName", heartbeatTXTName).Msg("Creating split brain TXT record")
+		log.Info().
+			Str("HeartbeatTXTName", heartbeatTXTName).
+			Msg("Creating split brain TXT record")
 		_, err = objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
 		if err != nil {
 			m.InfobloxIncrementHeartbeatError(gslb)
 			return
 		}
 	} else {
-		log.Info().Str("HeartbeatTXTName", heartbeatTXTName).Msg("Updating split brain TXT record")
+		log.Info().
+			Str("HeartbeatTXTName", heartbeatTXTName).
+			Msg("Updating split brain TXT record")
 		_, err = objMgr.UpdateTXTRecord(heartbeatTXTName, edgeTimestamp)
 		if err != nil {
 			m.InfobloxIncrementHeartbeatError(gslb)

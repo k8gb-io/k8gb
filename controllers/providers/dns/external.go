@@ -59,7 +59,9 @@ func NewExternalDNS(dnsType ExternalDNSType, config depresolver.Config, assistan
 
 func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
 	ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
-	log.Info().Msgf("Creating/Updating DNSEndpoint CRDs for %s...", p)
+	log.Info().
+		Str("provider", p.String()).
+		Msg("Creating/Updating DNSEndpoint CRDs")
 	NSServerList := []string{p.config.GetClusterNSName()}
 	for _, v := range p.config.GetExternalClusterNSNames() {
 		NSServerList = append(NSServerList, v)
