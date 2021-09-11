@@ -40,6 +40,18 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
+const (
+	defaultDNSZone          = "k8gb-test-preprod.gslb.cloud.example.com"
+	defaultEdgeDNSZone      = "cloud.example.com"
+	defaultVersion          = "0.0.1"
+	defaultHost             = "test.domain"
+	defaultInfobloxUsername = "foo"
+	defaultInfobloxPassword = "blah"
+	defaultClusterGeoTagUs1 = "us-west-1"
+	defaultClusterGeoTagUs2 = "us-east-1"
+	defaultClusterGeoTagEu  = "eu-central-1"
+)
+
 var predefinedConfig = Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us",
@@ -48,7 +60,7 @@ var predefinedConfig = Config{
 	EdgeDNSServer:           "dns.cloud.example.com",
 	EdgeDNSServerPort:       53,
 	EdgeDNSZone:             "example.com",
-	DNSZone:                 "cloud.example.com",
+	DNSZone:                 defaultEdgeDNSZone,
 	K8gbNamespace:           "k8gb",
 	SplitBrainCheck:         true,
 	MetricsAddress:          "0.0.0.0:8080",
@@ -685,8 +697,8 @@ func TestBothRoute53AndInfobloxAreEnabled(t *testing.T) {
 	customConfig.Infoblox.Host = "Infoblox.domain"
 	customConfig.Infoblox.Version = "0.0.1"
 	customConfig.Infoblox.Port = 443
-	customConfig.Infoblox.Username = "foo"
-	customConfig.Infoblox.Password = "blah"
+	customConfig.Infoblox.Username = defaultInfobloxUsername
+	customConfig.Infoblox.Password = defaultInfobloxPassword
 	configureEnvVar(customConfig)
 	_ = os.Setenv(Route53EnabledKey, "true")
 	resolver := NewDependencyResolver()
@@ -751,10 +763,10 @@ func TestRoute53IsDisabledButInfobloxIsConfigured(t *testing.T) {
 	expected.route53Enabled = false
 	expected.EdgeDNSType = DNSTypeInfoblox
 	expected.Infoblox.Host = "Infoblox.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -766,10 +778,10 @@ func TestRoute53IsEnabledButInfobloxIsNotConfigured(t *testing.T) {
 	expected.route53Enabled = true
 	expected.EdgeDNSType = DNSTypeRoute53
 	expected.Infoblox.Host = ""
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -794,11 +806,11 @@ func TestInfobloxGridHostIsNotEmpty(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Host = defaultHost
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -808,7 +820,7 @@ func TestInfobloxGridHostIsNotEmptyButInfobloxPropsAreEmpty(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
+	expected.Infoblox.Host = defaultHost
 	expected.Infoblox.Version = ""
 	expected.Infoblox.Port = 0
 	expected.Infoblox.Username = ""
@@ -824,10 +836,10 @@ func TestInfobloxGridHostIsEmptyButInfobloxPropsAreFilled(t *testing.T) {
 	expected.EdgeDNSType = DNSTypeRoute53
 	expected.route53Enabled = true
 	expected.Infoblox.Host = ""
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -839,10 +851,10 @@ func TestInfobloxGridHostIsUnset(t *testing.T) {
 	expected.EdgeDNSType = DNSTypeNoEdgeDNS
 	expected.route53Enabled = false
 	expected.Infoblox.Host = ""
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	// values are ignored and not validated
 	arrangeVariablesAndAssert(t, expected, assert.NoError, InfobloxGridHostKey)
@@ -855,10 +867,10 @@ func TestInfobloxGridHostIsInvalid(t *testing.T) {
 	expected.EdgeDNSType = DNSTypeInfoblox
 	expected.route53Enabled = false
 	expected.Infoblox.Host = "dnfkjdnf kj"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -870,11 +882,11 @@ func TestInfobloxVersionIsValid(t *testing.T) {
 	for _, v := range []string{"0.0.1", "v0.0.1", "v0.0.0-patch1", "2.3.5-patch1"} {
 		expected := predefinedConfig
 		expected.EdgeDNSType = DNSTypeInfoblox
-		expected.Infoblox.Host = "test.domain"
+		expected.Infoblox.Host = defaultHost
 		expected.Infoblox.Version = v
 		expected.Infoblox.Port = 443
-		expected.Infoblox.Username = "foo"
-		expected.Infoblox.Password = "blah"
+		expected.Infoblox.Username = defaultInfobloxUsername
+		expected.Infoblox.Password = defaultInfobloxPassword
 		// act,assert
 		arrangeVariablesAndAssert(t, expected, assert.NoError)
 	}
@@ -886,11 +898,11 @@ func TestInfobloxVersionIsInvalid(t *testing.T) {
 	for _, v := range []string{"0.1.*", "kkojo", "k12k", ""} {
 		expected := predefinedConfig
 		expected.EdgeDNSType = DNSTypeInfoblox
-		expected.Infoblox.Host = "test.domain"
+		expected.Infoblox.Host = defaultHost
 		expected.Infoblox.Version = v
 		expected.Infoblox.Port = 443
-		expected.Infoblox.Username = "foo"
-		expected.Infoblox.Password = "blah"
+		expected.Infoblox.Username = defaultInfobloxUsername
+		expected.Infoblox.Password = defaultInfobloxPassword
 		// act,assert
 		arrangeVariablesAndAssert(t, expected, assert.Error)
 	}
@@ -901,11 +913,11 @@ func TestInfobloxVersionIsUnset(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
+	expected.Infoblox.Host = defaultHost
 	expected.Infoblox.Version = ""
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxVersionKey)
 }
@@ -916,11 +928,11 @@ func TestInvalidInfobloxPort(t *testing.T) {
 	for _, p := range []int{-1, 0, 65536} {
 		expected := predefinedConfig
 		expected.EdgeDNSType = DNSTypeInfoblox
-		expected.Infoblox.Host = "test.domain"
-		expected.Infoblox.Version = "0.0.1"
+		expected.Infoblox.Host = defaultHost
+		expected.Infoblox.Version = defaultVersion
 		expected.Infoblox.Port = p
-		expected.Infoblox.Username = "foo"
-		expected.Infoblox.Password = "blah"
+		expected.Infoblox.Username = defaultInfobloxUsername
+		expected.Infoblox.Password = defaultInfobloxPassword
 		// act,assert
 		arrangeVariablesAndAssert(t, expected, assert.Error)
 	}
@@ -931,11 +943,11 @@ func TestUnsetInfobloxPort(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Host = defaultHost
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 0
-	expected.Infoblox.Username = "foo"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Username = defaultInfobloxUsername
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxPortKey)
 }
@@ -945,11 +957,11 @@ func TestValidInfobloxUserPasswordAndPort(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Host = defaultHost
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
 	expected.Infoblox.Username = "infobloxUser"
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -959,11 +971,11 @@ func TestEmptyInfobloxUser(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Host = defaultHost
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
 	expected.Infoblox.Username = ""
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -973,11 +985,11 @@ func TestUnsetInfobloxUser(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Host = defaultHost
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
 	expected.Infoblox.Username = ""
-	expected.Infoblox.Password = "blah"
+	expected.Infoblox.Password = defaultInfobloxPassword
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxUsernameKey)
 }
@@ -987,8 +999,8 @@ func TestEmptyInfobloxPassword(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Host = defaultHost
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
 	expected.Infoblox.Username = "infobloxUser"
 	expected.Infoblox.Password = ""
@@ -1001,10 +1013,10 @@ func TestUnsetInfobloxPassword(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = "test.domain"
-	expected.Infoblox.Version = "0.0.1"
+	expected.Infoblox.Host = defaultHost
+	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = "foo"
+	expected.Infoblox.Username = defaultInfobloxUsername
 	expected.Infoblox.Password = ""
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxPasswordKey)
@@ -1350,10 +1362,10 @@ func TestHeartBeatWithMultipleExtClusterGeoTag(t *testing.T) {
 	// arrange
 	defer cleanup()
 	customConfig := predefinedConfig
-	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = "cloud.example.com"
-	customConfig.ClusterGeoTag = "location-1"
-	customConfig.ExtClustersGeoTags = []string{"location-2", "location-3"}
+	customConfig.DNSZone = defaultDNSZone
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
+	customConfig.ExtClustersGeoTags = []string{defaultClusterGeoTagUs2, defaultClusterGeoTagEu}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
@@ -1363,10 +1375,10 @@ func TestHeartBeatWithMultipleExtClusterGeoTag(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Len(t, config.GetExternalClusterHeartbeatFQDNs(geoTag), 2)
-	assert.Equal(t, "test-gslb-1-heartbeat-location-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
+	assert.Equal(t, "test-gslb-1-heartbeat-us-west-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
 
-	for k, v := range map[string]string{"location-2": "test-gslb-1-heartbeat-location-2.cloud.example.com",
-		"location-3": "test-gslb-1-heartbeat-location-3.cloud.example.com"} {
+	for k, v := range map[string]string{defaultClusterGeoTagUs2: "test-gslb-1-heartbeat-us-east-1.cloud.example.com",
+		defaultClusterGeoTagEu: "test-gslb-1-heartbeat-eu-central-1.cloud.example.com"} {
 		assert.Equal(t, config.GetExternalClusterHeartbeatFQDNs(geoTag)[k], v)
 	}
 }
@@ -1376,10 +1388,10 @@ func TestHeartBeatWithOneExtClusterGeoTag(t *testing.T) {
 	// arrange
 	defer cleanup()
 	customConfig := predefinedConfig
-	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = "cloud.example.com"
-	customConfig.ClusterGeoTag = "location-1"
-	customConfig.ExtClustersGeoTags = []string{"location-2"}
+	customConfig.DNSZone = defaultDNSZone
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
+	customConfig.ExtClustersGeoTags = []string{defaultClusterGeoTagUs2}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
@@ -1389,18 +1401,18 @@ func TestHeartBeatWithOneExtClusterGeoTag(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Len(t, config.GetExternalClusterHeartbeatFQDNs(geoTag), 1)
-	assert.Equal(t, "test-gslb-1-heartbeat-location-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
-	assert.Equal(t, config.GetExternalClusterHeartbeatFQDNs(geoTag)["location-2"], "test-gslb-1-heartbeat-location-2.cloud.example.com")
+	assert.Equal(t, "test-gslb-1-heartbeat-us-west-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
+	assert.Equal(t, config.GetExternalClusterHeartbeatFQDNs(geoTag)[defaultClusterGeoTagUs2], "test-gslb-1-heartbeat-us-east-1.cloud.example.com")
 }
 
 func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
 	// arrange
 	defer cleanup()
 	customConfig := predefinedConfig
-	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = "cloud.example.com"
-	customConfig.ClusterGeoTag = "location-1"
-	customConfig.ExtClustersGeoTags = []string{"location-2", "location-3"}
+	customConfig.DNSZone = defaultDNSZone
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
+	customConfig.ExtClustersGeoTags = []string{defaultClusterGeoTagUs2, defaultClusterGeoTagEu}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
@@ -1410,9 +1422,9 @@ func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Len(t, config.GetExternalClusterNSNames(), 2)
-	assert.Equal(t, "gslb-ns-location-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
-	for k, v := range map[string]string{"location-2": "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com",
-		"location-3": "gslb-ns-location-3-k8gb-test-preprod-gslb.cloud.example.com"} {
+	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	for k, v := range map[string]string{defaultClusterGeoTagUs2: "gslb-ns-us-east-1-k8gb-test-preprod-gslb.cloud.example.com",
+		defaultClusterGeoTagEu: "gslb-ns-eu-central-1-k8gb-test-preprod-gslb.cloud.example.com"} {
 		assert.Equal(t, config.GetExternalClusterNSNames()[k], v)
 	}
 }
@@ -1438,9 +1450,9 @@ func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 	// arrange
 	defer cleanup()
 	customConfig := predefinedConfig
-	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = "cloud.example.com"
-	customConfig.ClusterGeoTag = "location-1"
+	customConfig.DNSZone = defaultDNSZone
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
 	customConfig.ExtClustersGeoTags = []string{"location-2"}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
@@ -1451,8 +1463,8 @@ func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Len(t, config.GetExternalClusterNSNames(), 1)
-	assert.Equal(t, "gslb-ns-location-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
-	assert.Equal(t, "gslb-ns-k8gb-test-preprod-gslb-cloud-example-com-location-1.cloud.example.com", config.GetClusterOldNSName())
+	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	assert.Equal(t, "gslb-ns-k8gb-test-preprod-gslb-cloud-example-com-us-west-1.cloud.example.com", config.GetClusterOldNSName())
 	assert.Equal(t, config.GetExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
 }
 
@@ -1461,7 +1473,7 @@ func TestNsServerNamesLargeDNSZone(t *testing.T) {
 	// arrange DNSZone exceeds
 	customConfig := predefinedConfig
 	customConfig.DNSZone = "k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = "us"
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
@@ -1483,8 +1495,8 @@ func TestNsServerNamesWithLargeExtClusterGeoTag(t *testing.T) {
 	defer cleanup()
 	// arrange
 	customConfig := predefinedConfig
-	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.DNSZone = defaultDNSZone
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = "us"
 	customConfig.ExtClustersGeoTags = []string{}
 	customConfig.ExtClustersGeoTags = append(customConfig.ExtClustersGeoTags, predefinedConfig.ExtClustersGeoTags...)
@@ -1509,8 +1521,8 @@ func TestNsServerNamesWithLargeClusterGeoTag(t *testing.T) {
 	defer cleanup()
 	// arrange
 	customConfig := predefinedConfig
-	customConfig.DNSZone = "k8gb-test-preprod.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = "cloud.example.com"
+	customConfig.DNSZone = defaultDNSZone
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = "us-lorem-ipsum-donor-blah-blah-blah-blah"
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
@@ -1728,6 +1740,6 @@ func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {
 	s.AddKnownTypes(k8gbv1beta1.GroupVersion, gslb)
 	// Register external-dns DNSEndpoint CRD
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
-	cl := fake.NewFakeClientWithScheme(s, objs...)
+	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
 	return cl, gslb
 }

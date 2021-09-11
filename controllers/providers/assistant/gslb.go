@@ -64,7 +64,6 @@ func NewGslbAssistant(client client.Client, k8gbNamespace, edgeDNSServer string,
 // CoreDNSExposedIPs retrieves list of IP's exposed by CoreDNS
 func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	serviceList := &corev1.ServiceList{}
-	coreDNSService := &corev1.Service{}
 	sel, err := labels.Parse(coreDNSServiceLabel)
 	if err != nil {
 		log.Error().Err(err).Msg("Badly formed label selector")
@@ -91,7 +90,7 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New("more than 1 CoreDNS service was found. Check if CoreDNS exposed correctly")
 		return nil, err
 	}
-	coreDNSService = &serviceList.Items[0]
+	coreDNSService := &serviceList.Items[0]
 
 	var lbHostname string
 	if len(coreDNSService.Status.LoadBalancer.Ingress) > 0 {
