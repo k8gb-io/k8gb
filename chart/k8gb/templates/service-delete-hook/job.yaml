@@ -24,3 +24,14 @@ spec:
             - {{ .Release.Namespace }}
             - -l
             - 'app.kubernetes.io/name=coredns,k8gb-migrated-svc!=true'
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsUser: {{ .Values.k8gb.runAsUser }}
+            runAsNonRoot: true
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
