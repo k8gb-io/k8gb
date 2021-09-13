@@ -2,19 +2,13 @@ name: KubeLinter
 
 on:
   push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+    paths:
+      - 'chart/k8gb/**'
   pull_request:
     branches:
       - master
     paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+      - 'chart/k8gb/**'
 
 jobs:
   scan:
@@ -23,6 +17,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Scan repo
         id: kube-lint-repo
-        uses: stackrox/kube-linter-action@v1.0.0
+        uses: stackrox/kube-linter-action@v1.0.2
         with:
           directory: chart
