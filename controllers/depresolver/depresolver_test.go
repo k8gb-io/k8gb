@@ -50,6 +50,7 @@ const (
 	defaultClusterGeoTagUs1 = "us-west-1"
 	defaultClusterGeoTagUs2 = "us-east-1"
 	defaultClusterGeoTagEu  = "eu-central-1"
+	defaultEdgeDNSServerIP  = "10.0.40.2"
 )
 
 var predefinedConfig = Config{
@@ -443,7 +444,7 @@ func TestResolveConfigWithEmptyIpAddressInEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServer = "22.147.90.2"
+	expected.EdgeDNSServer = defaultEdgeDNSServerIP
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -471,7 +472,7 @@ func TestResolveConfigWithInvalidIpAddressEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServer = "22.147.90.2."
+	expected.EdgeDNSServer = fmt.Sprintf("%s.", defaultEdgeDNSServerIP)
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
