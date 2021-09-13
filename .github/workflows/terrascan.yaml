@@ -2,11 +2,13 @@ name: Terrascan
 
 on:
   push:
-#    paths:
-#     - 'chart/k8gb/**'
+    paths:
+     - 'chart/k8gb/**'
   pull_request:
     branches:
       - master
+    paths:
+     - 'chart/k8gb/**'
 
 jobs:
   terrascan:
