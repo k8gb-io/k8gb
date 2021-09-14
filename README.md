@@ -45,7 +45,7 @@ Global load balancing, commonly referred to as GSLB (Global Server Load Balancin
 
 k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.
 
-k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing strategies to meet requirements such as region failover for high availability.
+k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](./docs/strategy.md) to meet requirements such as region failover for high availability.
 
 Global load balancing for any Kubernetes Service can now be enabled and managed by any operations or development teams in the same Kubernetes native way as any other custom resource.
 
