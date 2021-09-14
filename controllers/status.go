@@ -29,7 +29,7 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
+func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb, ep *externaldns.DNSEndpoint) error {
 	var err error
 
 	gslb.Status.ServiceHealth, err = r.getServiceHealthStatus(gslb)
@@ -47,6 +47,8 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb) error {
 	gslb.Status.GeoTag = r.Config.ClusterGeoTag
 
 	m.UpdateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
+
+	m.UpdateEndpointStatus(ep)
 
 	err = r.Status().Update(context.TODO(), gslb)
 	return err

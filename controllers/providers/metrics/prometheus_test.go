@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"testing"
 
+	externaldns "sigs.k8s.io/external-dns/endpoint"
+
 	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -33,13 +35,17 @@ import (
 )
 
 const (
-	namespace = "ns"
-	gslbName  = "test-gslb"
+	namespace        = "ns"
+	gslbName         = "test-gslb"
+	endpointName     = "test-gslb"
+	localtargetsName = "localtargets.cloud.example.com"
+	targetsName      = "cloud.example.com"
 )
 
 var (
-	defaultGslb   = new(k8gbv1beta1.Gslb)
-	defaultConfig = depresolver.Config{K8gbNamespace: namespace, DNSZone: "cloud.example.com"}
+	defaultGslb     = new(k8gbv1beta1.Gslb)
+	defaultEndpoint = new(externaldns.DNSEndpoint)
+	defaultConfig   = depresolver.Config{K8gbNamespace: namespace, DNSZone: "cloud.example.com"}
 )
 
 func TestMetricsSingletonIsNotNil(t *testing.T) {
@@ -68,9 +74,9 @@ func TestPrometheusRegistry(t *testing.T) {
 	m := newPrometheusMetrics(defaultConfig)
 	fieldCnt := reflect.TypeOf(metrics.metrics).NumField()
 	items := []string{K8gbGslbErrorsTotal, K8gbGslbHealthyRecords, K8gbGslbReconciliationLoopsTotal,
-		K8gbGslbStatusPerIngressHosts, K8gbGslbStatusCountForFailover, K8gbGslbStatusCountForRoundrobin,
+		K8gbGslbServiceStatusNum, K8gbGslbStatusCountForFailover, K8gbGslbStatusCountForRoundrobin,
 		K8gbGslbStatusCountForGeoIP, K8gbInfobloxHeartbeatsTotal, K8gbInfobloxHeartbeatErrorsTotal,
-		K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal}
+		K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal, K8gbEndpointStatusNum}
 	// act
 	registry := m.registry()
 	// assert
@@ -205,18 +211,18 @@ func TestUpgradeIngressHost(t *testing.T) {
 		"notfound.cloud.example.com":   k8gbv1beta1.NotFound,
 	}
 	// act
-	cntHealthy1 := testutil.ToFloat64(m.Get(K8gbGslbStatusPerIngressHosts).AsGaugeVec().With(
+	cntHealthy1 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().With(
 		prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
-	cntUnhealthy1 := testutil.ToFloat64(m.Get(K8gbGslbStatusPerIngressHosts).AsGaugeVec().
+	cntUnhealthy1 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
 		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
-	cntNotFound1 := testutil.ToFloat64(m.Get(K8gbGslbStatusPerIngressHosts).AsGaugeVec().
+	cntNotFound1 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
 		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
 	m.UpdateIngressHostsPerStatusMetric(defaultGslb, serviceHealth)
-	cntHealthy2 := testutil.ToFloat64(m.Get(K8gbGslbStatusPerIngressHosts).AsGaugeVec().
+	cntHealthy2 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
 		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
-	ctnUnhealthy2 := testutil.ToFloat64(m.Get(K8gbGslbStatusPerIngressHosts).AsGaugeVec().
+	ctnUnhealthy2 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
 		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
-	cntNotFound2 := testutil.ToFloat64(m.Get(K8gbGslbStatusPerIngressHosts).AsGaugeVec().
+	cntNotFound2 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
 		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
 	// assert
 	assert.Equal(t, .0, cntHealthy1)
@@ -289,8 +295,50 @@ func TestUpdateRoundRobin(t *testing.T) {
 	assert.Equal(t, 0., fs)
 }
 
+func TestEndpointStatus(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	ep := defaultEndpoint
+	ep.Spec.Endpoints = []*externaldns.Endpoint{
+		{
+			DNSName: localtargetsName,
+			Targets: []string{"2.2.2.4", "2.2.2.5"},
+		},
+		{
+			DNSName: targetsName,
+			Targets: []string{"2.2.2.4", "2.2.2.5", "3.3.3.4", "3.3.3.5"},
+		}}
+	// act
+	m.UpdateEndpointStatus(ep)
+	// assert
+	cnt1 := testutil.ToFloat64(m.Get(K8gbEndpointStatusNum).AsGaugeVec().
+		With(prometheus.Labels{"namespace": namespace, "name": endpointName, "dns_name": targetsName}))
+	cnt2 := testutil.ToFloat64(m.Get(K8gbEndpointStatusNum).AsGaugeVec().
+		With(prometheus.Labels{"namespace": namespace, "name": endpointName, "dns_name": localtargetsName}))
+	cnt3 := testutil.ToFloat64(m.Get(K8gbEndpointStatusNum).AsGaugeVec().
+		With(prometheus.Labels{"namespace": namespace, "name": endpointName, "dns_name": "nonexists"}))
+	assert.Equal(t, 4., cnt1)
+	assert.Equal(t, 2., cnt2)
+	assert.Equal(t, 0., cnt3)
+}
+
+func TestRunMetricLinter(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	registry := m.registry()
+	// act
+	// assert
+	for name, scenario := range registry {
+		lintErrors, err := testutil.CollectAndLint(scenario)
+		assert.NoError(t, err)
+		assert.True(t, len(lintErrors) == 0, "Metric linting error(s): %s - %s", name, lintErrors)
+	}
+}
+
 func TestMain(m *testing.M) {
 	defaultGslb.Name = gslbName
 	defaultGslb.Namespace = namespace
+	defaultEndpoint.Name = endpointName
+	defaultEndpoint.Namespace = namespace
 	os.Exit(m.Run())
 }
