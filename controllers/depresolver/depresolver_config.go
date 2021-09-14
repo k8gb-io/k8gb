@@ -19,10 +19,13 @@ package depresolver
 
 import (
 	"fmt"
+	"net"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/AbsaOSS/gopkg/env"
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	"github.com/rs/zerolog"
 )
 
@@ -33,8 +36,7 @@ const (
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
 	Route53EnabledKey          = "ROUTE53_ENABLED"
 	NS1EnabledKey              = "NS1_ENABLED"
-	EdgeDNSServerKey           = "EDGE_DNS_SERVER"
-	EdgeDNSServerPortKey       = "EDGE_DNS_SERVER_PORT"
+	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"
 	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
 	DNSZoneKey                 = "DNS_ZONE"
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
@@ -55,6 +57,15 @@ const (
 	MetricsAddressKey              = "METRICS_ADDRESS"
 )
 
+// Deprecated environment variables keys
+const (
+	// Deprecated: Please use EDGE_DNS_SERVERS instead.
+	EdgeDNSServerKey = "EDGE_DNS_SERVER"
+
+	// Deprecated: Please use EDGE_DNS_SERVERS instead.
+	EdgeDNSServerPortKey = "EDGE_DNS_SERVER_PORT"
+)
+
 // ResolveOperatorConfig executes once. It reads operator's configuration
 // from environment variables into &Config and validates
 func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
@@ -67,8 +78,9 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.route53Enabled = env.GetEnvAsBoolOrFallback(Route53EnabledKey, false)
 		dr.config.ns1Enabled = env.GetEnvAsBoolOrFallback(NS1EnabledKey, false)
 		dr.config.CoreDNSExposed = env.GetEnvAsBoolOrFallback(CoreDNSExposedKey, false)
-		dr.config.EdgeDNSServer = env.GetEnvAsStringOrFallback(EdgeDNSServerKey, "")
-		dr.config.EdgeDNSServerPort, _ = env.GetEnvAsIntOrFallback(EdgeDNSServerPortKey, 53)
+		dr.config.EdgeDNSServers = parseEdgeDNSServers(env.GetEnvAsStringOrFallback(EdgeDNSServersKey,
+			fmt.Sprintf("%s:%v", env.GetEnvAsStringOrFallback(EdgeDNSServerKey, ""),
+				env.GetEnvAsStringOrFallback(EdgeDNSServerPortKey, "53"))))
 		dr.config.EdgeDNSZone = env.GetEnvAsStringOrFallback(EdgeDNSZoneKey, "")
 		dr.config.DNSZone = env.GetEnvAsStringOrFallback(DNSZoneKey, "")
 		dr.config.K8gbNamespace = env.GetEnvAsStringOrFallback(K8gbNamespaceKey, "")
@@ -128,13 +140,26 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return err
 		}
 	}
-	err = field(EdgeDNSServerKey, config.EdgeDNSServer).isNotEmpty().matchRegexps(hostNameRegex, ipAddressRegex).err
+	err = field(EdgeDNSServersKey, os.Getenv(EdgeDNSServersKey)).isNotEmpty().matchRegexp(hostNamesWithPortsRegex1).err
 	if err != nil {
 		return err
 	}
-	err = field(EdgeDNSServerPortKey, config.EdgeDNSServerPort).isHigherThanZero().err
+	err = field(EdgeDNSServersKey, os.Getenv(EdgeDNSServersKey)).isNotEmpty().matchRegexp(hostNamesWithPortsRegex2).err
 	if err != nil {
 		return err
+	}
+	err = validateLocalhostNotAmongDNSServers(config)
+	if err != nil {
+		return err
+	}
+	err = field(EdgeDNSServersKey, config.EdgeDNSServers).isNotEmpty().matchRegexp(hostNamesWithPortsRegex1).err
+	if err != nil {
+		return err
+	}
+	for _, s := range config.EdgeDNSServers {
+		if s.Port < 1 || s.Port > 65535 {
+			return fmt.Errorf("error for port of edge dns server(%v): it must be a positive integer between 1 and 65535", s)
+		}
 	}
 	err = field(EdgeDNSZoneKey, config.EdgeDNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
 	if err != nil {
@@ -146,31 +171,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	}
 	// do full Infoblox validation only in case that Host exists
 	if isNotEmpty(config.Infoblox.Host) {
-		err = field(InfobloxGridHostKey, config.Infoblox.Host).matchRegexps(hostNameRegex, ipAddressRegex).err
-		if err != nil {
-			return err
-		}
-		err = field(InfobloxVersionKey, config.Infoblox.Version).isNotEmpty().matchRegexp(versionNumberRegex).err
-		if err != nil {
-			return err
-		}
-		err = field(InfobloxPortKey, config.Infoblox.Port).isHigherThanZero().isLessOrEqualTo(65535).err
-		if err != nil {
-			return err
-		}
-		err = field(InfobloxUsernameKey, config.Infoblox.Username).isNotEmpty().err
-		if err != nil {
-			return err
-		}
-		err = field(InfobloxPasswordKey, config.Infoblox.Password).isNotEmpty().err
-		if err != nil {
-			return err
-		}
-		err = field(InfobloxHTTPPoolConnectionsKey, config.Infoblox.HTTPPoolConnections).isHigherOrEqualToZero().err
-		if err != nil {
-			return err
-		}
-		err = field(InfobloxHTTPRequestTimeoutKey, config.Infoblox.HTTPRequestTimeout).isHigherThanZero().err
+		err = validateConfigForInfoblox(config)
 		if err != nil {
 			return err
 		}
@@ -212,6 +213,80 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	return nil
 }
 
+func validateLocalhostNotAmongDNSServers(config *Config) error {
+	containsLocalhost := func(list utils.DNSList) bool {
+		for i := 1; i < len(list); i++ { // skipping first because localhost or 127.0.0.1 can occur on the first position
+			if list[i].Host == "localhost" || list[i].Host == "127.0.0.1" {
+				return true
+			}
+		}
+		return false
+	}
+	if len(config.EdgeDNSServers) > 1 && containsLocalhost(config.EdgeDNSServers) {
+		return fmt.Errorf("invalid %s: the list can't contain 'localhost' or '127.0.0.1' on other than the first position", EdgeDNSServersKey)
+	}
+	return nil
+}
+
+func validateConfigForInfoblox(config *Config) error {
+	err := field(InfobloxGridHostKey, config.Infoblox.Host).matchRegexps(hostNameRegex, ipAddressRegex).err
+	if err != nil {
+		return err
+	}
+	err = field(InfobloxVersionKey, config.Infoblox.Version).isNotEmpty().matchRegexp(versionNumberRegex).err
+	if err != nil {
+		return err
+	}
+	err = field(InfobloxPortKey, config.Infoblox.Port).isHigherThanZero().isLessOrEqualTo(65535).err
+	if err != nil {
+		return err
+	}
+	err = field(InfobloxUsernameKey, config.Infoblox.Username).isNotEmpty().err
+	if err != nil {
+		return err
+	}
+	err = field(InfobloxPasswordKey, config.Infoblox.Password).isNotEmpty().err
+	if err != nil {
+		return err
+	}
+	err = field(InfobloxHTTPPoolConnectionsKey, config.Infoblox.HTTPPoolConnections).isHigherOrEqualToZero().err
+	if err != nil {
+		return err
+	}
+	err = field(InfobloxHTTPRequestTimeoutKey, config.Infoblox.HTTPRequestTimeout).isHigherThanZero().err
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dr *DependencyResolver) GetDeprecations() (deprecations []string) {
+	type oldVar = string
+	type newVar struct {
+		Name string
+		Msg  string
+	}
+
+	var deprecated = map[oldVar]newVar{
+		EdgeDNSServerKey: newVar{
+			Name: EdgeDNSServersKey,
+			Msg:  "Pass the hostname or IP address as comma-separated list",
+		},
+		EdgeDNSServerPortKey: newVar{
+			Name: EdgeDNSServersKey,
+			Msg: "Port is an optional item in the comma-separated list of dns edge servers, in following form: dns1:53,dns2 (if not provided after the " +
+				"hostname and colon, it defaults to '53')",
+		},
+	}
+
+	for k, v := range deprecated {
+		if os.Getenv(k) != "" {
+			deprecations = append(deprecations, fmt.Sprintf("'%s' has been deprecated, use %s instead. Details: %s", k, v.Name, v.Msg))
+		}
+	}
+	return
+}
+
 func parseMetricsAddr(metricsAddr string) (host string, port int, err error) {
 	ma := strings.Split(metricsAddr, ":")
 	if len(ma) != 2 {
@@ -221,6 +296,44 @@ func parseMetricsAddr(metricsAddr string) (host string, port int, err error) {
 	host = ma[0]
 	port, err = strconv.Atoi(ma[1])
 	return
+}
+
+func parseEdgeDNSServers(serverList string) []utils.DNSServer {
+	r := []utils.DNSServer{}
+	if len(strings.TrimSpace(serverList)) == 0 {
+		return r
+	}
+	chunks := strings.Split(serverList, ",")
+	var host, portStr string
+	var err error
+	for _, chunk := range chunks {
+		chunk = strings.TrimSpace(chunk)
+		switch strings.Count(chunk, ":") {
+		case 0: // ipv4 or domain w/o port
+			host = chunk
+			portStr = "53"
+		case 1: // ipv4 or domain w/ port
+			host, portStr, err = net.SplitHostPort(chunk)
+			if err != nil {
+				continue
+			}
+		default: // ipv6 or http://foo:bar
+			// not supported
+			continue
+		}
+		var port int
+		port, err = strconv.Atoi(portStr)
+		if err != nil {
+			port = 53
+		}
+		if host != "" {
+			r = append(r, utils.DNSServer{
+				Host: host,
+				Port: port,
+			})
+		}
+	}
+	return r
 }
 
 // getEdgeDNSType contains logic retrieving EdgeDNSType.
@@ -257,13 +370,13 @@ func parseLogOutputFormat(value string) LogFormat {
 func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
 	m = make(map[string]string, len(c.ExtClustersGeoTags))
 	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getNsName(tag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServer)
+		m[tag] = getNsName(tag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServers[0].Host)
 	}
 	return
 }
 
 func (c *Config) GetClusterNSName() string {
-	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServer)
+	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServers[0].Host)
 }
 
 func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string) (m map[string]string) {

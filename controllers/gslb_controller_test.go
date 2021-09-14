@@ -73,11 +73,15 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us-west-1",
 	ExtClustersGeoTags:      []string{"us-east-1"},
-	EdgeDNSServer:           "127.0.0.1",
-	EdgeDNSServerPort:       7753,
-	EdgeDNSZone:             "example.com",
-	DNSZone:                 "cloud.example.com",
-	K8gbNamespace:           "k8gb",
+	EdgeDNSServers: []utils.DNSServer{
+		{
+			Host: "127.0.0.1",
+			Port: 7753,
+		},
+	},
+	EdgeDNSZone:   "example.com",
+	DNSZone:       "cloud.example.com",
+	K8gbNamespace: "k8gb",
 	Infoblox: depresolver.Infoblox{
 		Host:                "fakeinfoblox.example.com",
 		Username:            "foo",
@@ -108,6 +112,13 @@ const (
 	defaultEdgeDNS0              = "1.0.0.1"
 	defaultEdgeDNS1              = "1.1.1.1"
 )
+
+var defaultEdgeDNSServers = []utils.DNSServer{
+	{
+		Host: defaultEdgeDNS1,
+		Port: 53,
+	},
+}
 
 func TestNotFoundServiceStatus(t *testing.T) {
 	// arrange
@@ -523,7 +534,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
-			Labels:     externaldns.Labels{"strategy": "failover"},
+			Labels:     externaldns.Labels{"strategy": failoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -544,7 +555,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 	// enable failover strategy
-	settings.gslb.Spec.Strategy.Type = "failover"
+	settings.gslb.Spec.Strategy.Type = failoverStrategy
 	settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 	err = settings.client.Update(context.TODO(), settings.gslb)
 	require.NoError(t, err, "Can't update gslb")
@@ -578,7 +589,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
-			Labels:     externaldns.Labels{"strategy": "failover"},
+			Labels:     externaldns.Labels{"strategy": failoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -589,7 +600,12 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
-	customConfig.EdgeDNSServer = "localhost"
+	customConfig.EdgeDNSServers = []utils.DNSServer{
+		{
+			Host: "localhost",
+			Port: 7753,
+		},
+	}
 	utils.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
@@ -606,7 +622,81 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 			// enable failover strategy
-			settings.gslb.Spec.Strategy.Type = "failover"
+			settings.gslb.Spec.Strategy.Type = failoverStrategy
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
+			err = settings.client.Update(context.TODO(), settings.gslb)
+			require.NoError(t, err, "Can't update gslb")
+
+			// act
+			createHealthyService(t, &settings, serviceName)
+			defer deleteHealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to get expected DNSEndpoint")
+			got := dnsEndpoint.Spec.Endpoints
+			prettyGot := str.ToString(got)
+			prettyWant := str.ToString(want)
+
+			// assert
+			assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		}).RequireNoError(t)
+}
+
+func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *testing.T) {
+	// arrange
+	serviceName := "frontend-podinfo"
+	want := []*externaldns.Endpoint{
+		{
+			DNSName:    "localtargets-roundrobin.cloud.example.com",
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2"},
+		},
+		{
+			DNSName:    "roundrobin.cloud.example.com",
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2"},
+			Labels:     externaldns.Labels{"strategy": failoverStrategy},
+		},
+	}
+	ingressIPs := []corev1.LoadBalancerIngress{
+		{IP: "10.0.0.1"},
+		{IP: "10.0.0.2"},
+	}
+	dnsEndpoint := &externaldns.DNSEndpoint{}
+	customConfig := predefinedConfig
+	customConfig.ClusterGeoTag = "za"
+	customConfig.EdgeDNSServers = []utils.DNSServer{
+		{ // this one will be tried frist, but fails
+			Host: "localhost",
+			Port: 7752,
+		},
+		{
+			Host: "localhost",
+			Port: 7753,
+		},
+		{ // this one fails as well, but shouldn't be tried because the previous works
+			Host: "localhost",
+			Port: 7754,
+		},
+	}
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
+
+			// ingress
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
+
+			// enable failover strategy
+			settings.gslb.Spec.Strategy.Type = failoverStrategy
 			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
@@ -714,8 +804,7 @@ func TestCreatesNSDNSRecordsForRoute53(t *testing.T) {
 	}
 	dnsEndpointRoute53 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = defaultEdgeDNS1
-	customConfig.EdgeDNSServerPort = 53
+	customConfig.EdgeDNSServers = defaultEdgeDNSServers
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -788,8 +877,7 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 	}
 	dnsEndpointNS1 := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = defaultEdgeDNS1
-	customConfig.EdgeDNSServerPort = 53
+	customConfig.EdgeDNSServers = defaultEdgeDNSServers
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -838,9 +926,8 @@ func TestCreatesNSDNSRecordsForNS1(t *testing.T) {
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServer = defaultEdgeDNS1
-	customConfig.EdgeDNSServerPort = 53
 	serviceName := defaultPodinfoServiceName
+	customConfig.EdgeDNSServers = defaultEdgeDNSServers
 	want := []*externaldns.Endpoint{
 		{
 			DNSName:    "localtargets-roundrobin.cloud.example.com",
@@ -1198,7 +1285,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		t.Fatalf("reconcile: (%v)", err)
 	}
 	r.DNSProvider = f.Provider()
-	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServer, r.Config.EdgeDNSServerPort)
+	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServers)
 	res, err := r.Reconcile(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)

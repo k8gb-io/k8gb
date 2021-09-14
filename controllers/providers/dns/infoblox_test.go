@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client"
@@ -31,10 +32,15 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us-west-1",
 	ExtClustersGeoTags:      []string{"us-east-1"},
-	EdgeDNSServer:           "8.8.8.8",
-	EdgeDNSZone:             "example.com",
-	DNSZone:                 "cloud.example.com",
-	K8gbNamespace:           "k8gb",
+	EdgeDNSServers: []utils.DNSServer{
+		{
+			Host: "8.8.8.8",
+			Port: 53,
+		},
+	},
+	EdgeDNSZone:   "example.com",
+	DNSZone:       "cloud.example.com",
+	K8gbNamespace: "k8gb",
 	Infoblox: depresolver.Infoblox{
 		Host:     "fakeinfoblox.example.com",
 		Username: "foo",
@@ -65,7 +71,7 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	customConfig := predefinedConfig
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer, customConfig.EdgeDNSServerPort)
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
 	provider := NewInfobloxDNS(customConfig, a)
 	// act
 	extClusters := customConfig.GetExternalClusterNSNames()
@@ -100,7 +106,7 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	customConfig.ClusterGeoTag = "eu"
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServer, customConfig.EdgeDNSServerPort)
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
 	provider := NewInfobloxDNS(customConfig, a)
 	// act
 	got := provider.sanitizeDelegateZone(local, upstream)

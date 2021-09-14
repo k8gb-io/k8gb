@@ -57,6 +57,7 @@ func main() {
 	var f *dns.ProviderFactory
 	resolver := depresolver.NewDependencyResolver()
 	config, err := resolver.ResolveOperatorConfig()
+	deprecations := resolver.GetDeprecations()
 	// Initialize desired log or default log in case of configuration failed.
 	logging.Init(config)
 	log := logging.Logger()
@@ -84,6 +85,10 @@ func main() {
 	if err != nil {
 		log.Err(err).Msg("Unable to start manager")
 		return
+	}
+
+	for _, d := range deprecations {
+		log.Warn().Msg(d)
 	}
 
 	log.Info().Msg("Registering components")

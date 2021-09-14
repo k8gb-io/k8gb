@@ -44,20 +44,18 @@ const coreDNSServiceLabel = "app.kubernetes.io/name=coredns"
 // Gslb is common wrapper operating on GSLB instance.
 // It uses apimachinery client to call kubernetes API
 type Gslb struct {
-	client            client.Client
-	k8gbNamespace     string
-	edgeDNSServer     string
-	edgeDNSServerPort int
+	client         client.Client
+	k8gbNamespace  string
+	edgeDNSServers utils.DNSList
 }
 
 var log = logging.Logger()
 
-func NewGslbAssistant(client client.Client, k8gbNamespace, edgeDNSServer string, edgeDNSServerPort int) *Gslb {
+func NewGslbAssistant(client client.Client, k8gbNamespace string, edgeDNSServers []utils.DNSServer) *Gslb {
 	return &Gslb{
-		client:            client,
-		k8gbNamespace:     k8gbNamespace,
-		edgeDNSServer:     edgeDNSServer,
-		edgeDNSServerPort: edgeDNSServerPort,
+		client:         client,
+		k8gbNamespace:  k8gbNamespace,
+		edgeDNSServers: edgeDNSServers,
 	}
 }
 
@@ -103,7 +101,7 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	IPs, err := utils.Dig(r.edgeDNSServer, lbHostname)
+	IPs, err := utils.Dig(lbHostname, r.edgeDNSServers...)
 	if err != nil {
 		log.Warn().Err(err).
 			Str("LoadBalancerHostname", lbHostname).
@@ -139,7 +137,7 @@ func (r *Gslb) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
 		}
 		if len(ip.Hostname) > 0 {
-			IPs, err := utils.Dig(r.edgeDNSServer, ip.Hostname)
+			IPs, err := utils.Dig(ip.Hostname, r.edgeDNSServers...)
 			if err != nil {
 				log.Warn().Err(err).Msg("Dig error")
 				return nil, err
@@ -225,11 +223,10 @@ func (r *Gslb) RemoveEndpoint(endpointName string) error {
 func (r *Gslb) InspectTXTThreshold(fqdn string, splitBrainThreshold time.Duration) error {
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(fqdn), dns.TypeTXT)
-	ns := fmt.Sprintf("%s:%v", r.edgeDNSServer, r.edgeDNSServerPort)
-	txt, err := dns.Exchange(m, ns)
+	txt, err := utils.Exchange(m, r.edgeDNSServers)
 	if err != nil {
 		log.Info().
-			Str("edgeDNS", ns).
+			Str("edgeDNSServers", r.edgeDNSServers.String()).
 			Err(err).
 			Msg("Contacting EdgeDNS server for TXT split brain record")
 		return err
@@ -261,7 +258,7 @@ func (r *Gslb) InspectTXTThreshold(fqdn string, splitBrainThreshold time.Duratio
 			return nil
 		}
 	}
-	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS server(%s) and record %s ", ns, fqdn))
+	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS servers(%+v) and record %s ", r.edgeDNSServers, fqdn))
 }
 
 func getARecords(msg *dns.Msg) []string {
@@ -273,18 +270,17 @@ func getARecords(msg *dns.Msg) []string {
 	return ARecords
 }
 
-func dnsQuery(host string, nameserver string, nameserverport int) (*dns.Msg, error) {
+func dnsQuery(host string, nameservers utils.DNSList) (*dns.Msg, error) {
 	dnsMsg := new(dns.Msg)
-	edgeDNSServer := fmt.Sprintf("%s:%v", nameserver, nameserverport)
 	fqdn := fmt.Sprintf("%s.", host) // Convert to true FQDN with dot at the end
 	dnsMsg.SetQuestion(fqdn, dns.TypeA)
-	dnsMsgA, err := dns.Exchange(dnsMsg, edgeDNSServer)
+	dnsMsgA, err := utils.Exchange(dnsMsg, nameservers)
 	if err != nil {
 		log.Warn().
 			Str("fqdn", fqdn).
-			Str("nameserver", nameserver).
+			Str("nameservers", nameservers.String()).
 			Err(err).
-			Msg("Can't resolve FQDN using nameserver")
+			Msg("Can't resolve FQDN using nameservers")
 	}
 	return dnsMsgA, err
 }
@@ -296,24 +292,25 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		log.Info().
 			Str("cluster", cluster).
 			Msg("Adding external Gslb targets from cluster")
-		glueA, err := dnsQuery(cluster, r.edgeDNSServer, r.edgeDNSServerPort)
+		glueA, err := dnsQuery(cluster, r.edgeDNSServers)
 		if err != nil {
 			return
 		}
 		log.Info().
 			Str("nameserver", cluster).
-			Str("edgeDNS", fmt.Sprintf("%s:%v", r.edgeDNSServer, r.edgeDNSServerPort)).
+			Str("edgeDNS", r.edgeDNSServers.String()).
 			Str("glue A record", fmt.Sprintf("%v", glueA.Answer)).
 			Msg("Resolved glue A record for NS")
 		glueARecords := getARecords(glueA)
-		var nameServerToUse string
+		var hostToUse string
 		if len(glueARecords) > 0 {
-			nameServerToUse = glueARecords[0]
+			hostToUse = glueARecords[0]
 		} else {
-			nameServerToUse = cluster
+			hostToUse = cluster
 		}
+		nameServersToUse := getNSCombinations(r.edgeDNSServers, hostToUse)
 		host = fmt.Sprintf("localtargets-%s", host)
-		a, err := dnsQuery(host, nameServerToUse, r.edgeDNSServerPort)
+		a, err := dnsQuery(host, nameServersToUse)
 		if err != nil {
 			return
 		}
@@ -327,4 +324,32 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		}
 	}
 	return targets
+}
+
+func getNSCombinations(original []utils.DNSServer, hostToUse string) []utils.DNSServer {
+	portToUse := original[0].Port
+	nameServerToUse := []utils.DNSServer{
+		{
+			Host: hostToUse,
+			Port: portToUse,
+		},
+	}
+	defaultPortAdded := false
+	for _, s := range original {
+		if s.Port != 53 {
+			nameServerToUse = append(nameServerToUse, utils.DNSServer{
+				Host: hostToUse,
+				Port: s.Port,
+			})
+		} else {
+			defaultPortAdded = true
+		}
+	}
+	if !defaultPortAdded {
+		nameServerToUse = append(nameServerToUse, utils.DNSServer{
+			Host: hostToUse,
+			Port: 53,
+		})
+	}
+	return nameServerToUse
 }

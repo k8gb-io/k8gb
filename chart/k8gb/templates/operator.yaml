@@ -61,10 +61,8 @@ spec:
               value: {{ quote .Values.k8gb.extGslbClustersGeoTags }}
             - name: EDGE_DNS_ZONE
               value: {{ .Values.k8gb.edgeDNSZone }}
-            - name: EDGE_DNS_SERVER
-              value: {{ .Values.k8gb.edgeDNSServer }}
-            - name: EDGE_DNS_SERVER_PORT
-              value: "53"
+            - name: EDGE_DNS_SERVERS
+              value: {{ join "," .Values.k8gb.edgeDNSServers }}
             - name: DNS_ZONE
               value: {{ .Values.k8gb.dnsZone }}
             - name: RECONCILE_REQUEUE_SECONDS

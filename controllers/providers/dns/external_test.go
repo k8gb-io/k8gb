@@ -51,10 +51,15 @@ var a = struct {
 		ReconcileRequeueSeconds: 30,
 		ClusterGeoTag:           "us",
 		ExtClustersGeoTags:      []string{"za", "eu"},
-		EdgeDNSServer:           "dns.cloud.example.com",
-		EdgeDNSZone:             "example.com",
-		DNSZone:                 "cloud.example.com",
-		K8gbNamespace:           "k8gb",
+		EdgeDNSServers: []utils.DNSServer{
+			{
+				Host: "dns.cloud.example.com",
+				Port: 53,
+			},
+		},
+		EdgeDNSZone:   "example.com",
+		DNSZone:       "cloud.example.com",
+		K8gbNamespace: "k8gb",
 	},
 	Gslb: func() *k8gbv1beta1.Gslb {
 		var crSampleYaml = "../../../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
@@ -139,7 +144,7 @@ func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {
 
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(ep).Build()
 
-	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config.EdgeDNSServer, a.Config.EdgeDNSServerPort)
+	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config.EdgeDNSServers)
 	p := NewExternalDNS(dnsType, a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, expectedDNSEndpoint)
@@ -161,7 +166,7 @@ func TestSaveExistingDNSEndpointOnExternalDNS(t *testing.T) {
 	require.NoError(t, schemeBuilder.AddToScheme(runtimeScheme))
 
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(endpointToSave).Build()
-	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config.EdgeDNSServer, a.Config.EdgeDNSServerPort)
+	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config.EdgeDNSServers)
 	p := NewExternalDNS(dnsType, a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, endpointToSave)
