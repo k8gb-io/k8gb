@@ -170,7 +170,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	// == Status =
-	err = r.updateGslbStatus(gslb)
+	err = r.updateGslbStatus(gslb, dnsEndpoint)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
