@@ -15,7 +15,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -s -w -X main.Version={{ .Tag }}
+      - -s -w -X main.version={{ .Tag }} main.commit={{ .Commit }}
 dockers:
 - image_templates:
   - "absaoss/k8gb:{{ .Tag }}-amd64"

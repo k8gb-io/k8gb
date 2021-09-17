@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -51,6 +52,7 @@ const (
 	K8gbInfobloxZoneUpdatesTotal      = "k8gb_infoblox_zone_updates_total"
 	K8gbInfobloxZoneUpdateErrorsTotal = "k8gb_infoblox_zone_update_errors_total"
 	K8gbEndpointStatusNum             = "k8gb_endpoint_status_num"
+	K8gbRuntimeInfo                   = "k8gb_runtime_info"
 )
 
 // collectors contains list of metrics.
@@ -67,6 +69,7 @@ type collectors struct {
 	K8gbInfobloxHeartbeatsTotal       *prometheus.CounterVec
 	K8gbInfobloxHeartbeatErrorsTotal  *prometheus.CounterVec
 	K8gbEndpointStatusNum             *prometheus.GaugeVec
+	K8gbRuntimeInfo                   *prometheus.GaugeVec
 }
 
 type PrometheusMetrics struct {
@@ -160,6 +163,19 @@ func (m *PrometheusMetrics) InfobloxIncrementHeartbeatError(gslb *k8gbv1beta1.Gs
 	m.metrics.K8gbInfobloxHeartbeatErrorsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
 }
 
+func (m *PrometheusMetrics) SetRuntimeInfo(version, commit string) {
+	firstN := func(value string, n int) string {
+		if len(value) < n {
+			return value
+		}
+		return value[:n]
+	}
+
+	m.metrics.K8gbRuntimeInfo.With(
+		prometheus.Labels{"namespace": m.config.K8gbNamespace, "go_version": runtime.Version(), "arch": runtime.GOARCH,
+			"os": runtime.GOOS, "k8gb_version": version, "git_sha": firstN(commit, 7)}).Set(1)
+}
+
 // Register prometheus metrics. Read register documentation, but shortly:
 // You can register metric with given name only once
 func (m *PrometheusMetrics) Register() (err error) {
@@ -185,6 +201,14 @@ func (m *PrometheusMetrics) Unregister() {
 
 // init instantiates particular metrics
 func (m *PrometheusMetrics) init() {
+
+	m.metrics.K8gbRuntimeInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: K8gbRuntimeInfo,
+			Help: "K8gb runtime info.",
+		},
+		[]string{"namespace", "k8gb_version", "go_version", "arch", "os", "git_sha"},
+	)
 
 	m.metrics.K8gbEndpointStatusNum = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{

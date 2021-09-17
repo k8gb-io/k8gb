@@ -39,6 +39,7 @@ import (
 var (
 	runtimescheme = runtime.NewScheme()
 	version       = "development"
+	commit        = "none"
 )
 
 func init() {
@@ -61,6 +62,7 @@ func main() {
 	log := logging.Logger()
 	log.Info().
 		Str("version", version).
+		Str("commit", commit).
 		Msg("K8gb status")
 	if err != nil {
 		log.Err(err).Msg("can't resolve environment variables")
@@ -124,6 +126,7 @@ func main() {
 		log.Err(err).Msg("Unable to create controller Gslb")
 		return
 	}
+	metrics.Metrics().SetRuntimeInfo(version, commit)
 	// +kubebuilder:scaffold:builder
 	log.Info().Msg("Starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
