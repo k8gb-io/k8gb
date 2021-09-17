@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"runtime"
 	"testing"
 
 	externaldns "sigs.k8s.io/external-dns/endpoint"
@@ -76,7 +77,8 @@ func TestPrometheusRegistry(t *testing.T) {
 	items := []string{K8gbGslbErrorsTotal, K8gbGslbHealthyRecords, K8gbGslbReconciliationLoopsTotal,
 		K8gbGslbServiceStatusNum, K8gbGslbStatusCountForFailover, K8gbGslbStatusCountForRoundrobin,
 		K8gbGslbStatusCountForGeoIP, K8gbInfobloxHeartbeatsTotal, K8gbInfobloxHeartbeatErrorsTotal,
-		K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal, K8gbEndpointStatusNum}
+		K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal, K8gbEndpointStatusNum,
+		K8gbRuntimeInfo}
 	// act
 	registry := m.registry()
 	// assert
@@ -332,6 +334,37 @@ func TestRunMetricLinter(t *testing.T) {
 		lintErrors, err := testutil.CollectAndLint(scenario)
 		assert.NoError(t, err)
 		assert.True(t, len(lintErrors) == 0, "Metric linting error(s): %s - %s", name, lintErrors)
+	}
+}
+
+func TestRuntimeStatus(t *testing.T) {
+	// arrange
+	const version = "v0.8.1"
+	const gitSHAShort = "74bf71b"
+	const gitSHALarge = "74bf71b879d5326ebbf3e1172c1cb8c03b2e03a6"
+
+	l := prometheus.Labels{
+		"namespace":    namespace,
+		"go_version":   runtime.Version(),
+		"arch":         runtime.GOARCH,
+		"os":           runtime.GOOS,
+		"k8gb_version": version,
+	}
+
+	m := newPrometheusMetrics(defaultConfig)
+
+	f := func(sha, expected string) {
+		m.SetRuntimeInfo(version, sha)
+		l["git_sha"] = expected
+		cnt := testutil.ToFloat64(m.Get(K8gbRuntimeInfo).AsGaugeVec().With(l))
+		assert.Equal(t, 1., cnt)
+	}
+
+	// act
+	// assert
+	f(gitSHALarge, gitSHAShort)
+	for _, sha := range []string{gitSHAShort, "74bf", "none", ""} {
+		f(sha, sha)
 	}
 }
 
