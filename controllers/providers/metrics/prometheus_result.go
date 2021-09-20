@@ -38,7 +38,3 @@ func (c *MetricResult) AsGaugeVec() *prometheus.GaugeVec {
 func (c *MetricResult) AsCounterVec() *prometheus.CounterVec {
 	return c.value.(*prometheus.CounterVec)
 }
-
-func (c *MetricResult) AsCounter() prometheus.Counter {
-	return c.value.(prometheus.Counter)
-}

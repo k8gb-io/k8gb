@@ -278,10 +278,10 @@ func TestHealthyRecordMetric(t *testing.T) {
 func TestGslbReconciliationTotalIncrement(t *testing.T) {
 	// arrange
 	settings := provideSettings(t, predefinedConfig)
-	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounter())
+	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounterVec())
 	// act
 	_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
-	cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounter())
+	cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounterVec())
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, cnt+1, cnt2)

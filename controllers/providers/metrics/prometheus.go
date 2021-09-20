@@ -63,7 +63,7 @@ type collectors struct {
 	K8gbGslbStatusCountForRoundrobin  *prometheus.GaugeVec
 	K8gbGslbStatusCountForGeoip       *prometheus.GaugeVec
 	K8gbGslbErrorsTotal               *prometheus.CounterVec
-	K8gbGslbReconciliationLoopsTotal  prometheus.Counter
+	K8gbGslbReconciliationLoopsTotal  *prometheus.CounterVec
 	K8gbInfobloxZoneUpdatesTotal      *prometheus.CounterVec
 	K8gbInfobloxZoneUpdateErrorsTotal *prometheus.CounterVec
 	K8gbInfobloxHeartbeatsTotal       *prometheus.CounterVec
@@ -143,8 +143,8 @@ func (m *PrometheusMetrics) IncrementError(gslb *k8gbv1beta1.Gslb) {
 	m.metrics.K8gbGslbErrorsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
 }
 
-func (m *PrometheusMetrics) IncrementReconciliation() {
-	m.metrics.K8gbGslbReconciliationLoopsTotal.Inc()
+func (m *PrometheusMetrics) IncrementReconciliation(gslb *k8gbv1beta1.Gslb) {
+	m.metrics.K8gbGslbReconciliationLoopsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
 }
 
 func (m *PrometheusMetrics) InfobloxIncrementZoneUpdate(gslb *k8gbv1beta1.Gslb) {
@@ -242,11 +242,13 @@ func (m *PrometheusMetrics) init() {
 		[]string{"namespace", "name"},
 	)
 
-	m.metrics.K8gbGslbReconciliationLoopsTotal = prometheus.NewCounter(
+	m.metrics.K8gbGslbReconciliationLoopsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: K8gbGslbReconciliationLoopsTotal,
 			Help: "Number of successful reconciliation loops.",
-		})
+		},
+		[]string{"namespace", "name"},
+	)
 
 	m.metrics.K8gbGslbStatusCountForFailover = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
