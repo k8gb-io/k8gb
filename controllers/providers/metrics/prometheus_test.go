@@ -102,11 +102,11 @@ func TestMetricsRegister(t *testing.T) {
 func TestReconciliationTotal(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	cnt1 := testutil.ToFloat64(m.Get(K8gbGslbReconciliationLoopsTotal).AsCounter())
+	cnt1 := testutil.ToFloat64(m.Get(K8gbGslbReconciliationLoopsTotal).AsCounterVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
 	// act
-	m.IncrementReconciliation()
+	m.IncrementReconciliation(defaultGslb)
 	// assert
-	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbReconciliationLoopsTotal).AsCounter())
+	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbReconciliationLoopsTotal).AsCounterVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
 	assert.Equal(t, cnt1+1.0, cnt2)
 }
 

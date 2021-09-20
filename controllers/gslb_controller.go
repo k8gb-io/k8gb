@@ -180,7 +180,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// Everything went fine, requeue after some time to catch up
 	// with external Gslb status
 	// TODO: potentially enhance with smarter reaction to external Event
-	m.IncrementReconciliation()
+	m.IncrementReconciliation(gslb)
 	return result.Requeue()
 }
 
