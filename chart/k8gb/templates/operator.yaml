@@ -32,6 +32,7 @@ spec:
             runAsUser: {{ .Values.k8gb.runAsUser }}
             runAsNonRoot: true
             readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
           resources:
             requests:
               memory: "32Mi"
