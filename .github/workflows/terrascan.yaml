@@ -22,7 +22,7 @@ jobs:
       with:
         iac_type: helm
         iac_version: v3
-        only_warn: true
+        only_warn: false
         verbose: true
         sarif_upload: true
         iac_dir: chart/k8gb
