@@ -51,7 +51,6 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibclient.NameS
 	// And final list is sorted
 	final := local
 	remote := p.filterOutDelegateTo(upstream, p.config.GetClusterNSName())
-	remote = p.filterOutDelegateTo(remote, p.config.GetClusterOldNSName())
 	final = append(final, remote...)
 	sortZones(final)
 
