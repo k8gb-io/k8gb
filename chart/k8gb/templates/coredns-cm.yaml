@@ -6,7 +6,7 @@ metadata:
 apiVersion: v1
 data:
   Corefile: |-
-    {{ .Values.k8gb.dnsZone }}:53 {
+    {{ .Values.k8gb.dnsZone }}:5353 {
         errors
         health
         ready
