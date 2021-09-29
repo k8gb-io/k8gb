@@ -58,13 +58,17 @@ var predefinedConfig = Config{
 	ClusterGeoTag:           "us",
 	ExtClustersGeoTags:      []string{"za", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
-	EdgeDNSServer:           "dns.cloud.example.com",
-	EdgeDNSServerPort:       53,
-	EdgeDNSZone:             "example.com",
-	DNSZone:                 defaultEdgeDNSZone,
-	K8gbNamespace:           "k8gb",
-	SplitBrainCheck:         true,
-	MetricsAddress:          "0.0.0.0:8080",
+	EdgeDNSServers: []utils.DNSServer{
+		{
+			Host: "dns.cloud.example.com",
+			Port: 53,
+		},
+	},
+	EdgeDNSZone:     "example.com",
+	DNSZone:         defaultEdgeDNSZone,
+	K8gbNamespace:   "k8gb",
+	SplitBrainCheck: true,
+	MetricsAddress:  "0.0.0.0:8080",
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
@@ -172,7 +176,7 @@ func TestResolveConfigWithMultipleInvalidEnv(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSZone = ""
-	expected.EdgeDNSServer = ""
+	expected.EdgeDNSServers = []utils.DNSServer{}
 	expected.ExtClustersGeoTags = []string{}
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -184,8 +188,8 @@ func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
 	defaultConfig.ReconcileRequeueSeconds = 30
 	defaultConfig.Infoblox.HTTPRequestTimeout = 20
 	defaultConfig.Infoblox.HTTPPoolConnections = 10
-	defaultConfig.EdgeDNSServerPort = 53
 	defaultConfig.EdgeDNSType = DNSTypeNoEdgeDNS
+	defaultConfig.EdgeDNSServers = []utils.DNSServer{}
 	defaultConfig.ExtClustersGeoTags = []string{}
 	defaultConfig.Log.Level = zerolog.InfoLevel
 	defaultConfig.Log.Format = SimpleFormat
@@ -194,8 +198,10 @@ func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
+	depr := resolver.GetDeprecations()
 	// assert
 	assert.Error(t, err)
+	assert.Empty(t, depr)
 	assert.Equal(t, defaultConfig, *config)
 }
 
@@ -216,8 +222,10 @@ func TestResolveConfigWithTextReconcileRequeueSecondsSync(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
+	depr := resolver.GetDeprecations()
 	// assert
 	assert.NoError(t, err)
+	assert.Empty(t, depr)
 	assert.Equal(t, predefinedConfig, *config)
 }
 
@@ -229,8 +237,10 @@ func TestResolveConfigWithEmptyReconcileRequeueSecondsSync(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
+	depr := resolver.GetDeprecations()
 	// assert
 	assert.NoError(t, err)
+	assert.Empty(t, depr)
 	assert.Equal(t, predefinedConfig, *config)
 }
 
@@ -260,9 +270,59 @@ func TestResolveConfigWithEmptyReconcileRequeueSecondsKey(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
+	depr := resolver.GetDeprecations()
 	// assert
 	assert.NoError(t, err)
+	assert.Empty(t, depr)
 	assert.Equal(t, predefinedConfig, *config)
+}
+
+func TestResolveConfigWithEmptyEdgeDNSServersKey(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "")
+	resolver := NewDependencyResolver()
+	// act
+	_, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), fmt.Sprintf("'%s' is empty", EdgeDNSServersKey))
+}
+
+// remove this test once the deprecated key is no longer supported
+func TestResolveConfigWithDeprecatedEdgeDNSServerKey(t *testing.T) {
+	// arrange
+	deprecatedKey := "EDGE_DNS_SERVER"
+	defer func() {
+		cleanup()
+		if os.Unsetenv(deprecatedKey) != nil {
+			panic(fmt.Errorf("cleanup %s", deprecatedKey))
+		}
+	}()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(deprecatedKey, "dns.cloud.example.com")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	depr := resolver.GetDeprecations()
+	// assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, depr)
+	assert.Equal(t, predefinedConfig, *config)
+}
+
+func TestResolveConfigWithMalformedEdgeDNSServersKey(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "dns1;dns2?")
+	resolver := NewDependencyResolver()
+	// act
+	_, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not match given criteria")
 }
 
 func TestResolveConfigWithoutReconcileRequeueSecondsKey(t *testing.T) {
@@ -301,14 +361,18 @@ func TestConfigRunOnce(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	config1, err1 := resolver.ResolveOperatorConfig()
+	depr1 := resolver.GetDeprecations()
 	_ = os.Setenv(ReconcileRequeueSecondsKey, "100")
 	// resolve again with new values
 	config2, err2 := resolver.ResolveOperatorConfig()
+	depr2 := resolver.GetDeprecations()
 	// assert
 	assert.NoError(t, err1)
+	assert.Empty(t, depr1)
 	assert.Equal(t, predefinedConfig, *config1)
 	// config2, err2 would be equal
 	assert.NoError(t, err2)
+	assert.Empty(t, depr2)
 	assert.Equal(t, *config1, *config2)
 }
 
@@ -426,25 +490,48 @@ func TestResolveConfigWithEmptyEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServer = ""
+	expected.EdgeDNSServers = []utils.DNSServer{}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestResolveConfigWithTwoEdgeDnsServers(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.EdgeDNSServers = []utils.DNSServer{
+		{
+			Host: "8.8.8.8",
+			Port: 53,
+		},
+		{
+			Host: "8.8.4.4",
+			Port: 53,
+		},
+	}
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
 
 func TestResolveConfigWithNoEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServer = ""
+	expected.EdgeDNSServers = []utils.DNSServer{}
 	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, EdgeDNSServerKey)
+	arrangeVariablesAndAssert(t, expected, assert.Error, EdgeDNSServersKey)
 }
 
 func TestResolveConfigWithEmptyIpAddressInEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServer = defaultEdgeDNSServerIP
+	expected.EdgeDNSServers = []utils.DNSServer{
+		{
+			Host: defaultEdgeDNSServerIP,
+			Port: 53,
+		},
+	}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -453,72 +540,187 @@ func TestResolveConfigWithHostnameEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServer = "server-nonprod.on.domain.l3.2l.com"
+	expected.EdgeDNSServers = []utils.DNSServer{
+		{
+			Host: "server-nonprod.on.domain.l3.2l.com",
+			Port: 53,
+		},
+	}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 
-}
-
-func TestResolveConfigWithInvalidHostnameEdgeDnsServer(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSServer = "https://server-nonprod.on.domain.l3.2l.com"
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
 
 func TestResolveConfigWithInvalidIpAddressEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServer = fmt.Sprintf("%s.", defaultEdgeDNSServerIP)
+	expected.EdgeDNSServers = []utils.DNSServer{
+		{
+			Host: fmt.Sprintf("%s.", defaultEdgeDNSServerIP),
+			Port: 53,
+		},
+	}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestResolveConfigWithMultipleEdgeDnsServers1(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:53,  2.2.2.2:42")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	depr := resolver.GetDeprecations()
+	// assert
+	assert.NoError(t, err)
+	assert.Empty(t, depr)
+	assert.Equal(t, 2, len(config.EdgeDNSServers))
+	assert.Equal(t, 42, config.EdgeDNSServers[1].Port)
+}
+
+func TestResolveConfigWithMultipleEdgeDnsServers2(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:11, 2.2.2.2:22, 3.3.3.3, somedns:1337")
+	resolver := NewDependencyResolver()
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+	depr := resolver.GetDeprecations()
+	// assert
+	assert.NoError(t, err)
+	assert.Empty(t, depr)
+	assert.Equal(t, 4, len(config.EdgeDNSServers))
+	assert.Equal(t, "1.1.1.1", config.EdgeDNSServers[0].Host)
+	assert.Equal(t, 11, config.EdgeDNSServers[0].Port)
+	assert.Equal(t, 22, config.EdgeDNSServers[1].Port)
+	assert.Equal(t, 53, config.EdgeDNSServers[2].Port)
+	assert.Equal(t, 1337, config.EdgeDNSServers[3].Port)
+	assert.Equal(t, "somedns", config.EdgeDNSServers[3].Host)
 }
 
 func TestResolveConfigWithNoEdgeDnsServerPort(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServerPortKey, "")
+	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, 53, config.EdgeDNSServerPort)
+	assert.Equal(t, 53, config.EdgeDNSServers[0].Port)
 }
 
 func TestResolveConfigWithEdgeDnsServerPort(t *testing.T) {
 	// arrange
 	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSServerPort = 7753
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigWithInvalidEdgeDnsServerPort(t *testing.T) {
-	// arrange
-	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServerPortKey, "invalid")
+	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:42")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, 53, config.EdgeDNSServerPort)
+	assert.Equal(t, 42, config.EdgeDNSServers[0].Port)
+}
+
+func TestResolveConfigWithInvalidEdgeDnsServerPort1(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:invalid")
+	resolver := NewDependencyResolver()
+	// act
+	_, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not match given criteria")
+}
+
+func TestResolveConfigWithInvalidEdgeDnsServersValue(t *testing.T) {
+	for _, invalid := range []string{"127.0.0.1:5 053", "host.cloud.example.com:5353:21", "1.2.3.:53", "1.2.3.4:5 3", "21:host.cloud.example.com",
+		"1.2.3.4:3,,1.2.3.4:4", ",1.2.3.4:4", "1.2.3.4:4,", "host.cloud..example.com", "host.cloud example.com"} {
+		// arrange
+		defer cleanup()
+		configureEnvVar(predefinedConfig)
+		_ = os.Setenv(EdgeDNSServersKey, invalid)
+		resolver := NewDependencyResolver()
+		// act
+		_, err := resolver.ResolveOperatorConfig()
+		// assert
+		assert.Error(t, err, fmt.Sprintf("Value %s should not pass the regexp check, but it did.", invalid))
+		assert.True(t, strings.Contains(err.Error(), "does not match given criteria") || strings.Contains(err.Error(), "is empty"))
+	}
+}
+
+func TestResolveConfigWithMultipleEdgeDnsServersLocalhostNotFirst(t *testing.T) {
+	for _, invalid := range []string{"valid:53, 127.0.0.1:53", "127.0.0.1:5353, 127.0.0.1:53", "valid:53,valid:5353,localhost"} {
+		// arrange
+		defer cleanup()
+		configureEnvVar(predefinedConfig)
+		_ = os.Setenv(EdgeDNSServersKey, invalid)
+		resolver := NewDependencyResolver()
+		// act
+		_, err := resolver.ResolveOperatorConfig()
+		// assert
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "other than the first position")
+	}
+}
+
+func TestResolveConfigWithMultipleEdgeDnsServersMalformed1(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "somehost:,somehost3:123:aaa.com")
+	resolver := NewDependencyResolver()
+	// act
+	_, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not match given criteria")
+}
+
+func TestResolveConfigWithMultipleEdgeDnsServersMalformed2(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1,")
+	resolver := NewDependencyResolver()
+	// act
+	_, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not match given criteria")
+}
+
+func TestResolveConfigWithInvalidHostnameEdgeDnsServer(t *testing.T) {
+	// arrange
+	defer cleanup()
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "https://server-nonprod.on.domain.l3.2l.com")
+	resolver := NewDependencyResolver()
+	// act
+	_, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not match given criteria")
 }
 
 func TestResolveConfigWithZeroOrNegativeEdgeDnsServerPort(t *testing.T) {
 	// arrange
 	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSServerPort = 0
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error)
+	configureEnvVar(predefinedConfig)
+	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:-53")
+	resolver := NewDependencyResolver()
+	// act
+	_, err := resolver.ResolveOperatorConfig()
+	// assert
+	assert.Error(t, err)
 }
 
 func TestResolveConfigWithEmptyEdgeDnsZone(t *testing.T) {
@@ -1435,7 +1637,12 @@ func TestNsServerNamesForLocalEdgeDNS(t *testing.T) {
 	defer cleanup()
 	for _, edgeDNSServer := range []string{"127.0.0.1", "localhost"} {
 		customConfig := predefinedConfig
-		customConfig.EdgeDNSServer = edgeDNSServer
+		customConfig.EdgeDNSServers = []utils.DNSServer{
+			{
+				Host: edgeDNSServer,
+				Port: 53,
+			},
+		}
 		configureEnvVar(customConfig)
 		resolver := NewDependencyResolver()
 		// act
@@ -1685,8 +1892,8 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 }
 
 func cleanup() {
-	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServerKey,
-		EdgeDNSServerPortKey, Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
+	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServersKey,
+		Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
@@ -1699,8 +1906,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(ReconcileRequeueSecondsKey, strconv.Itoa(config.ReconcileRequeueSeconds))
 	_ = os.Setenv(ClusterGeoTagKey, config.ClusterGeoTag)
 	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
-	_ = os.Setenv(EdgeDNSServerKey, config.EdgeDNSServer)
-	_ = os.Setenv(EdgeDNSServerPortKey, strconv.Itoa(config.EdgeDNSServerPort))
+	_ = os.Setenv(EdgeDNSServersKey, config.EdgeDNSServers.String())
 	_ = os.Setenv(EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.DNSZone)
 	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)

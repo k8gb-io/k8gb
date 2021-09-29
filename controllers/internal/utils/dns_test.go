@@ -26,15 +26,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	defaultFqdn = "google.com"
+)
+
+var defaultEdgeDNSServer = DNSServer{
+	Host: "8.8.8.8",
+	Port: 53,
+}
+
+func TestValidDigFQDNWithDot(t *testing.T) {
+	// arrange
+	if !connected() {
+		t.Skipf("no connectivity, skipping")
+	}
+	fqdn := defaultFqdn
+	// act
+	result, err := Dig(fqdn+".", defaultEdgeDNSServer)
+	// assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+	assert.NotEmpty(t, result[0])
+}
+
 func TestValidDig(t *testing.T) {
 	// arrange
 	if !connected() {
 		t.Skipf("no connectivity, skipping")
 	}
-	edgeDNSServer := "8.8.8.8"
-	fqdn := "google.com"
+	fqdn := defaultFqdn
 	// act
-	result, err := Dig(edgeDNSServer, fqdn)
+	result, err := Dig(fqdn, defaultEdgeDNSServer)
 	// assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
@@ -46,10 +68,9 @@ func TestEmptyFQDNButValidEdgeDNS(t *testing.T) {
 	if !connected() {
 		t.Skipf("no connectivity, skipping")
 	}
-	edgeDNSServer := "8.8.8.8"
 	fqdn := ""
 	// act
-	result, err := Dig(edgeDNSServer, fqdn)
+	result, err := Dig(fqdn, defaultEdgeDNSServer)
 	// assert
 	assert.NoError(t, err)
 	assert.Nil(t, result)
@@ -57,13 +78,91 @@ func TestEmptyFQDNButValidEdgeDNS(t *testing.T) {
 
 func TestEmptyEdgeDNS(t *testing.T) {
 	// arrange
-	edgeDNSServer := ""
 	fqdn := "whatever"
 	// act
-	result, err := Dig(edgeDNSServer, fqdn)
+	result, err := Dig(fqdn, DNSServer{Host: "", Port: 53})
 	// assert
 	assert.Error(t, err)
 	assert.Nil(t, result)
+}
+
+func TestEmptyDNSList(t *testing.T) {
+	// arrange
+	fqdn := "whatever"
+	// act
+	result, err := Dig(fqdn, []DNSServer{}...)
+	// assert
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+func TestOneValidEdgeDNSInTheList(t *testing.T) {
+	if !connected() {
+		t.Skipf("no connectivity, skipping")
+	}
+	// arrange
+	edgeDNSServers := []DNSServer{
+		{Host: "127.1.2.3", Port: 53}, // wrong
+		{Host: "8.8.8.8", Port: 153},  // wrong
+		{Host: "8.8.8.8", Port: 53},   // ok
+		{Host: "8.8.8.8", Port: 253},  // wrong
+	}
+	fqdn := defaultFqdn
+	// act
+	result, err := Dig(fqdn, edgeDNSServers...)
+	// assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+	assert.NotEmpty(t, result[0])
+}
+
+func TestNoValidEdgeDNSInTheList(t *testing.T) {
+	// arrange
+	edgeDNSServers := []DNSServer{
+		{Host: "", Port: 53},         // wrong
+		{Host: "8.8.8.8", Port: 153}, // wrong
+		{Host: "8.8.4.4", Port: 253}, // wrong
+	}
+	fqdn := defaultFqdn
+	// act
+	result, err := Dig(fqdn, edgeDNSServers...)
+	// assert
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+func TestEmptyEdgeDNSInTheList(t *testing.T) {
+	// arrange
+	edgeDNSServers := []DNSServer{
+		{Host: "", Port: 53},        // wrong
+		{Host: "8.8.8.8", Port: 53}, // ok
+		{Host: "8.8.4.4", Port: 53}, // ok
+	}
+	fqdn := defaultFqdn
+	// act
+	result, err := Dig(fqdn, edgeDNSServers...)
+	// assert
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+func TestMultipleValidEdgeDNSInTheList(t *testing.T) {
+	if !connected() {
+		t.Skipf("no connectivity, skipping")
+	}
+	// arrange
+	edgeDNSServers := []DNSServer{
+		{Host: "1.1.1.1", Port: 53}, // ok
+		{Host: "8.8.8.8", Port: 53}, // ok
+		{Host: "8.8.4.4", Port: 53}, // ok
+	}
+	fqdn := defaultFqdn
+	// act
+	result, err := Dig(fqdn, edgeDNSServers...)
+	// assert
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+	assert.NotEmpty(t, result[0])
 }
 
 func TestValidEdgeDNSButNonExistingFQDN(t *testing.T) {
@@ -71,7 +170,7 @@ func TestValidEdgeDNSButNonExistingFQDN(t *testing.T) {
 	edgeDNSServer := "localhost"
 	fqdn := "some-valid-ip-fqdn-123"
 	// act
-	result, err := Dig(edgeDNSServer, fqdn)
+	result, err := Dig(fqdn, DNSServer{Host: edgeDNSServer, Port: 53})
 	// assert
 	assert.Error(t, err)
 	assert.Nil(t, result)

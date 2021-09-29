@@ -21,13 +21,20 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 )
 
 const (
 	// hostNameRegex allows cloud region formats; e.g. af-south-1
 	geoTagRegex = "^[a-zA-Z\\-\\d]*$"
 	// hostNameRegex is valid as per RFC 1123 that allows hostname segments could start with a digit
-	hostNameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+	hostNamePart  = "(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])"
+	hostNameRegex = "^" + hostNamePart + "$"
+	// hostnames are valid as per the previous regexp, it may also contain :123 port and multiple comma-separated entries are supported
+	hostNamesWithPortsRegex1 = "^(" + hostNamePart + "(:\\d{1,5})?(\\s*,\\s*)?)+$"
+	// doesn't end with comma or space (golang doesn't support negative lookbehind regexps)
+	hostNamesWithPortsRegex2 = "^.*[^,]$"
 	// ipAddressRegex matches valid IPv4 addresses
 	ipAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
 	// versionNumberRegex matches version in formats 0.1.2, v0.1.2, v0.1.2-alpha
@@ -64,6 +71,8 @@ func field(name string, value interface{}) *validator {
 		validator.strValue = v
 	case []string:
 		validator.strArr = v
+	case utils.DNSList:
+		validator.strValue = v.String()
 	default:
 		// float32, float64, bool, interface{}, maps, slices, Custom Types
 		validator.err = fmt.Errorf("can't parse '%v' of type '%T' as int or string", v, v)

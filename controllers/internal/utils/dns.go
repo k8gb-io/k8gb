@@ -20,30 +20,69 @@ package utils
 import (
 	"fmt"
 	"sort"
+	"strings"
 
-	"github.com/lixiangzhong/dnsutil"
+	"github.com/miekg/dns"
 )
 
-// Dig retrieves list of tuple <IP address, A record > from edge DNS server for specific FQDN
-func Dig(edgeDNSServer, fqdn string) ([]string, error) {
-	var dig dnsutil.Dig
-	if edgeDNSServer == "" {
-		return nil, fmt.Errorf("empty edgeDNSServer")
+type DNSServer struct {
+	Host string
+	Port int
+}
+
+type DNSList []DNSServer
+
+func (s DNSServer) String() string {
+	return fmt.Sprintf("%s:%v", s.Host, s.Port)
+}
+
+func (l DNSList) String() string {
+	var aux []string
+	for _, el := range l {
+		aux = append(aux, el.String())
 	}
-	err := dig.SetDNS(edgeDNSServer)
+	return strings.Join(aux, ",")
+}
+
+// Dig returns a list of IP addresses for a given FQDN by using the dns servers from edgeDNSServers
+// dns servers are tried one by one from the edgeDNSServers and if there is a non-error response it is returned and the rest is not tried
+func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {
+	if len(edgeDNSServers) == 0 {
+		return nil, fmt.Errorf("empty edgeDNSServers, provide at least one")
+	}
+	if len(fqdn) == 0 {
+		return
+	}
+
+	if !strings.HasSuffix(fqdn, ".") {
+		fqdn += "."
+	}
+	msg := new(dns.Msg)
+	msg.SetQuestion(fqdn, dns.TypeA)
+	ack, err := Exchange(msg, edgeDNSServers)
 	if err != nil {
-		err = fmt.Errorf("dig error: can't set query dns (%s) with error(%s)", edgeDNSServer, err)
-		return nil, err
+		return nil, fmt.Errorf("dig error: %s", err)
 	}
-	a, err := dig.A(fqdn)
-	if err != nil {
-		err = fmt.Errorf("dig error: can't dig fqdn(%s) with error(%s)", fqdn, err)
-		return nil, err
+	for _, a := range ack.Answer {
+		ips = append(ips, a.(*dns.A).A.String())
 	}
-	var IPs []string
-	for _, ip := range a {
-		IPs = append(IPs, fmt.Sprint(ip.A))
+	sort.Strings(ips)
+	return
+}
+
+func Exchange(m *dns.Msg, edgeDNSServers []DNSServer) (msg *dns.Msg, err error) {
+	if len(edgeDNSServers) == 0 {
+		return nil, fmt.Errorf("empty edgeDNSServers, provide at least one")
 	}
-	sort.Strings(IPs)
-	return IPs, nil
+	for _, ns := range edgeDNSServers {
+		if ns.Host == "" {
+			return nil, fmt.Errorf("empty edgeDNSServer.Host in the list")
+		}
+		msg, err = dns.Exchange(m, ns.String())
+		if err != nil {
+			continue
+		}
+		return
+	}
+	return nil, fmt.Errorf("exchange error: all dns servers were tried and none of them were able to resolve, err: %s", err)
 }

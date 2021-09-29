@@ -8,7 +8,6 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/golang/mock v1.5.0
 	github.com/infobloxopen/infoblox-go-client v1.1.0
-	github.com/lixiangzhong/dnsutil v0.0.0-20191203032812-75ad39d2945a
 	github.com/miekg/dns v1.1.42
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.21.0

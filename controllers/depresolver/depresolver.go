@@ -27,6 +27,7 @@ import (
 	"sync"
 
 	"github.com/AbsaOSS/k8gb/api/v1beta1"
+	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 
 	"github.com/rs/zerolog"
 )
@@ -119,10 +120,8 @@ type Config struct {
 	ExtClustersGeoTags []string
 	// EdgeDNSType is READONLY and is set automatically by configuration
 	EdgeDNSType EdgeDNSType
-	// EdgeDNSServer
-	EdgeDNSServer string
-	// EdgeDNSServerPort
-	EdgeDNSServerPort int
+	// EdgeDNSServers
+	EdgeDNSServers utils.DNSList
 	// EdgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
 	EdgeDNSZone string
 	// DNSZone controlled by gslb; e.g. cloud.example.com
