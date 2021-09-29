@@ -297,6 +297,8 @@ mocks:
 	go install github.com/golang/mock/mockgen@v1.5.0
 	mockgen -source=controllers/providers/assistant/assistant.go -destination=controllers/providers/assistant/assistant_mock.go -package=assistant
 	mockgen -source=controllers/providers/dns/dns.go -destination=controllers/providers/dns/dns_mock.go -package=dns
+	mockgen -source=controllers/providers/dns/infoblox-client.go -destination=controllers/providers/dns/infoblox-client_mock.go -package=dns
+	mockgen -destination=controllers/providers/dns/infoblox-connection_mock.go -package=dns github.com/infobloxopen/infoblox-go-client IBConnector
 	$(call golic)
 
 # remove clusters and redeploy

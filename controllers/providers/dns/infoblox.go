@@ -34,12 +34,14 @@ import (
 type InfobloxProvider struct {
 	assistant assistant.Assistant
 	config    depresolver.Config
+	client    InfobloxClient
 }
 
 var m = metrics.Metrics()
 
-func NewInfobloxDNS(config depresolver.Config, assistant assistant.Assistant) *InfobloxProvider {
+func NewInfobloxDNS(config depresolver.Config, assistant assistant.Assistant, client InfobloxClient) *InfobloxProvider {
 	return &InfobloxProvider{
+		client:    client,
 		assistant: assistant,
 		config:    config,
 	}
@@ -58,7 +60,7 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibclient.NameS
 }
 
 func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
-	objMgr, err := p.infobloxConnection()
+	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
@@ -152,7 +154,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 }
 
 func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
-	objMgr, err := p.infobloxConnection()
+	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		return err
 	}
@@ -241,5 +243,24 @@ func (p *InfobloxProvider) saveHeartbeatTXTRecord(objMgr *ibclient.ObjectManager
 		}
 	}
 	m.InfobloxIncrementHeartbeat(gslb)
+	return
+}
+
+func (p *InfobloxProvider) checkZoneDelegated(findZone *ibclient.ZoneDelegated) error {
+	if findZone.Fqdn != p.config.DNSZone {
+		err := fmt.Errorf("delegated zone returned from infoblox(%s) does not match requested gslb zone(%s)", findZone.Fqdn, p.config.DNSZone)
+		return err
+	}
+	return nil
+}
+
+func (p *InfobloxProvider) filterOutDelegateTo(delegateTo []ibclient.NameServer, fqdn string) (result []ibclient.NameServer) {
+	result = make([]ibclient.NameServer, 0)
+
+	for _, v := range delegateTo {
+		if v.Name != fqdn {
+			result = append(result, v)
+		}
+	}
 	return
 }

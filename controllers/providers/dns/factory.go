@@ -50,7 +50,8 @@ func (f *ProviderFactory) Provider() Provider {
 	case depresolver.DNSTypeRoute53:
 		return NewExternalDNS(externalDNSTypeRoute53, f.config, a)
 	case depresolver.DNSTypeInfoblox:
-		return NewInfobloxDNS(f.config, a)
+		ibx := NewInfobloxClient(f.config)
+		return NewInfobloxDNS(f.config, a, ibx)
 	}
 	return NewEmptyDNS(f.config, a)
 }
