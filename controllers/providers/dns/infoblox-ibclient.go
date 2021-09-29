@@ -38,7 +38,7 @@ func (p *InfobloxProvider) infobloxConnection() (*ibclient.ObjectManager, error)
 
 	var objMgr *ibclient.ObjectManager
 
-	if p.config.Override.FakeInfobloxEnabled {
+	if p.config.Infoblox.IsFakeInfobloxEnabled() {
 		fqdn := "fakezone.example.com"
 		fakeRefReturn := "zone_delegated/ZG5zLnpvbmUkLl9kZWZhdWx0LnphLmNvLmFic2EuY2Fhcy5vaG15Z2xiLmdzbGJpYmNsaWVudA:fakezone.example.com/default"
 		k8gbFakeConnector := &fakeInfobloxConnector{
