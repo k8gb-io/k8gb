@@ -29,12 +29,16 @@ k8gb:
     level: info # log level (panic,fatal,error,warn,info,debug,trace)
   splitBrainCheck: false
   metricsAddress: "0.0.0.0:8080"
-  runAsUser: 1000
+  securityContext: # For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    runAsUser: 1000
 
 externaldns:
   image: k8s.gcr.io/external-dns/external-dns:v0.9.0
   interval: "20s"
-  securityContext:
+  securityContext: # For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
     fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
     runAsUser: 1000
     runAsNonRoot: true
