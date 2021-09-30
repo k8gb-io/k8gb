@@ -1,4 +1,4 @@
-{{ if .Values.infoblox.enabled }}
+{{- if .Values.infoblox.enabled }}
 apiVersion: v1
 data:
   INFOBLOX_GRID_HOST: {{ quote .Values.infoblox.gridHost }}
@@ -9,4 +9,4 @@ data:
 kind: ConfigMap
 metadata:
   name: infoblox
-{{ end }}
+{{- end }}

@@ -15,14 +15,14 @@ spec:
       labels:
         name: k8gb
     spec:
-      {{ if .Values.k8gb.hostAlias.enabled }}
+      {{- if .Values.k8gb.hostAlias.enabled }}
       hostAliases:
         - ip: "{{ .Values.k8gb.hostAlias.ip }}"
           hostnames:
             {{- range.Values.k8gb.hostAlias.hostnames }}
             - {{ . }}
             {{- end }}
-      {{ end }}
+      {{- end }}
       serviceAccountName: k8gb
       containers:
         - name: k8gb
@@ -67,7 +67,7 @@ spec:
               value: {{ .Values.k8gb.dnsZone }}
             - name: RECONCILE_REQUEUE_SECONDS
               value: {{ quote .Values.k8gb.reconcileRequeueSeconds}}
-            {{ if .Values.infoblox.enabled }}
+            {{- if .Values.infoblox.enabled }}
             - name: INFOBLOX_GRID_HOST
               valueFrom:
                 configMapKeyRef:
@@ -103,19 +103,19 @@ spec:
                 secretKeyRef:
                   name: infoblox
                   key: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
-            {{ end }}
-            {{ if .Values.route53.enabled }}
+            {{- end }}
+            {{- if .Values.route53.enabled }}
             - name: ROUTE53_ENABLED
               value: "true"
-            {{ end }}
-            {{ if .Values.ns1.enabled }}
+            {{- end }}
+            {{- if .Values.ns1.enabled }}
             - name: NS1_ENABLED
               value: "true"
-            {{ end }}
-            {{ if eq "LoadBalancer" ( quote .Values.coredns.serviceType ) }}
+            {{- end }}
+            {{- if eq "LoadBalancer" ( quote .Values.coredns.serviceType ) }}
             - name: COREDNS_EXPOSED
               value: "true"
-            {{ end }}
+            {{- end }}
             - name: LOG_FORMAT
               value: {{ quote .Values.k8gb.log.format }}
             - name: LOG_LEVEL

@@ -38,7 +38,7 @@ rules:
   - namespaces
   verbs:
   - 'list'
-{{ if .Values.openshift.enabled }}
+{{- if .Values.openshift.enabled }}
 - apiGroups:
   - route.openshift.io
   resources:
@@ -46,4 +46,4 @@ rules:
   verbs:
   - create
   - update
-{{ end }}
+{{- end }}
