@@ -1,4 +1,4 @@
-{{ if or .Values.ns1.enabled .Values.route53.enabled }}
+{{- if or .Values.ns1.enabled .Values.route53.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -54,4 +54,4 @@ spec:
             cpu: "500m"
         securityContext:
           readOnlyRootFilesystem: true
-{{ end }}
+{{- end }}

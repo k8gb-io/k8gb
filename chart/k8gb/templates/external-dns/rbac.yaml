@@ -29,7 +29,7 @@ kind: ServiceAccount
 metadata:
   name: k8gb-external-dns
   namespace: {{ .Release.Namespace }}
-{{ if and .Values.route53.enabled .Values.route53.irsaRole }}
+{{- if and .Values.route53.enabled .Values.route53.irsaRole }}
   annotations:
     eks.amazonaws.com/role-arn: {{ .Values.route53.irsaRole }}
-{{ end }}
+{{- end }}
