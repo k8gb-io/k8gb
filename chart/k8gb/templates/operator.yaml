@@ -28,11 +28,10 @@ spec:
         - name: k8gb
           image: {{ .Values.k8gb.imageRepo }}:{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
           imagePullPolicy: IfNotPresent
+          {{- if .Values.k8gb.securityContext }}
           securityContext:
-            runAsUser: {{ .Values.k8gb.runAsUser }}
-            runAsNonRoot: true
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
+            {{- toYaml .Values.k8gb.securityContext | nindent 12 }}
+          {{- end }}
           resources:
             requests:
               memory: "32Mi"
