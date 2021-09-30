@@ -20,6 +20,7 @@ package dns
 import (
 	"fmt"
 	"io/ioutil"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -111,10 +112,15 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 	m := assistant.NewMockAssistant(ctrl)
 	p := NewExternalDNS(dnsType, a.Config, m)
 	m.EXPECT().GslbIngressExposedIPs(a.Gslb).Return(a.TargetIPs, nil).Times(1)
-	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(expectedDNSEndpoint)).Return(nil).Times(1)
+	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(expectedDNSEndpoint)).Return(nil).Times(1).
+		Do(func(ns string, ep *externaldns.DNSEndpoint) {
+			require.True(t, reflect.DeepEqual(ep, expectedDNSEndpoint))
+			require.Equal(t, ns, a.Config.K8gbNamespace)
+		})
 
-	// act, assert
+	// act
 	err := p.CreateZoneDelegationForExternalDNS(a.Gslb)
+	// assert
 	assert.NoError(t, err)
 }
 
