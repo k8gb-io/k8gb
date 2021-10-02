@@ -91,9 +91,6 @@ var predefinedConfig = depresolver.Config{
 		HTTPPoolConnections: 20,
 		HTTPRequestTimeout:  10,
 	},
-	Override: depresolver.Override{
-		FakeInfobloxEnabled: true,
-	},
 	Log: depresolver.Log{
 		Format: depresolver.SimpleFormat,
 	},

@@ -52,9 +52,6 @@ var predefinedConfig = depresolver.Config{
 		Port:     443,
 		Version:  "0.0.0",
 	},
-	Override: depresolver.Override{
-		FakeInfobloxEnabled: true,
-	},
 }
 
 func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {

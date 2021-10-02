@@ -78,9 +78,6 @@ var predefinedConfig = Config{
 		21,
 		11,
 	},
-	Override: Override{
-		false,
-	},
 	Log: Log{
 		Format: SimpleFormat,
 	},
@@ -1323,63 +1320,6 @@ func TestNegativeInfobloxHTTPRequestTimeout(t *testing.T) {
 
 }
 
-func TestResolveConfigEnableFakeDNSAsTrue(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.Override.FakeInfobloxEnabled = true
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigEnableFakeDNSAsFalse(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.Override.FakeInfobloxEnabled = false
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigEnableFakeInfobloxAsTrue(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.Override.FakeInfobloxEnabled = true
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigEnableFakeInfobloxAsFalse(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.Override.FakeInfobloxEnabled = false
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-
-}
-
-func TestResolveConfigEnableFakeInfobloxAsInvalidValue(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(OverrideFakeInfobloxKey, "i.am.wrong??.")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.Override.FakeInfobloxEnabled)
-}
-
-func TestResolveConfigEnableFakeInfobloxAsUnsetEnvironmentVariable(t *testing.T) {
-	// arrange
-	defer cleanup()
-	// act,assert
-	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError, OverrideFakeInfobloxKey)
-}
-
 func TestResolveLoggerUseDefaultValue(t *testing.T) {
 	// arrange
 	// Build zerolog from empty string which is equal to zerolog.NoLevel.
@@ -1894,7 +1834,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServersKey,
 		Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
-		InfobloxPasswordKey, OverrideFakeInfobloxKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
+		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
@@ -1920,7 +1860,6 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(InfobloxPasswordKey, config.Infoblox.Password)
 	_ = os.Setenv(InfobloxHTTPRequestTimeoutKey, strconv.Itoa(config.Infoblox.HTTPRequestTimeout))
 	_ = os.Setenv(InfobloxHTTPPoolConnectionsKey, strconv.Itoa(config.Infoblox.HTTPPoolConnections))
-	_ = os.Setenv(OverrideFakeInfobloxKey, strconv.FormatBool(config.Override.FakeInfobloxEnabled))
 	_ = os.Setenv(LogLevelKey, config.Log.Level.String())
 	_ = os.Setenv(LogFormatKey, config.Log.Format.String())
 	_ = os.Setenv(LogNoColorKey, strconv.FormatBool(config.Log.NoColor))

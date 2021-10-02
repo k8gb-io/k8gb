@@ -47,7 +47,6 @@ const (
 	InfobloxPasswordKey            = "EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"
 	InfobloxHTTPRequestTimeoutKey  = "INFOBLOX_HTTP_REQUEST_TIMEOUT"
 	InfobloxHTTPPoolConnectionsKey = "INFOBLOX_HTTP_POOL_CONNECTIONS"
-	OverrideFakeInfobloxKey        = "FAKE_INFOBLOX"
 	K8gbNamespaceKey               = "POD_NAMESPACE"
 	CoreDNSExposedKey              = "COREDNS_EXPOSED"
 	LogLevelKey                    = "LOG_LEVEL"
@@ -91,7 +90,6 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Infoblox.Password = env.GetEnvAsStringOrFallback(InfobloxPasswordKey, "")
 		dr.config.Infoblox.HTTPPoolConnections, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPPoolConnectionsKey, 10)
 		dr.config.Infoblox.HTTPRequestTimeout, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPRequestTimeoutKey, 20)
-		dr.config.Override.FakeInfobloxEnabled = env.GetEnvAsBoolOrFallback(OverrideFakeInfobloxKey, false)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, SimpleFormat.String())))
 		dr.config.Log.NoColor = env.GetEnvAsBoolOrFallback(LogNoColorKey, false)

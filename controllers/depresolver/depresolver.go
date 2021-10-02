@@ -104,12 +104,6 @@ type Infoblox struct {
 	HTTPPoolConnections int
 }
 
-// Override configuration
-type Override struct {
-	// FakeInfobloxEnabled if true than Infoblox connection FQDN=`fakezone.example.com`; default = false
-	FakeInfobloxEnabled bool
-}
-
 // Config is operator configuration returned by depResolver
 type Config struct {
 	// Reschedule of Reconcile loop to pickup external Gslb targets
@@ -130,8 +124,6 @@ type Config struct {
 	K8gbNamespace string
 	// Infoblox configuration
 	Infoblox Infoblox
-	// Override the behavior of GSLB in the test environments
-	Override Override
 	// CoreDNSExposed flag
 	CoreDNSExposed bool
 	// Log configuration
