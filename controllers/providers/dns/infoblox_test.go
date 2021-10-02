@@ -20,6 +20,10 @@ package dns
 import (
 	"testing"
 
+	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+
+	"github.com/golang/mock/gomock"
+
 	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
@@ -72,7 +76,10 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
-	provider := NewInfobloxDNS(customConfig, a)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := NewMockInfobloxClient(ctrl)
+	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
 	extClusters := customConfig.GetExternalClusterNSNames()
 	got := provider.filterOutDelegateTo(delegateTo, extClusters["za"])
@@ -107,7 +114,10 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	customConfig.ClusterGeoTag = "eu"
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
-	provider := NewInfobloxDNS(customConfig, a)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := NewMockInfobloxClient(ctrl)
+	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
 	got := provider.sanitizeDelegateZone(local, upstream)
 	// assert
@@ -133,6 +143,37 @@ func TestSortNameServer(t *testing.T) {
 	}
 	sortZones(delegateTo)
 	assert.Equal(t, want, delegateTo, "got:\n %q \n\n want:\n %q", delegateTo, want)
+}
+
+func TestCreateZoneDelegationForExternalDNS(t *testing.T) {
+	// arrange
+	const ret = "zone_delegated/ZG5zLnpvbmUkLl9kZWZhdWx0LnphLmNvLmFic2EuY2Fhcy5vaG15Z2xiLmdzbGJpYmNsaWVudA:cloud.example.com/default"
+	gslb := new(k8gbv1beta1.Gslb)
+	gslb.Name = "test-gslb"
+	gslb.Namespace = "test-gslb"
+	zone := ibclient.ZoneDelegated{
+		Fqdn:       predefinedConfig.DNSZone,
+		DelegateTo: []ibclient.NameServer{},
+		Ref:        ret,
+	}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	a := assistant.NewMockAssistant(ctrl)
+	mclient := NewMockInfobloxClient(ctrl)
+	mcon := NewMockIBConnector(ctrl)
+	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{"10.0.0.1", "10.0.0.2"}, nil).Times(1)
+	mcon.EXPECT().CreateObject(gomock.Any()).Return(ret, nil).AnyTimes()
+	mcon.EXPECT().DeleteObject(gomock.Any()).Return(ret, nil).AnyTimes()
+	mcon.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ret, nil).AnyTimes()
+	mcon.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{zone}).Return(nil)
+	mclient.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(mcon, "k8gbclient", ""), nil).Times(1)
+	config := predefinedConfig
+	provider := NewInfobloxDNS(config, a, mclient)
+
+	// act
+	err := provider.CreateZoneDelegationForExternalDNS(gslb)
+	// assert
+	assert.NoError(t, err)
 }
 
 func TestEmptySort(t *testing.T) {
