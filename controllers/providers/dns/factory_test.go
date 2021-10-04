@@ -33,7 +33,7 @@ import (
 func TestFactoryInfoblox(t *testing.T) {
 	// arrange
 	client := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects([]runtime.Object{}...).Build()
-	customConfig := predefinedConfig
+	customConfig := defaultConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeInfoblox
 	// act
 	f, err := NewDNSProviderFactory(client, customConfig)
@@ -48,7 +48,7 @@ func TestFactoryInfoblox(t *testing.T) {
 func TestFactoryNS1(t *testing.T) {
 	// arrange
 	client := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects([]runtime.Object{}...).Build()
-	customConfig := predefinedConfig
+	customConfig := defaultConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeNS1
 	// act
 	f, err := NewDNSProviderFactory(client, customConfig)
@@ -63,7 +63,7 @@ func TestFactoryNS1(t *testing.T) {
 func TestFactoryRoute53(t *testing.T) {
 	// arrange
 	client := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects([]runtime.Object{}...).Build()
-	customConfig := predefinedConfig
+	customConfig := defaultConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeRoute53
 	// act
 	f, err := NewDNSProviderFactory(client, customConfig)
@@ -78,7 +78,7 @@ func TestFactoryRoute53(t *testing.T) {
 func TestFactoryNoEdgeDNS(t *testing.T) {
 	// arrange
 	client := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects([]runtime.Object{}...).Build()
-	customConfig := predefinedConfig
+	customConfig := defaultConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeNoEdgeDNS
 	// act
 	f, err := NewDNSProviderFactory(client, customConfig)
@@ -91,7 +91,7 @@ func TestFactoryNoEdgeDNS(t *testing.T) {
 
 func TestFactoryNilClient(t *testing.T) {
 	// arrange
-	customConfig := predefinedConfig
+	customConfig := defaultConfig
 	customConfig.EdgeDNSType = depresolver.DNSTypeNoEdgeDNS
 	// act
 	// assert
