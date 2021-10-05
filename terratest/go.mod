@@ -12,4 +12,4 @@ require (
 	k8s.io/client-go v0.20.5 // indirect
 )
 
-replace github.com/containerd/containerd v1.3.0 => github.com/containerd/containerd v1.4.3
+replace github.com/containerd/containerd v1.3.0 => github.com/containerd/containerd v1.4.11
