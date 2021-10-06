@@ -119,3 +119,9 @@ changes
 # gh-pages | Jekyll generated files
 _site
 .jekyll-metadata
+
+# OLM
+/bundle
+/bundle.Dockerfile
+/deploy-tmp/
+/json.tmp
