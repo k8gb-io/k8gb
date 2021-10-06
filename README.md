@@ -41,7 +41,7 @@ spec:
     primaryGeoTag: eu-west-1 # Primary cluster geo tag
 ```
 
-Global load balancing, commonly referred to as GSLB (Global Server Load Balancing) solutions, has been typically the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
+[Global load balancing](https://cloud.redhat.com/blog/global-load-balancer-approaches), commonly referred to as GSLB (Global Server Load Balancing) solutions, has been typically the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 
 k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.
 
