@@ -4,6 +4,11 @@
 # $1 - nameserver to use usually k8gb-coredns service ip
 # $2 - test fqdn to resolve in demo loops
 
+# checks
+[[ $# != 2 ]] && echo "Usage: $0 <nameserver> <url>" && exit 1
+
+DELAY="${DELAY:-5}"
+
 if [ "$DEBUG" == 1 ]
 then
    set -x
@@ -18,7 +23,7 @@ url="$2"
 
 while true
 do
-  curl -k -s -w "%{stderr}\n%{http_code}\n" --location --request GET "${url}" |grep message
-  sleep 5
+  curl -k -s -w "%{stderr}\n%{http_code}\n" --location --request GET "${url}" | grep message
+  sleep ${DELAY}
   echo "[`date`] ..."
 done
