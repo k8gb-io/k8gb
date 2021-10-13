@@ -197,6 +197,30 @@ uninstall-prometheus:
 	$(call uninstall-prometheus,$(CLUSTER_GSLB1))
 	$(call uninstall-prometheus,$(CLUSTER_GSLB2))
 
+.PHONY: deploy-grafana
+deploy-grafana:
+	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
+	@echo "\n$(YELLOW)install grafana $(NC)"
+	@$(eval PREVIOUS_CONTEXT := $(shell kubectl config current-context))
+	kubectl config use-context k3d-$(CLUSTER_GSLB1)
+	kubectl apply -f deploy/grafana/dashboard-cm.yaml
+	@kubectl config use-context $(PREVIOUS_CONTEXT)
+	helm repo add grafana https://grafana.github.io/helm-charts
+	helm repo update
+	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
+		--wait --timeout=2m0s \
+		--kube-context=k3d-$(CLUSTER_GSLB1)
+
+.PHONY: uninstall-grafana
+uninstall-grafana:
+	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
+	@echo "\n$(YELLOW)uninstall grafana $(NC)"
+	@$(eval PREVIOUS_CONTEXT := $(shell kubectl config current-context))
+	kubectl config use-context k3d-$(CLUSTER_GSLB1)
+	-kubectl delete -f deploy/grafana/dashboard-cm.yaml
+	@kubectl config use-context $(PREVIOUS_CONTEXT)
+	helm uninstall grafana -n k8gb --kube-context=k3d-$(CLUSTER_GSLB1)
+
 .PHONY: dns-tools
 dns-tools: ## Run temporary dnstools pod for debugging DNS issues
 	@kubectl -n k8gb get svc k8gb-coredns
