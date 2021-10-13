@@ -47,6 +47,7 @@ EDGE_DNS_ZONE ?= example.com
 DNS_ZONE ?= cloud.example.com
 DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
+DEMO_DELAY ?=5
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -454,7 +455,7 @@ define testapp-set-replicas
 endef
 
 define demo-host
-	kubectl run -it --rm k8gb-demo --restart=Never --image=absaoss/k8gb-demo-curl --env="DEBUG=$(DEMO_DEBUG)" \
+	kubectl run -it --rm k8gb-demo --restart=Never --image=absaoss/k8gb-demo-curl --env="DELAY=$(DEMO_DELAY)" --env="DEBUG=$(DEMO_DEBUG)" \
 	"`$(K8GB_COREDNS_IP)`" $1
 endef
 
