@@ -50,7 +50,7 @@ coredns:
     skipConfig: true
   image:
     repository: absaoss/k8s_crd
-    tag: "v0.0.6"
+    tag: "v0.0.7"
   serviceAccount:
     create: true
     name: coredns
