@@ -1,6 +1,6 @@
-# K8GB - Kubernetes Global Balancer
-
-## Project Health
+<h1 align=center>K8GB - Kubernetes Global Balancer<a href="https://www.k8gb.io"></h1>
+<p align=center><a href="https://landscape.cncf.io/?selected=k8gb">CNCF Sandbox Project</p>
+<p align=center><a href="https://landscape.cncf.io/card-mode?category=coordination-service-discovery&grouping=category">CNCF Coordination &amp; Service Discovery</p>
 
 [![License: MIT](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://github.com/AbsaOSS/k8gb/workflows/build/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang+lint+and+test%22+branch%3Amaster)
