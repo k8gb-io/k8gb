@@ -1,3 +1,10 @@
+adminUser: admin
+adminPassword: admin # don't use in production (1st login to web ui will ask for the password change)
+service:
+  nodePort: 30030 # allowed port range between 30000 and 32768
+  targetPort: 3000
+  port: 3000
+  type: NodePort
 sidecar:
   dashboards:
     enabled: true

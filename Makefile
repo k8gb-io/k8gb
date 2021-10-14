@@ -202,14 +202,17 @@ deploy-grafana:
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
 	@echo "\n$(YELLOW)install grafana $(NC)"
 	@$(eval PREVIOUS_CONTEXT := $(shell kubectl config current-context))
-	kubectl config use-context k3d-$(CLUSTER_GSLB1)
-	kubectl apply -f deploy/grafana/dashboard-cm.yaml
-	@kubectl config use-context $(PREVIOUS_CONTEXT)
 	helm repo add grafana https://grafana.github.io/helm-charts
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
 		--wait --timeout=2m0s \
 		--kube-context=k3d-$(CLUSTER_GSLB1)
+	kubectl config use-context k3d-$(CLUSTER_GSLB1)
+	kubectl apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	@kubectl config use-context $(PREVIOUS_CONTEXT)
+	@echo "\nGrafana is listening on http://localhost:3000\n"
+	@echo "🖖 credentials are admin:admin\n"
+
 
 .PHONY: uninstall-grafana
 uninstall-grafana:
