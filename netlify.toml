@@ -1,0 +1,7 @@
+[build]
+  command = "git config remote.origin.url || git remote add -f -t gh-pages origin https://github.com/k8gb-io/k8gb && git fetch origin gh-pages:gh-pages && git checkout gh-pages && make netlify-build"
+  publish = "_site/"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- {README,CONTRIBUTING,CHANGELOG}.md docs/"
+
+[context.deploy-preview]
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- {README,CONTRIBUTING,CHANGELOG}.md docs/"
