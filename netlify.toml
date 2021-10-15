@@ -1,0 +1,7 @@
+[build]
+  command = "make website"
+  publish = "_site/"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- {README,CONTRIBUTING,CHANGELOG}.md docs/"
+
+[context.deploy-preview]
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- {README,CONTRIBUTING,CHANGELOG}.md docs/"

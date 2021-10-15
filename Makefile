@@ -376,6 +376,18 @@ test-failover:
 terratest: # Run terratest suite
 	cd terratest/test/ && go mod download && go test -v -timeout 15m -parallel=12
 
+.PHONY: website
+website:
+	@if [ "$(CI)" = "true" ]; then\
+		git config remote.origin.url || git remote add -f -t gh-pages origin https://github.com/k8gb-io/k8gb ;\
+		git fetch origin gh-pages:gh-pages ;\
+		git checkout gh-pages ;\
+		git checkout - {README,CONTRIBUTING,CHANGELOG}.md docs/ ;\
+		mv CNAME EMANC ;\
+		bundle install ;\
+		bundle exec jekyll build ;\
+	fi
+
 .PHONY: version
 version:
 	@echo $(VERSION)
