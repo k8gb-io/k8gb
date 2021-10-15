@@ -40,3 +40,9 @@ else
 	@echo "Local generation requires a GitHub PAT token with the 'public_repo' scope (https://github.com/settings/tokens/new)."
 	@echo "The token should be assigned to the JEKYLL_GITHUB_TOKEN environment variable."
 endif
+
+# Used from Netflify context
+.PHONY: netlify-build
+netlify-build:
+	git checkout - {README,CONTRIBUTING,CHANGELOG}.md docs/ && \
+	mv CNAME EMANC && bundle install && bundle exec jekyll build
