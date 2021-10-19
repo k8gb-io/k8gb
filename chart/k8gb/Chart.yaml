@@ -2,8 +2,8 @@ apiVersion: v2
 name: k8gb
 description: A Helm chart for Kubernetes Global Balancer
 type: application
-version: v0.8.2
-appVersion: v0.8.2
+version: v0.8.3
+appVersion: v0.8.3
 
 dependencies:
   - name: coredns
