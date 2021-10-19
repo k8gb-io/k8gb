@@ -382,7 +382,7 @@ website:
 		git config remote.origin.url || git remote add -f -t gh-pages origin https://github.com/k8gb-io/k8gb ;\
 		git fetch origin gh-pages:gh-pages ;\
 		git checkout gh-pages ;\
-		git checkout - {README,CONTRIBUTING,CHANGELOG}.md docs/ ;\
+		git checkout - README.md CONTRIBUTING.md CHANGELOG.md docs/ ;\
 		mv CNAME EMANC ;\
 		bundle install ;\
 		bundle exec jekyll build ;\
