@@ -130,33 +130,31 @@ deploy-stable:
 
 .PHONY: upgrade-candidate
 upgrade-candidate: ## Upgrade k8gb to the test version on existing clusters
-	@echo "\n$(YELLOW)build k8gb docker and import to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
-	docker build . -t $(REPO):$(SEMVER)
+	@echo "\n$(YELLOW)import k8gb docker image to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
 
-	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB1)
-	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB2)
+	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB1)
+	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB2)
 
-	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB1) $(NC)"
+	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER)-amd64 on k3d-$(CLUSTER_GSLB1) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_GSLB1)
-	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),,'./chart/k8gb')
+	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER)-amd64,,'./chart/k8gb')
 
-	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER) on k3d-$(CLUSTER_GSLB2) $(NC)"
+	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER)-amd64 on k3d-$(CLUSTER_GSLB2) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_GSLB2)
-	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
+	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER)-amd64,$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
 
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
 
 .PHONY: deploy-candidate
 deploy-candidate: ## Deploy test k8gb version together with CRs and test apps on top of existing clusters
-	@echo "\n$(YELLOW)build k8gb docker and import to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
-	docker build . -t $(REPO):$(SEMVER)
+	@echo "\n$(YELLOW)import k8gb docker image to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
 
-	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB1)
-	k3d image import $(REPO):$(SEMVER) -c $(CLUSTER_GSLB2)
+	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB1)
+	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB2)
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER),,'./chart/k8gb')
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER),$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
+	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER)-amd64,,'./chart/k8gb')
+	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER)-amd64,$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
 
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
@@ -233,22 +231,9 @@ dns-tools: ## Run temporary dnstools pod for debugging DNS issues
 dns-smoke-test:
 	kubectl -n k8gb run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @k8gb-coredns roundrobin.cloud.example.com
 
-# build docker images for multiple architectures
-# useful for CI
-.PHONY: docker-build-multi
-docker-build-multi: test
-	$(call docker-build-arch,amd64)
-	$(call docker-build-arch,arm64)
-
-# push docker for multiple architectures
-.PHONY: docker-push-multi
-docker-push-multi:
-	$(call docker-push-arch,amd64)
-	$(call docker-push-arch,arm64)
-
 # create and push docker manifest
 .PHONY: docker-manifest
-docker-manifest: docker-push-multi
+docker-manifest:
 	docker manifest create ${IMG} \
 		${IMG}-amd64 \
 		${IMG}-arm64
@@ -259,17 +244,12 @@ docker-manifest: docker-push-multi
 # build the docker image
 .PHONY: docker-build
 docker-build: test
-	$(call docker-build-arch,amd64)
-
-# push the docker image
-.PHONY: docker-push
-docker-push:
-	$(call docker-push-arch,amd64)
+	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist
 
 # build and push the docker image exclusively for testing using commit hash
 .PHONY: docker-test-build-push
-docker-test-build-push: test
-	$(call docker-test-build-push)
+docker-push: test
+	docker push ${IMG}-$(COMMIT_HASH)-amd64
 
 .PHONY: init-failover
 init-failover:
@@ -524,21 +504,6 @@ endef
 define golic
 	@go install github.com/AbsaOSS/golic@$(GOLIC_VERSION)
 	$(GOBIN)/golic inject $1
-endef
-
-define docker-build-arch
-	docker build --build-arg GOARCH=${1} -t ${IMG}-${1} .
-endef
-
-define docker-push-arch
-	docker push ${IMG}-${1}
-endef
-
-define docker-test-build-push
-	docker build . -t k8gb:$(COMMIT_HASH)
-	docker tag k8gb:$(COMMIT_HASH) $(REPO):$(COMMIT_HASH)
-	docker push $(REPO):$(COMMIT_HASH)
-	sed -i "s/$(VERSION)/$(COMMIT_HASH)/g" chart/k8gb/Chart.yaml
 endef
 
 define debug

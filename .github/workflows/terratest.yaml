@@ -22,6 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
+      - name: Build artifacts
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist --skip-publish --skip-validate --snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create 1st k3s Cluster
         uses: AbsaOSS/k3d-action@v1.5.0
         with:
