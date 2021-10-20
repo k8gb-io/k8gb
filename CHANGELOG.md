@@ -1,20 +1,5 @@
 # Changelog
 
-## [Unreleased](https://github.com/k8gb-io/k8gb/tree/HEAD)
-
-[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.3...HEAD)
-
-**Closed issues:**
-
-- Fix the vulnerabilities reported by Artifacthub - part 2 [\#637](https://github.com/k8gb-io/k8gb/issues/637)
-- Fix the vulnerabilities reported by Artifacthub - part 1 [\#636](https://github.com/k8gb-io/k8gb/issues/636)
-
-**Merged pull requests:**
-
-- Add icon URL to k8gb helm chart [\#667](https://github.com/k8gb-io/k8gb/pull/667) ([somaritane](https://github.com/somaritane))
-- web-preview: list the files to checkout w/o using the {foo,bar}.md syntax [\#665](https://github.com/k8gb-io/k8gb/pull/665) ([jkremser](https://github.com/jkremser))
-- Add automatic deployment preview of PRs when changing the site [\#660](https://github.com/k8gb-io/k8gb/pull/660) ([jkremser](https://github.com/jkremser))
-
 ## [v0.8.3](https://github.com/k8gb-io/k8gb/tree/v0.8.3) (2021-10-19)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.2...v0.8.3)
