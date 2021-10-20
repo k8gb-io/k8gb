@@ -7,19 +7,19 @@ network: k3d-action-bridge-network
 ports:
 - port: 80:80
   nodeFilters:
-  - agent[0] 
+  - agent[0]
 - port: 443:443
   nodeFilters:
   - agent[0]
 - port: 3000:30030
   nodeFilters:
     - agent[0]
-- port: 8080:30090
+- port: 9080:30090
   nodeFilters:
     - agent[0]
 - port: 5053:53/udp
   nodeFilters:
-  - agent[0] 
+  - agent[0]
 options:
   k3d:
     disableLoadbalancer: true
