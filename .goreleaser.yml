@@ -18,26 +18,24 @@ builds:
       - -s -w -X main.version={{ .Tag }} -X main.commit={{ .Commit }}
 dockers:
 - image_templates:
-  - "absaoss/k8gb:{{ .Tag }}-amd64"
+  - "absaoss/k8gb:v{{ .Version }}-amd64"
   use_buildx: false
-  dockerfile: Dockerfile-gr-amd64
   build_flag_templates:
   - "--platform=linux/amd64"
 - image_templates:
-  - "absaoss/k8gb:{{ .Tag }}-arm64"
+  - "absaoss/k8gb:v{{ .Version }}-arm64"
   use_buildx: false
   goarch: arm64
-  dockerfile: Dockerfile-gr-arm64
   build_flag_templates:
   - "--platform=linux/arm64"
 docker_manifests:
 - name_template: absaoss/k8gb:{{ .Tag }}
   image_templates:
-  - absaoss/k8gb:{{ .Tag }}-amd64
-  - absaoss/k8gb:{{ .Tag }}-arm64
+  - absaoss/k8gb:v{{ .Version }}-amd64
+  - absaoss/k8gb:v{{ .Version }}-arm64
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .Version }}-{{ .ShortCommit }}"
 release:
   draft: true
