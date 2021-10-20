@@ -64,11 +64,13 @@ var predefinedConfig = Config{
 			Port: 53,
 		},
 	},
-	EdgeDNSZone:     "example.com",
-	DNSZone:         defaultEdgeDNSZone,
-	K8gbNamespace:   "k8gb",
-	SplitBrainCheck: true,
-	MetricsAddress:  "0.0.0.0:8080",
+	fallbackEdgeDNSServerName: "",
+	fallbackEdgeDNSServerPort: 53,
+	EdgeDNSZone:               "example.com",
+	DNSZone:                   defaultEdgeDNSZone,
+	K8gbNamespace:             "k8gb",
+	SplitBrainCheck:           true,
+	MetricsAddress:            "0.0.0.0:8080",
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
@@ -80,6 +82,8 @@ var predefinedConfig = Config{
 	},
 	Log: Log{
 		Format: SimpleFormat,
+		format: SimpleFormat.String(),
+		level:  zerolog.DebugLevel.String(),
 	},
 }
 
@@ -168,79 +172,6 @@ func TestResolveSpecWithNilClient(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestResolveConfigWithMultipleInvalidEnv(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSZone = ""
-	expected.EdgeDNSServers = []utils.DNSServer{}
-	expected.ExtClustersGeoTags = []string{}
-	arrangeVariablesAndAssert(t, expected, assert.Error)
-}
-
-func TestResolveConfigWithoutEnvVarsSet(t *testing.T) {
-	// arrange
-	defer cleanup()
-	defaultConfig := Config{}
-	defaultConfig.ReconcileRequeueSeconds = 30
-	defaultConfig.Infoblox.HTTPRequestTimeout = 20
-	defaultConfig.Infoblox.HTTPPoolConnections = 10
-	defaultConfig.EdgeDNSType = DNSTypeNoEdgeDNS
-	defaultConfig.EdgeDNSServers = []utils.DNSServer{}
-	defaultConfig.ExtClustersGeoTags = []string{}
-	defaultConfig.Log.Level = zerolog.InfoLevel
-	defaultConfig.Log.Format = SimpleFormat
-	defaultConfig.Log.NoColor = false
-	defaultConfig.MetricsAddress = "0.0.0.0:8080"
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	depr := resolver.GetDeprecations()
-	// assert
-	assert.Error(t, err)
-	assert.Empty(t, depr)
-	assert.Equal(t, defaultConfig, *config)
-}
-
-func TestResolveConfigWithReconcileRequeueSecondsSync(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.ReconcileRequeueSeconds = 3
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigWithTextReconcileRequeueSecondsSync(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(ReconcileRequeueSecondsKey, "invalid")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	depr := resolver.GetDeprecations()
-	// assert
-	assert.NoError(t, err)
-	assert.Empty(t, depr)
-	assert.Equal(t, predefinedConfig, *config)
-}
-
-func TestResolveConfigWithEmptyReconcileRequeueSecondsSync(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(ReconcileRequeueSecondsKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	depr := resolver.GetDeprecations()
-	// assert
-	assert.NoError(t, err)
-	assert.Empty(t, depr)
-	assert.Equal(t, predefinedConfig, *config)
-}
-
 func TestResolveConfigWithNegativeReconcileRequeueSecondsKey(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -259,46 +190,19 @@ func TestResolveConfigWithZeroReconcileRequeueSecondsKey(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
 
-func TestResolveConfigWithEmptyReconcileRequeueSecondsKey(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(ReconcileRequeueSecondsKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	depr := resolver.GetDeprecations()
-	// assert
-	assert.NoError(t, err)
-	assert.Empty(t, depr)
-	assert.Equal(t, predefinedConfig, *config)
-}
-
-func TestResolveConfigWithEmptyEdgeDNSServersKey(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	_, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), fmt.Sprintf("'%s' is empty", EdgeDNSServersKey))
-}
-
 // remove this test once the deprecated key is no longer supported
 func TestResolveConfigWithDeprecatedEdgeDNSServerKey(t *testing.T) {
 	// arrange
-	deprecatedKey := "EDGE_DNS_SERVER"
 	defer func() {
 		cleanup()
-		if os.Unsetenv(deprecatedKey) != nil {
-			panic(fmt.Errorf("cleanup %s", deprecatedKey))
+		if os.Unsetenv(EdgeDNSServerKey) != nil {
+			panic(fmt.Errorf("cleanup %s", EdgeDNSServerKey))
 		}
 	}()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(deprecatedKey, "dns.cloud.example.com")
+	expected := predefinedConfig
+	expected.fallbackEdgeDNSServerName = "dns.cloud.example.com"
+	configureEnvVar(expected)
+	_ = os.Setenv(EdgeDNSServerKey, "dns.cloud.example.com")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
@@ -306,7 +210,7 @@ func TestResolveConfigWithDeprecatedEdgeDNSServerKey(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, depr)
-	assert.Equal(t, predefinedConfig, *config)
+	assert.Equal(t, expected, *config)
 }
 
 func TestResolveConfigWithMalformedEdgeDNSServersKey(t *testing.T) {
@@ -320,13 +224,6 @@ func TestResolveConfigWithMalformedEdgeDNSServersKey(t *testing.T) {
 	// assert
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "does not match given criteria")
-}
-
-func TestResolveConfigWithoutReconcileRequeueSecondsKey(t *testing.T) {
-	// arrange
-	defer cleanup()
-	// act,assert
-	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError, ReconcileRequeueSecondsKey)
 }
 
 func TestResolveConfigWithMalformedGeoTag(t *testing.T) {
@@ -371,116 +268,6 @@ func TestConfigRunOnce(t *testing.T) {
 	assert.NoError(t, err2)
 	assert.Empty(t, depr2)
 	assert.Equal(t, *config1, *config2)
-}
-
-func TestResolveConfigWithMalformedRoute53Enabled(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(Route53EnabledKey, "i.am.wrong??.")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.route53Enabled)
-}
-
-func TestResolveConfigWithProperRoute53Enabled(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.route53Enabled = true
-	expected.Infoblox.Host = ""
-	expected.EdgeDNSType = DNSTypeRoute53
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigWithoutRoute53(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.route53Enabled = false
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError, Route53EnabledKey)
-}
-
-func TestResolveConfigWithEmptyRoute53(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(Route53EnabledKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.route53Enabled)
-}
-
-func TestResolveConfigWithProperNS1Enabled(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.ns1Enabled = true
-	expected.Infoblox.Host = ""
-	expected.EdgeDNSType = DNSTypeNS1
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigWithoutNS1(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.ns1Enabled = false
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError, NS1EnabledKey)
-}
-
-func TestResolveConfigWithEmptyNS1(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(NS1EnabledKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.ns1Enabled)
-}
-
-func TestResolveConfigWithProperCoreDNSExposed(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.CoreDNSExposed = true
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigWithoutCoreDNSExposed(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.CoreDNSExposed = false
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError, CoreDNSExposedKey)
-}
-
-func TestResolveConfigWithEmptyCoreDNSExposed(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(CoreDNSExposedKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.CoreDNSExposed)
 }
 
 func TestResolveConfigWithEmptyEdgeDnsServer(t *testing.T) {
@@ -729,15 +516,6 @@ func TestResolveConfigWithEmptyEdgeDnsZone(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
 
-func TestResolveConfigWithoutEdgeDnsZone(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSZone = ""
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, EdgeDNSZoneKey)
-}
-
 func TestResolveConfigWithHostnameEdgeDnsZone(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -756,24 +534,6 @@ func TestResolveConfigWithInvalidHostnameEdgeDnsZone(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
 
-func TestResolveConfigWithValidHostnameDnsZone(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.DNSZone = "3l2.zo-ne.com"
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigWithEmptyHostnameDnsZone(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.DNSZone = ""
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error)
-}
-
 func TestResolveConfigWithInvalidHostnameDnsZone(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -781,24 +541,6 @@ func TestResolveConfigWithInvalidHostnameDnsZone(t *testing.T) {
 	expected.DNSZone = "dns-zo?ne"
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
-}
-
-func TestResolveConfigWithoutDnsZone(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.DNSZone = ""
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, DNSZoneKey)
-}
-
-func TestResolveConfigWithEmptyK8gbNamespace(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.K8gbNamespace = ""
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, K8gbNamespaceKey)
 }
 
 func TestResolveConfigWithInvalidK8gbNamespace(t *testing.T) {
@@ -830,15 +572,6 @@ func TestResolveEmptyExtGeoTags(t *testing.T) {
 	expected.DNSZone = ""
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, DNSZoneKey)
-}
-
-func TestResolveOneExtGeoTags(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.ExtClustersGeoTags = []string{"foo"}
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
 
 func TestResolveMultipleExtGeoTags(t *testing.T) {
@@ -1108,20 +841,6 @@ func TestInfobloxVersionIsInvalid(t *testing.T) {
 	}
 }
 
-func TestInfobloxVersionIsUnset(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = defaultHost
-	expected.Infoblox.Version = ""
-	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = defaultInfobloxUsername
-	expected.Infoblox.Password = defaultInfobloxPassword
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxVersionKey)
-}
-
 func TestInvalidInfobloxPort(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1136,20 +855,6 @@ func TestInvalidInfobloxPort(t *testing.T) {
 		// act,assert
 		arrangeVariablesAndAssert(t, expected, assert.Error)
 	}
-}
-
-func TestUnsetInfobloxPort(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = defaultHost
-	expected.Infoblox.Version = defaultVersion
-	expected.Infoblox.Port = 0
-	expected.Infoblox.Username = defaultInfobloxUsername
-	expected.Infoblox.Password = defaultInfobloxPassword
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxPortKey)
 }
 
 func TestValidInfobloxUserPasswordAndPort(t *testing.T) {
@@ -1180,20 +885,6 @@ func TestEmptyInfobloxUser(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
 
-func TestUnsetInfobloxUser(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = defaultHost
-	expected.Infoblox.Version = defaultVersion
-	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = ""
-	expected.Infoblox.Password = defaultInfobloxPassword
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxUsernameKey)
-}
-
 func TestEmptyInfobloxPassword(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1206,20 +897,6 @@ func TestEmptyInfobloxPassword(t *testing.T) {
 	expected.Infoblox.Password = ""
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
-}
-
-func TestUnsetInfobloxPassword(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.Infoblox.Host = defaultHost
-	expected.Infoblox.Version = defaultVersion
-	expected.Infoblox.Port = 443
-	expected.Infoblox.Username = defaultInfobloxUsername
-	expected.Infoblox.Password = ""
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, InfobloxPasswordKey)
 }
 
 func TestValidInfobloxHTTPPoolConnections(t *testing.T) {
@@ -1236,19 +913,9 @@ func TestInvalidInfobloxHTTPPoolConnections(t *testing.T) {
 	_ = os.Setenv(InfobloxHTTPPoolConnectionsKey, "i.am.wrong??.")
 	resolver := NewDependencyResolver()
 	// act
-	config, err := resolver.ResolveOperatorConfig()
+	_, err := resolver.ResolveOperatorConfig()
 	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, 10, config.Infoblox.HTTPPoolConnections)
-}
-
-func TestUnsetInfobloxHTTPPoolConnections(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.Infoblox.HTTPPoolConnections = 10
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError, InfobloxHTTPPoolConnectionsKey)
+	assert.Error(t, err)
 }
 
 func TestZeroInfobloxHTTPPoolConnections(t *testing.T) {
@@ -1258,7 +925,6 @@ func TestZeroInfobloxHTTPPoolConnections(t *testing.T) {
 	expected.Infoblox.HTTPPoolConnections = 0
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
-
 }
 
 func TestNegativeInfobloxHTTPPoolConnections(t *testing.T) {
@@ -1268,7 +934,6 @@ func TestNegativeInfobloxHTTPPoolConnections(t *testing.T) {
 	expected.Infoblox.HTTPPoolConnections = -1
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
-
 }
 
 func TestValidInfobloxHTTPRequestTimeout(t *testing.T) {
@@ -1276,29 +941,6 @@ func TestValidInfobloxHTTPRequestTimeout(t *testing.T) {
 	defer cleanup()
 	// act,assert
 	arrangeVariablesAndAssert(t, predefinedConfig, assert.NoError)
-}
-
-func TestInvalidInfobloxHTTPRequestTimeout(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(InfobloxHTTPRequestTimeoutKey, "i.am.wrong??.")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, 20, config.Infoblox.HTTPRequestTimeout)
-}
-
-func TestUnsetInfobloxHTTPRequestTimeout(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.Infoblox.HTTPRequestTimeout = 20
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError, InfobloxHTTPRequestTimeoutKey)
-
 }
 
 func TestZeroInfobloxHTTPRequestTimeout(t *testing.T) {
@@ -1317,7 +959,6 @@ func TestNegativeInfobloxHTTPRequestTimeout(t *testing.T) {
 	expected.Infoblox.HTTPRequestTimeout = -1
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
-
 }
 
 func TestResolveLoggerUseDefaultValue(t *testing.T) {
@@ -1327,6 +968,7 @@ func TestResolveLoggerUseDefaultValue(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.Log.Level = zerolog.InfoLevel
+	expected.Log.level = zerolog.InfoLevel.String()
 	expected.Log.NoColor = false
 	// act
 	// assert
@@ -1339,6 +981,7 @@ func TestResolveLoggerOutputFormatMode(t *testing.T) {
 	expected := predefinedConfig
 	expected.Log.Format = SimpleFormat
 	expected.Log.Level = zerolog.InfoLevel
+	expected.Log.level = zerolog.InfoLevel.String()
 	// act
 	// assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError, LogLevelKey)
@@ -1366,6 +1009,7 @@ func TestResolveLoggerInfoMode(t *testing.T) {
 	// arrange
 	expected := predefinedConfig
 	expected.Log.Level = zerolog.InfoLevel
+	expected.Log.level = zerolog.InfoLevel.String()
 	// act
 	// assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
@@ -1411,19 +1055,6 @@ func TestResolveLoggerLevelWithInvalidValue(t *testing.T) {
 	assert.Equal(t, SimpleFormat, config.Log.Format)
 }
 
-func TestResolveLoggerNoColorInvalidValue(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(LogNoColorKey, "i.am.wrong??.")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.Log.NoColor)
-}
-
 func TestResolveLoggerOutputWithInvalidValue(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1437,36 +1068,6 @@ func TestResolveLoggerOutputWithInvalidValue(t *testing.T) {
 	assert.Equal(t, NoFormat, config.Log.Format)
 }
 
-func TestResolveLoggerWithEmptyValues(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(LogFormatKey, "")
-	_ = os.Setenv(LogLevelKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, SimpleFormat, config.Log.Format)
-	assert.Equal(t, zerolog.InfoLevel, config.Log.Level)
-}
-
-func TestResolveLoggerEmptyValues(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(LogFormatKey, "")
-	_ = os.Setenv(LogLevelKey, "")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, zerolog.InfoLevel, config.Log.Level)
-	assert.Equal(t, SimpleFormat, config.Log.Format)
-}
-
 func TestResolveConfigSplitBrainCheckEnabled(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1474,30 +1075,6 @@ func TestResolveConfigSplitBrainCheckEnabled(t *testing.T) {
 	expected.SplitBrainCheck = true
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestResolveConfigSplitBrainCheckNotSet(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.SplitBrainCheck = false
-	// act
-	// assert
-	// SplitBrainCheck is not set and expecting to resolve SplitBrainCheck = true and NoError
-	arrangeVariablesAndAssert(t, expected, assert.NoError, SplitBrainCheckKey)
-}
-
-func TestResolveConfigSplitBrainCheckDisabledInvalid(t *testing.T) {
-	// arrange
-	defer cleanup()
-	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(SplitBrainCheckKey, "i.am.wrong??.")
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, false, config.SplitBrainCheck)
 }
 
 func TestHeartBeatWithMultipleExtClusterGeoTag(t *testing.T) {
@@ -1787,29 +1364,6 @@ func TestMetricsAddressWithValidHostName(t *testing.T) {
 	expected := predefinedConfig
 	expected.MetricsAddress = "address.com:8080"
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestMetricsAddressEmptyEnvVariable(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.MetricsAddress = ""
-	configureEnvVar(expected)
-	resolver := NewDependencyResolver()
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, "0.0.0.0:8080", config.MetricsAddress)
-}
-
-func TestMetricsAddressEnvVarIsUnset(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.MetricsAddress = "0.0.0.0:8080"
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError, MetricsAddressKey)
 }
 
 // arrangeVariablesAndAssert sets string environment variables and asserts `expected` argument with

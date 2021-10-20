@@ -24,7 +24,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/AbsaOSS/gopkg/env"
+	"github.com/AbsaOSS/env-binder/env"
+
 	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
 	"github.com/rs/zerolog"
 )
@@ -70,32 +71,24 @@ const (
 func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 	var recognizedDNSTypes []EdgeDNSType
 	dr.onceConfig.Do(func() {
+
 		dr.config = &Config{}
-		dr.config.ReconcileRequeueSeconds, _ = env.GetEnvAsIntOrFallback(ReconcileRequeueSecondsKey, 30)
-		dr.config.ClusterGeoTag = env.GetEnvAsStringOrFallback(ClusterGeoTagKey, "")
-		dr.config.ExtClustersGeoTags = env.GetEnvAsArrayOfStringsOrFallback(ExtClustersGeoTagsKey, []string{})
-		dr.config.route53Enabled = env.GetEnvAsBoolOrFallback(Route53EnabledKey, false)
-		dr.config.ns1Enabled = env.GetEnvAsBoolOrFallback(NS1EnabledKey, false)
-		dr.config.CoreDNSExposed = env.GetEnvAsBoolOrFallback(CoreDNSExposedKey, false)
-		dr.config.EdgeDNSServers = parseEdgeDNSServers(env.GetEnvAsStringOrFallback(EdgeDNSServersKey,
-			fmt.Sprintf("%s:%v", env.GetEnvAsStringOrFallback(EdgeDNSServerKey, ""),
-				env.GetEnvAsStringOrFallback(EdgeDNSServerPortKey, "53"))))
-		dr.config.EdgeDNSZone = env.GetEnvAsStringOrFallback(EdgeDNSZoneKey, "")
-		dr.config.DNSZone = env.GetEnvAsStringOrFallback(DNSZoneKey, "")
-		dr.config.K8gbNamespace = env.GetEnvAsStringOrFallback(K8gbNamespaceKey, "")
-		dr.config.Infoblox.Host = env.GetEnvAsStringOrFallback(InfobloxGridHostKey, "")
-		dr.config.Infoblox.Version = env.GetEnvAsStringOrFallback(InfobloxVersionKey, "")
-		dr.config.Infoblox.Port, _ = env.GetEnvAsIntOrFallback(InfobloxPortKey, 0)
-		dr.config.Infoblox.Username = env.GetEnvAsStringOrFallback(InfobloxUsernameKey, "")
-		dr.config.Infoblox.Password = env.GetEnvAsStringOrFallback(InfobloxPasswordKey, "")
-		dr.config.Infoblox.HTTPPoolConnections, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPPoolConnectionsKey, 10)
-		dr.config.Infoblox.HTTPRequestTimeout, _ = env.GetEnvAsIntOrFallback(InfobloxHTTPRequestTimeoutKey, 20)
-		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(env.GetEnvAsStringOrFallback(LogLevelKey, zerolog.InfoLevel.String())))
-		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(env.GetEnvAsStringOrFallback(LogFormatKey, SimpleFormat.String())))
-		dr.config.Log.NoColor = env.GetEnvAsBoolOrFallback(LogNoColorKey, false)
-		dr.config.MetricsAddress = env.GetEnvAsStringOrFallback(MetricsAddressKey, "0.0.0.0:8080")
-		dr.config.SplitBrainCheck = env.GetEnvAsBoolOrFallback(SplitBrainCheckKey, false)
+
+		// binding
+		dr.errorConfig = env.Bind(dr.config)
+		if dr.errorConfig != nil {
+			return
+		}
+
+		// calculation
+		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
+		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
+		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
+		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
+		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
+
+		// validation
 		dr.errorConfig = dr.validateConfig(dr.config, recognizedDNSTypes)
 	})
 	return dr.config, dr.errorConfig
@@ -296,15 +289,11 @@ func parseMetricsAddr(metricsAddr string) (host string, port int, err error) {
 	return
 }
 
-func parseEdgeDNSServers(serverList string) []utils.DNSServer {
-	r := []utils.DNSServer{}
-	if len(strings.TrimSpace(serverList)) == 0 {
-		return r
-	}
-	chunks := strings.Split(serverList, ",")
+func parseEdgeDNSServers(serverList []string) (r []utils.DNSServer) {
+	r = []utils.DNSServer{}
 	var host, portStr string
 	var err error
-	for _, chunk := range chunks {
+	for _, chunk := range serverList {
 		chunk = strings.TrimSpace(chunk)
 		switch strings.Count(chunk, ":") {
 		case 0: // ipv4 or domain w/o port
