@@ -20,12 +20,12 @@ datasources:
     #   isDefault: true
     - name: Prometheus-cluster1
       type: prometheus
-      url: http://localhost:8080
+      url: http://localhost:9080
       access: direct
       isDefault: false
     - name: Prometheus-cluster2
       type: prometheus
-      url: http://localhost:8081
+      url: http://localhost:9081
       access: direct
       isDefault: false
 dashboardProviders:
