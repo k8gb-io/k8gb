@@ -16,14 +16,22 @@ jobs:
         with:
           token: ${{ secrets.CR_TOKEN }}
           project: k8gb
+          output: CHANGELOG-latest.md
           pullRequests: true
           author: true
           issues: true
           issuesWoLabels: true
           prWoLabels: true
+          onlyLastTag: true
           compareLink: true
           filterByMilestone: true
-          unreleased: true
+          unreleased: false
+      - name: Prepend the latest changes to CHANGELOG.md
+        run: |
+          mv CHANGELOG.md CHANGELOG-old.md
+          cat CHANGELOG-latest.md | sed -e'$d' > CHANGELOG.md
+          cat CHANGELOG-old.md | sed -e'1,4d' >> CHANGELOG.md
+          rm CHANGELOG-old.md CHANGELOG-latest.md
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
