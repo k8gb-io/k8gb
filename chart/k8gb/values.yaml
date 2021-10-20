@@ -10,7 +10,6 @@ k8gb:
   # image tag defaults to Chart.AppVersion, see Chart.yaml
   # but can be overrided with imageTag key
   # imageTag:
-  hookImage: bitnami/kubectl:1.21.1
   dnsZone: "cloud.example.com" # dnsZone controlled by gslb
   dnsZoneNegTTL: 300 # Negative TTL for SOA record
   edgeDNSZone: "example.com" # main zone which would contain gslb zone to delegate
@@ -54,9 +53,6 @@ coredns:
   serviceAccount:
     create: true
     name: coredns
-  customLabels:
-    # label coredns svc by label to prevent further deletions by helm hook
-    k8gb-migrated-svc: "true"
 
 infoblox:
   enabled: false
