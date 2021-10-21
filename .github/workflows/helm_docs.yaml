@@ -1,0 +1,26 @@
+name: Helm docs
+on:
+  push:
+    branches:
+    - 'master'
+    paths:
+     - 'chart/k8gb/**'
+jobs:
+  build-helm-doc:
+    name: Update Helm Doc
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    - name: Check all charts README.md
+      uses: docker://jnorwood/helm-docs:v1.5.0
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        title: "Update Helm Docs"
+        branch: ci-helm-doc
+        delete-branch: true
+        base: master
+        signoff: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+
