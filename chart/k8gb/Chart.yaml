@@ -1,7 +1,7 @@
 apiVersion: v2
 name: k8gb
 description: A Helm chart for Kubernetes Global Balancer
-icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/k8gb/icon/color/k8gb-icon-color.svg
+icon: https://avatars.githubusercontent.com/u/84017757?s=200
 type: application
 version: v0.8.3
 appVersion: v0.8.3
