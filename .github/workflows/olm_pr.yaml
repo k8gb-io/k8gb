@@ -1,0 +1,75 @@
+name: OLM bundle and PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundleVersion:
+        description: Version of the bundle that should be generated. If not provided, the latest release tag is taken
+        required: false
+        default: ""
+      upstreamRepo:
+        description: "The pull request will be opened against this repository"
+        required: true
+        default: "k8s-operatorhub/community-operators"
+      olmBundleToolVersion:
+        description: "Version of the olm-bundle tool that generate CSV file from Chart.yaml and yamls on FS"
+        required: false
+        default: "0.5.3"
+
+jobs:
+  olm-bundle-pr:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event.inputs.bundleVersion }}x" == "x" ]; then
+            version=$(git describe --abbrev=0 --tags)
+          else
+            version=${{ github.event.inputs.bundleVersion }}
+          fi
+          echo "::set-output name=version::${version#v}"
+
+      - name: Generate OLM bundle
+        env:
+          TOOL_VERSION: ${{ github.event.inputs.olmBundleToolVersion }}
+          DEBUG: 1
+        run: |
+          ./olm/generate.sh ${{ steps.get_version.outputs.version }}
+          rm ./olm/bundle/Dockerfile
+          cp -r ./olm/bundle/ $GITHUB_WORKSPACE/
+
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.inputs.upstreamRepo }}
+          path: sandbox
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Copy the generated manifests
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/sandbox/community-operators/operators/k8gb/
+          cp -r $GITHUB_WORKSPACE/bundle $GITHUB_WORKSPACE/sandbox/community-operators/operators/k8gb/${{ github.event.inputs.bundleVersion }}
+
+      - name: Open Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          push-to-fork: k8gb-io/community-operators
+          path: sandbox
+          commit-message: OLM bundle for k8gb@${{ github.event.inputs.bundleVersion }}
+          title: OLM bundle for k8gb@${{ github.event.inputs.bundleVersion }}
+          body: ':package:'
+          branch: k8gb-${{ github.event.inputs.bundleVersion }}
+          delete-branch: true
+          signoff: true
+
+      - name: Check PR
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

@@ -119,3 +119,7 @@ changes
 # gh-pages | Jekyll generated files
 _site
 .jekyll-metadata
+
+# OLM
+/olm/bundle
+/olm/olm-bundle
