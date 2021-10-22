@@ -6,9 +6,19 @@ A Helm chart for Kubernetes Global Balancer
 
 **Homepage:** <https://www.k8gb.io/>
 
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Dinar Valeev | dinar.valeev@absa.africa |  |
+| Jiri Kremser | jiri.kremser@gmail.com |  |
+| Michal Kuritka | kuritka@gmail.com |  |
+| Timofey Ilinykh | timofey.ilinykh@absa.africa |  |
+| Yury Tsarev | yury.tsarev@absa.africa |  |
+
 ## Source Code
 
-* <https://github.com/AbsaOSS/k8gb>
+* <https://github.com/k8gb-io/k8gb>
 
 ## Requirements
 
