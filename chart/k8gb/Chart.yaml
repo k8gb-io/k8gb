@@ -13,7 +13,7 @@ dependencies:
 
 home: https://www.k8gb.io/
 sources:
-  - https://github.com/AbsaOSS/k8gb
+  - https://github.com/k8gb-io/k8gb
 
 keywords:
   - gslb
@@ -21,6 +21,18 @@ keywords:
   - kuberneters-global-balancer
   - kubernetes-operator
   - balancer
+
+maintainers:
+  - email: dinar.valeev@absa.africa
+    name: Dinar Valeev
+  - email: jiri.kremser@gmail.com
+    name: Jiri Kremser
+  - email: kuritka@gmail.com
+    name: Michal Kuritka
+  - email: timofey.ilinykh@absa.africa
+    name: Timofey Ilinykh
+  - email: yury.tsarev@absa.africa
+    name: Yury Tsarev
 
 annotations:
   artifacthub.io/operator: "true"
