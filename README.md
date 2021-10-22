@@ -1,7 +1,10 @@
-<h1 align=center>K8GB - Kubernetes Global Balancer<a href="https://www.k8gb.io"></h1>
-<p align=center><a href="https://landscape.cncf.io/?selected=k8gb">CNCF Sandbox Project</p>
-<p align=center><a href="https://landscape.cncf.io/card-mode?category=coordination-service-discovery&grouping=category">CNCF Coordination &amp; Service Discovery</p>
-<p align=center><a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack<a></p>
+<p align="center" class="disable-logo">
+<a href="#"><img src="https://raw.githubusercontent.com/cncf/artwork/master/projects/k8gb/icon/color/k8gb-icon-color.svg" width="200"/></a>
+</p>
+<h1 align="center" style="margin-top: 0;">K8GB - Kubernetes Global Balancer<a href="https://www.k8gb.io"></h1>
+<p align="center"><a href="https://landscape.cncf.io/?selected=k8gb">CNCF Sandbox Project</p>
+<p align="center"><a href="https://landscape.cncf.io/card-mode?category=coordination-service-discovery&grouping=category">CNCF Coordination &amp; Service Discovery</p>
+<p align="center"><a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack<a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://github.com/AbsaOSS/k8gb/workflows/build/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang+lint+and+test%22+branch%3Amaster)
