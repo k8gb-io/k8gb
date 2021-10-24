@@ -283,8 +283,8 @@ init-round-robin:
 .PHONY: infoblox-secret
 infoblox-secret:
 	kubectl -n k8gb create secret generic infoblox \
-		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
-		--from-literal=EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
+		--from-literal=INFOBLOX_WAPI_USERNAME=$${WAPI_USERNAME} \
+		--from-literal=INFOBLOX_WAPI_PASSWORD=$${WAPI_PASSWORD}
 
 # GoKart - Go Security Static Analysis
 # see: https://github.com/praetorian-inc/gokart

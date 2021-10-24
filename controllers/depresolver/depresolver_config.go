@@ -43,9 +43,9 @@ const (
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
 	InfobloxVersionKey         = "INFOBLOX_WAPI_VERSION"
 	InfobloxPortKey            = "INFOBLOX_WAPI_PORT"
-	InfobloxUsernameKey        = "EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"
+	InfobloxUsernameKey        = "INFOBLOX_WAPI_USERNAME"
 	// #nosec G101; ignore false positive gosec; see: https://securego.io/docs/rules/g101.html
-	InfobloxPasswordKey            = "EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"
+	InfobloxPasswordKey            = "INFOBLOX_WAPI_PASSWORD"
 	InfobloxHTTPRequestTimeoutKey  = "INFOBLOX_HTTP_REQUEST_TIMEOUT"
 	InfobloxHTTPPoolConnectionsKey = "INFOBLOX_HTTP_POOL_CONNECTIONS"
 	K8gbNamespaceKey               = "POD_NAMESPACE"
