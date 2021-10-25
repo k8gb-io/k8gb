@@ -20,7 +20,7 @@ package metrics
 import (
 	"sync"
 
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
 )
 
 const (

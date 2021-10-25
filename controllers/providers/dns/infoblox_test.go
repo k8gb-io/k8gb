@@ -26,10 +26,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
-	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
-	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 )
 
 const (

@@ -26,8 +26,8 @@ package depresolver
 import (
 	"sync"
 
-	"github.com/AbsaOSS/k8gb/api/v1beta1"
-	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 
 	"github.com/rs/zerolog"
 )

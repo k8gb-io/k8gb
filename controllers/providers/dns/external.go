@@ -22,12 +22,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/AbsaOSS/k8gb/controllers/logging"
+	"github.com/k8gb-io/k8gb/controllers/logging"
 
-	assistant2 "github.com/AbsaOSS/k8gb/controllers/providers/assistant"
+	assistant2 "github.com/k8gb-io/k8gb/controllers/providers/assistant"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )

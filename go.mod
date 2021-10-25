@@ -1,4 +1,4 @@
-module github.com/AbsaOSS/k8gb
+module github.com/k8gb-io/k8gb
 
 go 1.16
 

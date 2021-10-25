@@ -24,8 +24,8 @@ package dns
 import (
 	reflect "reflect"
 
-	v1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
 	gomock "github.com/golang/mock/gomock"
+	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	endpoint "sigs.k8s.io/external-dns/endpoint"
 )
 

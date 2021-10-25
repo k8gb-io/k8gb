@@ -20,8 +20,8 @@ package dns
 import (
 	"strconv"
 
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
 )
 
 type InfobloxClient interface {

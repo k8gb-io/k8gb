@@ -20,8 +20,8 @@ package dns
 import (
 	"fmt"
 
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
-	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
