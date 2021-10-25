@@ -99,9 +99,9 @@ type Infoblox struct {
 	// Port
 	Port int `env:"INFOBLOX_WAPI_PORT, default=0"`
 	// Username
-	Username string `env:"EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME"`
+	Username string `env:"INFOBLOX_WAPI_USERNAME"`
 	// Password
-	Password string `env:"EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD"`
+	Password string `env:"INFOBLOX_WAPI_PASSWORD"`
 	// HTTPRequestTimeout seconds
 	HTTPRequestTimeout int `env:"INFOBLOX_HTTP_REQUEST_TIMEOUT, default=20"`
 	// HTTPPoolConnections seconds

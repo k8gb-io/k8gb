@@ -92,16 +92,16 @@ spec:
                 configMapKeyRef:
                   name: infoblox
                   key: INFOBLOX_HTTP_POOL_CONNECTIONS
-            - name: EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME
+            - name: INFOBLOX_WAPI_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: infoblox
-                  key: EXTERNAL_DNS_INFOBLOX_WAPI_USERNAME
-            - name: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
+                  key: INFOBLOX_WAPI_USERNAME
+            - name: INFOBLOX_WAPI_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: infoblox
-                  key: EXTERNAL_DNS_INFOBLOX_WAPI_PASSWORD
+                  key: INFOBLOX_WAPI_PASSWORD
             {{- end }}
             {{- if .Values.route53.enabled }}
             - name: ROUTE53_ENABLED
