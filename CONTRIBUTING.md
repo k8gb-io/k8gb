@@ -23,6 +23,8 @@
 - [Documentation](#documentation)
 - [k8gb.io website](#k8gbio-website)
   - [Local website authoring and testing](#local-website-authoring-and-testing)
+    - [Using custom SSL CA certificate](#using-custom-ssl-ca-certificate)
+    - [.env support](#env-support)
 - [End-to-end demo helper](#end-to-end-demo-helper)
 - [Release process](#release-process)
 
@@ -165,7 +167,7 @@ k8gb project is using the [zerolog](https://github.com/rs/zerolog) library for l
 ### Error handling
 See [effective go errors](https://golang.org/doc/effective_go.html#errors) first. Do not discard errors using `_` variables except
 tests, or, in truly exceptional situations. If a function returns an error, check it to make sure the function succeeded.
-If the function fails, consider logging the error and recording errors in metrics (see: [logging recommendations](#logging)). 
+If the function fails, consider logging the error and recording errors in metrics (see: [logging recommendations](#logging)).
 
 The following example demonstrates error handling inside the reconciliation loop:
 ```go
@@ -251,17 +253,41 @@ Changes to the k8gb.io website layout and styling should be checked out from the
 ### Local website authoring and testing
 
 These instructions will help you to set up and use local website authoring and testing environment:
-- Check-out from the `gh-pages` branch
+
+- Check-out the [`gh-pages`](https://github.com/k8gb-io/k8gb/tree/gh-pages) branch
 - Create dedicated [GitHub Personal Access Token](https://github.com/settings/tokens/new) with `public_repo` permission and assign it to the `JEKYLL_GITHUB_TOKEN` environment variable:
+
   ```sh
-- Run the following `make` target to build and serve the local copy of the k8gb.io website.
-  ```sh
-  make serve
+  export JEKYLL_GITHUB_TOKEN=<your-github-token>
   ```
-  *The target utilizes the `jekyll/jekyll` docker container to avoid unnecessary installation of local GitHub page authoring dependencies.*
+
+- Run `make` and serve the local copy of the k8gb.io website.
+
+  *The target utilizes the `jekyll/jekyll` docker container to avoid local environment pollution from Jekyll gem dependencies.*
 
 - Open the `http://localhost:4000/` page in your browser.
-- Website will automatically rebuild and refresh in the browser to accommodate the related code changes.
+- Website will get automatically rebuilt and refreshed in the browser to accommodate the related code changes.
+
+#### Using custom SSL CA certificate
+
+When the dev environment is behind a proxy, it might be required to use a custom SSL CA certificate,
+otherwise, Jekyll is not able to update its plugins and dependencies.
+Local website authoring target automatically detects and wires the SSL certificate to its docker container from the path provided by the `CUSTOM_CERT_PATH` environment variable:
+
+```sh
+export CUSTOM_CERT_PATH=/path/to/custom/certificate.pem
+```
+
+> NOTE: Certificate should be in a PEM format
+
+#### .env support
+
+Environment variables can be stored in a local `.env` file in the project's root to retain their persistency between the authoring sessions:
+
+```.env
+JEKYLL_GITHUB_TOKEN=<your-github-token>
+CUSTOM_CERT_PATH=<your-custom-ssl-certificate>
+```
 
 ## End-to-end demo helper
 
@@ -310,11 +336,11 @@ export RELEASE_TAG=<tag, e.g.: v0.8.2>
 git tag $RELEASE_TAG -s -m "Release $RELEASE_TAG"
 git push origin refs/tags/$RELEASE_TAG
 ```
-* At this point a DRAFT release will be created on GitHub. After the [release pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/release.yaml) 
+* At this point a DRAFT release will be created on GitHub. After the [release pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/release.yaml)
 has been successfully completed, you check the [release DRAFT](https://github.com/k8gb-io/k8gb/releases) and if it is OK, you click on the **"Publish release"** button.
 
 * Check the [helm publish pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml) status
-* Check the [offline changelog](https://github.com/k8gb-io/k8gb/actions/workflows/changelog_pr.yaml) status. This pipeline creates 
+* Check the [offline changelog](https://github.com/k8gb-io/k8gb/actions/workflows/changelog_pr.yaml) status. This pipeline creates
 a pull request with an offline changelog. Do a review and if everything is ok, merge it.
 
 Congratulations, the release is complete!
