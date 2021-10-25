@@ -83,59 +83,67 @@ type Log struct {
 	// Format [simple,json] specifies how the logger prints values
 	Format LogFormat
 	// NoColor prints colored output if Format == simple
-	NoColor bool
+	NoColor bool `env:"NO_COLOR, default=false"`
+	// format is binding source for Format
+	format string `env:"LOG_FORMAT, default=simple"`
+	// level is binding source for Level
+	level string `env:"LOG_LEVEL, default=info"`
 }
 
 // Infoblox configuration
 type Infoblox struct {
 	// Host
-	Host string
+	Host string `env:"INFOBLOX_GRID_HOST"`
 	// Version
-	Version string
+	Version string `env:"INFOBLOX_WAPI_VERSION"`
 	// Port
-	Port int
+	Port int `env:"INFOBLOX_WAPI_PORT, default=0"`
 	// Username
-	Username string
+	Username string `env:"INFOBLOX_WAPI_USERNAME"`
 	// Password
-	Password string
-	// HTTPRequestTimeout seconds; default = 20
-	HTTPRequestTimeout int
-	// HTTPPoolConnections seconds; default = 10
-	HTTPPoolConnections int
+	Password string `env:"INFOBLOX_WAPI_PASSWORD"`
+	// HTTPRequestTimeout seconds
+	HTTPRequestTimeout int `env:"INFOBLOX_HTTP_REQUEST_TIMEOUT, default=20"`
+	// HTTPPoolConnections seconds
+	HTTPPoolConnections int `env:"INFOBLOX_HTTP_POOL_CONNECTIONS, default=10"`
 }
 
 // Config is operator configuration returned by depResolver
 type Config struct {
 	// Reschedule of Reconcile loop to pickup external Gslb targets
-	ReconcileRequeueSeconds int
+	ReconcileRequeueSeconds int `env:"RECONCILE_REQUEUE_SECONDS, default=30"`
 	// ClusterGeoTag to determine specific location
-	ClusterGeoTag string
+	ClusterGeoTag string `env:"CLUSTER_GEO_TAG"`
 	// ExtClustersGeoTags to identify clusters in other locations in format separated by comma. i.e.: "eu,uk,us"
-	ExtClustersGeoTags []string
+	ExtClustersGeoTags []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS, default=[]"`
 	// EdgeDNSType is READONLY and is set automatically by configuration
 	EdgeDNSType EdgeDNSType
 	// EdgeDNSServers
 	EdgeDNSServers utils.DNSList
+	// to avoid breaking changes is used as fallback server for EdgeDNSServers
+	fallbackEdgeDNSServerName string `env:"EDGE_DNS_SERVER"`
+	// to avoid breaking changes is used as fallback server port for EdgeDNSServers
+	fallbackEdgeDNSServerPort int `env:"EDGE_DNS_SERVER_PORT, default=53"`
 	// EdgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
-	EdgeDNSZone string
+	EdgeDNSZone string `env:"EDGE_DNS_ZONE"`
 	// DNSZone controlled by gslb; e.g. cloud.example.com
-	DNSZone string
+	DNSZone string `env:"DNS_ZONE"`
 	// K8gbNamespace k8gb namespace
-	K8gbNamespace string
+	K8gbNamespace string `env:"POD_NAMESPACE"`
 	// Infoblox configuration
 	Infoblox Infoblox
 	// CoreDNSExposed flag
-	CoreDNSExposed bool
+	CoreDNSExposed bool `env:"COREDNS_EXPOSED, default=false"`
 	// Log configuration
 	Log Log
 	// MetricsAddress in format address:port where address can be empty, IP address, or hostname, default: 0.0.0.0:8080
-	MetricsAddress string
+	MetricsAddress string `env:"METRICS_ADDRESS, default=0.0.0.0:8080"`
 	// route53Enabled hidden. EdgeDNSType defines all enabled Enabled types
-	route53Enabled bool
+	route53Enabled bool `env:"ROUTE53_ENABLED, default=false"`
 	// ns1Enabled flag
-	ns1Enabled bool
+	ns1Enabled bool `env:"NS1_ENABLED, default=false"`
 	// SplitBrainCheck flag decides whether split brain TXT records will be stored in edge DNS
-	SplitBrainCheck bool
+	SplitBrainCheck bool `env:"SPLIT_BRAIN_CHECK, default=false"`
 }
 
 // DependencyResolver resolves configuration for GSLB
