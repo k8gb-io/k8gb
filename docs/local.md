@@ -55,8 +55,8 @@ If local setup runs well, check if clusters are correctly installed
 kubectl cluster-info --context k3d-test-gslb1 && kubectl cluster-info --context k3d-test-gslb2
 ```
 
-Cluster [test-gslb1](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
-while [test-gslb2](https://github.com/AbsaOSS/k8gb/tree/master/deploy/kind/cluster2.yaml) on port `:5054`.
+Cluster [test-gslb1](https://github.com/k8gb-io/k8gb/tree/master/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
+while [test-gslb2](https://github.com/k8gb-io/k8gb/tree/master/deploy/kind/cluster2.yaml) on port `:5054`.
 ```shell script
 dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
@@ -78,7 +78,7 @@ curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H
 
 ## Run integration tests
 
-There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/AbsaOSS/k8gb/tree/master/terratest).
+There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/k8gb-io/k8gb/tree/master/terratest).
 To check whether everything is running properly execute [terratest](https://terratest.gruntwork.io/) :
 
 ```shell script
@@ -99,7 +99,7 @@ make destroy-full-local-setup
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - roundrobin.cloud.example.com` and depending
 on region will podinfo return **us** or **eu**. In current round robin implementation are IP addresses randomly picked.
-See [Gslb manifest with round robin strategy](https://github.com/AbsaOSS/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
+See [Gslb manifest with round robin strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 
 Run several times command below and watch `message` field.
 ```shell script
@@ -129,7 +129,7 @@ As expected result you should see podinfo message changing
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending
 on whether podinfo is running inside the cluster it returns only **eu** or **us**.
-See [Gslb manifest with failover strategy](https://github.com/AbsaOSS/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 Switch GLSB to failover mode:
 ```shell script
@@ -167,7 +167,7 @@ As expected result you should see only podinfo from **second cluster (us)** is r
 }
 ```
 It might happen that podinfo will be unavailable for a while due to
-[DNS sync interval](https://github.com/AbsaOSS/k8gb/pull/81) and default k8gb DNS TTL of 30 seconds
+[DNS sync interval](https://github.com/k8gb-io/k8gb/pull/81) and default k8gb DNS TTL of 30 seconds
 ```text
 wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
 ```
