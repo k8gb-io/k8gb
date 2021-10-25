@@ -26,12 +26,12 @@ import (
 
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/prometheus/client_golang/prometheus/testutil"
 
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -24,11 +24,11 @@ import (
 
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
-	"github.com/AbsaOSS/k8gb/controllers/providers/assistant"
-	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
+	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 )
 
 type InfobloxProvider struct {

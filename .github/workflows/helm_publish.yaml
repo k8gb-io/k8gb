@@ -16,7 +16,7 @@ jobs:
         with:
           access-token: ${{ secrets.CR_TOKEN }}
           source-charts-folder: 'chart'
-          destination-repo: absaoss/k8gb
+          destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
       - name: Create k3s cluster
         uses: AbsaOSS/k3d-action@v1.5.0

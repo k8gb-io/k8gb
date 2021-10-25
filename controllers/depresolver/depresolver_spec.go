@@ -24,7 +24,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 )
 
 var predefinedStrategy = k8gbv1beta1.Strategy{

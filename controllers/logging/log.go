@@ -21,7 +21,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 )

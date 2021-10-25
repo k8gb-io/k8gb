@@ -19,12 +19,12 @@ import (
 
 	str "github.com/AbsaOSS/gopkg/strings"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"github.com/AbsaOSS/k8gb/controllers"
-	"github.com/AbsaOSS/k8gb/controllers/depresolver"
-	"github.com/AbsaOSS/k8gb/controllers/logging"
-	"github.com/AbsaOSS/k8gb/controllers/providers/dns"
-	"github.com/AbsaOSS/k8gb/controllers/providers/metrics"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/logging"
+	"github.com/k8gb-io/k8gb/controllers/providers/dns"
+	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"

@@ -7,17 +7,17 @@
 <p align="center"><a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack<a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://github.com/AbsaOSS/k8gb/workflows/build/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang+lint+and+test%22+branch%3Amaster)
-[![Terratest Status](https://github.com/AbsaOSS/k8gb/workflows/Terratest/badge.svg?branch=master)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3ATerratest+branch%3Amaster)
-[![Gosec](https://github.com/AbsaOSS/k8gb/workflows/Gosec/badge.svg?branch=master)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3AGosec+branch%3Amaster)
-[![CodeQL](https://github.com/AbsaOSS/k8gb/workflows/CodeQL/badge.svg?branch=master)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3ACodeQL+branch%3Amaster)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AbsaOSS/k8gb)](https://goreportcard.com/report/github.com/AbsaOSS/k8gb)
-[![Helm Publish](https://github.com/AbsaOSS/k8gb/workflows/Helm%20Publish/badge.svg?branch=master)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3A%22Helm+Publish%22)
-[![KubeLinter](https://github.com/AbsaOSS/k8gb/workflows/KubeLinter/badge.svg?branch=master)](https://github.com/AbsaOSS/k8gb/actions?query=workflow%3AKubeLinter+branch%3Amaster)
+[![Build Status](https://github.com/k8gb-io/k8gb/workflows/build/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang+lint+and+test%22+branch%3Amaster)
+[![Terratest Status](https://github.com/k8gb-io/k8gb/workflows/Terratest/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ATerratest+branch%3Amaster)
+[![Gosec](https://github.com/k8gb-io/k8gb/workflows/Gosec/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3AGosec+branch%3Amaster)
+[![CodeQL](https://github.com/k8gb-io/k8gb/workflows/CodeQL/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ACodeQL+branch%3Amaster)
+[![Go Report Card](https://goreportcard.com/badge/github.com/k8gb-io/k8gb)](https://goreportcard.com/report/github.com/k8gb-io/k8gb)
+[![Helm Publish](https://github.com/k8gb-io/k8gb/workflows/Helm%20Publish/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Helm+Publish%22)
+[![KubeLinter](https://github.com/k8gb-io/k8gb/workflows/KubeLinter/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3AKubeLinter+branch%3Amaster)
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8gb)](https://artifacthub.io/packages/search?repo=k8gb)
-[![doc.crds.dev](https://img.shields.io/badge/doc-crds-purple)](https://doc.crds.dev/github.com/absaoss/k8gb)
-[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2FAbsaOSS%2Fk8gb.svg?type=shield)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2FAbsaOSS%2Fk8gb?ref=badge_shield)
+[![doc.crds.dev](https://img.shields.io/badge/doc-crds-purple)](https://doc.crds.dev/github.com/k8gb-io/k8gb)
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fk8gb-io%2Fk8gb.svg?type=shield)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fk8gb-io%2Fk8gb?ref=badge_shield)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4866/badge)](https://bestpractices.coreinfrastructure.org/projects/4866)
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.

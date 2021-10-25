@@ -21,9 +21,9 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	v1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

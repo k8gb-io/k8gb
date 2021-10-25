@@ -55,7 +55,7 @@ Following is a rough outline for the contributor's workflow:
 - Make sure the commit messages are in the [proper format](#commit-and-pull-request-message).
 - Make sure the changes are covered by [reasonable amount of testing](#testing).
 - Push changes in a topic branch to a personal fork of the repository.
-- Submit a pull request to AbsaOSS/k8gb GitHub repository.
+- Submit a pull request to k8gb-io/k8gb GitHub repository.
 - Resolve review comments.
 - PR must receive an "LGTM" approval from at least one maintainer listed in the `CODEOWNERS` file.
 
@@ -94,8 +94,8 @@ Overrides done this way can persist between terminal sessions and can be used as
 
 ## Testing
 
-- Any functional GSLB controller code change should be secured by the corresponding [unit tests](https://github.com/AbsaOSS/k8gb/tree/master/controllers/gslb_controller_test.go).
-- Integration terratest suite is located [here](https://github.com/AbsaOSS/k8gb/tree/master/terratest).
+- Any functional GSLB controller code change should be secured by the corresponding [unit tests](https://github.com/k8gb-io/k8gb/tree/master/controllers/gslb_controller_test.go).
+- Integration terratest suite is located [here](https://github.com/k8gb-io/k8gb/tree/master/terratest).
   These tests are updated only if the change is substantial enough to affect the main end-to-end flow.
 - See the [local playground guide](https://github.com/k8gb-io/k8gb/blob/master/docs/local.md) for local testing environment setup and integration test execution.
 

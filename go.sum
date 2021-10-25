@@ -857,7 +857,6 @@ github.com/linode/linodego v0.19.0 h1:JxYBTxUcXcOlCwLMuugc7Il0RMtJ7riaddqz6gG/AC
 github.com/linode/linodego v0.19.0/go.mod h1:XOWXRHjqeU2uPS84tKLgfWIfTlv3TYzCS0io4GOQzEI=
 github.com/lithammer/dedent v1.1.0 h1:VNzHMVCBNG1j0fh3OrsFRkVUwStdDArbgBWoPAffktY=
 github.com/lithammer/dedent v1.1.0/go.mod h1:jrXYCQtgg0nJiN+StA2KgR7w6CiQNv9Fd/Z9BP0jIOc=
-github.com/lixiangzhong/dnsutil v0.0.0-20191203032812-75ad39d2945a h1:/yAdTRA3/jQoGjC+LrnEIb4PS0/E+Bhb0nZtn1Lc1wA=
 github.com/lixiangzhong/dnsutil v0.0.0-20191203032812-75ad39d2945a/go.mod h1:lznJf63BpaQUI5MnVQkV6X57CTTgnB8OZV3U4omV3BI=
 github.com/lyft/protoc-gen-star v0.4.10 h1:yekjh68Yp+AF+IXd/0vLd+DQv+eb6joCTA6qxRmtE2A=
 github.com/lyft/protoc-gen-star v0.4.10/go.mod h1:mE8fbna26u7aEA2QCVvvfBU/ZrPgocG1206xAFPcs94=

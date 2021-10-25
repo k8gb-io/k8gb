@@ -33,7 +33,7 @@ import (
 
 // Basic k8gb deployment test that is verifying that associated ingress is getting created
 // Relies on two local clusters deployed by `$make deploy-two-local-clusters`
-// Tests expected behavior for https://github.com/AbsaOSS/k8gb/issues/67
+// Tests expected behavior for https://github.com/k8gb-io/k8gb/issues/67
 func TestK8gbSplitFailoverExample(t *testing.T) {
 	t.Parallel()
 

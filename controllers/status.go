@@ -21,7 +21,7 @@ import (
 	"context"
 	"regexp"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	types "k8s.io/apimachinery/pkg/types"

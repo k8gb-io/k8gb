@@ -24,9 +24,9 @@ import (
 	"strings"
 	"time"
 
-	k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
-	"github.com/AbsaOSS/k8gb/controllers/logging"
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/logging"
 
 	str "github.com/AbsaOSS/gopkg/strings"
 	"github.com/miekg/dns"

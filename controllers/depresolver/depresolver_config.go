@@ -25,8 +25,7 @@ import (
 	"strings"
 
 	"github.com/AbsaOSS/env-binder/env"
-
-	"github.com/AbsaOSS/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/rs/zerolog"
 )
 

@@ -25,8 +25,6 @@ import (
 	"testing"
 	"time"
 
-	//k8gbv1beta1 "github.com/AbsaOSS/k8gb/api/v1beta1"
-
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/require"
