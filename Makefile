@@ -17,6 +17,7 @@
 JEKYLL_VERSION = 4.2.0
 PWD ?=  $(shell pwd)
 JEKYLL_PORT ?= 4000
+JEKYLL_HOST ?= 0.0.0.0
 
 # Bootstrap env vars from "dotenv" file
 ifneq ($(wildcard ./.env),)
@@ -24,17 +25,29 @@ ifneq ($(wildcard ./.env),)
 	export
 endif
 
+# Detect custom certificate
+ifneq ($(CUSTOM_CERT_PATH),)
+	CUSTOM_CERT_PATH := $(abspath $(CUSTOM_CERT_PATH))
+	CERT_INSTALL_CMD := update-ca-certificates;
+endif
+
+JEKYLL_CMD := "$(CERT_INSTALL_CMD) bundle install; jekyll serve --host $(JEKYLL_HOST) --watch --livereload --incremental --port $(JEKYLL_PORT)"
+
 # Build and serve k8gb.io website locally with watch and livereload
 .PHONY: serve
 serve:
-	@echo "Building and serving k8gb.io website at http://localhost:$(JEKYLL_PORT) ⌛ ..."
+ifneq ($(CUSTOM_CERT_PATH),)
+	@echo "Using custom certificate: $(CUSTOM_CERT_PATH)"
+endif
+	@echo "Building and serving k8gb.io website at http://$(JEKYLL_HOST):$(JEKYLL_PORT) ⌛ ..."
 ifneq ($(JEKYLL_GITHUB_TOKEN),)
 	@docker run --rm -it \
 		--env JEKYLL_GITHUB_TOKEN=$(JEKYLL_GITHUB_TOKEN) \
 		--volume="$(PWD):/srv/jekyll" \
 		--volume="$(PWD)/vendor/bundle:/usr/local/bundle" \
-		-p 4000:4000 -p 35729:35729 jekyll/jekyll:$(JEKYLL_VERSION) \
-		sh -c "jekyll serve --host 0.0.0.0 --watch --livereload --incremental"
+		--volume="$(CUSTOM_CERT_PATH):/usr/local/share/ca-certificates/custom-cert" \
+		-p $(JEKYLL_PORT):$(JEKYLL_PORT) -p 35729:35729 jekyll/jekyll:$(JEKYLL_VERSION) \
+ 		sh -c $(JEKYLL_CMD)
 else
 	@echo "GitHub pages are using the GitHub API to obtain repository metadata for the website generation."
 	@echo "Local generation requires a GitHub PAT token with the 'public_repo' scope (https://github.com/settings/tokens/new)."
