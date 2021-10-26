@@ -21,7 +21,14 @@ main() {
         OLM_BINARY="olm-bundle"
     fi
 
-    git checkout v${_VERSION}
+    # if master is set as version don't do the checkout and use the latest annotated tag (~release) as the
+    # desired version for the olm bundle
+    if [[ ${_VERSION} == "master" ]]; then
+        _VERSION=$(git describe --abbrev=0 --tags)
+        _VERSION=${_VERSION#"v"}
+    else
+        git checkout v${_VERSION}
+    fi
     generate
 }
 
