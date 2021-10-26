@@ -227,7 +227,7 @@ func (p *InfobloxProvider) saveHeartbeatTXTRecord(objMgr *ibclient.ObjectManager
 		log.Info().
 			Str("HeartbeatTXTName", heartbeatTXTName).
 			Msg("Creating split brain TXT record")
-		_, err = objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, gslb.Spec.Strategy.DNSTtlSeconds, "default")
+		_, err = objMgr.CreateTXTRecord(heartbeatTXTName, edgeTimestamp, uint(gslb.Spec.Strategy.DNSTtlSeconds), "default")
 		if err != nil {
 			m.InfobloxIncrementHeartbeatError(gslb)
 			return

@@ -715,9 +715,9 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 
 func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 	// arrange
+	expectedAnnotations := map[string]string{"annotation": "test", "k8gb.io/strategy": "roundRobin"}
 	settings := provideSettings(t, predefinedConfig)
-	expectedAnnotations := map[string]string{"annotation": "test"}
-	settings.gslb.Annotations = expectedAnnotations
+	settings.gslb.Annotations = map[string]string{"annotation": "test"}
 	err := settings.client.Update(context.TODO(), settings.gslb)
 	require.NoError(t, err, "Can't update gslb")
 	// act
@@ -726,6 +726,7 @@ func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 	// assert
 	assert.NoError(t, err2, "Failed to get expected ingress")
 	assert.Equal(t, expectedAnnotations, settings.ingress.Annotations)
+	assert.Equal(t, expectedAnnotations, settings.gslb.ObjectMeta.Annotations)
 }
 
 func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
