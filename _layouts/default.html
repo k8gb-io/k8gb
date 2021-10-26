@@ -45,7 +45,7 @@
     </header>
 
     <main id="content" class="main-content" role="main">
-      {% include anchor_headings.html html=content anchorBody="§" %}
+      {% include anchor_headings.html html=content anchorBody="§" anchorClass="heading-anchor" anchorAttrs="aria-labelledby=\"%html_id%\"" headerAttrs="class=heading" %}
 
       <footer class="site-footer">
         <a href="https://www.cncf.io" target="_blank">

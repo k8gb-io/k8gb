@@ -61,6 +61,14 @@ a.header-url:hover {
 }
 
 .disable-logo {
-  display: none;
+    display: none;
 }
 
+.heading-anchor {
+    visibility: hidden;
+}
+
+.heading-anchor:hover,
+.heading:hover > .heading-anchor {
+    visibility: visible;
+}
