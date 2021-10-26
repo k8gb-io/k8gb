@@ -5,7 +5,14 @@ annotations:
     description: A cloud native Kubernetes Global Balancer
     namespace: placeholder
     operatorframework.io/suggested-namespace: k8gb
+    operators.operatorframework.io.bundle.mediatype.v1: registry+v1
+    operators.operatorframework.io.bundle.manifests.v1: manifests/
+    operators.operatorframework.io.bundle.metadata.v1: metadata/
+    operators.operatorframework.io.bundle.package.v1: k8gb
+    operators.operatorframework.io.bundle.channels.v1: alpha
     operators.operatorframework.io/builder: operator-sdk-v1.12.0+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
-    repository: https://github.com/k8gb/k8gb
+    operators.operatorframework.io.test.mediatype.v1: scorecard+v1
+    operators.operatorframework.io.test.config.v1: tests/scorecard/
+    repository: https://github.com/k8gb-io/k8gb
     support: cncf-k8gb-maintainers@lists.cncf.io
