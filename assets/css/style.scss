@@ -64,16 +64,11 @@ a.header-url:hover {
     display: none;
 }
 
-.anchor-heading {
+.heading-anchor {
     visibility: hidden;
 }
 
-.anchor-heading:hover,
-h1:hover > .anchor-heading,
-h2:hover > .anchor-heading,
-h3:hover > .anchor-heading,
-h4:hover > .anchor-heading,
-h5:hover > .anchor-heading,
-h6:hover > .anchor-heading {
+.heading-anchor:hover,
+.heading:hover > .heading-anchor {
     visibility: visible;
 }
