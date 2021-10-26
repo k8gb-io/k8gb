@@ -32,6 +32,12 @@ jobs:
           else
             version=${{ github.event.inputs.bundleVersion }}
           fi
+          if [ "${{ github.event.inputs.bundleVersion }}" == "master" ]; then
+            bundleDir=$(git describe --abbrev=0 --tags)
+          else
+            bundleDir=${version}
+          fi
+          echo "::set-output name=bundleDir::${bundleDir#v}"
           echo "::set-output name=version::${version#v}"
 
       - name: Generate OLM bundle
@@ -52,8 +58,8 @@ jobs:
 
       - name: Copy the generated manifests
         run: |
-          mkdir -p $GITHUB_WORKSPACE/sandbox/community-operators/operators/k8gb/
-          cp -r $GITHUB_WORKSPACE/bundle $GITHUB_WORKSPACE/sandbox/community-operators/operators/k8gb/${{ github.event.inputs.bundleVersion }}
+          mkdir -p $GITHUB_WORKSPACE/sandbox/operators/k8gb/
+          cp -r $GITHUB_WORKSPACE/bundle $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ steps.get_version.outputs.bundleDir }}
 
       - name: Open Pull Request
         id: cpr
@@ -62,10 +68,30 @@ jobs:
           token: ${{ secrets.GH_OLM_TOKEN }}
           push-to-fork: k8gb-io/community-operators
           path: sandbox
-          commit-message: OLM bundle for k8gb@${{ github.event.inputs.bundleVersion }}
-          title: OLM bundle for k8gb@${{ github.event.inputs.bundleVersion }}
-          body: ':package:'
-          branch: k8gb-${{ github.event.inputs.bundleVersion }}
+          commit-message: OLM bundle for k8gb@${{ steps.get_version.outputs.bundleDir }}
+          title: OLM bundle for k8gb@${{ steps.get_version.outputs.bundleDir }}
+          body: |
+            :package: Update k8gb operator bundle :package:
+
+            ### New Submissions
+            N/A
+
+            ### Updates to existing Operators
+            - [x] All checks
+
+            ### Your submission should not
+            - [x] All checks
+
+            ### Operator Description must contain (in order)
+            - [x] All checks
+
+            ### Operator Metadata should contain
+            - [x] All checks
+
+            This automated PR was created by [this action][1].
+
+            [1]: https://github.com/k8gb-io/k8gb/runs/${GITHUB_RUN_ID}
+          branch: k8gb-${{ steps.get_version.outputs.bundleDir }}
           delete-branch: true
           signoff: true
 
