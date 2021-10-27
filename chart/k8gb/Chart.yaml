@@ -40,7 +40,7 @@ annotations:
   artifacthub.io/crds: |
     - kind: Gslb
       version: v1beta1
-      name: gslb
+      name: gslbs.k8gb.absa.oss
       displayName: Gslb
       description: Gslb resource for global load balancing strategy configuration
   artifacthub.io/crdsExamples: |

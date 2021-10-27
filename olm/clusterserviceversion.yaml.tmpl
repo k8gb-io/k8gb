@@ -36,3 +36,13 @@ spec:
      For more deployment variables see [helm code](https://github.com/k8gb-io/k8gb/blob/v0.8.3/chart/k8gb/templates/operator.yaml#L53:L68).
 
      For more information see [k8gb.io](https://k8gb.io).
+  installModes:
+    - supported: false
+      type: OwnNamespace
+    - supported: false
+      type: SingleNamespace
+    - supported: false
+      type: MultiNamespace
+    - supported: true
+      type: AllNamespaces
+
