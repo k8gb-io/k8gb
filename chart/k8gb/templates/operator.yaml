@@ -61,7 +61,7 @@ spec:
             - name: EDGE_DNS_ZONE
               value: {{ .Values.k8gb.edgeDNSZone }}
             - name: EDGE_DNS_SERVERS
-              value: {{ join "," .Values.k8gb.edgeDNSServers }}
+              value: {{ include "k8gb.edgeDNSServers" . }}
             - name: DNS_ZONE
               value: {{ .Values.k8gb.dnsZone }}
             - name: RECONCILE_REQUEUE_SECONDS
