@@ -29,6 +29,8 @@ main() {
     else
         git checkout v${_VERSION}
     fi
+    PREVIOUS_VERSION=${PREVIOUS_VERSION:-$(git describe --abbrev=0 --tags v${_VERSION}^)}
+
     generate
 }
 
@@ -39,7 +41,8 @@ generate() {
         --name-template=k8gb \
         --set k8gb.securityContext.runAsUser=null | ${OLM_BINARY} \
             --chart-file-path=${DIR}/../chart/k8gb/Chart.yaml \
-            --version=${_VERSION} \
+            --version=v${_VERSION} \
+            --replaces-version=${PREVIOUS_VERSION} \
             --helm-chart-overrides \
             --output-dir ${DIR}
     git checkout ${DIR}/annotations.yaml.tmpl
