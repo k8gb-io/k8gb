@@ -88,3 +88,11 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- end -}}
 {{- end -}}
+
+{{- define "k8gb.edgeDNSServers" -}}
+{{- if .Values.k8gb.edgeDNSServer -}}
+{{ .Values.k8gb.edgeDNSServer }}
+{{- else -}}
+{{ join "," .Values.k8gb.edgeDNSServers }}
+{{- end -}}
+{{- end -}}
