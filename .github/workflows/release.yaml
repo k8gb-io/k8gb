@@ -49,3 +49,11 @@ jobs:
           args: release --rm-dist --release-notes=changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./deploy/test-apps/curldemo/
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USER }}/k8gb:${{ env.GITHUB_JOB }}
