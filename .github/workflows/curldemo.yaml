@@ -1,4 +1,4 @@
-name: Release
+name: curldemo
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - "v*"
 
 jobs:
-  release:
+  curldemo:
     runs-on: ubuntu-20.04
     env:
       DOCKER_CLI_EXPERIMENTAL: "enabled"
@@ -19,20 +19,6 @@ jobs:
         run: |
           previous_tag=$(git tag --sort=v:refname | tail -2 | head -1)
           echo "::set-output name=previous_tag::${previous_tag}"
-      - uses: heinrichreimer/github-changelog-generator-action@v2.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          project: k8gb
-          sinceTag: ${{ steps.get_tag.outputs.previous_tag }}
-          output: changes
-          pullRequests: true
-          author: true
-          issues: true
-          issuesWoLabels: true
-          prWoLabels: true
-          compareLink: true
-          filterByMilestone: true
-          unreleased: true
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -49,3 +35,11 @@ jobs:
           args: release --rm-dist --release-notes=changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./deploy/test-apps/curldemo/
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USER }}/k8gb-demo:latest
