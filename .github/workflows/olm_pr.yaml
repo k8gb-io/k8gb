@@ -43,12 +43,11 @@ jobs:
       - name: Generate OLM bundle
         env:
           TOOL_VERSION: ${{ github.event.inputs.olmBundleToolVersion }}
-          PREVIOUS_VERSION: "v0.0.1" # remove me after the pr on community-operators repo is merged
           DEBUG: 1
         run: |
           ./olm/generate.sh ${{ steps.get_version.outputs.version }}
           rm ./olm/bundle/Dockerfile
-          cp -r ./olm/bundle/ $GITHUB_WORKSPACE/
+          cp -r ./olm/bundle $GITHUB_WORKSPACE/
 
       - uses: actions/checkout@v2
         with:
@@ -60,7 +59,7 @@ jobs:
       - name: Copy the generated manifests
         run: |
           mkdir -p $GITHUB_WORKSPACE/sandbox/operators/k8gb/
-          cp -r $GITHUB_WORKSPACE/bundle $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ steps.get_version.outputs.bundleDir }}
+          cp -r $GITHUB_WORKSPACE/bundle/ $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ steps.get_version.outputs.bundleDir }}
 
       - name: Open Pull Request
         id: cpr
@@ -91,7 +90,7 @@ jobs:
 
             This automated PR was created by [this action][1].
 
-            [1]: https://github.com/k8gb-io/k8gb/runs/${{ github.run_id }}
+            [1]: https://github.com/k8gb-io/k8gb/actions/runs/${{ github.run_id }}
           branch: k8gb-${{ steps.get_version.outputs.bundleDir }}
           delete-branch: true
           signoff: true
