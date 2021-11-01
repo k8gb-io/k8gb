@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       bundleVersion:
-        description: Version of the bundle that should be generated. If not provided, the latest release tag is taken
+        description: Version of the bundle that should be generated. If not provided, the latest release tag is taken. Use 'master' for incorporating the latest changes in repo
         required: false
         default: ""
       upstreamRepo:
@@ -43,6 +43,7 @@ jobs:
       - name: Generate OLM bundle
         env:
           TOOL_VERSION: ${{ github.event.inputs.olmBundleToolVersion }}
+          PREVIOUS_VERSION: "v0.0.1" # remove me after the pr on community-operators repo is merged
           DEBUG: 1
         run: |
           ./olm/generate.sh ${{ steps.get_version.outputs.version }}
@@ -69,7 +70,7 @@ jobs:
           push-to-fork: k8gb-io/community-operators
           path: sandbox
           commit-message: OLM bundle for k8gb@${{ steps.get_version.outputs.bundleDir }}
-          title: OLM bundle for k8gb@${{ steps.get_version.outputs.bundleDir }}
+          title: operators k8gb ({{ steps.get_version.outputs.bundleDir }})
           body: |
             :package: Update k8gb operator bundle :package:
 
@@ -90,7 +91,7 @@ jobs:
 
             This automated PR was created by [this action][1].
 
-            [1]: https://github.com/k8gb-io/k8gb/runs/${GITHUB_RUN_ID}
+            [1]: https://github.com/k8gb-io/k8gb/runs/${{ github.run_id }}
           branch: k8gb-${{ steps.get_version.outputs.bundleDir }}
           delete-branch: true
           signoff: true

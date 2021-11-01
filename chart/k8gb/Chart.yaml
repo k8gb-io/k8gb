@@ -43,6 +43,10 @@ annotations:
       name: gslbs.k8gb.absa.oss
       displayName: Gslb
       description: Gslb resource for global load balancing strategy configuration
+    - kind: DNSEndpoint
+      name: dnsendpoints.externaldns.k8s.io
+      version: v1alpha1
+      description: Using ExternalDNS it synchronizes exposed Kubernetes Services and Ingresses with DNS providers
   artifacthub.io/crdsExamples: |
     - apiVersion: k8gb.absa.oss/v1beta1
       kind: Gslb
