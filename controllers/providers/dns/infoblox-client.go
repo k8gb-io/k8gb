@@ -58,5 +58,5 @@ func (c *Client) GetObjectManager() (objMgr *ibclient.ObjectManager, err error) 
 		err = conn.Logout()
 	}()
 	c.objMgr = ibclient.NewObjectManager(conn, "k8gbclient", "")
-	return
+	return c.objMgr, nil
 }
