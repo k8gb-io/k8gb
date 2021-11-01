@@ -2,8 +2,8 @@ name: curldemo
 
 on:
   push:
-    tags:
-      - "v*"
+    paths:
+      - 'deploy/test-apps/curldemo/**'
 
 jobs:
   curldemo:
@@ -14,27 +14,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Get tag
-        id: get_tag
-        run: |
-          previous_tag=$(git tag --sort=v:refname | tail -2 | head -1)
-          echo "::set-output name=previous_tag::${previous_tag}"
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16.9
       - name: Login to Dockerhub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          version: latest
-          args: release --rm-dist --release-notes=changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -42,4 +26,4 @@ jobs:
           context: ./deploy/test-apps/curldemo/
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USER }}/k8gb-demo:latest
+          tags: ${{ secrets.DOCKER_USER }}/k8gb-demo-curl:$GITHUB_RUN_NUMBER
