@@ -36,7 +36,7 @@ K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:sp
 CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-eu-cloud.example.com}'
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
-CONTROLLER_GEN_VERSION  ?= v0.4.1
+CONTROLLER_GEN_VERSION  ?= v0.7.0
 GOLIC_VERSION  ?= v0.5.0
 GOKART_VERSION ?= v0.2.0
 POD_NAMESPACE ?= k8gb
