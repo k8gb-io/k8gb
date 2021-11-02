@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - name: Login to Dockerhub
         uses: docker/login-action@v1
         with:
@@ -26,4 +26,5 @@ jobs:
           context: ./deploy/test-apps/curldemo/
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USER }}/k8gb-demo-curl:$GITHUB_RUN_NUMBER
+          tags: ${{ secrets.DOCKER_USER }}/k8gb-demo-curl:latest
+
