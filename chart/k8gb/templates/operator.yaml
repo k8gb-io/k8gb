@@ -26,6 +26,8 @@ spec:
       serviceAccountName: k8gb
       containers:
         - name: k8gb
+          ports:
+          - containerPort: {{ (split ":" .Values.k8gb.metricsAddress)._1 }}
           image: {{ .Values.k8gb.imageRepo }}:{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
           imagePullPolicy: IfNotPresent
           {{- if .Values.k8gb.securityContext }}
