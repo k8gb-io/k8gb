@@ -119,8 +119,8 @@ deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),,'k8gb/k8gb')
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
 
-.PHONY: deploy-stable
-deploy-stable:
+.PHONY: deploy-stable-version
+deploy-stable-version:
 	@echo "\n$(YELLOW) import $(CYAN)k8gb:$(STABLE_VERSION) $(YELLOW)to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(STABLE_VERSION),,'k8gb/k8gb')
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(STABLE_VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
@@ -128,8 +128,8 @@ deploy-stable:
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
 
-.PHONY: upgrade-candidate
-upgrade-candidate: ## Upgrade k8gb to the test version on existing clusters
+.PHONY: deploy-test-version
+deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 	@echo "\n$(YELLOW)import k8gb docker image to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
 
 	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB1)
@@ -145,6 +145,9 @@ upgrade-candidate: ## Upgrade k8gb to the test version on existing clusters
 
 	$(call list-running-pods,$(CLUSTER_GSLB1))
 	$(call list-running-pods,$(CLUSTER_GSLB2))
+
+.PHONY: upgrade-candidate
+upgrade-candidate: release-images deploy-test-version
 
 .PHONY: deploy-candidate
 deploy-candidate: ## Deploy test k8gb version together with CRs and test apps on top of existing clusters
@@ -241,10 +244,17 @@ docker-manifest:
 		--os linux --arch arm64
 	docker manifest push ${IMG}
 
+.PHONY: goreleaser
+goreleaser:
+	go install github.com/goreleaser/goreleaser@v0.184.0
+
+.PHONY: release-images
+release-images: goreleaser
+	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist
+
 # build the docker image
 .PHONY: docker-build
-docker-build: test
-	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist
+docker-build: test release-images
 
 # build and push the docker image exclusively for testing using commit hash
 .PHONY: docker-test-build-push

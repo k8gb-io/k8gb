@@ -46,11 +46,11 @@ jobs:
           cluster-name: "test-gslb2"
           args: -c k3d/test-gslb2.yaml
 
-      - name: K8GB deploy stable
-        run: make deploy-stable
+      - name: K8GB deploy stable version
+        run: make deploy-stable-version
 
-      - name: K8GB upgrade candidate
-        run: make upgrade-candidate
+      - name: K8GB deploy test version
+        run: make deploy-test-version
 
       - name: Terratest
         run: make terratest
