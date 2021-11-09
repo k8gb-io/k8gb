@@ -8,8 +8,12 @@ Two EKS clusters in `eu-west-1` and `us-east-1`.
 
 Terraform code for cluster reference setup can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53)
 
-Feel free to reuse this code fully or partially and adapt for your existing scenario
-things like IRSA(IAM Roles for Service Accounts).
+Feel free to reuse this code fully or partially and adapt for your existing scenario custom configuration like
+
+* Existing VPC names
+* Existing Public/private subnets tags
+* EKS custom tags
+* IRSA(IAM Roles for Service Accounts) role reference
 
 ## Install Ingress Controller
 
