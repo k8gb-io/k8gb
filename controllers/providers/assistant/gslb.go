@@ -309,8 +309,8 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 			hostToUse = cluster
 		}
 		nameServersToUse := getNSCombinations(r.edgeDNSServers, hostToUse)
-		host = fmt.Sprintf("localtargets-%s", host)
-		a, err := dnsQuery(host, nameServersToUse)
+		lHost := fmt.Sprintf("localtargets-%s", host)
+		a, err := dnsQuery(lHost, nameServersToUse)
 		if err != nil {
 			return
 		}
