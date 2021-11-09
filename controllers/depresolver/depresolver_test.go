@@ -633,7 +633,7 @@ func TestBothRoute53AndInfobloxAreEnabled(t *testing.T) {
 	customConfig.Infoblox.Username = defaultInfobloxUsername
 	customConfig.Infoblox.Password = defaultInfobloxPassword
 	configureEnvVar(customConfig)
-	_ = os.Setenv(Route53EnabledKey, "true")
+	_ = os.Setenv(ExtDNSEnabledKey, "true")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
@@ -647,8 +647,7 @@ func TestRoute53NS1AndInfobloxAreConfigured(t *testing.T) {
 	defer cleanup()
 	// predefinedConfig has Infoblox preconfigured
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(Route53EnabledKey, "true")
-	_ = os.Setenv(NS1EnabledKey, "true")
+	_ = os.Setenv(ExtDNSEnabledKey, "true")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
@@ -657,7 +656,7 @@ func TestRoute53NS1AndInfobloxAreConfigured(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, DNSTypeMultipleProviders, config.EdgeDNSType)
 	assert.Equal(t, recognizedEdgeDNSType, config.EdgeDNSType)
-	assert.Equal(t, recognizedEdgeDNSTypes, []EdgeDNSType{DNSTypeNS1, DNSTypeRoute53, DNSTypeInfoblox})
+	assert.Equal(t, recognizedEdgeDNSTypes, []EdgeDNSType{DNSTypeExternal, DNSTypeInfoblox})
 }
 
 func TestNoDNSIsConfigured(t *testing.T) {
@@ -682,7 +681,7 @@ func TestRoute53IsDisabledAndInfobloxIsNotConfigured(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeNoEdgeDNS
-	expected.route53Enabled = false
+	expected.extDNSEnabled = false
 	expected.Infoblox.Host = ""
 	// act,assert
 	// that's how our integration tests are running
@@ -693,7 +692,7 @@ func TestRoute53IsDisabledButInfobloxIsConfigured(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.route53Enabled = false
+	expected.extDNSEnabled = false
 	expected.EdgeDNSType = DNSTypeInfoblox
 	expected.Infoblox.Host = "Infoblox.domain"
 	expected.Infoblox.Version = defaultVersion
@@ -708,8 +707,8 @@ func TestRoute53IsEnabledButInfobloxIsNotConfigured(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.route53Enabled = true
-	expected.EdgeDNSType = DNSTypeRoute53
+	expected.extDNSEnabled = true
+	expected.EdgeDNSType = DNSTypeExternal
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
@@ -723,8 +722,8 @@ func TestInfobloxGridHostIsEmpty(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSType = DNSTypeRoute53
-	expected.route53Enabled = true
+	expected.EdgeDNSType = DNSTypeExternal
+	expected.extDNSEnabled = true
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = ""
 	expected.Infoblox.Port = 0
@@ -766,8 +765,8 @@ func TestInfobloxGridHostIsEmptyButInfobloxPropsAreFilled(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSType = DNSTypeRoute53
-	expected.route53Enabled = true
+	expected.EdgeDNSType = DNSTypeExternal
+	expected.extDNSEnabled = true
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
@@ -782,7 +781,7 @@ func TestInfobloxGridHostIsUnset(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeNoEdgeDNS
-	expected.route53Enabled = false
+	expected.extDNSEnabled = false
 	expected.Infoblox.Host = ""
 	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
@@ -798,7 +797,7 @@ func TestInfobloxGridHostIsInvalid(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSType = DNSTypeInfoblox
-	expected.route53Enabled = false
+	expected.extDNSEnabled = false
 	expected.Infoblox.Host = "dnfkjdnf kj"
 	expected.Infoblox.Version = defaultVersion
 	expected.Infoblox.Port = 443
@@ -1387,7 +1386,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServersKey,
-		Route53EnabledKey, NS1EnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
+		ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
@@ -1404,8 +1403,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(EdgeDNSZoneKey, config.EdgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.DNSZone)
 	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)
-	_ = os.Setenv(Route53EnabledKey, strconv.FormatBool(config.route53Enabled))
-	_ = os.Setenv(NS1EnabledKey, strconv.FormatBool(config.ns1Enabled))
+	_ = os.Setenv(ExtDNSEnabledKey, strconv.FormatBool(config.extDNSEnabled))
 	_ = os.Setenv(CoreDNSExposedKey, strconv.FormatBool(config.CoreDNSExposed))
 	_ = os.Setenv(InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(InfobloxVersionKey, config.Infoblox.Version)

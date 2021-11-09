@@ -45,10 +45,8 @@ func NewDNSProviderFactory(client client.Client, config depresolver.Config) (f *
 func (f *ProviderFactory) Provider() Provider {
 	a := assistant.NewGslbAssistant(f.client, f.config.K8gbNamespace, f.config.EdgeDNSServers)
 	switch f.config.EdgeDNSType {
-	case depresolver.DNSTypeNS1:
-		return NewExternalDNS(externalDNSTypeNS1, f.config, a)
-	case depresolver.DNSTypeRoute53:
-		return NewExternalDNS(externalDNSTypeRoute53, f.config, a)
+	case depresolver.DNSTypeExternal:
+		return NewExternalDNS(f.config, a)
 	case depresolver.DNSTypeInfoblox:
 		ibx := NewInfobloxClient(f.config)
 		return NewInfobloxDNS(f.config, a, ibx)

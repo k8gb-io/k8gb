@@ -32,28 +32,21 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-type ExternalDNSType string
-
-const (
-	externalDNSTypeNS1     ExternalDNSType = "ns1"
-	externalDNSTypeRoute53 ExternalDNSType = "route53"
-)
+const externalDNSTypeCommon = "extdns"
 
 type ExternalDNSProvider struct {
 	assistant    assistant2.Assistant
-	dnsType      ExternalDNSType
 	config       depresolver.Config
 	endpointName string
 }
 
 var log = logging.Logger()
 
-func NewExternalDNS(dnsType ExternalDNSType, config depresolver.Config, assistant assistant2.Assistant) *ExternalDNSProvider {
+func NewExternalDNS(config depresolver.Config, assistant assistant2.Assistant) *ExternalDNSProvider {
 	return &ExternalDNSProvider{
 		assistant:    assistant,
-		dnsType:      dnsType,
 		config:       config,
-		endpointName: fmt.Sprintf("k8gb-ns-%s", dnsType),
+		endpointName: fmt.Sprintf("k8gb-ns-%s", externalDNSTypeCommon),
 	}
 }
 
@@ -81,7 +74,7 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        p.endpointName,
 			Namespace:   p.config.K8gbNamespace,
-			Annotations: map[string]string{"k8gb.absa.oss/dnstype": string(p.dnsType)},
+			Annotations: map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
 		},
 		Spec: externaldns.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{
@@ -124,5 +117,5 @@ func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externa
 }
 
 func (p *ExternalDNSProvider) String() string {
-	return strings.ToUpper(string(p.dnsType))
+	return strings.ToUpper(externalDNSTypeCommon)
 }

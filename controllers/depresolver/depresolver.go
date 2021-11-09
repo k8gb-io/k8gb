@@ -69,9 +69,7 @@ const (
 	// DNSTypeInfoblox type
 	DNSTypeInfoblox EdgeDNSType = "Infoblox"
 	// DNSTypeRoute53 type
-	DNSTypeRoute53 EdgeDNSType = "Route53"
-	// DNSTypeNS1 type
-	DNSTypeNS1 EdgeDNSType = "NS1"
+	DNSTypeExternal EdgeDNSType = "ExtDNS"
 	// DNSTypeMultipleProviders type
 	DNSTypeMultipleProviders EdgeDNSType = "MultipleProviders"
 )
@@ -138,10 +136,8 @@ type Config struct {
 	Log Log
 	// MetricsAddress in format address:port where address can be empty, IP address, or hostname, default: 0.0.0.0:8080
 	MetricsAddress string `env:"METRICS_ADDRESS, default=0.0.0.0:8080"`
-	// route53Enabled hidden. EdgeDNSType defines all enabled Enabled types
-	route53Enabled bool `env:"ROUTE53_ENABLED, default=false"`
-	// ns1Enabled flag
-	ns1Enabled bool `env:"NS1_ENABLED, default=false"`
+	// extDNSEnabled hidden. EdgeDNSType defines all enabled Enabled types
+	extDNSEnabled bool `env:"EXTDNS_ENABLED, default=false"`
 	// SplitBrainCheck flag decides whether split brain TXT records will be stored in edge DNS
 	SplitBrainCheck bool `env:"SPLIT_BRAIN_CHECK, default=false"`
 }

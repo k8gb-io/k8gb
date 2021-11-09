@@ -105,12 +105,8 @@ spec:
                   name: infoblox
                   key: INFOBLOX_WAPI_PASSWORD
             {{- end }}
-            {{- if .Values.route53.enabled }}
-            - name: ROUTE53_ENABLED
-              value: "true"
-            {{- end }}
-            {{- if .Values.ns1.enabled }}
-            - name: NS1_ENABLED
+            {{- if or .Values.route53.enabled .Values.ns1.enabled }}
+            - name: EXTDNS_ENABLED
               value: "true"
             {{- end }}
             {{- if eq "LoadBalancer" ( quote .Values.coredns.serviceType ) }}
