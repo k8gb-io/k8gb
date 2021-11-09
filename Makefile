@@ -30,6 +30,7 @@ CLUSTER_NAME ?= test-gslb
 CLUSTER_GEO_TAGS ?= eu us cz af ru ap uk ca
 CHART ?= k8gb/k8gb
 CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
+CLUSTER_GSLB_GATEWAY = docker network inspect ${CLUSTER_GSLB_NETWORK} -f '{{ (index .IPAM.Config 0).Gateway }}'
 GSLB_DOMAIN ?= cloud.example.com
 REPO = absaoss/k8gb
 VALUES_YAML ?= ""
@@ -117,6 +118,7 @@ demo: ## Execute end-to-end demo
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
 	@echo "\n$(YELLOW)Creating $(CLUSTERS_NUMBER) k8s clusters$(NC)"
+	$(MAKE) create-local-cluster CLUSTER_NAME=edge-dns
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
 	done
@@ -125,12 +127,14 @@ deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster s
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
+	$(call deploy-edgedns)
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c ;\
 	done
 
 .PHONY: deploy-test-version
 deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
+	$(call deploy-edgedns)
 	@echo "\n$(YELLOW)import k8gb docker image to all $(CLUSTERS_NUMBER) clusters$(NC)"
 
 	@for c in $(CLUSTER_IDS); do \
@@ -200,6 +204,8 @@ upgrade-candidate: release-images deploy-test-version
 .PHONY: deploy-k8gb-with-helm
 deploy-k8gb-with-helm:
 	@if [ -z "$(CLUSTER_ID)" ]; then echo invalid CLUSTER_ID value && exit 1; fi
+	# create rfc2136 secret
+	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
@@ -209,6 +215,9 @@ deploy-k8gb-with-helm:
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
 		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL) \
+		--set rfc2136.enabled=true \
+		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
+		--set externaldns.image=absaoss/external-dns:rfc-ns1 \
 		--wait --timeout=2m0s
 
 .PHONY: deploy-gslb-operator
@@ -222,6 +231,7 @@ deploy-gslb-operator: ## Deploy k8gb operator
 # destroy local test environment
 .PHONY: destroy-full-local-setup
 destroy-full-local-setup: ## Destroy full local multicluster setup
+	k3d cluster delete edgedns
 	@for c in $(CLUSTER_IDS); do \
 		k3d cluster delete $(CLUSTER_NAME)$$c ;\
 	done
@@ -446,6 +456,11 @@ help: ## Show this help
 #		FUNCTIONS
 ###############################
 
+define deploy-edgedns
+	@echo "\n$(YELLOW)Deploying EdgeDNS $(NC)"
+	kubectl --context k3d-edgedns apply -f deploy/edge/
+endef
+
 define apply-cr
 	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
 	kubectl apply -f "$1"
@@ -464,16 +479,7 @@ $(shell echo $(foreach cl,$(filter-out $1,$(shell seq $(CLUSTERS_NUMBER))),$(cal
 endef
 
 define get-helm-args
-k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' \
-$(foreach cl,$(shell seq $(CLUSTERS_NUMBER)), --set "k8gb.hostAliases[$$(( $(cl) - 1 ))].ip=$(shell $(call get-host-alias-ip,k3d-$(CLUSTER_NAME)$1,k3d-$(CLUSTER_NAME)$(cl)))" --set "k8gb.hostAliases[$$(( $(cl) - 1 ))].hostnames={gslb-ns-$(call nth-geo-tag,$(cl))-cloud.example.com}")
-endef
-
-# get-host-alias-ip switch to second context ($2), search for IP and switch back to first context ($1)
-# function returns one IP address
-define get-host-alias-ip
-kubectl config use-context $2 > /dev/null && \
-kubectl get nodes $2-agent-0 -o custom-columns='IP:status.addresses[0].address' --no-headers && \
-kubectl config use-context $1 > /dev/null
+k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)'
 endef
 
 define hit-testapp-host

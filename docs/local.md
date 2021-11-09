@@ -52,11 +52,25 @@ make deploy-full-local-setup
 If local setup runs well, check if clusters are correctly installed
 
 ```shell script
-kubectl cluster-info --context k3d-test-gslb1 && kubectl cluster-info --context k3d-test-gslb2
+kubectl cluster-info --context k3d-edgedns && kubectl cluster-info --context k3d-test-gslb1 && kubectl cluster-info --context k3d-test-gslb2
 ```
 
-Cluster [test-gslb1](https://github.com/k8gb-io/k8gb/tree/master/deploy/kind/cluster.yaml) is exposing external DNS on default port `:5053`
-while [test-gslb2](https://github.com/k8gb-io/k8gb/tree/master/deploy/kind/cluster2.yaml) on port `:5054`.
+Cluster [test-gslb1](https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb1.yaml) is exposing external DNS on default port `:5053`
+while [test-gslb2](https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb2.yaml) on port `:5054`.
+
+Cluster [edgedns](https://github.com/k8gb-io/k8gb/tree/master/k3d/edge-dns.yaml) runs BIND and acts as EdgeDNS holding Delegated Zone for out test setup and answers
+on port `:1053`.
+
+```shell script
+dig @localhost -p 1053 roundrobin.cloud.example.com +short
+```
+Should return ***two A records*** from both clusters:
+```
+10.43.178.134
+10.43.75.137
+```
+
+Or you can ask specific CoreDNS instance for it's local targets:
 ```shell script
 dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```

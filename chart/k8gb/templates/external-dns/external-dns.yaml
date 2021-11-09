@@ -1,4 +1,4 @@
-{{- if or .Values.ns1.enabled .Values.route53.enabled }}
+{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,20 +31,7 @@ spec:
         - --annotation-filter=k8gb.absa.oss/dnstype=extdns # filter out only relevant DNSEntrypoints
         - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
         - --provider={{ include "k8gb.extdnsProvider" . }}
-{{- if .Values.ns1.enabled -}}
-{{- if .Values.ns1.endpoint -}}
-        - --ns1-endpoint={{ .Values.ns1.endpoint }}
-{{- end -}}
-{{- if .Values.ns1.ignoreSSL -}}
-        - --ns1-ignoressl
-{{- end -}}
-        env:
-        - name: NS1_APIKEY
-          valueFrom:
-            secretKeyRef:
-              name: ns1
-              key: apiKey
-{{- end }}
+        {{ include "k8gb.extdnsProviderOpts" . }}
         resources:
           requests:
             memory: "32Mi"
