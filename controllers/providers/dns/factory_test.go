@@ -45,11 +45,11 @@ func TestFactoryInfoblox(t *testing.T) {
 	assert.Equal(t, "Infoblox", provider.String())
 }
 
-func TestFactoryNS1(t *testing.T) {
+func TestFactoryExternal(t *testing.T) {
 	// arrange
 	client := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects([]runtime.Object{}...).Build()
 	customConfig := defaultConfig
-	customConfig.EdgeDNSType = depresolver.DNSTypeNS1
+	customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 	// act
 	f, err := NewDNSProviderFactory(client, customConfig)
 	require.NoError(t, err)
@@ -57,22 +57,7 @@ func TestFactoryNS1(t *testing.T) {
 	// assert
 	assert.NotNil(t, provider)
 	assert.Equal(t, "*ExternalDNSProvider", utils.GetType(provider))
-	assert.Equal(t, "NS1", provider.String())
-}
-
-func TestFactoryRoute53(t *testing.T) {
-	// arrange
-	client := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects([]runtime.Object{}...).Build()
-	customConfig := defaultConfig
-	customConfig.EdgeDNSType = depresolver.DNSTypeRoute53
-	// act
-	f, err := NewDNSProviderFactory(client, customConfig)
-	require.NoError(t, err)
-	provider := f.Provider()
-	// assert
-	assert.NotNil(t, provider)
-	assert.Equal(t, "*ExternalDNSProvider", utils.GetType(provider))
-	assert.Equal(t, "ROUTE53", provider.String())
+	assert.Equal(t, "EXTDNS", provider.String())
 }
 
 func TestFactoryNoEdgeDNS(t *testing.T) {

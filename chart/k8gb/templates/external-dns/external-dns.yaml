@@ -28,7 +28,7 @@ spec:
         - --managed-record-types=A
         - --managed-record-types=CNAME
         - --managed-record-types=NS
-        - --annotation-filter=k8gb.absa.oss/dnstype={{ include "k8gb.extdnsAnnotation" . }} # filter out only relevant DNSEntrypoints
+        - --annotation-filter=k8gb.absa.oss/dnstype=extdns # filter out only relevant DNSEntrypoints
         - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
         - --provider={{ include "k8gb.extdnsProvider" . }}
 {{- if .Values.ns1.enabled -}}

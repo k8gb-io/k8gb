@@ -82,9 +82,9 @@ var a = struct {
 
 var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:        fmt.Sprintf("k8gb-ns-%s", externalDNSTypeRoute53),
+		Name:        fmt.Sprintf("k8gb-ns-%s", externalDNSTypeCommon),
 		Namespace:   a.Config.K8gbNamespace,
-		Annotations: map[string]string{"k8gb.absa.oss/dnstype": string(externalDNSTypeRoute53)},
+		Annotations: map[string]string{"k8gb.absa.oss/dnstype": string(externalDNSTypeCommon)},
 	},
 	Spec: externaldns.DNSEndpointSpec{
 		Endpoints: []*externaldns.Endpoint{
@@ -106,11 +106,10 @@ var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 
 func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 	// arrange
-	const dnsType = externalDNSTypeRoute53
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := assistant.NewMockAssistant(ctrl)
-	p := NewExternalDNS(dnsType, a.Config, m)
+	p := NewExternalDNS(a.Config, m)
 	m.EXPECT().GslbIngressExposedIPs(a.Gslb).Return(a.TargetIPs, nil).Times(1)
 	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(expectedDNSEndpoint)).Return(nil).Times(1).
 		Do(func(ns string, ep *externaldns.DNSEndpoint) {
@@ -126,15 +125,13 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 
 func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {
 	// arrange
-	const dnsType = externalDNSTypeRoute53
-
 	var ep = &corev1.Endpoints{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
 			Kind:       "Endpoints",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("k8gb-ns-%s", dnsType),
+			Name:      "k8gb-ns-extdns",
 			Namespace: "test-gslb",
 		},
 	}
@@ -151,7 +148,7 @@ func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(ep).Build()
 
 	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config.EdgeDNSServers)
-	p := NewExternalDNS(dnsType, a.Config, assistant)
+	p := NewExternalDNS(a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, expectedDNSEndpoint)
 	assert.NoError(t, err)
@@ -159,8 +156,6 @@ func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {
 
 func TestSaveExistingDNSEndpointOnExternalDNS(t *testing.T) {
 	// arrange
-	const dnsType = externalDNSTypeRoute53
-
 	endpointToSave := expectedDNSEndpoint
 	endpointToSave.Namespace = a.Gslb.Namespace
 
@@ -173,7 +168,7 @@ func TestSaveExistingDNSEndpointOnExternalDNS(t *testing.T) {
 
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(endpointToSave).Build()
 	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config.EdgeDNSServers)
-	p := NewExternalDNS(dnsType, a.Config, assistant)
+	p := NewExternalDNS(a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, endpointToSave)
 	assert.NoError(t, err)

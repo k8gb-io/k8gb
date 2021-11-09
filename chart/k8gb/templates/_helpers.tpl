@@ -62,15 +62,6 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{- define "k8gb.extdnsAnnotation" -}}
-{{- if .Values.ns1.enabled -}}
-{{- print "ns1" -}}
-{{- end -}}
-{{- if .Values.route53.enabled }}
-{{- print "route53" -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "k8gb.extdnsProvider" -}}
 {{- if .Values.ns1.enabled -}}
 {{- print "ns1" -}}

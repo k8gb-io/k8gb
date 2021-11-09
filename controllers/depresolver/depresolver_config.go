@@ -34,8 +34,7 @@ const (
 	ReconcileRequeueSecondsKey = "RECONCILE_REQUEUE_SECONDS"
 	ClusterGeoTagKey           = "CLUSTER_GEO_TAG"
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
-	Route53EnabledKey          = "ROUTE53_ENABLED"
-	NS1EnabledKey              = "NS1_ENABLED"
+	ExtDNSEnabledKey           = "EXTDNS_ENABLED"
 	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"
 	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
 	DNSZoneKey                 = "DNS_ZONE"
@@ -325,11 +324,8 @@ func parseEdgeDNSServers(serverList []string) (r []utils.DNSServer) {
 // getEdgeDNSType contains logic retrieving EdgeDNSType.
 func getEdgeDNSType(config *Config) (EdgeDNSType, []EdgeDNSType) {
 	recognized := make([]EdgeDNSType, 0)
-	if config.ns1Enabled {
-		recognized = append(recognized, DNSTypeNS1)
-	}
-	if config.route53Enabled {
-		recognized = append(recognized, DNSTypeRoute53)
+	if config.extDNSEnabled {
+		recognized = append(recognized, DNSTypeExternal)
 	}
 	if isNotEmpty(config.Infoblox.Host) {
 		recognized = append(recognized, DNSTypeInfoblox)
