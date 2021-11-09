@@ -47,7 +47,7 @@ helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/rou
 ## Test
 
 *Note*: here and for all occurrences below whenever we speak about application to *each*
-cluster, we assume that you switch kubctl context and apply the same command to all clusters.
+cluster, we assume that you switch kubectl context and apply the same command to all clusters.
 
 * Deploy test application to *each* cluster.
 
@@ -98,7 +98,7 @@ kubectl -n test-gslb scale deploy frontend-podinfo --replicas=0
 * Observe Gslb status change.
 
 ```sh
-k -n test-gslb get gslb test-gslb-failover -o yaml | grep status -A6
+kubectl -n test-gslb get gslb test-gslb-failover -o yaml | grep status -A6
 status:
   geoTag: us-east-1
   healthyRecords:
