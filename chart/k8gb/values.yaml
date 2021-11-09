@@ -23,12 +23,6 @@ k8gb:
   clusterGeoTag: "eu"
   # -- comma-separated list of external gslb geo tags to pair with
   extGslbClustersGeoTags: "us"
-  hostAlias:
-    # -- use https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ inside operator pod. Useful for advanced testing scenarios and to break dependency on EdgeDNS for cross k8gb collaboration
-    enabled: false
-    ip: "172.17.0.1"
-    hostnames:
-     - "gslb-ns-us-cloud.example.com"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
   log:
@@ -109,3 +103,11 @@ ns1:
 openshift:
   # -- Install OpenShift specific RBAC
   enabled: false
+
+rfc2136:
+  enabled: false
+  rfc2136Opts:
+    - host: host.k3d.internal
+    - port: 1053
+    - tsig-secret-alg: hmac-sha256
+    - tsig-keyname: externaldns-key

@@ -15,14 +15,6 @@ spec:
       labels:
         name: k8gb
     spec:
-      {{- if .Values.k8gb.hostAlias.enabled }}
-      hostAliases:
-        - ip: "{{ .Values.k8gb.hostAlias.ip }}"
-          hostnames:
-            {{- range.Values.k8gb.hostAlias.hostnames }}
-            - {{ . }}
-            {{- end }}
-      {{- end }}
       serviceAccountName: k8gb
       containers:
         - name: k8gb
@@ -105,7 +97,7 @@ spec:
                   name: infoblox
                   key: INFOBLOX_WAPI_PASSWORD
             {{- end }}
-            {{- if or .Values.route53.enabled .Values.ns1.enabled }}
+            {{- if or .Values.route53.enabled .Values.ns1.enabled .Values.rfc2136.enabled }}
             - name: EXTDNS_ENABLED
               value: "true"
             {{- end }}

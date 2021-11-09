@@ -113,6 +113,7 @@ demo: ## Execute end-to-end demo
 # spin-up local environment
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
+	$(call create-local-cluster,edge-dns)
 	$(call create-local-cluster,$(CLUSTER_GSLB1))
 	$(call create-local-cluster,$(CLUSTER_GSLB2))
 
@@ -156,6 +157,7 @@ deploy-candidate: ## Deploy test k8gb version together with CRs and test apps on
 	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB1)
 	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB2)
 
+	$(call deploy-edgedns)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER)-amd64,,'./chart/k8gb')
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER)-amd64,$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
 
@@ -184,6 +186,7 @@ deploy-test-apps: ## Deploy testing workloads
 # destroy local test environment
 .PHONY: destroy-full-local-setup
 destroy-full-local-setup: ## Destroy full local multicluster setup
+	k3d cluster delete edgedns
 	k3d cluster delete $(CLUSTER_GSLB1)
 	k3d cluster delete $(CLUSTER_GSLB2)
 	docker network rm $(CLUSTER_GSLB_NETWORK)
@@ -396,15 +399,23 @@ define create-local-cluster
 endef
 
 define deploy-k8gb-with-helm
+	# create rfc2136 secret
+	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb $5 -f $(VALUES_YAML) \
-		--set k8gb.hostAlias.enabled=true \
-		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
 		--set k8gb.imageTag=$3 $4 \
+		--set rfc2136.enabled=true \
+		--set k8gb.edgeDNSServers[0]=host.k3d.internal:1053 \
 		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--wait --timeout=2m0s
+endef
+
+define deploy-edgedns
+	@echo "\n$(YELLOW)Deploying EdgeDNS $(NC)"
+	kubectl config use-context k3d-edgedns
+	kubectl apply -f deploy/edge/
 endef
 
 define deploy-local-cluster
@@ -455,14 +466,6 @@ endef
 
 define get-cluster-geo-tag
 	kubectl -n k8gb describe deploy k8gb |  awk '/CLUSTER_GEO_TAG/ { printf $$2 }'
-endef
-
-# get-host-alias-ip switch to second context ($2), search for IP and switch back to first context ($1)
-# function returns one IP address
-define get-host-alias-ip
-	kubectl config use-context $2 > /dev/null && \
-	kubectl get nodes $2-agent-0 -o custom-columns='IP:status.addresses[0].address' --no-headers && \
-	kubectl config use-context $1 > /dev/null
 endef
 
 define hit-testapp-host
