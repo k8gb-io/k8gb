@@ -62,7 +62,7 @@ NO_VALUE ?= no_value
 #		VARIABLES
 ###############################
 PWD ?=  $(shell pwd)
-VERSION ?= $(shell helm show chart chart/k8gb/|awk '/appVersion:/ {print $$2}')
+VERSION ?= $(shell git describe --tags --abbrev=0)
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
 SEMVER ?= $(VERSION)-$(COMMIT_HASH)
 # image URL to use all building/pushing image targets
