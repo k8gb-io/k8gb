@@ -1,12 +1,6 @@
 name: Upgrade Testing
 
 on:
-  push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
   pull_request:
     branches:
       - master
@@ -38,13 +32,13 @@ jobs:
         uses: AbsaOSS/k3d-action@v1.5.0
         with:
           cluster-name: "test-gslb1"
-          args: -c k3d/test-gslb1.yaml
+          args: -c k3d/test-gslb1.yaml --network upgrade
 
       - name: Create 2nd k3s Cluster
         uses: AbsaOSS/k3d-action@v1.5.0
         with:
           cluster-name: "test-gslb2"
-          args: -c k3d/test-gslb2.yaml
+          args: -c k3d/test-gslb2.yaml --network upgrade
 
       - name: K8GB deploy stable version
         run: make deploy-stable-version
