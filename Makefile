@@ -407,6 +407,7 @@ define deploy-k8gb-with-helm
 		--set k8gb.imageTag=$3 $4 \
 		--set rfc2136.enabled=true \
 		--set k8gb.edgeDNSServers[0]=host.k3d.internal:1053 \
+		--set k8gb.dnsZoneNegTTL=30 \
 		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--wait --timeout=2m0s
