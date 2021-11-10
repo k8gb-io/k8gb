@@ -87,7 +87,7 @@ infoblox:
   # -- use SSL
   sslVerify: true
   # -- Request Timeout in secconds
-  httpRequestTimeout: 20
+  httpRequestTimeout: 60
   # -- Size of connections pool
   httpPoolConnections: 10
 
