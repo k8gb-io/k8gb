@@ -54,8 +54,6 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "k8gb"
-            - name: K8GB_VERSION
-              value: {{ quote .Chart.AppVersion }}
             - name: CLUSTER_GEO_TAG
               value: {{ quote .Values.k8gb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS
