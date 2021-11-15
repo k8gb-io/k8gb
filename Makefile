@@ -119,6 +119,11 @@ deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),,'k8gb/k8gb')
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
 
+	@echo "\n$(YELLOW)Deploy test apps $(NC)"
+	$(call deploy-test-apps, $(CLUSTER_GSLB1))
+	$(call deploy-test-apps, $(CLUSTER_GSLB2))
+
+
 .PHONY: deploy-stable-version
 deploy-stable-version:
 	@echo "\n$(YELLOW) import $(CYAN)k8gb:$(STABLE_VERSION) $(YELLOW)to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
@@ -425,14 +430,6 @@ define deploy-local-cluster
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 3.24.0 -f deploy/ingress/nginx-ingress-values.yaml
 
-	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
-	kubectl apply -f deploy/crds/test-namespace.yaml
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
-
-	@echo "\n$(YELLOW)Deploy test apps $(NC)"
-	$(call deploy-test-apps)
-
 	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait-for-ingress)
 
@@ -446,6 +443,12 @@ define apply-cr
 endef
 
 define deploy-test-apps
+	kubectl config use-context k3d-$1
+	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
+	kubectl apply -f deploy/crds/test-namespace.yaml
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
 	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
