@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     k8gb.io/strategy: roundRobin
+    k8gb.io/dns-ttl-seconds: "5"
   name: test-gslb-annotation
 spec:
   rules:

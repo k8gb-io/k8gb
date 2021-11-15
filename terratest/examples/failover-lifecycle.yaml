@@ -16,4 +16,4 @@ spec:
     type: failover
     primaryGeoTag: "eu"
     splitBrainThresholdSeconds: 600
-    dnsTtlSeconds:  60
+    dnsTtlSeconds: 5

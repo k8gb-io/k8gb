@@ -5,6 +5,7 @@ metadata:
   annotations:
     k8gb.io/strategy: failover
     k8gb.io/primary-geotag: "eu"
+    k8gb.io/dns-ttl-seconds: "5"
 spec:
   rules:
     - host: ingress-failover-simple.cloud.example.com
