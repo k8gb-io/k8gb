@@ -25,4 +25,4 @@ options:
     disableLoadbalancer: true
   k3s: # options passed on to K3s itself
     extraServerArgs: # additional arguments passed to the `k3s server` command; same as `--k3s-server-arg`
-      - --no-deploy=traefik,servicelb,metrics-server
+      - --no-deploy=traefik,servicelb,metrics-server,local-storage
