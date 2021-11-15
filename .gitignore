@@ -4,3 +4,4 @@ _site
 .jekyll-metadata
 vendor
 .env
+chart/k8gb/charts/*.tgz
