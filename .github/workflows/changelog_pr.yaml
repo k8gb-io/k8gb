@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: heinrichreimer/github-changelog-generator-action@v2.2
+      - uses: heinrichreimer/github-changelog-generator-action@v2.3
         with:
           token: ${{ secrets.CR_TOKEN }}
           project: k8gb
