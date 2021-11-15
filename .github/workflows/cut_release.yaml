@@ -1,0 +1,28 @@
+name: Create Tag for Release
+
+on:
+  push:
+    branches:
+    - 'master'
+    paths:
+     - 'chart/k8gb/Chart.yaml'
+
+jobs:
+  cut_release:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get Tag
+        id: get_tag
+        run: |
+          new_tag=$(awk '/appVersion:/ {print $2}' chart/k8gb/Chart.yaml)
+          echo "Version to release: ${new_tag}"
+          echo "::set-output name=new_tag::${new_tag}"
+      - name: Push Tag
+        uses: mathieudutour/github-tag-action@v5.6
+        if: "contains(github.event.head_commit.message, 'RELEASE:')"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          create_annotated_tag: true
+          tag_prefix: ""
+          custom_tag: ${{ steps.get_tag.outputs.new_tag }}
