@@ -5,6 +5,73 @@ entries:
       artifacthub.io/crds: |
         - kind: Gslb
           version: v1beta1
+          name: gslbs.k8gb.absa.oss
+          displayName: Gslb
+          description: Gslb resource for global load balancing strategy configuration
+        - kind: DNSEndpoint
+          name: dnsendpoints.externaldns.k8s.io
+          version: v1alpha1
+          description: Using ExternalDNS it synchronizes exposed Kubernetes Services and Ingresses with DNS providers
+      artifacthub.io/crdsExamples: |
+        - apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metada:
+            name: test-gslb-failover
+            namespace: test-gslb
+          spec:
+            ingress:
+              rules:
+                - host: failover.test.k8gb.io # Desired GSLB enabled FQDN
+                  http:
+                    paths:
+                    - backend:
+                        serviceName: frontend-podinfo # Service name to enable GSLB for
+                        servicePort: http
+                      path: /
+            strategy:
+              type: failover # Global load balancing strategy
+              primaryGeoTag: eu-west-1 # Primary cluster geo tag
+      artifacthub.io/operator: "true"
+      artifacthub.io/operatorCapabilities: Seamless Upgrades
+    apiVersion: v2
+    appVersion: v0.8.4
+    created: "2021-11-15T16:40:55.437958279Z"
+    dependencies:
+    - name: coredns
+      repository: https://absaoss.github.io/coredns-helm
+      version: 1.15.3
+    description: A Helm chart for Kubernetes Global Balancer
+    digest: ea9be345319c1c47c3fc03982f87a6d7e6fd3c52ee641706f847a7eb45330828
+    home: https://www.k8gb.io/
+    icon: https://www.k8gb.io/assets/images/icon-192x192.png
+    keywords:
+    - gslb
+    - dns-lb
+    - kuberneters-global-balancer
+    - kubernetes-operator
+    - balancer
+    maintainers:
+    - email: dinar.valeev@absa.africa
+      name: Dinar Valeev
+    - email: jiri.kremser@gmail.com
+      name: Jiri Kremser
+    - email: kuritka@gmail.com
+      name: Michal Kuritka
+    - email: timofey.ilinykh@absa.africa
+      name: Timofey Ilinykh
+    - email: yury.tsarev@absa.africa
+      name: Yury Tsarev
+    name: k8gb
+    sources:
+    - https://github.com/k8gb-io/k8gb
+    type: application
+    urls:
+    - charts/k8gb-v0.8.4.tgz
+    version: v0.8.4
+  - annotations:
+      artifacthub.io/crds: |
+        - kind: Gslb
+          version: v1beta1
           name: gslb
           displayName: Gslb
           description: Gslb resource for global load balancing strategy configuration
@@ -31,7 +98,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.8.3
-    created: "2021-10-19T10:16:21.814199198Z"
+    created: "2021-11-15T16:40:55.435181176Z"
     dependencies:
     - name: coredns
       repository: https://absaoss.github.io/coredns-helm
@@ -82,7 +149,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.8.2
-    created: "2021-10-19T10:16:21.811748572Z"
+    created: "2021-11-15T16:40:55.432505673Z"
     dependencies:
     - name: coredns
       repository: https://absaoss.github.io/coredns-helm
@@ -136,7 +203,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.8.1
-    created: "2021-10-19T10:16:21.808182735Z"
+    created: "2021-11-15T16:40:55.42925207Z"
     dependencies:
     - name: coredns
       repository: https://absaoss.github.io/coredns-helm
@@ -187,7 +254,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.8.0
-    created: "2021-10-19T10:16:21.805947412Z"
+    created: "2021-11-15T16:40:55.425862466Z"
     dependencies:
     - name: coredns
       repository: https://absaoss.github.io/coredns-helm
@@ -238,7 +305,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.7
-    created: "2021-10-19T10:16:21.803710889Z"
+    created: "2021-11-15T16:40:55.422722163Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -289,7 +356,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.6
-    created: "2021-10-19T10:16:21.801539666Z"
+    created: "2021-11-15T16:40:55.42009026Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -340,7 +407,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.5
-    created: "2021-10-19T10:16:21.798326933Z"
+    created: "2021-11-15T16:40:55.417713558Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -372,7 +439,7 @@ entries:
       artifacthub.io/operatorCapabilities: Seamless Upgrades
     apiVersion: v2
     appVersion: v0.7.4
-    created: "2021-10-19T10:16:21.796326712Z"
+    created: "2021-11-15T16:40:55.414706655Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -389,7 +456,7 @@ entries:
     version: v0.7.4
   - apiVersion: v2
     appVersion: 0.7.2
-    created: "2021-10-19T10:16:21.793130878Z"
+    created: "2021-11-15T16:40:55.410931251Z"
     dependencies:
     - name: coredns
       repository: https://coredns.github.io/helm
@@ -404,4 +471,4 @@ entries:
     urls:
     - charts/k8gb-0.7.2.tgz
     version: 0.7.2
-generated: "2021-10-19T10:16:21.789715643Z"
+generated: "2021-11-15T16:40:55.407258547Z"
