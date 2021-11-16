@@ -120,9 +120,8 @@ deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
 	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
 
 	@echo "\n$(YELLOW)Deploy test apps $(NC)"
-	$(call deploy-test-apps, $(CLUSTER_GSLB1))
-	$(call deploy-test-apps, $(CLUSTER_GSLB2))
-
+	$(call deploy-test-apps,$(CLUSTER_GSLB1))
+	$(call deploy-test-apps,$(CLUSTER_GSLB2))
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
@@ -443,12 +442,15 @@ define apply-cr
 endef
 
 define deploy-test-apps
-	kubectl config use-context k3d-$1
-	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
+	$(if $1,@kubectl config use-context k3d-$1, \
+		@echo "Current context: $(shell kubectl config current-context)")
+
+	@echo "\n$(YELLOW)Deploy GSLB CR $(NC)"
 	kubectl apply -f deploy/crds/test-namespace.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
+	@echo "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
 	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
