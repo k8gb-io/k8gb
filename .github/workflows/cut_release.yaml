@@ -13,7 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Get New Tag
-        if: startsWith(github.event.head_commit.message, 'RELEASE:')
         id: get_new_tag
         run: |
           tag=$(awk '/appVersion:/ {print $2}' chart/k8gb/Chart.yaml)
@@ -34,8 +33,15 @@ jobs:
           tag=$(git describe --tags --abbrev=0)
           echo "Version to revert: ${tag}"
           echo "::set-output name=tag::${tag}"
-      - name: Delete Tag and Release
+      - name: Get Previous Tag
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
+        id: get_previous_tag
+        run: |
+          tag=$(git describe --tags --abbrev=0 $(git describe --tags --abbrev=0)^)
+          echo "Previos tag: ${tag}"
+          echo "::set-output name=tag::${tag}"
+      - name: Delete Tag and Release
+        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && steps.get_new_tag.outputs.tag == steps.get_previous_tag.outputs.tag
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
           delete_release: true # default: false
