@@ -158,16 +158,6 @@ func (v *validator) isHigherThan(num int) *validator {
 	return v
 }
 
-func (v *validator) isNotEqualTo(value string) *validator {
-	if v.err != nil {
-		return v
-	}
-	if v.strValue == value {
-		v.err = fmt.Errorf(`'%s' can't be equal to '%s'`, v.name, value)
-	}
-	return v
-}
-
 func (v *validator) hasItems() *validator {
 	if v.err != nil {
 		return v
