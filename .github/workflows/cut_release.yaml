@@ -1,4 +1,4 @@
-name: Create Tag for Release
+name: Release tagging
 
 on:
   push:
@@ -12,17 +12,41 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - name: Get Tag
-        id: get_tag
+        with:
+          fetch-depth: 0
+      - name: Get Desired Tag
+        id: get_desired_tag
         run: |
-          new_tag=$(awk '/appVersion:/ {print $2}' chart/k8gb/Chart.yaml)
-          echo "Version to release: ${new_tag}"
-          echo "::set-output name=new_tag::${new_tag}"
+          tag=$(awk '/appVersion:/ {print $2}' chart/k8gb/Chart.yaml)
+          echo "Version to release: ${tag}"
+          echo "::set-output name=tag::${tag}"
       - name: Push Tag
+        if: startsWith(github.event.head_commit.message, 'RELEASE:')
         uses: mathieudutour/github-tag-action@v5.6
-        if: "startsWith(github.event.head_commit.message, 'RELEASE:')"
         with:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true
           tag_prefix: ""
-          custom_tag: ${{ steps.get_tag.outputs.new_tag }}
+          custom_tag: ${{ steps.get_desired_tag.outputs.tag }}
+      - name: Get Current Tag
+        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
+        id: get_current_tag
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          echo "Version to revert: ${tag}"
+          echo "::set-output name=tag::${tag}"
+      - name: Get Previous Tag
+        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
+        id: get_previous_tag
+        run: |
+          tag=$(git describe --tags --abbrev=0 $(git describe --tags --abbrev=0)^)
+          echo "Previous tag: ${tag}"
+          echo "::set-output name=tag::${tag}"
+      - name: Delete Tag and Release
+        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && steps.get_desired_tag.outputs.tag == steps.get_previous_tag.outputs.tag
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true # default: false
+          tag_name: ${{ steps.get_current_tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.CR_TOKEN }}
