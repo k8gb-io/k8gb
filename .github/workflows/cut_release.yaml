@@ -14,8 +14,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Get New Tag
-        id: get_new_tag
+      - name: Get Desired Tag
+        id: get_desired_tag
         run: |
           tag=$(awk '/appVersion:/ {print $2}' chart/k8gb/Chart.yaml)
           echo "Version to release: ${tag}"
@@ -27,7 +27,7 @@ jobs:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true
           tag_prefix: ""
-          custom_tag: ${{ steps.get_new_tag.outputs.tag }}
+          custom_tag: ${{ steps.get_desired_tag.outputs.tag }}
       - name: Get Current Tag
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
         id: get_current_tag
@@ -40,10 +40,10 @@ jobs:
         id: get_previous_tag
         run: |
           tag=$(git describe --tags --abbrev=0 $(git describe --tags --abbrev=0)^)
-          echo "Previos tag: ${tag}"
+          echo "Previous tag: ${tag}"
           echo "::set-output name=tag::${tag}"
       - name: Delete Tag and Release
-        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && steps.get_new_tag.outputs.tag == steps.get_previous_tag.outputs.tag
+        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && steps.get_desired_tag.outputs.tag == steps.get_previous_tag.outputs.tag
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
           delete_release: true # default: false
