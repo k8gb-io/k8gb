@@ -53,7 +53,7 @@ jobs:
         with:
           repository: ${{ github.event.inputs.upstreamRepo }}
           path: sandbox
-          token: ${{ secrets.GH_OLM_TOKEN }}
+          token: ${{ secrets.CR_TOKEN }}
           fetch-depth: 0
 
       - name: Copy the generated manifests
@@ -65,7 +65,7 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GH_OLM_TOKEN }}
+          token: ${{ secrets.CR_TOKEN }}
           push-to-fork: k8gb-io/community-operators
           path: sandbox
           commit-message: OLM bundle for k8gb@${{ steps.get_version.outputs.bundleDir }}
