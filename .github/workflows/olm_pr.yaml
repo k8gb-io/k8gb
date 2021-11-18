@@ -59,6 +59,7 @@ jobs:
       - name: Copy the generated manifests
         run: |
           mkdir -p $GITHUB_WORKSPACE/sandbox/operators/k8gb/
+          rm -rf $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ steps.get_version.outputs.bundleDir }} || true
           cp -r $GITHUB_WORKSPACE/bundle/ $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ steps.get_version.outputs.bundleDir }}
 
       - name: Open Pull Request
