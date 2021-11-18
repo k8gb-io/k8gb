@@ -328,7 +328,7 @@ make demo DEMO_URL=https://failover.test.exampledns.tk DEMO_DEBUG=1
 
 ## Release process
 
-* Bump the version in `Chart.yaml`, see [example PR](https://github.com/k8gb-io/k8gb/pull/724). Make sure the
+* Bump the version in `Chart.yaml`, see [example PR](https://github.com/k8gb-io/k8gb/pull/749). Make sure the
 commit message starts with `RELEASE:`.
 * Merge the Pull Request after the review approval
 * At this point a DRAFT release will be created on GitHub. After the [automatic tag](https://github.com/k8gb-io/k8gb/actions/workflows/cut_release.yaml) & [release pipeline](https://github.com/k8gb-io/k8gb/actions/workflows/release.yaml)
