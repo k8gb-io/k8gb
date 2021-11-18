@@ -21,3 +21,6 @@ chart/k8gb/charts/*.tgz
 
 # gh-pages | Jekyll generated files
 _site
+
+# generated k3d configs
+k3d/test-gslb[!1-3].yaml

@@ -25,7 +25,10 @@ type TestSettings struct {
 	Port1           int
 	DNSServer2      string
 	Port2           int
+	DNSServer3      string
+	Port3           int
 	Cluster1        string
 	Cluster2        string
+	Cluster3        string
 	PodinfoImage    string
 }

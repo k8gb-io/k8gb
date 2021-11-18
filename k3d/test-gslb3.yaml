@@ -1,0 +1,25 @@
+apiVersion: k3d.io/v1alpha2
+kind: Simple
+name: test-gslb3
+image: docker.io/rancher/k3s:v1.21.2-k3s1
+agents: 1
+network: k3d-action-bridge-network
+ports:
+- port: 82:80
+  nodeFilters:
+  - agent[0]
+- port: 445:443
+  nodeFilters:
+  - agent[0]
+- port: 9082:30090
+  nodeFilters:
+    - agent[0]
+- port: 5055:53/udp
+  nodeFilters:
+  - agent[0]
+options:
+  k3d:
+    disableLoadbalancer: true
+  k3s: # options passed on to K3s itself
+    extraServerArgs: # additional arguments passed to the `k3s server` command; same as `--k3s-server-arg`
+      - --no-deploy=traefik,servicelb,metrics-server,local-storage

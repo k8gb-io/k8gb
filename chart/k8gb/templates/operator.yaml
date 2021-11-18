@@ -15,13 +15,9 @@ spec:
       labels:
         name: k8gb
     spec:
-      {{- if .Values.k8gb.hostAlias.enabled }}
+      {{- if .Values.k8gb.hostAliases }}
       hostAliases:
-        - ip: "{{ .Values.k8gb.hostAlias.ip }}"
-          hostnames:
-            {{- range.Values.k8gb.hostAlias.hostnames }}
-            - {{ . }}
-            {{- end }}
+        {{- toYaml .Values.k8gb.hostAliases | nindent 8 }}
       {{- end }}
       serviceAccountName: k8gb
       containers:
