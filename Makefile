@@ -410,7 +410,7 @@ test-failover:
 terratest: # Run terratest suite
 	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
 	@if [ $(RUNNING_CLUSTERS) != 3 ] ; then \
-		echo "$(RED)Make sure the you run the tests againt 3 running clusters$(NC)" ;\
+		echo "$(RED)Make sure you run the tests against 3 running clusters$(NC)" ;\
 		echo "$(RED)Currently $(RUNNING_CLUSTERS) running clusters were discovered$(NC)" ;\
 		exit 1 ;\
 	fi
