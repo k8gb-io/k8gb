@@ -29,60 +29,99 @@ func TestFullRoundRobin(t *testing.T) {
 	const host = "roundrobin-test.cloud.example.com"
 	const gslbPath = "../examples/roundrobin2.yaml"
 
-	instanceEU, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
+	instanceEU, err := utils.NewWorkflow(t, settings.Cluster1, settings.Port1).
 		WithGslb(gslbPath, host).
 		WithTestApp("eu").
 		Start()
 	require.NoError(t, err)
 	defer instanceEU.Kill()
-	instanceUS, err := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
+	instanceUS, err := utils.NewWorkflow(t, settings.Cluster2, settings.Port2).
 		WithGslb(gslbPath, host).
 		WithTestApp("us").
 		Start()
 	require.NoError(t, err)
 	defer instanceUS.Kill()
+	instanceCZ, err := utils.NewWorkflow(t, settings.Cluster3, settings.Port3).
+		WithGslb(gslbPath, host).
+		WithTestApp("cz").
+		Start()
+	require.NoError(t, err)
+	defer instanceCZ.Kill()
 
-	t.Run("round-robin on two concurrent clusters with podinfo running", func(t *testing.T) {
+	t.Run("round-robin on three concurrent clusters with podinfo running", func(t *testing.T) {
 		err = instanceEU.WaitForAppIsRunning()
 		require.NoError(t, err)
 		err = instanceUS.WaitForAppIsRunning()
+		require.NoError(t, err)
+		err = instanceCZ.WaitForAppIsRunning()
 		require.NoError(t, err)
 	})
 
 	euLocalTargets := instanceEU.GetLocalTargets()
 	usLocalTargets := instanceUS.GetLocalTargets()
-	expectedIPs := append(euLocalTargets, usLocalTargets...)
+	czLocalTargets := instanceCZ.GetLocalTargets()
+	euAndCZTargets := append(euLocalTargets, czLocalTargets...)
+	czAndUSTargets := append(czLocalTargets, usLocalTargets...)
+	expectedIPs := append(euAndCZTargets, usLocalTargets...)
 
-	t.Run("kill podinfo on the second cluster", func(t *testing.T) {
+	t.Run("kill podinfo on the second (us) cluster", func(t *testing.T) {
 		instanceUS.StopTestApp()
-		err = instanceEU.WaitForExpected(euLocalTargets)
+		err = instanceEU.WaitForExpected(euAndCZTargets)
 		require.NoError(t, err)
-		err = instanceUS.WaitForExpected(euLocalTargets)
+		err = instanceUS.WaitForExpected(euAndCZTargets)
+		require.NoError(t, err)
+		err = instanceCZ.WaitForExpected(euAndCZTargets)
 		require.NoError(t, err)
 	})
 
-	t.Run("kill podinfo on the first cluster", func(t *testing.T) {
+	t.Run("kill podinfo on the third (cz) cluster", func(t *testing.T) {
+		instanceCZ.StopTestApp()
+		err = instanceUS.WaitForExpected(euLocalTargets)
+		require.NoError(t, err)
+		err = instanceEU.WaitForExpected(euLocalTargets)
+		require.NoError(t, err)
+		err = instanceCZ.WaitForExpected(euLocalTargets)
+		require.NoError(t, err)
+	})
+
+	t.Run("kill podinfo on the first (eu) cluster", func(t *testing.T) {
 		instanceEU.StopTestApp()
 		err = instanceUS.WaitForExpected([]string{})
 		require.NoError(t, err)
 		err = instanceEU.WaitForExpected([]string{})
 		require.NoError(t, err)
+		err = instanceCZ.WaitForExpected([]string{})
+		require.NoError(t, err)
 	})
 
-	t.Run("start podinfo on the second cluster", func(t *testing.T) {
+	t.Run("start podinfo on the third (cz) cluster", func(t *testing.T) {
+		instanceCZ.StartTestApp()
+		err = instanceEU.WaitForExpected(czLocalTargets)
+		require.NoError(t, err)
+		err = instanceUS.WaitForExpected(czLocalTargets)
+		require.NoError(t, err)
+		err = instanceCZ.WaitForExpected(czLocalTargets)
+		require.NoError(t, err)
+	})
+
+	t.Run("start podinfo on the second (us) cluster", func(t *testing.T) {
 		instanceUS.StartTestApp()
-		err = instanceEU.WaitForExpected(usLocalTargets)
+		err = instanceEU.WaitForExpected(czAndUSTargets)
 		require.NoError(t, err)
-		err = instanceUS.WaitForExpected(usLocalTargets)
+		err = instanceUS.WaitForExpected(czAndUSTargets)
+		require.NoError(t, err)
+		err = instanceCZ.WaitForExpected(czAndUSTargets)
 		require.NoError(t, err)
 	})
 
-	t.Run("start podinfo on the first cluster", func(t *testing.T) {
+	t.Run("start podinfo on the first (eu) cluster", func(t *testing.T) {
 		// start app in the both clusters
 		instanceEU.StartTestApp()
 		err = instanceEU.WaitForExpected(expectedIPs)
 		require.NoError(t, err)
 		err = instanceUS.WaitForExpected(expectedIPs)
+		require.NoError(t, err)
+		err = instanceCZ.WaitForExpected(expectedIPs)
 		require.NoError(t, err)
 	})
 }

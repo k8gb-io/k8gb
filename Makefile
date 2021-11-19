@@ -24,8 +24,11 @@ endif
 ###############################
 #		CONSTANTS
 ###############################
-CLUSTER_GSLB1 = test-gslb1
-CLUSTER_GSLB2 = test-gslb2
+CLUSTERS_NUMBER ?= 2
+CLUSTER_IDS = $(shell seq $(CLUSTERS_NUMBER))
+CLUSTER_NAME ?= test-gslb
+CLUSTER_GEO_TAGS ?= eu us cz af ru ap uk ca
+CHART ?= k8gb/k8gb
 CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
 GSLB_DOMAIN ?= cloud.example.com
 REPO = absaoss/k8gb
@@ -33,7 +36,6 @@ VALUES_YAML ?= ""
 PODINFO_IMAGE_REPO ?= ghcr.io/stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
-CLUSTER_GSLB2_HELM_ARGS ?= --set k8gb.clusterGeoTag='us' --set k8gb.extGslbClustersGeoTags='eu' --set k8gb.hostAlias.hostnames='{gslb-ns-eu-cloud.example.com}'
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.7.0
@@ -52,6 +54,7 @@ DEMO_DELAY ?=5
 ifndef NO_COLOR
 YELLOW=\033[0;33m
 CYAN=\033[1;36m
+RED=\033[31m
 # no color
 NC=\033[0m
 endif
@@ -112,59 +115,94 @@ demo: ## Execute end-to-end demo
 
 # spin-up local environment
 .PHONY: deploy-full-local-setup
-deploy-full-local-setup: ## Deploy full local multicluster setup (k3d >= 4.2.0)
-	$(call create-local-cluster,$(CLUSTER_GSLB1))
-	$(call create-local-cluster,$(CLUSTER_GSLB2))
+deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 4.2.0)
+	@echo "\n$(YELLOW)Creating $(CLUSTERS_NUMBER) k8s clusters$(NC)"
+	@for c in $(CLUSTER_IDS); do \
+		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
+	done
 
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(VERSION),,'k8gb/k8gb')
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
-
-	@echo "\n$(YELLOW)Deploy test apps $(NC)"
-	$(call deploy-test-apps,$(CLUSTER_GSLB1))
-	$(call deploy-test-apps,$(CLUSTER_GSLB2))
+	$(MAKE) deploy-stable-version
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
-	@echo "\n$(YELLOW) import $(CYAN)k8gb:$(STABLE_VERSION) $(YELLOW)to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(STABLE_VERSION),,'k8gb/k8gb')
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(STABLE_VERSION),$(CLUSTER_GSLB2_HELM_ARGS),'k8gb/k8gb')
-
-	$(call list-running-pods,$(CLUSTER_GSLB1))
-	$(call list-running-pods,$(CLUSTER_GSLB2))
+	@for c in $(CLUSTER_IDS); do \
+		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c ;\
+	done
 
 .PHONY: deploy-test-version
 deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
-	@echo "\n$(YELLOW)import k8gb docker image to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
+	@echo "\n$(YELLOW)import k8gb docker image to all $(CLUSTERS_NUMBER) clusters$(NC)"
 
-	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB1)
-	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB2)
+	@for c in $(CLUSTER_IDS); do \
+		echo "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
+		k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_NAME)$$c ;\
+	done
 
-	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER)-amd64 on k3d-$(CLUSTER_GSLB1) $(NC)"
-	kubectl config use-context k3d-$(CLUSTER_GSLB1)
-	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER)-amd64,,'./chart/k8gb')
+	@for c in $(CLUSTER_IDS); do \
+		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-amd64 CHART='./chart/k8gb' ;\
+	done
 
-	@echo "\n$(YELLOW)Upgrade GSLB operator from $(STABLE_VERSION) to $(SEMVER)-amd64 on k3d-$(CLUSTER_GSLB2) $(NC)"
-	kubectl config use-context k3d-$(CLUSTER_GSLB2)
-	$(call deploy-k8gb-with-helm,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER)-amd64,$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
+.PHONY: list-running-pods
+list-running-pods:
+	@for c in $(CLUSTER_IDS); do \
+		echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_NAME)$$c $(NC)" ;\
+		kubectl get pods -A --context=k3d-$(CLUSTER_NAME)$$c ;\
+	done
 
-	$(call list-running-pods,$(CLUSTER_GSLB1))
-	$(call list-running-pods,$(CLUSTER_GSLB2))
+create-local-cluster:
+	@echo "\n$(YELLOW)Create local cluster $(CYAN)$(CLUSTER_NAME) $(NC)"
+	k3d cluster create -c k3d/$(CLUSTER_NAME).yaml
+
+.PHONY: deploy-local-cluster
+deploy-local-cluster:
+	@if [ -z $(CLUSTER_ID) ]; then echo invalid CLUSTER_ID value && exit 1; fi
+	@echo "\n$(YELLOW)Deploy local cluster $(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(NC)"
+	kubectl config use-context k3d-$(CLUSTER_NAME)$(CLUSTER_ID)
+
+	@echo "\n$(YELLOW)Create namespace $(NC)"
+	kubectl apply -f deploy/namespace.yaml
+
+	@echo "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
+	$(MAKE) deploy-k8gb-with-helm
+
+	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
+	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
+	helm repo update
+	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
+		--version 3.24.0 -f deploy/ingress/nginx-ingress-values.yaml
+
+	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
+	$(MAKE) deploy-gslb-cr
+
+	$(call deploy-test-apps)
+
+	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
+	$(call wait-for-ingress)
+
+	@echo "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
+
+.PHONY: deploy-gslb-cr
+deploy-gslb-cr: ## Apply Gslb Custom Resources
+	kubectl apply -f deploy/crds/test-namespace.yaml
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 .PHONY: upgrade-candidate
 upgrade-candidate: release-images deploy-test-version
 
-.PHONY: deploy-candidate
-deploy-candidate: ## Deploy test k8gb version together with CRs and test apps on top of existing clusters
-	@echo "\n$(YELLOW)import k8gb docker image to $(CYAN)$(CLUSTER_GSLB1), $(CLUSTER_GSLB2) $(NC)"
-
-	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB1)
-	k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_GSLB2)
-
-	$(call deploy-local-cluster,$(CLUSTER_GSLB1),$(CLUSTER_GSLB2),$(SEMVER)-amd64,,'./chart/k8gb')
-	$(call deploy-local-cluster,$(CLUSTER_GSLB2),$(CLUSTER_GSLB1),$(SEMVER)-amd64,$(CLUSTER_GSLB2_HELM_ARGS),'./chart/k8gb')
-
-	$(call list-running-pods,$(CLUSTER_GSLB1))
-	$(call list-running-pods,$(CLUSTER_GSLB2))
+.PHONY: deploy-k8gb-with-helm
+deploy-k8gb-with-helm:
+	@if [ -z $(CLUSTER_ID) ]; then echo invalid CLUSTER_ID value && exit 1; fi
+	helm repo add --force-update k8gb https://www.k8gb.io
+	cd chart/k8gb && helm dependency update
+	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
+		--set $(call get-helm-args,$(CLUSTER_ID)) \
+		--set k8gb.reconcileRequeueSeconds=10 \
+		--set k8gb.dnsZoneNegTTL=10 \
+		--set k8gb.imageTag=${VERSION:"stable"=""} \
+		--set k8gb.log.format=$(LOG_FORMAT) \
+		--set k8gb.log.level=$(LOG_LEVEL) \
+		--wait --timeout=2m0s
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: ## Deploy k8gb operator
@@ -174,33 +212,25 @@ deploy-gslb-operator: ## Deploy k8gb operator
 		--set k8gb.log.format=$(LOG_FORMAT)
 		--set k8gb.log.level=$(LOG_LEVEL)
 
-.PHONY: deploy-gslb-cr
-deploy-gslb-cr: ## Apply Gslb Custom Resources
-	kubectl apply -f deploy/crds/test-namespace.yaml
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
-
-.PHONY: deploy-test-apps
-deploy-test-apps: ## Deploy testing workloads
-	kubectl apply -f deploy/crds/test-namespace.yaml
-	$(call deploy-test-apps)
-
 # destroy local test environment
 .PHONY: destroy-full-local-setup
 destroy-full-local-setup: ## Destroy full local multicluster setup
-	k3d cluster delete $(CLUSTER_GSLB1)
-	k3d cluster delete $(CLUSTER_GSLB2)
+	@for c in $(CLUSTER_IDS); do \
+		k3d cluster delete $(CLUSTER_NAME)$$c ;\
+	done
 	docker network rm $(CLUSTER_GSLB_NETWORK)
 
 .PHONY: deploy-prometheus
 deploy-prometheus:
-	$(call deploy-prometheus,$(CLUSTER_GSLB1))
-	$(call deploy-prometheus,$(CLUSTER_GSLB2))
+	@for c in $(CLUSTER_IDS); do \
+		$(call deploy-prometheus,$(CLUSTER_NAME)$$c) ;\
+	done
 
 .PHONY: uninstall-prometheus
 uninstall-prometheus:
-	$(call uninstall-prometheus,$(CLUSTER_GSLB1))
-	$(call uninstall-prometheus,$(CLUSTER_GSLB2))
+	@for c in $(CLUSTER_IDS); do \
+		$(call uninstall-prometheus,$(CLUSTER_NAME)$$c) ;\
+	done
 
 .PHONY: deploy-grafana
 deploy-grafana:
@@ -247,6 +277,16 @@ docker-manifest:
 	docker manifest annotate ${IMG} ${IMG}-arm64 \
 		--os linux --arch arm64
 	docker manifest push ${IMG}
+
+.PHONY: ensure-cluster-size
+ensure-cluster-size:
+	@if [ $(CLUSTERS_NUMBER) -gt 8 ] ; then \
+		echo "$(RED)$(CLUSTERS_NUMBER) clusters is probably way too many$(NC)" ;\
+		echo "$(RED)you will probably hit resource limits or port collisions, gook luck you are on your own$(NC)" ;\
+	fi
+	@if [ $(CLUSTERS_NUMBER) -gt 3 ] ; then \
+		./k3d/generate-yaml.sh $(CLUSTERS_NUMBER) ;\
+	fi
 
 .PHONY: goreleaser
 goreleaser:
@@ -368,6 +408,12 @@ test-failover:
 # executes terra-tests
 .PHONY: terratest
 terratest: # Run terratest suite
+	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
+	@if [ $(RUNNING_CLUSTERS) != 3 ] ; then \
+		echo "$(RED)Make sure the you run the tests againt 3 running clusters$(NC)" ;\
+		echo "$(RED)Currently $(RUNNING_CLUSTERS) running clusters were discovered$(NC)" ;\
+		exit 1 ;\
+	fi
 	cd terratest/test/ && go mod download && go test -v -timeout 15m -parallel=12
 
 .PHONY: website
@@ -394,47 +440,6 @@ help: ## Show this help
 #		FUNCTIONS
 ###############################
 
-define create-local-cluster
-	@echo "\n$(YELLOW)Deploy local cluster $(CYAN)$1 $(NC)"
-	k3d cluster create -c k3d/$1.yaml
-endef
-
-define deploy-k8gb-with-helm
-	helm repo add --force-update k8gb https://www.k8gb.io
-	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb $5 -f $(VALUES_YAML) \
-		--set k8gb.hostAlias.enabled=true \
-		--set k8gb.hostAlias.ip="`$(call get-host-alias-ip,k3d-$1,k3d-$2)`" \
-		--set k8gb.reconcileRequeueSeconds=10 \
-		--set k8gb.dnsZoneNegTTL=10 \
-		--set k8gb.imageTag=$3 $4 \
-		--set k8gb.log.format=$(LOG_FORMAT) \
-		--set k8gb.log.level=$(LOG_LEVEL) \
-		--wait --timeout=2m0s
-endef
-
-define deploy-local-cluster
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$1 $(NC)"
-	kubectl config use-context k3d-$1
-
-	@echo "\n$(YELLOW)Create namespace $(NC)"
-	kubectl apply -f deploy/namespace.yaml
-
-	@echo "\n$(YELLOW)Deploy GSLB operator from ${3} $(NC)"
-	$(call deploy-k8gb-with-helm,$1,$2,${3:"stable"=""},$4,$5)
-
-	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
-	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
-	helm repo update
-	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
-		--version 3.24.0 -f deploy/ingress/nginx-ingress-values.yaml
-
-	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
-	$(call wait-for-ingress)
-
-	@echo "\n$(CYAN)$1 $(YELLOW)deployed! $(NC)"
-endef
-
 define apply-cr
 	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
 	kubectl apply -f "$1"
@@ -442,14 +447,6 @@ define apply-cr
 endef
 
 define deploy-test-apps
-	$(if $1,@kubectl config use-context k3d-$1, \
-		@echo "Current context: $(shell kubectl config current-context)")
-
-	@echo "\n$(YELLOW)Deploy GSLB CR $(NC)"
-	kubectl apply -f deploy/crds/test-namespace.yaml
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
-
 	@echo "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
@@ -464,12 +461,24 @@ define get-cluster-geo-tag
 	kubectl -n k8gb describe deploy k8gb |  awk '/CLUSTER_GEO_TAG/ { printf $$2 }'
 endef
 
+nth-geo-tag = $(subst $1_,,$(filter $1_%, $(join $(addsuffix _,$(CLUSTER_IDS)),$(CLUSTER_GEO_TAGS))))
+
+define get-ext-tags
+$(shell echo $(foreach cl,$(filter-out $1,$(shell seq $(CLUSTERS_NUMBER))),$(call nth-geo-tag,$(cl)))
+	| sed 's/ /\\,/g')
+endef
+
+define get-helm-args
+k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' \
+$(foreach cl,$(shell seq $(CLUSTERS_NUMBER)), --set "k8gb.hostAliases[$$(( $(cl) - 1 ))].ip=$(shell $(call get-host-alias-ip,k3d-$(CLUSTER_NAME)$1,k3d-$(CLUSTER_NAME)$(cl)))" --set "k8gb.hostAliases[$$(( $(cl) - 1 ))].hostnames={gslb-ns-$(call nth-geo-tag,$(cl))-cloud.example.com}")
+endef
+
 # get-host-alias-ip switch to second context ($2), search for IP and switch back to first context ($1)
 # function returns one IP address
 define get-host-alias-ip
-	kubectl config use-context $2 > /dev/null && \
-	kubectl get nodes $2-agent-0 -o custom-columns='IP:status.addresses[0].address' --no-headers && \
-	kubectl config use-context $1 > /dev/null
+kubectl config use-context $2 > /dev/null && \
+kubectl get nodes $2-agent-0 -o custom-columns='IP:status.addresses[0].address' --no-headers && \
+kubectl config use-context $1 > /dev/null
 endef
 
 define hit-testapp-host
@@ -483,7 +492,8 @@ define init-test-strategy
  	kubectl apply -f $1
  	kubectl config use-context k3d-test-gslb1
  	kubectl apply -f $1
- 	$(call testapp-set-replicas,2)
+	$(MAKE) start-test-app
+
 endef
 
 define testapp-set-replicas
@@ -531,32 +541,24 @@ define debug
 	dlv $1
 endef
 
-define list-running-pods
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$1 $(NC)"
-	kubectl get pods -A --context=k3d-$1
-endef
-
 define deploy-prometheus
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)"
-
-	@echo "\n$(YELLOW)Set annotations on pods that will be scraped by prometheus$(NC)"
-	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/scrape="true" --context=k3d-$1
-	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/port="8080" --context=k3d-$1
-
-	@echo "\n$(YELLOW)install prometheus $(NC)"
-	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-	helm repo update
+	echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
+	echo "\n$(YELLOW)Set annotations on pods that will be scraped by prometheus$(NC)" ;\
+	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/scrape="true" --context=k3d-$1 ;\
+	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/port="8080" --context=k3d-$1 ;\
+	echo "\n$(YELLOW)install prometheus $(NC)" ;\
+	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ;\
+	helm repo update ;\
 	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
 		--version 14.2.0 \
 		--wait --timeout=2m0s \
-		--kube-context=k3d-$1
+		--kube-context=k3d-$1 ;
 endef
 
 define uninstall-prometheus
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)"
-
-	@echo "\n$(YELLOW)uninstall prometheus $(NC)"
-	helm uninstall prometheus -n k8gb --kube-context=k3d-$1
-	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/scrape- --context=k3d-$1
-	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/port- --context=k3d-$1
+	echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
+	echo "\n$(YELLOW)uninstall prometheus $(NC)" ;\
+	helm uninstall prometheus -n k8gb --kube-context=k3d-$1 ;\
+	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/scrape- --context=k3d-$1 ;\
+	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/port- --context=k3d-$1 ;
 endef

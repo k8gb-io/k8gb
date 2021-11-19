@@ -46,8 +46,21 @@ jobs:
           cluster-name: "test-gslb2"
           args: -c k3d/test-gslb2.yaml
 
+      - name: Create 3rd k3s Cluster
+        uses: AbsaOSS/k3d-action@v1.5.0
+        with:
+          cluster-name: "test-gslb3"
+          args: -c k3d/test-gslb3.yaml
+
       - name: K8GB deployment
-        run: make deploy-candidate
+        run: |
+          make deploy-test-version list-running-pods CLUSTERS_NUMBER=3
+          echo "Cluster 1 (eu):"
+          kubectl get no -owide --context=k3d-test-gslb1
+          echo "Cluster 2 (us):"
+          kubectl get no -owide --context=k3d-test-gslb2
+          echo "Cluster 3 (cz):"
+          kubectl get no -owide --context=k3d-test-gslb3
 
       - name: Terratest
         run: make terratest
