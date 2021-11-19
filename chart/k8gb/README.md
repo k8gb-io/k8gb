@@ -55,9 +55,7 @@ A Helm chart for Kubernetes Global Balancer
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.edgeDNSZone | string | `"example.com"` | main zone which would contain gslb zone to delegate |
 | k8gb.extGslbClustersGeoTags | string | `"us"` | comma-separated list of external gslb geo tags to pair with |
-| k8gb.hostAlias.enabled | bool | `false` | use https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ inside operator pod. Useful for advanced testing scenarios and to break dependency on EdgeDNS for cross k8gb collaboration |
-| k8gb.hostAlias.hostnames[0] | string | `"gslb-ns-us-cloud.example.com"` |  |
-| k8gb.hostAlias.ip | string | `"172.17.0.1"` |  |
+| k8gb.hostAliases | list | `[]` | use [/etc/hosts](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) inside operator pod. Useful for advanced testing scenarios and to break dependency on EdgeDNS for cross k8gb collaboration example: `[{"ip": "172.17.0.1", "hostnames": ["gslb-ns-us-cloud.example.com"]}]` |
 | k8gb.imageRepo | string | `"absaoss/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
