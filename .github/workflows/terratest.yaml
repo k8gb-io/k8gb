@@ -62,5 +62,24 @@ jobs:
           echo "Cluster 3 (cz):"
           kubectl get no -owide --context=k3d-test-gslb3
 
-      - name: Terratest
-        run: make terratest
+      - name: Terratest (round robin for 3 clusters)
+        run: |
+          cd terratest/test/
+          go mod download
+          go get -u github.com/rakyll/gotest
+          gotest -v -timeout 15m -parallel=12 ./3clusters
+
+      - name: Delete 3rd k3s Cluster
+        run: | 
+          k3d cluster delete test-gslb3
+          make deploy-test-version list-running-pods CLUSTERS_NUMBER=2
+          echo "Cluster 1 (eu):"
+          kubectl get no -owide --context=k3d-test-gslb1
+          echo "Cluster 2 (us):"
+          kubectl get no -owide --context=k3d-test-gslb2
+
+      - name: Terratest (2 clusters)
+        run: |
+          cd terratest/test/
+          go mod download
+          gotest -v -timeout 15m -parallel=12 ./2clusters
