@@ -250,10 +250,19 @@ func EqualStringSlices(a, b []string) bool {
 }
 
 // RunBusyBoxCommand the command argument is executed inside the busybox pod. It can be for example an HTTP request etc.
-func RunBusyBoxCommand(t *testing.T, options *k8s.KubectlOptions, command string) (out string, err error) {
+func RunBusyBoxCommand(t *testing.T, options *k8s.KubectlOptions, dns string, command []string) (out string, err error) {
+	dnsOverride := fmt.Sprintf("{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"%s\"]},\"dnsPolicy\": \"None\"}}", dns)
+	args := []string{}
+	kubectlCtx := []string{"--context", options.ContextName, "-n", options.Namespace}
+	containerArgs := []string{"run", "-i", "--rm", "busybox", "--restart", "Never", "--image", "busybox"}
+	containerDNS := []string{"--overrides", dnsOverride}
+	appArgs := append([]string{"--"}, command...)
+	args = append(kubectlCtx, containerArgs...)
+	args = append(args, containerDNS...)
+	args = append(args, appArgs...)
 	cmd := shell.Command{
 		Command: "kubectl",
-		Args:    []string{"--context", options.ContextName, "-n", options.Namespace, "run", "-i", "--rm", "busybox", "--restart", "Never", "--image", "busybox", "--", "sh", "-c", command},
+		Args:    args,
 		Env:     options.Env,
 	}
 	return shell.RunCommandAndGetOutputE(t, cmd)

@@ -361,10 +361,10 @@ func (i *Instance) HitTestApp() (result *TestAppResult) {
 	require.True(i.w.t, i.w.state.testApp.isInstalled)
 	var err error
 	result = new(TestAppResult)
-	coreDDNSIP := i.GetCoreDNSIP()
-	command := fmt.Sprintf("echo nameserver %s > /etc/resolv.conf && wget -qO - %s", coreDDNSIP, i.w.state.gslb.host)
+	coreDNSIP := i.GetCoreDNSIP()
+	command := []string{"sh", "-c", fmt.Sprintf("wget -qO - %s", i.w.state.gslb.host)}
 	for t := 0; t < 3; t++ {
-		result.Body, err = RunBusyBoxCommand(i.w.t, i.w.k8sOptions, command)
+		result.Body, err = RunBusyBoxCommand(i.w.t, i.w.k8sOptions, coreDNSIP, command)
 		require.NoError(i.w.t, err, "busybox", command, result.Body)
 		if strings.HasPrefix(result.Body, "{") {
 			break
