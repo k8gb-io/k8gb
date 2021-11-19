@@ -39,6 +39,7 @@ generate() {
     cd ${DIR}/../chart/k8gb && helm dependency update && cd -
     helm -n placeholder template ${DIR}/../chart/k8gb \
         --name-template=k8gb \
+        --set k8gb.securityContext.runAsNonRoot=null \
         --set k8gb.securityContext.runAsUser=null | ${OLM_BINARY} \
             --chart-file-path=${DIR}/../chart/k8gb/Chart.yaml \
             --version=v${_VERSION} \
