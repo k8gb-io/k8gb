@@ -82,6 +82,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
 		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
 		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
+		dr.config.ExtClustersGeoTags = excludeGeoTag(dr.config.ExtClustersGeoTags, dr.config.ClusterGeoTag)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
@@ -124,7 +125,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	}
 	for i, geoTag := range config.ExtClustersGeoTags {
 		err = field(fmt.Sprintf("%s[%v]", ExtClustersGeoTagsKey, i), geoTag).
-			isNotEmpty().matchRegexp(geoTagRegex).isNotEqualTo(config.ClusterGeoTag).err
+			isNotEmpty().matchRegexp(geoTagRegex).err
 		if err != nil {
 			return err
 		}
@@ -319,6 +320,17 @@ func parseEdgeDNSServers(serverList []string) (r []utils.DNSServer) {
 		}
 	}
 	return r
+}
+
+// excludeGeoTag excludes the clusterGeoTag from external geo tags
+func excludeGeoTag(tags []string, tag string) (r []string) {
+	r = []string{}
+	for _, t := range tags {
+		if tag != t {
+			r = append(r, t)
+		}
+	}
+	return
 }
 
 // getEdgeDNSType contains logic retrieving EdgeDNSType.

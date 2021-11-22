@@ -603,15 +603,39 @@ func TestResolveInvalidExtGeoTags(t *testing.T) {
 	}
 }
 
-func TestResolveGeoTagExistsWithinExtGeoTags(t *testing.T) {
+func TestResolveOnlyGeoTagExistsWithinExtGeoTags(t *testing.T) {
 	// arrange
 	defer cleanup()
 	tag := "us-west1"
 	expected := predefinedConfig
 	expected.ClusterGeoTag = tag
-	expected.ExtClustersGeoTags = []string{"us-east1", tag}
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error)
+	expected.ExtClustersGeoTags = []string{}
+	configureEnvVar(expected)
+	os.Setenv(ExtClustersGeoTagsKey, tag)
+	resolver := NewDependencyResolver()
+	config, err := resolver.ResolveOperatorConfig()
+	assert.Error(t, err)
+	assert.Equal(t, expected, *config)
+}
+
+func TestResolveGeoTagExistsWithinExtGeoTags(t *testing.T) {
+	// arrange
+	defer cleanup()
+	tag := "us-west1"
+	for _, arr := range [][]string{{"good-tag"}, {"us-east1", "eu"}} {
+		expected := predefinedConfig
+		expected.ClusterGeoTag = tag
+		expected.ExtClustersGeoTags = arr
+		configureEnvVar(expected)
+		os.Setenv(ExtClustersGeoTagsKey, strings.Join(append(arr, tag), ","))
+		// act,assert
+		resolver := NewDependencyResolver()
+		// act
+		config, err := resolver.ResolveOperatorConfig()
+		// assert
+		assert.NoError(t, err)
+		assert.Equal(t, expected, *config)
+	}
 }
 
 func TestResolveGeoTagWithRepeatingExtGeoTags(t *testing.T) {
@@ -1178,6 +1202,27 @@ func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 	customConfig.EdgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
 	customConfig.ExtClustersGeoTags = []string{"location-2"}
+	configureEnvVar(customConfig)
+	resolver := NewDependencyResolver()
+
+	// act
+	config, err := resolver.ResolveOperatorConfig()
+
+	// assert
+	assert.NoError(t, err)
+	assert.Len(t, config.GetExternalClusterNSNames(), 1)
+	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	assert.Equal(t, config.GetExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
+}
+
+func TestNsServerNamesWithExtClusterGeoTagsContainingClusterGeoTag(t *testing.T) {
+	// arrange
+	defer cleanup()
+	customConfig := predefinedConfig
+	customConfig.DNSZone = defaultDNSZone
+	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
+	customConfig.ExtClustersGeoTags = []string{"location-2", defaultClusterGeoTagUs1}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
