@@ -121,7 +121,7 @@ deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster s
 		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
 	done
 
-	$(MAKE) deploy-stable-version
+	$(MAKE) deploy-stable-version DEPLOY_APPS=true
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
@@ -171,21 +171,28 @@ deploy-local-cluster:
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 3.24.0 -f deploy/ingress/nginx-ingress-values.yaml
 
-	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
-	$(MAKE) deploy-gslb-cr
-
-	$(call deploy-test-apps)
+	@if [ $(DEPLOY_APPS) = true ]; then $(MAKE) deploy-test-apps ; fi
 
 	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait-for-ingress)
 
 	@echo "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
 
-.PHONY: deploy-gslb-cr
-deploy-gslb-cr: ## Apply Gslb Custom Resources
+.PHONY: deploy-test-apps
+deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
+	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+
+	@echo "\n$(YELLOW)Deploy podinfo $(NC)"
+	kubectl apply -f deploy/test-apps
+	helm repo add podinfo https://stefanprodan.github.io/podinfo
+	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
+		--set ui.message="`$(call get-cluster-geo-tag)`" \
+		--set image.repository="$(PODINFO_IMAGE_REPO)" \
+		podinfo/podinfo \
+		--version 5.1.1
 
 .PHONY: upgrade-candidate
 upgrade-candidate: release-images deploy-test-version
@@ -444,17 +451,6 @@ define apply-cr
 	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
 	kubectl apply -f "$1"
 	git checkout -- "$1"
-endef
-
-define deploy-test-apps
-	@echo "\n$(YELLOW)Deploy podinfo $(NC)"
-	kubectl apply -f deploy/test-apps
-	helm repo add podinfo https://stefanprodan.github.io/podinfo
-	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
-		--set ui.message="`$(call get-cluster-geo-tag)`" \
-		--set image.repository="$(PODINFO_IMAGE_REPO)" \
-		podinfo/podinfo \
-		--version 5.1.1
 endef
 
 define get-cluster-geo-tag
