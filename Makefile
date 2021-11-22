@@ -155,7 +155,7 @@ create-local-cluster:
 
 .PHONY: deploy-local-cluster
 deploy-local-cluster:
-	@if [ -z $(CLUSTER_ID) ]; then echo invalid CLUSTER_ID value && exit 1; fi
+	@if [ -z "$(CLUSTER_ID)" ]; then echo invalid CLUSTER_ID value && exit 1; fi
 	@echo "\n$(YELLOW)Deploy local cluster $(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_NAME)$(CLUSTER_ID)
 
@@ -171,7 +171,7 @@ deploy-local-cluster:
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 3.24.0 -f deploy/ingress/nginx-ingress-values.yaml
 
-	@if [ $(DEPLOY_APPS) = true ]; then $(MAKE) deploy-test-apps ; fi
+	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
 	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait-for-ingress)
@@ -199,7 +199,7 @@ upgrade-candidate: release-images deploy-test-version
 
 .PHONY: deploy-k8gb-with-helm
 deploy-k8gb-with-helm:
-	@if [ -z $(CLUSTER_ID) ]; then echo invalid CLUSTER_ID value && exit 1; fi
+	@if [ -z "$(CLUSTER_ID)" ]; then echo invalid CLUSTER_ID value && exit 1; fi
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
@@ -287,11 +287,11 @@ docker-manifest:
 
 .PHONY: ensure-cluster-size
 ensure-cluster-size:
-	@if [ $(CLUSTERS_NUMBER) -gt 8 ] ; then \
+	@if [ "$(CLUSTERS_NUMBER)" -gt 8 ] ; then \
 		echo "$(RED)$(CLUSTERS_NUMBER) clusters is probably way too many$(NC)" ;\
 		echo "$(RED)you will probably hit resource limits or port collisions, gook luck you are on your own$(NC)" ;\
 	fi
-	@if [ $(CLUSTERS_NUMBER) -gt 3 ] ; then \
+	@if [ "$(CLUSTERS_NUMBER)" -gt 3 ] ; then \
 		./k3d/generate-yaml.sh $(CLUSTERS_NUMBER) ;\
 	fi
 
@@ -416,7 +416,7 @@ test-failover:
 .PHONY: terratest
 terratest: # Run terratest suite
 	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
-	@if [ $(RUNNING_CLUSTERS) != 3 ] ; then \
+	@if [ "$(RUNNING_CLUSTERS)" != 3 ] ; then \
 		echo "$(RED)Make sure you run the tests against 3 running clusters$(NC)" ;\
 		echo "$(RED)Currently $(RUNNING_CLUSTERS) running clusters were discovered$(NC)" ;\
 		exit 1 ;\
