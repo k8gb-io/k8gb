@@ -1,3 +1,5 @@
+// +build basic all
+
 /*
 Copyright 2021 The k8gb Contributors.
 

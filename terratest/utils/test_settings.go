@@ -31,4 +31,5 @@ type TestSettings struct {
 	Cluster2        string
 	Cluster3        string
 	PodinfoImage    string
+	ClustersNumber  int
 }
