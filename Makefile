@@ -35,7 +35,7 @@ REPO = absaoss/k8gb
 VALUES_YAML ?= ""
 PODINFO_IMAGE_REPO ?= ghcr.io/stefanprodan/podinfo
 HELM_ARGS ?=
-K8GB_COREDNS_IP ?= $(shell kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers)
+K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.7.0
@@ -479,7 +479,7 @@ endef
 
 define hit-testapp-host
 	kubectl run -it --rm busybox --restart=Never --image=busybox --command \
-	--overrides='{"spec": {"dnsConfig": {"nameservers": ["$(K8GB_COREDNS_IP)"]}, \"dnsPolicy\": \"None\"}}' \
+	--overrides "{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"$(shell $(K8GB_COREDNS_IP))\"]},\"dnsPolicy\":\"None\"}}" \
 	-- wget -qO - $1
 endef
 
