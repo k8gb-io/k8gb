@@ -88,6 +88,14 @@ ifndef GOBIN
 GOBIN=$(shell go env GOPATH)/bin
 endif
 
+# Check Make version (we need at least GNU Make 4.3). Fortunately,
+# 'grouped-target' directive has been introduced exactly in GNU Make 4.3.
+ifeq ($(filter grouped-target,$(value .FEATURES)),)
+$(error Unsupported Make version. \
+    The build system does not work properly with GNU Make $(MAKE_VERSION), \
+    please use GNU Make 4.3 or above.)
+endif
+
 ###############################
 #		TARGETS
 ###############################

@@ -21,6 +21,11 @@
     brew install gnu-sed
     ```
 
+- If you are on a Mac, install updated `make` with Homebrew (version 4.3 is required)
+    ```shell script
+    brew install make
+    ```
+
 - [Install **Docker**](https://docs.docker.com/get-docker/)
   > Ensure you are able to push/pull from your docker registry
 
