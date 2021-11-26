@@ -416,12 +416,12 @@ test-failover:
 .PHONY: terratest
 terratest: # Run terratest suite
 	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
-	@if [ "$(RUNNING_CLUSTERS)" != 3 ] ; then \
-		echo "$(RED)Make sure you run the tests against 3 running clusters$(NC)" ;\
-		echo "$(RED)Currently $(RUNNING_CLUSTERS) running clusters were discovered$(NC)" ;\
-		exit 1 ;\
+	@$(eval TEST_TAGS := $(shell [ $(RUNNING_CLUSTERS) == 2 ] && echo all || echo rr_multicluster))
+	@if [ "$(RUNNING_CLUSTERS)" -lt 2 ] ; then \
+		echo "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
+		exit 1;\
 	fi
-	cd terratest/test/ && go mod download && go test -v -timeout 15m -parallel=12
+	cd terratest/test/ && go mod download && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) go test -v -timeout 15m -parallel=12 --tags=$(TEST_TAGS)
 
 .PHONY: website
 website:

@@ -1,3 +1,5 @@
+// +build lifecycle all
+
 /*
 Copyright 2021 The k8gb Contributors.
 

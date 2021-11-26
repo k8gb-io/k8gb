@@ -11,3 +11,6 @@
 /api/**
 main.go
 gslb_controller.go
+
+# Build tags in tests...
+/terratest/test/**
