@@ -164,21 +164,6 @@ func (w *Workflow) Start() (*Instance, error) {
 	k8s.CreateNamespace(w.t, w.k8sOptions, w.namespace)
 	w.state.namespaceCreated = true
 
-	// gslb
-	if w.settings.gslbResourcePath != "" {
-		w.t.Logf("Create ingress %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
-		k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
-		k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.state.gslb.name, 60, 1*time.Second)
-		ingress := k8s.GetIngress(w.t, w.k8sOptions, w.state.gslb.name)
-		require.Equal(w.t, ingress.Name, w.state.gslb.name)
-		w.settings.ingressName = w.state.gslb.name
-	}
-
-	// ingress
-	if w.settings.ingressResourcePath != "" {
-
-	}
-
 	// app
 	if w.state.testApp.isInstalled {
 		const app = "https://stefanprodan.github.io/podinfo"
@@ -211,6 +196,17 @@ func (w *Workflow) Start() (*Instance, error) {
 		k8s.WaitUntilServiceAvailable(w.t, w.k8sOptions, w.state.testApp.name, 60, 1*time.Second)
 		w.state.testApp.isRunning = true
 	}
+
+	// gslb
+	if w.settings.gslbResourcePath != "" {
+		w.t.Logf("Create ingress %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
+		k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
+		k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.state.gslb.name, 60, 1*time.Second)
+		ingress := k8s.GetIngress(w.t, w.k8sOptions, w.state.gslb.name)
+		require.Equal(w.t, ingress.Name, w.state.gslb.name)
+		w.settings.ingressName = w.state.gslb.name
+	}
+
 	return &Instance{
 		w: w,
 	}, nil
