@@ -45,12 +45,6 @@ jobs:
           cluster-name: "test-gslb2"
           args: -c k3d/test-gslb2.yaml
 
-      - name: Create 3rd k3s Cluster
-        uses: AbsaOSS/k3d-action@v2
-        with:
-          cluster-name: "test-gslb3"
-          args: -c k3d/test-gslb3.yaml
-
       - name: K8GB deployment
         run: |
           make deploy-test-version list-running-pods
