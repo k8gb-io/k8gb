@@ -115,7 +115,7 @@ demo: ## Execute end-to-end demo
 
 # spin-up local environment
 .PHONY: deploy-full-local-setup
-deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 4.2.0)
+deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
 	@echo "\n$(YELLOW)Creating $(CLUSTERS_NUMBER) k8s clusters$(NC)"
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
@@ -225,7 +225,6 @@ destroy-full-local-setup: ## Destroy full local multicluster setup
 	@for c in $(CLUSTER_IDS); do \
 		k3d cluster delete $(CLUSTER_NAME)$$c ;\
 	done
-	docker network rm $(CLUSTER_GSLB_NETWORK)
 
 .PHONY: deploy-prometheus
 deploy-prometheus:

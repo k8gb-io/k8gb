@@ -19,7 +19,7 @@ jobs:
           destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
       - name: Create k3s cluster
-        uses: AbsaOSS/k3d-action@v1.5.0
+        uses: AbsaOSS/k3d-action@v2
         with:
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml

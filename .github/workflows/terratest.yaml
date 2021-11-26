@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
-
       - uses: actions/setup-go@v2
         with:
           go-version: "1.16.9"
@@ -35,16 +34,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create 1st k3s Cluster
-        uses: AbsaOSS/k3d-action@v1.5.0
+        uses: AbsaOSS/k3d-action@v2
         with:
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
 
       - name: Create 2nd k3s Cluster
-        uses: AbsaOSS/k3d-action@v1.5.0
+        uses: AbsaOSS/k3d-action@v2
         with:
           cluster-name: "test-gslb2"
           args: -c k3d/test-gslb2.yaml
+
+      - name: Create 3rd k3s Cluster
+        uses: AbsaOSS/k3d-action@v2
+        with:
+          cluster-name: "test-gslb3"
+          args: -c k3d/test-gslb3.yaml
 
       - name: K8GB deployment
         run: |
