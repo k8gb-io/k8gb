@@ -1,5 +1,51 @@
 # Changelog
 
+## [v0.8.5](https://github.com/k8gb-io/k8gb/tree/v0.8.5) (2021-12-01)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.4...v0.8.5)
+
+**Fixed bugs:**
+
+- dev: make command errors [\#770](https://github.com/k8gb-io/k8gb/issues/770)
+- deploy-test-apps and deploy-full-local-setup make commands are broken [\#751](https://github.com/k8gb-io/k8gb/issues/751)
+
+**Closed issues:**
+
+- k8gb controller's pid fails to start correctly when deployed by OLM [\#757](https://github.com/k8gb-io/k8gb/issues/757)
+- Use pod's dnsConfig for our demo [\#712](https://github.com/k8gb-io/k8gb/issues/712)
+- How does this compare to others? [\#689](https://github.com/k8gb-io/k8gb/issues/689)
+
+**Merged pull requests:**
+
+- RELEASE: v0.8.5 [\#780](https://github.com/k8gb-io/k8gb/pull/780) ([jkremser](https://github.com/jkremser))
+- Revert "RELEASE: v0.8.5 \(\#776\)" [\#779](https://github.com/k8gb-io/k8gb/pull/779) ([jkremser](https://github.com/jkremser))
+- .gitignoring file called 'changes' that's produced and consumed by goreleaser [\#778](https://github.com/k8gb-io/k8gb/pull/778) ([jkremser](https://github.com/jkremser))
+- RELEASE: v0.8.5 [\#776](https://github.com/k8gb-io/k8gb/pull/776) ([jkremser](https://github.com/jkremser))
+- Reorder terratest Workflow [\#774](https://github.com/k8gb-io/k8gb/pull/774) ([k0da](https://github.com/k0da))
+- dev: Update for k3d v5.1.0 | k3d-action@v2 [\#773](https://github.com/k8gb-io/k8gb/pull/773) ([somaritane](https://github.com/somaritane))
+- Don't evaluate COREDNS IP too early [\#772](https://github.com/k8gb-io/k8gb/pull/772) ([k0da](https://github.com/k0da))
+- Running all the tests on two clusters and only full-rr on 3 clusters [\#769](https://github.com/k8gb-io/k8gb/pull/769) ([jkremser](https://github.com/jkremser))
+- Makefile: surround vars with quotes in conditional expressions [\#768](https://github.com/k8gb-io/k8gb/pull/768) ([jkremser](https://github.com/jkremser))
+- Invoke the OLM pipeline from release pipeline [\#767](https://github.com/k8gb-io/k8gb/pull/767) ([jkremser](https://github.com/jkremser))
+- Do not deploy test-gslb for terratest runs [\#766](https://github.com/k8gb-io/k8gb/pull/766) ([jkremser](https://github.com/jkremser))
+- Drop resolv.conf hack [\#764](https://github.com/k8gb-io/k8gb/pull/764) ([k0da](https://github.com/k0da))
+- Fix two typos in Makefile [\#762](https://github.com/k8gb-io/k8gb/pull/762) ([jkremser](https://github.com/jkremser))
+- LICENSE & README are required by artifacthub.io, so un-.helmignoring [\#761](https://github.com/k8gb-io/k8gb/pull/761) ([jkremser](https://github.com/jkremser))
+- Fix helm docs for hostAliases entries [\#760](https://github.com/k8gb-io/k8gb/pull/760) ([jkremser](https://github.com/jkremser))
+- Update Helm Docs [\#759](https://github.com/k8gb-io/k8gb/pull/759) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Fix 'cannot verify user is non-root in OLM' [\#758](https://github.com/k8gb-io/k8gb/pull/758) ([jkremser](https://github.com/jkremser))
+- Fixing vulnerabilities in terratests [\#756](https://github.com/k8gb-io/k8gb/pull/756) ([kuritka](https://github.com/kuritka))
+- Add missing displayName + remove existing dir [\#755](https://github.com/k8gb-io/k8gb/pull/755) ([jkremser](https://github.com/jkremser))
+- In CONTRIBUTING.md point to a release pr that went smoothly [\#754](https://github.com/k8gb-io/k8gb/pull/754) ([jkremser](https://github.com/jkremser))
+- Switch to CR\_TOKEN with the workflow scope [\#753](https://github.com/k8gb-io/k8gb/pull/753) ([ytsarev](https://github.com/ytsarev))
+- fix: Broken first user experience commands [\#752](https://github.com/k8gb-io/k8gb/pull/752) ([somaritane](https://github.com/somaritane))
+- Allow the EXT\_GSLB\_CLUSTERS\_GEO\_TAGS to contain CLUSTER\_GEO\_TAG [\#750](https://github.com/k8gb-io/k8gb/pull/750) ([jkremser](https://github.com/jkremser))
+- cleaning .gitignore [\#740](https://github.com/k8gb-io/k8gb/pull/740) ([kuritka](https://github.com/kuritka))
+- Update Offline Changelog [\#736](https://github.com/k8gb-io/k8gb/pull/736) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Multicluster setup \(n \> 2\) [\#722](https://github.com/k8gb-io/k8gb/pull/722) ([jkremser](https://github.com/jkremser))
+
+
+
 ## [v0.8.4](https://github.com/k8gb-io/k8gb/tree/v0.8.4) (2021-11-16)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.3...v0.8.4)
