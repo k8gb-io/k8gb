@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.8.4](https://img.shields.io/badge/Version-v0.8.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.8.4](https://img.shields.io/badge/AppVersion-v0.8.4-informational?style=flat-square)
+![Version: v0.8.5](https://img.shields.io/badge/Version-v0.8.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.8.5](https://img.shields.io/badge/AppVersion-v0.8.5-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -55,7 +55,6 @@ A Helm chart for Kubernetes Global Balancer
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.edgeDNSZone | string | `"example.com"` | main zone which would contain gslb zone to delegate |
 | k8gb.extGslbClustersGeoTags | string | `"us"` | comma-separated list of external gslb geo tags to pair with |
-| k8gb.hostAliases | list | `[]` | use [/etc/hosts](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) inside operator pod. Useful for advanced testing scenarios and to break dependency on EdgeDNS for cross k8gb collaboration example: `[{"ip": "172.17.0.1", "hostnames": ["gslb-ns-us-cloud.example.com"]}]` |
 | k8gb.imageRepo | string | `"absaoss/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
@@ -70,6 +69,11 @@ A Helm chart for Kubernetes Global Balancer
 | ns1.enabled | bool | `false` | Enable NS1 provider |
 | ns1.ignoreSSL | bool | `false` | optional custom NS1 API endpoint for on-prem setups endpoint: https://api.nsone.net/v1/ |
 | openshift.enabled | bool | `false` | Install OpenShift specific RBAC |
+| rfc2136.enabled | bool | `false` |  |
+| rfc2136.rfc2136Opts[0].host | string | `"host.k3d.internal"` |  |
+| rfc2136.rfc2136Opts[1].port | int | `1053` |  |
+| rfc2136.rfc2136Opts[2].tsig-secret-alg | string | `"hmac-sha256"` |  |
+| rfc2136.rfc2136Opts[3].tsig-keyname | string | `"externaldns-key"` |  |
 | route53.enabled | bool | `false` | Enable Route53 provider |
 | route53.hostedZoneID | string | `"ZXXXSSS"` | Route53 ZoneID |
 | route53.irsaRole | string | `"arn:aws:iam::111111:role/external-dns"` | specify IRSA Role in AWS ARN format or disable it by setting to `false` |
