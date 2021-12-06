@@ -10,6 +10,16 @@
   - [Round Robin](#round-robin)
   - [Failover](#failover)
 
+ ---
+**NOTE**
+
+This tutorial relies on some makefile targets, to be able to fully understand what's happening under the covers, check the Makefile
+[source code](https://github.com/k8gb-io/k8gb/blob/master/Makefile).
+Or you may want to run a target first with `-n` switch that will print what it is going to do (example: `make -n test-round-robin`).
+For more user-centric targets in that makefile consult `make help`.
+
+---
+
 ## Environment prerequisites
 
 - [Install **Go 1.16**](https://golang.org/dl/)
@@ -17,7 +27,7 @@
 - [Install **Git**](https://git-scm.com/downloads)
 
 - Install **gnu-sed** if you don't have it. If you are on a Mac, install `gnu-sed` with Homebrew
-    ```shell script
+    ```sh
     brew install gnu-sed
     ```
 
@@ -39,11 +49,10 @@
 
  - [install **golangci-lint**](https://golangci-lint.run/usage/install/#local-installation) for code quality checks
 
-
 ## Running project locally
 
 To spin-up a local environment using two k3s clusters and deploy a test application to both clusters, execute the command below:
-```shell script
+```sh
 make deploy-full-local-setup
 ```
 
@@ -51,7 +60,7 @@ make deploy-full-local-setup
 
 If local setup runs well, check if clusters are correctly installed
 
-```shell script
+```sh
 kubectl cluster-info --context k3d-edgedns && kubectl cluster-info --context k3d-test-gslb1 && kubectl cluster-info --context k3d-test-gslb2
 ```
 
@@ -61,32 +70,51 @@ while [test-gslb2](https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb2.ya
 Cluster [edgedns](https://github.com/k8gb-io/k8gb/tree/master/k3d/edge-dns.yaml) runs BIND and acts as EdgeDNS holding Delegated Zone for out test setup and answers
 on port `:1053`.
 
-```shell script
+```sh
 dig @localhost -p 1053 roundrobin.cloud.example.com +short
 ```
-Should return ***two A records*** from both clusters:
+Should return ***two A records*** from both clusters (IP addresses and order may differ):
 ```
-10.43.178.134
-10.43.75.137
+172.20.0.2
+172.20.0.5
+172.20.0.4
+172.20.0.6
 ```
 
-Or you can ask specific CoreDNS instance for it's local targets:
-```shell script
+You can verify that correct IP addresses of all the nodes in both clusters were populated:
+```sh
+for c in k3d-test-gslb{1,2}; do kubectl get no -ocustom-columns="NAME:.metadata.name,IP:status.addresses[0].address" --context $c; done
+```
+
+Returns a result similar to:
+```
+NAME                      IP
+k3d-test-gslb1-agent-0    172.20.0.2
+k3d-test-gslb1-server-0   172.20.0.4
+NAME                      IP
+k3d-test-gslb2-server-0   172.20.0.6
+k3d-test-gslb2-agent-0    172.20.0.5
+```
+
+Or you can ask specific CoreDNS instance for its local targets:
+```sh
 dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
-As expected result you should see **two A records** divided between both clusters (IP addresses may differ).
-```shell script
+As expected result you should see **two A records** divided between both clusters.
+```sh
 ...
 ...
 ;; ANSWER SECTION:
-localtargets-roundrobin.cloud.example.com. 30 IN A 10.43.178.134
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.4
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.2
 ...
 ...
-localtargets-roundrobin.cloud.example.com. 30 IN A 10.43.75.137
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.5
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.6
 ```
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top.
 Run following command and check if you get two json responses.
-```shell script
+```sh
 curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H "Host:roundrobin.cloud.example.com"
 ```
 
@@ -95,14 +123,14 @@ curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H
 There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/k8gb-io/k8gb/tree/master/terratest).
 To check whether everything is running properly execute [terratest](https://terratest.gruntwork.io/) :
 
-```shell script
+```sh
 make terratest
 ```
 
 ## Cleaning
 
 Clean up your local development clusters with
-```shell script
+```sh
 make destroy-full-local-setup
 ```
 
@@ -112,11 +140,11 @@ make destroy-full-local-setup
 
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - roundrobin.cloud.example.com` and depending
-on region will podinfo return **us** or **eu**. In current round robin implementation are IP addresses randomly picked.
+on the region, podinfo will return **us** or **eu**. In the current round robin implementation IP addresses are randomly picked.
 See [Gslb manifest with round robin strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 
-Run several times command below and watch `message` field.
-```shell script
+Try to run the following command several times and watch the `message` field.
+```sh
 make test-round-robin
 ```
 As expected result you should see podinfo message changing
@@ -146,12 +174,12 @@ on whether podinfo is running inside the cluster it returns only **eu** or **us*
 See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
 Switch GLSB to failover mode:
-```shell script
+```sh
 make init-failover
 ```
 Now both clusters are running in failover mode and podinfo is running on both of them.
 Run several times command below and watch `message` field.
-```shell script
+```sh
 make test-failover
 ```
 You will see only **eu** podinfo is responsive:
@@ -168,7 +196,7 @@ Stop podinfo on **current (eu)** cluster:
 make stop-test-app
 ```
 Several times hit application again
-```shell script
+```sh
 make test-failover
 ```
 As expected result you should see only podinfo from **second cluster (us)** is responding:
@@ -186,11 +214,11 @@ It might happen that podinfo will be unavailable for a while due to
 wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
 ```
 Start podinfo again on **current (eu)** cluster:
-```shell script
+```sh
 make start-test-app
 ```
 and hit several times hit podinfo:
-```shell script
+```sh
 make test-failover
 ```
 After DNS sync interval is over **eu** will be back
@@ -203,6 +231,6 @@ After DNS sync interval is over **eu** will be back
 }
 ```
 Optionally you can switch GLSB back to round-robin mode
-```shell script
+```sh
 make init-round-robin
 ```
