@@ -26,6 +26,7 @@
     <meta name="msapplication-TileColor" content="#b91d47">
     <meta name="msapplication-config" content="/assets/images/browserconfig.xml">
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" rel="stylesheet">
   </head>
   <body>
     <header class="page-header" role="banner">
@@ -45,7 +46,7 @@
     </header>
 
     <main id="content" class="main-content" role="main">
-      {% include anchor_headings.html html=content anchorBody="§" anchorClass="heading-anchor" anchorAttrs="aria-labelledby=\"%html_id%\"" headerAttrs="class=heading" %}
+      {% include anchor_headings.html html=content anchorClass="heading-anchor fa fa-link" anchorAttrs="aria-labelledby=\"%html_id%\"" headerAttrs="class=heading" %}
 
       <footer class="site-footer">
         <a href="https://www.cncf.io" target="_blank">
