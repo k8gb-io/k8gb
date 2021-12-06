@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.8.6](https://github.com/k8gb-io/k8gb/tree/v0.8.6) (2021-12-05)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.5...v0.8.6)
+
+**Merged pull requests:**
+
+- RELEASE: v0.8.6 [\#783](https://github.com/k8gb-io/k8gb/pull/783) ([jkremser](https://github.com/jkremser))
+- Update Offline Changelog [\#782](https://github.com/k8gb-io/k8gb/pull/782) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#781](https://github.com/k8gb-io/k8gb/pull/781) ([github-actions[bot]](https://github.com/apps/github-actions))
+- switch hostAlias to real edgeDNS [\#726](https://github.com/k8gb-io/k8gb/pull/726) ([k0da](https://github.com/k0da))
+
+
+
 ## [v0.8.5](https://github.com/k8gb-io/k8gb/tree/v0.8.5) (2021-12-01)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.4...v0.8.5)
