@@ -1,0 +1,4 @@
+[build]
+  command = "make website"
+  publish = "_site/"
+
