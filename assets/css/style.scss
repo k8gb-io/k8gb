@@ -68,6 +68,10 @@ a.header-url:hover {
     visibility: hidden;
 }
 
+.heading-anchor::before {
+    font-size: 0.7em;
+}
+
 .heading-anchor:hover,
 .heading:hover > .heading-anchor {
     visibility: visible;
