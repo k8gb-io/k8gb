@@ -439,9 +439,7 @@ website:
 		git fetch origin gh-pages:gh-pages ;\
 		git checkout gh-pages ;\
 		git checkout - README.md CONTRIBUTING.md CHANGELOG.md docs/ ;\
-		mv CNAME EMANC ;\
-		bundle install ;\
-		bundle exec jekyll build ;\
+		$(MAKE) website ;\
 	fi
 
 .PHONY: version
