@@ -553,7 +553,7 @@ define deploy-prometheus
 	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
 		--version 14.2.0 \
 		--wait --timeout=2m0s \
-		--kube-context=k3d-$1 ;
+		--kube-context=k3d-$1
 endef
 
 define uninstall-prometheus
@@ -561,5 +561,5 @@ define uninstall-prometheus
 	echo "\n$(YELLOW)uninstall prometheus $(NC)" ;\
 	helm uninstall prometheus -n k8gb --kube-context=k3d-$1 ;\
 	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/scrape- --context=k3d-$1 ;\
-	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/port- --context=k3d-$1 ;
+	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/port- --context=k3d-$1
 endef
