@@ -50,10 +50,12 @@ func init() {
 }
 
 func main() {
-	var exitCode = 1
-	defer func() {
-		os.Exit(exitCode)
-	}()
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	var f *dns.ProviderFactory
 	resolver := depresolver.NewDependencyResolver()
 	config, err := resolver.ResolveOperatorConfig()
@@ -67,7 +69,7 @@ func main() {
 		Msg("K8gb status")
 	if err != nil {
 		log.Err(err).Msg("can't resolve environment variables")
-		return
+		return err
 	}
 	log.Debug().
 		Str("config", str.ToString(config)).
@@ -84,7 +86,7 @@ func main() {
 	})
 	if err != nil {
 		log.Err(err).Msg("Unable to start manager")
-		return
+		return err
 	}
 
 	for _, d := range deprecations {
@@ -99,7 +101,7 @@ func main() {
 	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
 	if err := schemeBuilder.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Err(err).Msg("Extending scheme")
-		return
+		return err
 	}
 
 	reconciler := &controllers.GslbReconciler{
@@ -115,29 +117,29 @@ func main() {
 	err = metrics.Metrics().Register()
 	if err != nil {
 		log.Err(err).Msg("Register metrics error")
-		return
+		return err
 	}
 
 	log.Info().Msg("Resolving DNS provider")
 	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config)
 	if err != nil {
 		log.Err(err).Msg("Unable to create factory")
-		return
+		return err
 	}
 	reconciler.DNSProvider = f.Provider()
 	log.Info().Str("provider", reconciler.DNSProvider.String()).Msg("Started")
 
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create controller Gslb")
-		return
+		return err
 	}
 	metrics.Metrics().SetRuntimeInfo(version, commit)
 	// +kubebuilder:scaffold:builder
 	log.Info().Msg("Starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		log.Err(err).Msg("Problem running manager")
-		return
+		return err
 	}
-	// time to call deferred functions including the exit one with code=0
-	exitCode = 0
+	log.Info().Msg("Gracefully finished, bye!\n")
+	return nil
 }
