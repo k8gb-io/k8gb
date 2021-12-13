@@ -147,7 +147,10 @@ The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoin
 - http://127.0.0.1:9080
 - http://127.0.0.1:9081
 
+All the metric data is ephemeral and will be lost with pod restarts.
 To uninstall Prometheus, run `make uninstall-prometheus`
+
+Optionally, you can also install Grafana that will have the datasources configured and example dashboard ready using `make deploy-grafana`
 
 ## Code style
 

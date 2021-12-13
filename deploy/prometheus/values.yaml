@@ -1,5 +1,7 @@
 server:
   enabled: true
+  persistentVolume:
+    enabled: false # emptyDir, all data is lost when pod restarts
   service:
     nodePort: 30090 # allowed port range between 30000 and 32768
     servicePort: 9090
