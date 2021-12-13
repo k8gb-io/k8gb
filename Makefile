@@ -250,17 +250,14 @@ uninstall-prometheus:
 
 .PHONY: deploy-grafana
 deploy-grafana:
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
+	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_NAME)1$(NC)"
 	@echo "\n$(YELLOW)install grafana $(NC)"
-	@$(eval PREVIOUS_CONTEXT := $(shell kubectl config current-context))
 	helm repo add grafana https://grafana.github.io/helm-charts
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
-		--wait --timeout=2m0s \
-		--kube-context=k3d-$(CLUSTER_GSLB1)
-	kubectl config use-context k3d-$(CLUSTER_GSLB1)
-	kubectl apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
-	@kubectl config use-context $(PREVIOUS_CONTEXT)
+		--wait --timeout=2m30s \
+		--kube-context=k3d-$(CLUSTER_NAME)1
+	kubectl --context k3d-$(CLUSTER_NAME)1 apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
 	@echo "\nGrafana is listening on http://localhost:3000\n"
 	@echo "🖖 credentials are admin:admin\n"
 
@@ -269,11 +266,8 @@ deploy-grafana:
 uninstall-grafana:
 	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
 	@echo "\n$(YELLOW)uninstall grafana $(NC)"
-	@$(eval PREVIOUS_CONTEXT := $(shell kubectl config current-context))
-	kubectl config use-context k3d-$(CLUSTER_GSLB1)
-	-kubectl delete -f deploy/grafana/dashboard-cm.yaml
-	@kubectl config use-context $(PREVIOUS_CONTEXT)
-	helm uninstall grafana -n k8gb --kube-context=k3d-$(CLUSTER_GSLB1)
+	kubectl --context k3d-$(CLUSTER_NAME)1 delete -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	helm uninstall grafana -n k8gb --kube-context=k3d-$(CLUSTER_NAME)1
 
 .PHONY: dns-tools
 dns-tools: ## Run temporary dnstools pod for debugging DNS issues
