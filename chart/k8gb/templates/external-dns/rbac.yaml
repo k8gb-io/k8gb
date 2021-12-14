@@ -1,5 +1,5 @@
----
 {{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled }}
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
