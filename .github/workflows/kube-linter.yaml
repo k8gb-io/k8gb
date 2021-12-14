@@ -15,8 +15,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Scan repo
+
+      - name: Create ../results directory for sarif files
+        shell: bash
+        run: mkdir -p ../results
+
+      - name: Scan k8gb chart
         id: kube-lint-repo
-        uses: stackrox/kube-linter-action@v1.0.2
+        uses: stackrox/kube-linter-action@v1
         with:
-          directory: chart
+          directory: chart/k8gb
+          version: 0.2.5
+          format: sarif
+          output-file: ../results/kube-linter.sarif
+
+      - name: Upload sarif output to GitHub
+        uses: github/codeql-action/upload-sarif@v1
+        continue-on-error: true
