@@ -32,7 +32,7 @@ A Helm chart for Kubernetes Global Balancer
 |-----|------|---------|-------------|
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
 | coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.0.7"` | image tag |
+| coredns.image.tag | string | `"v0.0.8"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
 | externaldns.image | string | `"k8s.gcr.io/external-dns/external-dns:v0.9.0"` | external-dns image repo:tag |
