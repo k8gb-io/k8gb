@@ -1,8 +1,8 @@
 dist/
 *.out
 *.sw[ap]
-k8gb
-k8gb.exe
+/k8gb
+/k8gb.exe
 .env
 
 # IDE specific files (debug config etc...)
