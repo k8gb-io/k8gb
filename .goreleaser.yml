@@ -6,7 +6,7 @@ builds:
       - CGO_ENABLED=0
     id: k8gb
     main: ./main.go
-    binary: bin/manager
+    binary: bin/k8gb
     goos:
       - linux
     goarch:

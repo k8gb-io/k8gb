@@ -85,7 +85,7 @@ func run() error {
 		LeaderElectionID:   "8020e9ff.absa.oss",
 	})
 	if err != nil {
-		log.Err(err).Msg("Unable to start manager")
+		log.Err(err).Msg("Unable to start k8gb")
 		return err
 	}
 
@@ -135,9 +135,9 @@ func run() error {
 	}
 	metrics.Metrics().SetRuntimeInfo(version, commit)
 	// +kubebuilder:scaffold:builder
-	log.Info().Msg("Starting manager")
+	log.Info().Msg("Starting k8gb")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		log.Err(err).Msg("Problem running manager")
+		log.Err(err).Msg("Problem running k8gb controller")
 		return err
 	}
 	log.Info().Msg("Gracefully finished, bye!\n")

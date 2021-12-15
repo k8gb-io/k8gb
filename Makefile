@@ -358,11 +358,11 @@ lint:
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
-# build manager binary
-.PHONY: manager
-manager: lint
+# build k8gb binary
+.PHONY: k8gb
+k8gb: lint
 	$(call generate)
-	go build -o bin/manager main.go
+	go build -o bin/k8gb main.go
 
 .PHONY: mocks
 mocks:
