@@ -63,7 +63,7 @@ coredns:
     # -- CoreDNS CRD plugin image
     repository: absaoss/k8s_crd
     # -- image tag
-    tag: v0.0.7
+    tag: v0.0.8
   # -- Creates serviceAccount for coredns
   serviceAccount:
     create: true
