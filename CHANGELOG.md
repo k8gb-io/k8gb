@@ -1,5 +1,40 @@
 # Changelog
 
+## [v0.8.7](https://github.com/k8gb-io/k8gb/tree/v0.8.7) (2021-12-15)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.6...v0.8.7)
+
+**Fixed bugs:**
+
+- Unable to deploy grafana to the test cluster with deploy-grafana make target [\#796](https://github.com/k8gb-io/k8gb/issues/796)
+
+**Closed issues:**
+
+- dev: Fix kube-linter github workflow [\#800](https://github.com/k8gb-io/k8gb/issues/800)
+- Unable to deploy prometheus to the test cluster with make target [\#795](https://github.com/k8gb-io/k8gb/issues/795)
+- Extend the netlify's PR preview for a change to gh-pages [\#693](https://github.com/k8gb-io/k8gb/issues/693)
+
+**Merged pull requests:**
+
+- RELEASE: v0.8.7 [\#807](https://github.com/k8gb-io/k8gb/pull/807) ([somaritane](https://github.com/somaritane))
+- Update Helm Docs [\#804](https://github.com/k8gb-io/k8gb/pull/804) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Bump coredns-crd-plugin version v0.0.7-\>v0.0.8 [\#803](https://github.com/k8gb-io/k8gb/pull/803) ([somaritane](https://github.com/somaritane))
+- dev: Don't .gitignore chart/k8gb/ directory [\#802](https://github.com/k8gb-io/k8gb/pull/802) ([somaritane](https://github.com/somaritane))
+- kube-linter pipeline and helm template fix [\#801](https://github.com/k8gb-io/k8gb/pull/801) ([somaritane](https://github.com/somaritane))
+- Fix coredns based exposure [\#799](https://github.com/k8gb-io/k8gb/pull/799) ([ytsarev](https://github.com/ytsarev))
+- Prometheus on emptyDir volumes [\#798](https://github.com/k8gb-io/k8gb/pull/798) ([jkremser](https://github.com/jkremser))
+- Fix Grafana makefile target \(use correct cluster name\) [\#797](https://github.com/k8gb-io/k8gb/pull/797) ([jkremser](https://github.com/jkremser))
+- Clean Terratest dependencies [\#793](https://github.com/k8gb-io/k8gb/pull/793) ([kuritka](https://github.com/kuritka))
+- Gracefully finishing deferred calls  [\#792](https://github.com/k8gb-io/k8gb/pull/792) ([kuritka](https://github.com/kuritka))
+- \(un\)deploying prometheus is broken [\#791](https://github.com/k8gb-io/k8gb/pull/791) ([jkremser](https://github.com/jkremser))
+- Re-use the Makefile target from gh-pages branch [\#790](https://github.com/k8gb-io/k8gb/pull/790) ([jkremser](https://github.com/jkremser))
+- Update the local dev docs [\#787](https://github.com/k8gb-io/k8gb/pull/787) ([jkremser](https://github.com/jkremser))
+- Update Offline Changelog [\#786](https://github.com/k8gb-io/k8gb/pull/786) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#785](https://github.com/k8gb-io/k8gb/pull/785) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Run terratests for upgrade testing against only 2 clusters [\#784](https://github.com/k8gb-io/k8gb/pull/784) ([jkremser](https://github.com/jkremser))
+
+
+
 ## [v0.8.6](https://github.com/k8gb-io/k8gb/tree/v0.8.6) (2021-12-05)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.5...v0.8.6)
