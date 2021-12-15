@@ -49,9 +49,3 @@ jobs:
           args: release --rm-dist --release-notes=changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Invoke workflow for OLM
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: OLM bundle and PR
-          token: ${{ secrets.CR_TOKEN }}
-          inputs: '{ "bundleVersion": "master" }'
