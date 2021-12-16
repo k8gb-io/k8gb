@@ -77,8 +77,8 @@ func TestPrometheusRegistry(t *testing.T) {
 	items := []string{K8gbGslbErrorsTotal, K8gbGslbHealthyRecords, K8gbGslbReconciliationLoopsTotal,
 		K8gbGslbServiceStatusNum, K8gbGslbStatusCountForFailover, K8gbGslbStatusCountForRoundrobin,
 		K8gbGslbStatusCountForGeoIP, K8gbInfobloxHeartbeatsTotal, K8gbInfobloxHeartbeatErrorsTotal,
-		K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal, K8gbEndpointStatusNum,
-		K8gbRuntimeInfo}
+		K8gbInfobloxRequestDuration, K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal,
+		K8gbEndpointStatusNum, K8gbRuntimeInfo}
 	// act
 	registry := m.registry()
 	// assert

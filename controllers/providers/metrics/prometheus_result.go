@@ -26,7 +26,7 @@ type MetricResult struct {
 	value prometheus.Collector
 }
 
-// Get gets actual copy of metric defined by it's name
+// Get gets actual copy of metric defined by its name
 func (m *PrometheusMetrics) Get(name string) (r *MetricResult) {
 	return &MetricResult{value: m.registry()[name]}
 }

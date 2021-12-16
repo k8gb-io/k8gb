@@ -24,6 +24,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
@@ -49,6 +50,7 @@ const (
 	K8gbGslbStatusCountForGeoIP       = "k8gb_gslb_status_count_for_geoip"
 	K8gbInfobloxHeartbeatsTotal       = "k8gb_infoblox_heartbeats_total"
 	K8gbInfobloxHeartbeatErrorsTotal  = "k8gb_infoblox_heartbeat_errors_total"
+	K8gbInfobloxRequestDuration       = "k8gb_infoblox_request_duration"
 	K8gbInfobloxZoneUpdatesTotal      = "k8gb_infoblox_zone_updates_total"
 	K8gbInfobloxZoneUpdateErrorsTotal = "k8gb_infoblox_zone_update_errors_total"
 	K8gbEndpointStatusNum             = "k8gb_endpoint_status_num"
@@ -64,6 +66,7 @@ type collectors struct {
 	K8gbGslbStatusCountForGeoip       *prometheus.GaugeVec
 	K8gbGslbErrorsTotal               *prometheus.CounterVec
 	K8gbGslbReconciliationLoopsTotal  *prometheus.CounterVec
+	K8gbInfobloxRequestDuration       *prometheus.HistogramVec
 	K8gbInfobloxZoneUpdatesTotal      *prometheus.CounterVec
 	K8gbInfobloxZoneUpdateErrorsTotal *prometheus.CounterVec
 	K8gbInfobloxHeartbeatsTotal       *prometheus.CounterVec
@@ -77,6 +80,21 @@ type PrometheusMetrics struct {
 	config  depresolver.Config
 	metrics collectors
 }
+
+// DNSProviderRequest is a label for histogram metric
+type DNSProviderRequest string
+
+const (
+	CreateZoneDelegated DNSProviderRequest = "ZoneCreate"
+	GetZoneDelegated    DNSProviderRequest = "ZoneRead"
+	UpdateZoneDelegated DNSProviderRequest = "ZoneUpdate"
+	DeleteZoneDelegated DNSProviderRequest = "ZoneDelete"
+
+	CreateTXTRecord = "TXTRecordCreate"
+	GetTXTRecord    = "TXTRecordRead"
+	UpdateTXTRecord = "TXTRecordUpdate"
+	DeleteTXTRecord = "TXTRecordDelete"
+)
 
 var regex = regexp.MustCompile("[A-Z]")
 
@@ -161,6 +179,11 @@ func (m *PrometheusMetrics) InfobloxIncrementHeartbeat(gslb *k8gbv1beta1.Gslb) {
 
 func (m *PrometheusMetrics) InfobloxIncrementHeartbeatError(gslb *k8gbv1beta1.Gslb) {
 	m.metrics.K8gbInfobloxHeartbeatErrorsTotal.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Inc()
+}
+
+func (m *PrometheusMetrics) InfobloxObserveRequestDuration(start time.Time, request DNSProviderRequest, success bool) {
+	duration := time.Since(start).Seconds()
+	m.metrics.K8gbInfobloxRequestDuration.With(prometheus.Labels{"request": string(request), "success": fmt.Sprintf("%t", success)}).Observe(duration)
 }
 
 func (m *PrometheusMetrics) SetRuntimeInfo(version, commit string) {
@@ -271,6 +294,15 @@ func (m *PrometheusMetrics) init() {
 		},
 		[]string{"namespace", "name", "status"},
 	)
+	m.metrics.K8gbInfobloxRequestDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    K8gbInfobloxRequestDuration,
+			Help:    "How long it took for Infoblox requests to complete, partitioned by request type. Round-trip time of http communication is included.",
+			Buckets: prometheus.ExponentialBuckets(.2, 4, 5),
+		},
+		[]string{"request", "success"},
+	)
+
 	m.metrics.K8gbInfobloxZoneUpdatesTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: K8gbInfobloxZoneUpdatesTotal,
