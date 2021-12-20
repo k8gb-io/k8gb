@@ -40,7 +40,7 @@ K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:sp
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.7.0
-GOLIC_VERSION  ?= v0.5.0
+GOLIC_VERSION  ?= v0.7.2
 GOKART_VERSION ?= v0.2.0
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu

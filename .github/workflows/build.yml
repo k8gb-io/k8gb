@@ -27,7 +27,7 @@ jobs:
           version: v1.42.1
       - name: golic
         run: |
-          go install github.com/AbsaOSS/golic@v0.5.0
+          go install github.com/AbsaOSS/golic@v0.7.2
           golic inject --dry -x -t apache2
       - name: gokart
         run: |
