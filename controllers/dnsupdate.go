@@ -28,11 +28,10 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-func sortTargets(targets []string) []string {
+func sortTargets(targets []string) {
 	sort.Slice(targets, func(i, j int) bool {
 		return targets[i] < targets[j]
 	})
-	return targets
 }
 
 func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
@@ -49,19 +48,18 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		return nil, err
 	}
 
-	for host, health := range serviceHealth {
+	for ingressHost, health := range serviceHealth {
 		var finalTargets []string
 
-		if !strings.Contains(host, r.Config.EdgeDNSZone) {
-			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", host, r.Config.EdgeDNSZone)
+		if !strings.Contains(ingressHost, r.Config.EdgeDNSZone) {
+			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", ingressHost, r.Config.EdgeDNSZone)
 		}
 
 		isPrimary := gslb.Spec.Strategy.PrimaryGeoTag == r.Config.ClusterGeoTag
 		isHealthy := health == k8gbv1beta1.Healthy
 
 		if isHealthy {
-			finalTargets = append(finalTargets, localTargets...)
-			localTargetsHost := fmt.Sprintf("localtargets-%s", host)
+			localTargetsHost := fmt.Sprintf("localtargets-%s", ingressHost)
 			dnsRecord := &externaldns.Endpoint{
 				DNSName:    localTargetsHost,
 				RecordTTL:  ttl,
@@ -71,49 +69,9 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 			gslbHosts = append(gslbHosts, dnsRecord)
 		}
 
-		// Check if host is alive on external Gslb
-		externalTargets := r.DNSProvider.GetExternalTargets(host)
+		finalTargets = r.resolveFinalTargets(gslb, ingressHost, localTargets, isPrimary, isHealthy)
 
-		sortTargets(externalTargets)
-
-		if len(externalTargets) > 0 {
-			switch gslb.Spec.Strategy.Type {
-			case roundRobinStrategy, geoStrategy:
-				finalTargets = append(finalTargets, externalTargets...)
-			case failoverStrategy:
-				// If cluster is Primary
-				if isPrimary {
-					// If cluster is Primary and Healthy return only own targets
-					// If cluster is Primary and Unhealthy return Secondary external targets
-					if !isHealthy {
-						finalTargets = externalTargets
-						log.Info().
-							Str("gslb", gslb.Name).
-							Str("cluster", gslb.Spec.Strategy.PrimaryGeoTag).
-							Str("targets", fmt.Sprintf("%v", finalTargets)).
-							Str("workload", k8gbv1beta1.Unhealthy.String()).
-							Msg("Executing failover strategy for primary cluster")
-					}
-				} else {
-					// If cluster is Secondary and Primary external cluster is Healthy
-					// then return Primary external targets.
-					// Return own targets by default.
-					finalTargets = externalTargets
-					log.Info().
-						Str("gslb", gslb.Name).
-						Str("cluster", gslb.Spec.Strategy.PrimaryGeoTag).
-						Str("targets", fmt.Sprintf("%v", finalTargets)).
-						Str("workload", k8gbv1beta1.Healthy.String()).
-						Msg("Executing failover strategy for secondary cluster")
-				}
-			}
-		} else {
-			log.Info().
-				Str("host", host).
-				Msg("No external targets have been found for host")
-		}
-
-		r.updateRuntimeStatus(gslb, isPrimary, health, finalTargets)
+		r.updateMetrics(gslb, isPrimary, health, finalTargets)
 		log.Info().
 			Str("gslb", gslb.Name).
 			Str("targets", fmt.Sprintf("%v", finalTargets)).
@@ -121,7 +79,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 
 		if len(finalTargets) > 0 {
 			dnsRecord := &externaldns.Endpoint{
-				DNSName:    host,
+				DNSName:    ingressHost,
 				RecordTTL:  ttl,
 				RecordType: "A",
 				Targets:    finalTargets,
@@ -153,7 +111,66 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 	return dnsEndpoint, err
 }
 
-func (r *GslbReconciler) updateRuntimeStatus(gslb *k8gbv1beta1.Gslb, isPrimary bool, isHealthy k8gbv1beta1.HealthStatus, finalTargets []string) {
+func (r *GslbReconciler) resolveFinalTargets(gslb *k8gbv1beta1.Gslb, host string, localTargets []string, isPrimary bool, isHealthy bool) []string {
+	allExternalClusterNSNames := r.Config.GetExternalClusterNSNames()
+	switch gslb.Spec.Strategy.Type {
+	case roundRobinStrategy, geoStrategy:
+		externalTargets := r.DNSProvider.GetExternalTargets(host, allExternalClusterNSNames)
+		if len(externalTargets) > 0 {
+			sortTargets(externalTargets)
+			return append(localTargets, externalTargets...)
+		}
+		log.Info().
+			Str("host", host).
+			Msg("No external targets have been found for host")
+	case failoverStrategy:
+		if isPrimary && isHealthy {
+			// If cluster is Primary and Healthy return only own targets
+			return localTargets
+		}
+		orderedTags := gslb.Spec.Strategy.FailoverOrder
+		log.Info().
+			Str("gslb", gslb.Name).
+			Str("cluster", gslb.Spec.Strategy.PrimaryGeoTag).
+			Str("localTargets", fmt.Sprintf("%v", localTargets)).
+			Str("workload", k8gbv1beta1.Unhealthy.String()).
+			Str("failoverOrder", strings.Join(orderedTags, ", ")).
+			Msg("Executing failover strategy: finding proper cluster to take it over")
+
+		// each cluster is responsible for updating its the DNS A records for localtargets-{host} based on the readiness probes, so let's find the
+		// first one from the list that have it non-empty
+		lHost := fmt.Sprintf("localtargets-%s", host)
+		for _, tag := range orderedTags {
+			externalTargets := r.DNSProvider.GetExternalTargets(lHost, map[string]string{
+				tag: allExternalClusterNSNames[tag],
+			})
+			if len(externalTargets) > 0 {
+				sortTargets(externalTargets)
+				log.Info().
+					Str("host", host).
+					Str("clusterTag", tag).
+					Msg("Executing failover strategy: suitable cluster on which the host is alive has been found")
+				return externalTargets
+			}
+			log.Info().
+				Str("host", host).
+				Str("clusterTag", tag).
+				Str("failoverOrder", strings.Join(orderedTags, ", ")).
+				Msg("No external targets have been found for host, trying next cluster tag..")
+		}
+
+		log.Info().
+			Str("host", host).
+			Msg("No external targets have been found for host, on all clusters. There is no cluster to fail over.")
+		return []string{}
+	}
+	if isHealthy {
+		return localTargets
+	}
+	return []string{}
+}
+
+func (r *GslbReconciler) updateMetrics(gslb *k8gbv1beta1.Gslb, isPrimary bool, isHealthy k8gbv1beta1.HealthStatus, finalTargets []string) {
 	switch gslb.Spec.Strategy.Type {
 	case roundRobinStrategy:
 		m.UpdateRoundrobinStatus(gslb, isHealthy, finalTargets)

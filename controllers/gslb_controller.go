@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 
@@ -59,6 +60,7 @@ const (
 	roundRobinStrategy                   = "roundRobin"
 	failoverStrategy                     = "failover"
 	primaryGeoTagAnnotation              = "k8gb.io/primary-geotag"
+	failoverOrder                        = "k8gb.io/failoverOrder"
 	strategyAnnotation                   = "k8gb.io/strategy"
 	dnsTTLSecondsAnnotation              = "k8gb.io/dns-ttl-seconds"
 	splitBrainThresholdSecondsAnnotation = "k8gb.io/splitbrain-threshold-seconds"
@@ -284,6 +286,8 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			for annotationKey, annotationValue := range a.GetAnnotations() {
 				if annotationKey == primaryGeoTagAnnotation {
 					gslb.Spec.Strategy.PrimaryGeoTag = annotationValue
+				} else if annotationKey == failoverOrder {
+					gslb.Spec.Strategy.FailoverOrder = strings.Split(annotationValue, ",")
 				}
 			}
 			if gslb.Spec.Strategy.PrimaryGeoTag == "" {

@@ -199,8 +199,8 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 	return nil
 }
 
-func (p *InfobloxProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+func (p *InfobloxProvider) GetExternalTargets(host string, extClusterNsNames map[string]string) (targets []string) {
+	return p.assistant.GetExternalTargets(host, extClusterNsNames)
 }
 
 func (p *InfobloxProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {

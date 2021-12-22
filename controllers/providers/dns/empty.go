@@ -45,8 +45,8 @@ func (p *EmptyDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) (r []st
 	return p.assistant.GslbIngressExposedIPs(gslb)
 }
 
-func (p *EmptyDNSProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+func (p *EmptyDNSProvider) GetExternalTargets(host string, extClusterNsNames map[string]string) (targets []string) {
+	return p.assistant.GetExternalTargets(host, extClusterNsNames)
 }
 
 func (p *EmptyDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {

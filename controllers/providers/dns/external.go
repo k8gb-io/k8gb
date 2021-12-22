@@ -104,8 +104,8 @@ func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb) error {
 	return p.assistant.RemoveEndpoint(p.endpointName)
 }
 
-func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets []string) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+func (p *ExternalDNSProvider) GetExternalTargets(host string, extClusterNsNames map[string]string) (targets []string) {
+	return p.assistant.GetExternalTargets(host, extClusterNsNames)
 }
 
 func (p *ExternalDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {

@@ -16,3 +16,7 @@ spec:
   strategy:
     type: failover
     primaryGeoTag: eu
+    failoverOrder:
+      - us
+      - cz
+      - af

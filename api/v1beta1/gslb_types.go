@@ -26,13 +26,18 @@ import (
 // Strategy defines Gslb behavior
 // +k8s:openapi-gen=true
 type Strategy struct {
-	// Load balancing strategy type:(roundRobin|failover)
+	// Load balancing strategy type:(roundRobin|failover|geoip)
+	// +kubebuilder:validation:Enum=failover;geoip;roundRobin
 	Type string `json:"type"`
 	// Primary Geo Tag. Valid for failover strategy only
 	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
+	// List of additional geo tags that should be tried in order if PrimaryGeoTag fails. Valid for failover strategy only
+	FailoverOrder []string `json:"failoverOrder,omitempty"`
 	// Defines DNS record TTL in seconds
+	// +kubebuilder:validation:Minimum=0
 	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty"`
 	// Split brain TXT record expiration in seconds
+	// +kubebuilder:validation:Minimum=0
 	SplitBrainThresholdSeconds int `json:"splitBrainThresholdSeconds,omitempty"`
 }
 

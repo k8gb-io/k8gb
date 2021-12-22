@@ -269,15 +269,28 @@ spec:
                 properties:
                   dnsTtlSeconds:
                     description: Defines DNS record TTL in seconds
+                    minimum: 0
                     type: integer
+                  failoverOrder:
+                    description: List of additional geo tags that should be tried
+                      in order if PrimaryGeoTag fails. Valid for failover strategy
+                      only
+                    items:
+                      type: string
+                    type: array
                   primaryGeoTag:
                     description: Primary Geo Tag. Valid for failover strategy only
                     type: string
                   splitBrainThresholdSeconds:
                     description: Split brain TXT record expiration in seconds
+                    minimum: 0
                     type: integer
                   type:
-                    description: Load balancing strategy type:(roundRobin|failover)
+                    description: Load balancing strategy type:(roundRobin|failover|geoip)
+                    enum:
+                    - failover
+                    - geoip
+                    - roundRobin
                     type: string
                 required:
                 - type

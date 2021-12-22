@@ -258,11 +258,11 @@ func (dr *DependencyResolver) GetDeprecations() (deprecations []string) {
 	}
 
 	var deprecated = map[oldVar]newVar{
-		EdgeDNSServerKey: newVar{
+		EdgeDNSServerKey: {
 			Name: EdgeDNSServersKey,
 			Msg:  "Pass the hostname or IP address as comma-separated list",
 		},
-		EdgeDNSServerPortKey: newVar{
+		EdgeDNSServerPortKey: {
 			Name: EdgeDNSServersKey,
 			Msg: "Port is an optional item in the comma-separated list of dns edge servers, in following form: dns1:53,dns2 (if not provided after the " +
 				"hostname and colon, it defaults to '53')",

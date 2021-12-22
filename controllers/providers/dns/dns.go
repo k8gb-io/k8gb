@@ -27,8 +27,8 @@ type Provider interface {
 	CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb) error
 	// GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses
 	GslbIngressExposedIPs(*k8gbv1beta1.Gslb) ([]string, error)
-	// GetExternalTargets retrieves list of external targets for specified host
-	GetExternalTargets(string) []string
+	// GetExternalTargets retrieves list of external targets for specified host using name servers specified in map
+	GetExternalTargets(string, map[string]string) []string
 	// SaveDNSEndpoint update DNS endpoint in gslb or create new one if doesn't exist
 	SaveDNSEndpoint(*k8gbv1beta1.Gslb, *externaldns.DNSEndpoint) error
 	// Finalize finalize gslb in k8gbNamespace
