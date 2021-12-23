@@ -46,4 +46,10 @@ rules:
   verbs:
   - create
   - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/finalizers
+  verbs:
+  - update
 {{- end }}
