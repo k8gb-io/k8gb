@@ -116,7 +116,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(ClusterGeoTagKey, config.ClusterGeoTag).isNotEmpty().matchRegexp(geoTagRegex).err
+	err = field(ClusterGeoTagKey, config.ClusterGeoTag).matchRegexp(geoTagRegex).err
 	if err != nil {
 		return err
 	}
