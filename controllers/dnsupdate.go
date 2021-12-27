@@ -129,12 +129,20 @@ func (r *GslbReconciler) resolveFinalTargets(gslb *k8gbv1beta1.Gslb, host string
 			return localTargets
 		}
 		orderedTags := gslb.Spec.Strategy.FailoverOrder
+		if len(orderedTags) == 0 {
+			orderedTags = r.Config.ExtClustersGeoTags
+			log.Warn().
+				Str("gslb", gslb.Name).
+				Str("newFailoverOrder", fmt.Sprintf("%v", orderedTags)).
+				Msg("failoverOrder was empty, using all available geo tags from operator configuration (env EXT_GSLB_CLUSTERS_GEO_TAGS)")
+		}
+		orderedTags = append([]string{gslb.Spec.Strategy.PrimaryGeoTag}, orderedTags...)
 		log.Info().
 			Str("gslb", gslb.Name).
 			Str("cluster", gslb.Spec.Strategy.PrimaryGeoTag).
 			Str("localTargets", fmt.Sprintf("%v", localTargets)).
 			Str("workload", k8gbv1beta1.Unhealthy.String()).
-			Str("failoverOrder", strings.Join(orderedTags, ", ")).
+			Str("failoverOrder", fmt.Sprintf("%v", orderedTags)).
 			Msg("Executing failover strategy: finding proper cluster to take it over")
 
 		// each cluster is responsible for updating its the DNS A records for localtargets-{host} based on the readiness probes, so let's find the
