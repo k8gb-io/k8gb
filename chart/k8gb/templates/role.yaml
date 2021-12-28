@@ -1,3 +1,4 @@
+{{- if .Values.k8gb.deployRbac }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -52,4 +53,5 @@ rules:
   - ingresses/finalizers
   verbs:
   - update
+{{- end }}
 {{- end }}
