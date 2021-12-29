@@ -51,7 +51,7 @@ annotations:
   artifacthub.io/crdsExamples: |
     - apiVersion: k8gb.absa.oss/v1beta1
       kind: Gslb
-      metada:
+      metadata:
         name: test-gslb-failover
         namespace: test-gslb
       spec:

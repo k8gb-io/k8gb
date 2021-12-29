@@ -27,7 +27,7 @@ Just a single Gslb CRD to enable the Global Load Balancing:
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
-metada:
+metadata:
   name: test-gslb-failover
   namespace: test-gslb
 spec:
