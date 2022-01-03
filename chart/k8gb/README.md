@@ -48,7 +48,9 @@ A Helm chart for Kubernetes Global Balancer
 | infoblox.sslVerify | bool | `true` | use SSL |
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
-| k8gb.clusterGeoTag | string | `"eu"` | used for places where we need to distinguish between differnet Gslb instances |
+| k8gb.clusterGeoTag | string | `"eu"` | used for places where we need to distinguish between different Gslb instances |
+| k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
+| k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
 | k8gb.dnsZone | string | `"cloud.example.com"` | dnsZone controlled by gslb |
 | k8gb.dnsZoneNegTTL | int | `300` | Negative TTL for SOA record |
 | k8gb.edgeDNSServers | list | `["1.1.1.1"]` | host/ip[:port] format is supported here where ports defaults to 53 |
