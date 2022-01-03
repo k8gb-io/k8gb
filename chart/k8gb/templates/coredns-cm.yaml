@@ -1,3 +1,4 @@
+{{- if .Values.coredns.deployment.enabled }}
 kind: ConfigMap
 metadata:
   labels:
@@ -19,3 +20,4 @@ data:
             negttl {{ .Values.k8gb.dnsZoneNegTTL }}
         }
     }
+{{- end }}
