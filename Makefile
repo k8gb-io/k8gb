@@ -351,7 +351,8 @@ ns1-secret:
 # runs golangci-lint aggregated linter; see .golangci.yaml for linter list
 .PHONY: lint
 lint:
-	golangci-lint run
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.43.0
+	$(GOBIN)/golangci-lint run
 
 # retrieves all targets
 .PHONY: list
