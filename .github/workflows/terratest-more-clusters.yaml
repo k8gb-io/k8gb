@@ -72,12 +72,12 @@ jobs:
 
       - name: Run Terratest
         continue-on-error: true
-        run: mkdir /tmp/terratest && make terratest | tee /tmp/terratest/all.log
+        run: mkdir $GITHUB_WORKSPACE/tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
 
       - name: Terratest log parser
-        run: terratest_log_parser --testlog /tmp/terratest/all.log --outputdir /tmp/terratest
+        run: terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
 
       - uses: actions/upload-artifact@v2
         with:
           name: terratest-logs
-          path: /tmp/terratest        
+          path: ${{ github.workspace }}/tmp/terratest        

@@ -63,12 +63,12 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb2
 
       - name: Run Terratests
-        run: mkdir -p /tmp/terratest && make terratest | tee /tmp/terratest/all.log
+        run: mkdir -p /tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
 
       - name: Terratest log parser
-        run: terratest_log_parser --testlog /tmp/terratest/all.log --outputdir /tmp/terratest
+        run: terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
 
       - uses: actions/upload-artifact@v2
         with:
           name: terratest-logs
-          path: /tmp/terratest
+          path: ${{ github.workspace }}/tmp/terratest
