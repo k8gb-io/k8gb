@@ -1,4 +1,4 @@
-// +build rr rr_multicluster all
+// +build rr rr_multicluster
 
 package test
 
