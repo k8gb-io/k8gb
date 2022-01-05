@@ -72,7 +72,7 @@ jobs:
 
       - name: Run Terratest
         continue-on-error: true
-        run: mkdir $GITHUB_WORKSPACE/tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+        run: mkdir -p ${{ github.workspace }}/tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
 
       - name: Terratest log parser
         run: terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest

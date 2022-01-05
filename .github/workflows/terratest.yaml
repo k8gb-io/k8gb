@@ -63,7 +63,7 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb2
 
       - name: Run Terratests
-        run: mkdir -p /tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+        run: mkdir -p ${{ github.workspace }}/tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
 
       - name: Terratest log parser
         run: terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
