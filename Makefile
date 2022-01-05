@@ -426,8 +426,11 @@ terratest: # Run terratest suite
 		echo "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
 		exit 1;\
 	fi
-	cd terratest/test/ && go mod download && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) go test -v -timeout 15m -parallel=12 --tags=$(TEST_TAGS)
-
+	mkdir -p /tmp/terratest && cd terratest/test/ && go mod download && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) go test -v -timeout 15m -parallel=12 --tags=$(TEST_TAGS) | tee /tmp/terratest/all.log
+	curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
+	chmod +x terratest_log_parser
+	sudo mv terratest_log_parser /usr/local/bin
+	terratest_log_parser --testlog /tmp/terratest/all.log --outputdir /tmp/terratest
 .PHONY: website
 website:
 	@if [ "$(CI)" = "true" ]; then\

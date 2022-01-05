@@ -62,5 +62,13 @@ jobs:
           echo "Cluster 2 (us):"
           kubectl get no -owide --context=k3d-test-gslb2
 
-      - name: Terratest
-        run: make terratest
+      - name: Run Terratests
+        run: mkdir -p /tmp/terratest && make terratest | tee /tmp/terratest/all.log
+
+      - name: Terratest log parser
+        run: terratest_log_parser --testlog /tmp/terratest/all.log --outputdir /tmp/terratest
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: terratest-logs
+          path: path/to/artifact/ # or path/to/artifact
