@@ -71,4 +71,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: terratest-logs
-          path: path/to/artifact/ # or path/to/artifact
+          path: /tmp/terratest

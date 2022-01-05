@@ -76,3 +76,8 @@ jobs:
 
       - name: Terratest log parser
         run: terratest_log_parser --testlog /tmp/terratest/all.log --outputdir /tmp/terratest
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: terratest-logs
+          path: /tmp/terratest        
