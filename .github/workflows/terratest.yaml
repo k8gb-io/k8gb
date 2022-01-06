@@ -62,7 +62,7 @@ jobs:
           echo "Cluster 2 (us):"
           kubectl get no -owide --context=k3d-test-gslb2
 
-      - name: Run Terratests
+      - name: Run Terratest
         run: mkdir -p ${{ github.workspace }}/tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
 
       - name: Terratest log parser

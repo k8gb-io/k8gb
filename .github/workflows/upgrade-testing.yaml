@@ -60,5 +60,13 @@ jobs:
       - name: K8GB deploy test version
         run: make deploy-test-version list-running-pods
 
-      - name: Terratest
-        run: make terratest
+      - name: Run Terratest
+        run: mkdir -p ${{ github.workspace }}/tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+
+      - name: Terratest log parser
+        run: terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: terratest-logs
+          path: ${{ github.workspace }}/tmp/terratest
