@@ -61,13 +61,20 @@ jobs:
         run: make deploy-test-version list-running-pods
 
       - name: Run Terratest
-        run: mkdir -p ${{ github.workspace }}/tmp/terratest && make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+        run: |
+        mkdir -p ${{ github.workspace }}/tmp/terratest 
+        echo "::group::Terratest logs" 
+        make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+        echo "::endgroup::"
 
       - name: Terratest log parser
         run: |
+          echo "::group::Terratest log parser"
           curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
           chmod +x terratest_log_parser
           ./terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
+          echo "::endgroup::"
+          echo Separated log files will be available under artifact section at https://github.com/k8gb-io/k8gb/actions/runs/${{ github.run_id }}
 
       - uses: actions/upload-artifact@v2
         with:
