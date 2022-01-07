@@ -62,10 +62,10 @@ jobs:
 
       - name: Run Terratest
         run: |
-        mkdir -p ${{ github.workspace }}/tmp/terratest 
-        echo "::group::Terratest logs" 
-        make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
-        echo "::endgroup::"
+          mkdir -p ${{ github.workspace }}/tmp/terratest 
+          echo "::group::Terratest logs" 
+          make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+          echo "::endgroup::"
 
       - name: Terratest log parser
         run: |
