@@ -118,7 +118,7 @@ demo: ## Execute end-to-end demo
 # spin-up local environment
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
-	@echo "\n$(YELLOW)Creating $(CLUSTERS_NUMBER) k8s clusters$(NC)"
+	@echo -e "\n$(YELLOW)Creating $(CLUSTERS_NUMBER) k8s clusters$(NC)"
 	$(MAKE) create-local-cluster CLUSTER_NAME=edge-dns
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
@@ -136,10 +136,10 @@ deploy-stable-version:
 .PHONY: deploy-test-version
 deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 	$(call deploy-edgedns)
-	@echo "\n$(YELLOW)import k8gb docker image to all $(CLUSTERS_NUMBER) clusters$(NC)"
+	@echo -e "\n$(YELLOW)import k8gb docker image to all $(CLUSTERS_NUMBER) clusters$(NC)"
 
 	@for c in $(CLUSTER_IDS); do \
-		echo "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
+		echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
 		k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_NAME)$$c ;\
 	done
 
@@ -150,27 +150,27 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 .PHONY: list-running-pods
 list-running-pods:
 	@for c in $(CLUSTER_IDS); do \
-		echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_NAME)$$c $(NC)" ;\
+		echo -e "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_NAME)$$c $(NC)" ;\
 		kubectl get pods -A --context=k3d-$(CLUSTER_NAME)$$c ;\
 	done
 
 create-local-cluster:
-	@echo "\n$(YELLOW)Create local cluster $(CYAN)$(CLUSTER_NAME) $(NC)"
+	@echo -e "\n$(YELLOW)Create local cluster $(CYAN)$(CLUSTER_NAME) $(NC)"
 	k3d cluster create -c k3d/$(CLUSTER_NAME).yaml
 
 .PHONY: deploy-local-cluster
 deploy-local-cluster:
 	@if [ -z "$(CLUSTER_ID)" ]; then echo invalid CLUSTER_ID value && exit 1; fi
-	@echo "\n$(YELLOW)Deploy local cluster $(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(NC)"
+	@echo -e "\n$(YELLOW)Deploy local cluster $(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(NC)"
 	kubectl config use-context k3d-$(CLUSTER_NAME)$(CLUSTER_ID)
 
-	@echo "\n$(YELLOW)Create namespace $(NC)"
+	@echo -e "\n$(YELLOW)Create namespace $(NC)"
 	kubectl apply -f deploy/namespace.yaml
 
-	@echo "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
+	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
 
-	@echo "\n$(YELLOW)Deploy Ingress $(NC)"
+	@echo -e "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
 	helm repo update
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
@@ -178,19 +178,19 @@ deploy-local-cluster:
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
-	@echo "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
+	@echo -e "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait-for-ingress)
 
-	@echo "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
+	@echo -e "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
 
 .PHONY: deploy-test-apps
 deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
-	@echo "\n$(YELLOW)Deploy GSLB cr $(NC)"
+	@echo -e "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
 
-	@echo "\n$(YELLOW)Deploy podinfo $(NC)"
+	@echo -e "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
 	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
@@ -251,22 +251,22 @@ uninstall-prometheus:
 
 .PHONY: deploy-grafana
 deploy-grafana:
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_NAME)1$(NC)"
-	@echo "\n$(YELLOW)install grafana $(NC)"
+	@echo -e "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_NAME)1$(NC)"
+	@echo -e "\n$(YELLOW)install grafana $(NC)"
 	helm repo add grafana https://grafana.github.io/helm-charts
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
 		--wait --timeout=2m30s \
 		--kube-context=k3d-$(CLUSTER_NAME)1
 	kubectl --context k3d-$(CLUSTER_NAME)1 apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
-	@echo "\nGrafana is listening on http://localhost:3000\n"
-	@echo "🖖 credentials are admin:admin\n"
+	@echo -e "\nGrafana is listening on http://localhost:3000\n"
+	@echo -e "🖖 credentials are admin:admin\n"
 
 
 .PHONY: uninstall-grafana
 uninstall-grafana:
-	@echo "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
-	@echo "\n$(YELLOW)uninstall grafana $(NC)"
+	@echo -e "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
+	@echo -e "\n$(YELLOW)uninstall grafana $(NC)"
 	kubectl --context k3d-$(CLUSTER_NAME)1 delete -f deploy/grafana/dashboard-cm.yaml -n k8gb
 	helm uninstall grafana -n k8gb --kube-context=k3d-$(CLUSTER_NAME)1
 
@@ -292,8 +292,8 @@ docker-manifest:
 .PHONY: ensure-cluster-size
 ensure-cluster-size:
 	@if [ "$(CLUSTERS_NUMBER)" -gt 8 ] ; then \
-		echo "$(RED)$(CLUSTERS_NUMBER) clusters is probably way too many$(NC)" ;\
-		echo "$(RED)you will probably hit resource limits or port collisions, gook luck you are on your own$(NC)" ;\
+		echo -e "$(RED)$(CLUSTERS_NUMBER) clusters is probably way too many$(NC)" ;\
+		echo -e "$(RED)you will probably hit resource limits or port collisions, gook luck you are on your own$(NC)" ;\
 	fi
 	@if [ "$(CLUSTERS_NUMBER)" -gt 3 ] ; then \
 		./k3d/generate-yaml.sh $(CLUSTERS_NUMBER) ;\
@@ -423,7 +423,7 @@ terratest: # Run terratest suite
 	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
 	@$(eval TEST_TAGS := $(shell [ $(RUNNING_CLUSTERS) == 2 ] && echo all || echo rr_multicluster))
 	@if [ "$(RUNNING_CLUSTERS)" -lt 2 ] ; then \
-		echo "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
+		echo -e "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
 		exit 1;\
 	fi
 	cd terratest/test/ && go mod download && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) go test -v -timeout 15m -parallel=12 --tags=$(TEST_TAGS)
@@ -451,7 +451,7 @@ help: ## Show this help
 ###############################
 
 define deploy-edgedns
-	@echo "\n$(YELLOW)Deploying EdgeDNS $(NC)"
+	@echo -e "\n$(YELLOW)Deploying EdgeDNS $(NC)"
 	kubectl --context k3d-edgedns apply -f deploy/edge/
 endef
 
@@ -537,11 +537,11 @@ define debug
 endef
 
 define deploy-prometheus
-	echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
-	echo "\n$(YELLOW)Set annotations on pods that will be scraped by prometheus$(NC)" ;\
+	echo -e "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
+	echo -e "\n$(YELLOW)Set annotations on pods that will be scraped by prometheus$(NC)" ;\
 	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/scrape="true" --context=k3d-$1 ;\
 	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/port="8080" --context=k3d-$1 ;\
-	echo "\n$(YELLOW)install prometheus $(NC)" ;\
+	echo -e "\n$(YELLOW)install prometheus $(NC)" ;\
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ;\
 	helm repo update ;\
 	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
@@ -551,8 +551,8 @@ define deploy-prometheus
 endef
 
 define uninstall-prometheus
-	echo "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
-	echo "\n$(YELLOW)uninstall prometheus $(NC)" ;\
+	echo -e "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
+	echo -e "\n$(YELLOW)uninstall prometheus $(NC)" ;\
 	helm uninstall prometheus -n k8gb --kube-context=k3d-$1 ;\
 	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/scrape- --context=k3d-$1 ;\
 	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/port- --context=k3d-$1
