@@ -84,10 +84,6 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		return err
 	}
 
-	if !p.config.SplitBrainCheck {
-		log.Info().Msg("Split-brain handling is disabled")
-	}
-
 	if findZone != nil {
 		err = p.checkZoneDelegated(findZone)
 		if err != nil {
