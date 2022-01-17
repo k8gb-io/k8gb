@@ -25,7 +25,6 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 
-	str "github.com/AbsaOSS/gopkg/strings"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/internal/utils"
@@ -97,7 +96,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	log.Debug().
 		Str("gslb", gslb.Name).
-		Str("Strategy", str.ToString(gslb.Spec.Strategy)).
+		Interface("strategy", gslb.Spec.Strategy).
 		Msg("Resolved strategy")
 	// == Finalizer business ==
 
@@ -265,10 +264,13 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			},
 		}
 
-		strToInt := func(str string) int {
-			intValue, err := strconv.Atoi(str)
+		annotationToInt := func(k string, v string) int {
+			intValue, err := strconv.Atoi(v)
 			if err != nil {
-				log.Err(err).Msg("can't convert string to int")
+				log.Err(err).
+					Str("annotationKey", k).
+					Str("annotationValue", v).
+					Msg("Can't parse annotation value to int")
 			}
 			return intValue
 		}
@@ -276,9 +278,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		for annotationKey, annotationValue := range a.GetAnnotations() {
 			switch annotationKey {
 			case dnsTTLSecondsAnnotation:
-				gslb.Spec.Strategy.DNSTtlSeconds = strToInt(annotationValue)
+				gslb.Spec.Strategy.DNSTtlSeconds = annotationToInt(annotationKey, annotationValue)
 			case splitBrainThresholdSecondsAnnotation:
-				gslb.Spec.Strategy.SplitBrainThresholdSeconds = strToInt(annotationValue)
+				gslb.Spec.Strategy.SplitBrainThresholdSeconds = annotationToInt(annotationKey, annotationValue)
 			}
 		}
 
@@ -300,7 +302,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		err = controllerutil.SetControllerReference(ingressToReuse, gslb, r.Scheme)
 		if err != nil {
 			log.Err(err).
-				Str("Ingress", ingressToReuse.Name).
+				Str("ingress", ingressToReuse.Name).
 				Str("gslb", gslb.Name).
 				Msg("Cannot set the Ingress as the owner of the Gslb")
 		}
