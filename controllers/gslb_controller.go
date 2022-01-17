@@ -320,9 +320,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				if annotationKey == strategyAnnotation {
 					switch annotationValue {
 					case roundRobinStrategy:
-						createGslbFromIngress(annotationKey, annotationKey, a, roundRobinStrategy)
+						createGslbFromIngress(annotationKey, annotationValue, a, roundRobinStrategy)
 					case failoverStrategy:
-						createGslbFromIngress(annotationKey, annotationKey, a, failoverStrategy)
+						createGslbFromIngress(annotationKey, annotationValue, a, failoverStrategy)
 					}
 				}
 			}
