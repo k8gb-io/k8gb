@@ -417,7 +417,7 @@ test-round-robin:
 test-failover:
 	@$(call hit-testapp-host, "failover.cloud.example.com")
 
-# executes terra-tests
+# executes terratests
 .PHONY: terratest
 terratest: # Run terratest suite
 	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
