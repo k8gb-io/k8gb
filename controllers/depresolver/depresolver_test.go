@@ -1442,6 +1442,8 @@ func cleanup() {
 }
 
 func configureEnvVar(config Config) {
+	_ = os.Unsetenv(EdgeDNSServerKey)
+	_ = os.Unsetenv(EdgeDNSServerPortKey)
 	_ = os.Setenv(ReconcileRequeueSecondsKey, strconv.Itoa(config.ReconcileRequeueSeconds))
 	_ = os.Setenv(ClusterGeoTagKey, config.ClusterGeoTag)
 	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
