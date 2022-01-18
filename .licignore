@@ -6,6 +6,7 @@
 !*.go
 !Dockerfile*
 !hack/boilerplate.go.txt
+!.golic.yaml
 
 # And skip generated files...
-/api/**
+/api/v1beta1/zz_generated.deepcopy.go
