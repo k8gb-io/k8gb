@@ -115,11 +115,11 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 
 			if !reflect.DeepEqual(findZone.DelegateTo, currentList) {
 				log.Info().
-					Str("records", fmt.Sprintf("(%v)", findZone.DelegateTo)).
+					Interface("records", findZone.DelegateTo).
 					Msg("Found delegated zone records")
 				log.Info().
-					Str("DNS zone", p.config.DNSZone).
-					Str("server list", fmt.Sprintf("%v", currentList)).
+					Str("DNSZone", p.config.DNSZone).
+					Interface("serverList", currentList).
 					Msg("Updating delegated zone with the server list")
 				_, err = p.updateZoneDelegated(objMgr, findZone.Ref, currentList)
 				if err != nil {
@@ -131,11 +131,11 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		}
 	} else {
 		log.Info().
-			Str("DNS zone", p.config.DNSZone).
+			Str("DNSZone", p.config.DNSZone).
 			Msg("Creating delegated zone")
 		sortZones(delegateTo)
 		log.Debug().
-			Str("records", fmt.Sprintf("%v", delegateTo)).
+			Interface("records", delegateTo).
 			Msg("Delegated records")
 		_, err = p.createZoneDelegated(objMgr, p.config.DNSZone, delegateTo)
 		if err != nil {
@@ -167,7 +167,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 		}
 		if len(findZone.Ref) > 0 {
 			log.Info().
-				Str("DNS zone", p.config.DNSZone).
+				Str("DNSZone", p.config.DNSZone).
 				Msg("Deleting delegated zone")
 			_, err := p.deleteZoneDelegated(objMgr, findZone.Ref)
 			if err != nil {
@@ -185,7 +185,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 	if findTXT != nil {
 		if len(findTXT.Ref) > 0 {
 			log.Info().
-				Str("TXT records", heartbeatTXTName).
+				Str("TXTRecords", heartbeatTXTName).
 				Msg("Deleting split brain TXT record")
 			_, err := p.deleteTXTRecord(objMgr, findTXT.Ref)
 			if err != nil {

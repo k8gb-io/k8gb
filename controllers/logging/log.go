@@ -67,9 +67,9 @@ func (l *loggerFactory) get() zerolog.Logger {
 			Logger()
 	}
 	logger.Info().Msg("Logger configured")
-	logger.Debug().
-		Str("Format", l.log.Format.String()).
-		Str("Level", l.log.Level.String()).
+	logger.Info().
+		Str("format", l.log.Format.String()).
+		Str("level", l.log.Level.String()).
 		Msg("Logger settings")
 	return logger
 }

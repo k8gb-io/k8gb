@@ -29,7 +29,6 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 
-	str "github.com/AbsaOSS/gopkg/strings"
 	"github.com/miekg/dns"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/networking/v1beta1"
@@ -65,7 +64,7 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	serviceList := &corev1.ServiceList{}
 	sel, err := labels.Parse(coreDNSServiceLabel)
 	if err != nil {
-		log.Error().Err(err).Msg("Badly formed label selector")
+		log.Err(err).Msg("Badly formed label selector")
 		return nil, err
 	}
 	listOption := &client.ListOptions{
@@ -83,7 +82,7 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		log.Warn().Msg("More than 1 CoreDNS service was found")
 		for _, service := range serviceList.Items {
 			log.Info().
-				Str("ServiceName", service.Name).
+				Str("serviceName", service.Name).
 				Msg("Found CoreDNS service")
 		}
 		err := coreerrors.New("more than 1 CoreDNS service was found. Check if CoreDNS exposed correctly")
@@ -97,7 +96,7 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	} else {
 		errMessage := "no LoadBalancer ExternalIPs are found"
 		log.Warn().
-			Str("ServiceName", coreDNSService.Name).
+			Str("serviceName", coreDNSService.Name).
 			Msg(errMessage)
 		err := coreerrors.New(errMessage)
 		return nil, err
@@ -105,7 +104,7 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	IPs, err := utils.Dig(lbHostname, r.edgeDNSServers...)
 	if err != nil {
 		log.Warn().Err(err).
-			Str("LoadBalancerHostname", lbHostname).
+			Str("loadBalancerHostname", lbHostname).
 			Msg("Can't dig CoreDNS service LoadBalancer FQDN")
 		return nil, err
 	}
@@ -160,7 +159,9 @@ func (r *Gslb) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) err
 	if err != nil && errors.IsNotFound(err) {
 
 		// Create the DNSEndpoint
-		log.Info().Msgf("Creating a new DNSEndpoint:\n %s", str.ToString(i))
+		log.Info().
+			Interface("DNSEndpoint", i).
+			Msgf("Creating a new DNSEndpoint")
 		err = r.client.Create(context.TODO(), i)
 
 		if err != nil {
@@ -227,7 +228,7 @@ func (r *Gslb) InspectTXTThreshold(fqdn string, splitBrainThreshold time.Duratio
 	txt, err := utils.Exchange(m, r.edgeDNSServers)
 	if err != nil {
 		log.Info().
-			Str("edgeDNSServers", r.edgeDNSServers.String()).
+			Interface("edgeDNSServers", r.edgeDNSServers).
 			Err(err).
 			Msg("Contacting EdgeDNS server for TXT split brain record")
 		return err
@@ -239,17 +240,17 @@ func (r *Gslb) InspectTXTThreshold(fqdn string, splitBrainThreshold time.Duratio
 			timeFromTXT, err := time.Parse("2006-01-02T15:04:05", timestamp)
 			if err != nil {
 				log.Err(err).
-					Str("raw record", t.String()).
-					Str("raw timestamp", timestamp).
+					Str("rawRecord", t.String()).
+					Str("rawTimestamp", timestamp).
 					Msg("Split brain TXT: can't parse timestamp")
 				return err
 			}
 			now := time.Now().UTC()
 			diff := now.Sub(timeFromTXT)
 			log.Debug().
-				Str("raw record", t.String()).
-				Str("raw timestamp", timestamp).
-				Str("parsed", timeFromTXT.String()).
+				Str("rawRecord", t.String()).
+				Str("rawTimestamp", timestamp).
+				Time("parsed", timeFromTXT).
 				Str("diff", diff.String()).
 				Msg("Split brain TXT")
 
@@ -279,9 +280,9 @@ func dnsQuery(host string, nameservers utils.DNSList) (*dns.Msg, error) {
 	if err != nil {
 		log.Warn().
 			Str("fqdn", fqdn).
-			Str("nameservers", nameservers.String()).
+			Interface("nameservers", nameservers).
 			Err(err).
-			Msg("Can't resolve FQDN using nameservers")
+			Msg("can't resolve FQDN using nameservers")
 	}
 	return dnsMsgA, err
 }
@@ -299,8 +300,8 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		}
 		log.Info().
 			Str("nameserver", cluster).
-			Str("edgeDNS", r.edgeDNSServers.String()).
-			Str("glue A record", fmt.Sprintf("%v", glueA.Answer)).
+			Interface("edgeDNSServers", r.edgeDNSServers).
+			Interface("glueARecord", glueA.Answer).
 			Msg("Resolved glue A record for NS")
 		glueARecords := getARecords(glueA)
 		var hostToUse string
@@ -319,7 +320,7 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		if len(clusterTargets) > 0 {
 			targets = append(targets, clusterTargets...)
 			log.Info().
-				Str("cluster targets", fmt.Sprintf("%s", clusterTargets)).
+				Strs("clusterTargets", clusterTargets).
 				Str("cluster", cluster).
 				Msg("Extend Gslb targets by targets from cluster")
 		}

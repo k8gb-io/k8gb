@@ -91,7 +91,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 						log.Info().
 							Str("gslb", gslb.Name).
 							Str("cluster", gslb.Spec.Strategy.PrimaryGeoTag).
-							Str("targets", fmt.Sprintf("%v", finalTargets)).
+							Strs("targets", finalTargets).
 							Str("workload", k8gbv1beta1.Unhealthy.String()).
 							Msg("Executing failover strategy for primary cluster")
 					}
@@ -103,7 +103,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 					log.Info().
 						Str("gslb", gslb.Name).
 						Str("cluster", gslb.Spec.Strategy.PrimaryGeoTag).
-						Str("targets", fmt.Sprintf("%v", finalTargets)).
+						Strs("targets", finalTargets).
 						Str("workload", k8gbv1beta1.Healthy.String()).
 						Msg("Executing failover strategy for secondary cluster")
 				}
@@ -117,7 +117,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		r.updateRuntimeStatus(gslb, isPrimary, health, finalTargets)
 		log.Info().
 			Str("gslb", gslb.Name).
-			Str("targets", fmt.Sprintf("%v", finalTargets)).
+			Strs("targets", finalTargets).
 			Msg("Final target list")
 
 		if len(finalTargets) > 0 {
