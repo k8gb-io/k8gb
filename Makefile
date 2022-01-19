@@ -52,6 +52,7 @@ DNS_ZONE ?= cloud.example.com
 DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
+GSLB_CRD_YAML ?= chart/k8gb/templates/crds/k8gb.absa.oss_gslbs.yaml
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -340,6 +341,7 @@ gokart:
 # updates source code with license headers
 .PHONY: license
 license:
+	@echo -e "\n$(YELLOW)Injecting the license$(NC)"
 	$(call golic,-t apache2)
 
 # creates ns1 secret in current cluster
@@ -352,6 +354,7 @@ ns1-secret:
 # runs golangci-lint aggregated linter; see .golangci.yaml for linter list
 .PHONY: lint
 lint:
+	@echo -e "\n$(YELLOW)Running the linters$(NC)"
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.43.0
 	$(GOBIN)/golangci-lint run
 
@@ -383,7 +386,8 @@ reset:	destroy-full-local-setup deploy-full-local-setup
 .PHONY: run
 run: lint
 	$(call generate)
-	$(call manifest)
+	$(call crd-manifest)
+	@echo -e "\n$(YELLOW)Running k8gb locally against the current k8s cluster$(NC)"
 	LOG_FORMAT=$(LOG_FORMAT) \
 	LOG_LEVEL=$(LOG_LEVEL) \
 	POD_NAMESPACE=$(POD_NAMESPACE) \
@@ -406,7 +410,8 @@ start-test-app:
 .PHONY: test
 test:
 	$(call generate)
-	$(call manifest)
+	$(call crd-manifest)
+	@echo -e "\n$(YELLOW)Running the unit tests$(NC)"
 	go test ./... -coverprofile cover.out
 
 .PHONY: test-round-robin
@@ -506,16 +511,21 @@ define wait-for-ingress
 endef
 
 define generate
-	$(call controller-gen,object:headerFile="hack/boilerplate.go.txt" paths="./...")
+	$(call install-controller-gen)
+	@echo -e "\n$(YELLOW)Generating the API code$(NC)"
+	$(GOBIN)/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
 endef
 
-define manifest
-	$(call controller-gen,crd:crdVersions=v1 paths="./..." output:crd:artifacts:config=chart/k8gb/templates/crds)
+define crd-manifest
+	$(call install-controller-gen)
+	@echo -e "\n$(YELLOW)Generating the CRD manifests$(NC)"
+	@echo -n "{{- if .Values.k8gb.deployCrds }}" > $(GSLB_CRD_YAML)
+	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./..." output:crd:stdout >> $(GSLB_CRD_YAML)
+	@echo "{{- end }}"  >> $(GSLB_CRD_YAML)
 endef
 
-define controller-gen
+define install-controller-gen
 	@go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
-	$(GOBIN)/controller-gen $1
 endef
 
 define gokart
