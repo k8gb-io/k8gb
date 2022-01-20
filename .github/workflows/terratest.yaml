@@ -62,5 +62,27 @@ jobs:
           echo "Cluster 2 (us):"
           kubectl get no -owide --context=k3d-test-gslb2
 
-      - name: Terratest
-        run: make terratest
+      - name: Run Terratest
+        run: |
+          mkdir -p ${{ github.workspace }}/tmp/terratest 
+          echo "::group::Terratest logs" 
+          make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+          echo "::endgroup::"
+
+      - name: Terratest log parser
+        run: |
+          curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
+          chmod +x terratest_log_parser
+          ./terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
+          echo -e "\n\nTerratest logs:"
+          for log in $(find ${{ github.workspace }}/tmp/terratest -regex ".*/Test.*\.log"); do
+              echo "::group::$(basename $log)"
+              cat $log
+              echo "::endgroup::"
+          done
+          echo Separated log files will be available under artifact section at https://github.com/k8gb-io/k8gb/actions/runs/${{ github.run_id }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: terratest-logs
+          path: ${{ github.workspace }}/tmp/terratest

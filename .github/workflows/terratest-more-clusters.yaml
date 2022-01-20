@@ -70,6 +70,6 @@ jobs:
           echo "Cluster 3 (cz):"
           kubectl get no -owide --context=k3d-test-gslb3
 
-      - name: Terratest
+      - name: Run Terratest
         continue-on-error: true
         run: make terratest
