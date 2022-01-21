@@ -21,6 +21,7 @@ jobs:
       - name: Create k3s cluster
         uses: AbsaOSS/k3d-action@v2
         with:
+          k3d-version: v5.1.0
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
       - name: Smoke test helm installation
