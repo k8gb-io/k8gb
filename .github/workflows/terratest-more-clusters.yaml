@@ -39,24 +39,28 @@ jobs:
       - name: Create edgeDNS k3s Cluster
         uses: AbsaOSS/k3d-action@v2
         with:
+          k3d-version: v5.1.0
           cluster-name: "edgedns"
           args: -c k3d/edge-dns.yaml
 
       - name: Create 1st k3s Cluster
         uses: AbsaOSS/k3d-action@v2
         with:
+          k3d-version: v5.1.0
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
 
       - name: Create 2nd k3s Cluster
         uses: AbsaOSS/k3d-action@v2
         with:
+          k3d-version: v5.1.0
           cluster-name: "test-gslb2"
           args: -c k3d/test-gslb2.yaml
 
       - name: Create 3rd k3s Cluster
         uses: AbsaOSS/k3d-action@v2
         with:
+          k3d-version: v5.1.0
           cluster-name: "test-gslb3"
           args: -c k3d/test-gslb3.yaml
 
