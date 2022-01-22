@@ -22,7 +22,7 @@ For more user-centric targets in that makefile consult `make help`.
 
 ## Environment prerequisites
 
-- [Install **Go 1.16**](https://golang.org/dl/)
+- [Install **Go 1.17**](https://golang.org/dl/)
 
 - [Install **Git**](https://git-scm.com/downloads)
 
