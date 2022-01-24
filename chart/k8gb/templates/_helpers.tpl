@@ -74,14 +74,6 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{- define "k8gb.extdnsOwnerID" -}}
-{{- if .Values.route53.enabled -}}
-k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
-{{- else -}}
-k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
-{{- end -}}
-{{- end -}}
-
 {{- define "k8gb.edgeDNSServers" -}}
 {{- if .Values.k8gb.edgeDNSServer -}}
 {{ .Values.k8gb.edgeDNSServer }}
@@ -98,12 +90,6 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- if .Values.ns1.ignoreSSL -}}
         - --ns1-ignoressl
 {{- end -}}
-        env:
-        - name: NS1_APIKEY
-          valueFrom:
-            secretKeyRef:
-              name: ns1
-              key: apiKey
 {{- end }}
 {{- if .Values.rfc2136.enabled -}}
         - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
@@ -113,11 +99,22 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
         - --rfc2136-{{ $kk }}={{ $vv }}
 {{- end -}}
 {{- end }}
-        env:
-        - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: rfc2136
-              key: secret
+{{- end -}}
+{{- end -}}
+
+{{- define "k8gb.extdnsProviderEnvs" -}}
+{{- if .Values.ns1.enabled -}}
+          - name: NS1_APIKEY
+            valueFrom:
+              secretKeyRef:
+                name: ns1
+                key: apiKey
+{{- end }}
+{{- if .Values.rfc2136.enabled -}}
+          - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: rfc2136
+                key: secret
 {{- end -}}
 {{- end -}}

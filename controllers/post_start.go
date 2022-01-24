@@ -24,15 +24,25 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *GslbReconciler) PostStartHook(operatorConfig *depresolver.Config, client client.Reader) error {
-	return inferClusterGeoTag(operatorConfig, client)
+func (r *GslbReconciler) PostStartHook(operatorConfig *depresolver.Config, mgr ctrl.Manager) error {
+	if err := inferClusterGeoTag(operatorConfig, mgr.GetAPIReader()); err != nil {
+		log.Err(err).Msgf("Can't infer the %s", depresolver.ClusterGeoTagKey)
+		return err
+	}
+	if err := createOrUpdateExternalDNSConfigMap(operatorConfig, mgr.GetClient()); err != nil {
+		log.Err(err).Msg("Can't create/update config map for external-dns")
+		return err
+	}
+	return nil
 }
 
-func inferClusterGeoTag(operatorConfig *depresolver.Config, client client.Reader) error {
-	if len(operatorConfig.ClusterGeoTag) != 0 {
+func inferClusterGeoTag(cfg *depresolver.Config, client client.Reader) error {
+	if len(cfg.ClusterGeoTag) != 0 {
 		// env var has the highest precedence
 		return nil
 	}
@@ -55,17 +65,47 @@ func inferClusterGeoTag(operatorConfig *depresolver.Config, client client.Reader
 		case len(node.Labels[region]) != 0:
 			foundTag = node.Labels[region]
 		}
-		if len(operatorConfig.ClusterGeoTag) != 0 && operatorConfig.ClusterGeoTag != foundTag {
+		if len(cfg.ClusterGeoTag) != 0 && cfg.ClusterGeoTag != foundTag {
 			return fmt.Errorf("%v nodes were tried, but they don't have the same annotation/label on "+
-				"them ('%s' != '%s'). Remedy: make sure the value of '%s' is same on each node in the cluster",
-				len(nodeList.Items), operatorConfig.ClusterGeoTag, foundTag, region)
+				"them ('%s' != '%s'). Remedy: make sure the value of '%s' is same on each node in the cluster."+
+				"Details: '%s' != '%s', where the latter was found on node '%s'",
+				len(nodeList.Items), cfg.ClusterGeoTag, foundTag, region, cfg.ClusterGeoTag, foundTag, node.GetName())
 		}
-		operatorConfig.ClusterGeoTag = foundTag
+		cfg.ClusterGeoTag = foundTag
 	}
-	if len(operatorConfig.ClusterGeoTag) == 0 {
+	if len(cfg.ClusterGeoTag) == 0 {
 		return fmt.Errorf("%v nodes were tried, but none of them were annotated. Either set the %s explicitly"+
 			" as operator conviguraion using env variable, or mark the nodes with label (or annotation) '%s'",
 			len(nodeList.Items), depresolver.ClusterGeoTagKey, region)
 	}
+	return nil
+}
+
+func createOrUpdateExternalDNSConfigMap(cfg *depresolver.Config, c client.Client) error {
+	const (
+		ns             = "k8gb"
+		cmName         = "external-dns-env"
+		txtOwnerKey    = "EXTERNAL_DNS_TXT_OWNER_ID"
+		txtOwnerPrefix = "k8gb"
+	)
+	txtOwnerValue := fmt.Sprintf("%s-%s-%s", txtOwnerPrefix, cfg.DNSZone, cfg.ClusterGeoTag)
+
+	cm := corev1.ConfigMap{
+		Data: map[string]string{
+			txtOwnerKey: txtOwnerValue,
+		},
+	}
+	cm.SetName(cmName)
+	cm.SetNamespace(ns)
+	if err := c.Create(context.TODO(), &cm); err != nil {
+		if errors.IsAlreadyExists(err) {
+			if updateErr := c.Update(context.TODO(), &cm); updateErr != nil {
+				return updateErr
+			}
+			log.Info().Msg("Configmap for external-dns has been updated")
+		}
+		return err
+	}
+	log.Info().Msg("Configmap for external-dns has been created")
 	return nil
 }

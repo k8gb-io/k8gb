@@ -52,6 +52,7 @@ const (
 	LogLevelKey                    = "LOG_LEVEL"
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
+	Route53HostedZoneIDKey         = "ROUTE53_HOSTED_ZONE_ID"
 	SplitBrainCheckKey             = "SPLIT_BRAIN_CHECK"
 	MetricsAddressKey              = "METRICS_ADDRESS"
 )
@@ -160,6 +161,10 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
+	err = field(Route53HostedZoneIDKey, config.Route53HostedZoneID).matchRegexp(route53ZoneIDRegex).err
+	if err != nil {
+		return err
+	}
 	// do full Infoblox validation only in case that Host exists
 	if isNotEmpty(config.Infoblox.Host) {
 		err = validateConfigForInfoblox(config)
@@ -259,11 +264,11 @@ func (dr *DependencyResolver) GetDeprecations() (deprecations []string) {
 	}
 
 	var deprecated = map[oldVar]newVar{
-		EdgeDNSServerKey: newVar{
+		EdgeDNSServerKey: {
 			Name: EdgeDNSServersKey,
 			Msg:  "Pass the hostname or IP address as comma-separated list",
 		},
-		EdgeDNSServerPortKey: newVar{
+		EdgeDNSServerPortKey: {
 			Name: EdgeDNSServersKey,
 			Msg: "Port is an optional item in the comma-separated list of dns edge servers, in following form: dns1:53,dns2 (if not provided after the " +
 				"hostname and colon, it defaults to '53')",

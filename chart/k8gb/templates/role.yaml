@@ -40,6 +40,14 @@ rules:
   - namespaces
   verbs:
   - 'list'
+- apiGroups:
+    - ""
+  resources:
+    - configmaps
+  verbs:
+    - 'create'
+    - 'update'
+    - 'get'
 {{- if .Values.openshift.enabled }}
 - apiGroups:
   - route.openshift.io

@@ -16,6 +16,14 @@ rules:
     verbs:
       - 'get'
       - 'list'
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - 'create'
+      - 'update'
+      - 'get'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

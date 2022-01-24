@@ -113,8 +113,7 @@ func run() error {
 		Scheme:      mgr.GetScheme(),
 	}
 
-	if err = reconciler.PostStartHook(config, mgr.GetAPIReader()); err != nil {
-		log.Err(err).Msgf("Can't infer the %s", depresolver.ClusterGeoTagKey)
+	if err = reconciler.PostStartHook(config, mgr); err != nil {
 		return err
 	}
 

@@ -648,6 +648,24 @@ func TestResolveGeoTagWithRepeatingExtGeoTags(t *testing.T) {
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
 
+func TestRoute53HostedZoneIDSet(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Route53HostedZoneID = "Z13374242ABCDEFGH5ZI"
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
+}
+
+func TestRoute53HostedZoneIDMalformed(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.Route53HostedZoneID = "asdf"
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
 func TestBothRoute53AndInfobloxAreEnabled(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1434,7 +1452,7 @@ func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServersKey,
 		ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
-		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey} {
+		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, Route53HostedZoneIDKey, SplitBrainCheckKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1464,6 +1482,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(LogFormatKey, config.Log.Format.String())
 	_ = os.Setenv(LogNoColorKey, strconv.FormatBool(config.Log.NoColor))
 	_ = os.Setenv(MetricsAddressKey, config.MetricsAddress)
+	_ = os.Setenv(Route53HostedZoneIDKey, config.Route53HostedZoneID)
 	_ = os.Setenv(SplitBrainCheckKey, strconv.FormatBool(config.SplitBrainCheck))
 }
 

@@ -139,6 +139,9 @@ type Config struct {
 	MetricsAddress string `env:"METRICS_ADDRESS, default=0.0.0.0:8080"`
 	// extDNSEnabled hidden. EdgeDNSType defines all enabled Enabled types
 	extDNSEnabled bool `env:"EXTDNS_ENABLED, default=false"`
+	// Route53HostedZoneID identifier of route53 hosted zone that's added (if not empty)
+	// for external-dns deployment as part of the txt-owner-id
+	Route53HostedZoneID string `env:"ROUTE53_HOSTED_ZONE_ID"`
 	// SplitBrainCheck flag decides whether split brain TXT records will be stored in edge DNS
 	SplitBrainCheck bool `env:"SPLIT_BRAIN_CHECK, default=false"`
 }
