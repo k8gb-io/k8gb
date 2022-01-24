@@ -68,7 +68,7 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 	utils.AssertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.dnsTtlSeconds", "5")
 	utils.AssertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.splitBrainThresholdSeconds", "600")
 
-	t.Run("Broken ingress is not proccessed", func(t *testing.T) {
+	t.Run("Broken ingress is not processed", func(t *testing.T) {
 		utils.CreateGslb(t, options, settings, brokenResourcePath)
 		err := k8s.RunKubectlE(t, options, "get", "gslb", "broken-test-gslb-annotation-failover")
 		require.Error(t, err)

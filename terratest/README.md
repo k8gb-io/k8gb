@@ -11,7 +11,7 @@ Terratests consist of three directories:
 
 - `/test/` contains the individual tests. Each test usually creates its own namespace where it installs its own
   version of GSLB. The test then runs against such instance. For optimization reasons, all tests are running
-  in parallel. Keep this on mind!
+  in parallel. Keep this in mind!
 - `/examples/` contains yaml configurations (GSLB, ingresses) for individual tests.
 - `/utils/` contains a common framework that makes writing tests easier.
 
@@ -25,8 +25,8 @@ The terratest framework is located in `/utils/` and contains a fluent-style conf
 
 ### Workflows
 First of all, we create a workflow instance that includes a namespace, and may include a test application or a GSLB object.
-We create the instance by calling the `NewWorkflow` function with the name of the cluster where the instance will run and t
-he port from which the cluster is accessed. If you followed [Quick Start](../README.md#quick-start), the clusters will
+We create the instance by calling the `NewWorkflow` function with the name of the cluster where the instance will run and
+the port from which the cluster is accessed. If you followed [Quick Start](../README.md#quick-start), the clusters will
 be `k3d-test-gslb1:5053` and `k3d-test-gslb2:5054`. This is optionally followed by the GSLB configuration from the yaml
 file and the test application [podinfo](https://github.com/stefanprodan/podinfo). The `Start` function creates the
 cluster resources and returns the workflow instance, the `Kill` function deletes the instance along with all resources
