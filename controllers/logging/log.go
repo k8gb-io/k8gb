@@ -58,13 +58,15 @@ func (l *loggerFactory) get() zerolog.Logger {
 			With().
 			Caller().
 			Timestamp().
-			Logger()
+			Logger().
+			Level(l.log.Level)
 	case depresolver.SimpleFormat:
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339, NoColor: l.log.NoColor}).
 			With().
 			Caller().
 			Timestamp().
-			Logger()
+			Logger().
+			Level(l.log.Level)
 	}
 	logger.Info().Msg("Logger configured")
 	logger.Info().

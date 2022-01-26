@@ -26,28 +26,38 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// LogrAdapter implements logr.Logger interface.
+func NewLogrAdapter(z *zerolog.Logger) logr.Logger {
+	l := logr.New(newLogrSinkAdapter(z))
+	l.V(int(z.GetLevel()))
+	return l
+}
+
+// logrSinkAdapter implements logr.Logger interface.
 // The adapter allows us to encapsulate zerolog into go-logr/logr interface.
-type LogrAdapter struct {
+type logrSinkAdapter struct {
 	z             *zerolog.Logger
 	keysAndValues map[string]string
 	name          string
 }
 
-func NewLogrAdapter(l *zerolog.Logger) *LogrAdapter {
+func newLogrSinkAdapter(z *zerolog.Logger) *logrSinkAdapter {
 	kv := make(map[string]string)
-	return &LogrAdapter{
-		l,
+	return &logrSinkAdapter{
+		z,
 		kv,
 		"",
 	}
 }
 
-func (a *LogrAdapter) Enabled() bool {
+func (a *logrSinkAdapter) Init(info logr.RuntimeInfo) {
+
+}
+
+func (a *logrSinkAdapter) Enabled(level int) bool {
 	return true
 }
 
-func (a *LogrAdapter) Info(msg string, keysAndValues ...interface{}) {
+func (a *logrSinkAdapter) Info(level int, msg string, keysAndValues ...interface{}) {
 	a.WithValues(keysAndValues)
 	if a.name != "" {
 		a.z.Info().Msgf("%s: %s %s", a.name, msg, a.valuesAsJSON())
@@ -55,7 +65,7 @@ func (a *LogrAdapter) Info(msg string, keysAndValues ...interface{}) {
 	a.z.Info().Msgf("%s %s", msg, a.valuesAsJSON())
 }
 
-func (a *LogrAdapter) Error(err error, msg string, keysAndValues ...interface{}) {
+func (a *logrSinkAdapter) Error(err error, msg string, keysAndValues ...interface{}) {
 	a.WithValues(keysAndValues)
 	if a.name != "" {
 		a.z.Err(err).Msgf("%s: %s %s", a.name, msg, a.valuesAsJSON())
@@ -64,20 +74,7 @@ func (a *LogrAdapter) Error(err error, msg string, keysAndValues ...interface{})
 	a.z.Err(err).Msgf("%s %s", msg, a.valuesAsJSON())
 }
 
-func (a *LogrAdapter) V(level int) logr.Logger {
-	if level <= 0 {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
-	if level == 1 {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	}
-	if level >= 2 {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	}
-	return a
-}
-
-func (a *LogrAdapter) WithValues(keysAndValues ...interface{}) logr.Logger {
+func (a *logrSinkAdapter) WithValues(keysAndValues ...interface{}) logr.LogSink {
 	for i := 0; i < len(keysAndValues)/2; i++ {
 		keyIndex := i * 2
 		valIndex := keyIndex + 1
@@ -91,12 +88,12 @@ func (a *LogrAdapter) WithValues(keysAndValues ...interface{}) logr.Logger {
 	return a
 }
 
-func (a *LogrAdapter) WithName(name string) logr.Logger {
+func (a *logrSinkAdapter) WithName(name string) logr.LogSink {
 	a.name = name
 	return a
 }
 
-func (a *LogrAdapter) valuesAsJSON() (s string) {
+func (a *logrSinkAdapter) valuesAsJSON() (s string) {
 	var b []byte
 	b, _ = json.Marshal(a.keysAndValues)
 	s = string(b)
