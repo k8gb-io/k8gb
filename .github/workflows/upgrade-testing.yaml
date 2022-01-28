@@ -17,8 +17,22 @@ on:
       - '.spelling'
 
 jobs:
+  skip-check:
+    runs-on: ubuntu-latest
+    name: Skip the job?
+    outputs:
+          should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+    - id: skip_check
+      uses: fkirc/skip-duplicate-actions@v3.4.1
+      with:
+        skip_after_successful_duplicate: 'true'
+        do_not_skip: '["workflow_dispatch", "schedule"]'
+
   upgrade-testing:
     runs-on: ubuntu-20.04
+    needs: skip-check
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
       - uses: actions/checkout@v2
         with:
