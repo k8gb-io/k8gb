@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/AbsaOSS/env-binder v1.0.0
-	github.com/AbsaOSS/gopkg v0.1.2
+	github.com/AbsaOSS/gopkg v0.1.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.0
 	github.com/golang/mock v1.6.0

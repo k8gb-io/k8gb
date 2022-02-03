@@ -62,7 +62,7 @@ func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string, additional
 
 	digApp := shell.Command{
 		Command: "dig",
-		Args:    append([]string{port, dnsServer, dnsName, "+short"}, additionalArgs...),
+		Args:    append([]string{port, dnsServer, dnsName, "+short", "+tcp"}, additionalArgs...),
 	}
 
 	digAppOut := shell.RunCommandAndGetOutput(t, digApp)

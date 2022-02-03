@@ -17,6 +17,9 @@ ports:
   - port: 9080:30090
     nodeFilters:
       - agent:0:direct
+  - port: 5053:30053/tcp
+    nodeFilters:
+      - agent:0:direct
   - port: 5053:53/udp
     nodeFilters:
       - agent:0:direct

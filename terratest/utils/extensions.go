@@ -50,6 +50,7 @@ type Workflow struct {
 		ingressResourcePath string
 		gslbResourcePath    string
 		ingressName         string
+		digUsingUDP			bool
 	}
 	state struct {
 		namespaceCreated bool
@@ -145,6 +146,11 @@ func (w *Workflow) WithGslb(path, host string) *Workflow {
 	if err != nil {
 		w.error = err
 	}
+	return w
+}
+
+func (w *Workflow) WithDigUsingUDP(digUsingUDP bool) *Workflow {
+	w.settings.digUsingUDP = digUsingUDP
 	return w
 }
 
@@ -287,12 +293,12 @@ func (i *Instance) WaitForGSLB(instances ...*Instance) ([]string, error) {
 			expectedIPs = append(expectedIPs, ip...)
 		}
 	}
-	return waitForLocalGSLBNew(i.w.t, i.w.state.gslb.host, i.w.state.gslb.port, expectedIPs)
+	return waitForLocalGSLBNew(i.w.t, i.w.state.gslb.host, i.w.state.gslb.port, expectedIPs, i.w.settings.digUsingUDP)
 }
 
 // WaitForExpected waits until GSLB dig doesnt return list of expected IP's
 func (i *Instance) WaitForExpected(expectedIPs []string) (err error) {
-	_, err = waitForLocalGSLBNew(i.w.t, i.w.state.gslb.host, i.w.state.gslb.port, expectedIPs)
+	_, err = waitForLocalGSLBNew(i.w.t, i.w.state.gslb.host, i.w.state.gslb.port, expectedIPs, i.w.settings.digUsingUDP)
 	if err != nil {
 		fmt.Println(i.GetStatus(fmt.Sprintf("expected IPs: %s", expectedIPs)).String())
 	}
@@ -339,7 +345,7 @@ func (i *Instance) String() (out string) {
 
 // Dig  returns a list of IP addresses from CoreDNS that belong to the instance
 func (i *Instance) Dig() []string {
-	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), i.w.state.gslb.host)
+	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), i.w.state.gslb.host, i.w.settings.digUsingUDP)
 	require.NoError(i.w.t, err)
 	return dig
 }
@@ -347,7 +353,7 @@ func (i *Instance) Dig() []string {
 // GetLocalTargets returns instance local targets
 func (i *Instance) GetLocalTargets() []string {
 	dnsName := fmt.Sprintf("localtargets-%s", i.w.state.gslb.host)
-	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), dnsName)
+	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), dnsName, i.w.settings.digUsingUDP)
 	require.NoError(i.w.t, err)
 	return dig
 }
@@ -432,12 +438,12 @@ func (s *InstanceStatus) String() string {
 	return gopkgstr.ToString(s)
 }
 
-func waitForLocalGSLBNew(t *testing.T, host string, port int, expectedResult []string) (output []string, err error) {
+func waitForLocalGSLBNew(t *testing.T, host string, port int, expectedResult []string, isUdp bool) (output []string, err error) {
 	return DoWithRetryWaitingForValueE(
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
 		100,
 		time.Second*1,
-		func() ([]string, error) { return dns.Dig("localhost:"+strconv.Itoa(port), host) },
+		func() ([]string, error) { return dns.Dig("localhost:"+strconv.Itoa(port), host, isUdp) },
 		expectedResult)
 }

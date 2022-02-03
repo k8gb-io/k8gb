@@ -1,0 +1,19 @@
+{{- if .Values.coredns.deployment.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+{{ include "chart.labels" . | indent 4  }}
+  name: {{ .Release.Name }}-coredns-tcp
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/instance: k8gb
+    app.kubernetes.io/name: coredns
+  ports:
+  - name: tcp-5353
+    port: 53
+    protocol: TCP
+    targetPort: 5353
+    nodePort: 30053
+{{- end }}
