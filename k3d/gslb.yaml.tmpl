@@ -14,6 +14,9 @@ ports:
   - port: $PORT_PROM:30090
     nodeFilters:
       - agent:0:direct
+  - port: $PORT_DNS:30053/tcp
+    nodeFilters:
+      - agent:0:direct
   - port: $PORT_DNS:53/udp
     nodeFilters:
       - agent:0:direct
