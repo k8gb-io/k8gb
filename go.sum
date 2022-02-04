@@ -56,8 +56,8 @@ git.lukeshu.com/go/libsystemd v0.5.3/go.mod h1:FfDoP0i92r4p5Vn4NCLxvjkd7rCOe6otP
 github.com/0x4c6565/genie v1.0.0/go.mod h1:fDOjW0hFamMWOIkh4irf2D/TZpXXWMFtpP8MfgK0N3c=
 github.com/AbsaOSS/env-binder v1.0.0 h1:TwDcooL87BdR7NTsG2XbQpIj7KrhPU7Es7vxDKHJUB8=
 github.com/AbsaOSS/env-binder v1.0.0/go.mod h1:B48qTr35jCMHNqghPQxqaXdom2s9O3aOk3dOaWI7OQU=
-github.com/AbsaOSS/gopkg v0.1.2 h1:jYLOqZC23vDi5cH4G2dnaQSzFO3RNb2V7NXa4yQ3vVY=
-github.com/AbsaOSS/gopkg v0.1.2/go.mod h1:6bJ9NNcX+xvAAv2c31HPGe+P04RKdm/NV/V+qqyJrlQ=
+github.com/AbsaOSS/gopkg v0.1.3 h1:pTeIn3u9cFsHo5PFUGYvKUu9kIetLwa0ldhzEdZRUhU=
+github.com/AbsaOSS/gopkg v0.1.3/go.mod h1:6bJ9NNcX+xvAAv2c31HPGe+P04RKdm/NV/V+qqyJrlQ=
 github.com/Azure/azure-sdk-for-go v16.2.1+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/azure-sdk-for-go v56.0.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/azure-sdk-for-go v61.5.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=

@@ -1,4 +1,4 @@
-{{- if .Values.coredns.deployment.enabled }}
+{{- if and .Values.coredns.deployment.enabled (not .Values.route53.enabled) }}
 apiVersion: v1
 kind: Service
 metadata:

@@ -30,7 +30,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	str "github.com/AbsaOSS/gopkg/strings"
+	str "github.com/AbsaOSS/gopkg/string"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/internal/utils"
