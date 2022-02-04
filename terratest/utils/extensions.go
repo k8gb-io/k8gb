@@ -29,7 +29,7 @@ import (
 	"time"
 
 	"github.com/AbsaOSS/gopkg/dns"
-	gopkgstr "github.com/AbsaOSS/gopkg/strings"
+	gopkgstr "github.com/AbsaOSS/gopkg/string"
 	"github.com/gruntwork-io/terratest/modules/helm"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
