@@ -71,7 +71,7 @@ Cluster [edgedns](https://github.com/k8gb-io/k8gb/tree/master/k3d/edge-dns.yaml)
 on port `:1053`.
 
 ```sh
-dig @localhost -p 1053 roundrobin.cloud.example.com +short
+dig @localhost -p 1053 roundrobin.cloud.example.com +short +tcp
 ```
 Should return ***two A records*** from both clusters (IP addresses and order may differ):
 ```
@@ -98,7 +98,8 @@ k3d-test-gslb2-agent-0    172.20.0.5
 
 Or you can ask specific CoreDNS instance for its local targets:
 ```sh
-dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
+dig -p 5053 +tcp @localhost localtargets-roundrobin.cloud.example.com && \
+dig -p 5054 +tcp @localhost localtargets-roundrobin.cloud.example.com
 ```
 As expected result you should see **two A records** divided between both clusters.
 ```sh
