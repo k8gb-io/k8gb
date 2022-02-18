@@ -59,6 +59,14 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 	serviceHealth := make(map[string]k8gbv1beta1.HealthStatus)
 	for _, rule := range gslb.Spec.Ingress.Rules {
 		for _, path := range rule.HTTP.Paths {
+			if path.Backend.Service == nil || path.Backend.Service.Name == "" {
+				log.Warn().
+					Str("gslb", gslb.Name).
+					Interface("service", path.Backend.Service).
+					Msg("Malformed service definition")
+				serviceHealth[rule.Host] = k8gbv1beta1.NotFound
+				continue
+			}
 			service := &corev1.Service{}
 			finder := client.ObjectKey{
 				Namespace: gslb.Namespace,
