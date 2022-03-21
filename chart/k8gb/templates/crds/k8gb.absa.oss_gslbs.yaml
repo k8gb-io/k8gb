@@ -55,7 +55,8 @@ spec:
                       resource:
                         description: Resource is an ObjectRef to another Kubernetes
                           resource in the namespace of the Ingress object. If resource
-                          is specified, serviceName and servicePort must not be specified.
+                          is specified, a service.Name and service.Port must not be
+                          specified. This is a mutually exclusive setting with "Service".
                         properties:
                           apiGroup:
                             description: APIGroup is the group for the resource being
@@ -73,15 +74,32 @@ spec:
                         - kind
                         - name
                         type: object
-                      serviceName:
-                        description: Specifies the name of the referenced service.
-                        type: string
-                      servicePort:
-                        anyOf:
-                        - type: integer
-                        - type: string
-                        description: Specifies the port of the referenced service.
-                        x-kubernetes-int-or-string: true
+                      service:
+                        description: Service references a Service as a Backend. This
+                          is a mutually exclusive setting with "Resource".
+                        properties:
+                          name:
+                            description: Name is the referenced service. The service
+                              must exist in the same namespace as the Ingress object.
+                            type: string
+                          port:
+                            description: Port of the referenced service. A port name
+                              or port number is required for a IngressServiceBackend.
+                            properties:
+                              name:
+                                description: Name is the name of the port on the Service.
+                                  This is a mutually exclusive setting with "Number".
+                                type: string
+                              number:
+                                description: Number is the numerical port number (e.g.
+                                  80) on the Service. This is a mutually exclusive
+                                  setting with "Name".
+                                format: int32
+                                type: integer
+                            type: object
+                        required:
+                        - name
+                        type: object
                     type: object
                   ingressClassName:
                     description: IngressClassName is the name of the IngressClass
@@ -158,8 +176,9 @@ spec:
                                         description: Resource is an ObjectRef to another
                                           Kubernetes resource in the namespace of
                                           the Ingress object. If resource is specified,
-                                          serviceName and servicePort must not be
-                                          specified.
+                                          a service.Name and service.Port must not
+                                          be specified. This is a mutually exclusive
+                                          setting with "Service".
                                         properties:
                                           apiGroup:
                                             description: APIGroup is the group for
@@ -181,17 +200,37 @@ spec:
                                         - kind
                                         - name
                                         type: object
-                                      serviceName:
-                                        description: Specifies the name of the referenced
-                                          service.
-                                        type: string
-                                      servicePort:
-                                        anyOf:
-                                        - type: integer
-                                        - type: string
-                                        description: Specifies the port of the referenced
-                                          service.
-                                        x-kubernetes-int-or-string: true
+                                      service:
+                                        description: Service references a Service
+                                          as a Backend. This is a mutually exclusive
+                                          setting with "Resource".
+                                        properties:
+                                          name:
+                                            description: Name is the referenced service.
+                                              The service must exist in the same namespace
+                                              as the Ingress object.
+                                            type: string
+                                          port:
+                                            description: Port of the referenced service.
+                                              A port name or port number is required
+                                              for a IngressServiceBackend.
+                                            properties:
+                                              name:
+                                                description: Name is the name of the
+                                                  port on the Service. This is a mutually
+                                                  exclusive setting with "Number".
+                                                type: string
+                                              number:
+                                                description: Number is the numerical
+                                                  port number (e.g. 80) on the Service.
+                                                  This is a mutually exclusive setting
+                                                  with "Name".
+                                                format: int32
+                                                type: integer
+                                            type: object
+                                        required:
+                                        - name
+                                        type: object
                                     type: object
                                   path:
                                     description: Path is matched against the path
@@ -220,13 +259,14 @@ spec:
                                       IngressClass. Implementations can treat this
                                       as a separate PathType   or treat it identically
                                       to Prefix or Exact path types. Implementations
-                                      are required to support all path types. Defaults
-                                      to ImplementationSpecific.'
+                                      are required to support all path types.'
                                     type: string
                                 required:
                                 - backend
+                                - pathType
                                 type: object
                               type: array
+                              x-kubernetes-list-type: atomic
                           required:
                           - paths
                           type: object
@@ -253,6 +293,7 @@ spec:
                           items:
                             type: string
                           type: array
+                          x-kubernetes-list-type: atomic
                         secretName:
                           description: SecretName is the name of the secret used to
                             terminate TLS traffic on port 443. Field is left optional

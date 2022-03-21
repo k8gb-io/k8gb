@@ -37,9 +37,12 @@ spec:
         http:
           paths:
           - backend:
-              serviceName: frontend-podinfo # Service name to enable GSLB for
-              servicePort: http
             path: /
+            pathType: Prefix
+            service:
+              name: frontend-podinfo # Service name to enable GSLB for
+              port:
+                name: http
   strategy:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag

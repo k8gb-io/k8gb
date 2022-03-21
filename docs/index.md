@@ -57,10 +57,12 @@ spec:
   host: app.cloud.example.com # This is the GSLB enabled host that clients would use
   http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
     paths:
-    - backend:
-        serviceName: app
-        servicePort: http
-      path: /
+    - path: /
+      backend:
+        service:
+          name: app
+          port:
+            name: http
   strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
   tls:
     secretName: app-glsb-tls # Use this Secret to add to the TLS configuration for the new Ingress resource that will be created for the GSLB host
@@ -69,7 +71,7 @@ spec:
 On creating this `Gslb` resource, the k8gb controller watching the cluster where this resource is created, will:
 
 1. Create a new `Ingress` resource that will allow requests with the GSLB host (`app.cloud.example.com`) to be handled by the cluster's Ingress controller
-2. Configure a health check strategy on the underlying `app` Pods. The Pods here are the Pods matched by the Service configured by `serviceName`
+2. Configure a health check strategy on the underlying `app` Pods. The Pods here are the Pods matched by the Service configured by `service.name`
 3. Based on the health (see [Service health](#service-health)) of those Pods, if at least one of the Pods is healthy, add DNS records with the external addresses of the cluster's nodes running the Ingress controllers
 
 #### 1.2 Client

@@ -25,25 +25,25 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	v1beta1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, error) {
+func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, error) {
 	metav1.SetMetaDataAnnotation(&gslb.ObjectMeta, strategyAnnotation, gslb.Spec.Strategy.Type)
 	if gslb.Spec.Strategy.PrimaryGeoTag != "" {
 		metav1.SetMetaDataAnnotation(&gslb.ObjectMeta, primaryGeoTagAnnotation, gslb.Spec.Strategy.PrimaryGeoTag)
 	}
-	ingress := &v1beta1.Ingress{
+	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        gslb.Name,
 			Namespace:   gslb.Namespace,
 			Annotations: gslb.Annotations,
 		},
-		Spec: k8gbv1beta1.ToV1Beta1IngressSpec(gslb.Spec.Ingress),
+		Spec: k8gbv1beta1.ToV1IngressSpec(gslb.Spec.Ingress),
 	}
 
 	err := controllerutil.SetControllerReference(gslb, ingress, r.Scheme)
@@ -53,8 +53,8 @@ func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*v1beta1.Ingress, 
 	return ingress, err
 }
 
-func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingress) error {
-	found := &v1beta1.Ingress{}
+func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingress) error {
+	found := &netv1.Ingress{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      instance.Name,
 		Namespace: instance.Namespace,
@@ -109,7 +109,7 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *v1beta1.Ingr
 	return nil
 }
 
-func ingressEqual(ing1 *v1beta1.Ingress, ing2 *v1beta1.Ingress) bool {
+func ingressEqual(ing1 *netv1.Ingress, ing2 *netv1.Ingress) bool {
 	for k, v := range ing2.Annotations {
 		if ing1.Annotations[k] != v {
 			return false
