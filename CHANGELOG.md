@@ -1,5 +1,53 @@
 # Changelog
 
+## [v0.8.8](https://github.com/k8gb-io/k8gb/tree/v0.8.8) (2022-03-21)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.7...v0.8.8)
+
+**Fixed bugs:**
+
+- dev: `make test` target fails with overriden k8gb env vars [\#835](https://github.com/k8gb-io/k8gb/issues/835)
+
+**Closed issues:**
+
+- Deploying locally is failing, resources not created [\#828](https://github.com/k8gb-io/k8gb/issues/828)
+- Consider making terratest output readable [\#825](https://github.com/k8gb-io/k8gb/issues/825)
+- Calltime metric for infoblox communication [\#713](https://github.com/k8gb-io/k8gb/issues/713)
+- Fix dependabot alerts [\#697](https://github.com/k8gb-io/k8gb/issues/697)
+
+**Merged pull requests:**
+
+- RELEASE: v0.8.8 [\#850](https://github.com/k8gb-io/k8gb/pull/850) ([jkremser](https://github.com/jkremser))
+- workflow optimization [\#844](https://github.com/k8gb-io/k8gb/pull/844) ([kuritka](https://github.com/kuritka))
+- \[Fix\] zz\_generated.deepcopy.go tags [\#842](https://github.com/k8gb-io/k8gb/pull/842) ([kuritka](https://github.com/kuritka))
+- Bump k8s.io/\* modules [\#841](https://github.com/k8gb-io/k8gb/pull/841) ([kuritka](https://github.com/kuritka))
+- PATCH: downgrade k3d version [\#839](https://github.com/k8gb-io/k8gb/pull/839) ([kuritka](https://github.com/kuritka))
+- GO 1.17 migration [\#838](https://github.com/k8gb-io/k8gb/pull/838) ([kuritka](https://github.com/kuritka))
+- Switching of licence headers from 2021 to 2022 \(additional\) [\#837](https://github.com/k8gb-io/k8gb/pull/837) ([somaritane](https://github.com/somaritane))
+- unset deprecated envvars [\#836](https://github.com/k8gb-io/k8gb/pull/836) ([kuritka](https://github.com/kuritka))
+- Fix log message for strategy annotation detection [\#833](https://github.com/k8gb-io/k8gb/pull/833) ([somaritane](https://github.com/somaritane))
+- Fix deployCrds template rewrite in generated CRD [\#832](https://github.com/k8gb-io/k8gb/pull/832) ([somaritane](https://github.com/somaritane))
+- Switching of licence headers from 2021 to 2022 [\#831](https://github.com/k8gb-io/k8gb/pull/831) ([kuritka](https://github.com/kuritka))
+- Structured logging improvements [\#830](https://github.com/k8gb-io/k8gb/pull/830) ([somaritane](https://github.com/somaritane))
+- Remove split-brain check log message for infoblox provider [\#829](https://github.com/k8gb-io/k8gb/pull/829) ([somaritane](https://github.com/somaritane))
+- Make make colorful [\#827](https://github.com/k8gb-io/k8gb/pull/827) ([jkremser](https://github.com/jkremser))
+- Terratest readable output [\#826](https://github.com/k8gb-io/k8gb/pull/826) ([AugustasV](https://github.com/AugustasV))
+- Always use the bash as the default shell [\#824](https://github.com/k8gb-io/k8gb/pull/824) ([jkremser](https://github.com/jkremser))
+- Update Helm Docs [\#821](https://github.com/k8gb-io/k8gb/pull/821) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Auto-install golangci-lint tool for make lint target [\#820](https://github.com/k8gb-io/k8gb/pull/820) ([somaritane](https://github.com/somaritane))
+- Fix typo in gslb crd examples in readme and helm chart [\#819](https://github.com/k8gb-io/k8gb/pull/819) ([nicsmith](https://github.com/nicsmith))
+- helm: finer control over what is going to be deployed [\#818](https://github.com/k8gb-io/k8gb/pull/818) ([jkremser](https://github.com/jkremser))
+- OpenShift support: add permission on ingress finalizer in k8gb rbac [\#816](https://github.com/k8gb-io/k8gb/pull/816) ([nicsmith](https://github.com/nicsmith))
+- Upgrade all GHA to checkout v2 [\#814](https://github.com/k8gb-io/k8gb/pull/814) ([ytsarev](https://github.com/ytsarev))
+- Upgrade licenses [\#812](https://github.com/k8gb-io/k8gb/pull/812) ([kuritka](https://github.com/kuritka))
+- Update Offline Changelog [\#810](https://github.com/k8gb-io/k8gb/pull/810) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Put OLM bundle under release publish [\#809](https://github.com/k8gb-io/k8gb/pull/809) ([k0da](https://github.com/k0da))
+- Update Helm Docs [\#808](https://github.com/k8gb-io/k8gb/pull/808) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Rename manager to k8gb [\#806](https://github.com/k8gb-io/k8gb/pull/806) ([k0da](https://github.com/k0da))
+- Add histogram metrics for infoblox calls [\#805](https://github.com/k8gb-io/k8gb/pull/805) ([jkremser](https://github.com/jkremser))
+
+
+
 ## [v0.8.7](https://github.com/k8gb-io/k8gb/tree/v0.8.7) (2021-12-15)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.6...v0.8.7)
