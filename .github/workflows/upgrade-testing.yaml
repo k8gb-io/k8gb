@@ -45,7 +45,7 @@ jobs:
       - name: Build artifacts
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: latest
+          version: v1.7.0
           args: release --rm-dist --skip-publish --skip-validate --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
