@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -10,21 +10,30 @@ spec:
   - host: ingress-rr-notfound.cloud.example.com
     http:
       paths:
-      - backend:
-          serviceName: non-existing-app
-          servicePort: http
-        path: /
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: non-existing-app
+            port:
+              name: http
   - host: ingress-rr-unhealthy.cloud.example.com
     http:
       paths:
-      - backend:
-          serviceName: unhealthy-app
-          servicePort: http
-        path: /
-  - host: ingress-roundrobin.cloud.example.com
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: unhealthy-app
+            port:
+              name: http
+  - host: ingress-rr.cloud.example.com
     http:
       paths:
-      - backend:
-          serviceName: frontend-podinfo
-          servicePort: http
-        path: /
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-podinfo
+            port:
+              name: http

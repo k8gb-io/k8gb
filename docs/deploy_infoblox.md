@@ -96,10 +96,13 @@ spec:
       - host: podinfo.cloud.example.com
         http:
           paths:
-          - backend:
-              serviceName: podinfo # This should point to Service name of testing application
-              servicePort: http
-            path: /
+          - path: /
+            backend:
+              service:
+                name: podinfo # This should point to Service name of testing application
+                port:
+                  name: http
+
   strategy:
     type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
 ```

@@ -31,7 +31,7 @@ import (
 
 	"github.com/miekg/dns"
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
@@ -118,7 +118,7 @@ func (r *Gslb) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 		Namespace: gslb.Namespace,
 	}
 
-	gslbIngress := &v1beta1.Ingress{}
+	gslbIngress := &netv1.Ingress{}
 
 	err := r.client.Get(context.TODO(), nn, gslbIngress)
 	if err != nil {

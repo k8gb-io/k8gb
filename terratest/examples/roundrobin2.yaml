@@ -8,10 +8,13 @@ spec:
       - host: roundrobin-test.cloud.example.com
         http:
           paths:
-          - backend:
-              serviceName: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
-              servicePort: http
-            path: /
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
+                port:
+                  name: http
   strategy:
     type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
     dnsTtlSeconds: 5

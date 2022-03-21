@@ -31,7 +31,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -205,7 +205,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			for _, gslb := range gslbList.Items {
 				for _, rule := range gslb.Spec.Ingress.Rules {
 					for _, path := range rule.HTTP.Paths {
-						if path.Backend.ServiceName == a.GetName() {
+						if path.Backend.Service != nil && path.Backend.Service.Name == a.GetName() {
 							gslbName = gslb.Name
 						}
 					}
@@ -228,7 +228,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Str("ingress", a.GetName()).
 			Msg("Detected strategy annotation on ingress")
 		c := mgr.GetClient()
-		ingressToReuse := &v1beta1.Ingress{}
+		ingressToReuse := &netv1.Ingress{}
 		err := c.Get(context.Background(), client.ObjectKey{
 			Namespace: a.GetNamespace(),
 			Name:      a.GetName(),
@@ -257,7 +257,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				Annotations: a.GetAnnotations(),
 			},
 			Spec: k8gbv1beta1.GslbSpec{
-				Ingress: k8gbv1beta1.FromV1Beta1IngressSpec(ingressToReuse.Spec),
+				Ingress: k8gbv1beta1.FromV1IngressSpec(ingressToReuse.Spec),
 				Strategy: k8gbv1beta1.Strategy{
 					Type: strategy,
 				},
@@ -333,9 +333,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8gbv1beta1.Gslb{}).
-		Owns(&v1beta1.Ingress{}).
+		Owns(&netv1.Ingress{}).
 		Owns(&externaldns.DNSEndpoint{}).
 		Watches(&source.Kind{Type: &corev1.Endpoints{}}, endpointMapHandler).
-		Watches(&source.Kind{Type: &v1beta1.Ingress{}}, ingressMapHandler).
+		Watches(&source.Kind{Type: &netv1.Ingress{}}, ingressMapHandler).
 		Complete(r)
 }

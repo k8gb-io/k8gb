@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -8,9 +8,3 @@ metadata:
 spec:
   rules:
   - host: notfound-broken.cloud.example.com
-    #http:
-    #  paths:
-    #  - backend:
-    #      serviceName: non-existing-app
-    #      servicePort: http
-    #    path: /

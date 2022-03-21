@@ -44,7 +44,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -63,7 +63,7 @@ type testSettings struct {
 	request    reconcile.Request
 	config     depresolver.Config
 	client     client.Client
-	ingress    *v1beta1.Ingress
+	ingress    *netv1.Ingress
 	finalCall  bool
 	assistant  assistant.Assistant
 }
@@ -938,7 +938,7 @@ func TestGslbSetsAnnotationsOnTheIngress(t *testing.T) {
 	reconcileAndUpdateGslb(t, settings)
 
 	// assert
-	ingress := &v1beta1.Ingress{}
+	ingress := &netv1.Ingress{}
 	err := settings.client.Get(context.Background(), client.ObjectKey{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}, ingress)
 	require.NoError(t, err, "Gslb should be created from annotated Ingress")
 
@@ -1220,7 +1220,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	if res.Requeue {
 		t.Error("requeue expected")
 	}
-	ingress := &v1beta1.Ingress{}
+	ingress := &netv1.Ingress{}
 	err = cl.Get(context.TODO(), req.NamespacedName, ingress)
 	if err != nil {
 		t.Fatalf("Failed to get expected ingress: (%v)", err)
