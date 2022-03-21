@@ -19,12 +19,10 @@ builds:
 dockers:
 - image_templates:
   - "absaoss/k8gb:v{{ .Version }}-amd64"
-  use_buildx: false
   build_flag_templates:
   - "--platform=linux/amd64"
 - image_templates:
   - "absaoss/k8gb:v{{ .Version }}-arm64"
-  use_buildx: false
   goarch: arm64
   build_flag_templates:
   - "--platform=linux/arm64"
