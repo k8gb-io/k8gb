@@ -89,9 +89,9 @@ func TestFakeDNSMultipleTXTRecords(t *testing.T) {
 
 func TestFakeDNSBasic(t *testing.T) {
 	NewFakeDNS(testSettings).
-		AddNSRecord("blah.cloud.example.com.", "gslb-ns-us-cloud.example.com.").
-		AddNSRecord("blah.cloud.example.com.", "gslb-ns-uk-cloud.example.com.").
-		AddNSRecord("blah.cloud.example.com.", "gslb-ns-eu-cloud.example.com.").
+		AddNSRecord("blah.cloud.example.com.", "gslb-ns-us.cloud.example.com.").
+		AddNSRecord("blah.cloud.example.com.", "gslb-ns-uk.cloud.example.com.").
+		AddNSRecord("blah.cloud.example.com.", "gslb-ns-eu.cloud.example.com.").
 		AddTXTRecord("First", "Second", "Banana").
 		AddTXTRecord("White", "Red", "Purple").
 		AddARecord("ip.blah.cloud.example.com.", net.IPv4(10, 0, 1, 5)).

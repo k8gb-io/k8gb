@@ -786,13 +786,13 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "NS",
 			Targets: externaldns.Targets{
-				"gslb-ns-eu-cloud.example.com",
-				"gslb-ns-us-cloud.example.com",
-				"gslb-ns-za-cloud.example.com",
+				"gslb-ns-eu.cloud.example.com",
+				"gslb-ns-us.cloud.example.com",
+				"gslb-ns-za.cloud.example.com",
 			},
 		},
 		{
-			DNSName:    "gslb-ns-eu-cloud.example.com",
+			DNSName:    "gslb-ns-eu.cloud.example.com",
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets: externaldns.Targets{

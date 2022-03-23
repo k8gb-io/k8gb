@@ -391,7 +391,7 @@ func (c *Config) GetClusterHeartbeatFQDN(gslbName string) string {
 // DNS_ZONE k8gb-test.gslb.cloud.example.com
 // EDGE_DNS_ZONE: cloud.example.com
 // CLUSTER_GEOTAG: us
-// will generate "gslb-ns-us-k8gb-test-gslb.cloud.example.com"
+// will generate "gslb-ns-us-k8gb-test-gslb.k8gb-test.gslb.cloud.example.com"
 // If edgeDNSServer == localhost or 127.0.0.1 than edgeDNSServer is returned.
 // The function is private and expects only valid inputs.
 func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
@@ -400,8 +400,7 @@ func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
 	}
 	const prefix = "gslb-ns"
 	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
-	domainX := strings.ReplaceAll(d, ".", "-")
-	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edgeDNSZone)
+	return fmt.Sprintf("%s-%s.%s.%s", prefix, tag, d, edgeDNSZone)
 }
 
 // getHeartbeatFQDN returns heartbeat for geo tag.
