@@ -39,8 +39,8 @@ func abstractTestFullRoundRobin(t *testing.T, n int) {
 	const gslbPath = "../examples/roundrobin2.yaml"
 
 	// start all the test apps on all the clusters
-	for i := 0; i < n; i+=1 {
-		instance, er := utils.NewWorkflow(t, fmt.Sprintf("k3d-test-gslb%d", i+1), 5053 + i).
+	for i := 0; i < n; i += 1 {
+		instance, er := utils.NewWorkflow(t, fmt.Sprintf("k3d-test-gslb%d", i+1), 5053+i).
 			WithGslb(gslbPath, host).
 			WithTestApp(tags[i]).
 			Start()
@@ -50,7 +50,7 @@ func abstractTestFullRoundRobin(t *testing.T, n int) {
 	}
 	var err error
 	t.Run(fmt.Sprintf("round-robin on %d concurrent clusters with podinfo running", n), func(t *testing.T) {
-		for _, ins  := range instances {
+		for _, ins := range instances {
 			err = ins.WaitForAppIsRunning()
 			require.NoError(t, err)
 		}
@@ -58,7 +58,7 @@ func abstractTestFullRoundRobin(t *testing.T, n int) {
 
 	// at the beginning, it should contain all the targets
 	var workingTargets []string
-	for _, ins  := range instances {
+	for _, ins := range instances {
 		workingTargets = append(workingTargets, ins.GetLocalTargets()...)
 	}
 	t.Run(fmt.Sprintf("all %d clusters should be interconnected", n), func(t *testing.T) {
@@ -67,7 +67,7 @@ func abstractTestFullRoundRobin(t *testing.T, n int) {
 
 	// kill the apps on clusters one by one and expect less and less targets to be available
 	for i, instance := range instances {
-		t.Run(fmt.Sprintf("kill podinfo on cluster %d (%s)", i + 1, tags[i]), func(t *testing.T) {
+		t.Run(fmt.Sprintf("kill podinfo on cluster %d (%s)", i+1, tags[i]), func(t *testing.T) {
 			workingTargets = distinct(subtract(workingTargets, instance.GetLocalTargets()))
 			t.Logf("New expected targets: %v", workingTargets)
 			instance.StopTestApp()
@@ -77,7 +77,7 @@ func abstractTestFullRoundRobin(t *testing.T, n int) {
 
 	// start the test apps again on each cluster and check if the targets start appearing
 	for i, instance := range instances {
-		t.Run(fmt.Sprintf("start podinfo on cluster %d (%s)", i + 1, tags[i]), func(t *testing.T) {
+		t.Run(fmt.Sprintf("start podinfo on cluster %d (%s)", i+1, tags[i]), func(t *testing.T) {
 			instance.StartTestApp()
 			workingTargets = distinct(append(workingTargets, instance.GetLocalTargets()...))
 			t.Logf("New expected targets: %v", workingTargets)

@@ -50,7 +50,7 @@ type Workflow struct {
 		ingressResourcePath string
 		gslbResourcePath    string
 		ingressName         string
-		digUsingUDP			bool
+		digUsingUDP         bool
 	}
 	state struct {
 		namespaceCreated bool

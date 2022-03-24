@@ -1,3 +1,4 @@
+//go:build lifecycle || all
 // +build lifecycle all
 
 package test

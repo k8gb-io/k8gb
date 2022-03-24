@@ -1,3 +1,4 @@
+//go:build basic || all
 // +build basic all
 
 package test

@@ -62,7 +62,7 @@ func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string, additional
 
 	digApp := shell.Command{
 		Command: "dig",
-		Args:    append([]string{port, dnsServer, dnsName, "+short", "+tcp"}, additionalArgs...),
+		Args:    append([]string{port, dnsServer, dnsName, "+short"}, additionalArgs...),
 	}
 
 	digAppOut := shell.RunCommandAndGetOutput(t, digApp)
@@ -220,13 +220,17 @@ func AssertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName strin
 	assert.Equal(t, deletionExpected, deletionActual)
 }
 
-func WaitForLocalGSLB(t *testing.T, dnsServer string, dnsPort int, host string, expectedResult []string) (output []string, err error) {
+func WaitForLocalGSLB(t *testing.T, dnsServer string, dnsPort int, settings TestSettings, host string, expectedResult []string) (output []string, err error) {
+	var additionalArgs []string
+	if !settings.DigUsingUDP {
+		additionalArgs = append(additionalArgs, "+tcp")
+	}
 	return DoWithRetryWaitingForValueE(
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
 		300,
 		time.Second*1,
-		func() ([]string, error) { return Dig(t, dnsServer, dnsPort, host) },
+		func() ([]string, error) { return Dig(t, dnsServer, dnsPort, host+settings.DNSZone, additionalArgs...) },
 		expectedResult)
 }
 

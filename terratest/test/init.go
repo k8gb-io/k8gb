@@ -32,7 +32,7 @@ func init() {
 	p1, _ := env.GetEnvAsIntOrFallback("DNS_SERVER1_PORT", 5053)
 	p2, _ := env.GetEnvAsIntOrFallback("DNS_SERVER2_PORT", 5054)
 	p3, _ := env.GetEnvAsIntOrFallback("DNS_SERVER3_PORT", 5055)
-	clNum, _ :=  env.GetEnvAsIntOrFallback("CLUSTERS_NUMBER", 2)
+	clNum, _ := env.GetEnvAsIntOrFallback("CLUSTERS_NUMBER", 2)
 	settings = utils.TestSettings{
 		DNSZone:         env.GetEnvAsStringOrFallback("GSLB_DOMAIN", "cloud.example.com"),
 		PrimaryGeoTag:   env.GetEnvAsStringOrFallback("PRIMARY_GEO_TAG", "eu"),
@@ -48,5 +48,6 @@ func init() {
 		Cluster3:        env.GetEnvAsStringOrFallback("K8GB_CLUSTER3", "k3d-test-gslb3"),
 		PodinfoImage:    env.GetEnvAsStringOrFallback("PODINFO_IMAGE_REPO", "ghcr.io/stefanprodan/podinfo"),
 		ClustersNumber:  clNum,
+		DigUsingUDP:     env.GetEnvAsBoolOrFallback("DIG_USING_UDP", false),
 	}
 }
