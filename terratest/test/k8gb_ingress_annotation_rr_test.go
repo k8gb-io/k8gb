@@ -1,3 +1,4 @@
+//go:build rr || all
 // +build rr all
 
 package test

@@ -1,3 +1,4 @@
+//go:build rr || rr_multicluster
 // +build rr rr_multicluster
 
 package test

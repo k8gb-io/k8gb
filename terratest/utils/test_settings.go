@@ -33,4 +33,5 @@ type TestSettings struct {
 	Cluster3        string
 	PodinfoImage    string
 	ClustersNumber  int
+	DigUsingUDP     bool
 }

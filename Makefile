@@ -146,6 +146,7 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-amd64 CHART='./chart/k8gb' ;\
+		kubectl apply -n k8gb -f ./deploy/test/coredns-tcp-svc.yaml ;\
 	done
 
 .PHONY: list-running-pods

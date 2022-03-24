@@ -3,7 +3,7 @@ module k8gbterratest
 go 1.17
 
 require (
-	github.com/AbsaOSS/gopkg v0.1.2
+	github.com/AbsaOSS/gopkg v0.1.3
 	github.com/gruntwork-io/terratest v0.38.6
 	github.com/stretchr/testify v1.7.0
 	gopkg.in/yaml.v2 v2.4.0

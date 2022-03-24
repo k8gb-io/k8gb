@@ -1,3 +1,4 @@
+//go:build failover || all
 // +build failover all
 
 package test
