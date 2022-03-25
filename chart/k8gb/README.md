@@ -22,6 +22,8 @@ A Helm chart for Kubernetes Global Balancer
 
 ## Requirements
 
+Kubernetes: `>= 1.19.0-0`
+
 | Repository | Name | Version |
 |------------|------|---------|
 | https://absaoss.github.io/coredns-helm | coredns | 1.15.3 |
