@@ -9,24 +9,30 @@ spec:
       - host: notfound.test.k8gb.io # This is the GSLB enabled host that clients would use
         http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
           paths:
+            - path: /
             - backend:
-                serviceName: non-existing-app # Gslb should reflect NotFound status
-                servicePort: http
-              path: /
+                service:
+                  name: non-existing-app # Gslb should reflect NotFound status
+                  port:
+                    name: http
       - host: unhealthy.test.k8gb.io
         http:
           paths:
-          - backend:
-              serviceName: unhealthy-app # Gslb should reflect Unhealthy status
-              servicePort: http
-            path: /
+          - path: /
+            backend:
+              service:
+                  name: unhealthy-app # Gslb should reflect Unhealthy status
+                  port:
+                    name: http
       - host: roundrobin.test.k8gb.io
         http:
           paths:
-          - backend:
-              serviceName: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
-              servicePort: http
-            path: /
+          - path: /
+            backend:
+              service:
+                  name: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
+                  port:
+                    name: http
   strategy:
     type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
     splitBrainThresholdSeconds: 300 # Threshold after which external cluster is filtered out from delegated zone when it doesn't look alive
