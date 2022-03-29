@@ -1,5 +1,28 @@
 # Changelog
 
+## [v0.9.0](https://github.com/k8gb-io/k8gb/tree/v0.9.0) (2022-03-29)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.8...v0.9.0)
+
+**Closed issues:**
+
+- CR doesn't match CRD after the release [\#859](https://github.com/k8gb-io/k8gb/issues/859)
+- Support for Ingress @ networking.k8s.io/v1 [\#847](https://github.com/k8gb-io/k8gb/issues/847)
+
+**Merged pull requests:**
+
+- v0.9.0 [\#860](https://github.com/k8gb-io/k8gb/pull/860) ([jkremser](https://github.com/jkremser))
+- Update Helm Docs [\#858](https://github.com/k8gb-io/k8gb/pull/858) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Bump operator SDK to v1.18.1 [\#856](https://github.com/k8gb-io/k8gb/pull/856) ([kuritka](https://github.com/kuritka))
+- Use default k3d \(latest\) in our build pipes [\#855](https://github.com/k8gb-io/k8gb/pull/855) ([kuritka](https://github.com/kuritka))
+- Ingress v1 [\#854](https://github.com/k8gb-io/k8gb/pull/854) ([jkremser](https://github.com/jkremser))
+- Update Offline Changelog [\#853](https://github.com/k8gb-io/k8gb/pull/853) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#852](https://github.com/k8gb-io/k8gb/pull/852) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Don't use latest version of goreleaser [\#851](https://github.com/k8gb-io/k8gb/pull/851) ([jkremser](https://github.com/jkremser))
+- Expose CoreDNS over tcp + make Dig in terratests go via tcp [\#845](https://github.com/k8gb-io/k8gb/pull/845) ([jkremser](https://github.com/jkremser))
+
+
+
 ## [v0.8.8](https://github.com/k8gb-io/k8gb/tree/v0.8.8) (2022-03-21)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.8.7...v0.8.8)
