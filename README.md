@@ -113,12 +113,12 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 
 k8gb is very well tested with the following environment options
 
-| Type                             | Implementation                                                          |
-|----------------------------------|-------------------------------------------------------------------------|
-| Kubernetes Version               | >= 1.15                                                                 |
-| Environment                      | Self-managed, AWS(EKS) [*](#clarify)                                |
-| Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                       |
-| EdgeDNS                          | Infoblox, Route53, NS1                                                  |
+| Type                             | Implementation                                                               |
+|----------------------------------|------------------------------------------------------------------------------|
+| Kubernetes Version               | for k8s `< 1.19` use k8gb `<= 0.8.8`; since k8s `1.19` use `0.9.0` or newer  |
+| Environment                      | Self-managed, AWS(EKS) [*](#clarify)                                         |
+| Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                            |
+| EdgeDNS                          | Infoblox, Route53, NS1                                                       |
 
 <a name="clarify"></a>* We only mention solutions where we have tested and verified a k8gb installation.
 If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.

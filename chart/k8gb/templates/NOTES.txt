@@ -1,4 +1,10 @@
-K8GB and all dependencies are installed
+done
+   _    ___        _
+  | | _( _ )  __ _| |__
+  | |/ / _ \ / _` | '_ \
+  |   < (_) | (_| | |_) |
+  |_|\_\___/ \__, |_.__/  & all dependencies are installed
+             |___/
 
 1. Check if your DNS Zone is served by K8GB CoreDNS
   $ kubectl -n {{ .Release.Namespace }} run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @{{ .Release.Name }}-coredns SOA . +short
