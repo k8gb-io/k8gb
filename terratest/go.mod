@@ -65,6 +65,7 @@ require (
 replace (
 	github.com/Azure/go-autorest/autorest/adal => github.com/Azure/go-autorest/autorest/adal v0.9.16
 	github.com/containerd/containerd => github.com/containerd/containerd v1.5.8
+	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
 	github.com/opencontainers/image-spec v1.0.1 => github.com/opencontainers/image-spec v1.0.2
 	github.com/opencontainers/runc v1.0.2 => github.com/opencontainers/runc v1.0.3
 )
