@@ -1,0 +1,36 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+```
+      _    ___        _
+     | | _( _ )  __ _| |__
+     | |/ / _ \ / _` | '_ \
+     |   < (_) | (_| | |_) |
+     |_|\_\___/ \__, |_.__/ .io
+                |___/
+```
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
+
+#### Compatibility matrix:
+
+| k8gb                           |      <= 0.8.x      | >= 0.9.0           |
+| ------------------------------ | :----------------: | :----------------: |
+| Kubernetes <= 1.18             | :white_check_mark: |        :x:         |
+| Kubernetes >= 1.19 and <= 1.21 | :white_check_mark: | :white_check_mark: |
+| Kubernetes >= 1.22             |        :x:         | :white_check_mark: |
+
+{{ template "chart.valuesSection" . }}

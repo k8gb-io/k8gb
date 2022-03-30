@@ -12,8 +12,10 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
-    - name: Check all charts README.md
-      uses: docker://jnorwood/helm-docs:v1.5.0
+    - name: Generate docs for helm chart - chart/k8gb/README.md
+      uses: docker://jnorwood/helm-docs:v1.7.0
+      with:
+        args: --template-files=_helm-docs-template.gotmpl
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
       with:
