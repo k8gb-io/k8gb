@@ -1,7 +1,8 @@
 #!/bin/bash
+
 [ "${DEBUG}" == 1 ] && set -x
 
-TOOL_VERSION=${TOOL_VERSION:-"0.5.3"}
+TOOL_VERSION=${TOOL_VERSION:-"0.5.4"}
 TOOL_REPO=${TOOL_REPO:-"AbsaOSS"}
 DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 

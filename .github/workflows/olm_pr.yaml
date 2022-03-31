@@ -14,7 +14,7 @@ on:
       olmBundleToolVersion:
         description: "Version of the olm-bundle tool that generate CSV file from Chart.yaml and yamls on FS"
         required: false
-        default: "0.5.3"
+        default: "0.5.4"
 
 jobs:
   olm-bundle-pr:
