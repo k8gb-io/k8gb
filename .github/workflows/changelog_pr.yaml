@@ -41,3 +41,7 @@ jobs:
           base: master
           signoff: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Send http get to doc.crds.dev to index a new version
+        run: |
+          curl -sL https://doc.crds.dev/github.com/k8gb-io/k8gb@${{ github.event.release.tag_name }} | grep -A2 'class="container"'
