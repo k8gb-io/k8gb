@@ -21,11 +21,23 @@ dockers:
   - "absaoss/k8gb:v{{ .Version }}-amd64"
   build_flag_templates:
   - "--platform=linux/amd64"
+  - &LABEL1
+    "--label=org.opencontainers.image.title=k8gb"
+  - &LABEL2
+    "--label=org.opencontainers.image.description=A cloud native Kubernetes Global Balancer"
+  - &LABEL3
+    "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+  - &LABEL4
+    "--label=org.opencontainers.image.version={{ .Version }}"
 - image_templates:
   - "absaoss/k8gb:v{{ .Version }}-arm64"
   goarch: arm64
   build_flag_templates:
   - "--platform=linux/arm64"
+  - *LABEL1
+  - *LABEL2
+  - *LABEL3
+  - *LABEL4
 docker_manifests:
 - name_template: absaoss/k8gb:{{ .Tag }}
   image_templates:
