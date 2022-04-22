@@ -19,7 +19,7 @@ k8gb:
   dnsZoneNegTTL: 300
   # -- main zone which would contain gslb zone to delegate
   edgeDNSZone: "example.com" # main zone which would contain gslb zone to delegate
-  # -- host/ip[:port] format is supported here where ports defaults to 53
+  # -- host/ip[:port] format is supported here where port defaults to 53
   edgeDNSServers:
       # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
       - "1.1.1.1"
