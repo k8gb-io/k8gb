@@ -1,0 +1,394 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/All",
+    "definitions": {
+        "All": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "global": {
+                    "$ref": "#/definitions/Global"
+                },
+                "k8gb": {
+                    "$ref": "#/definitions/k8gb"
+                },
+                "externaldns": {
+                    "$ref": "#/definitions/Externaldns"
+                },
+                "coredns": {
+                    "$ref": "#/definitions/Coredns"
+                },
+                "infoblox": {
+                    "$ref": "#/definitions/Infoblox"
+                },
+                "route53": {
+                    "$ref": "#/definitions/Route53"
+                },
+                "ns1": {
+                    "$ref": "#/definitions/Ns1"
+                },
+                "openshift": {
+                    "$ref": "#/definitions/Openshift"
+                },
+                "rfc2136": {
+                    "$ref": "#/definitions/Rfc2136"
+                }
+            },
+            "required": []
+        },
+        "Coredns": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "isClusterService": {
+                    "type": "boolean"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/CorednsDeployment"
+                },
+                "image": {
+                    "$ref": "#/definitions/CorednsImage"
+                },
+                "serviceAccount": {
+                    "$ref": "#/definitions/CorednsServiceAccount"
+                }
+            },
+            "required": [],
+            "title": "Coredns"
+        },
+        "CorednsDeployment": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "skipConfig": {
+                    "type": "boolean"
+                }
+            },
+            "required": [],
+            "title": "Deployment"
+        },
+        "CorednsImage": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "repository": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "tag": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "repository",
+                "tag"
+            ],
+            "title": "Image"
+        },
+        "CorednsServiceAccount": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "create": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "title": "ServiceAccount"
+        },
+        "Externaldns": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "image": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "interval": {
+                    "type": "string"
+                },
+                "securityContext": {
+                    "$ref": "#/definitions/ExternaldnsSecurityContext"
+                }
+            },
+            "required": [],
+            "title": "Externaldns"
+        },
+        "ExternaldnsSecurityContext": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "runAsUser": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "fsGroup": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                }
+            },
+            "required": [],
+            "title": "ExternaldnsSecurityContext"
+        },
+        "Global": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "imagePullSecrets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required": [],
+            "title": "Global"
+        },
+        "Infoblox": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "gridHost": {
+                    "format": "idn-hostname"
+                },
+                "wapiVersion": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "wapiPort": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                },
+                "sslVerify": {
+                    "type": "boolean"
+                },
+                "httpRequestTimeout": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "httpPoolConnections": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "gridHost",
+                "wapiPort"
+            ],
+            "title": "Infoblox"
+        },
+        "k8gb": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "imageRepo": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "imageTag": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "deployCrds": {
+                    "type": "boolean"
+                },
+                "deployRbac": {
+                    "type": "boolean"
+                },
+                "dnsZone": {
+                    "format": "idn-hostname",
+                    "minLength": 1
+                },
+                "dnsZoneNegTTL": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "edgeDNSZone": {
+                    "format": "idn-hostname",
+                    "minLength": 1
+                },
+                "edgeDNSServers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "clusterGeoTag": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "extGslbClustersGeoTags": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "reconcileRequeueSeconds": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "log": {
+                    "$ref": "#/definitions/k8gbLog"
+                },
+                "splitBrainCheck": {
+                    "type": "boolean"
+                },
+                "metricsAddress": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "securityContext": {
+                    "$ref": "#/definitions/k8gbSecurityContext"
+                }
+            },
+            "required": [
+                "clusterGeoTag",
+                "extGslbClustersGeoTags",
+                "dnsZone",
+                "edgeDNSServers",
+                "edgeDNSZone"
+            ],
+            "title": "k8gb"
+        },
+        "k8gbLog": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "format": {
+                    "enum": ["simple", "json"]
+                },
+                "level": {
+                    "enum": ["panic", "fatal", "error", "warn", "info", "debug", "trace"]
+                }
+            },
+            "required": [],
+            "title": "Log"
+        },
+        "k8gbSecurityContext": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "readOnlyRootFilesystem": {
+                    "type": "boolean"
+                },
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "required": [],
+            "title": "k8gbSecurityContext"
+        },
+        "Ns1": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "ignoreSSL": {
+                    "type": "boolean"
+                }
+            },
+            "required": [],
+            "title": "Ns1"
+        },
+        "Openshift": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            },
+            "required": [],
+            "title": "Openshift"
+        },
+        "Rfc2136": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "rfc2136Opts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Rfc2136Opt"
+                    }
+                }
+            },
+            "required": [
+                "rfc2136Opts"
+            ],
+            "title": "Rfc2136"
+        },
+        "Rfc2136Opt": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "host": {
+                    "format": "idn-hostname"
+                },
+                "port": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                },
+                "tsig-secret-alg": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "tsig-keyname": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [],
+            "title": "Rfc2136Opt"
+        },
+        "Route53": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hostedZoneID": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "irsaRole": {
+                    "type": "string",
+                    "pattern": "^arn:aws:iam:.+$",
+                    "minLength": 20
+                }
+            },
+            "required": [
+                "hostedZoneID",
+                "irsaRole"
+            ],
+            "title": "Route53"
+        }
+    }
+}
