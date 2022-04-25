@@ -74,7 +74,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
 | k8gb.dnsZone | string | `"cloud.example.com"` | dnsZone controlled by gslb |
 | k8gb.dnsZoneNegTTL | int | `300` | Negative TTL for SOA record |
-| k8gb.edgeDNSServers | list | `["1.1.1.1"]` | host/ip[:port] format is supported here where ports defaults to 53 |
+| k8gb.edgeDNSServers | list | `["1.1.1.1"]` | host/ip[:port] format is supported here where port defaults to 53 |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.edgeDNSZone | string | `"example.com"` | main zone which would contain gslb zone to delegate |
 | k8gb.extGslbClustersGeoTags | string | `"us"` | comma-separated list of external gslb geo tags to pair with |
