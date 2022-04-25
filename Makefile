@@ -547,11 +547,20 @@ define debug
 	dlv $1
 endef
 
+define annotate-for-scraping
+	kubectl annotate pods -n k8gb -l $1 --overwrite prometheus.io/scrape="true" --overwrite prometheus.io/port="$2" --context=k3d-$3
+endef
+
+define stop-scraping
+	kubectl annotate pods -n k8gb -l $1 prometheus.io/scrape- prometheus.io/port- --context=k3d-$2
+endef
+
 define deploy-prometheus
 	echo -e "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
 	echo -e "\n$(YELLOW)Set annotations on pods that will be scraped by prometheus$(NC)" ;\
-	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/scrape="true" --context=k3d-$1 ;\
-	kubectl annotate pods -l name=k8gb -n k8gb --overwrite prometheus.io/port="8080" --context=k3d-$1 ;\
+	$(call annotate-for-scraping,"name=k8gb",8080,$1) ;\
+	$(call annotate-for-scraping,"app=external-dns",7979,$1) ;\
+	$(call annotate-for-scraping,"app.kubernetes.io/name=coredns",9153,$1) ;\
 	echo -e "\n$(YELLOW)install prometheus $(NC)" ;\
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ;\
 	helm repo update ;\
@@ -565,6 +574,7 @@ define uninstall-prometheus
 	echo -e "\n$(YELLOW)Local cluster $(CYAN)$1$(NC)" ;\
 	echo -e "\n$(YELLOW)uninstall prometheus $(NC)" ;\
 	helm uninstall prometheus -n k8gb --kube-context=k3d-$1 ;\
-	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/scrape- --context=k3d-$1 ;\
-	kubectl annotate pods -l name=k8gb -n k8gb prometheus.io/port- --context=k3d-$1
+	$(call stop-scraping,"name=k8gb",$1) ;\
+	$(call stop-scraping,"app=external-dns",$1) ;\
+	$(call stop-scraping,"app.kubernetes.io/name=coredns",$1)
 endef
