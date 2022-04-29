@@ -8,6 +8,7 @@ metadata:
     k8gb.io/splitbrain-threshold-seconds: "600"
   name: test-gslb-annotation-failover
 spec:
+  ingressClassName: nginx
   rules:
   - host: ingress-failover-notfound.cloud.example.com
     http:

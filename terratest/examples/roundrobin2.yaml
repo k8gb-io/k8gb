@@ -4,6 +4,7 @@ metadata:
   name: roundrobin-test-gslb
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: roundrobin-test.cloud.example.com
         http:

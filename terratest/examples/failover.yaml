@@ -4,6 +4,7 @@ metadata:
   name: test-gslb
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: terratest-failover.cloud.example.com
         http:

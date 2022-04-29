@@ -7,6 +7,7 @@ metadata:
     k8gb.io/primary-geotag: "eu"
     k8gb.io/dns-ttl-seconds: "5"
 spec:
+  ingressClassName: nginx
   rules:
     - host: ingress-failover-simple.cloud.example.com
       http:

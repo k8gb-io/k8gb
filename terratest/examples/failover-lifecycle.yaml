@@ -4,6 +4,7 @@ metadata:
   name: test-gslb-lifecycle
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: lifecycle.cloud.example.com
         http:
