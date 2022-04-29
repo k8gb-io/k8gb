@@ -4,6 +4,7 @@ metadata:
   name: test-gslb
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: terratest-notfound.cloud.example.com # This is the GSLB enabled host that clients would use
         http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host

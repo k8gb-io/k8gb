@@ -4,6 +4,7 @@ metadata:
   name: test-gslb
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: playground-failover.cloud.example.com
         http:

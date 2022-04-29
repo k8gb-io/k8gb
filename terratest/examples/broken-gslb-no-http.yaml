@@ -4,6 +4,7 @@ metadata:
   name: broken-test-gslb1
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: broken-no-http.cloud.example.com
   strategy:

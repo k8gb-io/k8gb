@@ -6,5 +6,6 @@ metadata:
     k8gb.io/primary-geotag: eu
   name: broken-test-gslb-annotation-failover
 spec:
+  ingressClassName: nginx
   rules:
   - host: notfound-broken.cloud.example.com

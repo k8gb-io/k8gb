@@ -4,6 +4,7 @@ metadata:
   name: broken-test-gslb2
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: terratest-broken.cloud.example.com
         https:

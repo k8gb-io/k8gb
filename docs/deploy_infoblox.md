@@ -92,6 +92,7 @@ metadata:
   namespace: test-gslb
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: podinfo.cloud.example.com
         http:

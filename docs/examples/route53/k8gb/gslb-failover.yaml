@@ -5,6 +5,7 @@ metadata:
   namespace: test-gslb
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: failover.test.k8gb.io # Desired GSLB enabled FQDN
         http:
