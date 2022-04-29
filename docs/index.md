@@ -54,15 +54,18 @@ kind: Gslb
 metadata:
   name: app
 spec:
-  host: app.cloud.example.com # This is the GSLB enabled host that clients would use
-  http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
-    paths:
-    - path: /
-      backend:
-        service:
-          name: app
-          port:
-            name: http
+  ingress:
+    ingressClassName: nginx
+    rules:
+    - host: app.cloud.example.com # This is the GSLB enabled host that clients would use
+      http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
+        paths:
+        - path: /
+          backend:
+            service:
+              name: app
+              port:
+                name: http
   strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
   tls:
     secretName: app-glsb-tls # Use this Secret to add to the TLS configuration for the new Ingress resource that will be created for the GSLB host

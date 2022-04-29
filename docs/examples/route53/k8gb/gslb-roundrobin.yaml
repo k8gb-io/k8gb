@@ -5,6 +5,7 @@ metadata:
   namespace: test-gslb
 spec:
   ingress:
+    ingressClassName: nginx
     rules:
       - host: notfound.test.k8gb.io # This is the GSLB enabled host that clients would use
         http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
