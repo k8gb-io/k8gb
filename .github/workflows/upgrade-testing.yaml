@@ -76,7 +76,8 @@ jobs:
 
       - name: Run Terratest
         run: |
-          mkdir -p ${{ github.workspace }}/tmp/terratest 
+          mkdir -p ${{ github.workspace }}/tmp/terratest
+          set -o pipefail
           make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
           echo "::endgroup::"
 
