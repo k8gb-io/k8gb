@@ -68,7 +68,9 @@ NO_VALUE ?= no_value
 #		VARIABLES
 ###############################
 PWD ?=  $(shell pwd)
-VERSION ?= $(shell git describe --tags --abbrev=0)
+ifndef VERSION
+VERSION := $(shell git fetch --force --tags &> /dev/null ; git describe --tags --abbrev=0)
+endif
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
 SEMVER ?= $(VERSION)-$(COMMIT_HASH)
 # image URL to use all building/pushing image targets
