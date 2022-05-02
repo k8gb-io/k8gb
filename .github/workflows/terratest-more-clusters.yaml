@@ -85,5 +85,4 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb3
 
       - name: Run Terratest
-        continue-on-error: true
         run: make terratest
