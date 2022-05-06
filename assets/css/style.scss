@@ -76,3 +76,42 @@ a.header-url:hover {
 .heading:hover > .heading-anchor {
     visibility: visible;
 }
+
+// don't use dark color for syntax highlighting
+.highlight .k, .highlight .kv {
+    color: #f00 !important;
+}
+
+// used by clipboard.js
+.clipboard {
+    border: 0;
+    font-size: .75em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 6px;
+    color: #888;
+    position: relative;
+    top: .6rem;
+    left: 95%;
+    background: transparent;
+    border-radius: 3px;
+}
+
+.pre-code {
+  position: relative;
+  padding-right: 40px;
+  background-color: #f1f1f1;
+}
+
+.clipboard:hover, .clipboard:focus, .clipboard:active {
+    outline: 0;
+    background-color: #ddd;
+}
+
+.highlight.pre-code button {
+    visibility: hidden;
+}
+
+.highlight.pre-code:hover button {
+    visibility: visible;
+}
