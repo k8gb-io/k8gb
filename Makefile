@@ -31,7 +31,7 @@ ifneq ($(CUSTOM_CERT_PATH),)
 	CERT_INSTALL_CMD := update-ca-certificates;
 endif
 
-JEKYLL_CMD := "$(CERT_INSTALL_CMD) bundle install; jekyll serve --host $(JEKYLL_HOST) --watch --livereload --incremental --port $(JEKYLL_PORT)"
+JEKYLL_CMD := "$(CERT_INSTALL_CMD) bundle install; /usr/local/bundle/bin/jekyll serve --host $(JEKYLL_HOST) --watch --livereload --incremental --port $(JEKYLL_PORT)"
 
 # Build and serve k8gb.io website locally with watch and livereload
 .PHONY: serve
@@ -44,7 +44,6 @@ ifneq ($(JEKYLL_GITHUB_TOKEN),)
 	@docker run --rm -it \
 		--env JEKYLL_GITHUB_TOKEN=$(JEKYLL_GITHUB_TOKEN) \
 		--volume="$(PWD):/srv/jekyll" \
-		--volume="$(PWD)/vendor/bundle:/usr/local/bundle" \
 		--volume="$(CUSTOM_CERT_PATH):/usr/local/share/ca-certificates/custom-cert" \
 		-p $(JEKYLL_PORT):$(JEKYLL_PORT) -p 35729:35729 jekyll/jekyll:$(JEKYLL_VERSION) \
  		sh -c $(JEKYLL_CMD)

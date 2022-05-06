@@ -101,7 +101,7 @@ Or you can ask specific CoreDNS instance for its local targets:
 dig @localhost localtargets-roundrobin.cloud.example.com -p 5053 && dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
 As expected result you should see **two A records** divided between both clusters.
-```sh
+```text
 ...
 ...
 ;; ANSWER SECTION:
@@ -192,7 +192,7 @@ You will see only **eu** podinfo is responsive:
 }
 ```
 Stop podinfo on **current (eu)** cluster:
-```
+```sh
 make stop-test-app
 ```
 Several times hit application again
