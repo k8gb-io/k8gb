@@ -68,6 +68,7 @@ replace (
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
 	github.com/opencontainers/image-spec v1.0.1 => github.com/opencontainers/image-spec v1.0.2
 	github.com/opencontainers/runc v1.0.2 => github.com/opencontainers/runc v1.0.3
+	gopkg.in/yaml.v3 => gopkg.in/yaml.v3 v3.0.0
 )
 
 exclude (
