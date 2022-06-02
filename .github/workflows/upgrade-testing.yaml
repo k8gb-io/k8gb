@@ -82,6 +82,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Terratest log parser
+        if: always()
         run: |
           curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
           chmod +x terratest_log_parser
@@ -95,6 +96,7 @@ jobs:
           echo Separated log files will be available under artifact section at https://github.com/k8gb-io/k8gb/actions/runs/${{ github.run_id }}
 
       - uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: terratest-logs
           path: ${{ github.workspace }}/tmp/terratest
