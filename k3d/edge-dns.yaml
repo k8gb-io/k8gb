@@ -1,6 +1,7 @@
-apiVersion: k3d.io/v1alpha3
+apiVersion: k3d.io/v1alpha4
 kind: Simple
-name: edgedns
+metadata:
+  name: edgedns
 image: docker.io/rancher/k3s:v1.22.6-k3s1
 agents: 0
 network: k3d-action-bridge-network
