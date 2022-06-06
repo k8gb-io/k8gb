@@ -37,4 +37,8 @@ spec:
     type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
     splitBrainThresholdSeconds: 305
     dnsTtlSeconds: 35
+    weight:
+      us: 60%
+      eu: 25%
+      za: 15%
 
