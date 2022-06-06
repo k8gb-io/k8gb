@@ -65,5 +65,18 @@ func (dr *DependencyResolver) validateSpec(strategy k8gbv1beta1.Strategy) (err e
 	if err != nil {
 		return
 	}
+	w, err := strategy.Weight.TryParse()
+	if err != nil {
+		return
+	}
+	if !strategy.Weight.IsEmpty() {
+		if strategy.Type != RoundRobinStrategy {
+			return fmt.Errorf(`"spec.strategy.weight" is allowed only for roundRobin strategy`)
+		}
+		err = field("Weight", w).isHigherOrEqualToZero().isLessOrEqualTo(100).err
+		if err != nil {
+			return
+		}
+	}
 	return
 }

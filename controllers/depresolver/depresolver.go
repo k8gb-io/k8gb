@@ -75,6 +75,15 @@ const (
 	DNSTypeMultipleProviders EdgeDNSType = "MultipleProviders"
 )
 
+const (
+	// GeoIP strategy
+	GeoStrategy = "geoip"
+	// RoundRobin strategy
+	RoundRobinStrategy = "roundRobin"
+	// Failover strategy
+	FailoverStrategy = "failover"
+)
+
 // Log configuration
 type Log struct {
 	// Level [panic, fatal, error,warn,info,debug,trace], defines level of logger, default: info

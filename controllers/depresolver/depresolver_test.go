@@ -98,6 +98,8 @@ func TestResolveSpecWithFilledFields(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
 	assert.Equal(t, 305, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
+	assert.False(t, gslb.Spec.Strategy.Weight.IsEmpty())
+	assert.Equal(t, 20, gslb.Spec.Strategy.Weight.Int())
 }
 
 func TestResolveSpecWithoutFields(t *testing.T) {
@@ -110,6 +112,9 @@ func TestResolveSpecWithoutFields(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
 	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
+	assert.Equal(t, 0, gslb.Spec.Strategy.Weight.Int())
+	assert.Equal(t, "", gslb.Spec.Strategy.Weight.String())
+	assert.True(t, gslb.Spec.Strategy.Weight.IsEmpty())
 }
 
 func TestResolveSpecWithZeroSplitBrain(t *testing.T) {
@@ -144,6 +149,46 @@ func TestResolveSpecWithNegativeFields(t *testing.T) {
 	err := resolver.ResolveGslbSpec(context.TODO(), gslb, cl)
 	// assert
 	assert.Error(t, err)
+}
+
+func TestResolveSpecWithWeightCornerCases(t *testing.T) {
+	type test struct {
+		strategy    string
+		weight      k8gbv1beta1.Percentage
+		expectederr bool
+		empty       bool
+	}
+	tests := []test{
+		{RoundRobinStrategy, "-20%", true, false},
+		{RoundRobinStrategy, "-20", true, false},
+		{RoundRobinStrategy, "+20", false, false},
+		{RoundRobinStrategy, " 20% ", false, false},
+		{RoundRobinStrategy, "20%", false, false},
+		{RoundRobinStrategy, "20", false, false},
+		{RoundRobinStrategy, "100%", false, false},
+		{RoundRobinStrategy, "101", true, false},
+		{RoundRobinStrategy, "101%", true, false},
+		{RoundRobinStrategy, "0", false, false},
+		{RoundRobinStrategy, "0%", false, false},
+		{RoundRobinStrategy, "", false, true},
+		{RoundRobinStrategy, "blah", true, false},
+		{FailoverStrategy, "10%", true, false},
+		{GeoStrategy, "0%", true, false},
+	}
+	// arrange
+	cl, gslb := getTestContext("./testdata/filled_omitempty.yaml")
+	resolver := NewDependencyResolver()
+	// act
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("weight_%s_%s", tt.strategy, tt.weight), func(t *testing.T) {
+			gslb.Spec.Strategy.Weight = tt.weight
+			gslb.Spec.Strategy.Type = tt.strategy
+			err := resolver.ResolveGslbSpec(context.TODO(), gslb, cl)
+			// assert
+			assert.Equal(t, tt.empty, gslb.Spec.Strategy.Weight.IsEmpty())
+			assert.True(t, (err != nil) == tt.expectederr)
+		})
+	}
 }
 
 func TestSpecRunWhenChanged(t *testing.T) {
