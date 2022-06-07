@@ -203,6 +203,10 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 		podinfo/podinfo \
 		--version 5.1.1
 
+.PHONY: deploy-kuar-app
+deploy-kuar-app:
+	./deploy/test-apps/kuar/deploy.sh $(CLUSTERS_NUMBER)
+
 .PHONY: upgrade-candidate
 upgrade-candidate: release-images deploy-test-version
 
