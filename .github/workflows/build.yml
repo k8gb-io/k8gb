@@ -50,7 +50,7 @@ jobs:
           golic inject --dry -x -t apache2
       - name: gokart
         run: |
-          go install github.com/praetorian-inc/gokart@v0.2.0
+          go install github.com/praetorian-inc/gokart@v0.4.0
           gokart scan --globalsTainted
       - name: go test
         run: go test ./...
