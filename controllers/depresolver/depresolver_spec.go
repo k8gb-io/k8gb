@@ -65,6 +65,10 @@ func (dr *DependencyResolver) validateSpec(strategy k8gbv1beta1.Strategy) (err e
 	if err != nil {
 		return
 	}
+	err = field("Type", strategy.Type).isOneOf(RoundRobinStrategy, GeoStrategy, FailoverStrategy).err
+	if err != nil {
+		return
+	}
 	w, err := strategy.Weight.TryParse()
 	if err != nil {
 		return

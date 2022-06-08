@@ -151,6 +151,34 @@ func TestResolveSpecWithNegativeFields(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestResolveSpecWithType(t *testing.T) {
+	type test struct {
+		strategy    string
+		expectederr bool
+	}
+	tests := []test{
+		{RoundRobinStrategy, false},
+		{FailoverStrategy, false},
+		{GeoStrategy, false},
+		{"", true},
+		{"123", true},
+		{"roundrobin", true},
+		{" ", true},
+	}
+	// arrange
+	cl, gslb := getTestContext("./testdata/free_omitempty.yaml")
+	resolver := NewDependencyResolver()
+	// act
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("strategy_%s", tt.strategy), func(t *testing.T) {
+			gslb.Spec.Strategy.Type = tt.strategy
+			err := resolver.ResolveGslbSpec(context.TODO(), gslb, cl)
+			// assert
+			assert.True(t, (err != nil) == tt.expectederr)
+		})
+	}
+}
+
 func TestResolveSpecWithWeightCornerCases(t *testing.T) {
 	type test struct {
 		strategy    string
