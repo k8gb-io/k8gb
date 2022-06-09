@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kuar
+  name: kuar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kuar
+  template:
+    metadata:
+      labels:
+        app: kuar
+    spec:
+      containers:
+      - image: gcr.io/kuar-demo/kuard-amd64:blue
+        imagePullPolicy: Always
+        name: kuar
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthy
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          failureThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          failureThreshold: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kuar
+  name: kuar
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: kuar

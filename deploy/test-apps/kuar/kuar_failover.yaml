@@ -1,0 +1,22 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: kuar-failover
+  namespace: test-gslb
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: kuar.cloud.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kuar
+                port:
+                  number: 8080
+  strategy:
+    type: failover
+    primaryGeoTag: eu
