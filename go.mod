@@ -3,7 +3,7 @@ module github.com/k8gb-io/k8gb
 go 1.17
 
 require (
-	github.com/AbsaOSS/env-binder v1.0.0
+	github.com/AbsaOSS/env-binder v1.0.1
 	github.com/AbsaOSS/gopkg v0.1.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.0
