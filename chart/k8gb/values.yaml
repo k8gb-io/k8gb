@@ -97,6 +97,15 @@ route53:
   # -- specify IRSA Role in AWS ARN format or disable it by setting to `false`
   irsaRole: arn:aws:iam::111111:role/external-dns
 
+azuredns:
+  # -- Enable Azure DNS provider
+  enabled: false
+  tenantId: 01234abc-de56-ff78-abc1-234567890def
+  subscriptionId: 01234abc-de56-ff78-abc1-234567890def
+  userAssignedIdentityID: 01234abc-de56-ff78-abc1-234567890def
+  # -- Azure Resource which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
+  resourceGroup: myDnsResourceGroup
+
 ns1:
   # -- Enable NS1 provider
   enabled: false

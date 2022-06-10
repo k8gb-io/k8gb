@@ -24,6 +24,9 @@
                 "route53": {
                     "$ref": "#/definitions/Route53"
                 },
+                "azuredns": {
+                    "$ref": "#/definitions/azuredns"
+                },
                 "ns1": {
                     "$ref": "#/definitions/Ns1"
                 },
@@ -389,6 +392,38 @@
                 "irsaRole"
             ],
             "title": "Route53"
+        },
+        "azuredns": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "tenantId": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "subscriptionId": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "userAssignedIdentityID": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "resourceGroup": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "tenantId",
+                "subscriptionId",
+                "userAssignedIdentityID",
+                "resourceGroup"
+            ],
+            "title": "azuredns"
         }
     }
 }

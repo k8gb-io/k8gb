@@ -1,4 +1,4 @@
-{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled }}
+{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.azuredns.enabled .Values.rfc2136.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -41,4 +41,18 @@ spec:
             cpu: "500m"
         securityContext:
           readOnlyRootFilesystem: true
+        volumeMounts:
+          {{- if .Values.azuredns.enabled }}
+          # Azure mountPath(s)
+          - name: azure-config-file
+            mountPath: /etc/kubernetes/azure.json
+            readOnly: true
+          {{- end }}
+        volumes:
+          {{- if .Values.azuredns.enabled }}
+          # Azure DNS volume(s)
+          - name: azure-config-file
+            secret:
+              secretName: external-dns-secret-azure
+          {{- end }}
 {{- end }}

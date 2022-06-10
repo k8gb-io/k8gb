@@ -105,6 +105,9 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               name: ns1
               key: apiKey
 {{- end }}
+{{- if .Values.azuredns.enabled -}}
+        - --azure-resource-group={{ .Values.azuredns.resourceGroup }}
+{{- end }}
 {{- if .Values.rfc2136.enabled -}}
         - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
         - --rfc2136-tsig-axfr
@@ -120,4 +123,16 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               name: rfc2136
               key: secret
 {{- end -}}
+{{- end -}}
+
+{{- if .Values.azuredns.enabled -}}
+{{- define "external-dns.azure-credentials" -}}
+{
+  "tenantId": "{{ .Values.azuredns.tenantId }}",
+  "subscriptionId": "{{ .Values.azuredns.subscriptionId }}",
+  "resourceGroup": "{{ .Values.azuredns.resourceGroup }}",
+  "useManagedIdentityExtension": true,
+  "userAssignedIdentityID": "{{ .Values.azuredns.userAssignedIdentityID }}"
+}
+{{ end }}
 {{- end -}}
