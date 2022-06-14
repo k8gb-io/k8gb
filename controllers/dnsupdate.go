@@ -23,6 +23,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -79,9 +81,9 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 
 		if len(externalTargets) > 0 {
 			switch gslb.Spec.Strategy.Type {
-			case roundRobinStrategy, geoStrategy:
+			case depresolver.RoundRobinStrategy, depresolver.GeoStrategy:
 				finalTargets = append(finalTargets, externalTargets...)
-			case failoverStrategy:
+			case depresolver.FailoverStrategy:
 				// If cluster is Primary
 				if isPrimary {
 					// If cluster is Primary and Healthy return only own targets
@@ -156,11 +158,11 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 
 func (r *GslbReconciler) updateRuntimeStatus(gslb *k8gbv1beta1.Gslb, isPrimary bool, isHealthy k8gbv1beta1.HealthStatus, finalTargets []string) {
 	switch gslb.Spec.Strategy.Type {
-	case roundRobinStrategy:
+	case depresolver.RoundRobinStrategy:
 		m.UpdateRoundrobinStatus(gslb, isHealthy, finalTargets)
-	case geoStrategy:
+	case depresolver.GeoStrategy:
 		m.UpdateGeoIPStatus(gslb, isHealthy, finalTargets)
-	case failoverStrategy:
+	case depresolver.FailoverStrategy:
 		m.UpdateFailoverStatus(gslb, isPrimary, isHealthy, finalTargets)
 	}
 }

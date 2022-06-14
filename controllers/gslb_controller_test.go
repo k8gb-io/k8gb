@@ -532,7 +532,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
-			Labels:     externaldns.Labels{"strategy": failoverStrategy},
+			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -553,7 +553,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 	// enable failover strategy
-	settings.gslb.Spec.Strategy.Type = failoverStrategy
+	settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
 	settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 	err = settings.client.Update(context.TODO(), settings.gslb)
 	require.NoError(t, err, "Can't update gslb")
@@ -587,7 +587,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
-			Labels:     externaldns.Labels{"strategy": failoverStrategy},
+			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -620,7 +620,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 			// enable failover strategy
-			settings.gslb.Spec.Strategy.Type = failoverStrategy
+			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
 			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
@@ -655,7 +655,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2"},
-			Labels:     externaldns.Labels{"strategy": failoverStrategy},
+			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -694,7 +694,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 			// enable failover strategy
-			settings.gslb.Spec.Strategy.Type = failoverStrategy
+			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
 			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
