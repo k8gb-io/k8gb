@@ -105,7 +105,7 @@ func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb) error {
 	return p.assistant.RemoveEndpoint(p.endpointName)
 }
 
-func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets []string) {
+func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets assistant2.Targets) {
 	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
 }
 

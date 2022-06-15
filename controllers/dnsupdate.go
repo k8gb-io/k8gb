@@ -75,7 +75,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		}
 
 		// Check if host is alive on external Gslb
-		externalTargets := r.DNSProvider.GetExternalTargets(host)
+		externalTargets := r.DNSProvider.GetExternalTargets(host).GetIPs()
 
 		sortTargets(externalTargets)
 
