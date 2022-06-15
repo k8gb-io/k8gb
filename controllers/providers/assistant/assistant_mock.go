@@ -70,10 +70,10 @@ func (mr *MockAssistantMockRecorder) CoreDNSExposedIPs() *gomock.Call {
 }
 
 // GetExternalTargets mocks base method.
-func (m *MockAssistant) GetExternalTargets(host string, extClusterNsNames map[string]string) []string {
+func (m *MockAssistant) GetExternalTargets(host string, extClusterNsNames map[string]string) Targets {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExternalTargets", host, extClusterNsNames)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].(Targets)
 	return ret0
 }
 

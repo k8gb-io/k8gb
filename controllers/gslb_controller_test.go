@@ -306,7 +306,7 @@ func TestGslbErrorsIncrement(t *testing.T) {
 	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
 	m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
 	m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(fmt.Errorf("save DNS error")).Times(1)
-	m.EXPECT().GetExternalTargets(gomock.Any()).Return([]string{}).AnyTimes()
+	m.EXPECT().GetExternalTargets(gomock.Any()).Return(assistant.Targets{}).AnyTimes()
 	m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
 	settings.reconciler.DNSProvider = m
 	// act

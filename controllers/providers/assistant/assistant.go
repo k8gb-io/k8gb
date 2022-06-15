@@ -31,7 +31,7 @@ type Assistant interface {
 	// GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses
 	GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error)
 	// GetExternalTargets retrieves slice of targets from external clusters
-	GetExternalTargets(host string, extClusterNsNames map[string]string) (targets []string)
+	GetExternalTargets(host string, extClusterNsNames map[string]string) (targets Targets)
 	// SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist
 	SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error
 	// RemoveEndpoint removes endpoint

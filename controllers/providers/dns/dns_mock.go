@@ -27,6 +27,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	assistant "github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	endpoint "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -82,10 +83,10 @@ func (mr *MockProviderMockRecorder) Finalize(arg0 interface{}) *gomock.Call {
 }
 
 // GetExternalTargets mocks base method.
-func (m *MockProvider) GetExternalTargets(arg0 string) []string {
+func (m *MockProvider) GetExternalTargets(arg0 string) assistant.Targets {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExternalTargets", arg0)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].(assistant.Targets)
 	return ret0
 }
 

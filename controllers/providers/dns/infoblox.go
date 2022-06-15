@@ -196,7 +196,7 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 	return nil
 }
 
-func (p *InfobloxProvider) GetExternalTargets(host string) (targets []string) {
+func (p *InfobloxProvider) GetExternalTargets(host string) (targets assistant.Targets) {
 	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
 }
 
