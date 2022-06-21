@@ -50,7 +50,7 @@ type GslbReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
 	Config      *depresolver.Config
-	DepResolver *depresolver.DependencyResolver
+	DepResolver depresolver.GslbResolver
 	DNSProvider dns.Provider
 }
 
