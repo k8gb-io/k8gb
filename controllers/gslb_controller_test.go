@@ -849,6 +849,78 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 	assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 }
 
+func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
+	// arrange
+	const dnsZone = "cloud.example.com"
+	const want = "extdns"
+	wantEp := []*externaldns.Endpoint{
+		{
+			DNSName:    dnsZone,
+			RecordTTL:  30,
+			RecordType: "NS",
+			Targets: externaldns.Targets{
+				"gslb-ns-eu-cloud.example.com",
+				"gslb-ns-us-cloud.example.com",
+				"gslb-ns-za-cloud.example.com",
+			},
+		},
+		{
+			DNSName:    "gslb-ns-eu-cloud.example.com",
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets: externaldns.Targets{
+				defaultEdgeDNS1,
+			},
+		},
+	}
+	dnsEndpoint := &externaldns.DNSEndpoint{}
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSServers = defaultEdgeDNSServers
+	customConfig.CoreDNSExposed = true
+	coreDNSService := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      defaultCoreDNSExtServiceName,
+			Namespace: predefinedConfig.K8gbNamespace,
+			Labels: map[string]string{
+				"app.kubernetes.io/name": "coredns",
+			},
+		},
+	}
+	serviceIPs := []corev1.LoadBalancerIngress{
+		{IP: "1.1.1.1"}, // rely on 1.1.1.1 response from Cloudflare
+	}
+	settings := provideSettings(t, customConfig)
+	err := settings.client.Create(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
+	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
+	err = settings.client.Status().Update(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to update coredns service lb hostname")
+
+	// act
+	customConfig.EdgeDNSType = depresolver.DNSTypeExternal
+	customConfig.ClusterGeoTag = "eu"
+	customConfig.ExtClustersGeoTags = []string{"za", "us"}
+	customConfig.DNSZone = dnsZone
+	// apply new environment variables and update config only
+	settings.reconciler.Config = &customConfig
+	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
+	// configuration at another time than startup
+	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
+	settings.reconciler.DNSProvider = f.Provider()
+
+	reconcileAndUpdateGslb(t, settings)
+	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+	require.NoError(t, err, "Failed to get expected DNSEndpoint")
+	got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+	gotEp := dnsEndpoint.Spec.Endpoints
+	prettyGot := str.ToString(gotEp)
+	prettyWant := str.ToString(wantEp)
+
+	// assert
+	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+	assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+}
+
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
