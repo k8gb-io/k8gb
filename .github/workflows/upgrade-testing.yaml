@@ -86,7 +86,14 @@ jobs:
         run: |
           curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
           chmod +x terratest_log_parser
+          echo "::group::Parsing the logs"
           ./terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
+          echo "::endgroup::"
+
+          echo -e "\nSummary:\n--------"
+          export TERM=xterm
+          cat ${{ github.workspace }}/tmp/terratest/summary.log | sed -e "s;FAIL;$(tput setaf 1)&$(tput sgr0);" -e "s;PASS;$(tput setaf 2)&$(tput sgr0);"
+
           echo -e "\n\nTerratest logs:"
           for log in $(find ${{ github.workspace }}/tmp/terratest -regex ".*/Test.*\.log"); do
               echo "::group::$(basename $log)"
