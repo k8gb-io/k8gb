@@ -887,7 +887,7 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 		},
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
-		{IP: "1.1.1.1"}, // rely on 1.1.1.1 response from Cloudflare
+		{IP: "1.1.1.1"},
 	}
 	settings := provideSettings(t, customConfig)
 	err := settings.client.Create(context.TODO(), coreDNSService)
