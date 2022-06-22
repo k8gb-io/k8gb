@@ -183,6 +183,19 @@ func (v *validator) hasUniqueItems() *validator {
 	return v
 }
 
+func (v *validator) isOneOf(items ...string) *validator {
+	if v.err != nil {
+		return v
+	}
+	for _, item := range items {
+		if item == v.strValue {
+			return v
+		}
+	}
+	v.err = fmt.Errorf(`'%s' must be one of the values %v`, v.name, items)
+	return v
+}
+
 func isNotEmpty(s string) bool {
 	return strings.ReplaceAll(s, " ", "") != ""
 }

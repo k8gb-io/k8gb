@@ -90,10 +90,8 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	}
 	coreDNSService := &serviceList.Items[0]
 
-	var lbHostname string
-	if len(coreDNSService.Status.LoadBalancer.Ingress) > 0 {
-		lbHostname = coreDNSService.Status.LoadBalancer.Ingress[0].Hostname
-	} else {
+	var lb corev1.LoadBalancerIngress
+	if len(coreDNSService.Status.LoadBalancer.Ingress) == 0 {
 		errMessage := "no LoadBalancer ExternalIPs are found"
 		log.Warn().
 			Str("serviceName", coreDNSService.Name).
@@ -101,14 +99,25 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	IPs, err := utils.Dig(lbHostname, r.edgeDNSServers...)
-	if err != nil {
-		log.Warn().Err(err).
-			Str("loadBalancerHostname", lbHostname).
-			Msg("Can't dig CoreDNS service LoadBalancer FQDN")
-		return nil, err
+	lb = coreDNSService.Status.LoadBalancer.Ingress[0]
+	return extractIPFromLB(lb, r.edgeDNSServers)
+}
+
+func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
+	if lb.Hostname != "" {
+		IPs, err := utils.Dig(lb.Hostname, ns...)
+		if err != nil {
+			log.Warn().Err(err).
+				Str("loadBalancerHostname", lb.Hostname).
+				Msg("Can't dig CoreDNS service LoadBalancer FQDN")
+			return nil, err
+		}
+		return IPs, nil
 	}
-	return IPs, nil
+	if lb.IP != "" {
+		return []string{lb.IP}, nil
+	}
+	return nil, nil
 }
 
 // GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses
@@ -287,8 +296,8 @@ func dnsQuery(host string, nameservers utils.DNSList) (*dns.Msg, error) {
 	return dnsMsgA, err
 }
 
-func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]string) (targets []string) {
-	targets = []string{}
+func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]string) (targets Targets) {
+	targets = Targets{}
 	for _, cluster := range extClusterNsNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		log.Info().
@@ -318,7 +327,7 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		}
 		clusterTargets := getARecords(a)
 		if len(clusterTargets) > 0 {
-			targets = append(targets, clusterTargets...)
+			targets = append(targets, Target{cluster, clusterTargets})
 			log.Info().
 				Strs("clusterTargets", clusterTargets).
 				Str("cluster", cluster).

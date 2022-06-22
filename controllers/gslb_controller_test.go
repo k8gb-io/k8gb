@@ -306,7 +306,7 @@ func TestGslbErrorsIncrement(t *testing.T) {
 	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
 	m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
 	m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(fmt.Errorf("save DNS error")).Times(1)
-	m.EXPECT().GetExternalTargets(gomock.Any()).Return([]string{}).AnyTimes()
+	m.EXPECT().GetExternalTargets(gomock.Any()).Return(assistant.Targets{}).AnyTimes()
 	m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
 	settings.reconciler.DNSProvider = m
 	// act
@@ -532,7 +532,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
-			Labels:     externaldns.Labels{"strategy": failoverStrategy},
+			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -553,7 +553,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 	// enable failover strategy
-	settings.gslb.Spec.Strategy.Type = failoverStrategy
+	settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
 	settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 	err = settings.client.Update(context.TODO(), settings.gslb)
 	require.NoError(t, err, "Can't update gslb")
@@ -587,7 +587,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2", "10.1.0.3"},
-			Labels:     externaldns.Labels{"strategy": failoverStrategy},
+			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -620,7 +620,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 			// enable failover strategy
-			settings.gslb.Spec.Strategy.Type = failoverStrategy
+			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
 			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
@@ -655,7 +655,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 			RecordTTL:  30,
 			RecordType: "A",
 			Targets:    externaldns.Targets{"10.1.0.1", "10.1.0.2"},
-			Labels:     externaldns.Labels{"strategy": failoverStrategy},
+			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
 	ingressIPs := []corev1.LoadBalancerIngress{
@@ -694,7 +694,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
 			// enable failover strategy
-			settings.gslb.Spec.Strategy.Type = failoverStrategy
+			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
 			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
@@ -816,6 +816,78 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
 		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
+	}
+	settings := provideSettings(t, customConfig)
+	err := settings.client.Create(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
+	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
+	err = settings.client.Status().Update(context.TODO(), coreDNSService)
+	require.NoError(t, err, "Failed to update coredns service lb hostname")
+
+	// act
+	customConfig.EdgeDNSType = depresolver.DNSTypeExternal
+	customConfig.ClusterGeoTag = "eu"
+	customConfig.ExtClustersGeoTags = []string{"za", "us"}
+	customConfig.DNSZone = dnsZone
+	// apply new environment variables and update config only
+	settings.reconciler.Config = &customConfig
+	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
+	// configuration at another time than startup
+	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
+	settings.reconciler.DNSProvider = f.Provider()
+
+	reconcileAndUpdateGslb(t, settings)
+	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+	require.NoError(t, err, "Failed to get expected DNSEndpoint")
+	got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+	gotEp := dnsEndpoint.Spec.Endpoints
+	prettyGot := str.ToString(gotEp)
+	prettyWant := str.ToString(wantEp)
+
+	// assert
+	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+	assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+}
+
+func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
+	// arrange
+	const dnsZone = "cloud.example.com"
+	const want = "extdns"
+	wantEp := []*externaldns.Endpoint{
+		{
+			DNSName:    dnsZone,
+			RecordTTL:  30,
+			RecordType: "NS",
+			Targets: externaldns.Targets{
+				"gslb-ns-eu-cloud.example.com",
+				"gslb-ns-us-cloud.example.com",
+				"gslb-ns-za-cloud.example.com",
+			},
+		},
+		{
+			DNSName:    "gslb-ns-eu-cloud.example.com",
+			RecordTTL:  30,
+			RecordType: "A",
+			Targets: externaldns.Targets{
+				defaultEdgeDNS1,
+			},
+		},
+	}
+	dnsEndpoint := &externaldns.DNSEndpoint{}
+	customConfig := predefinedConfig
+	customConfig.EdgeDNSServers = defaultEdgeDNSServers
+	customConfig.CoreDNSExposed = true
+	coreDNSService := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      defaultCoreDNSExtServiceName,
+			Namespace: predefinedConfig.K8gbNamespace,
+			Labels: map[string]string{
+				"app.kubernetes.io/name": "coredns",
+			},
+		},
+	}
+	serviceIPs := []corev1.LoadBalancerIngress{
+		{IP: "1.1.1.1"}, // rely on 1.1.1.1 response from Cloudflare
 	}
 	settings := provideSettings(t, customConfig)
 	err := settings.client.Create(context.TODO(), coreDNSService)
