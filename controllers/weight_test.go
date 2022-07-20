@@ -118,14 +118,21 @@ func TestWeight(t *testing.T) {
 		},
 		{
 			name:          "no weights with external targets",
-			injectWeights: false,
+			injectWeights: true,
 			data: map[string]wrr{
-				"eu": {weight: "100%", targets: []string{"10.10.0.1", "10.10.0.2"}},
+				"eu": {weight: "0%", targets: []string{"10.10.0.1", "10.10.0.2"}},
 				"us": {weight: "0%", targets: []string{"10.0.0.1", "10.0.0.2"}},
 				"za": {weight: "0%", targets: []string{"10.22.0.1", "10.22.0.2", "10.22.1.1"}},
 			},
 			expectedLabels: map[string]string{
-				"strategy": depresolver.RoundRobinStrategy,
+				"strategy":      depresolver.RoundRobinStrategy,
+				"weight-us-0-0": "10.0.0.1",
+				"weight-us-1-0": "10.0.0.2",
+				"weight-eu-0-0": "10.10.0.1",
+				"weight-eu-1-0": "10.10.0.2",
+				"weight-za-0-0": "10.22.0.1",
+				"weight-za-1-0": "10.22.0.2",
+				"weight-za-2-0": "10.22.1.1",
 			},
 		},
 		{
@@ -146,6 +153,7 @@ func TestWeight(t *testing.T) {
 				if !test.injectWeights {
 					return nil
 				}
+				gslb.Spec.Strategy.Type = depresolver.RoundRobinStrategy
 				gslb.Spec.Strategy.Weight = make(map[string]k8gbv1beta1.Percentage, 0)
 				for k, w := range test.data {
 					gslb.Spec.Strategy.Weight[k] = k8gbv1beta1.Percentage(w.weight)
@@ -170,7 +178,7 @@ func TestWeight(t *testing.T) {
 			defer ctrl.Finish()
 			// settings := provideSettings(t, predefinedConfig)
 			m := dns.NewMockProvider(ctrl)
-			r := depresolver.NewMockResolver(ctrl)
+			r := depresolver.NewMockGslbResolver(ctrl)
 			m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Do(assertAnnotation).Return(fmt.Errorf("save DNS error")).Times(1)
 			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()

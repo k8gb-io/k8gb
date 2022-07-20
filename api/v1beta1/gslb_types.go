@@ -33,7 +33,7 @@ import (
 type Strategy struct {
 	// Load balancing strategy type:(roundRobin|failover)
 	Type string `json:"type"`
-	// roundrobin and in the future consistent may (but also may not) contain a weight
+	// weight roundrobin
 	Weight Weight `json:"weight,omitempty"`
 	// Primary Geo Tag. Valid for failover strategy only
 	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
@@ -120,6 +120,12 @@ func (p Percentage) TryParse() (v int, err error) {
 func (p Percentage) Int() int {
 	v, _ := p.TryParse()
 	return v
+}
+
+func (p *Percentage) UnmarshalJSON(data []byte) error {
+	str := strings.ReplaceAll(string(data), "\"", "")
+	*p = Percentage(str)
+	return nil
 }
 
 func (w Weight) IsEmpty() bool {

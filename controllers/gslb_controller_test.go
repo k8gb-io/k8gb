@@ -1222,7 +1222,7 @@ func reconcileAndUpdateGslb(t *testing.T, s testSettings) {
 	// resources' Status.
 	res, err := s.reconciler.Reconcile(context.TODO(), s.request)
 	if err != nil {
-		return
+		t.Fatalf("reconciliation error: %s", err)
 	}
 
 	if !s.finalCall {
