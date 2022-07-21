@@ -22,6 +22,9 @@ spec:
     - jsonPath: .status.geoTag
       name: geoTag
       type: string
+    - jsonPath: .status.hosts,priority=1
+      name: hosts
+      type: string
     name: v1beta1
     schema:
       openAPIV3Schema:
@@ -344,6 +347,10 @@ spec:
                   type: array
                 description: Current Healthy DNS record structure
                 type: object
+              hosts:
+                description: Comma-separated list of hosts. Duplicating the value
+                  from range .spec.ingress.rules[*].host for printer column
+                type: string
               serviceHealth:
                 additionalProperties:
                   type: string

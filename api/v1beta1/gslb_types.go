@@ -60,6 +60,8 @@ type GslbStatus struct {
 	HealthyRecords map[string][]string `json:"healthyRecords"`
 	// Cluster Geo Tag
 	GeoTag string `json:"geoTag"`
+	// Comma-separated list of hosts. Duplicating the value from range .spec.ingress.rules[*].host for printer column
+	Hosts string `json:"hosts,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -68,6 +70,7 @@ type GslbStatus struct {
 // Gslb is the Schema for the gslbs API
 // +kubebuilder:printcolumn:name="strategy",type=string,JSONPath=`.spec.strategy.type`
 // +kubebuilder:printcolumn:name="geoTag",type=string,JSONPath=`.status.geoTag`
+// +kubebuilder:printcolumn:name="hosts",type=string,JSONPath=`.status.hosts,priority=1`
 type Gslb struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
