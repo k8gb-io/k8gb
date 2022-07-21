@@ -52,7 +52,7 @@ DNS_ZONE ?= cloud.example.com
 DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
-GSLB_CRD_YAML ?= chart/k8gb/templates/crds/k8gb.absa.oss_gslbs.yaml
+GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -121,7 +121,7 @@ demo: ## Execute end-to-end demo
 # spin-up local environment
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
-	@echo -e "\n$(YELLOW)Creating $(CLUSTERS_NUMBER) k8s clusters$(NC)"
+	@echo -e "\n$(YELLOW)Creating $$(( $(CLUSTERS_NUMBER) + 1 )) k8s clusters$(NC)"
 	$(MAKE) create-local-cluster CLUSTER_NAME=edge-dns
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
@@ -527,9 +527,7 @@ endef
 define crd-manifest
 	$(call install-controller-gen)
 	@echo -e "\n$(YELLOW)Generating the CRD manifests$(NC)"
-	@echo -n "{{- if .Values.k8gb.deployCrds }}" > $(GSLB_CRD_YAML)
-	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./..." output:crd:stdout >> $(GSLB_CRD_YAML)
-	@echo "{{- end }}"  >> $(GSLB_CRD_YAML)
+	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./..." output:crd:stdout > $(GSLB_CRD_YAML)
 endef
 
 define install-controller-gen
