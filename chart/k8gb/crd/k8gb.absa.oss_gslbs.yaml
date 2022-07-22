@@ -22,8 +22,9 @@ spec:
     - jsonPath: .status.geoTag
       name: geoTag
       type: string
-    - jsonPath: .status.hosts,priority=1
+    - jsonPath: .status.hosts
       name: hosts
+      priority: 1
       type: string
     name: v1beta1
     schema:

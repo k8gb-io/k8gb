@@ -139,7 +139,7 @@ func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][
 
 func (r *GslbReconciler) hostsToCSV(gslb *k8gbv1beta1.Gslb) string {
 	var hosts []string
-	for _,r := range gslb.Spec.Ingress.Rules {
+	for _, r := range gslb.Spec.Ingress.Rules {
 		hosts = append(hosts, r.Host)
 	}
 	return strings.Join(hosts, ", ")
