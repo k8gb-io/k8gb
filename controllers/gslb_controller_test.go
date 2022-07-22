@@ -162,6 +162,43 @@ func TestHealthyServiceStatus(t *testing.T) {
 		healthyHost, expectedServiceStatus, actualServiceStatus)
 }
 
+func TestHostsInStatusAreAdded(t *testing.T) {
+	// arrange
+	settings := provideSettings(t, predefinedConfig)
+	settings.gslb.Status.Hosts = ""
+	hostsInStatusBeforeReconciliation := settings.gslb.Status.Hosts
+	expectedHostsInStatus := settings.reconciler.hostsToCSV(settings.gslb)
+
+	reconcileAndUpdateGslb(t, settings)
+	// act
+	actualHostsInStatus := settings.gslb.Status.Hosts
+
+	// assert
+	assert.Empty(t, hostsInStatusBeforeReconciliation, "for gslb: '%s', the '.status.hosts' should be empty before reconciliation, but was: '%s'",
+		settings.gslb.Name, hostsInStatusBeforeReconciliation)
+	assert.NotEmpty(t, actualHostsInStatus, "for gslb: '%s', expected status.hosts to be not empty", settings.gslb.Name)
+	assert.Equal(t, expectedHostsInStatus, actualHostsInStatus)
+}
+
+func TestHostsInStatusAllPresent(t *testing.T) {
+	// arrange
+	settings := provideSettings(t, predefinedConfig)
+	var expectedHosts []string
+	for _, h := range settings.gslb.Spec.Ingress.Rules {
+		expectedHosts = append(expectedHosts, h.Host)
+	}
+
+	reconcileAndUpdateGslb(t, settings)
+	// act
+	actualHostsInStatus := settings.reconciler.hostsToCSV(settings.gslb)
+
+	// assert
+	for _, expectedHost := range expectedHosts {
+		assert.Contains(t, actualHostsInStatus, expectedHost, "for gslb: %s, expecting %s to be present in status.hosts (%s)",
+			settings.gslb.Name, expectedHost, actualHostsInStatus)
+	}
+}
+
 func TestIngressHostsPerStatusMetric(t *testing.T) {
 	// arrange
 	settings := provideSettings(t, predefinedConfig)
