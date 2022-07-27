@@ -113,6 +113,10 @@ func run() error {
 		Scheme:      mgr.GetScheme(),
 	}
 
+	if err = reconciler.PostStartHook(config, mgr); err != nil {
+		return err
+	}
+
 	log.Info().Msg("Starting metrics")
 	metrics.Init(config)
 	defer metrics.Metrics().Unregister()

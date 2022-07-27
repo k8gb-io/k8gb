@@ -23,7 +23,8 @@ k8gb:
   edgeDNSServers:
       # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
       - "1.1.1.1"
-  # -- used for places where we need to distinguish between different Gslb instances
+  # -- used for places where we need to distinguish between different Gslb instances. If left empty, the value of annotation or label
+  #    'topology.kubernetes.io/region' on k8s nodes will be used
   clusterGeoTag: "eu"
   # -- comma-separated list of external gslb geo tags to pair with
   extGslbClustersGeoTags: "us"

@@ -42,6 +42,8 @@ const (
 	versionNumberRegex = "^(v){0,1}(0|(?:[1-9]\\d*))(?:\\.(0|(?:[1-9]\\d*))(?:\\.(0|(?:[1-9]\\d*)))?(?:\\-([\\w][\\w\\.\\-_]*))?)?$"
 	// k8sNamespaceRegex matches valid kubernetes namespace
 	k8sNamespaceRegex = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+	// route53ZoneIDRegex matches valid hosted zone id for route53 (starts with Z)
+	route53ZoneIDRegex = "^Z.+$"
 )
 
 // validator wrapper against field to be verified

@@ -29,9 +29,15 @@ spec:
         - --managed-record-types=CNAME
         - --managed-record-types=NS
         - --annotation-filter=k8gb.absa.oss/dnstype=extdns # filter out only relevant DNSEntrypoints
-        - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
         - --provider={{ include "k8gb.extdnsProvider" . }}
         {{ include "k8gb.extdnsProviderOpts" . }}
+        env:
+          {{ include "k8gb.extdnsProviderEnvs" . }}
+          - name: EXTERNAL_DNS_TXT_OWNER_ID
+            valueFrom:
+              configMapKeyRef:
+                name: external-dns-env
+                key: EXTERNAL_DNS_TXT_OWNER_ID
         resources:
           requests:
             memory: "32Mi"
