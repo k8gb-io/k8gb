@@ -1,4 +1,4 @@
-{{- if .Values.k8gb.deployCrds }}---
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -21,6 +21,10 @@ spec:
       type: string
     - jsonPath: .status.geoTag
       name: geoTag
+      type: string
+    - jsonPath: .status.hosts
+      name: hosts
+      priority: 1
       type: string
     name: v1beta1
     schema:
@@ -344,6 +348,10 @@ spec:
                   type: array
                 description: Current Healthy DNS record structure
                 type: object
+              hosts:
+                description: Comma-separated list of hosts. Duplicating the value
+                  from range .spec.ingress.rules[*].host for printer column
+                type: string
               serviceHealth:
                 additionalProperties:
                   type: string
@@ -365,4 +373,3 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-{{- end }}
