@@ -26,7 +26,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	ibclient "github.com/infobloxopen/infoblox-go-client"
+	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 )
 
 // MockInfobloxClient is a mock of InfobloxClient interface.
@@ -53,10 +53,10 @@ func (m *MockInfobloxClient) EXPECT() *MockInfobloxClientMockRecorder {
 }
 
 // GetObjectManager mocks base method.
-func (m *MockInfobloxClient) GetObjectManager() (*ibclient.ObjectManager, error) {
+func (m *MockInfobloxClient) GetObjectManager() (ibclient.IBObjectManager, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetObjectManager")
-	ret0, _ := ret[0].(*ibclient.ObjectManager)
+	ret0, _ := ret[0].(ibclient.IBObjectManager)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

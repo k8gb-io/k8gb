@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	ibclient "github.com/infobloxopen/infoblox-go-client"
+	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -170,7 +170,7 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
 	config := defaultConfig
 	provider := NewInfobloxDNS(config, a, cl)
@@ -194,9 +194,9 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 	}).Return(nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(2)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
 		Return(nil).Do(func(arg0 *ibclient.RecordTXT, arg1, arg2 interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
 	}).AnyTimes()
@@ -221,9 +221,9 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreating
 	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{}).Return(nil).AnyTimes()
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{}).Return(nil).AnyTimes()
 	config := defaultConfig
 	config.SplitBrainCheck = true
 	provider := NewInfobloxDNS(config, a, cl)
@@ -244,9 +244,9 @@ func TestInfobloxFinalize(t *testing.T) {
 	con.EXPECT().DeleteObject(gomock.Any()).Return(ref, nil).Do(func(arg0 string) {
 		require.Equal(t, arg0, ref)
 	}).AnyTimes()
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).
 		Return(nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
 		Return(nil).Do(func(arg0 *ibclient.RecordTXT, arg1, arg2 interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
 	}).Times(1)
