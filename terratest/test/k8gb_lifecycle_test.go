@@ -71,7 +71,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 
 	utils.CreateGslb(t, options, settings, ingressResourcePath)
 
-	k8s.WaitUntilIngressAvailable(t, options, name, 120, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(t, options, name, utils.DefaultRetries, 1*time.Second)
 
 	ingress := k8s.GetIngress(t, options, name)
 
@@ -87,7 +87,7 @@ func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
 	// recreate ingress
 	utils.CreateGslb(t, options, settings, ingressResourcePath)
 
-	k8s.WaitUntilIngressAvailable(t, options, name, 120, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(t, options, name, utils.DefaultRetries, 1*time.Second)
 
 	ingress = k8s.GetIngress(t, options, name)
 
@@ -129,14 +129,14 @@ func TestK8gbSpecKeepsStableAfterIngressUpdates(t *testing.T) {
 
 	// create gslb
 	utils.CreateGslb(t, options, settings, kubeResourcePath)
-	k8s.WaitUntilIngressAvailable(t, options, name, 120, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(t, options, name, utils.DefaultRetries, 1*time.Second)
 
 	assertStrategy(t, options)
 
 	// reapply ingress
 	utils.CreateGslb(t, options, settings, ingressResourcePath)
 
-	k8s.WaitUntilIngressAvailable(t, options, name, 120, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(t, options, name, utils.DefaultRetries, 1*time.Second)
 
 	ingress := k8s.GetIngress(t, options, name)
 

@@ -38,6 +38,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -127,6 +128,8 @@ func (w *Workflow) WithIngress(path string) *Workflow {
 	return w
 }
 
+// WithGslb
+// TODO: consider taking host dynamically
 func (w *Workflow) WithGslb(path, host string) *Workflow {
 	var err error
 	if host == "" {
@@ -195,13 +198,13 @@ func (w *Workflow) Start() (*Instance, error) {
 		testAppFilter := metav1.ListOptions{
 			LabelSelector: "app.kubernetes.io/name=" + w.state.testApp.name,
 		}
-		k8s.WaitUntilNumPodsCreated(w.t, w.k8sOptions, testAppFilter, 1, 120, 1*time.Second)
+		k8s.WaitUntilNumPodsCreated(w.t, w.k8sOptions, testAppFilter, 1, DefaultRetries, 1*time.Second)
 		var testAppPods []corev1.Pod
 		testAppPods = k8s.ListPods(w.t, w.k8sOptions, testAppFilter)
 		for _, pod := range testAppPods {
-			k8s.WaitUntilPodAvailable(w.t, w.k8sOptions, pod.Name, 120, 1*time.Second)
+			k8s.WaitUntilPodAvailable(w.t, w.k8sOptions, pod.Name, DefaultRetries, 1*time.Second)
 		}
-		k8s.WaitUntilServiceAvailable(w.t, w.k8sOptions, w.state.testApp.name, 120, 1*time.Second)
+		k8s.WaitUntilServiceAvailable(w.t, w.k8sOptions, w.state.testApp.name, DefaultRetries, 1*time.Second)
 		w.state.testApp.isRunning = true
 	}
 
@@ -243,6 +246,21 @@ func (i *Instance) Kill() {
 	if i.w.state.namespaceCreated {
 		k8s.DeleteNamespace(i.w.t, i.w.k8sOptions, i.w.namespace)
 	}
+}
+
+func (i *Instance) ReapplyIngress(path string) {
+	var err error
+	i.w.t.Logf("reapplying %s", path)
+	i.w.settings.ingressResourcePath = path
+	i.w.settings.gslbResourcePath = ""
+	i.w.state.gslb.name, err = i.w.getManifestName(i.w.settings.ingressResourcePath)
+	require.NoError(i.w.t, err)
+	k8s.KubectlApply(i.w.t, i.w.k8sOptions, i.w.settings.ingressResourcePath)
+	// modifying inner state.gslb.name and ingress.Name has nothing to do with reading these values dynamically afterwards.
+	k8s.WaitUntilIngressAvailable(i.w.t, i.w.k8sOptions, i.w.state.gslb.name, 60, 1*time.Second)
+	ingress := k8s.GetIngress(i.w.t, i.w.k8sOptions, i.w.state.gslb.name)
+	require.Equal(i.w.t, ingress.Name, i.w.state.gslb.name)
+	i.w.settings.ingressName = i.w.state.gslb.name
 }
 
 // GetCoreDNSIP gets core DNS IP address
@@ -297,7 +315,48 @@ func (i *Instance) WaitForGSLB(instances ...*Instance) ([]string, error) {
 	return waitForLocalGSLBNew(i.w.t, i.w.state.gslb.host, i.w.state.gslb.port, expectedIPs, i.w.settings.digUsingUDP)
 }
 
-// WaitForExpected waits until GSLB dig doesnt return list of expected IP's
+func (i *Instance) WaitForLocalDNSEndpointExists() error {
+	periodic := func() (result bool, err error) {
+		lep := i.Resources().GetLocalDNSEndpoint()
+		result = len(lep.Spec.Endpoints) > 0
+		return result, err
+	}
+	return tickerWaiter(DefaultRetries, "LocalDNSEndpoint exists:", periodic)
+}
+
+func (i *Instance) WaitForExternalDNSEndpointExists() error {
+	periodic := func() (result bool, err error) {
+		lep := i.Resources().GetExternalDNSEndpoint()
+		result = len(lep.Spec.Endpoints) > 0
+		return result, err
+	}
+	return tickerWaiter(DefaultRetries, "ExternalDNSEndpoint exists:", periodic)
+}
+
+func (r *Resources) WaitForExternalDNSEndpointHasTargets(epName string) error {
+	periodic := func() (result bool, err error) {
+		epx, err := r.GetExternalDNSEndpoint().GetEndpointByName(epName)
+		if err != nil {
+			return false, nil
+		}
+		result = len(epx.Targets) > 0
+		return result, err
+	}
+	return tickerWaiter(DefaultRetries, "ExternalDNSEndpoint has targets:", periodic)
+}
+
+// WaitForLocalDNSEndpointHasTargets waits until LocalDNSEndpoint has expected targets
+func (i *Instance) WaitForLocalDNSEndpointHasTargets(expectedIPs []string) error {
+	periodic := func() (result bool, err error) {
+		lep := i.Resources().GetLocalDNSEndpoint()
+		ep, err := lep.GetEndpointByName(i.w.state.gslb.host)
+		result = EqualStringSlices(ep.Targets, expectedIPs)
+		return result, err
+	}
+	return tickerWaiter(DefaultRetries, "LocalDNSEndpoint targets:", periodic)
+}
+
+// WaitForExpected waits until GSLB dig doesn't return list of expected IP's
 func (i *Instance) WaitForExpected(expectedIPs []string) (err error) {
 	_, err = waitForLocalGSLBNew(i.w.t, i.w.state.gslb.host, i.w.state.gslb.port, expectedIPs, i.w.settings.digUsingUDP)
 	if err != nil {
@@ -320,7 +379,7 @@ func (i *Instance) WaitForAppIsStopped() (err error) {
 func (i *Instance) waitForApp(predicate func(instances int) bool) (err error) {
 	const (
 		description = "Wait for app is running"
-		maxRetries = 50
+		maxRetries  = 50
 		waitSeconds = 2
 	)
 
@@ -361,20 +420,8 @@ func (i *Instance) Dig() []string {
 func (i *Instance) GetLocalTargets() []string {
 	dnsName := fmt.Sprintf("localtargets-%s", i.w.state.gslb.host)
 	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), dnsName, i.w.settings.digUsingUDP)
-	require.NoError(i.w.t, err)
+	i.logIfError(err, "GetLocalTargets(), dig: %s", err)
 	return dig
-}
-
-func (i *Instance) GetExternalDNSEndpoint() (ep DNSEndpoint) {
-	const endpointName = "test-gslb"
-	ep = DNSEndpoint{}
-	j, err := k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", endpointName, "-ojson")
-	require.NoError(i.w.t, err)
-	err = json.Unmarshal([]byte(j), &ep)
-	if err != nil {
-		return ep
-	}
-	return ep
 }
 
 // HitTestApp makes HTTP GET to TestApp when installed otherwise panics.
@@ -461,8 +508,86 @@ func waitForLocalGSLBNew(t *testing.T, host string, port int, expectedResult []s
 	return DoWithRetryWaitingForValueE(
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
-		120,
+		DefaultRetries,
 		time.Second*1,
 		func() ([]string, error) { return dns.Dig("localhost:"+strconv.Itoa(port), host, isUdp) },
 		expectedResult)
+}
+
+// tickerWaiter periodically executes periodic function
+func tickerWaiter(timeoutSeconds int, name string, periodic func() (result bool, err error)) error {
+	const interval = 2
+	var cycles = timeoutSeconds / interval
+	t := 0
+	for range time.NewTicker(interval * time.Second).C {
+		result, err := periodic()
+		if err != nil {
+			return fmt.Errorf("%s: targets %v, error: %s", name, result, err)
+		}
+		if result {
+			return nil
+		}
+		if t >= cycles {
+			break
+		}
+		t++
+	}
+	return fmt.Errorf("%s: timeout", name)
+}
+
+func (i *Instance) Resources() (o *Resources) {
+	return &Resources{
+		i,
+	}
+}
+
+func (i *Instance) continueIfK8sResourceNotFound(err error) {
+	if err != nil && strings.HasSuffix(err.Error(), "not found") {
+		return
+	}
+	require.NoError(i.w.t, err)
+}
+
+type Resources struct {
+	i *Instance
+}
+
+// GslbSpecProperty returns actual value of one Spec property, e.g: `spec.ingress.rules[0].host`
+func (r *Resources) GslbSpecProperty(specPath string) string {
+	actualValue, _ := k8s.RunKubectlAndGetOutputE(r.i.w.t, r.i.w.k8sOptions, "get", "gslb", r.i.w.state.gslb.name,
+		"-o", fmt.Sprintf("custom-columns=SERVICESTATUS:%s", specPath), "--no-headers")
+	return actualValue
+}
+
+func (r *Resources) Ingress() *networkingv1.Ingress {
+	return k8s.GetIngress(r.i.w.t, r.i.w.k8sOptions, r.i.w.settings.ingressName)
+}
+
+func (r *Resources) GetLocalDNSEndpoint() DNSEndpoint {
+	ep, err := r.getDNSEndpoint("test-gslb", r.i.w.namespace)
+	r.i.continueIfK8sResourceNotFound(err)
+	return ep
+}
+
+func (r *Resources) GetExternalDNSEndpoint() DNSEndpoint {
+	ep, err := r.getDNSEndpoint("k8gb-ns-extdns", "k8gb")
+	r.i.continueIfK8sResourceNotFound(err)
+	return ep
+}
+
+func (i *Instance) logIfError(err error, message string, args ...interface{}) {
+	if err != nil {
+		i.w.t.Logf(message, args)
+	}
+}
+
+func (r *Resources) getDNSEndpoint(epName, ns string) (ep DNSEndpoint, err error) {
+	ep = DNSEndpoint{}
+	opts := k8s.NewKubectlOptions(r.i.w.k8sOptions.ContextName, r.i.w.k8sOptions.ConfigPath, ns)
+	j, err := k8s.RunKubectlAndGetOutputE(r.i.w.t, opts, "get", "dnsendpoints.externaldns.k8s.io", epName, "-ojson")
+	if err != nil {
+		return ep, err
+	}
+	err = json.Unmarshal([]byte(j), &ep)
+	return ep, err
 }
