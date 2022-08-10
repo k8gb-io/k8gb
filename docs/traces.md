@@ -41,11 +41,11 @@ In case you have already a OTEL collector present in the Kubernetes cluster and 
 a new one, you can deploy also the following topology:
 
 ```text
-+--------------+               +----------------+             +------------+             +----------+
-|     k8gb     |               | OTEL collector |    otlp     |     X      |    http     |   User   |
-|              |     otlp      |                +------------>|            +------------>|          |
-|              +-------------->|                |             |            |             |          |
-+--------------+               +----------------+             +------------+             +----------+
++----------+               +----------------+             +--------+             +---------+
+|   k8gb   |               | OTEL collector |    otlp     |   X    |    http     |  User   |
+|          |     otlp      |                +------------>|        +------------>|         |
+|          +-------------->|                |             |        |             |         |
++----------+               +----------------+             +--------+             +---------+
 ```
 
 However, we don't support this use-case on the Helm chart level so you are on your own with the setup. Nonetheless, it should be relatively straightforward. All you have to do is set the following env vars for k8gb deployment:
