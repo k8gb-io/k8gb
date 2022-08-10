@@ -1,0 +1,36 @@
+{{- if .Values.tracing.enabled }}
+{{- if .Values.tracing.deployJaeger }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+  labels:
+{{ include "chart.labels" . | indent 4  }}
+spec:
+  selector:
+    matchLabels:
+      id: jaeger
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        id: jaeger
+    spec:
+      containers:
+        - name: jaeger
+          image: {{ .Values.tracing.jaegerImage.repository }}:{{ .Values.tracing.jaegerImage.tag }}
+          imagePullPolicy: {{ .Values.tracing.jaegerImage.pullPolicy }}
+          readinessProbe:
+            httpGet:
+              path: "/"
+              port: 14269
+            initialDelaySeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 64Mi
+{{- end }}
+{{- end }}

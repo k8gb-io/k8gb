@@ -150,6 +150,13 @@ type Config struct {
 	extDNSEnabled bool `env:"EXTDNS_ENABLED, default=false"`
 	// SplitBrainCheck flag decides whether split brain TXT records will be stored in edge DNS
 	SplitBrainCheck bool `env:"SPLIT_BRAIN_CHECK, default=false"`
+	// TracingEnabled flag decides whether to use a real otlp tracer or a noop one
+	TracingEnabled bool `env:"TRACING_ENABLED, default=false"`
+	// TracingSamplingRatio how many traces should be kept and sent (1.0 - all, 0.0 - none)
+	TracingSamplingRatio float64 `env:"TRACING_SAMPLING_RATIO, default=1.0"`
+	// OtelExporterOtlpEndpoint where the traces should be sent to (in case of otel collector deployed on the same pod as sidecar -> localhost:4318)
+	// otel collector itself can be configured via a configmap to send it somewhere else
+	OtelExporterOtlpEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT, default=localhost:4318"`
 }
 
 // DependencyResolver resolves configuration for GSLB

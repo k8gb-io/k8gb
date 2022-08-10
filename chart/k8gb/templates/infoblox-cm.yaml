@@ -9,4 +9,6 @@ data:
 kind: ConfigMap
 metadata:
   name: infoblox
+  labels:
+{{ include "chart.labels" . | indent 4  }}
 {{- end }}

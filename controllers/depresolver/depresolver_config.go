@@ -53,6 +53,9 @@ const (
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
 	SplitBrainCheckKey             = "SPLIT_BRAIN_CHECK"
+	TracingEnabled                 = "TRACING_ENABLED"
+	OtelExporterOtlpEndpoint       = "OTEL_EXPORTER_OTLP_ENDPOINT"
+	TracingSamplingRatio           = "TRACING_SAMPLING_RATIO"
 	MetricsAddressKey              = "METRICS_ADDRESS"
 )
 
