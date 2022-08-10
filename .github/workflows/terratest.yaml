@@ -87,6 +87,7 @@ jobs:
       - name: Terratest log parser
         if: always()
         run: |
+          kubectl get cm coredns -n kube-system -o yaml | grep -A7 NodeHosts:
           curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
           chmod +x terratest_log_parser
           echo "::group::Parsing the logs"
