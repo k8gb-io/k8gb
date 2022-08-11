@@ -25,6 +25,9 @@ spec:
               path: "/"
               port: 14269
             initialDelaySeconds: 5
+          env:
+            - name: COLLECTOR_OTLP_ENABLED
+              value: "true"
           resources:
             limits:
               cpu: 500m

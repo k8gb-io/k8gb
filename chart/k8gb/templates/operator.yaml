@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         name: k8gb
+      annotations:
+        kubectl.kubernetes.io/default-container: k8gb
     spec:
       serviceAccountName: k8gb
       containers:

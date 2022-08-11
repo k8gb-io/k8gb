@@ -11,7 +11,7 @@ done
 
 To check the OpenTelemetry (tracing) data:
 ------------------------------------------
-kubectl port-forward svc/jaeger-collector 16686
+kubectl port-forward svc/jaeger-collector -n k8gb 16686
 open http://localhost:16686
 
 {{- end }}

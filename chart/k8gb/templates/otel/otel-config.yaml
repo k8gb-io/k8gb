@@ -16,17 +16,19 @@ data:
           grpc:
     processors:
     exporters:
-      jaeger:
-        endpoint: jaeger-collector.k8gb:14250
+      otlp:
+        endpoint: jaeger-collector.k8gb:4317
         tls:
           insecure: true
+        retry_on_failure:
+          enabled: true
       logging:
     service:
       pipelines:
         traces:
           receivers: [otlp]
           processors: []
-          exporters: [jaeger]
+          exporters: [otlp]
 {{- else -}}
   agent.yaml: |  
 {{ toYaml .Values.tracing.otelConfig | indent 4  }}

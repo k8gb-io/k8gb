@@ -12,14 +12,14 @@ spec:
       port: 16686
       protocol: TCP
       targetPort: 16686
-    - name: grpc-collector
-      port: 14250
+    - name: grpc-otlp-collector
+      port: 4317
       protocol: TCP
-      targetPort: 14250
-    - name: thrift-collector
-      port: 14268
+      targetPort: 4317
+    - name: http-otlp-collector
+      port: 4318
       protocol: TCP
-      targetPort: 14268
+      targetPort: 4318
   selector:
     id: jaeger
   type: ClusterIP
