@@ -228,7 +228,6 @@ deploy-k8gb-with-helm:
 		--set rfc2136.enabled=true \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
 		--set externaldns.image=absaoss/external-dns:rfc-ns1 \
-		--set rfc2136.rfc2136Opts[0].host=$(shell $(CLUSTER_GSLB_GATEWAY)) \
 		--wait --timeout=2m0s
 
 .PHONY: deploy-gslb-operator
