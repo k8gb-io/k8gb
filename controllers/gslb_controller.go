@@ -30,6 +30,8 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -52,6 +54,7 @@ type GslbReconciler struct {
 	Config      *depresolver.Config
 	DepResolver depresolver.GslbResolver
 	DNSProvider dns.Provider
+	Tracer      trace.Tracer
 }
 
 const (
@@ -71,6 +74,9 @@ var m = metrics.Metrics()
 
 // Reconcile runs main reconiliation loop
 func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	ctx, span := r.Tracer.Start(ctx, "Reconcile")
+	defer span.End()
+
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
@@ -103,12 +109,15 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	if isGslbMarkedToBeDeleted {
 		// For the legacy reasons, delete all finalizers that corresponds with the slice
 		// see: https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.4.0/#change-your-operators-finalizer-names
+		_, fSpan := r.Tracer.Start(ctx, "finalize")
 		for _, f := range []string{gslbFinalizer, "finalizer.k8gb.absa.oss"} {
 			if contains(gslb.GetFinalizers(), f) {
 				// Run finalization logic for gslbFinalizer. If the
 				// finalization logic fails, don't remove the finalizer so
 				// that we can retry during the next reconciliation.
 				if err := r.finalizeGslb(gslb); err != nil {
+					fSpan.RecordError(err)
+					fSpan.SetStatus(codes.Error, err.Error())
 					return result.RequeueError(err)
 				}
 
@@ -117,10 +126,14 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 				gslb.SetFinalizers(remove(gslb.GetFinalizers(), f))
 				err := r.Update(ctx, gslb)
 				if err != nil {
+					fSpan.RecordError(err)
+					fSpan.SetStatus(codes.Error, err.Error())
 					return result.RequeueError(err)
 				}
 			}
+
 		}
+		fSpan.End()
 		log.Info().Msg("reconciler exit")
 		return result.Stop()
 	}
@@ -153,19 +166,23 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return result.RequeueError(err)
 	}
 
+	_, s := r.Tracer.Start(ctx, "SaveDNSEndpoint")
 	err = r.DNSProvider.SaveDNSEndpoint(gslb, dnsEndpoint)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
 	}
+	s.End()
 
 	// == handle delegated zone in Edge DNS
+	_, szd := r.Tracer.Start(ctx, "CreateZoneDelegationForExternalDNS")
 	err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
 	if err != nil {
 		log.Err(err).Msg("Unable to create zone delegation")
 		m.IncrementError(gslb)
 		return result.Requeue()
 	}
+	szd.End()
 
 	// == Status =
 	err = r.updateGslbStatus(gslb, dnsEndpoint)

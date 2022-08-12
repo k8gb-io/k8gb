@@ -4,6 +4,8 @@ kind: ClusterRole
 metadata:
   creationTimestamp: null
   name: k8gb
+  labels:
+{{ include "chart.labels" . | indent 4  }}
 rules:
 - apiGroups:
   - ""

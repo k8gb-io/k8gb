@@ -1,0 +1,36 @@
+{{- if .Values.tracing.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-config
+  namespace: k8gb
+  labels:
+{{ include "chart.labels" . | indent 4  }}
+data:
+{{- if or .Values.tracing.deployJaeger (not .Values.tracing.otelConfig ) }}
+  agent.yaml: |  
+    receivers:
+      otlp:
+        protocols:
+          http:
+          grpc:
+    processors:
+    exporters:
+      otlp:
+        endpoint: jaeger-collector.k8gb:4317
+        tls:
+          insecure: true
+        retry_on_failure:
+          enabled: true
+      logging:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: []
+          exporters: [otlp]
+{{- else -}}
+  agent.yaml: |  
+{{ toYaml .Values.tracing.otelConfig | indent 4  }}
+{{- end }}
+{{- end }}

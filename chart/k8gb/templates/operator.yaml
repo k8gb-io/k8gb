@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         name: k8gb
+      annotations:
+        kubectl.kubernetes.io/default-container: k8gb
     spec:
       serviceAccountName: k8gb
       containers:
@@ -103,6 +105,18 @@ spec:
             - name: COREDNS_EXPOSED
               value: "true"
             {{- end }}
+            {{- if .Values.tracing.enabled }}
+              {{- with .Values.tracing }}
+            - name: TRACING_ENABLED
+              value: {{ .enabled | quote }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .endpoint | quote }}
+                {{- with .samplingRatio }}
+            - name: TRACING_SAMPLING_RATIO
+              value: {{ . | quote }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
             - name: LOG_FORMAT
               value: {{ quote .Values.k8gb.log.format }}
             - name: LOG_LEVEL
@@ -113,3 +127,20 @@ spec:
               value: {{ quote .Values.k8gb.splitBrainCheck }}
             - name: METRICS_ADDRESS
               value: {{ .Values.k8gb.metricsAddress }}
+      {{- if .Values.tracing.enabled }}
+        - image: {{ .Values.tracing.sidecarImage.repository }}:{{ .Values.tracing.sidecarImage.tag }}
+          name: otel-collector
+          imagePullPolicy: {{ .Values.tracing.sidecarImage.pullPolicy }}
+          args:
+          - --config=/conf/agent.yaml
+          volumeMounts:
+          - mountPath: /conf
+            name: agent-config
+      volumes:
+      - configMap:
+          items:
+          - key: agent.yaml
+            path: agent.yaml
+          name: agent-config
+        name: agent-config
+      {{- end }}

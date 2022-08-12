@@ -6,6 +6,16 @@ done
   |_|\_\___/ \__, |_.__/  & all dependencies are installed
              |___/
 
+{{- if and .Values.tracing.enabled .Values.tracing.deployJaeger }}
+
+
+To check the OpenTelemetry (tracing) data:
+------------------------------------------
+kubectl port-forward svc/jaeger-collector -n k8gb 16686
+open http://localhost:16686
+
+{{- end }}
+
 1. Check if your DNS Zone is served by K8GB CoreDNS
   $ kubectl -n {{ .Release.Namespace }} run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --command -- /usr/bin/dig @{{ .Release.Name }}-coredns SOA . +short
 
