@@ -67,7 +67,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 
 	utils.CreateGslb(t, options, settings, kubeResourcePath)
 
-	k8s.WaitUntilIngressAvailable(t, options, "test-gslb", 60, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(t, options, "test-gslb", 120, 1*time.Second)
 	ingress := k8s.GetIngress(t, options, "test-gslb")
 	require.Equal(t, ingress.Name, "test-gslb")
 

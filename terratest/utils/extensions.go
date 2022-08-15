@@ -195,13 +195,13 @@ func (w *Workflow) Start() (*Instance, error) {
 		testAppFilter := metav1.ListOptions{
 			LabelSelector: "app.kubernetes.io/name=" + w.state.testApp.name,
 		}
-		k8s.WaitUntilNumPodsCreated(w.t, w.k8sOptions, testAppFilter, 1, 60, 1*time.Second)
+		k8s.WaitUntilNumPodsCreated(w.t, w.k8sOptions, testAppFilter, 1, 120, 1*time.Second)
 		var testAppPods []corev1.Pod
 		testAppPods = k8s.ListPods(w.t, w.k8sOptions, testAppFilter)
 		for _, pod := range testAppPods {
-			k8s.WaitUntilPodAvailable(w.t, w.k8sOptions, pod.Name, 60, 1*time.Second)
+			k8s.WaitUntilPodAvailable(w.t, w.k8sOptions, pod.Name, 120, 1*time.Second)
 		}
-		k8s.WaitUntilServiceAvailable(w.t, w.k8sOptions, w.state.testApp.name, 60, 1*time.Second)
+		k8s.WaitUntilServiceAvailable(w.t, w.k8sOptions, w.state.testApp.name, 120, 1*time.Second)
 		w.state.testApp.isRunning = true
 	}
 
@@ -209,7 +209,7 @@ func (w *Workflow) Start() (*Instance, error) {
 	if w.settings.gslbResourcePath != "" {
 		w.t.Logf("Create ingress %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
 		k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
-		k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.state.gslb.name, 60, 1*time.Second)
+		k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.state.gslb.name, 100, 1*time.Second)
 		ingress := k8s.GetIngress(w.t, w.k8sOptions, w.state.gslb.name)
 		require.Equal(w.t, ingress.Name, w.state.gslb.name)
 		w.settings.ingressName = w.state.gslb.name
