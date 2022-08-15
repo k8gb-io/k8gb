@@ -139,17 +139,17 @@ func InstallPodinfo(t *testing.T, options *k8s.KubectlOptions, settings TestSett
 		LabelSelector: "app.kubernetes.io/name=frontend-podinfo",
 	}
 
-	k8s.WaitUntilNumPodsCreated(t, options, testAppFilter, 1, 60, 1*time.Second)
+	k8s.WaitUntilNumPodsCreated(t, options, testAppFilter, 1, 120, 1*time.Second)
 
 	var testAppPods []corev1.Pod
 
 	testAppPods = k8s.ListPods(t, options, testAppFilter)
 
 	for _, pod := range testAppPods {
-		k8s.WaitUntilPodAvailable(t, options, pod.Name, 60, 1*time.Second)
+		k8s.WaitUntilPodAvailable(t, options, pod.Name, 120, 1*time.Second)
 	}
 
-	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
+	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 120, 1*time.Second)
 
 }
 
@@ -157,7 +157,7 @@ func CreateGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, setting
 
 	CreateGslb(t, options, settings, kubeResourcePath)
 
-	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(t, options, gslbName, 120, 1*time.Second)
 	ingress := k8s.GetIngress(t, options, gslbName)
 	require.Equal(t, ingress.Name, gslbName)
 
@@ -183,7 +183,7 @@ func AssertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName, servi
 	_, err := DoWithRetryWaitingForValueE(
 		t,
 		"Wait for expected ServiceHealth status...",
-		60,
+		120,
 		1*time.Second,
 		actualHealthStatus,
 		expectedHealthStatus)
