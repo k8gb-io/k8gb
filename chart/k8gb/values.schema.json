@@ -453,9 +453,9 @@
                 "enabled"
             ],
             "title": "Tracing"
-            }
-                    "azuredns": {
-                                "type": "object",
+        },
+        "azuredns": {
+            "type": "object",
             "additionalProperties": false,
             "properties": {
                 "enabled": {
