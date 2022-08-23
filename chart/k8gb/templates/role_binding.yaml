@@ -3,6 +3,8 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: k8gb
+  labels:
+{{ include "chart.labels" . | indent 4  }}
 subjects:
 - kind: ServiceAccount
   name: k8gb

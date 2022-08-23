@@ -38,6 +38,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
+	"github.com/k8gb-io/k8gb/controllers/tracing"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
@@ -1298,10 +1299,22 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	// Create a fake client to mock API calls.
 	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
+
+	// tracing
+	cfg := tracing.Settings{
+		Enabled:       expected.TracingEnabled,
+		Endpoint:      expected.OtelExporterOtlpEndpoint,
+		SamplingRatio: expected.TracingSamplingRatio,
+		Commit:        "commit",
+		AppVersion:    "version",
+	}
+	cleanup, tracer := tracing.SetupTracing(context.Background(), cfg, log)
+	defer cleanup()
 	// Create a GslbReconciler object with the scheme and fake client.
 	r := &GslbReconciler{
 		Client: cl,
 		Scheme: s,
+		Tracer: tracer,
 	}
 	r.DepResolver = depresolver.NewDependencyResolver()
 	r.Config = &expected

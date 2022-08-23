@@ -29,7 +29,8 @@ import (
 func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
 	t.Parallel()
 	const host = "terratest-roundrobin.cloud.example.com"
-	const localtargets = "localtargets-" + host
+	const endpointDNSNameEU = "gslb-ns-eu-cloud.example.com"
+	const endpointDNSNameUS = "gslb-ns-us-cloud.example.com"
 	const gslbPath = "../examples/roundrobin_weight1.yaml"
 	instanceEU, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
 		WithGslb(gslbPath, host).
@@ -50,31 +51,47 @@ func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
 	err = instanceUS.WaitForAppIsRunning()
 	require.NoError(t, err)
 
-	epLocalEU,err := instanceEU.GetExternalDNSEndpoint().GetEndpointByName(localtargets)
-	require.NoError(t, err, "missing EU endpoint", localtargets)
-	epLocalUS,err := instanceUS.GetExternalDNSEndpoint().GetEndpointByName(localtargets)
-	require.NoError(t, err, "missing US endpoint", localtargets)
-	expectedTargets := append(epLocalEU.Targets,epLocalUS.Targets...)
+	err = instanceEU.WaitForExternalDNSEndpointExists()
+	require.NoError(t, err)
+	err = instanceUS.WaitForExternalDNSEndpointExists()
+	require.NoError(t, err)
 
-	err = instanceEU.WaitForExpected(expectedTargets)
+	err = instanceEU.WaitForLocalDNSEndpointExists()
 	require.NoError(t, err)
-	err = instanceUS.WaitForExpected(expectedTargets)
+	err = instanceUS.WaitForLocalDNSEndpointExists()
 	require.NoError(t, err)
+
+	err = instanceEU.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameEU)
+	require.NoError(t, err)
+	err = instanceUS.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameUS)
+	require.NoError(t, err)
+
+	epExternalEU, err := instanceEU.Resources().GetExternalDNSEndpoint().GetEndpointByName(endpointDNSNameEU)
+	require.NoError(t, err, "missing EU endpoint %s", endpointDNSNameEU)
+	epExternalUS, err := instanceUS.Resources().GetExternalDNSEndpoint().GetEndpointByName(endpointDNSNameUS)
+	require.NoError(t, err, "missing US endpoint %s", endpointDNSNameUS)
+	t.Logf("ExternalDNS targets: EU: %v; US: %v", epExternalEU.Targets, epExternalUS.Targets)
+	expectedTargets := append(epExternalEU.Targets, epExternalUS.Targets...)
+
+	err = instanceUS.WaitForLocalDNSEndpointHasTargets(expectedTargets)
+	require.NoError(t, err, "US expectedTargets %v", expectedTargets)
+	err = instanceEU.WaitForLocalDNSEndpointHasTargets(expectedTargets)
+	require.NoError(t, err, "EU expectedTargets %v", expectedTargets)
 
 	for _, instance := range []*utils.Instance{instanceEU, instanceUS} {
-		ep, err := instance.GetExternalDNSEndpoint().GetEndpointByName(host)
+		ep, err := instance.Resources().GetLocalDNSEndpoint().GetEndpointByName(host)
 		require.NoError(t, err, "missing endpoint", host)
 		// check all labels are correct
 		require.Equal(t, "roundRobin", ep.Labels["strategy"])
-		require.True(t, Contains(ep.Labels["weight-eu-0-50"], epLocalEU.Targets))
-		require.True(t, Contains(ep.Labels["weight-eu-1-50"], epLocalEU.Targets))
-		require.True(t, Contains(ep.Labels["weight-us-0-50"], epLocalUS.Targets))
-		require.True(t, Contains(ep.Labels["weight-us-1-50"], epLocalUS.Targets))
 		require.NotEqual(t, ep.Labels["weight-eu-0-50"], ep.Labels["weight-eu-1-50"])
 		require.NotEqual(t, ep.Labels["weight-us-0-50"], ep.Labels["weight-us-1-50"])
 		// check all targets are correct
-		for _, v := range epLocalEU.Targets { require.True(t, Contains(v, ep.Targets)) }
-		for _, v := range epLocalUS.Targets { require.True(t, Contains(v, ep.Targets)) }
+		for _, v := range epExternalEU.Targets {
+			require.True(t, Contains(v, ep.Targets))
+		}
+		for _, v := range epExternalEU.Targets {
+			require.True(t, Contains(v, ep.Targets))
+		}
 	}
 }
 

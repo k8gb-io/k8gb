@@ -1,0 +1,27 @@
+{{- if .Values.tracing.enabled }}
+{{- if .Values.tracing.deployJaeger }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-collector
+  labels:
+{{ include "chart.labels" . | indent 4  }}
+spec:
+  ports:
+    - name: dashboard
+      port: 16686
+      protocol: TCP
+      targetPort: 16686
+    - name: grpc-otlp-collector
+      port: 4317
+      protocol: TCP
+      targetPort: 4317
+    - name: http-otlp-collector
+      port: 4318
+      protocol: TCP
+      targetPort: 4318
+  selector:
+    id: jaeger
+  type: ClusterIP
+{{- end }}
+{{- end }}

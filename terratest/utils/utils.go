@@ -39,6 +39,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const DefaultRetries = 120
+
 // GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
 	var ingressIPs []string
@@ -139,17 +141,17 @@ func InstallPodinfo(t *testing.T, options *k8s.KubectlOptions, settings TestSett
 		LabelSelector: "app.kubernetes.io/name=frontend-podinfo",
 	}
 
-	k8s.WaitUntilNumPodsCreated(t, options, testAppFilter, 1, 60, 1*time.Second)
+	k8s.WaitUntilNumPodsCreated(t, options, testAppFilter, 1, DefaultRetries, 1*time.Second)
 
 	var testAppPods []corev1.Pod
 
 	testAppPods = k8s.ListPods(t, options, testAppFilter)
 
 	for _, pod := range testAppPods {
-		k8s.WaitUntilPodAvailable(t, options, pod.Name, 60, 1*time.Second)
+		k8s.WaitUntilPodAvailable(t, options, pod.Name, DefaultRetries, 1*time.Second)
 	}
 
-	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", 60, 1*time.Second)
+	k8s.WaitUntilServiceAvailable(t, options, "frontend-podinfo", DefaultRetries, 1*time.Second)
 
 }
 
@@ -157,7 +159,7 @@ func CreateGslbWithHealthyApp(t *testing.T, options *k8s.KubectlOptions, setting
 
 	CreateGslb(t, options, settings, kubeResourcePath)
 
-	k8s.WaitUntilIngressAvailable(t, options, gslbName, 60, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(t, options, gslbName, DefaultRetries, 1*time.Second)
 	ingress := k8s.GetIngress(t, options, gslbName)
 	require.Equal(t, ingress.Name, gslbName)
 
@@ -183,7 +185,7 @@ func AssertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName, servi
 	_, err := DoWithRetryWaitingForValueE(
 		t,
 		"Wait for expected ServiceHealth status...",
-		60,
+		DefaultRetries,
 		1*time.Second,
 		actualHealthStatus,
 		expectedHealthStatus)

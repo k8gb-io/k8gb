@@ -108,6 +108,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 * [Local playground for testing and development](/docs/local.md)
 * [Local playground with Kuar web app](/docs/local-kuar.md)
 * [Metrics](/docs/metrics.md)
+* [Traces](/docs/traces.md)
 * [Ingress annotations](/docs/ingress_annotations.md)
 * [Integration with Admiralty](/docs/admiralty.md)
 * [Integration with Liqo](/docs/liqo.md)

@@ -1,0 +1,21 @@
+{{- if .Values.tracing.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  labels:
+{{ include "chart.labels" . | indent 4  }}
+spec:
+  ports:
+    - name: http-otlp
+      port: 4318
+      protocol: TCP
+      targetPort: 4318
+    - name: grpc-otlp
+      port: 4317
+      protocol: TCP
+      targetPort: 4317
+  selector:
+    name: k8gb
+  type: ClusterIP
+{{- end }}
