@@ -75,9 +75,9 @@ var a = struct {
 		"10.0.1.39",
 	},
 	TargetNSNamesSorted: []string{
-		"gslb-ns-eu-cloud.example.com",
-		"gslb-ns-us-cloud.example.com",
-		"gslb-ns-za-cloud.example.com",
+		"gslb-ns-eu.cloud.example.com",
+		"gslb-ns-us.cloud.example.com",
+		"gslb-ns-za.cloud.example.com",
 	},
 }
 
@@ -96,7 +96,7 @@ var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 				Targets:    a.TargetNSNamesSorted,
 			},
 			{
-				DNSName:    "gslb-ns-us-cloud.example.com",
+				DNSName:    "gslb-ns-us.cloud.example.com",
 				RecordTTL:  30,
 				RecordType: "A",
 				Targets:    a.TargetIPs,
