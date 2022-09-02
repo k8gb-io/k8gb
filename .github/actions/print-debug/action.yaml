@@ -1,0 +1,103 @@
+name: Print Debug
+description: 'Prints debug info from running clusters'
+
+inputs:
+  kubectl-context:
+    description: 'This will be passed to kubectl commands as --context argument'
+    required: false
+    default: 'k3d-test-gslb1'
+runs:
+  using: "composite"
+  steps:
+    - name: Check verbose
+      id: check
+      shell: bash
+      run: |
+        if [[ "x${{ runner.debug }}" == "x1" ]]; then
+           echo ::set-output name=verbose::true
+        else
+           echo ::set-output name=verbose::false
+        fi
+
+    - name: Env vars
+      shell: bash
+      run: |
+        echo "::group:: ☸☸☸ envs"
+        env | sort
+        echo ---------------------------------------
+        echo inputs.kubectl-context=${{ inputs.kubectl-context }}
+        echo verbose: ${{ steps.check.outputs.verbose }}
+        echo "::endgroup::"
+
+    - name: Terratest Logs
+      shell: bash
+      run: |
+        echo "::group::Parsing the logs"
+        curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
+        chmod +x terratest_log_parser
+        ./terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
+        echo -e "### Terratests Results :rocket:\n\n" >> $GITHUB_STEP_SUMMARY
+        cat ${{ github.workspace }}/tmp/terratest/summary.log | sed -e "s;FAIL;:x: &;" -e "s;PASS;✓ &;" >> $GITHUB_STEP_SUMMARY
+        echo "::endgroup::"
+
+        echo -e "\nSummary:\n--------"
+        export TERM=xterm
+        cat ${{ github.workspace }}/tmp/terratest/summary.log | sed -e "s;FAIL;$(tput setaf 1)&$(tput sgr0);" -e "s;PASS;$(tput setaf 2)&$(tput sgr0);"
+
+        echo -e "\n\nTerratest logs:"
+        for log in $(find ${{ github.workspace }}/tmp/terratest -regex ".*/Test.*\.log"); do
+            echo "::group::$(basename $log)"
+            cat $log
+            echo "::endgroup::"
+        done
+        echo Separated log files will be available under artifact section at https://github.com/k8gb-io/k8gb/actions/runs/${{ github.run_id }}
+
+    - name: CoreDNS Hosts
+      shell: bash
+      if: steps.check.outputs.verbose == 'true'
+      run: |
+        echo -e "\n\n\nVerbose is on, printing all the debug stuff:\n--------------------------------------------\n\n"
+        echo "::group:: ☸☸☸ cluster coredns - hosts (cluster 1)"
+        kubectl --context=${{ inputs.kubectl-context }} get cm coredns -n kube-system -o yaml | grep -A7 NodeHosts:
+        echo "::endgroup::"
+
+    - name: K8s Events
+      shell: bash
+      if: steps.check.outputs.verbose == 'true'
+      run: |
+        echo "::group:: ☸☸☸ k get events"
+        kubectl --context=${{ inputs.kubectl-context }} get events -A || true
+        echo "::endgroup::"
+
+    - name: gslbs
+      shell: bash
+      if: steps.check.outputs.verbose == 'true'
+      run: |
+        echo "::group:: ☸☸☸ gslbs"
+        kubectl --context=${{ inputs.kubectl-context }} get gslbs -owide -A || true
+        echo "::endgroup::"
+
+    - name: Dnsendpoints
+      shell: bash
+      if: steps.check.outputs.verbose == 'true'
+      run: |
+        echo "::group:: ☸☸☸ endpoints"
+        kubectl --context=${{ inputs.kubectl-context }} get dnsendpoints -A || true
+        echo "::endgroup::"
+
+    - name: K8gb logs
+      shell: bash
+      if: steps.check.outputs.verbose == 'true'
+      run: |
+        echo "::group:: ☸☸☸ k8gb logs"
+        kubectl --context=${{ inputs.kubectl-context }} logs -lname=k8gb -n k8gb --tail=-1 || true
+        echo "::endgroup::"
+
+    - name: Metrics
+      shell: bash
+      if: steps.check.outputs.verbose == 'true'
+      run: |
+        echo "::group:: ☸☸☸ k8gb metrics (cluster 1)"
+        _IP=$(kubectl --context=${{ inputs.kubectl-context }} get pods -lname=k8gb -n k8gb -o custom-columns='IP:status.podIP' --no-headers)
+        kubectl --context=${{ inputs.kubectl-context }} run -it --rm curl-metrics --restart=Never --image=curlimages/curl:7.82.0 -- $_IP:8080/metrics
+        echo "::endgroup::"

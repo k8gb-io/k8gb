@@ -84,29 +84,9 @@ jobs:
           make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
           echo "::endgroup::"
 
-      - name: Terratest log parser
+      - name: Print debug info
         if: always()
-        run: |
-          echo "::group::cluster coredns - hosts"
-          kubectl get cm coredns -n kube-system -o yaml | grep -A7 NodeHosts:
-          echo "::endgroup::"
-          curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
-          chmod +x terratest_log_parser
-          echo "::group::Parsing the logs"
-          ./terratest_log_parser --testlog ${{ github.workspace }}/tmp/terratest/all.log --outputdir ${{ github.workspace }}/tmp/terratest
-          echo "::endgroup::"
-
-          echo -e "\nSummary:\n--------"
-          export TERM=xterm
-          cat ${{ github.workspace }}/tmp/terratest/summary.log | sed -e "s;FAIL;$(tput setaf 1)&$(tput sgr0);" -e "s;PASS;$(tput setaf 2)&$(tput sgr0);"
-
-          echo -e "\n\nTerratest logs:"
-          for log in $(find ${{ github.workspace }}/tmp/terratest -regex ".*/Test.*\.log"); do
-              echo "::group::$(basename $log)"
-              cat $log
-              echo "::endgroup::"
-          done
-          echo Separated log files will be available under artifact section at https://github.com/k8gb-io/k8gb/actions/runs/${{ github.run_id }}
+        uses: ./.github/actions/print-debug
 
       - uses: actions/upload-artifact@v2
         if: always()

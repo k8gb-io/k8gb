@@ -86,3 +86,13 @@ jobs:
 
       - name: Run Terratest
         run: make terratest
+
+      - name: Print debug info
+        if: always()
+        uses: ./.github/actions/print-debug
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: terratest-logs
+          path: ${{ github.workspace }}/tmp/terratest
