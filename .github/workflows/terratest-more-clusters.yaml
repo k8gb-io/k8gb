@@ -85,7 +85,12 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb3
 
       - name: Run Terratest
-        run: make terratest
+        run: |
+          mkdir -p ${{ github.workspace }}/tmp/terratest
+          set -o pipefail
+          echo "::group::Terratest logs"
+          make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+          echo "::endgroup::"
 
       - name: Print debug info
         if: always()
