@@ -152,7 +152,7 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 
 	log.Info().
 		Str("gslb", gslb.Name).
-		Msg("Creating new Gslb out of Ingress annotation")
+		Msg(fmt.Sprintf("Creating a new Gslb out of Ingress with '%s' annotation", strategyAnnotation))
 	err = c.Create(context.Background(), gslb)
 	if err != nil {
 		log.Err(err).Msg("Glsb creation failed")
