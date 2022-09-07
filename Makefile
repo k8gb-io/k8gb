@@ -383,7 +383,7 @@ mocks:
 	mockgen -source=controllers/providers/dns/dns.go -destination=controllers/providers/dns/dns_mock.go -package=dns
 	mockgen -source=controllers/providers/dns/infoblox-client.go -destination=controllers/providers/dns/infoblox-client_mock.go -package=dns
 	mockgen -source=controllers/depresolver/resolver.go -destination=controllers/depresolver/resolver_mock.go -package=depresolver
-	mockgen -destination=controllers/providers/dns/infoblox-connection_mock.go -package=dns github.com/infobloxopen/infoblox-go-client IBConnector
+	mockgen -destination=controllers/providers/dns/infoblox-connection_mock.go -package=dns github.com/infobloxopen/infoblox-go-client/v2 IBConnector
 	$(call golic)
 
 # remove clusters and redeploy

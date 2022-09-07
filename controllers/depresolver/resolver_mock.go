@@ -31,31 +31,31 @@ import (
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// MockResolver is a mock of GslbResolver interface.
-type MockResolver struct {
+// MockGslbResolver is a mock of GslbResolver interface.
+type MockGslbResolver struct {
 	ctrl     *gomock.Controller
-	recorder *MockResolverMockRecorder
+	recorder *MockGslbResolverMockRecorder
 }
 
-// MockResolverMockRecorder is the mock recorder for MockResolver.
-type MockResolverMockRecorder struct {
-	mock *MockResolver
+// MockGslbResolverMockRecorder is the mock recorder for MockGslbResolver.
+type MockGslbResolverMockRecorder struct {
+	mock *MockGslbResolver
 }
 
-// NewMockResolver creates a new mock instance.
-func NewMockResolver(ctrl *gomock.Controller) *MockResolver {
-	mock := &MockResolver{ctrl: ctrl}
-	mock.recorder = &MockResolverMockRecorder{mock}
+// NewMockGslbResolver creates a new mock instance.
+func NewMockGslbResolver(ctrl *gomock.Controller) *MockGslbResolver {
+	mock := &MockGslbResolver{ctrl: ctrl}
+	mock.recorder = &MockGslbResolverMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockResolver) EXPECT() *MockResolverMockRecorder {
+func (m *MockGslbResolver) EXPECT() *MockGslbResolverMockRecorder {
 	return m.recorder
 }
 
 // ResolveGslbSpec mocks base method.
-func (m *MockResolver) ResolveGslbSpec(ctx context.Context, gslb *v1beta1.Gslb, client client.Client) error {
+func (m *MockGslbResolver) ResolveGslbSpec(ctx context.Context, gslb *v1beta1.Gslb, client client.Client) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResolveGslbSpec", ctx, gslb, client)
 	ret0, _ := ret[0].(error)
@@ -63,13 +63,13 @@ func (m *MockResolver) ResolveGslbSpec(ctx context.Context, gslb *v1beta1.Gslb, 
 }
 
 // ResolveGslbSpec indicates an expected call of ResolveGslbSpec.
-func (mr *MockResolverMockRecorder) ResolveGslbSpec(ctx, gslb, client interface{}) *gomock.Call {
+func (mr *MockGslbResolverMockRecorder) ResolveGslbSpec(ctx, gslb, client interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveGslbSpec", reflect.TypeOf((*MockResolver)(nil).ResolveGslbSpec), ctx, gslb, client)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveGslbSpec", reflect.TypeOf((*MockGslbResolver)(nil).ResolveGslbSpec), ctx, gslb, client)
 }
 
 // ResolveOperatorConfig mocks base method.
-func (m *MockResolver) ResolveOperatorConfig() (*Config, error) {
+func (m *MockGslbResolver) ResolveOperatorConfig() (*Config, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResolveOperatorConfig")
 	ret0, _ := ret[0].(*Config)
@@ -78,7 +78,7 @@ func (m *MockResolver) ResolveOperatorConfig() (*Config, error) {
 }
 
 // ResolveOperatorConfig indicates an expected call of ResolveOperatorConfig.
-func (mr *MockResolverMockRecorder) ResolveOperatorConfig() *gomock.Call {
+func (mr *MockGslbResolverMockRecorder) ResolveOperatorConfig() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveOperatorConfig", reflect.TypeOf((*MockResolver)(nil).ResolveOperatorConfig))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveOperatorConfig", reflect.TypeOf((*MockGslbResolver)(nil).ResolveOperatorConfig))
 }
