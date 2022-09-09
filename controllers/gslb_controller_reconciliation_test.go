@@ -28,18 +28,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
-	str "github.com/AbsaOSS/gopkg/string"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/logging"
+	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 
+	str "github.com/AbsaOSS/gopkg/string"
+	"github.com/golang/mock/gomock"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
@@ -340,7 +340,7 @@ func TestGslbErrorsIncrement(t *testing.T) {
 	defer ctrl.Finish()
 	settings := provideSettings(t, predefinedConfig)
 	var label = prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name}
-	m := dns.NewMockProvider(ctrl)
+	m := mocks.NewMockProvider(ctrl)
 	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
 	m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
 	m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(fmt.Errorf("save DNS error")).Times(1)

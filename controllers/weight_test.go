@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
-	"github.com/k8gb-io/k8gb/controllers/providers/dns"
+
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -169,8 +170,8 @@ func TestWeight(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			// settings := provideSettings(t, predefinedConfig)
-			m := dns.NewMockProvider(ctrl)
-			r := depresolver.NewMockResolver(ctrl)
+			m := mocks.NewMockProvider(ctrl)
+			r := mocks.NewMockGslbResolver(ctrl)
 			m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Do(assertAnnotation).Return(fmt.Errorf("save DNS error")).Times(1)
 			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()

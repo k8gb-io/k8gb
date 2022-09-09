@@ -22,15 +22,16 @@ import (
 	"os"
 	"testing"
 
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/mocks"
+	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
+
 	"github.com/golang/mock/gomock"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
-	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 )
 
 const (
@@ -93,7 +94,7 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	m := NewMockInfobloxClient(ctrl)
+	m := mocks.NewMockInfobloxClient(ctrl)
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
 	extClusters := customConfig.GetExternalClusterNSNames()
@@ -131,7 +132,7 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	m := NewMockInfobloxClient(ctrl)
+	m := mocks.NewMockInfobloxClient(ctrl)
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
 	got := provider.sanitizeDelegateZone(local, upstream)
@@ -164,9 +165,9 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	// arrange
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	a := assistant.NewMockAssistant(ctrl)
-	cl := NewMockInfobloxClient(ctrl)
-	con := NewMockIBConnector(ctrl)
+	a := mocks.NewMockAssistant(ctrl)
+	cl := mocks.NewMockInfobloxClient(ctrl)
+	con := mocks.NewMockIBConnector(ctrl)
 	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
@@ -185,9 +186,9 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 	// arrange
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	a := assistant.NewMockAssistant(ctrl)
-	cl := NewMockInfobloxClient(ctrl)
-	con := NewMockIBConnector(ctrl)
+	a := mocks.NewMockAssistant(ctrl)
+	cl := mocks.NewMockInfobloxClient(ctrl)
+	con := mocks.NewMockIBConnector(ctrl)
 	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
 	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, arg1 interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-east-1.example.com", fqdn)
@@ -214,9 +215,9 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreating
 	// arrange
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	a := assistant.NewMockAssistant(ctrl)
-	cl := NewMockInfobloxClient(ctrl)
-	con := NewMockIBConnector(ctrl)
+	a := mocks.NewMockAssistant(ctrl)
+	cl := mocks.NewMockInfobloxClient(ctrl)
+	con := mocks.NewMockIBConnector(ctrl)
 	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
 	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
@@ -238,9 +239,9 @@ func TestInfobloxFinalize(t *testing.T) {
 	// arrange
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	a := assistant.NewMockAssistant(ctrl)
-	cl := NewMockInfobloxClient(ctrl)
-	con := NewMockIBConnector(ctrl)
+	a := mocks.NewMockAssistant(ctrl)
+	cl := mocks.NewMockInfobloxClient(ctrl)
+	con := mocks.NewMockIBConnector(ctrl)
 	con.EXPECT().DeleteObject(gomock.Any()).Return(ref, nil).Do(func(arg0 string) {
 		require.Equal(t, arg0, ref)
 	}).AnyTimes()
