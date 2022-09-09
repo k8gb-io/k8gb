@@ -6,8 +6,8 @@ on:
     branches:
       - master
     paths:
-      - 'chart/{repo}/values.yaml'
-      - 'chart/{repo}/values.schema.json'
+      - 'chart/k8gb/values.yaml'
+      - 'chart/k8gb/values.schema.json'
 jobs:
   check:
     name: 'Check values.yaml and its schema in PR'
@@ -17,8 +17,8 @@ jobs:
         uses: actions/checkout@v3
       - name: 'Check if values.schema.json was updated'
         run: |
-          VALUES_FILE=chart/{repo}/values.yaml
-          SCHEMA_FILE=chart/{repo}/values.schema.json
+          VALUES_FILE=chart/k8gb/values.yaml
+          SCHEMA_FILE=chart/k8gb/values.schema.json
 
           # check if the values.json is covered by the schema
           pip3 install json-spec
