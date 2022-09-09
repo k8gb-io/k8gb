@@ -1,0 +1,27 @@
+# thanks to https://github.com/giantswarm/devctl/blob/v5.9.0/pkg/gen/input/workflows/internal/file/check_values_schema.yaml.template for the idea
+
+name: 'Check if values schema file has been updated'
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'chart/{repo}/values.yaml'
+      - 'chart/{repo}/values.schema.json'
+jobs:
+  check:
+    name: 'Check values.yaml and its schema in PR'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: 'Check if values.schema.json was updated'
+        run: |
+          VALUES_FILE=chart/{repo}/values.yaml
+          SCHEMA_FILE=chart/{repo}/values.schema.json
+
+          # check if the values.json is covered by the schema
+          pip3 install json-spec
+          yq -o=json eval ${VALUES_FILE} > /tmp/values.json
+          json validate --schema-file=${SCHEMA_FILE} --document-file=/tmp/values.json
+          echo "PASSED: values.yaml and values.schema.json both appear to have been updated and the document is valid against the schema"
