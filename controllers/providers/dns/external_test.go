@@ -24,14 +24,16 @@ import (
 	"reflect"
 	"testing"
 
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/mocks"
+
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/golang/mock/gomock"
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
@@ -109,7 +111,7 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 	// arrange
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	m := assistant.NewMockAssistant(ctrl)
+	m := mocks.NewMockAssistant(ctrl)
 	p := NewExternalDNS(a.Config, m)
 	m.EXPECT().GslbIngressExposedIPs(a.Gslb).Return(a.TargetIPs, nil).Times(1)
 	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(expectedDNSEndpoint)).Return(nil).Times(1).

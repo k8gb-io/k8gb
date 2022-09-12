@@ -379,11 +379,13 @@ k8gb: lint
 .PHONY: mocks
 mocks:
 	go install github.com/golang/mock/mockgen@v1.5.0
-	mockgen -source=controllers/providers/assistant/assistant.go -destination=controllers/providers/assistant/assistant_mock.go -package=assistant
-	mockgen -source=controllers/providers/dns/dns.go -destination=controllers/providers/dns/dns_mock.go -package=dns
-	mockgen -source=controllers/providers/dns/infoblox-client.go -destination=controllers/providers/dns/infoblox-client_mock.go -package=dns
-	mockgen -source=controllers/depresolver/resolver.go -destination=controllers/depresolver/resolver_mock.go -package=depresolver
-	mockgen -destination=controllers/providers/dns/infoblox-connection_mock.go -package=dns github.com/infobloxopen/infoblox-go-client IBConnector
+	mockgen -package=mocks -destination=controllers/mocks/assistant_mock.go -source=controllers/providers/assistant/assistant.go Assistant
+	mockgen -package=mocks -destination=controllers/mocks/infoblox-client_mock.go -source=controllers/providers/dns/infoblox-client.go InfobloxClient
+	mockgen -package=mocks -destination=controllers/mocks/infoblox-connection_mock.go github.com/infobloxopen/infoblox-go-client IBConnector
+	mockgen -package=mocks -destination=controllers/mocks/manager_mock.go sigs.k8s.io/controller-runtime/pkg/manager Manager
+	mockgen -package=mocks -destination=controllers/mocks/client_mock.go sigs.k8s.io/controller-runtime/pkg/client Client
+	mockgen -package=mocks -destination=controllers/mocks/resolver_mock.go -source=controllers/depresolver/resolver.go GslbResolver
+	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
 	$(call golic)
 
 # remove clusters and redeploy
