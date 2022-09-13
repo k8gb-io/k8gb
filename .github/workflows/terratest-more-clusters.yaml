@@ -85,4 +85,19 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb3
 
       - name: Run Terratest
-        run: make terratest
+        run: |
+          mkdir -p ${{ github.workspace }}/tmp/terratest
+          set -o pipefail
+          echo "::group::Terratest logs"
+          make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+          echo "::endgroup::"
+
+      - name: Print debug info
+        if: always()
+        uses: ./.github/actions/print-debug
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: terratest-logs
+          path: ${{ github.workspace }}/tmp/terratest
