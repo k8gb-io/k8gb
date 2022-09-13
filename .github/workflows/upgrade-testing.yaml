@@ -82,11 +82,11 @@ jobs:
           echo "::endgroup::"
 
       - name: Print debug info
-        if: always()
+        if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
         uses: ./.github/actions/print-debug
 
       - uses: actions/upload-artifact@v2
-        if: always()
+        if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
         with:
           name: terratest-logs
           path: ${{ github.workspace }}/tmp/terratest
