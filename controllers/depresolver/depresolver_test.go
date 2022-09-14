@@ -98,10 +98,10 @@ func TestResolveSpecWithFilledFields(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
 	assert.Equal(t, 305, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
-	assert.False(t, gslb.Spec.Strategy.Weight.IsEmpty())
-	assert.Equal(t, 15, gslb.Spec.Strategy.Weight["za"].Int())
-	assert.Equal(t, 25, gslb.Spec.Strategy.Weight["eu"].Int())
-	assert.Equal(t, 60, gslb.Spec.Strategy.Weight["us"].Int())
+	assert.False(t, len(gslb.Spec.Strategy.Weight) == 0)
+	assert.Equal(t, 15, gslb.Spec.Strategy.Weight["za"])
+	assert.Equal(t, 25, gslb.Spec.Strategy.Weight["eu"])
+	assert.Equal(t, 60, gslb.Spec.Strategy.Weight["us"])
 	assert.Equal(t, 3, len(gslb.Spec.Strategy.Weight))
 }
 
@@ -115,7 +115,7 @@ func TestResolveSpecWithoutFields(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
 	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
-	assert.True(t, gslb.Spec.Strategy.Weight.IsEmpty())
+	assert.True(t, len(gslb.Spec.Strategy.Weight) == 0)
 }
 
 func TestResolveSpecWithZeroSplitBrain(t *testing.T) {
@@ -181,55 +181,41 @@ func TestResolveSpecWithType(t *testing.T) {
 }
 
 func TestResolveSpecWithWeightCornerCases(t *testing.T) {
-	type test struct {
-		strategy            string
-		weight              k8gbv1beta1.Weight
-		expectederr         bool
-		empty               bool
-		ignoreSumValidation bool
-	}
-	tests := []test{
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "-20%"}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"eu": "-20"}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"za": "+20"}, false, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": " 20% "}, false, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "20%"}, false, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "20"}, false, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "100%"}, false, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "101"}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "101%"}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "0"}, false, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "0%"}, false, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": ""}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "%"}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us": "blah"}, true, false, true},
-		{FailoverStrategy, map[string]k8gbv1beta1.Percentage{"us": "10%"}, true, false, true},
-		{GeoStrategy, map[string]k8gbv1beta1.Percentage{"us": "0%"}, true, false, true},
-		{GeoStrategy, nil, false, true, true},
-		{RoundRobinStrategy, nil, false, true, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"": ""}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"": "20%"}, true, false, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{}, false, true, true},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us-1": "100%", "us-2": "0%"}, false, false, false},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us-1": "100%", "us-2": "100%"}, true, false, false},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us-1": "0%", "us-2": "0%"}, true, false, false},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us-1": "50 %", "eu": "20%", "za": "30"}, false, false, false},
-		{RoundRobinStrategy, map[string]k8gbv1beta1.Percentage{"us-1": "50 %", "0": "20%", "-": "-"}, true, false, false},
+	tests := []struct {
+		strategy string
+		weight   map[string]int
+		err      bool
+		empty    bool
+	}{
+		{RoundRobinStrategy, map[string]int{"us": -20}, true, false},
+		{RoundRobinStrategy, map[string]int{"za": 2}, false, false},
+		{RoundRobinStrategy, map[string]int{"us": 1000}, false, false},
+		{RoundRobinStrategy, map[string]int{"us": 0}, false, false},
+
+		{GeoStrategy, map[string]int{"za": 20}, true, false},
+		{GeoStrategy, map[string]int{"us": 0}, true, false},
+		{GeoStrategy, map[string]int{}, false, true},
+		{GeoStrategy, nil, false, true},
+
+		{RoundRobinStrategy, map[string]int{}, false, true},
+		{RoundRobinStrategy, map[string]int{"us-1": 100, "us-2": 0}, false, false},
+		{RoundRobinStrategy, map[string]int{"us-1": 100, "us-2": 100}, false, false},
+		{RoundRobinStrategy, map[string]int{"us-1": 10000, "us-2": 100}, true, false},
+		{RoundRobinStrategy, map[string]int{"us-1": 0, "us-2": 0}, false, false},
+		{RoundRobinStrategy, map[string]int{"us-1": 50, "eu": 20, "za": 0}, false, false},
 	}
 	// arrange
 	cl, gslb := getTestContext("./testdata/filled_omitempty.yaml")
 	resolver := NewDependencyResolver()
 	// act
-	for _, tt := range tests {
-		t.Run(fmt.Sprintf("weight_%s_%s", tt.strategy, tt.weight), func(t *testing.T) {
-			gslb.Spec.Strategy.Weight = tt.weight
-			gslb.Spec.Strategy.Type = tt.strategy
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("weight_%s_%v", test.strategy, test.weight), func(t *testing.T) {
+			gslb.Spec.Strategy.Weight = test.weight
+			gslb.Spec.Strategy.Type = test.strategy
 			err := resolver.ResolveGslbSpec(context.TODO(), gslb, cl)
 			// assert
-			assert.Equal(t, tt.empty, gslb.Spec.Strategy.Weight.IsEmpty())
-			if !(tt.ignoreSumValidation && err != nil && strings.Contains(err.Error(), `the sum of the weights must be equal to 100`)) {
-				assert.True(t, (err != nil) == tt.expectederr)
-			}
+			assert.Equal(t, test.empty, len(gslb.Spec.Strategy.Weight) == 0)
+			assert.True(t, (err != nil) == test.err)
 		})
 	}
 }
