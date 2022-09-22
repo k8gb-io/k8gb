@@ -79,7 +79,7 @@ The k8gb exposes several metrics to help you monitor the health and behavior.
 | `k8gb_gslb_errors_total` | Counter | Number of errors | `namespace`, `name` |
 | `k8gb_gslb_healthy_records` | Gauge | Number of healthy records observed by k8gb. | `namespace`, `name` |
 | `k8gb_gslb_reconciliation_loops_total` | Counter | Number of successful reconciliation loops. | `namespace`, `name` |
-| `k8gb_gslb_service_status_num` | Counter | Number of managed hosts observed by k8gb. | `namespace`, `name`, `status` |
+| `k8gb_gslb_service_status_num` | Gauge | Number of managed hosts observed by k8gb. | `namespace`, `name`, `status` |
 | `k8gb_gslb_status_count_for_failover` | Gauge | Gslb status count for Failover strategy. | `namespace`, `name`, `status` |
 | `k8gb_gslb_status_count_for_geoip` | Gauge | Gslb status count for GeoIP strategy. | `namespace`, `name`, `status` |
 | `k8gb_gslb_status_count_for_roundrobin` | Gauge | Gslb status count for RoundRobin strategy. | `namespace`, `name`, `status` |
