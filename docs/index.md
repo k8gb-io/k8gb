@@ -148,6 +148,7 @@ If the Pods in cluster **Y** were to once again become healthy (liveness and rea
 
 The following load balancing strategies, as it relates to resolving Ingress node IPs, should be provided as part of the initial implementation:
 * **roundRobin**
+* **weightRoundRobin**
 * **failover**
 * **geoip**
 
