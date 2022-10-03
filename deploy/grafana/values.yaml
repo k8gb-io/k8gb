@@ -12,12 +12,11 @@ datasources:
   datasources.yaml:
     apiVersion: 1
     datasources:
-    # use this proxied datasource for single cluster deployment
-    # - name: Prometheus
-    #   type: prometheus
-    #   url: http://prometheus-server.k8gb.svc.cluster.local:9090
-    #   access: proxy
-    #   isDefault: true
+    - name: Prometheus
+      type: prometheus
+      url: http://k3d-test-gslb1-agent-0:30090
+      access: proxy
+      isDefault: true
     - name: Prometheus-cluster1
       type: prometheus
       url: http://localhost:9080

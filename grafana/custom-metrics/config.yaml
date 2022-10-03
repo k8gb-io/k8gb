@@ -1,0 +1,29 @@
+# Use kubebuilder edit --plugins grafana.kubebuilder.io/v1-alpha to generate the dashboard
+---
+customMetrics:
+  - metric: Total errors per minute
+    type:   counter
+    unit:   cpm
+    expr:   sum(rate(k8gb_gslb_errors_total{namespace=~\"$namespace\", job=\"$job\"}[5m])*5*60) by (namespace)
+
+  - metric: Total errors per gslb per minute
+    type:   counter
+    unit:   cpm
+    expr:   sum(rate(k8gb_gslb_errors_total{namespace=~\"$namespace\", job=\"$job\", exported_name=\"$gslb\"}[5m])*5*60) by (exported_name)
+
+  # Number of targets in DNS endpoint
+  - metric: Number of IPs (targets) per dns record
+    type:   gauge
+    unit:   none
+    expr:   sum(k8gb_endpoint_status_num{namespace=~\"$namespace\", job=\"$job\"}) by (dns_name)
+
+  # Number of managed hosts observed by k8gb
+  - metric: Service status of gslb
+    type:   gauge
+    unit:   none
+    expr:   sum(k8gb_gslb_service_status_num{namespace=~\"$namespace\", job=\"$job\", exported_name=\"$gslb\"}) by (status)
+
+  - metric: k8gb_runtime_info
+    type:   info
+    unit:   none
+    expr:   k8gb_runtime_info
