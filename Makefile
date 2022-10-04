@@ -265,6 +265,7 @@ deploy-grafana:
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
 		--wait --timeout=2m30s \
+		--version=6.38.6 \
 		--kube-context=k3d-$(CLUSTER_NAME)1
 	kubectl --context k3d-$(CLUSTER_NAME)1 apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
 	@echo -e "\nGrafana is listening on http://localhost:3000\n"
@@ -309,7 +310,7 @@ ensure-cluster-size:
 
 .PHONY: goreleaser
 goreleaser:
-	go install github.com/goreleaser/goreleaser@v1.7.0
+	command -v goreleaser &> /dev/null || go install github.com/goreleaser/goreleaser@v1.7.0
 
 .PHONY: release-images
 release-images: goreleaser
@@ -572,7 +573,7 @@ define deploy-prometheus
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ;\
 	helm repo update ;\
 	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
-		--version 14.2.0 \
+		--version 15.14.0 \
 		--wait --timeout=2m0s \
 		--kube-context=k3d-$1
 endef

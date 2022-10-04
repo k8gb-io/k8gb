@@ -205,9 +205,9 @@
         {
           "datasource": "${DS_PROMETHEUS}",
           "exemplar": true,
-          "expr": "sum(rate(k8gb_gslb_errors_total{namespace=~\"$namespace\", job=\"$job\", exported_name=\"$gslb\"}[5m])*5*60) by (exported_name)",
+          "expr": "sum(rate(k8gb_gslb_errors_total{namespace=~\"$namespace\", job=\"$job\", name=\"$gslb\"}[5m])*5*60) by (name)",
           "format": "time_series",
-          "legendFormat": "gslb: {{exported_name}}",
+          "legendFormat": "gslb: {{name}}",
           "interval": "",
           "intervalFactor": 2,
           "refId": "A",
@@ -371,7 +371,7 @@
         {
           "datasource": "${DS_PROMETHEUS}",
           "exemplar": true,
-          "expr": "sum(k8gb_gslb_service_status_num{namespace=~\"$namespace\", job=\"$job\", exported_name=\"$gslb\"}) by (status)",
+          "expr": "sum(k8gb_gslb_service_status_num{namespace=~\"$namespace\", job=\"$job\", name=\"$gslb\"}) by (status)",
           "format": "time_series",
           "legendFormat": "{{label_name}}",
           "interval": "",
@@ -551,14 +551,14 @@
       },
       {
         "datasource": "${DS_PROMETHEUS}",
-        "definition": "label_values(k8gb_gslb_service_status_num{namespace=~\"$namespace\"}, exported_name)",
+        "definition": "label_values(k8gb_gslb_service_status_num{namespace=~\"$namespace\"}, name)",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "gslb",
         "options": [],
         "query": {
-          "query": "label_values(k8gb_gslb_service_status_num{namespace=~\"$namespace\"}, exported_name)",
+          "query": "label_values(k8gb_gslb_service_status_num{namespace=~\"$namespace\"}, name)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

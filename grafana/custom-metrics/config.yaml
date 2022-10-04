@@ -9,7 +9,7 @@ customMetrics:
   - metric: Total errors per gslb per minute
     type:   counter
     unit:   cpm
-    expr:   sum(rate(k8gb_gslb_errors_total{namespace=~\"$namespace\", job=\"$job\", exported_name=\"$gslb\"}[5m])*5*60) by (exported_name)
+    expr:   sum(rate(k8gb_gslb_errors_total{namespace=~\"$namespace\", job=\"$job\", name=\"$gslb\"}[5m])*5*60) by (name)
 
   # Number of targets in DNS endpoint
   - metric: Number of IPs (targets) per dns record
@@ -21,7 +21,7 @@ customMetrics:
   - metric: Service status of gslb
     type:   gauge
     unit:   none
-    expr:   sum(k8gb_gslb_service_status_num{namespace=~\"$namespace\", job=\"$job\", exported_name=\"$gslb\"}) by (status)
+    expr:   sum(k8gb_gslb_service_status_num{namespace=~\"$namespace\", job=\"$job\", name=\"$gslb\"}) by (status)
 
   - metric: k8gb_runtime_info
     type:   info
