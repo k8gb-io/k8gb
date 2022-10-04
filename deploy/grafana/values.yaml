@@ -44,3 +44,7 @@ dashboards:
     k8s-node-exporter-full:
       # Node Exporter Full https://grafana.com/grafana/dashboards/1860
       url: https://grafana.com/api/dashboards/1860/revisions/23/download
+rbac:
+  pspEnabled: false
+testFramework:
+  enabled: false

@@ -264,7 +264,7 @@ deploy-grafana:
 	helm repo add grafana https://grafana.github.io/helm-charts
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
-		--wait --timeout=2m30s \
+		--wait --timeout=3m \
 		--version=6.38.6 \
 		--kube-context=k3d-$(CLUSTER_NAME)1
 	kubectl --context k3d-$(CLUSTER_NAME)1 apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
