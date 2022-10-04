@@ -2,7 +2,7 @@ apiVersion: k3d.io/v1alpha4
 kind: Simple
 metadata:
   name: edgedns
-image: docker.io/rancher/k3s:v1.22.6-k3s1
+image: docker.io/rancher/k3s:v1.25.2-k3s1
 agents: 0
 network: k3d-action-bridge-network
 ports:
@@ -17,6 +17,6 @@ options:
     disableLoadbalancer: true
   k3s:
     extraArgs:
-      - arg: --no-deploy=traefik,servicelb,metrics-server,local-storage
+      - arg: --disable=traefik,servicelb,metrics-server,local-storage
         nodeFilters:
           - server:*
