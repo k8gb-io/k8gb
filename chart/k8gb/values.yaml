@@ -39,7 +39,7 @@ k8gb:
   # -- Metrics server address
   metricsAddress: "0.0.0.0:8080"
   securityContext:
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
     runAsNonRoot: true
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
@@ -50,8 +50,8 @@ externaldns:
   image: k8s.gcr.io/external-dns/external-dns:v0.9.0
   # -- external-dns sync interval
   interval: "20s"
-  securityContext: # For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
+  securityContext:
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
     runAsUser: 1000
     # -- For ExternalDNS to be able to read Kubernetes and AWS token files
     fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
