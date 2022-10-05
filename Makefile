@@ -105,7 +105,7 @@ check: license lint gokart test ## Check project integrity
 
 .PHONY: clean-test-apps
 clean-test-apps:
-	kubectl delete -f deploy/test-apps
+	kubectl delete --ignore-not-found -f deploy/test-apps
 	helm -n test-gslb uninstall frontend
 
 # see: https://dev4devs.com/2019/05/04/operator-framework-how-to-debug-golang-operator-projects/
@@ -264,9 +264,17 @@ deploy-grafana:
 	helm repo add grafana https://grafana.github.io/helm-charts
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
-		--wait --timeout=2m30s \
+		--wait --timeout=4m \
+		--version=6.38.6 \
 		--kube-context=k3d-$(CLUSTER_NAME)1
 	kubectl --context k3d-$(CLUSTER_NAME)1 apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	mkdir grafana/dashboards/ || true
+	cat grafana/controller-resources-metrics.json | sed 's/$${DS_PROMETHEUS}/Prometheus/g' > grafana/dashboards/controller-resources-metrics.json
+	cat grafana/controller-runtime-metrics.json | sed 's/$${DS_PROMETHEUS}/Prometheus/g' > grafana/dashboards/controller-runtime-metrics.json
+	cat grafana/custom-metrics/pretty-custom-metrics-dashboard.json | sed 's/$${DS_PROMETHEUS}/Prometheus/g' > grafana/dashboards/pretty-custom-metrics-dashboard.json
+	kubectl --context k3d-$(CLUSTER_NAME)1 -n k8gb create cm -n k8gb k8gb-dashboards --from-file=./grafana/dashboards/ --dry-run=client -oyaml | kubectl apply --context k3d-$(CLUSTER_NAME)1 -f -
+	kubectl --context k3d-$(CLUSTER_NAME)1 -n k8gb label cm k8gb-dashboards grafana_dashboard=true --overwrite
+	rm -rf grafana/dashboards/
 	@echo -e "\nGrafana is listening on http://localhost:3000\n"
 	@echo -e "🖖 credentials are admin:admin\n"
 
@@ -275,7 +283,8 @@ deploy-grafana:
 uninstall-grafana:
 	@echo -e "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
 	@echo -e "\n$(YELLOW)uninstall grafana $(NC)"
-	kubectl --context k3d-$(CLUSTER_NAME)1 delete -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	kubectl --context k3d-$(CLUSTER_NAME)1 delete --ignore-not-found -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	kubectl --context k3d-$(CLUSTER_NAME)1 delete cm --ignore-not-found -n k8gb k8gb-dashboards
 	helm uninstall grafana -n k8gb --kube-context=k3d-$(CLUSTER_NAME)1
 
 .PHONY: dns-tools
@@ -309,7 +318,7 @@ ensure-cluster-size:
 
 .PHONY: goreleaser
 goreleaser:
-	go install github.com/goreleaser/goreleaser@v1.7.0
+	command -v goreleaser &> /dev/null || go install github.com/goreleaser/goreleaser@v1.7.0
 
 .PHONY: release-images
 release-images: goreleaser
@@ -572,7 +581,7 @@ define deploy-prometheus
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ;\
 	helm repo update ;\
 	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
-		--version 14.2.0 \
+		--version 15.14.0 \
 		--wait --timeout=2m0s \
 		--kube-context=k3d-$1
 endef
