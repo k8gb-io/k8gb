@@ -174,7 +174,7 @@ func (r *GslbReconciler) getLabels(gslb *k8gbv1beta1.Gslb, targets assistant.Tar
 			continue
 		}
 		for i, ip := range t.IPs {
-			l := fmt.Sprintf("weight-%s-%v-%v", k, i, v.Int())
+			l := fmt.Sprintf("weight-%s-%v-%v", k, i, v)
 			labels[l] = ip
 		}
 	}

@@ -83,8 +83,8 @@ func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
 		require.NoError(t, err, "missing endpoint", host)
 		// check all labels are correct
 		require.Equal(t, "roundRobin", ep.Labels["strategy"])
-		require.NotEqual(t, ep.Labels["weight-eu-0-50"], ep.Labels["weight-eu-1-50"])
-		require.NotEqual(t, ep.Labels["weight-us-0-50"], ep.Labels["weight-us-1-50"])
+		require.NotEqual(t, ep.Labels["weight-eu-0-5"], ep.Labels["weight-eu-1-5"])
+		require.NotEqual(t, ep.Labels["weight-us-0-5"], ep.Labels["weight-us-1-5"])
 		// check all targets are correct
 		for _, v := range epExternalEU.Targets {
 			require.True(t, Contains(v, ep.Targets))
