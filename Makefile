@@ -79,6 +79,8 @@ STABLE_VERSION := "stable"
 # default bundle image tag
 BUNDLE_IMG ?= controller-bundle:$(VERSION)
 
+NGINX_INGRESS_VALUES_PATH ?= deploy/ingress/nginx-ingress-values.yaml
+
 # options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)
 BUNDLE_CHANNELS := --channels=$(CHANNELS)
@@ -178,7 +180,7 @@ deploy-local-cluster:
 	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
 	helm repo update
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
-		--version 4.0.15 -f deploy/ingress/nginx-ingress-values.yaml
+		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
