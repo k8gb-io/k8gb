@@ -73,8 +73,8 @@ jobs:
           CONTAINER_DIGEST="$(echo ${CONTAINER_INFO} | jq --raw-output '.[0].digest')"
           CONTAINER_TAGS=$(echo ${CONTAINER_INFO} | jq --raw-output '[.[].tags[]] | join(" ")')
           set | grep 'CONTAINER_'
-          echo "::set-output name=container_info::$CONTAINER_INFO"
-          echo "::set-output name=container_tags::$CONTAINER_TAGS"
+          echo "container_info=$CONTAINER_INFO" >> $GITHUB_ENV
+          echo "container_tags=$CONTAINER_TAGS" >> $GITHUB_ENV
       - name: Cleanup signing keys
         if: ${{ always() }}
         run: rm -f cosign.key
