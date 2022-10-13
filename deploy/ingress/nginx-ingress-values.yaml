@@ -18,7 +18,8 @@ controller:
       https: 443
 
   kind: DaemonSet
-
+  image:
+    digest: ""
   service:
     enabled: false
 
