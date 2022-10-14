@@ -11,7 +11,7 @@ jobs:
   cut_release:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Get Desired Tag
@@ -22,7 +22,7 @@ jobs:
           echo "::set-output name=tag::${tag}"
       - name: Push Tag
         if: startsWith(github.event.head_commit.message, 'RELEASE:')
-        uses: mathieudutour/github-tag-action@v5.6
+        uses: mathieudutour/github-tag-action@v6.0
         with:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true

@@ -24,7 +24,7 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - id: skip_check
-      uses: fkirc/skip-duplicate-actions@v3.4.1
+      uses: fkirc/skip-duplicate-actions@v5.2.0
       with:
         skip_after_successful_duplicate: 'true'
         do_not_skip: '["workflow_dispatch", "schedule"]'
@@ -34,11 +34,11 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v3
         with:
           go-version: "1.17.6"
 
@@ -85,7 +85,7 @@ jobs:
         if: always()
         uses: ./.github/actions/print-debug
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: terratest-logs
