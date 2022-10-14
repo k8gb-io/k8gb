@@ -14,9 +14,9 @@ runs:
       shell: bash
       run: |
         if [[ "x${{ runner.debug }}" == "x1" ]]; then
-           echo ::set-output name=verbose::true
+          echo "verbose=true" >> $GITHUB_ENV
         else
-           echo ::set-output name=verbose::false
+          echo "verbose=false" >> $GITHUB_ENV
         fi
 
     - name: Env vars
