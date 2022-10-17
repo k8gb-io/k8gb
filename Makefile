@@ -324,7 +324,7 @@ goreleaser:
 
 .PHONY: release-images
 release-images: goreleaser
-	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist
+	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist --skip-sbom --skip-sign
 
 # build the docker image
 .PHONY: docker-build

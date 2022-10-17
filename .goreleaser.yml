@@ -16,6 +16,22 @@ builds:
       - -trimpath
     ldflags:
       - -s -w -X main.version={{ .Tag }} -X main.commit={{ .Commit }}
+archives:
+  - id: binary
+    format: binary
+    name_template: "{{ .ProjectName }}_{{ .Os }}-{{ .Arch }}"
+  - id: archive
+    format: tar.gz
+    replacements:
+      darwin: macOS
+    files:
+      - LICENSE*
+      - README*
+      - cosign.pub
+      - dist/*.sig
+    format_overrides:
+      - goos: windows
+        format: zip
 dockers:
 - image_templates:
   - "absaoss/k8gb:v{{ .Version }}-amd64"
@@ -43,9 +59,79 @@ docker_manifests:
   image_templates:
   - absaoss/k8gb:v{{ .Version }}-amd64
   - absaoss/k8gb:v{{ .Version }}-arm64
+sboms:
+  - id: archive-sbom
+    cmd: syft
+    args: ["${artifact}", "--file", "${artifact}.sbom.json", "--output", "spdx-json"]
+    documents:
+      - "${artifact}.sbom.json"
+    artifacts: archive
+signs:
+  - id: checksums
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    output: true
+    artifacts: checksum
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+  - id: binaries
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    output: true
+    artifacts: binary
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+  - id: archives
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    output: true
+    artifacts: archive
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+  - id: sboms
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    output: true
+    artifacts: sbom
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+
+docker_signs:
+  - cmd: cosign
+    artifacts: all
+    output: true
+    args:
+      - 'sign'
+      - --key
+      - cosign.key
+      - '${artifact}'
 checksum:
   name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ .Version }}-{{ .ShortCommit }}"
 release:
   draft: true
+  extra_files:
+    - glob: "./cosign.pub"
+  footer: |
+    :rocket:
