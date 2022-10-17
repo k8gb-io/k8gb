@@ -10,7 +10,6 @@ runs:
   using: "composite"
   steps:
     - name: Check verbose
-      id: check
       shell: bash
       run: |
         if [[ "x${{ runner.debug }}" == "x1" ]]; then
@@ -26,7 +25,7 @@ runs:
         env | sort
         echo ---------------------------------------
         echo inputs.kubectl-context=${{ inputs.kubectl-context }}
-        echo verbose: ${{ steps.check.outputs.verbose }}
+        echo verbose: ${{ env.verbose }}
         echo "::endgroup::"
 
     - name: Terratest Logs
@@ -54,7 +53,7 @@ runs:
 
     - name: CoreDNS Hosts
       shell: bash
-      if: steps.check.outputs.verbose == 'true'
+      if: env.verbose == 'true'
       run: |
         echo -e "\n\n\nVerbose is on, printing all the debug stuff:\n--------------------------------------------\n\n"
         echo "::group:: ☸☸☸ cluster coredns - hosts (cluster 1)"
@@ -63,7 +62,7 @@ runs:
 
     - name: K8s Events
       shell: bash
-      if: steps.check.outputs.verbose == 'true'
+      if: env.verbose == 'true'
       run: |
         echo "::group:: ☸☸☸ k get events"
         kubectl --context=${{ inputs.kubectl-context }} get events -A || true
@@ -71,7 +70,7 @@ runs:
 
     - name: gslbs
       shell: bash
-      if: steps.check.outputs.verbose == 'true'
+      if: env.verbose == 'true'
       run: |
         echo "::group:: ☸☸☸ gslbs"
         kubectl --context=${{ inputs.kubectl-context }} get gslbs -owide -A || true
@@ -79,7 +78,7 @@ runs:
 
     - name: Dnsendpoints
       shell: bash
-      if: steps.check.outputs.verbose == 'true'
+      if: env.verbose == 'true'
       run: |
         echo "::group:: ☸☸☸ endpoints"
         kubectl --context=${{ inputs.kubectl-context }} get dnsendpoints -A || true
@@ -87,7 +86,7 @@ runs:
 
     - name: K8gb logs
       shell: bash
-      if: steps.check.outputs.verbose == 'true'
+      if: env.verbose == 'true'
       run: |
         echo "::group:: ☸☸☸ k8gb logs"
         kubectl --context=${{ inputs.kubectl-context }} logs -lname=k8gb -n k8gb --tail=-1 || true
@@ -95,7 +94,7 @@ runs:
 
     - name: Metrics
       shell: bash
-      if: steps.check.outputs.verbose == 'true'
+      if: env.verbose == 'true'
       run: |
         echo "::group:: ☸☸☸ k8gb metrics (cluster 1)"
         _IP=$(kubectl --context=${{ inputs.kubectl-context }} get pods -lname=k8gb -n k8gb -o custom-columns='IP:status.podIP' --no-headers)
