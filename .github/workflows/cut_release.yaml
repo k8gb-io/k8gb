@@ -15,11 +15,10 @@ jobs:
         with:
           fetch-depth: 0
       - name: Get Desired Tag
-        id: get_desired_tag
         run: |
           tag=$(awk '/appVersion:/ {print $2}' chart/k8gb/Chart.yaml)
           echo "Version to release: ${tag}"
-          echo "::set-output name=tag::${tag}"
+          echo "desired_tag=${tag}" >> $GITHUB_ENV
       - name: Push Tag
         if: startsWith(github.event.head_commit.message, 'RELEASE:')
         uses: mathieudutour/github-tag-action@v6.0
@@ -27,26 +26,24 @@ jobs:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true
           tag_prefix: ""
-          custom_tag: ${{ steps.get_desired_tag.outputs.tag }}
+          custom_tag: ${{ env.desired_tag }}
       - name: Get Current Tag
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
-        id: get_current_tag
         run: |
           tag=$(git describe --tags --abbrev=0)
           echo "Version to revert: ${tag}"
-          echo "::set-output name=tag::${tag}"
+          echo "current_tag=${tag}" >> $GITHUB_ENV
       - name: Get Previous Tag
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
-        id: get_previous_tag
         run: |
           tag=$(git describe --tags --abbrev=0 $(git describe --tags --abbrev=0)^)
           echo "Previous tag: ${tag}"
-          echo "::set-output name=tag::${tag}"
+          echo "previous_tag=${tag}" >> $GITHUB_ENV
       - name: Delete Tag and Release
-        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && steps.get_desired_tag.outputs.tag == steps.get_previous_tag.outputs.tag
+        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && env.desired_tag == env.previous_tag
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
           delete_release: true # default: false
-          tag_name: ${{ steps.get_current_tag.outputs.tag }}
+          tag_name: ${{ env.current_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.CR_TOKEN }}
