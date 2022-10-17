@@ -27,6 +27,8 @@
     - [.env support](#env-support)
 - [End-to-end demo helper](#end-to-end-demo-helper)
 - [Release process](#release-process)
+  - [Signed releases](#signed-releases)
+  - [Software bill of materials](#software-bill-of-materials)
 
 k8gb is licensed under [Apache 2 License](./LICENSE) and accepts contributions via GitHub pull requests.
 This document outlines the resources and guidelines necessary to follow by contributors to the k8gb project.
@@ -342,6 +344,31 @@ have been successfully completed, you check the [release DRAFT](https://github.c
 a pull request with an offline changelog. Do a review and if everything is ok, merge it.
 
 Congratulations, the release is complete!
+
+### Signed releases
+
+During the release process we generate also the provenance file that is compliant with
+https://in-toto.io/Statement/v0.1 schema. It contains the information about the github action run that was
+responsible for the release, but also other metadata about artifacts there were created and their signatures.
+
+This provenance file is signed itself and attached with the signature to the release artifacts. For signing
+the artifacts we use [`cosign`](https://github.com/sigstore/cosign) tool and private key stored as the
+repository secret. Public key is available in the repository itself in file [`cosign.pub`](./cosign.pub).
+This way anybody can verify the origin of arbitrary artifact. In order to regenerate the keys for cosign,
+one can run `cosign generate-key-pair`, use some passphrase and update the `COSIGN_{PRIVATE,PUBLIC}_KEY` &
+`COSIGN_PASSWORD` repo secret and also the content of `./cosign.pub` file.
+
+All the container images that are produced during the build are also signed with `cosign` and the signatures
+are also pushed to the container registries (dockerhub). So that users of k8gb can introduce OPA policy that
+imposes such verification on our images. These signatures are stored in OCI format under predictable name
+that can be found using `cosign triangulate $IMAGE` command. However, `cosign verify ..` with our public key
+should be sufficient.
+
+### Software bill of materials
+
+For each container image we also create Software bill of materials (SBOM) file + its signature that ends up
+as part of the release. These files follows this naming pattern:
+`k8gb_{version}_{os}_{arch}.tar.gz.sbom.json` and are generated using [Syft](https://github.com/anchore/syft)tool.
 
 ---
 Thanks for contributing!
