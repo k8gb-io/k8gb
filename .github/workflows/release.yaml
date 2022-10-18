@@ -79,6 +79,8 @@ jobs:
           set | grep 'CONTAINER_'
           echo "container_info=$CONTAINER_INFO" >> $GITHUB_ENV
           echo "container_tags=$CONTAINER_TAGS" >> $GITHUB_ENV
+          echo "container_info=$CONTAINER_INFO" >> $GITHUB_OUTPUT
+          echo "container_tags=$CONTAINER_TAGS" >> $GITHUB_OUTPUT
       - name: Cleanup signing keys
         if: ${{ always() }}
         run: rm -f cosign.key
