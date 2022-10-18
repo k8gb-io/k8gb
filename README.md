@@ -7,7 +7,7 @@
 <p align="center"><a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack<a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://github.com/k8gb-io/k8gb/workflows/build/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang+lint+and+test%22+branch%3Amaster)
+[![Build Status](https://github.com/k8gb-io/k8gb/workflows/Golang%20lint,%20golic,%20gokart%20and%20test/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang%20lint,%20golic,%20gokart%20and%20test%22+branch%3Amaster)
 [![Terratest Status](https://github.com/k8gb-io/k8gb/workflows/Terratest/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ATerratest+branch%3Amaster)
 [![Gosec](https://github.com/k8gb-io/k8gb/workflows/Gosec/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3AGosec+branch%3Amaster)
 [![CodeQL](https://github.com/k8gb-io/k8gb/workflows/CodeQL/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ACodeQL+branch%3Amaster)
