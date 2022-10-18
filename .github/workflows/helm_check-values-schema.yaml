@@ -8,13 +8,21 @@ on:
     paths:
       - 'chart/k8gb/values.yaml'
       - 'chart/k8gb/values.schema.json'
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   check:
     name: 'Check values.yaml and its schema in PR'
     runs-on: ubuntu-20.04
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
       - name: 'Checkout'
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: 'Check if values.schema.json was updated'
         run: |
           VALUES_FILE=chart/k8gb/values.yaml

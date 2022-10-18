@@ -7,11 +7,19 @@ on:
     paths:
      - 'chart/k8gb/Chart.yaml'
 
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   cut_release:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
         with:
           fetch-depth: 0
       - name: Get Desired Tag
@@ -21,7 +29,7 @@ jobs:
           echo "desired_tag=${tag}" >> $GITHUB_ENV
       - name: Push Tag
         if: startsWith(github.event.head_commit.message, 'RELEASE:')
-        uses: mathieudutour/github-tag-action@v6.0
+        uses: mathieudutour/github-tag-action@d745f2e74aaf1ee82e747b181f7a0967978abee0
         with:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true
@@ -41,7 +49,7 @@ jobs:
           echo "previous_tag=${tag}" >> $GITHUB_ENV
       - name: Delete Tag and Release
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && env.desired_tag == env.previous_tag
-        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        uses: dev-drprasad/delete-tag-and-release@085c6969f18bad0de1b9f3fe6692a3cd01f64fe5
         with:
           delete_release: true # default: false
           tag_name: ${{ env.current_tag }}
