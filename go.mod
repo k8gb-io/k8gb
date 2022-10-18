@@ -9,7 +9,7 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/golang/mock v1.6.0
 	github.com/infobloxopen/infoblox-go-client v1.1.1
-	github.com/miekg/dns v1.1.48
+	github.com/miekg/dns v1.1.50
 	github.com/prometheus/client_golang v1.11.1
 	github.com/rs/zerolog v1.21.0
 	github.com/stretchr/testify v1.7.1
