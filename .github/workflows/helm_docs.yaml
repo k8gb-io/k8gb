@@ -5,19 +5,30 @@ on:
     - 'master'
     paths:
      - 'chart/k8gb/**'
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   build-helm-doc:
+    permissions:
+      contents: write  # for peter-evans/create-pull-request to create branch
+      pull-requests: write  # for peter-evans/create-pull-request to create a PR
     name: Update Helm Doc
     runs-on: ubuntu-latest
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
     - name: Generate docs for helm chart - chart/k8gb/README.md
-      uses: docker://jnorwood/helm-docs:v1.7.0
+      uses: docker://jnorwood/helm-docs@sha256:835200d7734899c7784419069be0a20a75b9bb381a790637ac911f26eb9d8c53 # v1.7.0
       with:
         args: --template-files=_helm-docs-template.gotmpl
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v4
+      uses: peter-evans/create-pull-request@b4d51739f96fca8047ad065eccef63442d8e99f7
       with:
         title: "Update Helm Docs"
         branch: ci-helm-doc
