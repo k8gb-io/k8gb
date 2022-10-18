@@ -9,6 +9,8 @@ on:
       - master
     paths:
      - 'chart/k8gb/**'
+permissions:
+  contents: read
 
 jobs:
   terrascan:
