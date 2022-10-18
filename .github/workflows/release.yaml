@@ -5,6 +5,10 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+  packages: read
+
 jobs:
   release:
     runs-on: ubuntu-20.04
