@@ -3,7 +3,7 @@
 </p>
 <h1 align="center" style="margin-top: 0;">K8GB - Kubernetes Global Balancer<a href="https://www.k8gb.io"></h1>
 <p align="center"><a href="https://landscape.cncf.io/?selected=k8gb">CNCF Sandbox Project</p>
-<p align="center"><a href="https://landscape.cncf.io/card-mode?category=coordination-service-discovery&grouping=category">CNCF Coordination &amp; Service Discovery</p>
+<p align="center"><a href="https://github.com/orgs/k8gb-io/projects/2/views/2">Roadmap</p>
 <p align="center"><a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack<a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
