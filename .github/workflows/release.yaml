@@ -28,7 +28,7 @@ jobs:
           echo "previous_tag=${previous_tag}" >> $GITHUB_ENV
       - uses: heinrichreimer/github-changelog-generator-action@v2.2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CHANGELOG_GH_TOKEN }}
           project: k8gb
           sinceTag: ${{ env.previous_tag }}
           output: changes
