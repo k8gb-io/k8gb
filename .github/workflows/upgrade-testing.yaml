@@ -15,6 +15,8 @@ on:
       - '**.svg'
       - '**.drawio'
       - '.spelling'
+permissions:
+  contents: read
 
 jobs:
   skip-check:
@@ -39,11 +41,6 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
-        with:
-          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
-
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
         with:
           fetch-depth: 0

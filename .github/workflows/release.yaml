@@ -6,11 +6,13 @@ on:
       - "v*"
 
 permissions:
-  contents: write
+  contents: read
   packages: read
 
 jobs:
   release:
+    permissions:
+      contents: write
     runs-on: ubuntu-20.04
     outputs:
       container_tags: ${{ steps.container_info.outputs.container_tags }}
@@ -136,6 +138,8 @@ jobs:
     name: provenance
     needs: [release]
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
@@ -184,6 +188,8 @@ jobs:
     name: container-provenance
     needs: [release]
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
 
     strategy:
       matrix:

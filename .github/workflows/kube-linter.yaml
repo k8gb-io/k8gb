@@ -9,6 +9,8 @@ on:
       - master
     paths-ignore:
       - 'chart/k8gb/**'
+permissions:
+  contents: read
 
 jobs:
   scan:
