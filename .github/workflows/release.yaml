@@ -33,7 +33,7 @@ jobs:
         run: |
           previous_tag=$(git tag --sort=v:refname | tail -2 | head -1)
           echo "previous_tag=${previous_tag}" >> $GITHUB_ENV
-      - uses: heinrichreimer/github-changelog-generator-action@854576bb5274851427527d8199fba0061552dff5
+      - uses: heinrichreimer/github-changelog-generator-action@6f5b9494dd265d6fb7243a10c53dc0169c55f247
         with:
           token: ${{ secrets.CHANGELOG_GH_TOKEN }}
           project: k8gb
