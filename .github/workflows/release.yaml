@@ -259,9 +259,9 @@ jobs:
             echo "- version: [${{ github.ref_name }}](https://github.com/${GITHUB_REPOSITORY}/tree/${{ github.ref_name }})"
             echo '- git sha: [`'$(echo ${GITHUB_SHA} | cut -c1-8)'`](https://github.com/'${GITHUB_REPOSITORY}'/commit/'${GITHUB_SHA}')'
             echo '- SCM: [:octocat:`'${GITHUB_REPOSITORY}'`](https://github.com/'${GITHUB_REPOSITORY}')'
-            echo "- self reference: [action run #${{ github.run_id }}](https://github.com/'${GITHUB_REPOSITORY}'/actions/runs/${{ github.run_id }})"
-            echo "- release page: [${{ github.ref_name }}](https://github.com/'${GITHUB_REPOSITORY}'/releases/tag/${{ github.ref_name }})"
-            echo "- this github workflow (code): [ci.yaml](https://github.com/'${GITHUB_REPOSITORY}'/blob/${GITHUB_SHA}/.github/workflows/release.yaml)"
+            echo "- self reference: [action run #${{ github.run_id }}](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }})"
+            echo "- release page: [${{ github.ref_name }}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ github.ref_name }})"
+            echo "- this github workflow (code): [ci.yaml](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/.github/workflows/release.yaml)"
             echo "- container images at dockerhub: [docker.io/absaoss/k8gb](https://hub.docker.com/r/absaoss/k8gb/tags)"
             echo ""
             echo "## :closed_lock_with_key: Secure Software Supply Chain"
@@ -295,7 +295,7 @@ jobs:
             echo
             echo 'Instead of using `--key cosign.pub` that requires having the public key locally present, you can alternatively use:'
             echo '```bash'
-            echo "cosign verify --key https://github.com/${GITHUB_REPOSITORY}/blob/${{ github.ref_name }}/cosign.pub \${image}"
+            echo "cosign verify --key https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/blob/${{ github.ref_name }}/cosign.pub \${image}"
             echo '```'
             echo
             echo "---"
