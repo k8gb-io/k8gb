@@ -754,7 +754,6 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 
 func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 	// arrange
-	expectedAnnotations := map[string]string{"annotation": "test", "k8gb.io/strategy": "roundRobin"}
 	settings := provideSettings(t, predefinedConfig)
 	settings.gslb.Annotations = map[string]string{"annotation": "test"}
 	err := settings.client.Update(context.TODO(), settings.gslb)
@@ -764,8 +763,29 @@ func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 	err2 := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 	// assert
 	assert.NoError(t, err2, "Failed to get expected ingress")
-	assert.Equal(t, expectedAnnotations, settings.ingress.Annotations)
-	assert.Equal(t, expectedAnnotations, settings.gslb.ObjectMeta.Annotations)
+	// only k8gb annotations are allowed to be merged into ingress
+	assert.True(t, utils.EqualAnnotations(map[string]string{"k8gb.io/strategy": "roundRobin"}, settings.ingress.Annotations))
+	assert.True(t, utils.EqualAnnotations(map[string]string{"annotation": "test", "k8gb.io/strategy": "roundRobin"}, settings.gslb.Annotations))
+}
+
+func TestIngressDoesntPropagateAnnotationsToGslb(t *testing.T) {
+	// arrange
+	mgslb := map[string]string{"k8gb.io/primary-geotag": "us", "k8gb.io/strategy": "roundRobin"}
+	ming := map[string]string{"k8gb.io/strategy": "roundRobin", "k8gb.io/primary-geotag": "na", "k8gb.io/protocol": "HTTP"}
+	settings := provideSettings(t, predefinedConfig)
+	settings.gslb.Annotations = mgslb
+	err := settings.client.Update(context.TODO(), settings.gslb)
+	require.NoError(t, err, "Can't update gslb")
+	settings.ingress.Annotations = ming
+	err = settings.client.Update(context.TODO(), settings.ingress)
+	require.NoError(t, err, "Can't update ingress")
+	// act
+	reconcileAndUpdateGslb(t, settings)
+	err2 := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+	// assert
+	assert.NoError(t, err2, "Failed to get expected ingress")
+	assert.True(t, utils.EqualAnnotations(mgslb, settings.gslb.Annotations))
+	assert.True(t, utils.EqualAnnotations(ming, settings.ingress.Annotations))
 }
 
 func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {

@@ -87,7 +87,9 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingres
 	// Update existing object with new spec and annotations
 	if !ingressEqual(found, i) {
 		found.Spec = i.Spec
-		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations)
+		// target (found) is taken from the cluster while source (i) is calculated from gslb
+		// only allowed to merge fields to be merged from source to target.
+		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations, primaryGeoTagAnnotation, strategyAnnotation)
 		err = r.Update(context.TODO(), found)
 		if errors.IsConflict(err) {
 			log.Info().
