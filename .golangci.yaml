@@ -2,7 +2,6 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
     - errcheck
     - gocritic
     - gocyclo
@@ -16,15 +15,12 @@ linters:
     - nakedret
     - lll
     - noctx
-    - rowserrcheck
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - depguard
     - dogsled
     - exportloopref
@@ -41,6 +37,10 @@ linters:
  #  - exhaustive
  #  - gomnd
  #  - gofmt
+ #  - deadcode      # deprecated since v1.49.0
+ #  - structcheck   # deprecated since v1.49.0
+ #  - varcheck      # deprecated since v1.49.0
+ #  - rowserrcheck  # rowserrcheck is disabled because of generics. You can track the evolution of the generics support by following the https://github.com/golangci/golangci-lint/issues/2649
 
 run:
   deadline: 3m

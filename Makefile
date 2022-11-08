@@ -42,7 +42,8 @@ LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.8.0
 GOLIC_VERSION  ?= v0.7.2
-GOKART_VERSION ?= v0.4.0
+GOKART_VERSION ?= v0.5.1
+GOLANGCI_VERSION ?= v1.50.1
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -373,7 +374,7 @@ ns1-secret:
 .PHONY: lint
 lint:
 	@echo -e "\n$(YELLOW)Running the linters$(NC)"
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.2
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	$(GOBIN)/golangci-lint run
 
 # retrieves all targets
