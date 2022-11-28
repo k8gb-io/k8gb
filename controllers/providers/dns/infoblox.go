@@ -66,7 +66,13 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
 	}
-	addresses, err := p.assistant.GslbIngressExposedIPs(gslb)
+
+	var addresses []string
+	if p.config.CoreDNSExposed {
+		addresses, err = p.assistant.CoreDNSExposedIPs()
+	} else {
+		addresses, err = p.assistant.GslbIngressExposedIPs(gslb)
+	}
 	if err != nil {
 		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
