@@ -48,7 +48,7 @@ jobs:
           filterByMilestone: true
           unreleased: true
       - name: Install Cosign
-        uses: sigstore/cosign-installer@c6d50c2e98b401591ef0ec04be0868d8f2626d0f
+        uses: sigstore/cosign-installer@7bca8b41164994a7dc93749d266e2f1db492f8a2
         with:
           cosign-release: 'v1.12.1'
       - name: Install Syft
@@ -106,7 +106,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76
+        uses: sigstore/cosign-installer@7bca8b41164994a7dc93749d266e2f1db492f8a2
         with:
           cosign-release: 'v1.12.1'
 
@@ -162,7 +162,7 @@ jobs:
           [ "x${{steps.provenance-step.outcome}}" == "xfailure" ] && echo ":x: Uploading provenance for release failed, make sure to delete all the previous releases in GitHub web api before releasing." > "$GITHUB_STEP_SUMMARY" || true
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76
+        uses: sigstore/cosign-installer@7bca8b41164994a7dc93749d266e2f1db492f8a2
         with:
           cosign-release: 'v1.12.1'
 
@@ -202,7 +202,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76
+        uses: sigstore/cosign-installer@7bca8b41164994a7dc93749d266e2f1db492f8a2
         with:
           cosign-release: 'v1.12.1'
 
