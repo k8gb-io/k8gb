@@ -36,7 +36,7 @@ jobs:
           helm repo update
           helm -n k8gb upgrade -i k8gb k8gb/k8gb --wait --create-namespace --version=$(make version)
       - name: Invoke workflow for OLM
-        uses: benc-uk/workflow-dispatch@4c044c1613fabbe5250deadc65452d54c4ad4fc7
+        uses: benc-uk/workflow-dispatch@798e70c97009500150087d30d9f11c5444830385
         with:
           workflow: OLM bundle and PR
           token: ${{ secrets.CR_TOKEN }}
