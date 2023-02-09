@@ -61,7 +61,7 @@ jobs:
         with:
           go-version: 1.19.1
       - name: Login to Dockerhub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@3da7dc6e2b31f99ef2cb9fb4c50fb0971e0d0139
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -113,7 +113,7 @@ jobs:
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@b5042e9d19d8b32849779bfe17673ff84aec702d
       - name: Login to Dockerhub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@3da7dc6e2b31f99ef2cb9fb4c50fb0971e0d0139
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -219,7 +219,7 @@ jobs:
         run: |
           cat provenance.att | jq .predicate > provenance-predicate.att
       - name: Login to Dockerhub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@3da7dc6e2b31f99ef2cb9fb4c50fb0971e0d0139
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
