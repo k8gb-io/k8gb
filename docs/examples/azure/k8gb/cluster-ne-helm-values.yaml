@@ -1,0 +1,73 @@
+k8gb:
+  imageRepo: "docker.io/absaoss/k8gb"
+  deployCrds: true
+  deployRbac: true
+  # -- dns zone that will be managed by CoreDNS
+  dnsZone: "k8gb.mbcpcloud.lab"
+  # -- Negative TTL for SOA record
+  dnsZoneNegTTL: 300
+  # -- main zone which would contain gslb zone to delegate
+  edgeDNSZone: "mbcpcloud.lab"
+  # -- host/ip[:port] format is supported here where port defaults to 53
+  edgeDNSServers:
+      # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
+      - "10.101.240.93"
+  # -- used for places where we need to distinguish between different Gslb instances
+  clusterGeoTag: "ne"
+  # -- comma-separated list of external gslb geo tags to pair with
+  extGslbClustersGeoTags: "we"
+  # -- Reconcile time in seconds
+  reconcileRequeueSeconds: 30
+  log:
+    # -- log format (simple,json)
+    format: simple # log format (simple,json)
+    # -- log level (panic,fatal,error,warn,info,debug,trace)
+    level: debug # log level (panic,fatal,error,warn,info,debug,trace)
+  # -- Enable SplitBrain check (Infoblox only)
+  splitBrainCheck: false
+  # -- Metrics server address
+  metricsAddress: "0.0.0.0:8080"
+  securityContext:
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    runAsUser: 1000
+
+externaldns:
+  # -- external-dns image repo:tag
+  image: k8s.gcr.io/external-dns/external-dns:v0.11.0
+  # -- external-dns sync interval
+  interval: "20s"
+  securityContext:
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
+    runAsUser: 1000
+    # -- For ExternalDNS to be able to read Kubernetes and AWS token files
+    fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+    runAsNonRoot: true
+
+coredns:
+  # -- service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps
+  isClusterService: false
+  serviceType: LoadBalancer
+  service:
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  deployment:
+    # -- Skip CoreDNS creation and uses the one shipped by k8gb instead
+    skipConfig: true
+  image:
+    repository: absaoss/k8s_crd
+    tag: v0.0.8
+  # -- Creates serviceAccount for coredns
+  rbac:
+    create: true
+    name: coredns
+
+rfc2136:
+  enabled: true
+  rfc2136Opts:
+    - host: 10.101.240.93
+    - port: 53
+    #- tsig-secret-alg: hmac-sha256
+    #- tsig-keyname: externaldns-key

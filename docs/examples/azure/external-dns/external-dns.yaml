@@ -1,0 +1,151 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-dns
+  labels:
+    name: external-dns
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-dns
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - dnsendpoints
+  - pods
+  - nodes
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - extensions
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - externaldns.k8s.io
+  resources:
+  - dnsendpoints
+  - dnsendpoints/status
+  verbs:
+  - "*"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-dns
+  namespace: external-dns
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: external-dns-viewer
+  namespace: external-dns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-dns
+subjects:
+- kind: ServiceAccount
+  name: external-dns
+  namespace: external-dns
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: krb5.conf
+  namespace: external-dns
+data:
+  krb5.conf: |
+    [logging]
+      default = FILE:/var/log/krb5libs.log
+      kdc = FILE:/var/log/krb5kdc.log
+      admin_server = FILE:/var/log/kadmind.log
+
+    [libdefaults]
+      default_realm = MBCPK8GB.LOCAL
+      dns_lookup_realm = false
+      dns_lookup_kdc = false
+      ticket_lifetime = 24h
+      forwardable = yes
+      default_tkt_enctypes = aes256-cts-hmac-sha1-96
+      default_tgs_enctypes = aes256-cts-hmac-sha1-96
+
+    [realms]
+     MBCPK8GB.LOCAL = {
+      kdc = svcb2lmavs001.mbcpk8gb.local:88
+      admin_server = svcb2lmavs001.mbcpk8gb.local
+    }
+
+    [domain_realm]
+      mbcpk8gb.local= MBCPK8GB.LOCAL
+      .mbcpk8gb.local = MBCPK8GB.LOCAL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-dns
+  namespace: external-dns
+spec:
+  selector:
+    matchLabels:
+      app: external-dns
+  template:
+    metadata:
+      labels:
+        app: external-dns
+    spec:
+      serviceAccountName: external-dns
+      hostAliases:
+        - ip: "10.101.240.93"
+          hostnames:
+            - "svcb2lmavs001.mbcpk8gb.local"
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 65534
+        runAsNonRoot: true
+      containers:
+      - name: external-dns
+        image: k8s.gcr.io/external-dns/external-dns:v0.11.0
+        args:
+        - --registry=txt
+        - --txt-prefix=external-dns-
+        - --txt-owner-id=k8s
+        - --provider=rfc2136
+        - --source=crd
+        - --rfc2136-gss-tsig
+        - --rfc2136-host=10.101.240.93
+        - --rfc2136-port=53
+        - --rfc2136-zone=mbcpk8gb.local
+        - --rfc2136-kerberos-username=http/external-dns@mbcpk8gb.local
+        - --rfc2136-kerberos-password=Teste123!
+        - --rfc2136-kerberos-realm=MBCPK8GB.LOCAL
+        - --rfc2136-tsig-axfr
+        - --managed-record-types=A
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /etc/krb5.conf
+            name: kerberos-config-volume
+            subPath: krb5.conf
+      volumes:
+        - name: kerberos-config-volume
+          configMap:
+            name: krb5.conf
+            defaultMode: 420
