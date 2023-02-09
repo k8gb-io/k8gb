@@ -111,6 +111,16 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- range $k, $v := .Values.rfc2136.rfc2136Opts }}
 {{- range $kk, $vv := $v }}
         - --rfc2136-{{ $kk }}={{ $vv }}
+
+{{- end -}}
+{{- end }}
+{{- if .Values.rfc2136.rfc2136auth.insecure.enabled }}
+        - --rfc2136-insecure
+{{- end -}}
+{{- if .Values.rfc2136.rfc2136auth.tsig.enabled }}
+{{- range $k, $v := .Values.rfc2136.rfc2136auth.tsig.tsigCreds }}
+{{- range $kk, $vv := $v }}
+        - --rfc2136-{{ $kk }}={{ $vv }}
 {{- end -}}
 {{- end }}
         env:
@@ -119,5 +129,15 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
             secretKeyRef:
               name: rfc2136
               key: secret
+{{- end -}}
+{{- if .Values.rfc2136.rfc2136auth.gssTsig.enabled }}
+        - --rfc2136-gss-tsig
+{{- range $k, $v := .Values.rfc2136.rfc2136auth.gssTsig.gssTsigCreds }}
+{{- range $kk, $vv := $v }}
+        - --rfc2136-{{ $kk }}={{ $vv }}
+{{- end -}}
+{{- end }}
+{{- end -}}
+
 {{- end -}}
 {{- end -}}

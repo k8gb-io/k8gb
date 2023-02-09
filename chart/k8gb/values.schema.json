@@ -360,6 +360,12 @@
                     "items": {
                         "$ref": "#/definitions/Rfc2136Opt"
                     }
+                },
+                "rfc2136auth": {
+                    "type": "object",
+                    "items": {
+                        "$ref": "#/definitions/Rfc2136auth"
+                    }
                 }
             },
             "required": [
@@ -378,7 +384,65 @@
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 65535
+                }
+            },
+            "title": "Rfc2136Opt"
+        },
+        "Rfc2136auth": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "insecure": {
+                    "type": "object",
+                    "items": {
+                        "$ref": "#/definitions/Rfc2136authInsecure"
+                    }
                 },
+                "tsig": {
+                    "type": "object",
+                    "items": {
+                        "$ref": "#/definitions/Rfc2136authTsig"
+                    }
+                },
+                "gssTsig": {
+                    "type": "object",
+                    "items": {
+                        "$ref": "#/definitions/Rfc2136authGssTsig"
+                    }
+                }
+            },
+            "title": "Rfc2136auth"
+        },
+        "Rfc2136authInsecure": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            },
+            "title": "Rfc2136authInsecure"
+        },
+        "Rfc2136authTsig": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "tsigCreds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Rfc2136authTsigCreds"
+                    }
+                }
+            },
+            "title": "Rfc2136authTsig"
+        },
+        "Rfc2136authTsigCreds": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
                 "tsig-secret-alg": {
                     "type": "string",
                     "minLength": 1
@@ -388,7 +452,42 @@
                     "minLength": 1
                 }
             },
-            "title": "Rfc2136Opt"
+            "title": "Rfc2136authTsigCreds"
+        },
+        "Rfc2136authGssTsig": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "gssTsigCreds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Rfc2136authGssTsigCreds"
+                    }
+                }
+            },
+            "title": "Rfc2136authGssTsig"
+        },
+        "Rfc2136authGssTsigCreds": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "kerberos-username": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "kerberos-password": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "kerberos-realm": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "title": "Rfc2136authGssTsigCreds"
         },
         "Route53": {
             "type": "object",

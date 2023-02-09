@@ -113,8 +113,20 @@ rfc2136:
   rfc2136Opts:
     - host: host.k3d.internal
     - port: 1053
-    - tsig-secret-alg: hmac-sha256
-    - tsig-keyname: externaldns-key
+  rfc2136auth:
+    insecure: 
+      enabled: false
+    tsig:
+      enabled: false
+      tsigCreds:
+        - tsig-secret-alg: hmac-sha256
+        - tsig-keyname: externaldns-key
+    gssTsig:
+      enabled: false
+      gssTsigCreds:
+        - kerberos-username: ad-user
+        - kerberos-password: ad-user-pass
+        - kerberos-realm: ad-domain-realm
 
 tracing:
   # -- if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`)
