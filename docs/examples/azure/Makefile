@@ -22,5 +22,7 @@ destroy-infra:
 
 .PHONY: deploy-k8gb
 deploy-k8gb:
-	
+
+.PHONY: deploy-demo
+deploy-demo:
 
