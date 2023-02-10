@@ -67,7 +67,19 @@ coredns:
 rfc2136:
   enabled: true
   rfc2136Opts:
-    - host: 10.101.240.93
+    - host: AD-DC.mbcpk8gb.local #when using gssTsig, use the FQDN of the host, not an IP
     - port: 53
-    #- tsig-secret-alg: hmac-sha256
-    #- tsig-keyname: externaldns-key
+  rfc2136auth:
+    insecure: 
+      enabled: false
+    tsig:
+      enabled: false
+      tsigCreds:
+        - tsig-secret-alg: hmac-sha256
+        - tsig-keyname: externaldns-key
+    gssTsig:
+      enabled: true
+      gssTsigCreds:
+        - kerberos-username: ad-user-account
+        - kerberos-password: ad-user-account-password
+        - kerberos-realm: mbcpk8gb.local
