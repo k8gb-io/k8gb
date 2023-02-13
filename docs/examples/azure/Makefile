@@ -16,6 +16,10 @@
 deploy-infra:
 	./infra/build.sh
 
+.PHONE: setup-clusters
+setup-clusters:
+	./infra/setup.sh
+
 .PHONY: destroy-infra
 destroy-infra:
 	./infra/destroy.sh

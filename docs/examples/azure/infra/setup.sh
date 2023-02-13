@@ -17,12 +17,12 @@ spoke2ResourceGroupName="RGCM2LILABK8GB002"
 az account set --subscription $subscriptionName
 az aks get-credentials --resource-group $spoke1ResourceGroupName --name $cluster1Name
 
-helm repo add k8gb https://www.k8gb.io
-helm repo update
+### Deploy Ingress Controller
+kubectl apply -f ingress/namespace.yaml
+helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
+helm -n nginx-ingress upgrade -i nginx-ingress nginx-stable/ingress-nginx \
+                --version 4.0.15 -f nginx-ingress-values.yaml
 
-kubectl apply -f ../external-dns/external-dns-krb5conf.yaml -n k8gb
-
-helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f cluster-we-helm-values.yaml
 
 #####################
 # Deploy to Cluster 2
@@ -32,10 +32,8 @@ helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f cluster-we-helm-val
 az account set --subscription $subscriptionName
 az aks get-credentials --resource-group $spoke2ResourceGroupName --name $cluster2Name
 
-helm repo add k8gb https://www.k8gb.io
-helm repo update
-
-kubectl apply -f ../external-dns/external-dns-krb5conf.yaml -n k8gb
-
-helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f cluster-ne-helm-values.yaml
-
+### Deploy Ingress Controller
+kubectl apply -f ingress/namespace.yaml
+helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
+helm -n nginx-ingress upgrade -i nginx-ingress nginx-stable/ingress-nginx \
+                --version 4.0.15 -f nginx-ingress-values.yaml
