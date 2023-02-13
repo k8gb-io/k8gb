@@ -4,7 +4,7 @@
 
 The provided lab sample solution will create a simple hub and spoke architecture with two AKS clusters in different regions
 
-![Azure solution with WindowsDNS](/images/k8gb_solution.png?raw=true "GLSB with K8gb on Azure")
+![GLSB with K8gb on Azure](/docs/examples/azure/images/k8gb_solution.png?raw=true "GLSB with K8gb on Azure")
 
 ## Technical decisions
 
@@ -40,16 +40,17 @@ make destroy-infra #destroys all the created
 ## Configure GSS-TSIG authentication for DNS updates
 
 * Ensure that the Network Security is configured only for AES256
-![WindowsDNS](/images/LocalSecurityPolicyNetworkKerberos.png?raw=true "Network Policy - Kerberos auth")
+![Network Policy - Kerberos auth](/docs/examples/azure/images/LocalSecuryPolicyNetworkKerberos.png?raw=true "Network Policy - Kerberos auth")
 * Ensure that the DNS Zone has only Secure updates option enabled
-![WindowsDNS](/images/DNSSecureUpdates.png?raw=true "DNS Secure Updates")
+![DNS Secure Updates](/docs/examples/azure/images/DNSSecureUpdates.png "DNS Secure Updates")
 * Ensure that the DNS Zone has the option "Allow zone transfers" check with the option "To any server" under the tab Zone Transfers on the zone properties
-![WindowsDNS](/images/DNSZoneTransfers.png?raw=true "DNS Zone Transfers")
+![DNS Zone Transfers](/docs/examples/azure/images/DNSZoneTransfers.png "DNS Zone Transfers")
 * Create a new Active Directory user
     * The user should be created with "Encryptions options" for Kerberos AES256 encryption
     * The user needs to be added to the DNSAdmin group, or,
     * Select the zone that will have dynamic updates in DNS Manager, right click and select Properties. Under the Security tab, add the created user and add the permissions Write, Create all child objects and Delete all child objects
 * ExternalDNS configuration
+    * A sample configuration can be found at k8gb folder
 ```
 rfc2136:
   enabled: true
@@ -71,3 +72,4 @@ rfc2136:
         - kerberos-password: ad-user-account-password
         - kerberos-realm: mbcpk8gb.local
 ```
+ 
