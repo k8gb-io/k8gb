@@ -16,7 +16,7 @@
 deploy-infra:
 	./infra/build.sh
 
-.PHONE: setup-clusters
+.PHONY: setup-clusters
 setup-clusters:
 	./infra/setup.sh
 

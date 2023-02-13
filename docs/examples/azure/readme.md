@@ -18,6 +18,9 @@ The provided lab sample solution will create a simple hub and spoke architecture
 ## Run the sample
 
 * To run the provided sample, please use the provided Makefile
+* This lab requires a running AD Domain Controller with DNS and KDC services working
+    * There are several tutorials available online, but this Microsoft Learn article will probably help you out 
+    * [Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/deploy/install-active-directory-domain-services--level-100- "Install Active Directory")
 
 ### Deploy infrastructure
 * Deploys all the required infrastructure and configurations
@@ -51,10 +54,6 @@ make deploy-demo
 make destroy-infra
 ```
 
-* This lab requires a running AD Domain Controller with DNS and KDC services working
-    * There are several tutorials available online, but this Microsoft Learn article will probably help you out 
-    * [Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/deploy/install-active-directory-domain-services--level-100- "Install Active Directory")
-
 ## Configure GSS-TSIG authentication for DNS updates
 
 * Ensure that the Network Security is configured only for AES256
@@ -73,7 +72,7 @@ make destroy-infra
     * Select the zone that will have dynamic updates in DNS Manager, right click and select Properties. Under the Security tab, add the created user and add the permissions Write, Create all child objects and Delete all child objects
 * ExternalDNS configuration
     * For communication with WindowsDNS, ExternalDNS should be configured with the RFC2136 provider
-    * [External DNS](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md "RFC2136 documentation")
+    * [External DNS - RFC2126](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md "RFC2136 documentation")
     * A sample configuration can be found at k8gb folder
 ```
 rfc2136:
