@@ -4,6 +4,8 @@
 
 The provided lab sample solution will create a simple hub and spoke architecture with two AKS clusters in different regions
 
+![Azure solution with WindowsDNS](/images/k8gb_solution.png?raw=true "GLSB with K8gb on Azure")
+
 ## Technical decisions
 
 * Azure Private DNS Zones was discarded since they don't allow the creation of NS records
@@ -16,11 +18,33 @@ The provided lab sample solution will create a simple hub and spoke architecture
 ## Run the sample
 
 * To run the provided sample, please use the available Makefile
+```
+make deploy-infra #will deploy all the required infra
+```
 
-## Configure GSS-TSIG authentication
+```
+make deploy-k8gb #will deploy K8gb on both clusters
+```
+
+```
+make deploy-demo #will deploy the sample Podinfo workload with failover GLSB
+```
+
+```
+make destroy-infra #destroys all the created
+```
+* This lab requires a running AD Domain Controller with DNS and KDC services working
+    * There are several tutorials available online, but this Microsoft Learn link will probably help you out 
+    * https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/deploy/install-active-directory-domain-services--level-100-
+
+## Configure GSS-TSIG authentication for DNS updates
 
 * Ensure that the Network Security is configured only for AES256
+![WindowsDNS](/images/LocalSecurityPolicyNetworkKerberos.png?raw=true "Network Policy - Kerberos auth")
 * Ensure that the DNS Zone has only Secure updates option enabled
+![WindowsDNS](/images/DNSSecureUpdates.png?raw=true "DNS Secure Updates")
+* Ensure that the DNS Zone has the option "Allow zone transfers" check with the option "To any server" under the tab Zone Transfers on the zone properties
+![WindowsDNS](/images/DNSZoneTransfers.png?raw=true "DNS Zone Transfers")
 * Create a new Active Directory user
     * The user should be created with "Encryptions options" for Kerberos AES256 encryption
     * The user needs to be added to the DNSAdmin group, or,

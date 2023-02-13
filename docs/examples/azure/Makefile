@@ -22,7 +22,9 @@ destroy-infra:
 
 .PHONY: deploy-k8gb
 deploy-k8gb:
+	./k8gb/deploy.sh
 
 .PHONY: deploy-demo
 deploy-demo:
+	./demo/deploy.sh
 

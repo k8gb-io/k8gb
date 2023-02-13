@@ -17,14 +17,14 @@ data:
       forwardable = true
       rdns = false
       default_ccache_name = KEYRING:persistent:%{uid}
-      default_realm = MBCPK8GB.LOCAL
+      default_realm = MBCPCLOUD.LOCAL
 
     [realms]
      MBCPK8GB.LOCAL = {
-      kdc = svcb2lmavs001.mbcpk8gb.local:88
-      admin_server = svcb2lmavs001.mbcpk8gb.local
+      kdc = YOUR-KDC.mbcpcloud.lab:88
+      admin_server = YOUR-DC.mbcpcloud.lab
     }
 
     [domain_realm]
-      mbcpk8gb.local= MBCPK8GB.LOCAL
-      .mbcpk8gb.local = MBCPK8GB.LOCAL
+      mbcpk8gb.local= MBCPCLOUD.LOCAL
+      .mbcpk8gb.local = MBCPCLOUD.LOCAL

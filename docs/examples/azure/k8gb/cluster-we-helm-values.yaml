@@ -67,7 +67,7 @@ coredns:
 rfc2136:
   enabled: true
   rfc2136Opts:
-    - host: AD-DC.mbcpk8gb.local #when using gssTsig, use the FQDN of the host, not an IP
+    - host: AD-DC.mbcpcloud.local #when using gssTsig, use the FQDN of the host, not an IP
     - port: 53
   rfc2136auth:
     insecure: 
@@ -82,4 +82,4 @@ rfc2136:
       gssTsigCreds:
         - kerberos-username: ad-user-account
         - kerberos-password: ad-user-account-password
-        - kerberos-realm: mbcpk8gb.local
+        - kerberos-realm: MBCPCLOUD.LAB
