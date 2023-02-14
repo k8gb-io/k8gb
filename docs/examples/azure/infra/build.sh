@@ -1,37 +1,37 @@
 #!/bin/bash
 
 #generic configs
-subscriptionName="MBCPANLS02"
-windowsDnsServers="10.121.64.196"
+subscriptionName=""
+windowsDnsServers=""
 
 #Hub configs
-hubResourceGroupName="RGCM2LILABK8GB001"
-hubvNetName="VNCM2LINK8GB001"
-hubvNetRange="10.121.240.0/20"
-hubVnetSubnetName="VNCM2LINK8GB001-APP01"
-hubSubnetRange="10.121.240.0/22"
-hubLocation="westeurope"
+hubResourceGroupName=""
+hubvNetName=""
+hubvNetRange=""
+hubVnetSubnetName=""
+hubSubnetRange=""
+hubLocation=""
 
 #Spoke1 configs
-cluster1Name="cscm2lakslabK8GB001"
-spoke1ResourceGroupName="RGCM2LILABK8GB002"
-spoke1vNetName="VNCM2LINK8GB002"
-spoke1vNetRange="10.111.240.0/20"
-spoke1VnetSubnetName="VNCM2LINK8GB002-APP01"
-spoke1SubnetRange="10.111.240.0/22"
-spoke1Location="westeurope"
+cluster1Name=""
+spoke1ResourceGroupName=""
+spoke1vNetName=""
+spoke1vNetRange=""
+spoke1VnetSubnetName=""
+spoke1SubnetRange=""
+spoke1Location=""
 
 #Spoke2 configs
-cluster2Name="cscm2lakslabK8GB002"
-spoke2ResourceGroupName="RGCM2LILABK8GB003"
-spoke2vNetName="VNCM2LINK8GB003"
-spoke2vNetRange="10.101.240.0/20"
-spoke2VnetSubnetName="VNCM2LINK8GB003-APP01"
-spoke2SubnetRange="10.101.240.0/22"
-spoke2Location="northeurope"
+cluster2Name=""
+spoke2ResourceGroupName=""
+spoke2vNetName=""
+spoke2vNetRange=""
+spoke2VnetSubnetName=""
+spoke2SubnetRange=""
+spoke2Location=""
 
 #Private DNS configurations
-privateDnsZone="lab.mbcp.cloud"
+privateDnsZone=""
 
 az account set --subscription $subscriptionName
 #Create resource groups to manage azure resources

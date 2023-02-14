@@ -1,13 +1,13 @@
 #!/bin/bash
-subscriptionName="MBCPANLS02"
+subscriptionName=""
 
 ##Cluster 1
-cluster1Name="cscm2lakslabK8GB001"
-spoke1ResourceGroupName="RGCM2LILABK8GB002"
+cluster1Name=""
+spoke1ResourceGroupName=""
 
 ##Cluster 2
-cluster2Name="cscm2lakslabK8GB001"
-spoke2ResourceGroupName="RGCM2LILABK8GB002"
+cluster2Name=""
+spoke2ResourceGroupName=""
 
 #####################
 # Deploy to Cluster 1
