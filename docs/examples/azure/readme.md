@@ -58,6 +58,8 @@ make destroy-infra
 
 ## Configure GSS-TSIG authentication for DNS updates
 
+### Domain Controller config
+
 * Ensure that the Network Security is configured only for AES256
 
 ![Network Policy - Kerberos auth](/docs/examples/azure/images/LocalSecuryPolicyNetworkKerberos.png?raw=true "Network Policy - Kerberos auth")
@@ -72,10 +74,14 @@ make destroy-infra
     * The user should be created with "Encryptions options" for Kerberos AES256 encryption
     * The user needs to be added to the DNSAdmin group, or,
     * Select the zone that will have dynamic updates in DNS Manager, right click and select Properties. Under the Security tab, add the created user and add the permissions Write, Create all child objects and Delete all child objects
+
+### K8GB / ExternalDNS configuration
+
 * ExternalDNS configuration
     * For communication with WindowsDNS, ExternalDNS should be configured with the RFC2136 provider
     * [External DNS - RFC2126](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md "RFC2136 documentation")
     * A sample configuration can be found at k8gb folder
+    * At this moment ExternalDNS doesn't provide a way to use secrets as the source for the kerberos-password setting, so if you store the manifest in a git repo, please ensure that only required persons can access it
 ```
 rfc2136:
   enabled: true
