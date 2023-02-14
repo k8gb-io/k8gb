@@ -28,6 +28,8 @@ The provided lab sample solution will create a simple hub and spoke architecture
     * Before execute, please fill all the local variables in the scripts with the correct naming for the resources in order to avoid having problems with your azure policies
 * Scripts will use AZ cli, ensure that is installed and logged when trying to execute the command
     * [Microsoft Learn](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli "Install AZ Cli")
+
+### Deploy infrastructure 
 ```
 make deploy-infra
 ```
