@@ -24,7 +24,9 @@ The provided lab sample solution will create a simple hub and spoke architecture
 
 ### Deploy infrastructure
 * Deploys all the required infrastructure and configurations
-* Script will use AZ cli, ensure that is installed and logged when trying to execute the command
+* A Makefile is provided in order to execute all the steps of the installation and configuration
+    * Before execute, please fill all the local variables in the scripts with the correct naming for the resources in order to avoid having problems with your azure policies
+* Scripts will use AZ cli, ensure that is installed and logged when trying to execute the command
     * [Microsoft Learn](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli "Install AZ Cli")
 ```
 make deploy-infra
