@@ -47,7 +47,7 @@ k8gb:
 
 externaldns:
   # -- external-dns image repo:tag
-  image: k8s.gcr.io/external-dns/external-dns:v0.9.0
+  image: registry.k8s.io/external-dns/external-dns:v0.9.0
   # -- external-dns sync interval
   interval: "20s"
   securityContext:

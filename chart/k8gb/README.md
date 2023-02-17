@@ -56,7 +56,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | coredns.image.tag | string | `"v0.0.8"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
-| externaldns.image | string | `"k8s.gcr.io/external-dns/external-dns:v0.9.0"` | external-dns image repo:tag |
+| externaldns.image | string | `"registry.k8s.io/external-dns/external-dns:v0.9.0"` | external-dns image repo:tag |
 | externaldns.interval | string | `"20s"` | external-dns sync interval |
 | externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
 | externaldns.securityContext.runAsNonRoot | bool | `true` |  |
