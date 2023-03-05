@@ -66,7 +66,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@b953231f81b8dfd023c58e0854a721e35037f28b
+        uses: goreleaser/goreleaser-action@1d44853e589689f0aaa1c397f991ecf92e9c0591
         with:
           version: v1.7.0
           args: release --rm-dist --release-notes=changes
