@@ -114,6 +114,11 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 * [Integration with Admiralty](/docs/admiralty.md)
 * [Integration with Liqo](/docs/liqo.md)
 
+## Adopters
+
+A list of publicly known users of the K8GB project can be found in [ADOPTERS.md](ADOPTERS.md).
+We encourage all users of K8GB to add themselves to this list!
+
 ## Production Readiness
 
 k8gb is very well tested with the following environment options
