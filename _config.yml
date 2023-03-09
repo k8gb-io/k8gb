@@ -2,6 +2,7 @@ theme: jekyll-theme-cayman
 markdown: GFM
 include:
   - CONTRIBUTING.md
+  - ADOPTERS.md
 exclude:
   - Gemfile
   - Gemfile.lock
