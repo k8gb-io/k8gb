@@ -27,6 +27,7 @@ jobs:
       - name: Copy new docs to gh-pages
         run: |
           git checkout gh-pages
+          git checkout ${GITHUB_REF##*/} ADOPTERS.md
           git checkout ${GITHUB_REF##*/} README.md
           git checkout ${GITHUB_REF##*/} CONTRIBUTING.md
           git checkout ${GITHUB_REF##*/} CHANGELOG.md
