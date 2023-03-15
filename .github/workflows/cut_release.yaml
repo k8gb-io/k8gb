@@ -29,7 +29,7 @@ jobs:
           echo "desired_tag=${tag}" >> $GITHUB_ENV
       - name: Push Tag
         if: startsWith(github.event.head_commit.message, 'RELEASE:')
-        uses: mathieudutour/github-tag-action@d745f2e74aaf1ee82e747b181f7a0967978abee0
+        uses: mathieudutour/github-tag-action@86301c823dac64d427711dd6b99d7ffdd894d2dd
         with:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true
