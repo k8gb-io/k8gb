@@ -49,7 +49,7 @@ jobs:
           echo "previous_tag=${tag}" >> $GITHUB_ENV
       - name: Delete Tag and Release
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && env.desired_tag == env.previous_tag
-        uses: dev-drprasad/delete-tag-and-release@92d94d77429cb0436597047a92369526a5824f50
+        uses: dev-drprasad/delete-tag-and-release@51245fa16297defbb0b91c37e3cd35029c4e757f
         with:
           delete_release: true # default: false
           tag_name: ${{ env.current_tag }}
