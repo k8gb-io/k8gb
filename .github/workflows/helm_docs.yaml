@@ -22,7 +22,7 @@ jobs:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - name: Checkout Code
-      uses: actions/checkout@27135e314dd1818f797af1db9dae03a9f045786b
+      uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
     - name: Generate docs for helm chart - chart/k8gb/README.md
       uses: docker://jnorwood/helm-docs@sha256:66c8f4164dec860fa5c1528239c4aa826a12485305b7b224594b1a73f7e6879a
       with:
