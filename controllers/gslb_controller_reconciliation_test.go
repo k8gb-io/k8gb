@@ -295,7 +295,7 @@ func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
 func TestHealthyRecordMetric(t *testing.T) {
 	// arrange
 	expectedHealthyRecordsMetricCount := 3.0
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
@@ -376,7 +376,7 @@ func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
 			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
 			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
 	}
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
@@ -407,7 +407,7 @@ func TestDNSRecordReflectionInStatus(t *testing.T) {
 	serviceName := defaultPodinfoServiceName
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
@@ -436,7 +436,7 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 	serviceName := defaultPodinfoServiceName
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	want := "local"
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
@@ -488,7 +488,7 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
 	}
 	hrWant := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.1.0.1", "10.1.0.2", "10.1.0.3"}}
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
@@ -572,7 +572,7 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
@@ -627,7 +627,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
@@ -695,7 +695,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 			Labels:     externaldns.Labels{"strategy": depresolver.FailoverStrategy},
 		},
 	}
-	ingressIPs := []corev1.LoadBalancerIngress{
+	ingressIPs := []netv1.IngressLoadBalancerIngress{
 		{IP: "10.0.0.1"},
 		{IP: "10.0.0.2"},
 	}
@@ -983,7 +983,7 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
 	require.NoError(t, err, "Failed to get expected ingress")
 
-	settings.ingress.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{{Hostname: "one.one.one.one"}}
+	settings.ingress.Status.LoadBalancer.Ingress = []netv1.IngressLoadBalancerIngress{{Hostname: "one.one.one.one"}}
 	err = settings.client.Status().Update(context.TODO(), settings.ingress)
 	require.NoError(t, err, "Failed to update gslb Ingress Address")
 
