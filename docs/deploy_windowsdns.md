@@ -38,7 +38,7 @@ make deploy-infra
 
 ### Setup clusters
 
-Install required Ingress controllers in both clusters
+Install required Ingress controller in both clusters in order to deploy K8GB and demo application
 
 ```sh
 make setup-clusters
