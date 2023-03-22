@@ -123,6 +123,7 @@ rfc2136:
         - tsig-keyname: externaldns-key
     gssTsig:
       enabled: false
+      kerberosConfigMap: kerberos-config
       gssTsigCreds:
         - kerberos-username: ad-user
         - kerberos-password: ad-user-pass

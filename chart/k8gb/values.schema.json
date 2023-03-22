@@ -461,6 +461,10 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "kerberosConfigMap": {
+                    "type": "string",
+                    "minLength": 1
+                },
                 "gssTsigCreds": {
                     "type": "array",
                     "items": {
