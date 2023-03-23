@@ -1,6 +1,6 @@
 # Azure based deployment with Windows DNS integration
 
-Here we provide an example of k8gb deployment in Azure context with Windows DNS as edgeDNS provider.
+Here we provide an example of k8gb deployment in Azure environment with Windows DNS as edgeDNS provider.
 
 ## Reference Setup
 
@@ -113,7 +113,7 @@ make deploy-k8gb
 ### Install demo app
 
 Deploys the sample Podinfo workload with failover GLSB configured using annotations in the Ingress resource [samples](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azure/demo/).
-Ensure that the hosts on the samples are correctly updated.
+Ensure that the hosts on the samples are correctly updated before execution
 
 ```sh
 make deploy-demo
