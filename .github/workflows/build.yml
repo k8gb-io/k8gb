@@ -56,7 +56,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@0fd20142bbd74746740799c5d62cd62a49a09b6c
         with:
-          version: v1.50.1
+          version: v1.51.2
           skip-go-installation: true
       - name: golic
         run: |
