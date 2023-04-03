@@ -94,7 +94,7 @@ route53:
   enabled: false
   # -- Route53 ZoneID
   hostedZoneID: ZXXXSSS
-  # -- specify IRSA Role in AWS ARN format or disable it by setting to `false`
+  # -- specify IRSA Role in AWS ARN format or disable it by setting to `null`
   irsaRole: arn:aws:iam::111111:role/external-dns
   # -- specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null`
   assumeRoleArn: null

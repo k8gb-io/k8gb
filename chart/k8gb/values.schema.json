@@ -416,9 +416,16 @@
                     "minLength": 2
                 },
                 "irsaRole": {
-                    "type": "string",
-                    "pattern": "^arn:aws:iam:.+$",
-                    "minLength": 20
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^arn:aws:iam:.+$",
+                            "minLength": 20
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "assumeRoleArn": {
                     "oneOf": [

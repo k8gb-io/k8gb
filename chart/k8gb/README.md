@@ -99,7 +99,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | rfc2136.rfc2136Opts[3].tsig-keyname | string | `"externaldns-key"` |  |
 | route53.enabled | bool | `false` | Enable Route53 provider |
 | route53.hostedZoneID | string | `"ZXXXSSS"` | Route53 ZoneID |
-| route53.irsaRole | string | `"arn:aws:iam::111111:role/external-dns"` | specify IRSA Role in AWS ARN format or disable it by setting to `false` |
+| route53.irsaRole | string | `"arn:aws:iam::111111:role/external-dns"` | specify IRSA Role in AWS ARN format or disable it by setting to `null` |
 | route53.assumeRoleArn | string | `null` | specify IRSA Role in AWS ARN format for assume role permissions. Needed when Route53 is handled in a separate AWS account. Disable it by setting to `null` |
 | tracing.deployJaeger | bool | `false` | should the Jaeger be deployed together with the k8gb operator? In case of using another OpenTracing solution, make sure that configmap for OTEL agent has the correct exporters set up (`tracing.otelConfig`). |
 | tracing.enabled | bool | `false` | if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`) |
