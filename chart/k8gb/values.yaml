@@ -1,5 +1,5 @@
 global:
-  # -- Reference to one or more secrets to be used when pulling images 
+  # -- Reference to one or more secrets to be used when pulling images
   # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   imagePullSecrets: []
   # - name: "image-pull-secret"
@@ -94,8 +94,10 @@ route53:
   enabled: false
   # -- Route53 ZoneID
   hostedZoneID: ZXXXSSS
-  # -- specify IRSA Role in AWS ARN format or disable it by setting to `false`
+  # -- specify IRSA Role in AWS ARN format or disable it by setting to `null`
   irsaRole: arn:aws:iam::111111:role/external-dns
+  # -- specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null`
+  assumeRoleArn: null
 
 ns1:
   # -- Enable NS1 provider

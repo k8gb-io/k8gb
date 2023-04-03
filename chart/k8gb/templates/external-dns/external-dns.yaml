@@ -31,6 +31,9 @@ spec:
         - --annotation-filter=k8gb.absa.oss/dnstype=extdns # filter out only relevant DNSEntrypoints
         - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
         - --provider={{ include "k8gb.extdnsProvider" . }}
+        {{- if .Values.route53.assumeRoleArn }}
+        - --aws-assume-role={{ .Values.route53.assumeRoleArn }}
+        {{- end }}
         {{ include "k8gb.extdnsProviderOpts" . }}
         resources:
           requests:
