@@ -19,11 +19,11 @@ A Helm chart for Kubernetes Global Balancer
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Dinar Valeev | dinar.valeev@absa.africa |  |
-| Jiri Kremser | jiri.kremser@gmail.com |  |
-| Michal Kuritka | kuritka@gmail.com |  |
-| Timofey Ilinykh | timofey.ilinykh@absa.africa |  |
-| Yury Tsarev | yury.tsarev@absa.africa |  |
+| Dinar Valeev | <dinar.valeev@absa.africa> |  |
+| Jiri Kremser | <jiri.kremser@gmail.com> |  |
+| Michal Kuritka | <kuritka@gmail.com> |  |
+| Timofey Ilinykh | <timofey.ilinykh@absa.africa> |  |
+| Yury Tsarev | <yury.tsarev@absa.africa> |  |
 
 ## Source Code
 
@@ -61,7 +61,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
 | externaldns.securityContext.runAsNonRoot | bool | `true` |  |
 | externaldns.securityContext.runAsUser | int | `1000` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core |
-| global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images  ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
+| global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
 | infoblox.gridHost | string | `"10.0.0.1"` | WAPI address |
 | infoblox.httpPoolConnections | int | `10` | Size of connections pool |
@@ -97,10 +97,10 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | rfc2136.rfc2136Opts[1].port | int | `1053` |  |
 | rfc2136.rfc2136Opts[2].tsig-secret-alg | string | `"hmac-sha256"` |  |
 | rfc2136.rfc2136Opts[3].tsig-keyname | string | `"externaldns-key"` |  |
+| route53.assumeRoleArn | string | `nil` | specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null` |
 | route53.enabled | bool | `false` | Enable Route53 provider |
 | route53.hostedZoneID | string | `"ZXXXSSS"` | Route53 ZoneID |
 | route53.irsaRole | string | `"arn:aws:iam::111111:role/external-dns"` | specify IRSA Role in AWS ARN format or disable it by setting to `null` |
-| route53.assumeRoleArn | string | `null` | specify IRSA Role in AWS ARN format for assume role permissions. Needed when Route53 is handled in a separate AWS account. Disable it by setting to `null` |
 | tracing.deployJaeger | bool | `false` | should the Jaeger be deployed together with the k8gb operator? In case of using another OpenTracing solution, make sure that configmap for OTEL agent has the correct exporters set up (`tracing.otelConfig`). |
 | tracing.enabled | bool | `false` | if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`) |
 | tracing.endpoint | string | `"localhost:4318"` | `host:port` where the spans from the applications (traces) should be sent, sets the `OTEL_EXPORTER_OTLP_ENDPOINT` env var This is not the final destination where all the traces are going. Otel collector has its configuration in the associated configmap (`tracing.otelConfig`). |
