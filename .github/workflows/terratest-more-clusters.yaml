@@ -1,45 +1,19 @@
 name: Terratest for n clusters
 
 on:
-  push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
   pull_request:
-    branches:
-      - master
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+    types:
+      - labeled
+
 permissions:
   contents: read
 
+concurrency: terratest-${{ github.head_ref || github.run_id }}
+
 jobs:
-  skip-check:
-    runs-on: ubuntu-latest
-    name: Skip the job?
-    outputs:
-          should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
-      with:
-        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
-
-    - id: skip_check
-      uses: fkirc/skip-duplicate-actions@fc7bbd5283bce15e0594f80a57e0d4ca070b4b4b
-      with:
-        skip_after_successful_duplicate: 'true'
-        do_not_skip: '["workflow_dispatch", "schedule"]'
-
   terratest-n-clusters:
     runs-on: ubuntu-20.04
-    needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
+    if: ${{ github.event.label.name == 'heavy-tests' }}
     steps:
       - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
         with:
