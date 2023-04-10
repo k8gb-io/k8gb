@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
       # see: https://golangci-lint.run/usage/configuration/#config-file
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@32a046958e2303e582501e378567cdc3256c984c
+        uses: golangci/golangci-lint-action@744562230b87ecb1373b34ac686b1b7e46ec0d6d
         with:
           version: v1.51.2
           skip-go-installation: true
