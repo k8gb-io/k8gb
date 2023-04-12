@@ -47,6 +47,10 @@ k8gb:
 
 externaldns:
   # -- external-dns image repo:tag
+  # It is important to use the image from k8gb external-dns fork to get the full
+  # functionality. See links below
+  # https://github.com/k8gb-io/external-dns
+  # https://github.com/k8gb-io/external-dns/pkgs/container/external-dns
   image: ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns
   # -- external-dns sync interval
   interval: "20s"
