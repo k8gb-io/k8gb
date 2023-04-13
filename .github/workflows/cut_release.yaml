@@ -7,46 +7,51 @@ on:
     paths:
      - 'chart/k8gb/Chart.yaml'
 
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   cut_release:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@f8b229487278099721572481264761b1d4fdd530
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
         with:
           fetch-depth: 0
       - name: Get Desired Tag
-        id: get_desired_tag
         run: |
           tag=$(awk '/appVersion:/ {print $2}' chart/k8gb/Chart.yaml)
           echo "Version to release: ${tag}"
-          echo "::set-output name=tag::${tag}"
+          echo "desired_tag=${tag}" >> $GITHUB_ENV
       - name: Push Tag
         if: startsWith(github.event.head_commit.message, 'RELEASE:')
-        uses: mathieudutour/github-tag-action@v5.6
+        uses: mathieudutour/github-tag-action@86301c823dac64d427711dd6b99d7ffdd894d2dd
         with:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true
           tag_prefix: ""
-          custom_tag: ${{ steps.get_desired_tag.outputs.tag }}
+          custom_tag: ${{ env.desired_tag }}
       - name: Get Current Tag
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
-        id: get_current_tag
         run: |
           tag=$(git describe --tags --abbrev=0)
           echo "Version to revert: ${tag}"
-          echo "::set-output name=tag::${tag}"
+          echo "current_tag=${tag}" >> $GITHUB_ENV
       - name: Get Previous Tag
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:')
-        id: get_previous_tag
         run: |
           tag=$(git describe --tags --abbrev=0 $(git describe --tags --abbrev=0)^)
           echo "Previous tag: ${tag}"
-          echo "::set-output name=tag::${tag}"
+          echo "previous_tag=${tag}" >> $GITHUB_ENV
       - name: Delete Tag and Release
-        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && steps.get_desired_tag.outputs.tag == steps.get_previous_tag.outputs.tag
-        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && env.desired_tag == env.previous_tag
+        uses: dev-drprasad/delete-tag-and-release@7550ea180f81ca0a875ee3c135b1f72ef66ff4b1
         with:
           delete_release: true # default: false
-          tag_name: ${{ steps.get_current_tag.outputs.tag }}
+          tag_name: ${{ env.current_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.CR_TOKEN }}

@@ -1,75 +1,56 @@
 name: Terratest for n clusters
 
 on:
-  push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
   pull_request:
-    branches:
-      - master
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+    types:
+      - labeled
+
+permissions:
+  contents: read
+
+concurrency: terratest-${{ github.head_ref || github.run_id }}
 
 jobs:
-  skip-check:
-    runs-on: ubuntu-latest
-    name: Skip the job?
-    outputs:
-          should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-    - id: skip_check
-      uses: fkirc/skip-duplicate-actions@v3.4.1
-      with:
-        skip_after_successful_duplicate: 'true'
-        do_not_skip: '["workflow_dispatch", "schedule"]'
-
   terratest-n-clusters:
     runs-on: ubuntu-20.04
-    needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
+    if: ${{ github.event.label.name == 'heavy-tests' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@41c2024c46acfe1d0b8c9b7f20e28406983e553b
         with:
-          go-version: "1.17.6"
+          go-version: 1.19.1
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@347176ca378cb7d09fd40e239baf5134d051d1ac
         with:
           version: v1.7.0
-          args: release --rm-dist --skip-publish --skip-validate --snapshot
+          args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create edgeDNS k3s Cluster
-        uses: AbsaOSS/k3d-action@v2
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "edgedns"
           args: -c k3d/edge-dns.yaml
 
       - name: Create 1st k3s Cluster
-        uses: AbsaOSS/k3d-action@v2
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
 
       - name: Create 2nd k3s Cluster
-        uses: AbsaOSS/k3d-action@v2
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb2"
           args: -c k3d/test-gslb2.yaml
 
       - name: Create 3rd k3s Cluster
-        uses: AbsaOSS/k3d-action@v2
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb3"
           args: -c k3d/test-gslb3.yaml
@@ -85,4 +66,19 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb3
 
       - name: Run Terratest
-        run: make terratest
+        run: |
+          mkdir -p ${{ github.workspace }}/tmp/terratest
+          set -o pipefail
+          echo "::group::Terratest logs"
+          make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+          echo "::endgroup::"
+
+      - name: Print debug info
+        if: always()
+        uses: ./.github/actions/print-debug
+
+      - uses: actions/upload-artifact@65d862660abb392b8c4a3d1195a2108db131dd05
+        if: always()
+        with:
+          name: terratest-logs
+          path: ${{ github.workspace }}/tmp/terratest

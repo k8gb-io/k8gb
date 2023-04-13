@@ -9,12 +9,19 @@ on:
       - master
     paths-ignore:
       - 'chart/k8gb/**'
+permissions:
+  contents: read
 
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@f8b229487278099721572481264761b1d4fdd530
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
 
       - name: Create ../results directory for sarif files
         shell: bash
@@ -22,7 +29,7 @@ jobs:
 
       - name: Scan k8gb chart
         id: kube-lint-repo
-        uses: stackrox/kube-linter-action@v1
+        uses: stackrox/kube-linter-action@3e0698d47a525061e50c1380af263c18824c748b
         with:
           directory: chart/k8gb
           version: 0.2.5
@@ -30,5 +37,5 @@ jobs:
           output-file: ../results/kube-linter.sarif
 
       - name: Upload sarif output to GitHub
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@98f7bbd6102f2c11acb5631e38386a1837dca5a5
         continue-on-error: true

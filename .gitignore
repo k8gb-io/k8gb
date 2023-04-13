@@ -27,3 +27,8 @@ k3d/test-gslb[!1-3].yaml
 
 # Required by goreleaser
 changes
+
+# SLSA
+cosign.key
+*.sig
+*.att

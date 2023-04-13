@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "values.yaml for k8gb helm chart",
     "$ref": "#/definitions/All",
     "definitions": {
         "All": {
@@ -39,8 +39,7 @@
                 "tracing": {
                     "$ref": "#/definitions/Tracing"
                 }
-            },
-            "required": []
+            }
         },
         "Coredns": {
             "type": "object",
@@ -59,7 +58,6 @@
                     "$ref": "#/definitions/CorednsServiceAccount"
                 }
             },
-            "required": [],
             "title": "Coredns"
         },
         "CorednsDeployment": {
@@ -70,7 +68,6 @@
                     "type": "boolean"
                 }
             },
-            "required": [],
             "title": "Deployment"
         },
         "CorednsImage": {
@@ -124,7 +121,6 @@
                     "$ref": "#/definitions/ExternaldnsSecurityContext"
                 }
             },
-            "required": [],
             "title": "Externaldns"
         },
         "ExternaldnsSecurityContext": {
@@ -143,7 +139,6 @@
                     "type": "boolean"
                 }
             },
-            "required": [],
             "title": "ExternaldnsSecurityContext"
         },
         "Global": {
@@ -151,19 +146,29 @@
             "additionalProperties": false,
             "properties": {
                 "imagePullSecrets": {
-                    "type": "array",
+                    "type": [
+                        "array",
+                        "null"
+                    ],
                     "items": {
-                        "type": "string",
-                        "minLength": 1
-                    }
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "Name of secret"
+                            }
+                        }
+                    },
+                    "description": "ImagePullSecrets is a list of references to secrets in the same namespace to use for pulling any images in pods that reference this ServiceAccount. ImagePullSecrets are distinct from Secrets because Secrets can be mounted in the pod, but ImagePullSecrets are only accessed by the kubelet. More info: http://kubernetes.io/docs/user-guide/secrets#manually-specifying-an-imagepullsecret"
                 }
             },
-            "required": [],
             "title": "Global"
         },
         "Image": {
             "type": "object",
-            "required": [],
             "additionalProperties": false,
             "properties": {
                 "repository": {
@@ -228,8 +233,10 @@
                     "minLength": 1
                 },
                 "imageTag": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "deployCrds": {
                     "type": "boolean"
@@ -296,13 +303,23 @@
             "additionalProperties": false,
             "properties": {
                 "format": {
-                    "enum": ["simple", "json"]
+                    "enum": [
+                        "simple",
+                        "json"
+                    ]
                 },
                 "level": {
-                    "enum": ["panic", "fatal", "error", "warn", "info", "debug", "trace"]
+                    "enum": [
+                        "panic",
+                        "fatal",
+                        "error",
+                        "warn",
+                        "info",
+                        "debug",
+                        "trace"
+                    ]
                 }
             },
-            "required": [],
             "title": "Log"
         },
         "k8gbSecurityContext": {
@@ -323,7 +340,6 @@
                     "minimum": 0
                 }
             },
-            "required": [],
             "title": "k8gbSecurityContext"
         },
         "Ns1": {
@@ -337,7 +353,6 @@
                     "type": "boolean"
                 }
             },
-            "required": [],
             "title": "Ns1"
         },
         "Openshift": {
@@ -348,7 +363,6 @@
                     "type": "boolean"
                 }
             },
-            "required": [],
             "title": "Openshift"
         },
         "Rfc2136": {
@@ -391,7 +405,6 @@
                     "minLength": 1
                 }
             },
-            "required": [],
             "title": "Rfc2136Opt"
         },
         "Route53": {
@@ -406,9 +419,28 @@
                     "minLength": 2
                 },
                 "irsaRole": {
-                    "type": "string",
-                    "pattern": "^arn:aws:iam:.+$",
-                    "minLength": 20
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^arn:aws:iam:.+$",
+                            "minLength": 20
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "assumeRoleArn": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^arn:aws:iam:.+$",
+                            "minLength": 20
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 }
             },
             "required": [
@@ -439,7 +471,10 @@
                     "pattern": "^(0(\\.\\d{1,3})?|1(\\.0)?)$"
                 },
                 "otelConfig": {
-                    "type": ["object", "null"],
+                    "type": [
+                        "object",
+                        "null"
+                    ],
                     "additionalProperties": true
                 },
                 "sidecarImage": {

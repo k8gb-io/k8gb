@@ -38,7 +38,7 @@ spec:
     splitBrainThresholdSeconds: 305
     dnsTtlSeconds: 35
     weight:
-      us: 60%
-      eu: 25%
-      za: 15%
+      us: 60
+      eu: 25
+      za: 15
 

@@ -4,22 +4,29 @@ on:
   release:
     types:
       - published
+permissions:
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@f8b229487278099721572481264761b1d4fdd530
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
         with:
           fetch-depth: 0
-      - uses: dave-mcconnell/helm-gh-pages-microservices@master
+      - uses: dave-mcconnell/helm-gh-pages-microservices@8478af5f0fd712cc0fb59f2c99e0688f3f591287
         with:
           access-token: ${{ secrets.CR_TOKEN }}
           source-charts-folder: 'chart'
           destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
       - name: Create k3s cluster
-        uses: AbsaOSS/k3d-action@v2
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
@@ -29,7 +36,7 @@ jobs:
           helm repo update
           helm -n k8gb upgrade -i k8gb k8gb/k8gb --wait --create-namespace --version=$(make version)
       - name: Invoke workflow for OLM
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@798e70c97009500150087d30d9f11c5444830385
         with:
           workflow: OLM bundle and PR
           token: ${{ secrets.CR_TOKEN }}

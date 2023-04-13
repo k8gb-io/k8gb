@@ -324,9 +324,8 @@ spec:
                     type: string
                   weight:
                     additionalProperties:
-                      type: string
-                    description: roundrobin and in the future consistent may (but
-                      also may not) contain a weight
+                      type: integer
+                    description: Weight is defined by map region:weight
                     type: object
                 required:
                 - type

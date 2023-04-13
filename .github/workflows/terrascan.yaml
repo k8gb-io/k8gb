@@ -9,16 +9,23 @@ on:
       - master
     paths:
      - 'chart/k8gb/**'
+permissions:
+  contents: read
 
 jobs:
   terrascan:
     runs-on: ubuntu-20.04
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@f8b229487278099721572481264761b1d4fdd530
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
     - name: Run Terrascan
       id: terrascan
-      uses: accurics/terrascan-action@fad2372c88bb11afccc0b682bffbeffd443b56ed
+      uses: accurics/terrascan-action@81d74415906b5418095567a13d1ddb7f48c50cd2
       with:
         iac_type: helm
         iac_version: v3
@@ -27,6 +34,6 @@ jobs:
         sarif_upload: true
         iac_dir: chart/k8gb
     - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@98f7bbd6102f2c11acb5631e38386a1837dca5a5
       with:
         sarif_file: terrascan.sarif

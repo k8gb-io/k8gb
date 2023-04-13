@@ -1,12 +1,12 @@
 global:
-  # -- Reference to one or more secrets to be used when pulling images 
+  # -- Reference to one or more secrets to be used when pulling images
   # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
 k8gb:
   # -- image repository
-  imageRepo: "absaoss/k8gb"
+  imageRepo: "docker.io/absaoss/k8gb"
   # -- ( string ) image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key
   imageTag:
   # -- whether it should also deploy the gslb and dnsendpoints CRDs
@@ -39,7 +39,7 @@ k8gb:
   # -- Metrics server address
   metricsAddress: "0.0.0.0:8080"
   securityContext:
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
     runAsNonRoot: true
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
@@ -47,11 +47,15 @@ k8gb:
 
 externaldns:
   # -- external-dns image repo:tag
-  image: k8s.gcr.io/external-dns/external-dns:v0.9.0
+  # It is important to use the image from k8gb external-dns fork to get the full
+  # functionality. See links below
+  # https://github.com/k8gb-io/external-dns
+  # https://github.com/k8gb-io/external-dns/pkgs/container/external-dns
+  image: ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns
   # -- external-dns sync interval
   interval: "20s"
-  securityContext: # For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#securitycontext-v1-core
+  securityContext:
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
     runAsUser: 1000
     # -- For ExternalDNS to be able to read Kubernetes and AWS token files
     fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
@@ -94,8 +98,10 @@ route53:
   enabled: false
   # -- Route53 ZoneID
   hostedZoneID: ZXXXSSS
-  # -- specify IRSA Role in AWS ARN format or disable it by setting to `false`
+  # -- specify IRSA Role in AWS ARN format or disable it by setting to `null`
   irsaRole: arn:aws:iam::111111:role/external-dns
+  # -- specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null`
+  assumeRoleArn: null
 
 azuredns:
   # -- Enable Azure DNS provider

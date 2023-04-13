@@ -42,7 +42,8 @@ LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.8.0
 GOLIC_VERSION  ?= v0.7.2
-GOKART_VERSION ?= v0.4.0
+GOKART_VERSION ?= v0.5.1
+GOLANGCI_VERSION ?= v1.51.2
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -79,6 +80,8 @@ STABLE_VERSION := "stable"
 # default bundle image tag
 BUNDLE_IMG ?= controller-bundle:$(VERSION)
 
+NGINX_INGRESS_VALUES_PATH ?= deploy/ingress/nginx-ingress-values.yaml
+
 # options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)
 BUNDLE_CHANNELS := --channels=$(CHANNELS)
@@ -105,7 +108,7 @@ check: license lint gokart test ## Check project integrity
 
 .PHONY: clean-test-apps
 clean-test-apps:
-	kubectl delete -f deploy/test-apps
+	kubectl delete --ignore-not-found -f deploy/test-apps
 	helm -n test-gslb uninstall frontend
 
 # see: https://dev4devs.com/2019/05/04/operator-framework-how-to-debug-golang-operator-projects/
@@ -178,7 +181,7 @@ deploy-local-cluster:
 	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
 	helm repo update
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
-		--version 4.0.15 -f deploy/ingress/nginx-ingress-values.yaml
+		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
@@ -226,7 +229,6 @@ deploy-k8gb-with-helm:
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--set rfc2136.enabled=true \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
-		--set externaldns.image=absaoss/external-dns:rfc-ns1 \
 		--wait --timeout=2m0s
 
 .PHONY: deploy-gslb-operator
@@ -264,9 +266,17 @@ deploy-grafana:
 	helm repo add grafana https://grafana.github.io/helm-charts
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
-		--wait --timeout=2m30s \
+		--wait --timeout=4m \
+		--version=6.38.6 \
 		--kube-context=k3d-$(CLUSTER_NAME)1
 	kubectl --context k3d-$(CLUSTER_NAME)1 apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	mkdir grafana/dashboards/ || true
+	cat grafana/controller-resources-metrics.json | sed 's/$${DS_PROMETHEUS}/Prometheus/g' > grafana/dashboards/controller-resources-metrics.json
+	cat grafana/controller-runtime-metrics.json | sed 's/$${DS_PROMETHEUS}/Prometheus/g' > grafana/dashboards/controller-runtime-metrics.json
+	cat grafana/custom-metrics/pretty-custom-metrics-dashboard.json | sed 's/$${DS_PROMETHEUS}/Prometheus/g' > grafana/dashboards/pretty-custom-metrics-dashboard.json
+	kubectl --context k3d-$(CLUSTER_NAME)1 -n k8gb create cm -n k8gb k8gb-dashboards --from-file=./grafana/dashboards/ --dry-run=client -oyaml | kubectl apply --context k3d-$(CLUSTER_NAME)1 -f -
+	kubectl --context k3d-$(CLUSTER_NAME)1 -n k8gb label cm k8gb-dashboards grafana_dashboard=true --overwrite
+	rm -rf grafana/dashboards/
 	@echo -e "\nGrafana is listening on http://localhost:3000\n"
 	@echo -e "🖖 credentials are admin:admin\n"
 
@@ -275,7 +285,8 @@ deploy-grafana:
 uninstall-grafana:
 	@echo -e "\n$(YELLOW)Local cluster $(CYAN)$(CLUSTER_GSLB1)$(NC)"
 	@echo -e "\n$(YELLOW)uninstall grafana $(NC)"
-	kubectl --context k3d-$(CLUSTER_NAME)1 delete -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	kubectl --context k3d-$(CLUSTER_NAME)1 delete --ignore-not-found -f deploy/grafana/dashboard-cm.yaml -n k8gb
+	kubectl --context k3d-$(CLUSTER_NAME)1 delete cm --ignore-not-found -n k8gb k8gb-dashboards
 	helm uninstall grafana -n k8gb --kube-context=k3d-$(CLUSTER_NAME)1
 
 .PHONY: dns-tools
@@ -309,11 +320,11 @@ ensure-cluster-size:
 
 .PHONY: goreleaser
 goreleaser:
-	go install github.com/goreleaser/goreleaser@v1.7.0
+	command -v goreleaser &> /dev/null || go install github.com/goreleaser/goreleaser@v1.7.0
 
 .PHONY: release-images
 release-images: goreleaser
-	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist
+	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist --skip-sbom --skip-sign
 
 # build the docker image
 .PHONY: docker-build
@@ -362,7 +373,7 @@ ns1-secret:
 .PHONY: lint
 lint:
 	@echo -e "\n$(YELLOW)Running the linters$(NC)"
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.2
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	$(GOBIN)/golangci-lint run
 
 # retrieves all targets
@@ -379,11 +390,13 @@ k8gb: lint
 .PHONY: mocks
 mocks:
 	go install github.com/golang/mock/mockgen@v1.5.0
-	mockgen -source=controllers/providers/assistant/assistant.go -destination=controllers/providers/assistant/assistant_mock.go -package=assistant
-	mockgen -source=controllers/providers/dns/dns.go -destination=controllers/providers/dns/dns_mock.go -package=dns
-	mockgen -source=controllers/providers/dns/infoblox-client.go -destination=controllers/providers/dns/infoblox-client_mock.go -package=dns
-	mockgen -source=controllers/depresolver/resolver.go -destination=controllers/depresolver/resolver_mock.go -package=depresolver
-	mockgen -destination=controllers/providers/dns/infoblox-connection_mock.go -package=dns github.com/infobloxopen/infoblox-go-client IBConnector
+	mockgen -package=mocks -destination=controllers/mocks/assistant_mock.go -source=controllers/providers/assistant/assistant.go Assistant
+	mockgen -package=mocks -destination=controllers/mocks/infoblox-client_mock.go -source=controllers/providers/dns/infoblox-client.go InfobloxClient
+	mockgen -package=mocks -destination=controllers/mocks/infoblox-connection_mock.go github.com/infobloxopen/infoblox-go-client IBConnector
+	mockgen -package=mocks -destination=controllers/mocks/manager_mock.go sigs.k8s.io/controller-runtime/pkg/manager Manager
+	mockgen -package=mocks -destination=controllers/mocks/client_mock.go sigs.k8s.io/controller-runtime/pkg/client Client
+	mockgen -package=mocks -destination=controllers/mocks/resolver_mock.go -source=controllers/depresolver/resolver.go GslbResolver
+	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
 	$(call golic)
 
 # remove clusters and redeploy
@@ -570,7 +583,7 @@ define deploy-prometheus
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ;\
 	helm repo update ;\
 	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
-		--version 14.2.0 \
+		--version 15.14.0 \
 		--wait --timeout=2m0s \
 		--kube-context=k3d-$1
 endef

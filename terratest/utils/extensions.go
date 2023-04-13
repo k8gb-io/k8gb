@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gruntwork-io/terratest/modules/retry"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -36,7 +36,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -230,7 +230,7 @@ func (w *Workflow) getManifestName(path string) (string, error) {
 		} `yaml:"metadata"`
 	}{}
 
-	yamlFile, err := ioutil.ReadFile(path)
+	yamlFile, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("parse %s; %s", path, err)
 	}
@@ -575,7 +575,7 @@ func (r *Resources) GetExternalDNSEndpoint() DNSEndpoint {
 	return ep
 }
 
-func (i *Instance) logIfError(err error, message string, args ...interface{}) {
+func (i *Instance) logIfError(err error, message string, args ...any) {
 	if err != nil {
 		i.w.t.Logf(message, args)
 	}

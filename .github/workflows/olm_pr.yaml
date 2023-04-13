@@ -16,16 +16,23 @@ on:
         required: false
         default: "0.5.4"
 
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   olm-bundle-pr:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@f8b229487278099721572481264761b1d4fdd530
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
         with:
           fetch-depth: 0
 
       - name: Get version
-        id: get_version
         run: |
           if [ "${{ github.event.inputs.bundleVersion }}x" == "x" ]; then
             version=$(git describe --abbrev=0 --tags)
@@ -37,19 +44,19 @@ jobs:
           else
             bundleDir=${version}
           fi
-          echo "::set-output name=bundleDir::${bundleDir#v}"
-          echo "::set-output name=version::${version#v}"
+          echo "bundleDir=${bundleDir#v}" >> $GITHUB_ENV
+          echo "version=${version#v}" >> $GITHUB_ENV
 
       - name: Generate OLM bundle
         env:
           TOOL_VERSION: ${{ github.event.inputs.olmBundleToolVersion }}
           DEBUG: 1
         run: |
-          ./olm/generate.sh ${{ steps.get_version.outputs.version }}
+          ./olm/generate.sh ${{ env.version }}
           rm ./olm/bundle/Dockerfile
           cp -r ./olm/bundle $GITHUB_WORKSPACE/
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
         with:
           repository: ${{ github.event.inputs.upstreamRepo }}
           path: sandbox
@@ -59,18 +66,18 @@ jobs:
       - name: Copy the generated manifests
         run: |
           mkdir -p $GITHUB_WORKSPACE/sandbox/operators/k8gb/
-          rm -rf $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ steps.get_version.outputs.bundleDir }} || true
-          cp -r $GITHUB_WORKSPACE/bundle/ $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ steps.get_version.outputs.bundleDir }}
+          rm -rf $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ env.bundleDir }} || true
+          cp -r $GITHUB_WORKSPACE/bundle/ $GITHUB_WORKSPACE/sandbox/operators/k8gb/${{ env.bundleDir }}
 
       - name: Open Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@5b4a9f6a9e2af26e5f02351490b90d01eb8ec1e5
         with:
           token: ${{ secrets.CR_TOKEN }}
           push-to-fork: k8gb-io/community-operators
           path: sandbox
-          commit-message: OLM bundle for k8gb@${{ steps.get_version.outputs.bundleDir }}
-          title: operators k8gb ({{ steps.get_version.outputs.bundleDir }})
+          commit-message: OLM bundle for k8gb@${{ env.bundleDir }}
+          title: operators k8gb (${{ env.bundleDir }})
           body: |
             :package: Update k8gb operator bundle :package:
 
@@ -92,7 +99,7 @@ jobs:
             This automated PR was created by [this action][1].
 
             [1]: https://github.com/k8gb-io/k8gb/actions/runs/${{ github.run_id }}
-          branch: k8gb-${{ steps.get_version.outputs.bundleDir }}
+          branch: k8gb-${{ env.bundleDir }}
           delete-branch: true
           signoff: true
 
