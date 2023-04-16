@@ -11,6 +11,7 @@ on:
      - 'chart/k8gb/**'
 permissions:
   contents: read
+  security-events: write # To upload sarif file
 
 jobs:
   terrascan:
