@@ -52,7 +52,7 @@ jobs:
         with:
           cosign-release: 'v1.12.1'
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@9cf3dcd57360c02651d5991ddaf59a311d187933
+        uses: anchore/sbom-action/download-syft@ea7104d7995265c38477a059bd139e80702ff245
       - name: Install signing key
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
@@ -111,7 +111,7 @@ jobs:
           cosign-release: 'v1.12.1'
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@9cf3dcd57360c02651d5991ddaf59a311d187933
+        uses: anchore/sbom-action/download-syft@ea7104d7995265c38477a059bd139e80702ff245
       - name: Login to Dockerhub
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
