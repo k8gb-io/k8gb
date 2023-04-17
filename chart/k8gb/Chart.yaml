@@ -22,6 +22,7 @@ keywords:
   - kuberneters-global-balancer
   - kubernetes-operator
   - balancer
+  - multi-cluster
 
 maintainers:
   - email: dinar.valeev@absa.africa
