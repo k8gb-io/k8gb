@@ -1,21 +1,6 @@
 # Enabling RFC2136 for ExternalDNS
 
-In order to enable the provider RFC2136 on ExternalDNS, the following values should be changed in the values.yaml for the K8GB helm chart:
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| rfc2136.enabled | bool | `false` |  |
-| rfc2136.rfc2136Opts[0].host | string | `"host.k3d.internal"` |  |
-| rfc2136.rfc2136Opts[1].port | int | `1053` |  |
-| rfc2136.rfc2136auth.insecure.enabled | bool | `false` | Set to True if insecure updates to the DNS provided can be executed by ExternalDNS |
-| rfc2136.rfc2136auth.tsig.enabled | bool | `false` | Set to True if the DNS server uses TSIG authentication for DNS updates by ExternalDNS |
-| rfc2136.rfc2136auth.tsig.tsigCreds[0].tsig-secret-alg | string | `"hmac-sha256"` | Algorithm used to generate the token for TSIG |
-| rfc2136.rfc2136auth.tsig.tsigCreds[1].tsig-keyname | string | `"externaldns-key"` |  |
-| rfc2136.rfc2136auth.gssTsig.enabled | bool | `false` | Set to True if the DNS server uses GSS-TSIG (Kerberos) authentication for DNS updates by ExternalDNS |
-| rfc2136.rfc2136auth.gssTsig.kerberosConfigMap | string | `"kerberos-configmap"` | When using GSS-TSIG, a ConfigMap with a valid krb5.conf configuration should be provided |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[0].kerberos-username | string | `"ad-user-account"` | AD user account with permissions for DNS updates |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[1].kerberos-password | string | `"ad-user-account-password"` | Passowrd of the AD user account |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[2].kerberos-realm | string | `"REALM.DOMAIN"` | Kerberos REALM that should be used for authentication |
+In order to enable the provider RFC2136 on ExternalDNS, the following [configurations](/chart/k8gb/README.md) should be changed in the values.yaml of the K8GB helm chart:
 
 * One authentication method should be enabled on the values:
   * Insecure
