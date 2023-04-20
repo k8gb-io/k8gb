@@ -1,3 +1,11 @@
+<h1 align="center" style="margin-top: 0;">Using K8GB on Azure</h1>
+
+## Sample solution
+
+Sample solution will create a common hub and spoke architecture with two AKS clusters in different regions
+
+![GLSB with K8gb on Azure](/docs/examples/azure/images/k8gb_solution.png?raw=true "GLSB with K8gb on Azure")
+
 # Azure based deployment with Windows DNS integration
 
 Here we provide an example of k8gb deployment in Azure environment with Windows DNS as edgeDNS provider.
