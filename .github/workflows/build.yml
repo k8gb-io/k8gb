@@ -48,7 +48,7 @@ jobs:
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
       - name: Set up Go
-        uses: actions/setup-go@41c2024c46acfe1d0b8c9b7f20e28406983e553b
+        uses: actions/setup-go@dd84a9531a6f8e72c321f2aa3b9048ed359670e4
         with:
           go-version: 1.19.1
       - uses: actions/checkout@f095bcc56b7c2baf48f3ac70d6d6782f4f553222
