@@ -3,6 +3,10 @@
   "extends": [
     "config:base"
   ],
+  "ignorePaths": [
+    ".github/workflows/release.yaml",
+    ".github/workflows/cut_release.yaml"
+  ],
   "prConcurrentLimit": 5,
   "packageRules": [
     {

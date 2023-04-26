@@ -48,11 +48,11 @@ jobs:
           filterByMilestone: true
           unreleased: true
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9e9de2292db7abb3f51b7f4808d98f0d347a8919
+        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76 # renovate: tag=v2.7.0
         with:
           cosign-release: 'v1.12.1'
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@ea7104d7995265c38477a059bd139e80702ff245
+        uses: anchore/sbom-action/download-syft@b5042e9d19d8b32849779bfe17673ff84aec702d # renovate: tag=v0.12.0
       - name: Install signing key
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
@@ -66,7 +66,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@08e23ccf3bfac1fe9ca737ec68d9252bed039bb6
+        uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b # renovate: tag=v4.2.0
         with:
           version: v1.7.0
           args: release --rm-dist --release-notes=changes
@@ -106,12 +106,12 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@9e9de2292db7abb3f51b7f4808d98f0d347a8919
+        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76 # renovate: tag=v2.7.0
         with:
           cosign-release: 'v1.12.1'
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@ea7104d7995265c38477a059bd139e80702ff245
+        uses: anchore/sbom-action/download-syft@b5042e9d19d8b32849779bfe17673ff84aec702d # renovate: tag=v0.12.0
       - name: Login to Dockerhub
         uses: docker/login-action@40891eba8c2bcd1309b07ba8b11232f313e86779
         with:
@@ -162,7 +162,7 @@ jobs:
           [ "x${{steps.provenance-step.outcome}}" == "xfailure" ] && echo ":x: Uploading provenance for release failed, make sure to delete all the previous releases in GitHub web api before releasing." > "$GITHUB_STEP_SUMMARY" || true
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@9e9de2292db7abb3f51b7f4808d98f0d347a8919
+        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76 # renovate: tag=v2.7.0
         with:
           cosign-release: 'v1.12.1'
 
@@ -202,7 +202,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@9e9de2292db7abb3f51b7f4808d98f0d347a8919
+        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76 # renovate: tag=v2.7.0
         with:
           cosign-release: 'v1.12.1'
 
