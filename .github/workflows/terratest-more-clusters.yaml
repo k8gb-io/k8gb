@@ -24,7 +24,7 @@ jobs:
           go-version: 1.19.1
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@347176ca378cb7d09fd40e239baf5134d051d1ac
+        uses: goreleaser/goreleaser-action@08e23ccf3bfac1fe9ca737ec68d9252bed039bb6
         with:
           version: v1.7.0
           args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign
