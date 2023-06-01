@@ -482,9 +482,9 @@ define deploy-edgedns
 endef
 
 define apply-cr
-	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
-	kubectl apply -f "$1"
-	git checkout -- "$1"
+	sed 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1" > "$1-cr"
+	-kubectl apply -f "$1-cr"
+	-rm "$1-cr"
 endef
 
 define get-cluster-geo-tag
