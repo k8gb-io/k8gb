@@ -20,7 +20,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.10.0
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
-	k8s.io/client-go v0.26.3
+	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/controller-runtime v0.14.5
 	sigs.k8s.io/external-dns v0.13.1
 )
