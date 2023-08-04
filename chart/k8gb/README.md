@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.11.1](https://img.shields.io/badge/Version-v0.11.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.11.1](https://img.shields.io/badge/AppVersion-v0.11.1-informational?style=flat-square)
+![Version: v0.11.2](https://img.shields.io/badge/Version-v0.11.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.11.2](https://img.shields.io/badge/AppVersion-v0.11.2-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -53,7 +53,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 |-----|------|---------|-------------|
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
 | coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.0.10"` | image tag |
+| coredns.image.tag | string | `"v0.0.11"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
 | externaldns.image | string | `"ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
