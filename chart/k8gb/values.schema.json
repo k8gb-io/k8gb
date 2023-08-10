@@ -144,21 +144,21 @@
             "properties": {
                 "imagePullSecrets": {
                     "type": [
-                        "array", 
+                        "array",
                         "null"
-                    ], 
+                    ],
                     "items": {
                         "type": "object",
                         "properties": {
                             "name": {
-                              "type": [
-                                "string", 
-                                "null"
-                              ], 
-                              "description": "Name of secret"
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "Name of secret"
                             }
                         }
-                    }, 
+                    },
                     "description": "ImagePullSecrets is a list of references to secrets in the same namespace to use for pulling any images in pods that reference this ServiceAccount. ImagePullSecrets are distinct from Secrets because Secrets can be mounted in the pod, but ImagePullSecrets are only accessed by the kubelet. More info: http://kubernetes.io/docs/user-guide/secrets#manually-specifying-an-imagepullsecret"
                 }
             },
@@ -230,7 +230,10 @@
                     "minLength": 1
                 },
                 "imageTag": {
-                    "type": ["string", "null"]
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "deployCrds": {
                     "type": "boolean"
@@ -297,10 +300,21 @@
             "additionalProperties": false,
             "properties": {
                 "format": {
-                    "enum": ["simple", "json"]
+                    "enum": [
+                        "simple",
+                        "json"
+                    ]
                 },
                 "level": {
-                    "enum": ["panic", "fatal", "error", "warn", "info", "debug", "trace"]
+                    "enum": [
+                        "panic",
+                        "fatal",
+                        "error",
+                        "warn",
+                        "info",
+                        "debug",
+                        "trace"
+                    ]
                 }
             },
             "title": "Log"
@@ -505,9 +519,28 @@
                     "minLength": 2
                 },
                 "irsaRole": {
-                    "type": "string",
-                    "pattern": "^arn:aws:iam:.+$",
-                    "minLength": 20
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^arn:aws:iam:.+$",
+                            "minLength": 20
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "assumeRoleArn": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^arn:aws:iam:.+$",
+                            "minLength": 20
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 }
             },
             "required": [
@@ -538,7 +571,10 @@
                     "pattern": "^(0(\\.\\d{1,3})?|1(\\.0)?)$"
                 },
                 "otelConfig": {
-                    "type": ["object", "null"],
+                    "type": [
+                        "object",
+                        "null"
+                    ],
                     "additionalProperties": true
                 },
                 "sidecarImage": {

@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+        uses: step-security/harden-runner@f8b229487278099721572481264761b1d4fdd530
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      - uses: actions/checkout@f095bcc56b7c2baf48f3ac70d6d6782f4f553222
         with:
           fetch-depth: 0
       - name: Get Desired Tag
@@ -29,7 +29,7 @@ jobs:
           echo "desired_tag=${tag}" >> $GITHUB_ENV
       - name: Push Tag
         if: startsWith(github.event.head_commit.message, 'RELEASE:')
-        uses: mathieudutour/github-tag-action@d745f2e74aaf1ee82e747b181f7a0967978abee0
+        uses: mathieudutour/github-tag-action@fcfbdceb3093f6d85a3b194740f8c6cec632f4e2 #v6.1
         with:
           github_token: ${{ secrets.CR_TOKEN }}
           create_annotated_tag: true
@@ -49,7 +49,7 @@ jobs:
           echo "previous_tag=${tag}" >> $GITHUB_ENV
       - name: Delete Tag and Release
         if: startsWith(github.event.head_commit.message, 'Revert "RELEASE:') && env.desired_tag == env.previous_tag
-        uses: dev-drprasad/delete-tag-and-release@92d94d77429cb0436597047a92369526a5824f50
+        uses: dev-drprasad/delete-tag-and-release@7550ea180f81ca0a875ee3c135b1f72ef66ff4b1
         with:
           delete_release: true # default: false
           tag_name: ${{ env.current_tag }}

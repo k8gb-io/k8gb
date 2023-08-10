@@ -17,22 +17,23 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+        uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
         with:
           fetch-depth: 0
       - name: Copy new docs to gh-pages
         run: |
           git checkout gh-pages
+          git checkout ${GITHUB_REF##*/} ADOPTERS.md
           git checkout ${GITHUB_REF##*/} README.md
           git checkout ${GITHUB_REF##*/} CONTRIBUTING.md
           git checkout ${GITHUB_REF##*/} CHANGELOG.md
           git checkout ${GITHUB_REF##*/} docs
       - name: Push to gh-pages
-        uses: EndBug/add-and-commit@e914420cec2dd995859ba38f18cab83dc21bbbc1
+        uses: EndBug/add-and-commit@cd275fe314bfb963f70ebd92b4a6b13cf8b8216f
         with:
           author_name: ${{ github.actor }}
           author_email: ${{ github.actor }}@users.noreply.github.com

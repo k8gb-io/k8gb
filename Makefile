@@ -43,7 +43,7 @@ LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.8.0
 GOLIC_VERSION  ?= v0.7.2
 GOKART_VERSION ?= v0.5.1
-GOLANGCI_VERSION ?= v1.50.1
+GOLANGCI_VERSION ?= v1.51.2
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -229,7 +229,6 @@ deploy-k8gb-with-helm:
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--set rfc2136.enabled=true \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
-		--set externaldns.image=absaoss/external-dns:rfc-ns1 \
 		--wait --timeout=2m0s
 
 .PHONY: deploy-gslb-operator
@@ -483,9 +482,9 @@ define deploy-edgedns
 endef
 
 define apply-cr
-	sed -i 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1"
-	kubectl apply -f "$1"
-	git checkout -- "$1"
+	sed 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' "$1" > "$1-cr"
+	-kubectl apply -f "$1-cr"
+	-rm "$1-cr"
 endef
 
 define get-cluster-geo-tag

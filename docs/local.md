@@ -26,11 +26,6 @@ For more user-centric targets in that makefile consult `make help`.
 
 - [Install **Git**](https://git-scm.com/downloads)
 
-- Install **gnu-sed** if you don't have it. If you are on a Mac, install `gnu-sed` with Homebrew
-    ```sh
-    brew install gnu-sed
-    ```
-
 - [Install **Docker**](https://docs.docker.com/get-docker/)
   > Ensure you are able to push/pull from your docker registry
 

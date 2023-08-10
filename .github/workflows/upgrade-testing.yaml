@@ -18,6 +18,8 @@ on:
 permissions:
   contents: read
 
+concurrency: terratest-${{ github.head_ref || github.run_id }}
+
 jobs:
   skip-check:
     runs-on: ubuntu-latest
@@ -26,12 +28,12 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+      uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - id: skip_check
-      uses: fkirc/skip-duplicate-actions@f11521568414503656a5af807dc3018c012552c4
+      uses: fkirc/skip-duplicate-actions@fc7bbd5283bce15e0594f80a57e0d4ca070b4b4b
       with:
         skip_after_successful_duplicate: 'true'
         do_not_skip: '["workflow_dispatch", "schedule"]'
@@ -41,16 +43,16 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@a3d889c34c5d4e071b33595c5fe8edfcaaad8260
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
         with:
           go-version: 1.19.1
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@b508e2e3ef3b19d4e4146d4f8fb3ba9db644a757
+        uses: goreleaser/goreleaser-action@920a7cbd0a5ce2fa16b0e4182e327d6a7761d677
         with:
           version: v1.9.2
           args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign

@@ -17,18 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+      uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - name: Checkout Code
-      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
     - name: Generate docs for helm chart - chart/k8gb/README.md
-      uses: docker://jnorwood/helm-docs@sha256:835200d7734899c7784419069be0a20a75b9bb381a790637ac911f26eb9d8c53 # v1.7.0
+      uses: docker://jnorwood/helm-docs@sha256:66c8f4164dec860fa5c1528239c4aa826a12485305b7b224594b1a73f7e6879a
       with:
         args: --template-files=_helm-docs-template.gotmpl
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@b4d51739f96fca8047ad065eccef63442d8e99f7
+      uses: peter-evans/create-pull-request@5848fcb314c4b57117ece59f6df6f225122550c4
       with:
         title: "Update Helm Docs"
         branch: ci-helm-doc

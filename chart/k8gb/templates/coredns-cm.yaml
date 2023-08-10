@@ -11,13 +11,12 @@ data:
         errors
         health
         ready
-        loadbalance round_robin
         prometheus 0.0.0.0:9153
         forward . /etc/resolv.conf
         k8s_crd {
-            resources DNSEndpoint
             filter k8gb.absa.oss/dnstype=local
             negttl {{ .Values.k8gb.dnsZoneNegTTL }}
+            loadbalance weight
         }
     }
 {{- end }}

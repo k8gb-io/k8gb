@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.10.0](https://img.shields.io/badge/Version-v0.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.10.0](https://img.shields.io/badge/AppVersion-v0.10.0-informational?style=flat-square)
+![Version: v0.11.2](https://img.shields.io/badge/Version-v0.11.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.11.2](https://img.shields.io/badge/AppVersion-v0.11.2-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -19,11 +19,11 @@ A Helm chart for Kubernetes Global Balancer
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Dinar Valeev | dinar.valeev@absa.africa |  |
-| Jiri Kremser | jiri.kremser@gmail.com |  |
-| Michal Kuritka | kuritka@gmail.com |  |
-| Timofey Ilinykh | timofey.ilinykh@absa.africa |  |
-| Yury Tsarev | yury.tsarev@absa.africa |  |
+| Dinar Valeev | <dinar.valeev@absa.africa> |  |
+| Jiri Kremser | <jiri.kremser@gmail.com> |  |
+| Michal Kuritka | <kuritka@gmail.com> |  |
+| Timofey Ilinykh | <timofey.ilinykh@absa.africa> |  |
+| Yury Tsarev | <yury.tsarev@absa.africa> |  |
 
 ## Source Code
 
@@ -53,15 +53,15 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 |-----|------|---------|-------------|
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
 | coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.0.8"` | image tag |
+| coredns.image.tag | string | `"v0.0.11"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
-| externaldns.image | string | `"k8s.gcr.io/external-dns/external-dns:v0.9.0"` | external-dns image repo:tag |
+| externaldns.image | string | `"ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
 | externaldns.interval | string | `"20s"` | external-dns sync interval |
 | externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
 | externaldns.securityContext.runAsNonRoot | bool | `true` |  |
 | externaldns.securityContext.runAsUser | int | `1000` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core |
-| global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images  ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
+| global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
 | infoblox.gridHost | string | `"10.0.0.1"` | WAPI address |
 | infoblox.httpPoolConnections | int | `10` | Size of connections pool |
@@ -107,7 +107,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | route53.assumeRoleArn | string | `nil` | specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null` |
 | route53.enabled | bool | `false` | Enable Route53 provider |
 | route53.hostedZoneID | string | `"ZXXXSSS"` | Route53 ZoneID |
-| route53.irsaRole | string | `"arn:aws:iam::111111:role/external-dns"` | specify IRSA Role in AWS ARN format or disable it by setting to `false` |
+| route53.irsaRole | string | `"arn:aws:iam::111111:role/external-dns"` | specify IRSA Role in AWS ARN format or disable it by setting to `null` |
 | tracing.deployJaeger | bool | `false` | should the Jaeger be deployed together with the k8gb operator? In case of using another OpenTracing solution, make sure that configmap for OTEL agent has the correct exporters set up (`tracing.otelConfig`). |
 | tracing.enabled | bool | `false` | if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`) |
 | tracing.endpoint | string | `"localhost:4318"` | `host:port` where the spans from the applications (traces) should be sent, sets the `OTEL_EXPORTER_OTLP_ENDPOINT` env var This is not the final destination where all the traces are going. Otel collector has its configuration in the associated configmap (`tracing.otelConfig`). |

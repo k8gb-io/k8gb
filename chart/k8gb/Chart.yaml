@@ -3,8 +3,8 @@ name: k8gb
 description: A Helm chart for Kubernetes Global Balancer
 icon: https://www.k8gb.io/assets/images/icon-192x192.png
 type: application
-version: v0.10.0
-appVersion: v0.10.0
+version: v0.11.2
+appVersion: v0.11.2
 kubeVersion: ">= 1.19.0-0"
 
 dependencies:
@@ -22,6 +22,7 @@ keywords:
   - kuberneters-global-balancer
   - kubernetes-operator
   - balancer
+  - multi-cluster
 
 maintainers:
   - email: dinar.valeev@absa.africa
