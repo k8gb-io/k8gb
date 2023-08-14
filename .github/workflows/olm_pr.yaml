@@ -71,7 +71,7 @@ jobs:
 
       - name: Open Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@5848fcb314c4b57117ece59f6df6f225122550c4
+        uses: peter-evans/create-pull-request@3f6dd507d6db1a5a5de747205453b550f1da8dbc
         with:
           token: ${{ secrets.CR_TOKEN }}
           push-to-fork: k8gb-io/community-operators
