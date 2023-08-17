@@ -20,7 +20,7 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+      - uses: actions/checkout@7739b9ba2efcda9dde65ad1e3c2dbe65b41dfba7
         with:
           fetch-depth: 0
       - uses: heinrichreimer/github-changelog-generator-action@6653241a44afb59146f719f322005de49a5c3b38
