@@ -35,6 +35,6 @@ jobs:
         sarif_upload: true
         iac_dir: chart/k8gb
     - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@e683046da183a09174d531cc43713853e27debb3
+      uses: github/codeql-action/upload-sarif@14877a1345faaf621b5d61b1d67176bfd3ef52fb
       with:
         sarif_file: terrascan.sarif
