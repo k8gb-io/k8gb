@@ -43,7 +43,7 @@ jobs:
       contents: read  # for actions/checkout to fetch code
       pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
     name: Inspect packages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:

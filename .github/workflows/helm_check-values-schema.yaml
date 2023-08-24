@@ -14,7 +14,7 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 jobs:
   check:
     name: 'Check values.yaml and its schema in PR'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05

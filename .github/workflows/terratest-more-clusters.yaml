@@ -12,7 +12,7 @@ concurrency: terratest-${{ github.head_ref || github.run_id }}
 
 jobs:
   terratest-n-clusters:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: ${{ github.event.label.name == 'heavy-tests' }}
     steps:
       - uses: actions/checkout@7739b9ba2efcda9dde65ad1e3c2dbe65b41dfba7
