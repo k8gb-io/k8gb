@@ -47,6 +47,11 @@ k8gb:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     runAsUser: 1000
+  # -- Exposing metrics
+  exposeMetrics: false
+  # -- enable ServiceMonitor
+  serviceMonitor:
+    enabled: false
 
 externaldns:
   # -- external-dns image repo:tag

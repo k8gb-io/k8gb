@@ -121,3 +121,6 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               key: secret
 {{- end -}}
 {{- end -}}
+{{- define "k8gb.metrics_port" -}}
+{{ print (split ":" .Values.k8gb.metricsAddress)._1 }}
+{{- end -}}
