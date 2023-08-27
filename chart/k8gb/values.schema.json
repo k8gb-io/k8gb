@@ -1,490 +1,1070 @@
 {
-    "title": "values.yaml for k8gb helm chart",
-    "$ref": "#/definitions/All",
-    "definitions": {
-        "All": {
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "default": {},
+    "title": "Root Schema",
+    "required": [
+        "global",
+        "k8gb",
+        "externaldns",
+        "coredns",
+        "infoblox",
+        "route53",
+        "ns1",
+        "openshift",
+        "rfc2136",
+        "tracing"
+    ],
+    "properties": {
+        "global": {
             "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "global": {
-                    "$ref": "#/definitions/Global"
-                },
-                "k8gb": {
-                    "$ref": "#/definitions/k8gb"
-                },
-                "externaldns": {
-                    "$ref": "#/definitions/Externaldns"
-                },
-                "coredns": {
-                    "$ref": "#/definitions/Coredns"
-                },
-                "infoblox": {
-                    "$ref": "#/definitions/Infoblox"
-                },
-                "route53": {
-                    "$ref": "#/definitions/Route53"
-                },
-                "ns1": {
-                    "$ref": "#/definitions/Ns1"
-                },
-                "openshift": {
-                    "$ref": "#/definitions/Openshift"
-                },
-                "rfc2136": {
-                    "$ref": "#/definitions/Rfc2136"
-                },
-                "tracing": {
-                    "$ref": "#/definitions/Tracing"
-                }
-            }
-        },
-        "Coredns": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "isClusterService": {
-                    "type": "boolean"
-                },
-                "deployment": {
-                    "$ref": "#/definitions/CorednsDeployment"
-                },
-                "image": {
-                    "$ref": "#/definitions/CorednsImage"
-                },
-                "serviceAccount": {
-                    "$ref": "#/definitions/CorednsServiceAccount"
-                }
-            },
-            "title": "Coredns"
-        },
-        "CorednsDeployment": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "skipConfig": {
-                    "type": "boolean"
-                }
-            },
-            "title": "Deployment"
-        },
-        "CorednsImage": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "repository": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "tag": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
+            "default": {},
+            "title": "The global Schema",
             "required": [
-                "repository",
-                "tag"
+                "imagePullSecrets"
             ],
-            "title": "Image"
-        },
-        "CorednsServiceAccount": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "create": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "title": "ServiceAccount"
-        },
-        "Externaldns": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "image": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "interval": {
-                    "type": "string"
-                },
-                "securityContext": {
-                    "$ref": "#/definitions/ExternaldnsSecurityContext"
-                }
-            },
-            "title": "Externaldns"
-        },
-        "ExternaldnsSecurityContext": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "runAsUser": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "fsGroup": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "runAsNonRoot": {
-                    "type": "boolean"
-                }
-            },
-            "title": "ExternaldnsSecurityContext"
-        },
-        "Global": {
-            "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "imagePullSecrets": {
-                    "type": [
-                        "array",
-                        "null"
-                    ],
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "description": "Name of secret"
-                            }
-                        }
-                    },
-                    "description": "ImagePullSecrets is a list of references to secrets in the same namespace to use for pulling any images in pods that reference this ServiceAccount. ImagePullSecrets are distinct from Secrets because Secrets can be mounted in the pod, but ImagePullSecrets are only accessed by the kubelet. More info: http://kubernetes.io/docs/user-guide/secrets#manually-specifying-an-imagepullsecret"
-                }
-            },
-            "title": "Global"
-        },
-        "Image": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "repository": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "pullPolicy": {
-                    "enum": [
-                        "Always",
-                        "IfNotPresent",
-                        "Never"
+                    "type": "array",
+                    "default": [],
+                    "title": "The imagePullSecrets Schema",
+                    "items": {},
+                    "examples": [
+                        []
                     ]
-                },
-                "tag": {
-                    "type": "string"
-                }
-            }
-        },
-        "Infoblox": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "gridHost": {
-                    "format": "idn-hostname"
-                },
-                "wapiVersion": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "wapiPort": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 65535
-                },
-                "sslVerify": {
-                    "type": "boolean"
-                },
-                "httpRequestTimeout": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "httpPoolConnections": {
-                    "type": "integer",
-                    "minimum": 0
                 }
             },
-            "required": [
-                "gridHost",
-                "wapiPort"
-            ],
-            "title": "Infoblox"
+            "examples": [{
+                "imagePullSecrets": []
+            }]
         },
         "k8gb": {
             "type": "object",
-            "additionalProperties": false,
+            "default": {},
+            "title": "The k8gb Schema",
+            "required": [
+                "imageRepo",
+                "imageTag",
+                "deployCrds",
+                "deployRbac",
+                "dnsZone",
+                "dnsZoneNegTTL",
+                "edgeDNSZone",
+                "edgeDNSServers",
+                "clusterGeoTag",
+                "extGslbClustersGeoTags",
+                "reconcileRequeueSeconds",
+                "log",
+                "splitBrainCheck",
+                "metricsAddress",
+                "securityContext",
+                "serviceMonitor"
+            ],
             "properties": {
                 "imageRepo": {
                     "type": "string",
-                    "minLength": 1
+                    "default": "",
+                    "title": "The imageRepo Schema",
+                    "examples": [
+                        "docker.io/absaoss/k8gb"
+                    ]
                 },
                 "imageTag": {
-                    "type": [
-                        "string",
-                        "null"
+                    "type": "null",
+                    "default": null,
+                    "title": "The imageTag Schema",
+                    "examples": [
+                        null
                     ]
                 },
                 "deployCrds": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The deployCrds Schema",
+                    "examples": [
+                        true
+                    ]
                 },
                 "deployRbac": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The deployRbac Schema",
+                    "examples": [
+                        true
+                    ]
                 },
                 "dnsZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
+                    "type": "string",
+                    "default": "",
+                    "title": "The dnsZone Schema",
+                    "examples": [
+                        "cloud.example.com"
+                    ]
                 },
                 "dnsZoneNegTTL": {
                     "type": "integer",
-                    "minimum": 0
+                    "default": 0,
+                    "title": "The dnsZoneNegTTL Schema",
+                    "examples": [
+                        300
+                    ]
                 },
                 "edgeDNSZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
+                    "type": "string",
+                    "default": "",
+                    "title": "The edgeDNSZone Schema",
+                    "examples": [
+                        "example.com"
+                    ]
                 },
                 "edgeDNSServers": {
                     "type": "array",
+                    "default": [],
+                    "title": "The edgeDNSServers Schema",
                     "items": {
                         "type": "string",
-                        "minLength": 1
-                    }
+                        "default": "",
+                        "title": "A Schema",
+                        "examples": [
+                            "1.1.1.1"
+                        ]
+                    },
+                    "examples": [
+                        [
+                            "1.1.1.1"]
+                    ]
                 },
                 "clusterGeoTag": {
                     "type": "string",
-                    "minLength": 1
+                    "default": "",
+                    "title": "The clusterGeoTag Schema",
+                    "examples": [
+                        "eu"
+                    ]
                 },
                 "extGslbClustersGeoTags": {
                     "type": "string",
-                    "minLength": 1
+                    "default": "",
+                    "title": "The extGslbClustersGeoTags Schema",
+                    "examples": [
+                        "us"
+                    ]
                 },
                 "reconcileRequeueSeconds": {
                     "type": "integer",
-                    "minimum": 0
+                    "default": 0,
+                    "title": "The reconcileRequeueSeconds Schema",
+                    "examples": [
+                        30
+                    ]
                 },
                 "log": {
-                    "$ref": "#/definitions/k8gbLog"
+                    "type": "object",
+                    "default": {},
+                    "title": "The log Schema",
+                    "required": [
+                        "format",
+                        "level"
+                    ],
+                    "properties": {
+                        "format": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The format Schema",
+                            "examples": [
+                                "simple"
+                            ]
+                        },
+                        "level": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The level Schema",
+                            "examples": [
+                                "info"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "format": "simple",
+                        "level": "info"
+                    }]
                 },
                 "splitBrainCheck": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The splitBrainCheck Schema",
+                    "examples": [
+                        false
+                    ]
                 },
                 "metricsAddress": {
                     "type": "string",
-                    "minLength": 1
+                    "default": "",
+                    "title": "The metricsAddress Schema",
+                    "examples": [
+                        "0.0.0.0:8080"
+                    ]
                 },
                 "securityContext": {
-                    "$ref": "#/definitions/k8gbSecurityContext"
+                    "type": "object",
+                    "default": {},
+                    "title": "The securityContext Schema",
+                    "required": [
+                        "runAsNonRoot",
+                        "readOnlyRootFilesystem",
+                        "allowPrivilegeEscalation",
+                        "runAsUser"
+                    ],
+                    "properties": {
+                        "runAsNonRoot": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "The runAsNonRoot Schema",
+                            "examples": [
+                                true
+                            ]
+                        },
+                        "readOnlyRootFilesystem": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "The readOnlyRootFilesystem Schema",
+                            "examples": [
+                                true
+                            ]
+                        },
+                        "allowPrivilegeEscalation": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "The allowPrivilegeEscalation Schema",
+                            "examples": [
+                                false
+                            ]
+                        },
+                        "runAsUser": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "The runAsUser Schema",
+                            "examples": [
+                                1000
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "runAsNonRoot": true,
+                        "readOnlyRootFilesystem": true,
+                        "allowPrivilegeEscalation": false,
+                        "runAsUser": 1000
+                    }]
+                },
+                "serviceMonitor": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The serviceMonitor Schema",
+                    "required": [
+                        "enabled"
+                    ],
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "The enabled Schema",
+                            "examples": [
+                                true
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "enabled": true
+                    }]
                 }
             },
-            "required": [
-                "clusterGeoTag",
-                "extGslbClustersGeoTags",
-                "dnsZone",
-                "edgeDNSServers",
-                "edgeDNSZone"
-            ],
-            "title": "k8gb"
+            "examples": [{
+                "imageRepo": "docker.io/absaoss/k8gb",
+                "imageTag": null,
+                "deployCrds": true,
+                "deployRbac": true,
+                "dnsZone": "cloud.example.com",
+                "dnsZoneNegTTL": 300,
+                "edgeDNSZone": "example.com",
+                "edgeDNSServers": [
+                    "1.1.1.1"
+                ],
+                "clusterGeoTag": "eu",
+                "extGslbClustersGeoTags": "us",
+                "reconcileRequeueSeconds": 30,
+                "log": {
+                    "format": "simple",
+                    "level": "info"
+                },
+                "splitBrainCheck": false,
+                "metricsAddress": "0.0.0.0:8080",
+                "securityContext": {
+                    "runAsNonRoot": true,
+                    "readOnlyRootFilesystem": true,
+                    "allowPrivilegeEscalation": false,
+                    "runAsUser": 1000
+                },
+                "serviceMonitor": {
+                    "enabled": true
+                }
+            }]
         },
-        "k8gbLog": {
+        "externaldns": {
             "type": "object",
-            "additionalProperties": false,
+            "default": {},
+            "title": "The externaldns Schema",
+            "required": [
+                "image",
+                "interval",
+                "securityContext"
+            ],
             "properties": {
-                "format": {
-                    "enum": [
-                        "simple",
-                        "json"
+                "image": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The image Schema",
+                    "examples": [
+                        "ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns"
                     ]
                 },
-                "level": {
-                    "enum": [
-                        "panic",
-                        "fatal",
-                        "error",
-                        "warn",
-                        "info",
-                        "debug",
-                        "trace"
+                "interval": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The interval Schema",
+                    "examples": [
+                        "20s"
+                    ]
+                },
+                "securityContext": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The securityContext Schema",
+                    "required": [
+                        "runAsUser",
+                        "fsGroup",
+                        "runAsNonRoot"
+                    ],
+                    "properties": {
+                        "runAsUser": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "The runAsUser Schema",
+                            "examples": [
+                                1000
+                            ]
+                        },
+                        "fsGroup": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "The fsGroup Schema",
+                            "examples": [
+                                65534
+                            ]
+                        },
+                        "runAsNonRoot": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "The runAsNonRoot Schema",
+                            "examples": [
+                                true
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "runAsUser": 1000,
+                        "fsGroup": 65534,
+                        "runAsNonRoot": true
+                    }]
+                }
+            },
+            "examples": [{
+                "image": "ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns",
+                "interval": "20s",
+                "securityContext": {
+                    "runAsUser": 1000,
+                    "fsGroup": 65534,
+                    "runAsNonRoot": true
+                }
+            }]
+        },
+        "coredns": {
+            "type": "object",
+            "default": {},
+            "title": "The coredns Schema",
+            "required": [
+                "isClusterService",
+                "deployment",
+                "image",
+                "serviceAccount"
+            ],
+            "properties": {
+                "isClusterService": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The isClusterService Schema",
+                    "examples": [
+                        false
+                    ]
+                },
+                "deployment": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The deployment Schema",
+                    "required": [
+                        "skipConfig"
+                    ],
+                    "properties": {
+                        "skipConfig": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "The skipConfig Schema",
+                            "examples": [
+                                true
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "skipConfig": true
+                    }]
+                },
+                "image": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The image Schema",
+                    "required": [
+                        "repository",
+                        "tag"
+                    ],
+                    "properties": {
+                        "repository": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The repository Schema",
+                            "examples": [
+                                "absaoss/k8s_crd"
+                            ]
+                        },
+                        "tag": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The tag Schema",
+                            "examples": [
+                                "v0.0.11"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "absaoss/k8s_crd",
+                        "tag": "v0.0.11"
+                    }]
+                },
+                "serviceAccount": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The serviceAccount Schema",
+                    "required": [
+                        "create",
+                        "name"
+                    ],
+                    "properties": {
+                        "create": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "The create Schema",
+                            "examples": [
+                                true
+                            ]
+                        },
+                        "name": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The name Schema",
+                            "examples": [
+                                "coredns"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "create": true,
+                        "name": "coredns"
+                    }]
+                }
+            },
+            "examples": [{
+                "isClusterService": false,
+                "deployment": {
+                    "skipConfig": true
+                },
+                "image": {
+                    "repository": "absaoss/k8s_crd",
+                    "tag": "v0.0.11"
+                },
+                "serviceAccount": {
+                    "create": true,
+                    "name": "coredns"
+                }
+            }]
+        },
+        "infoblox": {
+            "type": "object",
+            "default": {},
+            "title": "The infoblox Schema",
+            "required": [
+                "enabled",
+                "gridHost",
+                "wapiVersion",
+                "wapiPort",
+                "sslVerify",
+                "httpRequestTimeout",
+                "httpPoolConnections"
+            ],
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The enabled Schema",
+                    "examples": [
+                        false
+                    ]
+                },
+                "gridHost": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The gridHost Schema",
+                    "examples": [
+                        "10.0.0.1"
+                    ]
+                },
+                "wapiVersion": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The wapiVersion Schema",
+                    "examples": [
+                        "2.3.1"
+                    ]
+                },
+                "wapiPort": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "The wapiPort Schema",
+                    "examples": [
+                        443
+                    ]
+                },
+                "sslVerify": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The sslVerify Schema",
+                    "examples": [
+                        true
+                    ]
+                },
+                "httpRequestTimeout": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "The httpRequestTimeout Schema",
+                    "examples": [
+                        20
+                    ]
+                },
+                "httpPoolConnections": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "The httpPoolConnections Schema",
+                    "examples": [
+                        10
                     ]
                 }
             },
-            "title": "Log"
+            "examples": [{
+                "enabled": false,
+                "gridHost": "10.0.0.1",
+                "wapiVersion": "2.3.1",
+                "wapiPort": 443,
+                "sslVerify": true,
+                "httpRequestTimeout": 20,
+                "httpPoolConnections": 10
+            }]
         },
-        "k8gbSecurityContext": {
+        "route53": {
             "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "runAsNonRoot": {
-                    "type": "boolean"
-                },
-                "readOnlyRootFilesystem": {
-                    "type": "boolean"
-                },
-                "allowPrivilegeEscalation": {
-                    "type": "boolean"
-                },
-                "runAsUser": {
-                    "type": "integer",
-                    "minimum": 0
-                }
-            },
-            "title": "k8gbSecurityContext"
-        },
-        "Ns1": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "ignoreSSL": {
-                    "type": "boolean"
-                }
-            },
-            "title": "Ns1"
-        },
-        "Openshift": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                }
-            },
-            "title": "Openshift"
-        },
-        "Rfc2136": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "rfc2136Opts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Rfc2136Opt"
-                    }
-                }
-            },
+            "default": {},
+            "title": "The route53 Schema",
             "required": [
-                "rfc2136Opts"
+                "enabled",
+                "hostedZoneID",
+                "irsaRole",
+                "assumeRoleArn"
             ],
-            "title": "Rfc2136"
-        },
-        "Rfc2136Opt": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "host": {
-                    "format": "idn-hostname"
-                },
-                "port": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 65535
-                },
-                "tsig-secret-alg": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "tsig-keyname": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
-            "title": "Rfc2136Opt"
-        },
-        "Route53": {
-            "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "enabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The enabled Schema",
+                    "examples": [
+                        false
+                    ]
                 },
                 "hostedZoneID": {
                     "type": "string",
-                    "minLength": 2
+                    "default": "",
+                    "title": "The hostedZoneID Schema",
+                    "examples": [
+                        "ZXXXSSS"
+                    ]
                 },
                 "irsaRole": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^arn:aws:iam:.+$",
-                            "minLength": 20
-                        },
-                        {
-                            "type": "null"
-                        }
+                    "type": "string",
+                    "default": "",
+                    "title": "The irsaRole Schema",
+                    "examples": [
+                        "arn:aws:iam::111111:role/external-dns"
                     ]
                 },
                 "assumeRoleArn": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^arn:aws:iam:.+$",
-                            "minLength": 20
-                        },
-                        {
-                            "type": "null"
-                        }
+                    "type": "null",
+                    "default": null,
+                    "title": "The assumeRoleArn Schema",
+                    "examples": [
+                        null
                     ]
                 }
             },
-            "required": [
-                "hostedZoneID",
-                "irsaRole"
-            ],
-            "title": "Route53"
+            "examples": [{
+                "enabled": false,
+                "hostedZoneID": "ZXXXSSS",
+                "irsaRole": "arn:aws:iam::111111:role/external-dns",
+                "assumeRoleArn": null
+            }]
         },
-        "Tracing": {
+        "ns1": {
             "type": "object",
-            "additionalProperties": false,
+            "default": {},
+            "title": "The ns1 Schema",
+            "required": [
+                "enabled",
+                "ignoreSSL"
+            ],
             "properties": {
                 "enabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The enabled Schema",
+                    "examples": [
+                        false
+                    ]
                 },
-                "deployJaeger": {
-                    "type": "boolean"
-                },
-                "endpoint": {
-                    "type": "string",
-                    "pattern": "^.{2,256}:\\d{2,5}$"
-                },
-                "samplingRatio": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "pattern": "^(0(\\.\\d{1,3})?|1(\\.0)?)$"
-                },
-                "otelConfig": {
-                    "type": [
-                        "object",
-                        "null"
-                    ],
-                    "additionalProperties": true
-                },
-                "sidecarImage": {
-                    "$ref": "#/definitions/Image"
-                },
-                "jaegerImage": {
-                    "$ref": "#/definitions/Image"
+                "ignoreSSL": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The ignoreSSL Schema",
+                    "examples": [
+                        false
+                    ]
                 }
             },
+            "examples": [{
+                "enabled": false,
+                "ignoreSSL": false
+            }]
+        },
+        "openshift": {
+            "type": "object",
+            "default": {},
+            "title": "The openshift Schema",
             "required": [
                 "enabled"
             ],
-            "title": "Tracing"
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The enabled Schema",
+                    "examples": [
+                        false
+                    ]
+                }
+            },
+            "examples": [{
+                "enabled": false
+            }]
+        },
+        "rfc2136": {
+            "type": "object",
+            "default": {},
+            "title": "The rfc2136 Schema",
+            "required": [
+                "enabled",
+                "rfc2136Opts"
+            ],
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The enabled Schema",
+                    "examples": [
+                        false
+                    ]
+                },
+                "rfc2136Opts": {
+                    "type": "array",
+                    "default": [],
+                    "title": "The rfc2136Opts Schema",
+                    "items": {
+                        "type": "object",
+                        "title": "A Schema",
+                        "required": [
+                            "host",
+                            "port",
+                            "tsig-secret-alg",
+                            "tsig-keyname"
+                        ],
+                        "properties": {
+                            "host": {
+                                "type": "string",
+                                "default": "",
+                                "title": "The host Schema",
+                                "examples": [
+                                    "host.k3d.internal"
+                                ]
+                            },
+                            "port": {
+                                "type": "integer",
+                                "default": 0,
+                                "title": "The port Schema",
+                                "examples": [
+                                    1053
+                                ]
+                            },
+                            "tsig-secret-alg": {
+                                "type": "string",
+                                "default": "",
+                                "title": "The tsig-secret-alg Schema",
+                                "examples": [
+                                    "hmac-sha256"
+                                ]
+                            },
+                            "tsig-keyname": {
+                                "type": "string",
+                                "default": "",
+                                "title": "The tsig-keyname Schema",
+                                "examples": [
+                                    "externaldns-key"
+                                ]
+                            }
+                        },
+                        "examples": [{
+                            "host": "host.k3d.internal"
+                        },
+                        {
+                            "port": 1053
+                        },
+                        {
+                            "tsig-secret-alg": "hmac-sha256"
+                        },
+                        {
+                            "tsig-keyname": "externaldns-key"
+                        }]
+                    },
+                    "examples": [
+                        [{
+                            "host": "host.k3d.internal"
+                        },
+                        {
+                            "port": 1053
+                        },
+                        {
+                            "tsig-secret-alg": "hmac-sha256"
+                        },
+                        {
+                            "tsig-keyname": "externaldns-key"
+                        }]
+                    ]
+                }
+            },
+            "examples": [{
+                "enabled": false,
+                "rfc2136Opts": [{
+                    "host": "host.k3d.internal"
+                },
+                {
+                    "port": 1053
+                },
+                {
+                    "tsig-secret-alg": "hmac-sha256"
+                },
+                {
+                    "tsig-keyname": "externaldns-key"
+                }]
+            }]
+        },
+        "tracing": {
+            "type": "object",
+            "default": {},
+            "title": "The tracing Schema",
+            "required": [
+                "enabled",
+                "deployJaeger",
+                "endpoint",
+                "samplingRatio",
+                "otelConfig",
+                "sidecarImage",
+                "jaegerImage"
+            ],
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The enabled Schema",
+                    "examples": [
+                        false
+                    ]
+                },
+                "deployJaeger": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The deployJaeger Schema",
+                    "examples": [
+                        false
+                    ]
+                },
+                "endpoint": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The endpoint Schema",
+                    "examples": [
+                        "localhost:4318"
+                    ]
+                },
+                "samplingRatio": {
+                    "type": "null",
+                    "default": null,
+                    "title": "The samplingRatio Schema",
+                    "examples": [
+                        null
+                    ]
+                },
+                "otelConfig": {
+                    "type": "null",
+                    "default": null,
+                    "title": "The otelConfig Schema",
+                    "examples": [
+                        null
+                    ]
+                },
+                "sidecarImage": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The sidecarImage Schema",
+                    "required": [
+                        "repository",
+                        "tag",
+                        "pullPolicy"
+                    ],
+                    "properties": {
+                        "repository": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The repository Schema",
+                            "examples": [
+                                "otel/opentelemetry-collector"
+                            ]
+                        },
+                        "tag": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The tag Schema",
+                            "examples": [
+                                "0.57.2"
+                            ]
+                        },
+                        "pullPolicy": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The pullPolicy Schema",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "otel/opentelemetry-collector",
+                        "tag": "0.57.2",
+                        "pullPolicy": "Always"
+                    }]
+                },
+                "jaegerImage": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The jaegerImage Schema",
+                    "required": [
+                        "repository",
+                        "tag",
+                        "pullPolicy"
+                    ],
+                    "properties": {
+                        "repository": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The repository Schema",
+                            "examples": [
+                                "jaegertracing/all-in-one"
+                            ]
+                        },
+                        "tag": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The tag Schema",
+                            "examples": [
+                                "1.37.0"
+                            ]
+                        },
+                        "pullPolicy": {
+                            "type": "string",
+                            "default": "",
+                            "title": "The pullPolicy Schema",
+                            "examples": [
+                                "Always"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "repository": "jaegertracing/all-in-one",
+                        "tag": "1.37.0",
+                        "pullPolicy": "Always"
+                    }]
+                }
+            },
+            "examples": [{
+                "enabled": false,
+                "deployJaeger": false,
+                "endpoint": "localhost:4318",
+                "samplingRatio": null,
+                "otelConfig": null,
+                "sidecarImage": {
+                    "repository": "otel/opentelemetry-collector",
+                    "tag": "0.57.2",
+                    "pullPolicy": "Always"
+                },
+                "jaegerImage": {
+                    "repository": "jaegertracing/all-in-one",
+                    "tag": "1.37.0",
+                    "pullPolicy": "Always"
+                }
+            }]
         }
-    }
+    },
+    "examples": [{
+        "global": {
+            "imagePullSecrets": []
+        },
+        "k8gb": {
+            "imageRepo": "docker.io/absaoss/k8gb",
+            "imageTag": null,
+            "deployCrds": true,
+            "deployRbac": true,
+            "dnsZone": "cloud.example.com",
+            "dnsZoneNegTTL": 300,
+            "edgeDNSZone": "example.com",
+            "edgeDNSServers": [
+                "1.1.1.1"
+            ],
+            "clusterGeoTag": "eu",
+            "extGslbClustersGeoTags": "us",
+            "reconcileRequeueSeconds": 30,
+            "log": {
+                "format": "simple",
+                "level": "info"
+            },
+            "splitBrainCheck": false,
+            "metricsAddress": "0.0.0.0:8080",
+            "securityContext": {
+                "runAsNonRoot": true,
+                "readOnlyRootFilesystem": true,
+                "allowPrivilegeEscalation": false,
+                "runAsUser": 1000
+            },
+            "serviceMonitor": {
+                "enabled": true
+            }
+        },
+        "externaldns": {
+            "image": "ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns",
+            "interval": "20s",
+            "securityContext": {
+                "runAsUser": 1000,
+                "fsGroup": 65534,
+                "runAsNonRoot": true
+            }
+        },
+        "coredns": {
+            "isClusterService": false,
+            "deployment": {
+                "skipConfig": true
+            },
+            "image": {
+                "repository": "absaoss/k8s_crd",
+                "tag": "v0.0.11"
+            },
+            "serviceAccount": {
+                "create": true,
+                "name": "coredns"
+            }
+        },
+        "infoblox": {
+            "enabled": false,
+            "gridHost": "10.0.0.1",
+            "wapiVersion": "2.3.1",
+            "wapiPort": 443,
+            "sslVerify": true,
+            "httpRequestTimeout": 20,
+            "httpPoolConnections": 10
+        },
+        "route53": {
+            "enabled": false,
+            "hostedZoneID": "ZXXXSSS",
+            "irsaRole": "arn:aws:iam::111111:role/external-dns",
+            "assumeRoleArn": null
+        },
+        "ns1": {
+            "enabled": false,
+            "ignoreSSL": false
+        },
+        "openshift": {
+            "enabled": false
+        },
+        "rfc2136": {
+            "enabled": false,
+            "rfc2136Opts": [{
+                "host": "host.k3d.internal"
+            },
+            {
+                "port": 1053
+            },
+            {
+                "tsig-secret-alg": "hmac-sha256"
+            },
+            {
+                "tsig-keyname": "externaldns-key"
+            }]
+        },
+        "tracing": {
+            "enabled": false,
+            "deployJaeger": false,
+            "endpoint": "localhost:4318",
+            "samplingRatio": null,
+            "otelConfig": null,
+            "sidecarImage": {
+                "repository": "otel/opentelemetry-collector",
+                "tag": "0.57.2",
+                "pullPolicy": "Always"
+            },
+            "jaegerImage": {
+                "repository": "jaegertracing/all-in-one",
+                "tag": "1.37.0",
+                "pullPolicy": "Always"
+            }
+        }
+    }]
 }
