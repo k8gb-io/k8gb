@@ -1,239 +1,112 @@
 {
-    "title": "values.yaml for k8gb helm chart",
-    "$ref": "#/definitions/All",
-    "definitions": {
-        "All": {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "coredns": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
-                "global": {
-                    "$ref": "#/definitions/Global"
+                "deployment": {
+                    "type": "object",
+                    "properties": {
+                        "skipConfig": {
+                            "type": "boolean"
+                        }
+                    }
                 },
-                "k8gb": {
-                    "$ref": "#/definitions/k8gb"
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
                 },
-                "externaldns": {
-                    "$ref": "#/definitions/Externaldns"
-                },
-                "coredns": {
-                    "$ref": "#/definitions/Coredns"
-                },
-                "infoblox": {
-                    "$ref": "#/definitions/Infoblox"
-                },
-                "route53": {
-                    "$ref": "#/definitions/Route53"
-                },
-                "ns1": {
-                    "$ref": "#/definitions/Ns1"
-                },
-                "openshift": {
-                    "$ref": "#/definitions/Openshift"
-                },
-                "rfc2136": {
-                    "$ref": "#/definitions/Rfc2136"
-                },
-                "tracing": {
-                    "$ref": "#/definitions/Tracing"
-                }
-            }
-        },
-        "Coredns": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
                 "isClusterService": {
                     "type": "boolean"
                 },
-                "deployment": {
-                    "$ref": "#/definitions/CorednsDeployment"
-                },
-                "image": {
-                    "$ref": "#/definitions/CorednsImage"
-                },
                 "serviceAccount": {
-                    "$ref": "#/definitions/CorednsServiceAccount"
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
                 }
-            },
-            "title": "Coredns"
+            }
         },
-        "CorednsDeployment": {
+        "externaldns": {
             "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "skipConfig": {
-                    "type": "boolean"
-                }
-            },
-            "title": "Deployment"
-        },
-        "CorednsImage": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "repository": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "tag": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
-            "required": [
-                "repository",
-                "tag"
-            ],
-            "title": "Image"
-        },
-        "CorednsServiceAccount": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "create": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "title": "ServiceAccount"
-        },
-        "Externaldns": {
-            "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "image": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                 },
                 "interval": {
                     "type": "string"
                 },
                 "securityContext": {
-                    "$ref": "#/definitions/ExternaldnsSecurityContext"
-                }
-            },
-            "title": "Externaldns"
-        },
-        "ExternaldnsSecurityContext": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "runAsUser": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "fsGroup": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "runAsNonRoot": {
-                    "type": "boolean"
-                }
-            },
-            "title": "ExternaldnsSecurityContext"
-        },
-        "Global": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "imagePullSecrets": {
-                    "type": [
-                        "array",
-                        "null"
-                    ],
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "description": "Name of secret"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "fsGroup": {
+                            "type": "integer"
+                        },
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "type": "integer"
                         }
-                    },
-                    "description": "ImagePullSecrets is a list of references to secrets in the same namespace to use for pulling any images in pods that reference this ServiceAccount. ImagePullSecrets are distinct from Secrets because Secrets can be mounted in the pod, but ImagePullSecrets are only accessed by the kubelet. More info: http://kubernetes.io/docs/user-guide/secrets#manually-specifying-an-imagepullsecret"
-                }
-            },
-            "title": "Global"
-        },
-        "Image": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "repository": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "pullPolicy": {
-                    "enum": [
-                        "Always",
-                        "IfNotPresent",
-                        "Never"
-                    ]
-                },
-                "tag": {
-                    "type": "string"
+                    }
                 }
             }
         },
-        "Infoblox": {
+        "global": {
             "type": "object",
-            "additionalProperties": false,
+            "properties": {
+                "imagePullSecrets": {
+                    "type": "array"
+                }
+            }
+        },
+        "infoblox": {
+            "type": "object",
             "properties": {
                 "enabled": {
                     "type": "boolean"
                 },
                 "gridHost": {
-                    "format": "idn-hostname"
+                    "type": "string"
                 },
-                "wapiVersion": {
-                    "type": "string",
-                    "minLength": 1
+                "httpPoolConnections": {
+                    "type": "integer"
                 },
-                "wapiPort": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 65535
+                "httpRequestTimeout": {
+                    "type": "integer"
                 },
                 "sslVerify": {
                     "type": "boolean"
                 },
-                "httpRequestTimeout": {
-                    "type": "integer",
-                    "minimum": 0
+                "wapiPort": {
+                    "type": "integer"
                 },
-                "httpPoolConnections": {
-                    "type": "integer",
-                    "minimum": 0
+                "wapiVersion": {
+                    "type": "string"
                 }
-            },
-            "required": [
-                "gridHost",
-                "wapiPort"
-            ],
-            "title": "Infoblox"
+            }
         },
         "k8gb": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
-                "imageRepo": {
-                    "type": "string",
-                    "minLength": 1
+                "clusterGeoTag": {
+                    "type": "string"
                 },
-                "imageTag": {
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                "coredns": {
+                    "type": "object"
                 },
                 "deployCrds": {
                     "type": "boolean"
@@ -242,106 +115,70 @@
                     "type": "boolean"
                 },
                 "dnsZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
+                    "type": "string"
                 },
                 "dnsZoneNegTTL": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "edgeDNSZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
+                    "type": "integer"
                 },
                 "edgeDNSServers": {
                     "type": "array",
                     "items": {
-                        "type": "string",
-                        "minLength": 1
+                        "type": "string"
                     }
                 },
-                "clusterGeoTag": {
-                    "type": "string",
-                    "minLength": 1
+                "edgeDNSZone": {
+                    "type": "string"
                 },
                 "extGslbClustersGeoTags": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                 },
-                "reconcileRequeueSeconds": {
-                    "type": "integer",
-                    "minimum": 0
+                "imageRepo": {
+                    "type": "string"
+                },
+                "imageTag": {
+                    "type": "null"
                 },
                 "log": {
-                    "$ref": "#/definitions/k8gbLog"
+                    "type": "object",
+                    "properties": {
+                        "format": {
+                            "type": "string"
+                        },
+                        "level": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "metricsAddress": {
+                    "type": "string"
+                },
+                "reconcileRequeueSeconds": {
+                    "type": "integer"
+                },
+                "securityContext": {
+                    "type": "object",
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "type": "boolean"
+                        },
+                        "readOnlyRootFilesystem": {
+                            "type": "boolean"
+                        },
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "type": "integer"
+                        }
+                    }
                 },
                 "splitBrainCheck": {
                     "type": "boolean"
-                },
-                "metricsAddress": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "securityContext": {
-                    "$ref": "#/definitions/k8gbSecurityContext"
                 }
-            },
-            "required": [
-                "clusterGeoTag",
-                "extGslbClustersGeoTags",
-                "dnsZone",
-                "edgeDNSServers",
-                "edgeDNSZone"
-            ],
-            "title": "k8gb"
+            }
         },
-        "k8gbLog": {
+        "ns1": {
             "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "format": {
-                    "enum": [
-                        "simple",
-                        "json"
-                    ]
-                },
-                "level": {
-                    "enum": [
-                        "panic",
-                        "fatal",
-                        "error",
-                        "warn",
-                        "info",
-                        "debug",
-                        "trace"
-                    ]
-                }
-            },
-            "title": "Log"
-        },
-        "k8gbSecurityContext": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "runAsNonRoot": {
-                    "type": "boolean"
-                },
-                "readOnlyRootFilesystem": {
-                    "type": "boolean"
-                },
-                "allowPrivilegeEscalation": {
-                    "type": "boolean"
-                },
-                "runAsUser": {
-                    "type": "integer",
-                    "minimum": 0
-                }
-            },
-            "title": "k8gbSecurityContext"
-        },
-        "Ns1": {
-            "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "enabled": {
                     "type": "boolean"
@@ -349,22 +186,18 @@
                 "ignoreSSL": {
                     "type": "boolean"
                 }
-            },
-            "title": "Ns1"
+            }
         },
-        "Openshift": {
+        "openshift": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "enabled": {
                     "type": "boolean"
                 }
-            },
-            "title": "Openshift"
+            }
         },
-        "Rfc2136": {
+        "rfc2136": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "enabled": {
                     "type": "boolean"
@@ -372,119 +205,80 @@
                 "rfc2136Opts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Rfc2136Opt"
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
-            },
-            "required": [
-                "rfc2136Opts"
-            ],
-            "title": "Rfc2136"
+            }
         },
-        "Rfc2136Opt": {
+        "route53": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
-                "host": {
-                    "format": "idn-hostname"
+                "assumeRoleArn": {
+                    "type": "null"
                 },
-                "port": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 65535
-                },
-                "tsig-secret-alg": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "tsig-keyname": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
-            "title": "Rfc2136Opt"
-        },
-        "Route53": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
                 "enabled": {
                     "type": "boolean"
                 },
                 "hostedZoneID": {
-                    "type": "string",
-                    "minLength": 2
+                    "type": "string"
                 },
                 "irsaRole": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^arn:aws:iam:.+$",
-                            "minLength": 20
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ]
-                },
-                "assumeRoleArn": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^arn:aws:iam:.+$",
-                            "minLength": 20
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ]
+                    "type": "string"
                 }
-            },
-            "required": [
-                "hostedZoneID",
-                "irsaRole"
-            ],
-            "title": "Route53"
+            }
         },
-        "Tracing": {
+        "tracing": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
                 "deployJaeger": {
                     "type": "boolean"
                 },
+                "enabled": {
+                    "type": "boolean"
+                },
                 "endpoint": {
-                    "type": "string",
-                    "pattern": "^.{2,256}:\\d{2,5}$"
-                },
-                "samplingRatio": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "pattern": "^(0(\\.\\d{1,3})?|1(\\.0)?)$"
-                },
-                "otelConfig": {
-                    "type": [
-                        "object",
-                        "null"
-                    ],
-                    "additionalProperties": true
-                },
-                "sidecarImage": {
-                    "$ref": "#/definitions/Image"
+                    "type": "string"
                 },
                 "jaegerImage": {
-                    "$ref": "#/definitions/Image"
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "otelConfig": {
+                    "type": "null"
+                },
+                "samplingRatio": {
+                    "type": "null"
+                },
+                "sidecarImage": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
                 }
-            },
-            "required": [
-                "enabled"
-            ],
-            "title": "Tracing"
+            }
         }
     }
 }
