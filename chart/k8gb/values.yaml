@@ -106,6 +106,18 @@ route53:
   # -- specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null`
   assumeRoleArn: null
 
+azuredns:
+  # -- Enable Azure DNS provider
+  enabled: false
+  # -- Azure tenant ID which holds the managed identity
+  tenantId: 01234abc-de56-ff78-abc1-234567890def
+  # -- subscription id which holds the Azure DNS zone
+  subscriptionId: 01234abc-de56-ff78-abc1-234567890def
+  # -- Client ID of the user-managed identity. When running in AKS, this might be the kubelet identity
+  userAssignedIdentityID: 01234abc-de56-ff78-abc1-234567890def
+  # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
+  resourceGroup: myDnsResourceGroup
+
 ns1:
   # -- Enable NS1 provider
   enabled: false

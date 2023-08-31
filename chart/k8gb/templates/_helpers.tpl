@@ -69,6 +69,9 @@ Create the name of the service account to use
 {{- if .Values.route53.enabled }}
 {{- print "aws" -}}
 {{- end -}}
+{{- if .Values.azuredns.enabled }}
+{{- print "azure-dns" -}}
+{{- end -}}
 {{- if .Values.rfc2136.enabled }}
 {{- print "rfc2136" -}}
 {{- end -}}
@@ -105,6 +108,9 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               name: ns1
               key: apiKey
 {{- end }}
+{{- if .Values.azuredns.enabled -}}
+        - --azure-resource-group={{ .Values.azuredns.resourceGroup }}
+{{- end }}
 {{- if .Values.rfc2136.enabled -}}
         - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
         - --rfc2136-tsig-axfr
@@ -119,5 +125,17 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
             secretKeyRef:
               name: rfc2136
               key: secret
+{{- end -}}
+{{- end -}}
+
+{{- define "external-dns.azure-credentials" -}}
+{{- if .Values.azuredns.enabled -}}
+{
+  "tenantId": "{{ .Values.azuredns.tenantId }}",
+  "subscriptionId": "{{ .Values.azuredns.subscriptionId }}",
+  "resourceGroup": "{{ .Values.azuredns.resourceGroup }}",
+  "useManagedIdentityExtension": true,
+  "userAssignedIdentityID": "{{ .Values.azuredns.userAssignedIdentityID }}"
+}
 {{- end -}}
 {{- end -}}
