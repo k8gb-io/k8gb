@@ -70,6 +70,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
 | k8gb.clusterGeoTag | string | `"eu"` | used for places where we need to distinguish between different Gslb instances |
+| k8gb.coredns | object | `{"extra_plugins":{}}` | Extra CoreDNS plugins to be enabled (yaml object) |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
 | k8gb.dnsZone | string | `"cloud.example.com"` | dnsZone controlled by gslb |
@@ -77,6 +78,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.edgeDNSServers | list | `["1.1.1.1"]` | host/ip[:port] format is supported here where port defaults to 53 |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.edgeDNSZone | string | `"example.com"` | main zone which would contain gslb zone to delegate |
+| k8gb.exposeMetrics | bool | `false` | Exposing metrics |
 | k8gb.extGslbClustersGeoTags | string | `"us"` | comma-separated list of external gslb geo tags to pair with |
 | k8gb.imageRepo | string | `"docker.io/absaoss/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
@@ -88,6 +90,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.securityContext.readOnlyRootFilesystem | bool | `true` |  |
 | k8gb.securityContext.runAsNonRoot | bool | `true` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core |
 | k8gb.securityContext.runAsUser | int | `1000` |  |
+| k8gb.serviceMonitor | object | `{"enabled":false}` | enable ServiceMonitor |
 | k8gb.splitBrainCheck | bool | `false` | Enable SplitBrain check (Infoblox only) |
 | ns1.enabled | bool | `false` | Enable NS1 provider |
 | ns1.ignoreSSL | bool | `false` | optional custom NS1 API endpoint for on-prem setups endpoint: https://api.nsone.net/v1/ |
