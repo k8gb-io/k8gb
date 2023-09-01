@@ -287,6 +287,13 @@
                 },
                 "securityContext": {
                     "$ref": "#/definitions/k8gbSecurityContext"
+                },
+                "exposeMetrics": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "serviceMonitor": {
+                    "$ref": "#/definitions/k8gbServiceMonitor"
                 }
             },
             "required": [
@@ -351,6 +358,15 @@
                 }
             },
             "title": "k8gbSecurityContext"
+        },
+        "k8gbServiceMonitor": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
         },
         "Ns1": {
             "type": "object",
