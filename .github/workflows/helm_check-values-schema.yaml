@@ -22,7 +22,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: 'Checkout'
-        uses: actions/checkout@7739b9ba2efcda9dde65ad1e3c2dbe65b41dfba7
+        uses: actions/checkout@8b5e8b768746b50394015010d25e690bfab9dfbc
       - name: 'Check if values.schema.json was updated'
         run: |
           VALUES_FILE=chart/k8gb/values.yaml
