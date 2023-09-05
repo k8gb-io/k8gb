@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.11.2](https://img.shields.io/badge/Version-v0.11.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.11.2](https://img.shields.io/badge/AppVersion-v0.11.2-informational?style=flat-square)
+![Version: v0.11.3](https://img.shields.io/badge/Version-v0.11.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.11.3](https://img.shields.io/badge/AppVersion-v0.11.3-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
