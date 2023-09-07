@@ -51,7 +51,7 @@ jobs:
         uses: actions/setup-go@883490dfd06f396ebe0b738bc313a53cf9d851e5
         with:
           go-version: 1.19.1
-      - uses: actions/checkout@8b5e8b768746b50394015010d25e690bfab9dfbc
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
       # see: https://golangci-lint.run/usage/configuration/#config-file
       - name: golangci-lint
         uses: golangci/golangci-lint-action@c49c2afa5db885c2672ba3b25e923d5705ed6ba0
