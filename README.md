@@ -113,6 +113,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 * [Ingress annotations](/docs/ingress_annotations.md)
 * [Integration with Admiralty](/docs/admiralty.md)
 * [Integration with Liqo](/docs/liqo.md)
+* [Integration with Rancher Fleet](/docs/rancher.md)
 
 ## Adopters
 
