@@ -1,5 +1,62 @@
 # Changelog
 
+## [v0.11.4](https://github.com/k8gb-io/k8gb/tree/v0.11.4) (2023-09-07)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.11.2...v0.11.4)
+
+**Implemented enhancements:**
+
+- Extend pipelines with edgeDNS test coverage [\#351](https://github.com/k8gb-io/k8gb/issues/351)
+
+**Closed issues:**
+
+- Deploy k8gb on MS Azure [\#642](https://github.com/k8gb-io/k8gb/issues/642)
+
+**Merged pull requests:**
+
+- RELEASE: v0.11.4 [\#1259](https://github.com/k8gb-io/k8gb/pull/1259) ([kuritka](https://github.com/kuritka))
+- Removing @somaritane from CODEOWNERS [\#1257](https://github.com/k8gb-io/k8gb/pull/1257) ([somaritane](https://github.com/somaritane))
+- Rancher Fleet support [\#1255](https://github.com/k8gb-io/k8gb/pull/1255) ([kuritka](https://github.com/kuritka))
+- Update Helm Docs [\#1254](https://github.com/k8gb-io/k8gb/pull/1254) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update fossa-contrib/fossa-action digest to 8218c80 [\#1253](https://github.com/k8gb-io/k8gb/pull/1253) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update endbug/add-and-commit digest to db73408 [\#1252](https://github.com/k8gb-io/k8gb/pull/1252) ([renovate[bot]](https://github.com/apps/renovate))
+- Release v0.11.3 [\#1251](https://github.com/k8gb-io/k8gb/pull/1251) ([kuritka](https://github.com/kuritka))
+- Update Helm Docs [\#1249](https://github.com/k8gb-io/k8gb/pull/1249) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Allow to enable custom coredns plugins [\#1248](https://github.com/k8gb-io/k8gb/pull/1248) ([kuritka](https://github.com/kuritka))
+- Add optionally servicemonitor service and object [\#1247](https://github.com/k8gb-io/k8gb/pull/1247) ([kuritka](https://github.com/kuritka))
+- chore\(deps\): update docker/login-action digest to cf8514a [\#1246](https://github.com/k8gb-io/k8gb/pull/1246) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update github/codeql-action digest to 07d42ec [\#1243](https://github.com/k8gb-io/k8gb/pull/1243) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/checkout digest to 8b5e8b7 [\#1242](https://github.com/k8gb-io/k8gb/pull/1242) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update endbug/add-and-commit digest to 67a450f [\#1241](https://github.com/k8gb-io/k8gb/pull/1241) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/setup-go digest to d085b4f [\#1240](https://github.com/k8gb-io/k8gb/pull/1240) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update dependency ubuntu to v22 [\#1239](https://github.com/k8gb-io/k8gb/pull/1239) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update peter-evans/create-pull-request digest to 0cd7ff0 [\#1238](https://github.com/k8gb-io/k8gb/pull/1238) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update golangci/golangci-lint-action digest to c49c2af [\#1237](https://github.com/k8gb-io/k8gb/pull/1237) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update github/codeql-action digest to 14877a1 [\#1236](https://github.com/k8gb-io/k8gb/pull/1236) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update endbug/add-and-commit digest to 5c6b756 [\#1235](https://github.com/k8gb-io/k8gb/pull/1235) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/checkout digest to 7739b9b [\#1234](https://github.com/k8gb-io/k8gb/pull/1234) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update docker/build-push-action digest to 9311bf5 [\#1233](https://github.com/k8gb-io/k8gb/pull/1233) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update golangci/golangci-lint-action digest to 3a91952 [\#1232](https://github.com/k8gb-io/k8gb/pull/1232) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update fossa-contrib/fossa-action digest to 0bf3571 [\#1231](https://github.com/k8gb-io/k8gb/pull/1231) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update github/codeql-action digest to e683046 [\#1230](https://github.com/k8gb-io/k8gb/pull/1230) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update step-security/harden-runner digest to 394d78e [\#1229](https://github.com/k8gb-io/k8gb/pull/1229) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update peter-evans/create-pull-request digest to 3f6dd50 [\#1228](https://github.com/k8gb-io/k8gb/pull/1228) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update goreleaser/goreleaser-action digest to a10d0e3 [\#1227](https://github.com/k8gb-io/k8gb/pull/1227) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update fossa-contrib/fossa-action digest to cdc2aa9 [\#1226](https://github.com/k8gb-io/k8gb/pull/1226) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update endbug/add-and-commit digest to f91c672 [\#1225](https://github.com/k8gb-io/k8gb/pull/1225) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update docker/build-push-action digest to 56932de [\#1223](https://github.com/k8gb-io/k8gb/pull/1223) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update docker/login-action digest to 553b6f0 [\#1222](https://github.com/k8gb-io/k8gb/pull/1222) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update docker/build-push-action digest to 4b0752a [\#1221](https://github.com/k8gb-io/k8gb/pull/1221) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update fossa-contrib/fossa-action digest to a1670ab [\#1220](https://github.com/k8gb-io/k8gb/pull/1220) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update golangci/golangci-lint-action digest to a252750 [\#1219](https://github.com/k8gb-io/k8gb/pull/1219) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Offline Changelog [\#1218](https://github.com/k8gb-io/k8gb/pull/1218) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#1217](https://github.com/k8gb-io/k8gb/pull/1217) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update github/codeql-action digest to 2160dd3 [\#1215](https://github.com/k8gb-io/k8gb/pull/1215) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update fossa-contrib/fossa-action digest to 759299b [\#1214](https://github.com/k8gb-io/k8gb/pull/1214) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update docker/login-action digest to a979406 [\#1210](https://github.com/k8gb-io/k8gb/pull/1210) ([renovate[bot]](https://github.com/apps/renovate))
+
+
+
 ## [v0.11.2](https://github.com/k8gb-io/k8gb/tree/v0.11.2) (2023-08-04)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.11.1...v0.11.2)
