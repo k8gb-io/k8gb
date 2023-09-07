@@ -142,6 +142,9 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+                "fleet": {
+                    "type": "object"
+                },
                 "imagePullSecrets": {
                     "type": [
                         "array",
