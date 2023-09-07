@@ -21,7 +21,7 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@8b5e8b768746b50394015010d25e690bfab9dfbc
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
 
       - name: Create ../results directory for sarif files
         shell: bash
