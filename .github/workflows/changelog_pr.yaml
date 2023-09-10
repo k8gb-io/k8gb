@@ -13,14 +13,14 @@ jobs:
     permissions:
       contents: write  # for peter-evans/create-pull-request to create branch
       pull-requests: write  # for peter-evans/create-pull-request to create a PR
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
+        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
         with:
           fetch-depth: 0
       - uses: heinrichreimer/github-changelog-generator-action@6653241a44afb59146f719f322005de49a5c3b38
@@ -44,7 +44,7 @@ jobs:
           cat CHANGELOG-old.md | sed -e'1,2d' >> CHANGELOG.md
           rm CHANGELOG-old.md CHANGELOG-latest.md
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@5848fcb314c4b57117ece59f6df6f225122550c4
+        uses: peter-evans/create-pull-request@0cd7ff0e63a08ac27378fc70cf0df976be6bbbfa
         with:
           title: "Update Offline Changelog"
           branch: offline_changelog

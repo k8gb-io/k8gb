@@ -142,6 +142,9 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+                "fleet": {
+                    "type": "object"
+                },
                 "imagePullSecrets": {
                     "type": [
                         "array",
@@ -275,6 +278,9 @@
                 "log": {
                     "$ref": "#/definitions/k8gbLog"
                 },
+                "coredns": {
+                    "$ref": "#/definitions/k8gbCoreDNS"
+                },
                 "splitBrainCheck": {
                     "type": "boolean"
                 },
@@ -284,6 +290,13 @@
                 },
                 "securityContext": {
                     "$ref": "#/definitions/k8gbSecurityContext"
+                },
+                "exposeMetrics": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "serviceMonitor": {
+                    "$ref": "#/definitions/k8gbServiceMonitor"
                 }
             },
             "required": [
@@ -319,6 +332,16 @@
             },
             "title": "Log"
         },
+        "k8gbCoreDNS": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "extra_plugins": {
+                    "type": "object"
+                }
+            },
+            "title": "k8gbCoredns"
+        },
         "k8gbSecurityContext": {
             "type": "object",
             "additionalProperties": false,
@@ -338,6 +361,15 @@
                 }
             },
             "title": "k8gbSecurityContext"
+        },
+        "k8gbServiceMonitor": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
         },
         "Ns1": {
             "type": "object",

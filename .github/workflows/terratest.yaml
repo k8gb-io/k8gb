@@ -28,7 +28,7 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
+      uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
@@ -39,20 +39,20 @@ jobs:
         do_not_skip: '["workflow_dispatch", "schedule"]'
 
   terratest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
-      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
+      - uses: actions/setup-go@883490dfd06f396ebe0b738bc313a53cf9d851e5
         with:
           go-version: 1.19.1
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@920a7cbd0a5ce2fa16b0e4182e327d6a7761d677
+        uses: goreleaser/goreleaser-action@a10d0e32dce991f86e53faa7b4f269dedb82632f
         with:
           version: v1.9.2
           args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign

@@ -29,6 +29,9 @@ k8gb:
   extGslbClustersGeoTags: "us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
+  # -- Extra CoreDNS plugins to be enabled (yaml object)
+  coredns:
+    extra_plugins: {}
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)
@@ -44,6 +47,11 @@ k8gb:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     runAsUser: 1000
+  # -- Exposing metrics
+  exposeMetrics: false
+  # -- enable ServiceMonitor
+  serviceMonitor:
+    enabled: false
 
 externaldns:
   # -- external-dns image repo:tag

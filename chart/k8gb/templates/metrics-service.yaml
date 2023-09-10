@@ -1,0 +1,16 @@
+{{- if or .Values.k8gb.exposeMetrics .Values.k8gb.serviceMonitor.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8gb-metrics
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ include "k8gb.metrics_port" . }}
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "chart.selectorLabels" . | nindent 4 }}
+{{- end -}}

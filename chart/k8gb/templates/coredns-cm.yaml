@@ -10,6 +10,9 @@ data:
     {{ .Values.k8gb.dnsZone }}:5353 {
         errors
         health
+{{- if .Values.k8gb.coredns.extra_plugins }}
+{{ .Values.k8gb.coredns.extra_plugins | indent 8}}
+{{- end }}
         ready
         prometheus 0.0.0.0:9153
         forward . /etc/resolv.conf

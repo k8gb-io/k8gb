@@ -12,26 +12,26 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 
 jobs:
   curldemo:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       DOCKER_CLI_EXPERIMENTAL: "enabled"
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
+        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
         with:
           fetch-depth: 1
       - name: Login to Dockerhub
-        uses: docker/login-action@a9794064588be971151ec5e7144cb535bcb56e36
+        uses: docker/login-action@cf8514a65188af1d4f94f8c28a7a4153af1088ce
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@4b0752a2b1b87033d946e4e0106643f20d69d613
+        uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9
         with:
           context: ./deploy/test-apps/curldemo/
           file: ./deploy/test-apps/curldemo/Dockerfile

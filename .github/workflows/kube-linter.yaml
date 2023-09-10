@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
+        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
 
       - name: Create ../results directory for sarif files
         shell: bash
@@ -37,5 +37,5 @@ jobs:
           output-file: ../results/kube-linter.sarif
 
       - name: Upload sarif output to GitHub
-        uses: github/codeql-action/upload-sarif@013a1d0cb21639a20c083142edd7dae0964b16cc
+        uses: github/codeql-action/upload-sarif@07d42ec34e55d7e17f411bffdf54e254effd68ae
         continue-on-error: true

@@ -21,14 +21,14 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 
 jobs:
   olm-bundle-pr:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
+        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
         with:
           fetch-depth: 0
 
@@ -56,7 +56,7 @@ jobs:
           rm ./olm/bundle/Dockerfile
           cp -r ./olm/bundle $GITHUB_WORKSPACE/
 
-      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
         with:
           repository: ${{ github.event.inputs.upstreamRepo }}
           path: sandbox
@@ -71,7 +71,7 @@ jobs:
 
       - name: Open Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@5848fcb314c4b57117ece59f6df6f225122550c4
+        uses: peter-evans/create-pull-request@0cd7ff0e63a08ac27378fc70cf0df976be6bbbfa
         with:
           token: ${{ secrets.CR_TOKEN }}
           push-to-fork: k8gb-io/community-operators

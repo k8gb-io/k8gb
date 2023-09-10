@@ -24,15 +24,15 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
+        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Checkout code
-        uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+        uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
 
       - name: Run FOSSA scan and upload build data
-        uses: fossa-contrib/fossa-action@a1670ab7c854284ec342f5bd22f3b524aad7d98b
+        uses: fossa-contrib/fossa-action@8218c80f08026f7ee0d8a4ab262693b58835664a
         with:
           fossa-api-key: 044cfa03c61e6271a24349184e90b381
 

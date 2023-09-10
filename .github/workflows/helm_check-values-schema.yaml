@@ -14,15 +14,15 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 jobs:
   check:
     name: 'Check values.yaml and its schema in PR'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@6dacdfc16caa5ebd987908a44ab5b425193385f6
+        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: 'Checkout'
-        uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5
+        uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
       - name: 'Check if values.schema.json was updated'
         run: |
           VALUES_FILE=chart/k8gb/values.yaml
