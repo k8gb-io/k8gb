@@ -337,7 +337,7 @@
             "additionalProperties": false,
             "properties": {
                 "extra_plugins": {
-                    "type": "object"
+                    "type": "string"
                 }
             },
             "title": "k8gbCoredns"
