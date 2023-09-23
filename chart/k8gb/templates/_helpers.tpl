@@ -72,6 +72,9 @@ Create the name of the service account to use
 {{- if .Values.rfc2136.enabled }}
 {{- print "rfc2136" -}}
 {{- end -}}
+{{- if .Values.cloudflare.enabled }}
+{{- print "cloudflare" -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "k8gb.extdnsOwnerID" -}}
@@ -119,6 +122,17 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
             secretKeyRef:
               name: rfc2136
               key: secret
+{{- end -}}
+{{- if .Values.cloudflare.enabled -}}
+        - --zone-id-filter={{ .Values.cloudflare.zoneID }}
+        - --cloudflare-dns-records-per-page={{
+          .Values.cloudflare.dnsRecordsPerPage | default 5000 }}
+        env:
+        - name: CF_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cloudflare
+              key: token
 {{- end -}}
 {{- end -}}
 {{- define "k8gb.metrics_port" -}}

@@ -1,4 +1,4 @@
-{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled }}
+{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled .Values.cloudflare.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
