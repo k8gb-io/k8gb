@@ -15,4 +15,4 @@ This list is sorted in the order that organizations were added to it.
 | ------------ | ------- | ------------------ |
   [Absa](https://www.absa.co.za/) | @kuritka | K8GB was created in Absa and had there first production use in cross-regional datacenter context
 [Millennium bcp](https://www.millenniumbcp.pt/) | @infbase | Multicloud and multi-region cloud native load balancing
-[Eficode](https://eficode.com/) | @punasusi | As a cloud-native and devops consulting firm, we have used k8gb customer engagementsp
+[Eficode](https://eficode.com/) | @punasusi | As a cloud-native and devops consulting firm, we have used k8gb in customer engagements
