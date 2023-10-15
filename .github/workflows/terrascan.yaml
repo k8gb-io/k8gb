@@ -26,7 +26,7 @@ jobs:
       uses: actions/checkout@8530928916aaef40f59e6f221989ccb31f5759e7
     - name: Run Terrascan
       id: terrascan
-      uses: accurics/terrascan-action@81d74415906b5418095567a13d1ddb7f48c50cd2
+      uses: accurics/terrascan-action@a4b0f7ec5fb3c4c66b8e76d824d958002f6ce12c
       with:
         iac_type: helm
         iac_version: v3
