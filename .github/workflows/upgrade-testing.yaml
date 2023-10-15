@@ -43,7 +43,7 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+      - uses: actions/checkout@8530928916aaef40f59e6f221989ccb31f5759e7
         with:
           fetch-depth: 0
 
