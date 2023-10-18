@@ -7,6 +7,10 @@ on:
         description: Version of the bundle that should be generated. If not provided, the latest release tag is taken. Use 'master' for incorporating the latest changes in repo
         required: false
         default: ""
+      downstreamRepo:
+          description: "The pull request will be opened from this repository"
+          required: true
+          default: "k8gb-io/community-operators"
       upstreamRepo:
         description: "The pull request will be opened against this repository"
         required: true
@@ -74,7 +78,7 @@ jobs:
         uses: peter-evans/create-pull-request@0cd7ff0e63a08ac27378fc70cf0df976be6bbbfa
         with:
           token: ${{ secrets.CR_TOKEN }}
-          push-to-fork: k8gb-io/community-operators
+          push-to-fork: ${{ github.event.inputs.downstreamRepo }}
           path: sandbox
           commit-message: OLM bundle for k8gb@${{ env.bundleDir }}
           title: operators k8gb (${{ env.bundleDir }})
