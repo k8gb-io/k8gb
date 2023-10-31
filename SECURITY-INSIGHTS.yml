@@ -63,6 +63,8 @@ dependencies:
   third-party-packages: true
   dependencies-lists:
   - https://github.com/k8gb-io/k8gb/blob/master/go.mod
+  env-dependencies-policy:
+    policy-url: https://github.com/k8gb-io/k8gb/blob/main/DEPENDENCY.md
   sbom:
   - sbom-file: https://github.com/k8gb-io/k8gb/releases/download/v0.11.5/k8gb_0.11.5_linux_amd64.tar.gz.sbom.json
     sbom-format: SPDX
