@@ -1,0 +1,69 @@
+header:
+  schema-version: 1.0.0
+  expiration-date: '2024-12-31T23:23:59.000Z'
+  last-updated: '2023-10-26'
+  last-reviewed: '2022-10-26'
+  commit-hash: d01f1a8e2c9918c15b8e640f9be86a4c0be46c9d
+  project-url: https://github.com/k8gb-io/k8gb
+  project-release: '0.11.5'
+  changelog: https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md
+  license: https://github.com/k8gb-io/k8gb/blob/master/LICENSE.md
+
+project-lifecycle:
+  status: active
+  roadmap: https://github.com/orgs/k8gb-io/projects/2/views/2
+  bug-fixes-only: false
+  core-maintainers:
+  - https://github.com/jkremser
+  - https://github.com/k0da
+  - https://github.com/kuritka
+  - https://github.com/ytsarev
+  - https://github.com/somaritane
+  release-cycle: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#release-process
+  release-process: |
+      Fully automated & pull-request based
+
+contribution-policy:
+  accepts-pull-requests: true
+  accepts-automated-pull-requests: true
+  automated-tools-list:
+  - automated-tool: renovate
+    action: allowed
+    path:
+    - .github/workflows
+    - go.mod
+    - go.sum
+    - Dockerfile
+    - chart/k8gb/values.yaml
+  contributing-policy: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md
+  code-of-conduct: https://github.com/k8gb-io/k8gb/blob/master/code-of-conduct.md
+
+documentation:
+  - https://www.k8gb.io/docs/
+
+distribution-points:
+  - https://github.com/k8gb-io/k8gb/releases
+  - https://hub.docker.com/r/absaoss/k8gb/tags
+
+security-contacts:
+- type: email
+  value: cncf-k8gb-maintainers@lists.cncf.io
+  primary: true
+- type: email
+  value: yury@upbound.io
+  primary: false
+
+vulnerability-reporting:
+  accepts-vulnerability-reports: true
+  email-contact: cncf-k8gb-maintainers@lists.cncf.io
+  security-policy: https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md
+  bug-bounty-available: false
+
+dependencies:
+  third-party-packages: true
+  dependencies-lists:
+  - https://github.com/k8gb-io/k8gb/blob/master/go.mod
+  sbom:
+  - sbom-file: https://github.com/k8gb-io/k8gb/releases/download/v0.11.5/k8gb_0.11.5_linux_amd64.tar.gz.sbom.json
+    sbom-format: SPDX
+    sbom-url: https://github.com/k8gb-io/k8gb/releases/
