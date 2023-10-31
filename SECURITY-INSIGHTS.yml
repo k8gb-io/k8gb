@@ -45,12 +45,13 @@ distribution-points:
   - https://github.com/k8gb-io/k8gb/releases
   - https://hub.docker.com/r/absaoss/k8gb/tags
 
-self-assessment:
-  self-assessment-created: true
-  evidence-url:
-  - https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md
-  comment: |
-    Created on 2023-10-31
+security-artifacts:
+  self-assessment:
+    self-assessment-created: true
+    evidence-url:
+    - https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md
+    comment: |
+      Created on 2023-10-31
 
 security-contacts:
 - type: email
