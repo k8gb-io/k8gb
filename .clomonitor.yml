@@ -1,0 +1,4 @@
+# Checks exemptions
+exemptions:
+  - check: self_assessment
+    reason: "The check seems to be broken, we have the /self-assessment.md file present and linked from /SECURITY-INSIGHTS.yml"
