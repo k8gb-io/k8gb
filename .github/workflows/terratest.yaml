@@ -10,6 +10,9 @@ on:
   pull_request:
     branches:
       - master
+    # The specific activity types are listed here to include "labeled" and "unlabeled"
+    # (which are not included by default for the "pull_request" trigger).
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
     paths-ignore:
       - '**.md'
       - '**.svg'
@@ -41,7 +44,7 @@ jobs:
   terratest:
     runs-on: ubuntu-22.04
     needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
     steps:
       - uses: actions/checkout@8530928916aaef40f59e6f221989ccb31f5759e7
         with:
