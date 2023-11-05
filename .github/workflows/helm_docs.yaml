@@ -24,7 +24,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
     - name: Generate docs for helm chart - chart/k8gb/README.md
-      uses: docker://jnorwood/helm-docs@sha256:66c8f4164dec860fa5c1528239c4aa826a12485305b7b224594b1a73f7e6879a
+      uses: docker://jnorwood/helm-docs@sha256:c9b1a275ddc60ea1de290ced305dcc1412543e0624123d8b5182758880b12499
       with:
         args: --template-files=_helm-docs-template.gotmpl
     - name: Create Pull Request
