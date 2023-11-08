@@ -6,6 +6,8 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 spec:
+  endpoints:
+  - port: metrics
   selector:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
