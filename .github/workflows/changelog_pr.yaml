@@ -44,7 +44,7 @@ jobs:
           cat CHANGELOG-old.md | sed -e'1,2d' >> CHANGELOG.md
           rm CHANGELOG-old.md CHANGELOG-latest.md
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@0cd7ff0e63a08ac27378fc70cf0df976be6bbbfa
+        uses: peter-evans/create-pull-request@d7c27ba1b126e97b7c653dfbca2bd0aa018ba7a4
         with:
           title: "Update Offline Changelog"
           branch: offline_changelog
