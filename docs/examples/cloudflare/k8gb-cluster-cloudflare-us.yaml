@@ -1,0 +1,17 @@
+k8gb:
+  dnsZone: "cloudflare-test.k8gb.io"
+  # -- main zone which would contain gslb zone to delegate
+  edgeDNSZone: "k8gb.io" # main zone which would contain gslb zone to delegate
+  # -- used for places where we need to distinguish between different Gslb instances
+  clusterGeoTag: "us"
+  # -- comma-separated list of external gslb geo tags to pair with
+  extGslbClustersGeoTags: "eu"
+
+cloudflare:
+  # -- Enable Cloudflare provider
+  enabled: true
+  # -- Cloudflare Zone ID
+  zoneID: cdebf92e613133e4bb176a14a9c5b730
+  # -- Configure how many DNS records to fetch per request
+  # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
+  dnsRecordsPerPage: 5000

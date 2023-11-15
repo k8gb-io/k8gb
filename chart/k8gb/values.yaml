@@ -118,10 +118,6 @@ ns1:
   # endpoint: https://api.nsone.net/v1/
   ignoreSSL: false
 
-openshift:
-  # -- Install OpenShift specific RBAC
-  enabled: false
-
 rfc2136:
   enabled: false
   rfc2136Opts:
@@ -129,6 +125,21 @@ rfc2136:
     - port: 1053
     - tsig-secret-alg: hmac-sha256
     - tsig-keyname: externaldns-key
+
+cloudflare:
+  # -- Enable Cloudflare provider
+  enabled: false
+  # -- Cloudflare Zone ID
+  # follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/
+  # to find your zoneID value
+  zoneID: replaceme
+  # -- Configure how many DNS records to fetch per request
+  # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
+  dnsRecordsPerPage: 5000
+
+openshift:
+  # -- Install OpenShift specific RBAC
+  enabled: false
 
 tracing:
   # -- if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`)
