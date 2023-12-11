@@ -32,7 +32,6 @@ import (
 // TestFailoverPlayground is equal to k8gb failover test running on local playground.
 // see: https://github.com/k8gb-io/k8gb/blob/master/docs/local.md#failover
 func TestFailoverPlayground(t *testing.T) {
-	t.Parallel()
 	const host = "playground-failover.cloud.example.com"
 	const gslbPath = "../examples/failover-playground.yaml"
 	const euGeoTag = "eu"
