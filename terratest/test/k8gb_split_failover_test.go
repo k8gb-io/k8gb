@@ -39,7 +39,6 @@ import (
 // Relies on two local clusters deployed by `$make deploy-two-local-clusters`
 // Tests expected behavior for https://github.com/k8gb-io/k8gb/issues/67
 func TestK8gbSplitFailoverExample(t *testing.T) {
-	t.Parallel()
 
 	// Path to the Kubernetes resource config we will test
 	kubeResourcePath1, err := filepath.Abs("../examples/failover1.yaml")
