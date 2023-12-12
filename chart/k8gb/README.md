@@ -63,7 +63,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | externaldns.interval | string | `"20s"` | external-dns sync interval |
 | externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
 | externaldns.securityContext.runAsNonRoot | bool | `true` |  |
-| externaldns.securityContext.runAsUser | int | `1000` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core |
+| externaldns.securityContext.runAsUser | int | `1000` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core |
 | global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
 | infoblox.gridHost | string | `"10.0.0.1"` | WAPI address |
@@ -91,7 +91,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.reconcileRequeueSeconds | int | `30` | Reconcile time in seconds |
 | k8gb.securityContext.allowPrivilegeEscalation | bool | `false` |  |
 | k8gb.securityContext.readOnlyRootFilesystem | bool | `true` |  |
-| k8gb.securityContext.runAsNonRoot | bool | `true` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core |
+| k8gb.securityContext.runAsNonRoot | bool | `true` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core |
 | k8gb.securityContext.runAsUser | int | `1000` |  |
 | k8gb.serviceMonitor | object | `{"enabled":false}` | enable ServiceMonitor |
 | k8gb.splitBrainCheck | bool | `false` | Enable SplitBrain check (Infoblox only) |
