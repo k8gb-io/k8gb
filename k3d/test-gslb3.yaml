@@ -2,6 +2,8 @@ apiVersion: k3d.io/v1alpha4
 kind: Simple
 metadata:
   name: test-gslb3
+# Used by renovate
+# repo: rancher/k3s
 image: docker.io/rancher/k3s:v1.28.3-k3s2
 agents: 1
 network: k3d-action-bridge-network
