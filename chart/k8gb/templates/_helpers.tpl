@@ -72,6 +72,9 @@ Create the name of the service account to use
 {{- if .Values.rfc2136.enabled }}
 {{- print "rfc2136" -}}
 {{- end -}}
+{{- if .Values.cloudflare.enabled }}
+{{- print "cloudflare" -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "k8gb.extdnsOwnerID" -}}
@@ -105,24 +108,32 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               name: ns1
               key: apiKey
 {{- end }}
-{{- if .Values.rfc2136.enabled -}}
-        - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
-        - --rfc2136-tsig-axfr
-{{- range $k, $v := .Values.rfc2136.rfc2136Opts }}
-{{- range $kk, $vv := $v }}
-        - --rfc2136-{{ $kk }}={{ $vv }}
-
-{{- end -}}
-{{- end }}
-{{- if .Values.rfc2136.rfc2136auth.insecure.enabled }}
+{{- if .Values.rfc2136.rfc2136auth.insecure.enabled -}}
         - --rfc2136-insecure
 {{- end -}}
-{{- if .Values.rfc2136.rfc2136auth.tsig.enabled }}
-{{- range $k, $v := .Values.rfc2136.rfc2136auth.tsig.tsigCreds }}
+{{- if .Values.rfc2136.rfc2136auth.tsig.enabled -}}
+        - --rfc2136-tsig-axfr
+{{- range $k, $v := .Values.rfc2136.rfc2136auth.tsig.tsigCreds -}}
 {{- range $kk, $vv := $v }}
         - --rfc2136-{{ $kk }}={{ $vv }}
-{{- end -}}
 {{- end }}
+{{- end }}
+{{- end -}}
+{{- if .Values.rfc2136.rfc2136auth.gssTsig.enabled -}}
+        - --rfc2136-gss-tsig
+{{- range $k, $v := .Values.rfc2136.rfc2136auth.gssTsig.gssTsigCreds -}}
+{{- range $kk, $vv := $v }}
+        - --rfc2136-{{ $kk }}={{ $vv }}
+{{- end }}
+{{- end }}
+{{- end -}}
+{{ if .Values.rfc2136.enabled -}}
+{{- range $k, $v := .Values.rfc2136.rfc2136Opts -}}
+{{- range $kk, $vv := $v }}
+        - --rfc2136-{{ $kk }}={{ $vv }}
+{{- end }}
+{{- end }}
+        - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
         env:
         - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
           valueFrom:
@@ -130,15 +141,16 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               name: rfc2136
               key: secret
 {{- end -}}
-{{- if .Values.rfc2136.rfc2136auth.gssTsig.enabled }}
-        - --rfc2136-gss-tsig
-{{- range $k, $v := .Values.rfc2136.rfc2136auth.gssTsig.gssTsigCreds }}
-{{- range $kk, $vv := $v }}
-        - --rfc2136-{{ $kk }}={{ $vv }}
-{{- end -}}
-{{- end }}
-{{- end -}}
-
+{{- if .Values.cloudflare.enabled -}}
+        - --zone-id-filter={{ .Values.cloudflare.zoneID }}
+        - --cloudflare-dns-records-per-page={{
+          .Values.cloudflare.dnsRecordsPerPage | default 5000 }}
+        env:
+        - name: CF_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cloudflare
+              key: token
 {{- end -}}
 {{- end -}}
 {{- define "k8gb.metrics_port" -}}

@@ -35,7 +35,6 @@ func abstractTestFullRoundRobin(t *testing.T, n int) {
 	tags := []string{"eu", "us", "cz", "af", "ru", "ap", "uk", "ca"}
 	var instances []*utils.Instance
 
-	t.Parallel()
 	const host = "roundrobin-test.cloud.example.com"
 	const gslbPath = "../examples/roundrobin2.yaml"
 

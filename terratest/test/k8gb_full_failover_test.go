@@ -29,7 +29,6 @@ import (
 )
 
 func TestFullFailover(t *testing.T) {
-	t.Parallel()
 	const host = "terratest-failover.cloud.example.com"
 	const gslbPath = "../examples/failover.yaml"
 

@@ -37,7 +37,6 @@ import (
 // TestK8gbRepeatedlyRecreatedFromIngress creates GSLB, then keeps operator live and than recreates GSLB again from Ingress.
 // This is usual lifecycle scenario and we are testing spec strategy has expected values.
 func TestK8gbRepeatedlyRecreatedFromIngress(t *testing.T) {
-	t.Parallel()
 	// name of ingress and gslb
 	const name = "test-gslb-failover-simple"
 

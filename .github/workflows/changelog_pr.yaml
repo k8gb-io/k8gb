@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
+        uses: step-security/harden-runner@ea8b747819ff6d82907eb4018229f1a75c174697
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
           fetch-depth: 0
-      - uses: heinrichreimer/github-changelog-generator-action@6653241a44afb59146f719f322005de49a5c3b38
+      - uses: heinrichreimer/github-changelog-generator-action@e60b5a2bd9fcd88dadf6345ff8327863fb8b490f
         with:
           token: ${{ secrets.CR_TOKEN }}
           project: k8gb
@@ -44,7 +44,7 @@ jobs:
           cat CHANGELOG-old.md | sed -e'1,2d' >> CHANGELOG.md
           rm CHANGELOG-old.md CHANGELOG-latest.md
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@0cd7ff0e63a08ac27378fc70cf0df976be6bbbfa
+        uses: peter-evans/create-pull-request@d7c27ba1b126e97b7c653dfbca2bd0aa018ba7a4
         with:
           title: "Update Offline Changelog"
           branch: offline_changelog

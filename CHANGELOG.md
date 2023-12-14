@@ -1,5 +1,23 @@
 # Changelog
 
+## [v0.11.5](https://github.com/k8gb-io/k8gb/tree/v0.11.5) (2023-09-11)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.11.4...v0.11.5)
+
+**Merged pull requests:**
+
+- RELEASE: v0.11.5 [\#1269](https://github.com/k8gb-io/k8gb/pull/1269) ([kuritka](https://github.com/kuritka))
+- Update Helm Docs [\#1268](https://github.com/k8gb-io/k8gb/pull/1268) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Change Extra plugins from object to string [\#1266](https://github.com/k8gb-io/k8gb/pull/1266) ([kuritka](https://github.com/kuritka))
+- chore\(deps\): update docker/build-push-action digest to 0a97817 [\#1262](https://github.com/k8gb-io/k8gb/pull/1262) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Offline Changelog [\#1261](https://github.com/k8gb-io/k8gb/pull/1261) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#1260](https://github.com/k8gb-io/k8gb/pull/1260) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update actions/upload-artifact digest to a8a3f3a [\#1258](https://github.com/k8gb-io/k8gb/pull/1258) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/checkout digest to 72f2cec [\#1256](https://github.com/k8gb-io/k8gb/pull/1256) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/setup-go digest to 883490d [\#1250](https://github.com/k8gb-io/k8gb/pull/1250) ([renovate[bot]](https://github.com/apps/renovate))
+
+
+
 ## [v0.11.4](https://github.com/k8gb-io/k8gb/tree/v0.11.4) (2023-09-07)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.11.2...v0.11.4)

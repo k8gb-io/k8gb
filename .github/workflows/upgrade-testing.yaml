@@ -10,6 +10,9 @@ on:
   pull_request:
     branches:
       - master
+    # The specific activity types are listed here to include "labeled" and "unlabeled"
+    # (which are not included by default for the "pull_request" trigger).
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
     paths-ignore:
       - '**.md'
       - '**.svg'
@@ -28,12 +31,12 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05
+      uses: step-security/harden-runner@ea8b747819ff6d82907eb4018229f1a75c174697
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - id: skip_check
-      uses: fkirc/skip-duplicate-actions@fc7bbd5283bce15e0594f80a57e0d4ca070b4b4b
+      uses: fkirc/skip-duplicate-actions@2d93cbdfaef6dfa549606668cfb9228c96fa0816
       with:
         skip_after_successful_duplicate: 'true'
         do_not_skip: '["workflow_dispatch", "schedule"]'
@@ -41,18 +44,18 @@ jobs:
   upgrade-testing:
     runs-on: ubuntu-22.04
     needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
     steps:
-      - uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@883490dfd06f396ebe0b738bc313a53cf9d851e5
+      - uses: actions/setup-go@bfd2fb341f32be7281829126376a12a780ca79fc
         with:
           go-version: 1.19.1
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@a10d0e32dce991f86e53faa7b4f269dedb82632f
+        uses: goreleaser/goreleaser-action@44dd9927f499a126e26ae024981569ce889f15aa
         with:
           version: v1.9.2
           args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign
@@ -94,7 +97,7 @@ jobs:
         if: always()
         uses: ./.github/actions/print-debug
 
-      - uses: actions/upload-artifact@65d862660abb392b8c4a3d1195a2108db131dd05
+      - uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
         if: always()
         with:
           name: terratest-logs

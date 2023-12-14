@@ -31,7 +31,7 @@ k8gb:
   reconcileRequeueSeconds: 30
   # -- Extra CoreDNS plugins to be enabled (yaml object)
   coredns:
-    extra_plugins: {}
+    extra_plugins: ""
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)
@@ -42,7 +42,7 @@ k8gb:
   # -- Metrics server address
   metricsAddress: "0.0.0.0:8080"
   securityContext:
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core
     runAsNonRoot: true
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
@@ -63,7 +63,7 @@ externaldns:
   # -- external-dns sync interval
   interval: "20s"
   securityContext:
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
+    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core
     runAsUser: 1000
     # -- For ExternalDNS to be able to read Kubernetes and AWS token files
     fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
@@ -118,10 +118,6 @@ ns1:
   # endpoint: https://api.nsone.net/v1/
   ignoreSSL: false
 
-openshift:
-  # -- Install OpenShift specific RBAC
-  enabled: false
-
 rfc2136:
   enabled: false
   rfc2136Opts:
@@ -142,6 +138,21 @@ rfc2136:
         - kerberos-username: ad-user
         - kerberos-password: ad-user-pass
         - kerberos-realm: ad-domain-realm
+
+cloudflare:
+  # -- Enable Cloudflare provider
+  enabled: false
+  # -- Cloudflare Zone ID
+  # follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/
+  # to find your zoneID value
+  zoneID: replaceme
+  # -- Configure how many DNS records to fetch per request
+  # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
+  dnsRecordsPerPage: 5000
+
+openshift:
+  # -- Install OpenShift specific RBAC
+  enabled: false
 
 tracing:
   # -- if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`)

@@ -1,4 +1,4 @@
-{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled }}
+{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled .Values.cloudflare.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,6 +30,7 @@ spec:
         - --managed-record-types=NS
         - --annotation-filter=k8gb.absa.oss/dnstype=extdns # filter out only relevant DNSEntrypoints
         - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
+        - --txt-prefix=k8gb-{{ .Values.k8gb.clusterGeoTag }}- # add custom prefix to TXT records, critical for Cloudflare NS record creation
         - --provider={{ include "k8gb.extdnsProvider" . }}
         {{- if .Values.route53.assumeRoleArn }}
         - --aws-assume-role={{ .Values.route53.assumeRoleArn }}

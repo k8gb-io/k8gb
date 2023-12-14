@@ -27,11 +27,14 @@
                 "ns1": {
                     "$ref": "#/definitions/Ns1"
                 },
-                "openshift": {
-                    "$ref": "#/definitions/Openshift"
-                },
                 "rfc2136": {
                     "$ref": "#/definitions/Rfc2136"
+                },
+                "cloudflare": {
+                    "$ref": "#/definitions/Cloudflare"
+                },
+                "openshift": {
+                    "$ref": "#/definitions/Openshift"
                 },
                 "tracing": {
                     "$ref": "#/definitions/Tracing"
@@ -337,7 +340,7 @@
             "additionalProperties": false,
             "properties": {
                 "extra_plugins": {
-                    "type": "object"
+                    "type": "string"
                 }
             },
             "title": "k8gbCoredns"
@@ -580,6 +583,26 @@
                 "irsaRole"
             ],
             "title": "Route53"
+        },
+        "Cloudflare": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "dnsRecordsPerPage": {
+                    "type": "integer"
+                },
+                "zoneID": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "enabled",
+		"zoneID"
+            ],
+            "title": "Cloudflare"
         },
         "Tracing": {
             "type": "object",

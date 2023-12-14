@@ -22,7 +22,7 @@ Sidecar use-case:
 ### Deployment
 
 By default the tracing is disabled and no sidecar container is being created during the k8gb deployment. To
-enable the tracing, one has to set the `tracing.enabled=true` in Helm Chart. This will create the sidecar container for k8gb deployment, tweaks couple of env vars there. It will create the [configmap](https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/templates/otel/otel-config.yaml) for OTEL sidecar. This configuration of OTEL collector can be overriden by `tracing.otelConfig`.
+enable the tracing, one has to set the `tracing.enabled=true` in Helm Chart. This will create the sidecar container for k8gb deployment, tweaks couple of env vars there. It will create the [configmap](https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/templates/otel/otel-config.yaml) for OTEL sidecar. This configuration of OTEL collector can be overridden by `tracing.otelConfig`.
 
 If you need something quickly up and running, make sure that `tracing.deployJaeger` is also set to `true`.
 In this scenario you will end up also with Jaeger deployed and service for it. To be able to access it one can continue with:

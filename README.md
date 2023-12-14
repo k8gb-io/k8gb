@@ -107,6 +107,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 * [AWS based deployment with Route53 integration](/docs/deploy_route53.md)
 * [AWS based deployment with NS1 integration](/docs/deploy_ns1.md)
 * [Azure based deployment with Windows DNS integration](/docs/deploy_windowsdns.md)
+* [General deployment with Cloudflare integration](/docs/deploy_cloudflare.md)
 * [Local playground for testing and development](/docs/local.md)
 * [Local playground with Kuar web app](/docs/local-kuar.md)
 * [Metrics](/docs/metrics.md)
