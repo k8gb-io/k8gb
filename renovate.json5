@@ -5,7 +5,7 @@
     "group:allNonMajor",
   ],
   "ignoreDeps": [
-    "infobloxopen/infoblox-go-client",
+    "github.com/infobloxopen/infoblox-go-client",
     "zricethezav/gitleaks-action",
     "actions/setup-go",
   ],
@@ -17,40 +17,6 @@
   "prConcurrentLimit": 5,
   "packageRules": [
     {
-      "matchDatasources": [
-        "go",
-      ],
-      "groupName": "kubernetes packages",
-      "groupSlug": "kubernetes-go",
-      "matchPackagePrefixes": [
-        "k8s.io/api",
-        "k8s.io/apiextensions-apiserver",
-        "k8s.io/apimachinery",
-        "k8s.io/apiserver",
-        "k8s.io/cli-runtime",
-        "k8s.io/client-go",
-        "k8s.io/cloud-provider",
-        "k8s.io/cluster-bootstrap",
-        "k8s.io/code-generator",
-        "k8s.io/component-base",
-        "k8s.io/controller-manager",
-        "k8s.io/cri-api",
-        "k8s.io/csi-translation-lib", 
-        "k8s.io/kube-aggregator",
-        "k8s.io/kube-controller-manager",
-        "k8s.io/kube-proxy",
-        "k8s.io/kube-scheduler",
-        "k8s.io/kubectl",
-        "k8s.io/kubelet",
-        "k8s.io/legacy-cloud-providers",
-        "k8s.io/metrics",
-        "k8s.io/mount-utils",
-        "k8s.io/pod-security-admission",
-        "k8s.io/sample-apiserver",
-        "k8s.io/sample-cli-plugin",
-        "k8s.io/sample-controller",
-      ]
-    }, {
       "matchPackagePatterns": [
         "*",
       ],
@@ -60,6 +26,12 @@
       ],
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch"
+    }, {
+        "matchPackageNames": [
+        "rancher/k3s",
+      ],
+      "groupName": "update k8s version",
+      "groupSlug": "update-k8s-version"
     }, {
       "matchDepTypes": [
         "action",
@@ -72,9 +44,9 @@
       "fileMatch": ["^SECURITY-INSIGHTS.yml$"],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "k8gb-io/k8gb",
-      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "extractVersionTemplate": "^v?(?<version>.*)['\"]?$",
       "matchStrings": [
-        "\\s*project-release: ['\"]?v?(?<currentValue>.+)['\"]?",
+        "\\s*project-release: ['\"]?v?(?<currentValue>[^'\"]+)['\"]?",
       ],
     },
     {
@@ -83,9 +55,18 @@
       "depNameTemplate": "k8gb-io/k8gb",
       "extractVersionTemplate": "^v?(?<version>.*)$",
       "matchStrings": [
-        "\\s*- sbom-file: ['\"](.+)\\/download\\/v(?<currentValue>.+)\\/(.+)",
+        "\\s*- sbom-file: ['\"]?(.+)\\/download\\/v(?<currentValue>.+)\\/(.+)['\"]?",
       ],
       "autoReplaceStringTemplate": "  - sbom-file: https://github.com/{{{depName}}}/releases/download/v{{{newValue}}}/k8gb_{{{newValue}}}_linux_amd64.tar.gz.sbom.json"
+    },
+    // update the files in k3d/ with the up-to-date k8s version
+    {
+      "fileMatch": ["^k3d/.*y[a]?ml.*$"],
+      "datasourceTemplate": "docker",
+      "matchStrings": [
+        "repo: (?<depName>.*)\n(\\s*)image: \"?.+:(?<currentValue>.*?)\"?\n",
+      ],
+      "extractVersionTemplate": "^(?<version>.+)(-k3s2)?$",
     },
   ],
 }
