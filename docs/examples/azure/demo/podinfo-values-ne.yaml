@@ -1,0 +1,7 @@
+image:
+  pullPolicy: IfNotPresent
+  repository: ghcr.io/stefanprodan/podinfo
+  tag: 6.2.3
+replicaCount: 1
+ui:
+  message: cluster2-ne

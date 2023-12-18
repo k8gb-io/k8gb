@@ -45,4 +45,16 @@ spec:
             cpu: "500m"
         securityContext:
           readOnlyRootFilesystem: true
+      {{- if .Values.rfc2136.rfc2136auth.gssTsig.enabled }}
+        volumeMounts:
+          - mountPath: /etc/krb5.conf
+            name: kerberos-config-volume
+            subPath: krb5.conf
+      volumes:
+        - name: kerberos-config-volume
+          configMap:
+            name: {{ .Values.rfc2136.rfc2136auth.gssTsig.kerberosConfigmap }}
+            defaultMode: 420
+      {{- end }}
+        
 {{- end }}

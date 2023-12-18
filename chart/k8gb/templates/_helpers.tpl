@@ -108,14 +108,32 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               name: ns1
               key: apiKey
 {{- end }}
-{{- if .Values.rfc2136.enabled -}}
-        - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
+{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.insecure.enabled true) -}}
+        - --rfc2136-insecure
+{{- end -}}
+{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.tsig.enabled true) -}}
         - --rfc2136-tsig-axfr
-{{- range $k, $v := .Values.rfc2136.rfc2136Opts }}
+{{- range $k, $v := .Values.rfc2136.rfc2136auth.tsig.tsigCreds -}}
 {{- range $kk, $vv := $v }}
         - --rfc2136-{{ $kk }}={{ $vv }}
-{{- end -}}
 {{- end }}
+{{- end }}
+{{- end -}}
+{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.gssTsig.enabled true) -}}
+        - --rfc2136-gss-tsig
+{{- range $k, $v := .Values.rfc2136.rfc2136auth.gssTsig.gssTsigCreds -}}
+{{- range $kk, $vv := $v }}
+        - --rfc2136-{{ $kk }}={{ $vv }}
+{{- end }}
+{{- end }}
+{{- end -}}
+{{ if .Values.rfc2136.enabled -}}
+{{- range $k, $v := .Values.rfc2136.rfc2136Opts -}}
+{{- range $kk, $vv := $v }}
+        - --rfc2136-{{ $kk }}={{ $vv }}
+{{- end }}
+{{- end }}
+        - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
         env:
         - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
           valueFrom:
