@@ -108,10 +108,10 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
               name: ns1
               key: apiKey
 {{- end }}
-{{- if .Values.rfc2136.rfc2136auth.insecure.enabled -}}
+{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.insecure.enabled true) -}}
         - --rfc2136-insecure
 {{- end -}}
-{{- if .Values.rfc2136.rfc2136auth.tsig.enabled -}}
+{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.tsig.enabled true) -}}
         - --rfc2136-tsig-axfr
 {{- range $k, $v := .Values.rfc2136.rfc2136auth.tsig.tsigCreds -}}
 {{- range $kk, $vv := $v }}
@@ -119,7 +119,7 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- end }}
 {{- end }}
 {{- end -}}
-{{- if .Values.rfc2136.rfc2136auth.gssTsig.enabled -}}
+{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.gssTsig.enabled true) -}}
         - --rfc2136-gss-tsig
 {{- range $k, $v := .Values.rfc2136.rfc2136auth.gssTsig.gssTsigCreds -}}
 {{- range $kk, $vv := $v }}

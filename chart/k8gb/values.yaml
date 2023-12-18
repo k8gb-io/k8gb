@@ -127,7 +127,7 @@ rfc2136:
     insecure: 
       enabled: false
     tsig:
-      enabled: false
+      enabled: true
       tsigCreds:
         - tsig-secret-alg: hmac-sha256
         - tsig-keyname: externaldns-key

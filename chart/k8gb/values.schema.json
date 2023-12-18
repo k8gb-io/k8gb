@@ -477,7 +477,8 @@
             "additionalProperties": false,
             "properties": {
                 "enabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                 },
                 "tsigCreds": {
                     "type": "array",
