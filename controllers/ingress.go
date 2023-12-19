@@ -43,7 +43,7 @@ func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, er
 			Namespace:   gslb.Namespace,
 			Annotations: gslb.Annotations,
 		},
-		Spec: k8gbv1beta1.ToV1IngressSpec(gslb.Spec.Ingress),
+		Spec: k8gbv1beta1.ToV1IngressSpec(*gslb.Spec.Ingress),
 	}
 
 	err := controllerutil.SetControllerReference(gslb, ingress, r.Scheme)

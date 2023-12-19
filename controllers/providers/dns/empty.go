@@ -46,6 +46,10 @@ func (p *EmptyDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) (r []st
 	return p.assistant.GslbIngressExposedIPs(gslb)
 }
 
+func (p *EmptyDNSProvider) GslbServiceExposedIPs(gslb *k8gbv1beta1.Gslb) (r []string, err error) {
+	return p.assistant.GslbServiceExposedIPs(gslb)
+}
+
 func (p *EmptyDNSProvider) GetExternalTargets(host string) (targets assistant.Targets) {
 	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
 }

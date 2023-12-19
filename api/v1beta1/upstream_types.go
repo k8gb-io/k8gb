@@ -146,6 +146,17 @@ func (in *IngressSpec) DeepCopyInto(out *IngressSpec) {
 	}
 }
 
+// LoadBalancer defines the desired state of Gslb
+// +k8s:openapi-gen=true
+type LoadBalancer struct {
+	// Host is the fully qualified domain name of a network host, as defined by RFC 3986.
+	// This is the host name to be used as global domain name while creating GSLB records.
+	Host string `json:"host"`
+	// ServiceName is the name of the Service resource being exposed.
+	// Only LoadBalancer Service type is supported.
+	ServiceName string `json:"serviceName"`
+}
+
 // DeepCopyInto copying the receiver, writing into out. in must be non-nil.
 func (in *IngressRule) DeepCopyInto(out *IngressRule) {
 	*out = *in
@@ -163,7 +174,7 @@ func (in *IngressRuleValue) DeepCopyInto(out *IngressRuleValue) {
 }
 
 // FromV1IngressSpec transforms from networking.k8s.io/v1 IngressSpec to custom k8gb ingress Spec
-func FromV1IngressSpec(v1Spec netv1.IngressSpec) IngressSpec {
+func FromV1IngressSpec(v1Spec netv1.IngressSpec) *IngressSpec {
 	spec := IngressSpec{}
 	spec.DefaultBackend = v1Spec.DefaultBackend
 	spec.IngressClassName = v1Spec.IngressClassName
@@ -177,7 +188,7 @@ func FromV1IngressSpec(v1Spec netv1.IngressSpec) IngressSpec {
 		}
 		spec.Rules = append(spec.Rules, rule)
 	}
-	return spec
+	return &spec
 }
 
 // ToV1IngressSpec transforms from k8gb ingress Spec to networking.k8s.io/v1 IngressSpec
