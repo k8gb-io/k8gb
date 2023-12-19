@@ -101,15 +101,15 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | rfc2136.enabled | bool | `false` |  |
 | rfc2136.rfc2136Opts[0].host | string | `"host.k3d.internal"` |  |
 | rfc2136.rfc2136Opts[1].port | int | `1053` |  |
-| rfc2136.rfc2136auth.insecure.enabled | bool | `false` | Set to True if insecure updates to the DNS provided can be executed by ExternalDNS |
-| rfc2136.rfc2136auth.tsig.enabled | bool | `false` | Set to True if the DNS server uses TSIG authentication for DNS updates by ExternalDNS |
-| rfc2136.rfc2136auth.tsig.tsigCreds[0].tsig-secret-alg | string | `"hmac-sha256"` | Algorithm used to generate the token for TSIG |
+| rfc2136.rfc2136auth.gssTsig.enabled | bool | `false` |  |
+| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[0].kerberos-username | string | `"ad-user"` |  |
+| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[1].kerberos-password | string | `"ad-user-pass"` |  |
+| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[2].kerberos-realm | string | `"ad-domain-realm"` |  |
+| rfc2136.rfc2136auth.gssTsig.kerberosConfigMap | string | `"kerberos-config"` |  |
+| rfc2136.rfc2136auth.insecure.enabled | bool | `false` |  |
+| rfc2136.rfc2136auth.tsig.enabled | bool | `true` |  |
+| rfc2136.rfc2136auth.tsig.tsigCreds[0].tsig-secret-alg | string | `"hmac-sha256"` |  |
 | rfc2136.rfc2136auth.tsig.tsigCreds[1].tsig-keyname | string | `"externaldns-key"` |  |
-| rfc2136.rfc2136auth.gssTsig.enabled | bool | `false` | Set to True if the DNS server uses GSS-TSIG (Kerberos) authentication for DNS updates by ExternalDNS |
-| rfc2136.rfc2136auth.gssTsig.kerberosConfigMap | string | `"kerberos-configmap"` | When using GSS-TSIG, a ConfigMap with a valid krb5.conf configuration should be provided |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[0].kerberos-username | string | `"ad-user-account"` | AD user account with permissions for DNS updates |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[1].kerberos-password | string | `"ad-user-account-password"` | Passowrd of the AD user account |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[2].kerberos-realm | string | `"REALM.DOMAIN"` | Kerberos REALM that should be used for authentication |
 | route53.assumeRoleArn | string | `nil` | specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null` |
 | route53.enabled | bool | `false` | Enable Route53 provider |
 | route53.hostedZoneID | string | `"ZXXXSSS"` | Route53 ZoneID |
