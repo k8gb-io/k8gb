@@ -106,7 +106,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76 # renovate: tag=v2.7.0
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
         with:
           cosign-release: 'v1.12.1'
 
@@ -162,7 +162,7 @@ jobs:
           [ "x${{steps.provenance-step.outcome}}" == "xfailure" ] && echo ":x: Uploading provenance for release failed, make sure to delete all the previous releases in GitHub web api before releasing." > "$GITHUB_STEP_SUMMARY" || true
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76 # renovate: tag=v2.7.0
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
         with:
           cosign-release: 'v1.12.1'
 
@@ -202,7 +202,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ced07f21fb1da67979f539bbc6304c16c0677e76 # renovate: tag=v2.7.0
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
         with:
           cosign-release: 'v1.12.1'
 
