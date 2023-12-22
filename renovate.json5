@@ -28,6 +28,12 @@
       "groupSlug": "all-minor-patch"
     }, {
         "matchPackageNames": [
+        "k8gb-io/k8gb",
+      ],
+      "groupName": "update SECURITY-INSIGHTS.yml",
+      "groupSlug": "update-security-insights"
+    }, {
+        "matchPackageNames": [
         "rancher/k3s",
       ],
       "groupName": "update k8s version",
@@ -57,7 +63,7 @@
       "matchStrings": [
         "\\s*- sbom-file: ['\"]?(.+)\\/download\\/v(?<currentValue>.+)\\/(.+)['\"]?",
       ],
-      "autoReplaceStringTemplate": "  - sbom-file: https://github.com/{{{depName}}}/releases/download/v{{{newValue}}}/k8gb_{{{newValue}}}_linux_amd64.tar.gz.sbom.json"
+      "autoReplaceStringTemplate": "\n  - sbom-file: https://github.com/{{{depName}}}/releases/download/v{{{newValue}}}/k8gb_{{{newValue}}}_linux_amd64.tar.gz.sbom.json"
     },
     // update the files in k3d/ with the up-to-date k8s version
     {
