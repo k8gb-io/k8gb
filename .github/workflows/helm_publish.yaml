@@ -43,16 +43,18 @@ jobs:
           done
       - name: Invoke workflow for OLM (community-operators)
         if: always()
+        continue-on-error: true
         uses: benc-uk/workflow-dispatch@798e70c97009500150087d30d9f11c5444830385
         with:
           workflow: OLM bundle and PR
           token: ${{ secrets.CR_TOKEN }}
           inputs: '{ "bundleVersion": "master" }' # during the release 'master' is what we want here
-      - name: Invoke workflow for OLM
+      - name: Invoke workflow for OLM (community-operators-prod)
         if: always()
+        continue-on-error: true
         uses: benc-uk/workflow-dispatch@798e70c97009500150087d30d9f11c5444830385
         with:
-          workflow: OLM bundle and PR (community-operators-prod)
+          workflow: OLM bundle and PR
           token: ${{ secrets.CR_TOKEN }}
           inputs: |
             {
