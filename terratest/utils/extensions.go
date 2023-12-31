@@ -435,7 +435,8 @@ func (i *Instance) HitTestApp() (result *TestAppResult) {
 	command := []string{"sh", "-c", fmt.Sprintf("wget -qO - %s", i.w.state.gslb.host)}
 	for t := 0; t < 60; t++ {
 		result.Body, err = RunBusyBoxCommand(i.w.t, i.w.k8sOptions, coreDNSIP, command)
-		if err != nil && strings.Contains(err.Error(), "503") {
+		if strings.Contains(result.Body, "503") {
+			time.Sleep(time.Second * 1)
 			continue
 		}
 		require.NoError(i.w.t, err, "busybox", command, result.Body)
