@@ -21,8 +21,6 @@ on:
 permissions:
   contents: read
 
-concurrency: terratest-${{ github.head_ref || github.run_id }}
-
 jobs:
   skip-check:
     runs-on: ubuntu-latest
