@@ -436,6 +436,7 @@ func (i *Instance) HitTestApp() (result *TestAppResult) {
 	for t := 0; t < 60; t++ {
 		result.Body, err = RunBusyBoxCommand(i.w.t, i.w.k8sOptions, coreDNSIP, command)
 		if strings.Contains(result.Body, "503") {
+			i.w.t.Log("podinfo returns 503, trying again....")
 			time.Sleep(time.Second * 1)
 			continue
 		}
