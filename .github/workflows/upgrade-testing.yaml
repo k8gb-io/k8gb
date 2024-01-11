@@ -95,7 +95,7 @@ jobs:
         if: always()
         uses: ./.github/actions/print-debug
 
-      - uses: actions/upload-artifact@cf8714cfeaba5687a442b9bcb85b29e23f468dfa
+      - uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595
         if: always()
         with:
           name: terratest-logs
