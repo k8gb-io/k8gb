@@ -8,7 +8,7 @@ k8gb:
 route53:
   enabled: true
   hostedZoneID: Z<zone-id>
-  irsaRole: arn:aws:iam::<account-id>:role/external-dns-k8gb-cluster-us-east-1
+  irsaRole: arn:aws:iam::<account-id>:role/external-dns-k8gb-cluster-us-east-1 # ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
 coredns:
   serviceType: LoadBalancer
