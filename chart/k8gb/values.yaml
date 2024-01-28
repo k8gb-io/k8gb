@@ -110,6 +110,10 @@ route53:
   irsaRole: arn:aws:iam::111111:role/external-dns
   # -- specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null`
   assumeRoleArn: null
+  # -- alternatively specify the secret name with static credentials for IAM user (make sure this user has limited privileges)
+  # this can be useful when IRSA is not present or when using say Azure cluster and Route53
+  # docs: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#create-iam-user-and-attach-the-policy
+  secret: null
 
 ns1:
   # -- Enable NS1 provider
