@@ -110,6 +110,10 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+                "dnsPolicy": {
+                    "type": "string",
+                    "minLength": 1
+                },
                 "image": {
                     "type": "string",
                     "minLength": 1

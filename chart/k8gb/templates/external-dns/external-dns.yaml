@@ -50,6 +50,7 @@ spec:
           - mountPath: /etc/krb5.conf
             name: kerberos-config-volume
             subPath: krb5.conf
+      dnsPolicy: {{ .Values.externaldns.dnsPolicy }}
       volumes:
         - name: kerberos-config-volume
           configMap:
