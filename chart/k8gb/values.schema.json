@@ -567,8 +567,15 @@
                     ]
                 },
                 "secret": {
-                    "type": "string",
-                    "minLength": 1
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "assumeRoleArn": {
                     "oneOf": [
