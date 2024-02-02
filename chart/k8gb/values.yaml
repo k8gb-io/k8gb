@@ -54,6 +54,8 @@ k8gb:
     enabled: false
 
 externaldns:
+  # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment
+  dnsPolicy: "ClusterFirst"
   # -- external-dns image repo:tag
   # It is important to use the image from k8gb external-dns fork to get the full
   # functionality. See links below
