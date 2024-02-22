@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ github.event.label.name == 'heavy-tests' }}
     steps:
-      - uses: actions/checkout@aadec899646c8e0f34c52d9219c2faac36626b55
+      - uses: actions/checkout@b32f140b0c872d58512e0a66172253c302617b90
         with:
           fetch-depth: 0
 
