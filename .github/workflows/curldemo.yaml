@@ -25,7 +25,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Login to Dockerhub
-        uses: docker/login-action@83a00bc1ab5ded6580f31df1c49e6aaa932d840d
+        uses: docker/login-action@5139682d94efc37792e6b54386b5b470a68a4737
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
