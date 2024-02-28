@@ -29,7 +29,7 @@ jobs:
 
       - name: Scan k8gb chart
         id: kube-lint-repo
-        uses: stackrox/kube-linter-action@bc9b40871bba8be58c17396f32fa7ea48d996df6
+        uses: stackrox/kube-linter-action@5792edc6a03735d592b13c08201711327a935735
         with:
           directory: chart/k8gb
           version: 0.2.5
