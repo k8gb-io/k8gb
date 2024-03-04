@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@b32f140b0c872d58512e0a66172253c302617b90
         with:
           fetch-depth: 0
-      - uses: heinrichreimer/github-changelog-generator-action@e60b5a2bd9fcd88dadf6345ff8327863fb8b490f
+      - uses: heinrichreimer/github-changelog-generator-action@fbf04f8c68d6d3be3aeeb56fdb970c03b68b04c7
         with:
           token: ${{ secrets.CR_TOKEN }}
           project: k8gb
