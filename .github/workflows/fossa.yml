@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@8eb1f6a495037164bea451156472f35fdd6bafc0
 
       - name: Run FOSSA scan and upload build data
-        uses: fossa-contrib/fossa-action@79d0b9ff6bfd62a27b0ebf86e12042238f754cc8
+        uses: fossa-contrib/fossa-action@d9401f13703d4cb459d123464169591a4978149e
         with:
           fossa-api-key: 044cfa03c61e6271a24349184e90b381
 
