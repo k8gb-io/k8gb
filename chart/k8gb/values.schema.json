@@ -570,6 +570,17 @@
                         }
                     ]
                 },
+                "secret": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
                 "assumeRoleArn": {
                     "oneOf": [
                         {
