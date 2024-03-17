@@ -1,39 +1,23 @@
 #!/bin/bash
-subscriptionName=""
+subscriptionName="MVP Sponsorship"
 
 ##Cluster 1
-cluster1Name=""
-spoke1ResourceGroupName=""
+cluster1Name="aks1"
+spoke1ResourceGroupName="k8gb-az-spoke1"
 
 ##Cluster 2
-cluster2Name=""
-spoke2ResourceGroupName=""
+cluster2Name="aks2"
+spoke2ResourceGroupName="k8gb-az-spoke2"
 
-#####################
-# Deploy to Cluster 1
-#####################
+az account set --subscription "$subscriptionName"
 
-# Get credentials
-az account set --subscription $subscriptionName
-az aks get-credentials --resource-group $spoke1ResourceGroupName --name $cluster1Name
+# get credentials
+az aks get-credentials -g $spoke1ResourceGroupName -n $cluster1Name --admin --overwrite-existing
+az aks get-credentials -g $spoke2ResourceGroupName -n $cluster2Name --admin --overwrite-existing
 
-### Deploy Ingress Controller
-kubectl apply -f ingress/namespace.yaml
-helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
-helm -n nginx-ingress upgrade -i nginx-ingress nginx-stable/ingress-nginx \
-                --version 4.0.15 -f nginx-ingress-values.yaml
-
-
-#####################
-# Deploy to Cluster 2
-#####################
-
-# Get credentials
-az account set --subscription $subscriptionName
-az aks get-credentials --resource-group $spoke2ResourceGroupName --name $cluster2Name
-
-### Deploy Ingress Controller
-kubectl apply -f ingress/namespace.yaml
-helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
-helm -n nginx-ingress upgrade -i nginx-ingress nginx-stable/ingress-nginx \
-                --version 4.0.15 -f nginx-ingress-values.yaml
+# Deploy nginx
+helm repo add nginx-stable https://kubernetes.github.io/ingress-nginx 
+helm repo update 
+helm upgrade -i -n nginx-ingress --create-namespace nginx-ingress nginx-stable/ingress-nginx --version 4.0.15 -f infra/nginx-ingress-values.yaml --kube-context aks1-admin &
+helm upgrade -i -n nginx-ingress --create-namespace nginx-ingress nginx-stable/ingress-nginx --version 4.0.15 -f infra/nginx-ingress-values.yaml --kube-context aks2-admin &
+wait

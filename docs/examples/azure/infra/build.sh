@@ -1,62 +1,38 @@
 #!/bin/bash
 
 #generic configs
-subscriptionName=""
-windowsDnsServers=""
-
-#Hub configs
-hubResourceGroupName=""
-hubvNetName=""
-hubvNetRange=""
-hubVnetSubnetName=""
-hubSubnetRange=""
-hubLocation=""
+subscriptionName="MVP Sponsorship"
+dnsZone="k8gb-kubeconeu2023.com"
 
 #Spoke1 configs
-cluster1Name=""
-spoke1ResourceGroupName=""
-spoke1vNetName=""
-spoke1vNetRange=""
-spoke1VnetSubnetName=""
-spoke1SubnetRange=""
-spoke1Location=""
+cluster1Name="aks1"
+spoke1ResourceGroupName="k8gb-az-spoke1"
+spoke1vNetName="spoke1-vnet"
+spoke1vNetRange="10.11.0.0/16"
+spoke1VnetSubnetName="default"
+spoke1SubnetRange="10.11.0.0/20"
+spoke1Location="uksouth"
 
 #Spoke2 configs
-cluster2Name=""
-spoke2ResourceGroupName=""
-spoke2vNetName=""
-spoke2vNetRange=""
-spoke2VnetSubnetName=""
-spoke2SubnetRange=""
-spoke2Location=""
+cluster2Name="aks2"
+spoke2ResourceGroupName="k8gb-az-spoke2"
+spoke2vNetName="spoke2-vnet"
+spoke2vNetRange="10.12.0.0/16"
+spoke2VnetSubnetName="default"
+spoke2SubnetRange="10.12.0.0/20"
+spoke2Location="francecentral"
 
-#Private DNS configurations
-privateDnsZone=""
+az account set --subscription "$subscriptionName"
 
-az account set --subscription $subscriptionName
 #Create resource groups to manage azure resources
-##### Hub
-az group create --resource-group $hubResourceGroupName --location $hubLocation --tags solution=shared
-##### Spoke1
-az group create --resource-group $spoke1ResourceGroupName --location $spoke1Location --tags solution=shared
-##### Spoke2
-az group create --resource-group $spoke2ResourceGroupName --location $spoke2Location --tags solution=shared
+az group create --resource-group $spoke1ResourceGroupName --location $spoke1Location &
+az group create --resource-group $spoke2ResourceGroupName --location $spoke2Location &
+wait
 
-#### The Private DNS Zone will be deployed on the same resource group for the Hub. While this is acceptable for Lab environment, for other scenarios, a specific resource group should be created
-#Create an Azure Private DNS Zone*
-az network private-dns zone create -g $hubResourceGroupName -n $privateDnsZone
+spoke1RGId=$(az group show --resource-group $spoke1ResourceGroupName --query id --out tsv)
+spoke2RGId=$(az group show --resource-group $spoke2ResourceGroupName --query id --out tsv)
 
 #Create Virtual Networks to deploy resources
-### Hub
-az network vnet create \
-  --name $hubVnetName \
-  --resource-group $hubResourceGroupName \
-  --location $hubLocation \
-  --address-prefix $hubvNetRange \
-  --subnet-name $hubVnetSubnetName \
-  --subnet-prefixes $hubSubnetRange \
-  --dns-servers $windowsDnsServers
-
 ### Spoke1
 az network vnet create \
   --name $spoke1vNetName \
@@ -65,7 +41,7 @@ az network vnet create \
   --address-prefix $spoke1vNetRange \
   --subnet-name $spoke1VnetSubnetName \
   --subnet-prefixes $spoke1SubnetRange \
-  --dns-servers $windowsDnsServers
+  &
 
 ### Spoke2
 az network vnet create \
@@ -75,14 +51,11 @@ az network vnet create \
   --address-prefix $spoke2vNetRange \
   --subnet-name $spoke2VnetSubnetName \
   --subnet-prefixes $spoke2SubnetRange \
-  --dns-servers $windowsDnsServers
+  &
+
+wait
 
 #  Fetch Vnet resources id's - Needed for cross resource group peering
-HubvNetId=$(az network vnet show \
-  --resource-group $hubResourceGroupName \
-  --name $hubvNetName \
-  --query id --out tsv)
-
 Spoke1vNetId=$(az network vnet show \
   --resource-group $spoke1ResourceGroupName \
   --name $spoke1vNetName \
@@ -92,53 +65,6 @@ Spoke2vNetId=$(az network vnet show \
   --resource-group $spoke2ResourceGroupName \
   --name $spoke2vNetName \
   --query id --out tsv)
-
-#  Peer Spoke Vnets with Hub Vnet - A peering requires configuration from both Vnets to each other, in order to be fully in sync
-### Hub <-> Spoke1
-az network vnet peering create \
-   --name $hubVnetName-$spoke1vNetName \
-   --remote-vnet $Spoke1vNetId \
-   --resource-group $hubResourceGroupName \
-   --vnet-name $hubVnetName \
-   --allow-forwarded-traffic \
-   --allow-gateway-transit \
-   --allow-vnet-access
-
-az network vnet peering create \
-   --name $spoke1vNetName-$hubVnetName \
-   --remote-vnet $HubvNetId \
-   --resource-group $spoke1ResourceGroupName \
-   --vnet-name $spoke1vNetName \
-   --allow-forwarded-traffic \
-   --allow-gateway-transit \
-   --allow-vnet-access
-
-### Hub <-> Spoke2
-az network vnet peering create \
-   --name $hubVnetName-$spoke2vNetName \
-   --remote-vnet $Spoke2vNetId \
-   --resource-group $hubResourceGroupName \
-   --vnet-name $hubVnetName \
-   --allow-forwarded-traffic \
-   --allow-gateway-transit \
-   --allow-vnet-access
-
-az network vnet peering create \
-   --name $spoke2vNetName-$hubVnetName \
-   --remote-vnet $HubvNetId \
-   --resource-group $spoke2ResourceGroupName \
-   --vnet-name $spoke2vNetName \
-   --allow-forwarded-traffic \
-   --allow-gateway-transit \
-   --allow-vnet-access
-
-# Link Private DNS zone with the Hub Vnet
-az network private-dns link vnet create \
-    --resource-group $hubResourceGroupName \
-    --name $privateDnsZone-$hubVnetName \
-    --registration-enabled false \
-    --virtual-network $HubvNetId \
-    --zone-name $privateDnsZone
 
 #Fetch Subnet Id from the Spoke Vnets to deploy AKS Clusters
 Spoke1vNetSubnetId=$(az network vnet subnet show \
@@ -159,56 +85,58 @@ Spoke2vNetSubnetId=$(az network vnet subnet show \
 # cluster identity for cluster A
 az identity create \
   --name $cluster1Name-identity \
-  --resource-group $spoke1ResourceGroupName
-
-cluster1IdentityId=$(az identity show -n $cluster1Name-identity -g $spoke1ResourceGroupName --query id --out tsv) 
-
-cluster1IdentityClientId=$(az identity show -n $cluster1Name-identity -g $spoke1ResourceGroupName --query clientId --out tsv)
-
-#required permissions for the identity
-az role assignment create --role "Network Contributor" --assignee $cluster1Name-identity -g $spoke1ResourceGroupName
+  --resource-group $spoke1ResourceGroupName \
+  &
 
 # cluster identity for cluster B
 az identity create \
   --name $cluster2Name-identity \
-  --resource-group $spoke2ResourceGroupName
+  --resource-group $spoke2ResourceGroupName \
+  &
 
-cluster2IdentityId=$(az identity show -n $cluster2Name-identity -g $spoke2ResourceGroupName --query id --out tsv) 
+wait
 
-cluster2IdentityClientId=$(az identity show -n $cluster2Name-identity -g $spoke2ResourceGroupName --query clientId --out tsv)
+cluster1IdentityId=$(az identity show -n $cluster1Name-identity -g $spoke1ResourceGroupName --query id --out tsv)
+cluster1IdentityPrincipalId=$(az identity show -n $cluster1Name-identity -g $spoke1ResourceGroupName --query principalId --out tsv)
+cluster2IdentityId=$(az identity show -n $cluster2Name-identity -g $spoke2ResourceGroupName --query id --out tsv)
+cluster2IdentityPrincipalId=$(az identity show -n $cluster2Name-identity -g $spoke2ResourceGroupName --query principalId --out tsv)
 
-#required permissions for the identity
-az role assignment create --role "Network Contributor" --assignee $cluster2Name-identity -g $spoke2ResourceGroupName
+#required permissions for identities
+az role assignment create --role "Contributor" --assignee $cluster1IdentityPrincipalId --scope $spoke1RGId &
+az role assignment create --role "Contributor" --assignee $cluster2IdentityPrincipalId --scope $spoke2RGId &
 
-# Create AKS clusters on Spoke regions. In order for this command to be execute, the user should have specific permissions. Check the documentation 
+wait
+
+# Create AKS clusters on Spoke regions. In order for this command to be execute, the user should have specific permissions. Check the documentation
 # Cluster A
 az aks create \
   --resource-group $spoke1ResourceGroupName \
   --name $cluster1Name \
-  --generate-ssh-keys \
-  --vm-set-type VirtualMachineScaleSets \
-  --os-sku CBLMariner \
+  --os-sku AzureLinux \
   --node-vm-size Standard_DS2_v2 \
-  --vnet-subnet-id $Spoke1vNetSubnetId \
-  --load-balancer-sku standard \
   --enable-managed-identity \
   --assign-identity $cluster1IdentityId \
+  --vnet-subnet-id $Spoke1vNetSubnetId \
   --network-plugin azure \
-  --node-count 1 \
-  --zones 1
+  --enable-cluster-autoscaler \
+  --min-count 1 \
+  --max-count 3 \
+  &
 
 # Cluster B
 az aks create \
   --resource-group $spoke2ResourceGroupName \
   --name $cluster2Name \
-  --generate-ssh-keys \
-  --vm-set-type VirtualMachineScaleSets \
-  --os-sku CBLMariner \
+  --os-sku AzureLinux \
   --node-vm-size Standard_DS2_v2 \
-  --vnet-subnet-id $Spoke2vNetSubnetId \
-  --load-balancer-sku standard \
   --enable-managed-identity \
   --assign-identity $cluster2IdentityId \
+  --vnet-subnet-id $Spoke2vNetSubnetId \
   --network-plugin azure \
-  --node-count 1 \
-  --zones 1
+  --enable-cluster-autoscaler \
+  --min-count 1 \
+  --max-count 3 \
+  &
+
+wait
+

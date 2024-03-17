@@ -1,0 +1,33 @@
+k8gb:
+  # -- dnsZone controlled by gslb
+  dnsZone: "demo.k8gb-kubeconeu2023.com"
+  # -- Negative TTL for SOA record
+  dnsZoneNegTTL: 300
+  # -- main zone which would contain gslb zone to delegate
+  edgeDNSZone: "k8gb-kubeconeu2023.com" # main zone which would contain gslb zone to delegate
+  # -- host/ip[:port] format is supported here where port defaults to 53
+  edgeDNSServers:
+      # -- use these DNS server as a main resolver to enable cross k8gb DNS based communication
+      - "1.1.1.1"
+      - "8.8.8.8"
+  # -- used for places where we need to distinguish between different Gslb instances
+  clusterGeoTag: "francecentral"
+  # -- comma-separated list of external gslb geo tags to pair with
+  extGslbClustersGeoTags: "uksouth"
+  # -- Reconcile time in seconds
+  reconcileRequeueSeconds: 10
+
+externaldns:
+  interval: "10s"
+
+azuredns:
+  # -- Enable Azure DNS provider
+  enabled: true
+  # -- Azure tenant ID which holds the managed identity
+  tenantId: 0c568ebc-c62f-4671-8c99-51ad25cb084c
+  # -- subscription id which holds the Azure DNS zone
+  subscriptionId: dbeda895-eaa3-4f5c-a40e-3a1a8a582130
+  # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
+  resourceGroup: k8gb-kubeconeu2023
+  aadClientId: 690d8e9c-9c23-423c-bde3-f0149b87a713
+  aadClientSecret: ONB8Q~uuCFMB7ShqEGMbkwqHD5~e2pSZ2788rdj1

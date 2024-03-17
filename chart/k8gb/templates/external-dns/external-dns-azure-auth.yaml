@@ -1,0 +1,9 @@
+{{- if and .Values.azuredns.enabled .Values.azuredns.createAuthSecret }}
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ .Values.azuredns.authSecretName | default "external-dns-secret-azure" }}
+data:
+  azure.json: {{ include "external-dns.azure-credentials" . | b64enc }}
+{{- end }}

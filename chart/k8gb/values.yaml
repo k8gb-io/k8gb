@@ -145,6 +145,18 @@ rfc2136:
         - kerberos-password: ad-user-pass
         - kerberos-realm: ad-domain-realm
 
+azuredns:
+  enabled: false
+  # -- Create an authentication secret for Azure DNS based on the values below
+  # alternatively, you can create the secret manually and pass its name in the `authSecretName` value
+  createAuthSecret: true
+  # -- Azure tenant ID which holds the managed identity
+  tenantId: myTenantId
+  # -- subscription id which holds the Azure DNS zone
+  subscriptionId: mySubscriptionId
+  # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
+  resourceGroup: myDnsResourceGroup
+
 cloudflare:
   # -- Enable Cloudflare provider
   enabled: false
