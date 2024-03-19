@@ -32,7 +32,7 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@8eb1f6a495037164bea451156472f35fdd6bafc0
+      - uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017
         with:
           fetch-depth: 0
 
@@ -60,7 +60,7 @@ jobs:
           rm ./olm/bundle/Dockerfile
           cp -r ./olm/bundle $GITHUB_WORKSPACE/
 
-      - uses: actions/checkout@8eb1f6a495037164bea451156472f35fdd6bafc0
+      - uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017
         with:
           repository: ${{ github.event.inputs.upstreamRepo }}
           path: sandbox
