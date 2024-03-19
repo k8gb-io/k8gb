@@ -23,7 +23,7 @@ jobs:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - name: Checkout repository
-      uses: actions/checkout@8eb1f6a495037164bea451156472f35fdd6bafc0
+      uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017
     - name: Run Terrascan
       id: terrascan
       uses: accurics/terrascan-action@a4b0f7ec5fb3c4c66b8e76d824d958002f6ce12c
