@@ -22,3 +22,15 @@ options:
       - arg: --disable=traefik,servicelb,metrics-server,local-storage
         nodeFilters:
           - server:*
+registries:
+  create:
+    name: k3d-docker-io # name of the registry container
+    proxy:
+      remoteURL: https://registry-1.docker.io # proxy DockerHub
+    volumes:
+      - /tmp/reg:/var/lib/registry # persist data locally in /tmp/reg
+  config: | # tell K3s to use this registry when pulling from DockerHub
+    mirrors:
+      "docker.io":
+        endpoint:
+          - http://k3d-docker-io:5000
