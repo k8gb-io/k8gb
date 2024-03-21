@@ -31,3 +31,9 @@ options:
       - arg: --disable=traefik,servicelb,metrics-server,local-storage
         nodeFilters:
           - server:*
+registries:
+  config: | # tell K3s to use this registry when pulling from DockerHub
+    mirrors:
+      "docker.io":
+        endpoint:
+          - http://k3d-docker-io:5000
