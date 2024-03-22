@@ -11,9 +11,7 @@ data:
         errors
         health
 {{- if .Values.k8gb.coredns.extra_plugins }}
-{{- range .Values.k8gb.coredns.extra_plugins }}
-        {{ . }}
-{{- end }}
+{{ .Values.k8gb.coredns.extra_plugins | indent 8}}
 {{- end }}
         ready
         prometheus 0.0.0.0:9153
