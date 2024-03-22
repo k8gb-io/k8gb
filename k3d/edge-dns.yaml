@@ -28,9 +28,15 @@ registries:
     proxy:
       remoteURL: https://registry-1.docker.io # proxy DockerHub
     volumes:
-      - /tmp/reg:/var/lib/registry # persist data locally in /tmp/reg
+      - /tmp/k3d-docker-io:/var/lib/registry # persist data locally in /tmp/
   config: | # tell K3s to use this registry when pulling from DockerHub
     mirrors:
       "docker.io":
         endpoint:
           - http://k3d-docker-io:5000
+      "ghcr.io":
+        endpoint:
+          - http://k3d-ghcr-io:5000
+      "k8s.gcr.io":
+        endpoint:
+          - http://k3d-k8s-gcr-io:5000
