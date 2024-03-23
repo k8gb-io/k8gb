@@ -32,8 +32,20 @@ options:
         nodeFilters:
           - server:*
 registries:
+  create:
+    name: k3d-k8s-gcr-io # name of the registry container
+    proxy:
+      remoteURL: https://k8s.gcr.io # proxy k8s.gcr.io
+    volumes:
+      - /tmp/k3d-k8s-gcr-io:/var/lib/registry # persist data locally in /tmp/
   config: | # tell K3s to use this registry when pulling from DockerHub
     mirrors:
       "docker.io":
         endpoint:
           - http://k3d-docker-io:5000
+      "ghcr.io":
+        endpoint:
+          - http://k3d-ghcr-io:5000
+      "k8s.gcr.io":
+        endpoint:
+          - http://k3d-k8s-gcr-io:5000
