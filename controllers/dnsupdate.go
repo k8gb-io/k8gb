@@ -43,9 +43,19 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		return nil, err
 	}
 
-	localTargets, err := r.DNSProvider.GslbIngressExposedIPs(gslb)
-	if err != nil {
-		return nil, err
+	localTargets := []string{}
+	if gslb.Spec.Ingress != nil {
+		localTargets, err = r.DNSProvider.GslbIngressExposedIPs(gslb)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if gslb.Spec.LoadBalancer != nil {
+		localTargets, err = r.DNSProvider.GslbServiceExposedIPs(gslb)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	for host, health := range serviceHealth {

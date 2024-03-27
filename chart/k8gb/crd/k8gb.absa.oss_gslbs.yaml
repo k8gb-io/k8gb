@@ -307,6 +307,22 @@ spec:
                       type: object
                     type: array
                 type: object
+              loadBalancer:
+                description: Gslb-enabled LoadBalancer Service
+                properties:
+                  host:
+                    description: Host is the fully qualified domain name of a network
+                      host, as defined by RFC 3986. This is the host name to be used
+                      as global domain name while creating GSLB records.
+                    type: string
+                  serviceName:
+                    description: ServiceName is the name of the Service resource being
+                      exposed. Only LoadBalancer Service type is supported.
+                    type: string
+                required:
+                - host
+                - serviceName
+                type: object
               strategy:
                 description: Gslb Strategy spec
                 properties:
@@ -331,7 +347,6 @@ spec:
                 - type
                 type: object
             required:
-            - ingress
             - strategy
             type: object
           status:

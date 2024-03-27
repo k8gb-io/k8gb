@@ -210,6 +210,10 @@ func (p *InfobloxProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]stri
 	return p.assistant.GslbIngressExposedIPs(gslb)
 }
 
+func (p *InfobloxProvider) GslbServiceExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
+	return p.assistant.GslbServiceExposedIPs(gslb)
+}
+
 func (p *InfobloxProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {
 	return p.assistant.SaveDNSEndpoint(gslb.Namespace, i)
 }

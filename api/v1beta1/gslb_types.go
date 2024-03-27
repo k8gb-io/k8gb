@@ -44,7 +44,9 @@ type Strategy struct {
 // +k8s:openapi-gen=true
 type GslbSpec struct {
 	// Gslb-enabled Ingress Spec
-	Ingress IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
+	// Gslb-enabled LoadBalancer Service
+	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
 	// Gslb Strategy spec
 	Strategy Strategy `json:"strategy"`
 }

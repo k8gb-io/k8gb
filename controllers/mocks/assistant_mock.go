@@ -93,10 +93,25 @@ func (m *MockAssistant) GslbIngressExposedIPs(gslb *v1beta1.Gslb) ([]string, err
 	return ret0, ret1
 }
 
+// GslbServiceExposedIPs mocks base method.
+func (m *MockAssistant) GslbServiceExposedIPs(gslb *v1beta1.Gslb) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GslbServiceExposedIPs", gslb)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
 // GslbIngressExposedIPs indicates an expected call of GslbIngressExposedIPs.
 func (mr *MockAssistantMockRecorder) GslbIngressExposedIPs(gslb interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GslbIngressExposedIPs", reflect.TypeOf((*MockAssistant)(nil).GslbIngressExposedIPs), gslb)
+}
+
+// GslbServiceExposedIPs indicates an expected call of GslbServiceExposedIPs.
+func (mr *MockAssistantMockRecorder) GslbServiceExposedIPs(gslb interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GslbServiceExposedIPs", reflect.TypeOf((*MockAssistant)(nil).GslbIngressExposedIPs), gslb)
 }
 
 // InspectTXTThreshold mocks base method.

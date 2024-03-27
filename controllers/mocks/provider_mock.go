@@ -105,10 +105,25 @@ func (m *MockProvider) GslbIngressExposedIPs(arg0 *v1beta1.Gslb) ([]string, erro
 	return ret0, ret1
 }
 
+// GslbServiceExposedIPs mocks base method.
+func (m *MockProvider) GslbServiceExposedIPs(arg0 *v1beta1.Gslb) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GslbServiceExposedIPs", arg0)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
 // GslbIngressExposedIPs indicates an expected call of GslbIngressExposedIPs.
 func (mr *MockProviderMockRecorder) GslbIngressExposedIPs(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GslbIngressExposedIPs", reflect.TypeOf((*MockProvider)(nil).GslbIngressExposedIPs), arg0)
+}
+
+// GslbServiceExposedIPs indicates an expected call of GslbServiceExposedIPs.
+func (mr *MockProviderMockRecorder) GslbServiceExposedIPs(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GslbServiceExposedIPs", reflect.TypeOf((*MockProvider)(nil).GslbIngressExposedIPs), arg0)
 }
 
 // SaveDNSEndpoint mocks base method.

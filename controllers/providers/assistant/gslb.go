@@ -158,6 +158,47 @@ func (r *Gslb) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
 	return gslbIngressIPs, nil
 }
 
+// GslbServiceExposedIPs retrieves list of IP's exposed by all GSLB LoadBalancer type services
+func (r *Gslb) GslbServiceExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
+	nn := types.NamespacedName{
+		Name:      gslb.Spec.LoadBalancer.ServiceName,
+		Namespace: gslb.Namespace,
+	}
+
+	gslbService := &corev1.Service{}
+
+	err := r.client.Get(context.TODO(), nn, gslbService)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info().
+				Str("gslb", gslb.Spec.LoadBalancer.ServiceName).
+				Msg("Can't find gslb Service")
+		}
+		return nil, err
+	}
+
+	if gslbService.Spec.Type != corev1.ServiceTypeLoadBalancer {
+		return nil, fmt.Errorf("service %s is not of type LoadBalancer", gslb.Spec.LoadBalancer.ServiceName)
+	}
+
+	var gslbServiceIPs []string
+	for _, ip := range gslbService.Status.LoadBalancer.Ingress {
+		if len(ip.IP) > 0 {
+			gslbServiceIPs = append(gslbServiceIPs, ip.IP)
+		}
+		if len(ip.Hostname) > 0 {
+			IPs, err := utils.Dig(ip.Hostname, r.edgeDNSServers...)
+			if err != nil {
+				log.Warn().Err(err).Msg("Dig error")
+				return nil, err
+			}
+			gslbServiceIPs = append(gslbServiceIPs, IPs...)
+		}
+	}
+
+	return gslbServiceIPs, nil
+}
+
 // SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist
 func (r *Gslb) SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error {
 	found := &externaldns.DNSEndpoint{}
