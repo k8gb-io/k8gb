@@ -72,6 +72,9 @@ Create the name of the service account to use
 {{- if .Values.rfc2136.enabled }}
 {{- print "rfc2136" -}}
 {{- end -}}
+{{- if .Values.azuredns.enabled }}
+{{- print "azure-dns" -}}
+{{- end -}}
 {{- if .Values.cloudflare.enabled }}
 {{- print "cloudflare" -}}
 {{- end -}}
@@ -107,6 +110,9 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
             secretKeyRef:
               name: ns1
               key: apiKey
+{{- end }}
+{{- if .Values.azuredns.enabled -}}
+        - --azure-resource-group={{ .Values.azuredns.resourceGroup }}
 {{- end }}
 {{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.insecure.enabled true) -}}
         - --rfc2136-insecure
@@ -155,4 +161,25 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- end -}}
 {{- define "k8gb.metrics_port" -}}
 {{ print (split ":" .Values.k8gb.metricsAddress)._1 }}
+{{- end -}}
+
+{{- define "external-dns.azure-credentials" -}}
+{{- if .Values.azuredns.enabled -}}
+{
+  "tenantId": "{{ .Values.azuredns.tenantId }}",
+  "subscriptionId": "{{ .Values.azuredns.subscriptionId }}",
+  "resourceGroup": "{{ .Values.azuredns.resourceGroup }}",
+  {{- if .Values.azuredns.aadClientId -}}
+  "aadClientId": "{{ .Values.azuredns.aadClientId }}",
+  {{- end -}}
+  {{- if .Values.azuredns.aadClientSecret -}}
+  "aadClientSecret": "{{ .Values.azuredns.aadClientSecret }}",
+  {{- end -}}
+  "useManagedIdentityExtension": {{ .Values.azuredns.useManagedIdentityExtension | default false }},
+  {{- if .Values.azuredns.userAssignedIdentityID -}}
+  "userAssignedIdentityID": "{{ .Values.azuredns.userAssignedIdentityID }}",
+  {{- end -}}
+  "useWorkloadIdentityExtension": {{ .Values.azuredns.useWorkloadIdentityExtension | default false }}
+}
+{{- end -}}
 {{- end -}}
