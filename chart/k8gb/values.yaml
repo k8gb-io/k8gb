@@ -31,7 +31,7 @@ k8gb:
   reconcileRequeueSeconds: 30
   # -- Extra CoreDNS plugins to be enabled (yaml object)
   coredns:
-    extra_plugins: null
+    extra_plugins: []
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)
