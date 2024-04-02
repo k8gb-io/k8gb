@@ -24,10 +24,10 @@ azuredns:
   # -- Enable Azure DNS provider
   enabled: true
   # -- Azure tenant ID which holds the managed identity
-  tenantId: 0c568ebc-c62f-4671-8c99-51ad25cb084c
+  tenantId: myTenantID
   # -- subscription id which holds the Azure DNS zone
-  subscriptionId: dbeda895-eaa3-4f5c-a40e-3a1a8a582130
+  subscriptionId: mySubscriptionID
   # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
   resourceGroup: k8gb-kubeconeu2023
-  aadClientId: 690d8e9c-9c23-423c-bde3-f0149b87a713
-  aadClientSecret: ONB8Q~uuCFMB7ShqEGMbkwqHD5~e2pSZ2788rdj1
+  aadClientId: myAADClientID
+  aadClientSecret: myAADClientSecret
