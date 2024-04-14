@@ -75,7 +75,7 @@ jobs:
 
       - name: Open Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@36ef0ed92fad84020ab7eb31a226f860a2b8a886
+        uses: peter-evans/create-pull-request@c55203cfde3e5c11a452d352b4393e68b85b4533
         with:
           token: ${{ secrets.CR_TOKEN }}
           push-to-fork: ${{ github.event.inputs.downstreamRepo }}
