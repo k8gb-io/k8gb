@@ -33,7 +33,7 @@ jobs:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - id: skip_check
-      uses: fkirc/skip-duplicate-actions@f54720a485d24225d7ee6918004908e5025fec19
+      uses: fkirc/skip-duplicate-actions@84931c63f7562abc89860097e0caf563c7b87f65
       with:
         skip_after_successful_duplicate: 'true'
         do_not_skip: '["workflow_dispatch", "schedule"]'
