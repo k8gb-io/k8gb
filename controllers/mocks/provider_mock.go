@@ -101,21 +101,6 @@ func (mr *MockProviderMockRecorder) GetExternalTargets(arg0 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalTargets", reflect.TypeOf((*MockProvider)(nil).GetExternalTargets), arg0)
 }
 
-// GslbIngressExposedIPs mocks base method.
-func (m *MockProvider) GslbIngressExposedIPs(arg0 *v1beta1.Gslb) ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GslbIngressExposedIPs", arg0)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GslbIngressExposedIPs indicates an expected call of GslbIngressExposedIPs.
-func (mr *MockProviderMockRecorder) GslbIngressExposedIPs(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GslbIngressExposedIPs", reflect.TypeOf((*MockProvider)(nil).GslbIngressExposedIPs), arg0)
-}
-
 // SaveDNSEndpoint mocks base method.
 func (m *MockProvider) SaveDNSEndpoint(arg0 *v1beta1.Gslb, arg1 *endpoint.DNSEndpoint) error {
 	m.ctrl.T.Helper()

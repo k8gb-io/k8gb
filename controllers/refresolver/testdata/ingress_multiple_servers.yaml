@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multiple-servers
+  namespace: test-gslb
+  resourceVersion: "999"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: h1.cloud.example.com
+      http:
+        paths:
+          - path: /malformed
+            pathType: Prefix
+            backend:
+              service:
+                name: ""
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: s1
+                port:
+                  name: http
+    - host: h2.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ss1
+                port:
+                  name: http
+          - path: /debug
+            pathType: Prefix
+            backend:
+              service:
+                name: ss2
+                port:
+                  name: http
+status:
+  loadBalancer:
+    ingress:
+      - ip: 10.0.0.1
+      - ip: 10.0.0.2

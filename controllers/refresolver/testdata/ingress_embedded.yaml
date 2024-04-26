@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: embedded
+  namespace: test-gslb
+  resourceVersion: "999"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: embedded.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: embedded
+                port:
+                  name: http

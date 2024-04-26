@@ -40,13 +40,47 @@ type Strategy struct {
 	SplitBrainThresholdSeconds int `json:"splitBrainThresholdSeconds,omitempty"`
 }
 
+// ResourceRef selects a resource defining the GSLB's load balancer and server
+// +k8s:openapi-gen=true
+type ResourceRef struct {
+	// Ingress selects a kubernetes.networking.k8s.io/v1.Ingress resource
+	Ingress metav1.LabelSelector `json:"ingress,omitempty"`
+}
+
 // GslbSpec defines the desired state of Gslb
 // +k8s:openapi-gen=true
 type GslbSpec struct {
 	// Gslb-enabled Ingress Spec
-	Ingress IngressSpec `json:"ingress"`
+	Ingress IngressSpec `json:"ingress,omitempty"`
 	// Gslb Strategy spec
 	Strategy Strategy `json:"strategy"`
+	// ResourceRef spec
+	ResourceRef ResourceRef `json:"resourceRef,omitempty"`
+}
+
+// LoadBalancer holds the GSLB's load balancer configuration
+// +k8s:openapi-gen=true
+type LoadBalancer struct {
+	// ExposedIPs on the local Load Balancer. This information is extracted automatically from the 'ingress' or 'resourceRef' configuration (optional)
+	ExposedIPs []string `json:"exposedIps,omitempty"`
+}
+
+// Servers holds the GSLB's servers' configuration
+// +k8s:openapi-gen=true
+type Server struct {
+	// Hostname exposed by the GSLB. This information is extracted automatically from the 'ingress' or 'resourceRef' configuration (optional)
+	Host string `json:"host,omitempty"`
+	// Kubernetes Services backing the load balanced application under the hostname. This information is extracted automatically from the 'ingress' or 'resourceRef' configuration (optional)
+	Services []*NamespacedName `json:"services,omitempty"`
+}
+
+// NamespacedName holds a reference to a k8s resource
+// +k8s:openapi-gen=true
+type NamespacedName struct {
+	// Namespace where the resource can be found
+	Namespace string `json:"namespace"`
+	// Name of the resource
+	Name string `json:"name"`
 }
 
 // GslbStatus defines the observed state of Gslb
@@ -57,8 +91,12 @@ type GslbStatus struct {
 	HealthyRecords map[string][]string `json:"healthyRecords"`
 	// Cluster Geo Tag
 	GeoTag string `json:"geoTag"`
-	// Comma-separated list of hosts. Duplicating the value from range .spec.ingress.rules[*].host for printer column
+	// Comma-separated list of hosts
 	Hosts string `json:"hosts,omitempty"`
+	// LoadBalancer configuration
+	LoadBalancer LoadBalancer `json:"loadBalancer"`
+	// Servers configuration
+	Servers []*Server `json:"servers"`
 }
 
 // +kubebuilder:object:root=true

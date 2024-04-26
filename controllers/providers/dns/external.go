@@ -66,7 +66,7 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 	if p.config.CoreDNSExposed {
 		NSServerIPs, err = p.assistant.CoreDNSExposedIPs()
 	} else {
-		NSServerIPs, err = p.assistant.GslbIngressExposedIPs(gslb)
+		NSServerIPs = gslb.Status.LoadBalancer.ExposedIPs
 	}
 	if err != nil {
 		return err
@@ -107,10 +107,6 @@ func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb) error {
 
 func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets assistant2.Targets) {
 	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
-}
-
-func (p *ExternalDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
-	return p.assistant.GslbIngressExposedIPs(gslb)
 }
 
 func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {

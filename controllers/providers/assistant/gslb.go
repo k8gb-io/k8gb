@@ -27,12 +27,10 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 
 	"github.com/miekg/dns"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
@@ -119,44 +117,6 @@ func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []str
 		return []string{lb.IP}, nil
 	}
 	return nil, nil
-}
-
-// GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses
-func (r *Gslb) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
-	nn := types.NamespacedName{
-		Name:      gslb.Name,
-		Namespace: gslb.Namespace,
-	}
-
-	gslbIngress := &netv1.Ingress{}
-
-	err := r.client.Get(context.TODO(), nn, gslbIngress)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info().
-				Str("gslb", gslb.Name).
-				Msg("Can't find gslb Ingress")
-		}
-		return nil, err
-	}
-
-	var gslbIngressIPs []string
-
-	for _, ip := range gslbIngress.Status.LoadBalancer.Ingress {
-		if len(ip.IP) > 0 {
-			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
-		}
-		if len(ip.Hostname) > 0 {
-			IPs, err := utils.Dig(ip.Hostname, r.edgeDNSServers...)
-			if err != nil {
-				log.Warn().Err(err).Msg("Dig error")
-				return nil, err
-			}
-			gslbIngressIPs = append(gslbIngressIPs, IPs...)
-		}
-	}
-
-	return gslbIngressIPs, nil
 }
 
 // SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist

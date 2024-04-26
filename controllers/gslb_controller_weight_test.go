@@ -172,7 +172,6 @@ func TestWeight(t *testing.T) {
 			// settings := provideSettings(t, predefinedConfig)
 			m := mocks.NewMockProvider(ctrl)
 			r := mocks.NewMockGslbResolver(ctrl)
-			m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Do(assertAnnotation).Return(fmt.Errorf("save DNS error")).Times(1)
 			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
 			r.EXPECT().ResolveGslbSpec(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(injectWeight).AnyTimes()

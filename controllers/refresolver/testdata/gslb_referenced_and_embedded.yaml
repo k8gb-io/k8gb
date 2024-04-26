@@ -1,0 +1,27 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: embedded
+  namespace: test-gslb
+spec:
+  resourceRef:
+    ingress:
+      matchLabels:
+        app: referenced
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: embedded.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: embedded
+                  port:
+                    name: http
+  strategy:
+    type: roundRobin
+    splitBrainThresholdSeconds: 300
+    dnsTtlSeconds: 30

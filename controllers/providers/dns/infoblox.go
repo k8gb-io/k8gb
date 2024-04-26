@@ -71,7 +71,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	if p.config.CoreDNSExposed {
 		addresses, err = p.assistant.CoreDNSExposedIPs()
 	} else {
-		addresses, err = p.assistant.GslbIngressExposedIPs(gslb)
+		addresses = gslb.Status.LoadBalancer.ExposedIPs
 	}
 	if err != nil {
 		m.InfobloxIncrementZoneUpdateError(gslb)
@@ -204,10 +204,6 @@ func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
 
 func (p *InfobloxProvider) GetExternalTargets(host string) (targets assistant.Targets) {
 	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
-}
-
-func (p *InfobloxProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
-	return p.assistant.GslbIngressExposedIPs(gslb)
 }
 
 func (p *InfobloxProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {

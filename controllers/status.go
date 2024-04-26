@@ -59,47 +59,37 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb, ep *externaldn
 
 func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[string]k8gbv1beta1.HealthStatus, error) {
 	serviceHealth := make(map[string]k8gbv1beta1.HealthStatus)
-	for _, rule := range gslb.Spec.Ingress.Rules {
-		for _, path := range rule.HTTP.Paths {
-			if path.Backend.Service == nil || path.Backend.Service.Name == "" {
-				log.Warn().
-					Str("gslb", gslb.Name).
-					Interface("service", path.Backend.Service).
-					Msg("Malformed service definition")
-				serviceHealth[rule.Host] = k8gbv1beta1.NotFound
-				continue
-			}
+	for _, server := range gslb.Status.Servers {
+		serviceHealth[server.Host] = k8gbv1beta1.NotFound
+		for _, svc := range server.Services {
 			service := &corev1.Service{}
 			finder := client.ObjectKey{
-				Namespace: gslb.Namespace,
-				Name:      path.Backend.Service.Name,
+				Namespace: svc.Namespace,
+				Name:      svc.Name,
 			}
 			err := r.Get(context.TODO(), finder, service)
 			if err != nil {
 				if errors.IsNotFound(err) {
-					serviceHealth[rule.Host] = k8gbv1beta1.NotFound
 					continue
 				}
 				return serviceHealth, err
 			}
 
 			endpoints := &corev1.Endpoints{}
-
 			nn := types.NamespacedName{
-				Name:      path.Backend.Service.Name,
-				Namespace: gslb.Namespace,
+				Name:      svc.Name,
+				Namespace: svc.Namespace,
 			}
-
 			err = r.Get(context.TODO(), nn, endpoints)
 			if err != nil {
 				return serviceHealth, err
 			}
 
-			serviceHealth[rule.Host] = k8gbv1beta1.Unhealthy
+			serviceHealth[server.Host] = k8gbv1beta1.Unhealthy
 			if len(endpoints.Subsets) > 0 {
 				for _, subset := range endpoints.Subsets {
 					if len(subset.Addresses) > 0 {
-						serviceHealth[rule.Host] = k8gbv1beta1.Healthy
+						serviceHealth[server.Host] = k8gbv1beta1.Healthy
 					}
 				}
 			}
@@ -139,8 +129,8 @@ func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][
 
 func (r *GslbReconciler) hostsToCSV(gslb *k8gbv1beta1.Gslb) string {
 	var hosts []string
-	for _, r := range gslb.Spec.Ingress.Rules {
-		hosts = append(hosts, r.Host)
+	for _, server := range gslb.Status.Servers {
+		hosts = append(hosts, server.Host)
 	}
 	return strings.Join(hosts, ", ")
 }
