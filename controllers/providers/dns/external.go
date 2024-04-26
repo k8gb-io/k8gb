@@ -113,6 +113,10 @@ func (p *ExternalDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) ([]s
 	return p.assistant.GslbIngressExposedIPs(gslb)
 }
 
+func (p *ExternalDNSProvider) GslbServiceExposedIPs(gslb *k8gbv1beta1.Gslb) ([]string, error) {
+	return p.assistant.GslbServiceExposedIPs(gslb)
+}
+
 func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {
 	return p.assistant.SaveDNSEndpoint(gslb.Namespace, i)
 }

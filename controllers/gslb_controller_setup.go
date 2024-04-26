@@ -57,12 +57,17 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			}
 			gslbName := ""
 			for _, gslb := range gslbList.Items {
-				for _, rule := range gslb.Spec.Ingress.Rules {
-					for _, path := range rule.HTTP.Paths {
-						if path.Backend.Service != nil && path.Backend.Service.Name == a.GetName() {
-							gslbName = gslb.Name
+				if gslb.Spec.Ingress != nil {
+					for _, rule := range gslb.Spec.Ingress.Rules {
+						for _, path := range rule.HTTP.Paths {
+							if path.Backend.Service != nil && path.Backend.Service.Name == a.GetName() {
+								gslbName = gslb.Name
+							}
 						}
 					}
+				}
+				if gslb.Spec.LoadBalancer != nil && gslb.Spec.LoadBalancer.ServiceName == a.GetName() {
+					gslbName = gslb.Name
 				}
 			}
 			if len(gslbName) > 0 {
