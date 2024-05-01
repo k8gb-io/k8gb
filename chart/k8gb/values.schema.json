@@ -114,6 +114,15 @@
                     "type": "string",
                     "minLength": 1
                 },
+                "extraEnv": {
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "type": "array"
+                },
                 "image": {
                     "type": "string",
                     "minLength": 1
@@ -616,7 +625,7 @@
             },
             "required": [
                 "enabled",
-		"zoneID"
+                "zoneID"
             ],
             "title": "Cloudflare"
         },
