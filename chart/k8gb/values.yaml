@@ -56,6 +56,12 @@ k8gb:
 externaldns:
   # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment
   dnsPolicy: "ClusterFirst"
+  # -- extra environment variables
+  extraEnv: []
+  # -- extra volumes
+  extraVolumes: []
+  # -- extra volume mounts
+  extraVolumeMounts: []
   # -- external-dns image repo:tag
   # It is important to use the image from k8gb external-dns fork to get the full
   # functionality. See links below
@@ -130,7 +136,7 @@ rfc2136:
     - host: host.k3d.internal
     - port: 1053
   rfc2136auth:
-    insecure: 
+    insecure:
       enabled: false
     tsig:
       enabled: true
