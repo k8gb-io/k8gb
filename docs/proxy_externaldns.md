@@ -1,6 +1,6 @@
 # External DNS behind a proxy
 
-External DNS needs to communicate with a DNS server outside of the kubernetes cluster to update records. If there is a proxy for egress of the Kubernetes cluster the following should be configured:
+External DNS needs to communicate with a DNS server outside of the kubernetes cluster to update records. If a proxy is used for egress from the Kubernetes cluster the following should be configured:
 ```
 externaldns:
   extraEnv:
