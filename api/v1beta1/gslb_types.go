@@ -61,16 +61,16 @@ type GslbSpec struct {
 // LoadBalancer holds the GSLB's load balancer configuration
 // +k8s:openapi-gen=true
 type LoadBalancer struct {
-	// ExposedIPs on the local Load Balancer. This information is extracted automatically from the 'ingress' or 'resourceRef' configuration (optional)
+	// ExposedIPs on the local Load Balancer
 	ExposedIPs []string `json:"exposedIps,omitempty"`
 }
 
 // Servers holds the GSLB's servers' configuration
 // +k8s:openapi-gen=true
 type Server struct {
-	// Hostname exposed by the GSLB. This information is extracted automatically from the 'ingress' or 'resourceRef' configuration (optional)
+	// Hostname exposed by the GSLB
 	Host string `json:"host,omitempty"`
-	// Kubernetes Services backing the load balanced application under the hostname. This information is extracted automatically from the 'ingress' or 'resourceRef' configuration (optional)
+	// Kubernetes Services backing the load balanced application
 	Services []*NamespacedName `json:"services,omitempty"`
 }
 
