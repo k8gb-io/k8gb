@@ -4,7 +4,7 @@ metadata:
   name: test-gslb1
 # Used by renovate
 # repo: rancher/k3s
-image: docker.io/rancher/k3s:v1.29.2-k3s1
+image: docker.io/rancher/k3s:v1.30.0-k3s1
 agents: 1
 network: k3d-action-bridge-network
 ports:
