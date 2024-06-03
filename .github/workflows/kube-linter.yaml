@@ -37,5 +37,5 @@ jobs:
           output-file: ../results/kube-linter.sarif
 
       - name: Upload sarif output to GitHub
-        uses: github/codeql-action/upload-sarif@b1bd8da5e77d184fc454458c488c36cce2e52608
+        uses: github/codeql-action/upload-sarif@add199be7753abbeb58eee647967afe140edaba1
         continue-on-error: true
