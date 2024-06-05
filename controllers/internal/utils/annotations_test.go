@@ -26,11 +26,42 @@ import (
 
 var a2 = map[string]string{"k8gb.io/primary-geotag": "eu", "k8gb.io/strategy": "failover"}
 var a1 = map[string]string{"field.cattle.io/publicEndpoints": "dummy"}
+var allowed = []string{"k8gb.io/primary-geotag", "k8gb.io/strategy", "field.cattle.io/publicEndpoints"}
+
+func TestTryAddDeniedAnnotation(t *testing.T) {
+	// arrange
+	// act
+	source := map[string]string{
+		"k8gb.io/primary-geotag":  "us",
+		"k8gb.io/strategy":        "failover",
+		"k8gb.io/port":            "8080",
+		"k8gb.io/protocol":        "TCP",
+		"k8gb.io/dns-ttl-seconds": "100",
+		"kubectl.kubernetes.io/last-applied-configuration": "{}",
+		"k8gb.io/override": "blah",
+	}
+	target := map[string]string{"k8gb.io/primary-geotag": "na",
+		"k8gb.io/strategy": "failover",
+		"k8gb.io/port":     "80",
+		"k8gb.io/tls":      "true",
+		"k8gb.io/override": "foo",
+	}
+
+	repaired := MergeAnnotations(target, source, "k8gb.io/primary-geotag", "k8gb.io/dns-ttl-seconds", "k8gb.io/override")
+	// assert
+	assert.Equal(t, 6, len(repaired))
+	assert.Equal(t, "us", repaired["k8gb.io/primary-geotag"])
+	assert.Equal(t, "failover", repaired["k8gb.io/strategy"])
+	assert.Equal(t, "true", repaired["k8gb.io/tls"])
+	assert.Equal(t, "100", repaired["k8gb.io/dns-ttl-seconds"])
+	assert.Equal(t, "80", repaired["k8gb.io/port"])
+	assert.Equal(t, "blah", repaired["k8gb.io/override"])
+}
 
 func TestAddNewAnnotations(t *testing.T) {
 	// arrange
 	// act
-	repaired := MergeAnnotations(a1, a2)
+	repaired := MergeAnnotations(a1, a2, allowed...)
 	// assert
 	assert.Equal(t, 3, len(repaired))
 	assert.Equal(t, "eu", repaired["k8gb.io/primary-geotag"])
@@ -58,7 +89,7 @@ func TestUpdateExistingRecords(t *testing.T) {
 	}
 	a1["k8gb.io/primary-geotag"] = "us"
 	// act
-	repaired := MergeAnnotations(a1, a2)
+	repaired := MergeAnnotations(a1, a2, allowed...)
 	// assert
 	assert.Equal(t, 3, len(repaired))
 	assert.Equal(t, "eu", repaired["k8gb.io/primary-geotag"])
@@ -69,7 +100,7 @@ func TestUpdateExistingRecords(t *testing.T) {
 func TestEqualAnnotationsWithNilA1(t *testing.T) {
 	// arrange
 	// act
-	repaired := MergeAnnotations(nil, a2)
+	repaired := MergeAnnotations(nil, a2, allowed...)
 	// assert
 	assert.True(t, assert.ObjectsAreEqual(a2, repaired))
 }
