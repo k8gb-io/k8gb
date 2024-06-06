@@ -45,30 +45,48 @@ spec:
             cpu: "500m"
         securityContext:
           readOnlyRootFilesystem: true
-      {{- if .Values.route53.secret }}
+        {{- with .Values.externaldns.extraEnv }}
         env:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- if .Values.route53.secret }}
+        {{- if not .Values.externaldns.extraEnv }}
+        env:
+        {{- end }}
           - name: AWS_SHARED_CREDENTIALS_FILE
             value: /.aws/credentials
         volumeMounts:
           - name: aws-credentials
             mountPath: /.aws
             readOnly: true
+          {{- with .Values.externaldns.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
       volumes:
         - name: aws-credentials
           secret:
             secretName: {{ .Values.route53.secret }}
+        {{- with .Values.externaldns.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- if .Values.rfc2136.rfc2136auth.gssTsig.enabled }}
         volumeMounts:
           - mountPath: /etc/krb5.conf
             name: kerberos-config-volume
             subPath: krb5.conf
+          {{- with .Values.externaldns.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
       dnsPolicy: {{ .Values.externaldns.dnsPolicy }}
       volumes:
         - name: kerberos-config-volume
           configMap:
             name: {{ .Values.rfc2136.rfc2136auth.gssTsig.kerberosConfigmap }}
             defaultMode: 420
+        {{- with .Values.externaldns.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- if .Values.azuredns.enabled }}
         volumeMounts:
@@ -80,5 +98,4 @@ spec:
           secret:
             secretName: {{ .Values.azuredns.authSecretName | default "external-dns-secret-azure" }}
       {{- end }}
-        
 {{- end }}

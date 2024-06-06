@@ -55,25 +55,24 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				log.Info().Msg("Can't fetch gslb objects")
 				return nil
 			}
-			gslbName := ""
+			reconcileRequests := []reconcile.Request{}
+		GslbLoop:
 			for _, gslb := range gslbList.Items {
 				for _, rule := range gslb.Spec.Ingress.Rules {
 					for _, path := range rule.HTTP.Paths {
 						if path.Backend.Service != nil && path.Backend.Service.Name == a.GetName() {
-							gslbName = gslb.Name
+							reconcileRequests = append(reconcileRequests, reconcile.Request{
+								NamespacedName: types.NamespacedName{
+									Name:      gslb.Name,
+									Namespace: a.GetNamespace(),
+								},
+							})
+							continue GslbLoop
 						}
 					}
 				}
 			}
-			if len(gslbName) > 0 {
-				return []reconcile.Request{
-					{NamespacedName: types.NamespacedName{
-						Name:      gslbName,
-						Namespace: a.GetNamespace(),
-					}},
-				}
-			}
-			return nil
+			return reconcileRequests
 		})
 
 	ingressMapHandler := handler.EnqueueRequestsFromMapFunc(

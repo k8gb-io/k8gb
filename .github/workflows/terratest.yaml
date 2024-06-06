@@ -29,12 +29,12 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@6c3b1c91e8873ae0c705b0709f957c7a6a5eaf10
+      uses: step-security/harden-runner@f4f3f445f343c08c93d7771433e8dee4267e05b9
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - id: skip_check
-      uses: fkirc/skip-duplicate-actions@f54720a485d24225d7ee6918004908e5025fec19
+      uses: fkirc/skip-duplicate-actions@84931c63f7562abc89860097e0caf563c7b87f65
       with:
         skip_after_successful_duplicate: 'true'
         do_not_skip: '["workflow_dispatch", "schedule"]'
@@ -44,7 +44,7 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
     steps:
-      - uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017
+      - uses: actions/checkout@b80ff79f1755d06ba70441c368a6fe801f5f3a62
         with:
           fetch-depth: 0
 
@@ -53,7 +53,7 @@ jobs:
           go-version: 1.19.1
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@c21f56a7bc891b5f73bec61233c4102ef8273150
+        uses: goreleaser/goreleaser-action@5742e2a039330cbb23ebf35f046f814d4c6ff811
         with:
           version: v1.9.2
           args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign
@@ -98,7 +98,7 @@ jobs:
         if: always()
         uses: ./.github/actions/print-debug
 
-      - uses: actions/upload-artifact@ef09cdac3e2d3e60d8ccadda691f4f1cec5035cb
+      - uses: actions/upload-artifact@552bf3722c16e81001aea7db72d8cedf64eb5f68
         if: always()
         with:
           name: terratest-logs

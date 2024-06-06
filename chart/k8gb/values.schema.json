@@ -117,6 +117,15 @@
                     "type": "string",
                     "minLength": 1
                 },
+                "extraEnv": {
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "type": "array"
+                },
                 "image": {
                     "type": "string",
                     "minLength": 1
@@ -347,7 +356,10 @@
             "additionalProperties": false,
             "properties": {
                 "extra_plugins": {
-                    "type": "string"
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 }
             },
             "title": "k8gbCoredns"
@@ -671,7 +683,7 @@
             },
             "required": [
                 "enabled",
-		"zoneID"
+                "zoneID"
             ],
             "title": "Cloudflare"
         },

@@ -1,6 +1,6 @@
 # Enabling RFC2136 for ExternalDNS
 
-In order to enable the provider RFC2136 on ExternalDNS, the following [configurations](/chart/k8gb/README.md) should be changed in the values.yaml of the K8GB helm chart:
+In order to enable the provider RFC2136 on ExternalDNS, the following `rfc2136.*` [parameters](https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/README.md#values) should be changed in the values.yaml of the K8GB helm chart:
 
 * One authentication method should be enabled on the values:
   * Insecure
@@ -9,7 +9,7 @@ In order to enable the provider RFC2136 on ExternalDNS, the following [configura
     * This method uses TSIG authentication that relies on a token provided for the DNS records update.
   * GSS-TSIG
     * This method uses GSS-TSIG authentication, which is a variation of the TSIG method, but uses Kerberos for the generation of tokens for authentication and authorization
-    * Method used by Active Directory Windows DNS 
+    * Method used by Active Directory Windows DNS
 
 * GSS-TSIG
   * kerberos-username
@@ -25,10 +25,10 @@ In order to enable the provider RFC2136 on ExternalDNS, the following [configura
 rfc2136:
   enabled: true
   rfc2136Opts:
-    - host: yourAcDc.k8gb.local 
+    - host: yourAcDc.k8gb.local
     - port: 53
   rfc2136auth:
-    insecure: 
+    insecure:
       enabled: false
     tsig:
       enabled: false

@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ github.event.label.name == 'heavy-tests' }}
     steps:
-      - uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017
+      - uses: actions/checkout@b80ff79f1755d06ba70441c368a6fe801f5f3a62
         with:
           fetch-depth: 0
 
@@ -22,7 +22,7 @@ jobs:
           go-version: 1.19.1
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@c21f56a7bc891b5f73bec61233c4102ef8273150
+        uses: goreleaser/goreleaser-action@5742e2a039330cbb23ebf35f046f814d4c6ff811
         with:
           version: v1.7.0
           args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign
@@ -75,7 +75,7 @@ jobs:
         if: always()
         uses: ./.github/actions/print-debug
 
-      - uses: actions/upload-artifact@ef09cdac3e2d3e60d8ccadda691f4f1cec5035cb
+      - uses: actions/upload-artifact@552bf3722c16e81001aea7db72d8cedf64eb5f68
         if: always()
         with:
           name: terratest-logs

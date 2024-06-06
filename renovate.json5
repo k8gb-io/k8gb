@@ -12,6 +12,7 @@
   "ignorePaths": [
     ".github/workflows/release.yaml",
     ".github/workflows/cut_release.yaml",
+    ".github/workflows/scorecard.yml",
   ],
   "labels": ["dependencies", "renovate"],
   "prConcurrentLimit": 5,
@@ -72,7 +73,7 @@
       "matchStrings": [
         "repo: (?<depName>.*)\n(\\s*)image: \"?.+:(?<currentValue>.*?)\"?\n",
       ],
-      "extractVersionTemplate": "^(?<version>.+)(-k3s2)?$",
+      "extractVersionTemplate": "^(?<version>.+)(-k3s1)?(-k3s2)?$",
     },
   ],
 }
