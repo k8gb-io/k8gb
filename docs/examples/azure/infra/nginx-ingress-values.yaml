@@ -2,25 +2,10 @@
 ## Ref: https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
 ##
 controller:
-  admissionWebhooks:
-    enabled: false
-    patch:
-     enabled: false
-  hostNetwork: true
-  publishService:
-    enabled: false
-  ## Use host ports 80 and 443
-  daemonset:
-    useHostPort: false
-
-    hostPorts:
-      http: 80
-      https: 443
-
   kind: DaemonSet
-
   service:
-    enabled: false
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
 
 # UDP service key:value pairs
 # Ref: https://github.com/kubernetes/contrib/tree/master/ingress/controllers/nginx/examples/udp
