@@ -3,27 +3,24 @@ kind: Ingress
 metadata:
   annotations:
     k8gb.io/strategy: failover
-    k8gb.io/primary-geotag: ne
+    k8gb.io/primary-geotag: francecentral
     kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.org/redirect-to-https: "true"
   labels:
     app: podinfo
   name: podinfo-ingress
   namespace: podinfo
 spec:
   rules:
-  - host: podinfo.k8gb.mbcpcloud.lab
+  - host: podinfo.global.k8gb.local
     http:
       paths:
       - backend:
           service:
-            name: frontend-podinfo
+            name: podinfo
             port:
               name: http
         path: /
         pathType: Prefix
   tls:
   - hosts:
-    - podinfo.k8gb.mbcpcloud.lab
+    - podinfo.global.k8gb.local

@@ -1,4 +1,4 @@
-{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled .Values.cloudflare.enabled }}
+{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -88,5 +88,14 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
-
+      {{- if .Values.azuredns.enabled }}
+        volumeMounts:
+          - name: azure-config-file
+            mountPath: /etc/kubernetes/
+            readOnly: true
+      volumes:
+        - name: azure-config-file
+          secret:
+            secretName: {{ .Values.azuredns.authSecretName | default "external-dns-secret-azure" }}
+      {{- end }}
 {{- end }}

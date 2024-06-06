@@ -30,6 +30,9 @@
                 "rfc2136": {
                     "$ref": "#/definitions/Rfc2136"
                 },
+                "azuredns": {
+                    "$ref": "#/definitions/AzureDNS"
+                },                
                 "cloudflare": {
                     "$ref": "#/definitions/Cloudflare"
                 },
@@ -612,6 +615,58 @@
             ],
             "title": "Route53"
         },
+        "AzureDNS": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "createAuthSecret": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "authSecretName": {
+                    "type": "string",
+                    "default": "external-dns-secret-azure"
+                },
+                "tenantId": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "subscriptionId": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "resourceGroup": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "aadClientId": {
+                    "type": "string"
+                },
+                "aadClientSecret": {
+                    "type": "string"
+                },
+                "useManagedIdentityExtension": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "userAssignedIdentityID": {
+                    "type": "string"
+                },
+                "useWorkloadIdentityExtension": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "required": [
+                "tenantId",
+                "subscriptionId",
+                "resourceGroup"
+            ],
+            "title": "azuredns"
+        },        
         "Cloudflare": {
             "type": "object",
             "additionalProperties": false,
