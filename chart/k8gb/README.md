@@ -50,6 +50,11 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| azuredns.createAuthSecret | bool | `true` | Create an authentication secret for Azure DNS based on the values below alternatively, you can create the secret manually and pass its name in the `authSecretName` value |
+| azuredns.enabled | bool | `false` |  |
+| azuredns.resourceGroup | string | `"myDnsResourceGroup"` | Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone') |
+| azuredns.subscriptionId | string | `"mySubscriptionId"` | subscription id which holds the Azure DNS zone |
+| azuredns.tenantId | string | `"myTenantId"` | Azure tenant ID which holds the managed identity |
 | cloudflare.dnsRecordsPerPage | int | `5000` | Configure how many DNS records to fetch per request see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling |
 | cloudflare.enabled | bool | `false` | Enable Cloudflare provider |
 | cloudflare.zoneID | string | `"replaceme"` | Cloudflare Zone ID follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/ to find your zoneID value |
