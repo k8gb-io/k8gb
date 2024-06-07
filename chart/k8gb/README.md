@@ -67,7 +67,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | externaldns.extraEnv | list | `[]` | extra environment variables |
 | externaldns.extraVolumeMounts | list | `[]` | extra volume mounts |
 | externaldns.extraVolumes | list | `[]` | extra volumes |
-| externaldns.image | string | `"ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
+| externaldns.image | string | `"ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns-multiarch"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
 | externaldns.interval | string | `"20s"` | external-dns sync interval |
 | externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
 | externaldns.securityContext.runAsNonRoot | bool | `true` |  |
