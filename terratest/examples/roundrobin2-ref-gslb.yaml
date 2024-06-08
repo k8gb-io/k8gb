@@ -1,0 +1,12 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: roundrobin-test-gslb
+spec:
+  resourceRef:
+    ingress:
+      matchLabels:
+        app: roundrobin-test-gslb
+  strategy:
+    type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
+    dnsTtlSeconds: 5

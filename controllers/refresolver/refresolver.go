@@ -41,8 +41,8 @@ import (
 	"reflect"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/logging"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -54,7 +54,7 @@ type GslbReferenceResolver interface {
 	// GetServers retrieves the server configuration of the GSLB object
 	GetServers() ([]*k8gbv1beta1.Server, error)
 	// GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
-	GetGslbExposedIPs(*k8gbv1beta1.Gslb, client.Client, utils.DNSList) ([]string, error)
+	GetGslbExposedIPs(client.Client, utils.DNSList) ([]string, error)
 }
 
 // New creates a new GSLBReferenceResolver

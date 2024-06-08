@@ -31,7 +31,7 @@ import (
 	reflect "reflect"
 
 	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	utils "github.com/k8gb-io/k8gb/controllers/internal/utils"
+	utils "github.com/k8gb-io/k8gb/controllers/utils"
 	gomock "go.uber.org/mock/gomock"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -60,18 +60,18 @@ func (m *MockGslbReferenceResolver) EXPECT() *MockGslbReferenceResolverMockRecor
 }
 
 // GetGslbExposedIPs mocks base method.
-func (m *MockGslbReferenceResolver) GetGslbExposedIPs(arg0 *v1beta1.Gslb, arg1 client.Client, arg2 utils.DNSList) ([]string, error) {
+func (m *MockGslbReferenceResolver) GetGslbExposedIPs(arg0 client.Client, arg1 utils.DNSList) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGslbExposedIPs", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetGslbExposedIPs", arg0, arg1)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetGslbExposedIPs indicates an expected call of GetGslbExposedIPs.
-func (mr *MockGslbReferenceResolverMockRecorder) GetGslbExposedIPs(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockGslbReferenceResolverMockRecorder) GetGslbExposedIPs(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGslbExposedIPs", reflect.TypeOf((*MockGslbReferenceResolver)(nil).GetGslbExposedIPs), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGslbExposedIPs", reflect.TypeOf((*MockGslbReferenceResolver)(nil).GetGslbExposedIPs), arg0, arg1)
 }
 
 // GetServers mocks base method.

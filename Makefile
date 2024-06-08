@@ -452,7 +452,7 @@ terratest: # Run terratest suite
 		echo -e "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
 		exit 1;\
 	fi
-	cd terratest/test/ && go mod download && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) go test -v -timeout 15m -parallel=12 --tags=$(TEST_TAGS)
+	cd terratest/test/ && go mod download && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) go test -v -timeout 20m -parallel=12 --tags=$(TEST_TAGS)
 
 .PHONY: website
 website:

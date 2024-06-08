@@ -42,7 +42,7 @@ import (
 	"reflect"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -171,7 +171,7 @@ func (irr *IngressReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error)
 }
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
-func (irr *IngressReferenceResolver) GetGslbExposedIPs(gslb *k8gbv1beta1.Gslb, _ client.Client, edgeDNSServers utils.DNSList) ([]string, error) {
+func (irr *IngressReferenceResolver) GetGslbExposedIPs(_ client.Client, edgeDNSServers utils.DNSList) ([]string, error) {
 	gslbIngressIPs := []string{}
 
 	for _, ip := range irr.ingress.Status.LoadBalancer.Ingress {

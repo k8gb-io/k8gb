@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-gslb
+  labels:
+    app: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: terratest-notfound.cloud.example.com # This is the GSLB enabled host that clients would use
+      http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: non-existing-app # Gslb should reflect NotFound status
+                port:
+                  name: http
+    - host: terratest-unhealthy.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: unhealthy-app # Gslb should reflect Unhealthy status
+                port:
+                  name: http
+    - host: terratest-roundrobin.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
+                port:
+                  name: http

@@ -324,25 +324,25 @@ spec:
                         description: matchExpressions is a list of label selector
                           requirements. The requirements are ANDed.
                         items:
-                          description: A label selector requirement is a selector
-                            that contains values, a key, and an operator that relates
-                            the key and values.
+                          description: |-
+                            A label selector requirement is a selector that contains values, a key, and an operator that
+                            relates the key and values.
                           properties:
                             key:
                               description: key is the label key that the selector
                                 applies to.
                               type: string
                             operator:
-                              description: operator represents a key's relationship
-                                to a set of values. Valid operators are In, NotIn,
-                                Exists and DoesNotExist.
+                              description: |-
+                                operator represents a key's relationship to a set of values.
+                                Valid operators are In, NotIn, Exists and DoesNotExist.
                               type: string
                             values:
-                              description: values is an array of string values. If
-                                the operator is In or NotIn, the values array must
-                                be non-empty. If the operator is Exists or DoesNotExist,
-                                the values array must be empty. This array is replaced
-                                during a strategic merge patch.
+                              description: |-
+                                values is an array of string values. If the operator is In or NotIn,
+                                the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                the values array must be empty. This array is replaced during a strategic
+                                merge patch.
                               items:
                                 type: string
                               type: array
@@ -354,13 +354,13 @@ spec:
                       matchLabels:
                         additionalProperties:
                           type: string
-                        description: matchLabels is a map of {key,value} pairs. A
-                          single {key,value} in the matchLabels map is equivalent
-                          to an element of matchExpressions, whose key field is "key",
-                          the operator is "In", and the values array contains only
-                          "value". The requirements are ANDed.
+                        description: |-
+                          matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                          map is equivalent to an element of matchExpressions, whose key field is "key", the
+                          operator is "In", and the values array contains only "value". The requirements are ANDed.
                         type: object
                     type: object
+                    x-kubernetes-map-type: atomic
                 type: object
               strategy:
                 description: Gslb Strategy spec
@@ -408,9 +408,7 @@ spec:
                 description: LoadBalancer configuration
                 properties:
                   exposedIps:
-                    description: ExposedIPs on the local Load Balancer. This information
-                      is extracted automatically from the 'ingress' or 'resourceRef'
-                      configuration (optional)
+                    description: ExposedIPs on the local Load Balancer
                     items:
                       type: string
                     type: array
@@ -421,14 +419,10 @@ spec:
                   description: Servers holds the GSLB's servers' configuration
                   properties:
                     host:
-                      description: Hostname exposed by the GSLB. This information
-                        is extracted automatically from the 'ingress' or 'resourceRef'
-                        configuration (optional)
+                      description: Hostname exposed by the GSLB
                       type: string
                     services:
                       description: Kubernetes Services backing the load balanced application
-                        under the hostname. This information is extracted automatically
-                        from the 'ingress' or 'resourceRef' configuration (optional)
                       items:
                         description: NamespacedName holds a reference to a k8s resource
                         properties:

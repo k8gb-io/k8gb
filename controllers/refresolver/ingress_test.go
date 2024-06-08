@@ -42,7 +42,7 @@ import (
 	"testing"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -177,7 +177,7 @@ func TestGetGslbExposedIPs(t *testing.T) {
 			}
 
 			// act
-			IPs, err := resolver.GetGslbExposedIPs(&k8gbv1beta1.Gslb{}, nil, []utils.DNSServer{})
+			IPs, err := resolver.GetGslbExposedIPs(nil, []utils.DNSServer{})
 			assert.NoError(t, err)
 
 			// assert

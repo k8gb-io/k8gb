@@ -188,7 +188,7 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 	a := mocks.NewMockAssistant(ctrl)
 	cl := mocks.NewMockInfobloxClient(ctrl)
 	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, arg1 interface{}) {
+	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, _ interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-east-1.example.com", fqdn)
 	}).Return(nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()

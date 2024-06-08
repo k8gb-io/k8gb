@@ -169,7 +169,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	gslb.Status.Servers = servers
 	fmt.Printf("got servers: %v\n", servers)
 
-	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(gslb, r.Client, r.Config.EdgeDNSServers)
+	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(r.Client, r.Config.EdgeDNSServers)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting load balancer exposed IPs (%s)", err))

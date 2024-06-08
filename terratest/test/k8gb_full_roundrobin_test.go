@@ -26,5 +26,24 @@ import (
 )
 
 func TestFullRoundRobin(t *testing.T) {
-	abstractTestFullRoundRobin(t, settings.ClustersNumber)
+	tests := []struct {
+		name        string
+		gslbPath    string
+		ingressPath string
+	}{
+		{
+			name:        "embedded ingress",
+			gslbPath:    "../examples/roundrobin2.yaml",
+			ingressPath: "",
+		},
+		{
+			name:        "referenced ingress",
+			gslbPath:    "../examples/roundrobin2-ref-gslb.yaml",
+			ingressPath: "../examples/roundrobin2-ref-ingress.yaml",
+		},
+	}
+
+	for test := range tests {
+		abstractTestFullRoundRobin(t, settings.ClusterNumber, test.name, test.gslbPath, test.ingressPath)
+	}
 }
