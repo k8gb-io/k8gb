@@ -148,7 +148,7 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 
 	@for c in $(CLUSTER_IDS); do \
 		echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
-		k3d image import $(REPO):$(SEMVER)-$$(arch) -c $(CLUSTER_NAME)$$c ;\
+		k3d image import $(REPO):$(SEMVER)-$$(uname -m) -c $(CLUSTER_NAME)$$c ;\
 	done
 
 	@for c in $(CLUSTER_IDS); do \
