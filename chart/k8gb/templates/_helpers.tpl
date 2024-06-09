@@ -164,22 +164,22 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- end -}}
 
 {{- define "external-dns.azure-credentials" -}}
-{{- if .Values.azuredns.enabled -}}
+{{- if and (eq .Values.azuredns.enabled true) (eq .Values.azuredns.createAuthSecret true) -}}
 {
-  "tenantId": "{{ .Values.azuredns.tenantId }}",
-  "subscriptionId": "{{ .Values.azuredns.subscriptionId }}",
-  "resourceGroup": "{{ .Values.azuredns.resourceGroup }}",
-  {{- if .Values.azuredns.aadClientId -}}
-  "aadClientId": "{{ .Values.azuredns.aadClientId }}",
+  "tenantId": "{{ .Values.azuredns.createAuthSecret.tenantId }}",
+  "subscriptionId": "{{ .Values.azuredns.createAuthSecret.subscriptionId }}",
+  "resourceGroup": "{{ .Values.azuredns.createAuthSecret.resourceGroup }}",
+  {{- if .Values.azuredns.createAuthSecret.aadClientId -}}
+  "aadClientId": "{{ .Values.azuredns.createAuthSecret.aadClientId }}",
   {{- end -}}
-  {{- if .Values.azuredns.aadClientSecret -}}
-  "aadClientSecret": "{{ .Values.azuredns.aadClientSecret }}",
+  {{- if .Values.azuredns.createAuthSecret.aadClientSecret -}}
+  "aadClientSecret": "{{ .Values.azuredns.createAuthSecret.aadClientSecret }}",
   {{- end -}}
-  "useManagedIdentityExtension": {{ .Values.azuredns.useManagedIdentityExtension | default false }},
-  {{- if .Values.azuredns.userAssignedIdentityID -}}
-  "userAssignedIdentityID": "{{ .Values.azuredns.userAssignedIdentityID }}",
+  "useManagedIdentityExtension": {{ .Values.azuredns.createAuthSecret.useManagedIdentityExtension | default false }},
+  {{- if .Values.azuredns.createAuthSecret.userAssignedIdentityID -}}
+  "userAssignedIdentityID": "{{ .Values.azuredns.createAuthSecret.userAssignedIdentityID }}",
   {{- end -}}
-  "useWorkloadIdentityExtension": {{ .Values.azuredns.useWorkloadIdentityExtension | default false }}
+  "useWorkloadIdentityExtension": {{ .Values.azuredns.createAuthSecret.useWorkloadIdentityExtension | default false }}
 }
 {{- end -}}
 {{- end -}}
