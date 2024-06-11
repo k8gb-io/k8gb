@@ -24,6 +24,10 @@ endif
 ###############################
 #		CONSTANTS
 ###############################
+ARCH ?= $(shell uname -m)
+ifeq ($(ARCH), x86_64)
+	ARCH=amd64
+endif
 CLUSTERS_NUMBER ?= 2
 CLUSTER_IDS = $(shell seq $(CLUSTERS_NUMBER))
 CLUSTER_NAME ?= test-gslb
@@ -121,7 +125,9 @@ debug-idea:
 demo: ## Execute end-to-end demo
 	@$(call demo-host, $(DEMO_URL))
 
-# spin-up local environment
+K8GB_LOCAL_VERSION ?= stable
+# Spin-up local environment. Deploys stable released version by default
+# Use `K8GB_LOCAL_VERSION=test make deploy-full-local-setup`
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
 	@echo -e "\n$(YELLOW)Creating $$(( $(CLUSTERS_NUMBER) + 1 )) k8s clusters$(NC)"
@@ -129,8 +135,8 @@ deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster s
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
 	done
-
-	$(MAKE) deploy-stable-version DEPLOY_APPS=true
+	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
+	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=true
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
@@ -146,11 +152,11 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 
 	@for c in $(CLUSTER_IDS); do \
 		echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
-		k3d image import $(REPO):$(SEMVER)-amd64 -c $(CLUSTER_NAME)$$c ;\
+		k3d image import $(REPO):$(SEMVER)-$(ARCH) -c $(CLUSTER_NAME)$$c ;\
 	done
 
 	@for c in $(CLUSTER_IDS); do \
-		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-amd64 CHART='./chart/k8gb' ;\
+		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-$(ARCH) CHART='./chart/k8gb' ;\
 		kubectl apply -n k8gb -f ./deploy/test/coredns-tcp-svc.yaml ;\
 	done
 

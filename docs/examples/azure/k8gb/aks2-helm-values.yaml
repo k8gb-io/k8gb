@@ -23,11 +23,12 @@ externaldns:
 azuredns:
   # -- Enable Azure DNS provider
   enabled: true
-  # -- Azure tenant ID which holds the managed identity
-  tenantId: myTenantID
-  # -- subscription id which holds the Azure DNS zone
-  subscriptionId: mySubscriptionID
-  # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
-  resourceGroup: k8gb-kubeconeu2023
-  aadClientId: myAADClientID
-  aadClientSecret: myAADClientSecret
+  createAuthSecret:
+    enabled: true
+    tenantId: myTenantID
+    # -- subscription id which holds the Azure DNS zone
+    subscriptionId: mySubscriptionID
+    # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
+    resourceGroup: k8gb-kubeconeu2023
+    aadClientId: myAADClientID
+    aadClientSecret: myAADClientSecret
