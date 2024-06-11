@@ -23,7 +23,7 @@ Configurable resources:
 
 ## Run the sample
 
-* To run the provided sample, please use the provided Makefile [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azuredns/).
+* To run the provided sample, please use the provided Makefile [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azure/).
     * Deploys all the required infrastructure and configurations
     * Before executing, please fill all the local variables in the scripts with the correct naming for the resources in order to avoid having problems with your Azure policies
     * Scripts will use Az CLI, please ensure that it is installed and logged when trying to execute the command
@@ -47,7 +47,7 @@ make setup-clusters
 
 ### Install K8gb
 
-This action will install K8gb in both clusters using the provided [sample](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azuredns/k8gb/) values.yaml for each cluster. Please ensure that the are correctly updated before execution
+This action will install K8gb in both clusters using the provided [sample](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azure/) values.yaml for each cluster. Please ensure that the are correctly updated before execution
 
 ```sh
 make deploy-k8gb
@@ -55,7 +55,7 @@ make deploy-k8gb
 
 ### Install demo app
 
-Deploys the sample Podinfo workload with failover GLSB configured using annotations in the Ingress resource [samples](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azuredns/demo/).
+Deploys the sample Podinfo workload with failover GLSB configured using annotations in the Ingress resource [samples](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azure/demo/).
 Ensure that the hosts on the samples are correctly updated before execution
 
 ```sh
