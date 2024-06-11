@@ -50,11 +50,17 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| azuredns.createAuthSecret | bool | `true` | Create an authentication secret for Azure DNS based on the values below alternatively, you can create the secret manually and pass its name in the `authSecretName` value |
+| azuredns.authSecretName | string | `"external-dns-secret-azure"` | External-dns secret name which contains Azure credentials. See https://github.com/k8gb-io/external-dns/blob/master/docs/tutorials/azure.md#configuration-file for expected format |
+| azuredns.createAuthSecret.aadClientId | string | `"myAadClientId"` | Azure client ID that is associated with the Service Principal. |
+| azuredns.createAuthSecret.aadClientSecret | string | `"myAadClientSecret"` | Azure client secret that is associated with the Service Principal. |
+| azuredns.createAuthSecret.enabled | bool | `true` | Create an authentication secret for Azure DNS based on the values below alternatively, you can create the secret manually and pass its name in the `azuredns.authSecretName` value |
+| azuredns.createAuthSecret.resourceGroup | string | `"myDnsResourceGroup"` | Azure Resource Group which holds the Azure DNS Zone (which is defined as 'k8gb.edgeDNSZone') |
+| azuredns.createAuthSecret.subscriptionId | string | `"mySubscriptionId"` | subscription id which holds the Azure DNS zone |
+| azuredns.createAuthSecret.tenantId | string | `"myTenantId"` | Azure tenant ID which holds the managed identity |
+| azuredns.createAuthSecret.useManagedIdentityExtension | bool | `false` | Use either AKS Kubelet Identity or AAD Pod Identities |
+| azuredns.createAuthSecret.useWorkloadIdentityExtension | bool | `false` | Use AKS workload identity extension |
+| azuredns.createAuthSecret.userAssignedIdentityID | string | `"myUserAssignedIdentityID"` | Client id from the Managed identitty when using the AAD Pod Identities |
 | azuredns.enabled | bool | `false` |  |
-| azuredns.resourceGroup | string | `"myDnsResourceGroup"` | Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone') |
-| azuredns.subscriptionId | string | `"mySubscriptionId"` | subscription id which holds the Azure DNS zone |
-| azuredns.tenantId | string | `"myTenantId"` | Azure tenant ID which holds the managed identity |
 | cloudflare.dnsRecordsPerPage | int | `5000` | Configure how many DNS records to fetch per request see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling |
 | cloudflare.enabled | bool | `false` | Enable Cloudflare provider |
 | cloudflare.zoneID | string | `"replaceme"` | Cloudflare Zone ID follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/ to find your zoneID value |
