@@ -25,8 +25,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 
 	"github.com/miekg/dns"
@@ -305,7 +306,7 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 			Msg("Adding external Gslb targets from cluster")
 		glueA, err := dnsQuery(cluster, r.edgeDNSServers)
 		if err != nil {
-			return
+			return targets
 		}
 		log.Info().
 			Str("nameserver", cluster).
@@ -323,7 +324,7 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		lHost := fmt.Sprintf("localtargets-%s", host)
 		a, err := dnsQuery(lHost, nameServersToUse)
 		if err != nil {
-			return
+			return targets
 		}
 		clusterTargets := getARecords(a)
 		if len(clusterTargets) > 0 {

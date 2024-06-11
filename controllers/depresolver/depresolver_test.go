@@ -27,9 +27,9 @@ import (
 	"strings"
 	"testing"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	utils2 "github.com/k8gb-io/k8gb/controllers/utils"
 
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -58,7 +58,7 @@ var predefinedConfig = Config{
 	ClusterGeoTag:           "us",
 	ExtClustersGeoTags:      []string{"za", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
-	EdgeDNSServers: []utils.DNSServer{
+	EdgeDNSServers: []utils2.DNSServer{
 		{
 			Host: "dns.cloud.example.com",
 			Port: 53,
@@ -348,7 +348,7 @@ func TestResolveConfigWithEmptyEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils.DNSServer{}
+	expected.EdgeDNSServers = []utils2.DNSServer{}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -357,7 +357,7 @@ func TestResolveConfigWithTwoEdgeDnsServers(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils.DNSServer{
+	expected.EdgeDNSServers = []utils2.DNSServer{
 		{
 			Host: "8.8.8.8",
 			Port: 53,
@@ -375,7 +375,7 @@ func TestResolveConfigWithNoEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils.DNSServer{}
+	expected.EdgeDNSServers = []utils2.DNSServer{}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, EdgeDNSServersKey)
 }
@@ -384,7 +384,7 @@ func TestResolveConfigWithEmptyIpAddressInEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils.DNSServer{
+	expected.EdgeDNSServers = []utils2.DNSServer{
 		{
 			Host: defaultEdgeDNSServerIP,
 			Port: 53,
@@ -398,7 +398,7 @@ func TestResolveConfigWithHostnameEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils.DNSServer{
+	expected.EdgeDNSServers = []utils2.DNSServer{
 		{
 			Host: "server-nonprod.on.domain.l3.2l.com",
 			Port: 53,
@@ -413,7 +413,7 @@ func TestResolveConfigWithInvalidIpAddressEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils.DNSServer{
+	expected.EdgeDNSServers = []utils2.DNSServer{
 		{
 			Host: fmt.Sprintf("%s.", defaultEdgeDNSServerIP),
 			Port: 53,
@@ -1251,7 +1251,7 @@ func TestNsServerNamesForLocalEdgeDNS(t *testing.T) {
 	defer cleanup()
 	for _, edgeDNSServer := range []string{"127.0.0.1", "localhost"} {
 		customConfig := predefinedConfig
-		customConfig.EdgeDNSServers = []utils.DNSServer{
+		customConfig.EdgeDNSServers = []utils2.DNSServer{
 			{
 				Host: edgeDNSServer,
 				Port: 53,
@@ -1550,7 +1550,7 @@ func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {
 	if err != nil {
 		panic(fmt.Errorf("can't open example CR file: %s", testData))
 	}
-	gslb, err := utils.YamlToGslb(gslbYaml)
+	gslb, err := utils2.YamlToGslb(gslbYaml)
 	if err != nil {
 		panic(err)
 	}

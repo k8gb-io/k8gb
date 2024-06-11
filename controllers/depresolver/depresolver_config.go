@@ -25,8 +25,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	"github.com/AbsaOSS/env-binder/env"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/rs/zerolog"
 )
 

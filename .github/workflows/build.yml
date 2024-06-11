@@ -56,8 +56,9 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@8032b262982c71a7cf7a6d2aa823106fc57e545e
         with:
-          version: v1.51.2
+          version: v1.59.1
           skip-go-installation: true
+          args: --timeout=3m
       - name: golic
         run: |
           go install github.com/AbsaOSS/golic@v0.7.2

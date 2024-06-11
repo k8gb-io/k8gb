@@ -27,9 +27,10 @@ import (
 	"testing"
 	"time"
 
+	utils2 "github.com/k8gb-io/k8gb/controllers/utils"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
@@ -74,7 +75,7 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us-west-1",
 	ExtClustersGeoTags:      []string{"us-east-1"},
-	EdgeDNSServers: []utils.DNSServer{
+	EdgeDNSServers: []utils2.DNSServer{
 		{
 			Host: "127.0.0.1",
 			Port: 7753,
@@ -97,7 +98,7 @@ var predefinedConfig = depresolver.Config{
 	},
 }
 
-var fakeDNSSettings = utils.FakeDNSSettings{
+var fakeDNSSettings = utils2.FakeDNSSettings{
 	FakeDNSPort:     7753,
 	EdgeDNSZoneFQDN: "example.com.",
 	DNSZoneFQDN:     "cloud.example.com.",
@@ -111,7 +112,7 @@ const (
 	defaultEdgeDNS1              = "1.1.1.1"
 )
 
-var defaultEdgeDNSServers = []utils.DNSServer{
+var defaultEdgeDNSServers = []utils2.DNSServer{
 	{
 		Host: defaultEdgeDNS1,
 		Port: 53,
@@ -441,7 +442,7 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
 	}
-	utils.NewFakeDNS(fakeDNSSettings).
+	utils2.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
@@ -494,7 +495,7 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 		{IP: "10.0.0.3"},
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
-	utils.NewFakeDNS(fakeDNSSettings).
+	utils2.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
@@ -528,7 +529,7 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
 	// arrange
-	utils.NewFakeDNS(fakeDNSSettings).
+	utils2.NewFakeDNS(fakeDNSSettings).
 		AddTXTRecord("test-gslb-heartbeat-eu.example.com.", oldEdgeTimestamp("10m")).
 		Start().
 		RunTestFunc(func() {
@@ -543,7 +544,7 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
 	// arrange
-	utils.NewFakeDNS(fakeDNSSettings).
+	utils2.NewFakeDNS(fakeDNSSettings).
 		AddTXTRecord("test-gslb-heartbeat-za.example.com.", oldEdgeTimestamp("3m")).
 		Start().
 		RunTestFunc(func() {
@@ -635,13 +636,13 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
-	customConfig.EdgeDNSServers = []utils.DNSServer{
+	customConfig.EdgeDNSServers = []utils2.DNSServer{
 		{
 			Host: "localhost",
 			Port: 7753,
 		},
 	}
-	utils.NewFakeDNS(fakeDNSSettings).
+	utils2.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
@@ -702,7 +703,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
-	customConfig.EdgeDNSServers = []utils.DNSServer{
+	customConfig.EdgeDNSServers = []utils2.DNSServer{
 		{ // this one will be tried frist, but fails
 			Host: "localhost",
 			Port: 7752,
@@ -716,7 +717,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 			Port: 7754,
 		},
 	}
-	utils.NewFakeDNS(fakeDNSSettings).
+	utils2.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
 		Start().
@@ -1284,7 +1285,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
 	}
 	// Set the log to development mode for verbose logs.
-	gslb, err := utils.YamlToGslb(gslbYaml)
+	gslb, err := utils2.YamlToGslb(gslbYaml)
 	if err != nil {
 		t.Fatal(err)
 	}

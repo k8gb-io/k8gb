@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 )
 
 const (

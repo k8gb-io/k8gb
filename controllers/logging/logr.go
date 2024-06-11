@@ -49,15 +49,15 @@ func newLogrSinkAdapter(z *zerolog.Logger) *logrSinkAdapter {
 	}
 }
 
-func (a *logrSinkAdapter) Init(info logr.RuntimeInfo) {
+func (a *logrSinkAdapter) Init(_ logr.RuntimeInfo) {
 
 }
 
-func (a *logrSinkAdapter) Enabled(level int) bool {
+func (a *logrSinkAdapter) Enabled(_ int) bool {
 	return true
 }
 
-func (a *logrSinkAdapter) Info(level int, msg string, keysAndValues ...interface{}) {
+func (a *logrSinkAdapter) Info(_ int, msg string, keysAndValues ...interface{}) {
 	a.WithValues(keysAndValues)
 	if a.name != "" {
 		a.z.Info().Msgf("%s: %s %s", a.name, msg, a.valuesAsJSON())
