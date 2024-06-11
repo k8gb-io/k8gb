@@ -23,11 +23,12 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 	"time"
 
-	utils2 "github.com/k8gb-io/k8gb/controllers/utils"
+	utils "github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
@@ -75,7 +76,7 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	ClusterGeoTag:           "us-west-1",
 	ExtClustersGeoTags:      []string{"us-east-1"},
-	EdgeDNSServers: []utils2.DNSServer{
+	EdgeDNSServers: []utils.DNSServer{
 		{
 			Host: "127.0.0.1",
 			Port: 7753,
@@ -98,7 +99,7 @@ var predefinedConfig = depresolver.Config{
 	},
 }
 
-var fakeDNSSettings = utils2.FakeDNSSettings{
+var fakeDNSSettings = utils.FakeDNSSettings{
 	FakeDNSPort:     7753,
 	EdgeDNSZoneFQDN: "example.com.",
 	DNSZoneFQDN:     "cloud.example.com.",
@@ -112,7 +113,7 @@ const (
 	defaultEdgeDNS1              = "1.1.1.1"
 )
 
-var defaultEdgeDNSServers = []utils2.DNSServer{
+var defaultEdgeDNSServers = []utils.DNSServer{
 	{
 		Host: defaultEdgeDNS1,
 		Port: 53,
@@ -120,316 +121,374 @@ var defaultEdgeDNSServers = []utils2.DNSServer{
 }
 
 func TestNotFoundServiceStatus(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	expectedServiceStatus := k8gbv1beta1.NotFound
-	notFoundHost := "notfound.cloud.example.com"
-	// act
-	actualServiceStatus := settings.gslb.Status.ServiceHealth[notFoundHost]
-	// assert
-	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
-		notFoundHost, expectedServiceStatus, actualServiceStatus)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			expectedServiceStatus := k8gbv1beta1.NotFound
+			notFoundHost := "notfound.cloud.example.com"
+			// act
+			actualServiceStatus := settings.gslb.Status.ServiceHealth[notFoundHost]
+			// assert
+			assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
+				notFoundHost, expectedServiceStatus, actualServiceStatus)
+		})
 }
 
 func TestUnhealthyServiceStatus(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	serviceName := defaultUnhealthyServiceName
-	unhealthyHost := "unhealthy.cloud.example.com"
-	expectedServiceStatus := k8gbv1beta1.Unhealthy
-	defer deleteUnhealthyService(t, &settings, serviceName)
-	// act
-	createUnhealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	// assert
-	actualServiceStatus := settings.gslb.Status.ServiceHealth[unhealthyHost]
-	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
-		unhealthyHost, expectedServiceStatus, actualServiceStatus)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			serviceName := defaultUnhealthyServiceName
+			unhealthyHost := "unhealthy.cloud.example.com"
+			expectedServiceStatus := k8gbv1beta1.Unhealthy
+			defer deleteUnhealthyService(t, &settings, serviceName)
+			// act
+			createUnhealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			// assert
+			actualServiceStatus := settings.gslb.Status.ServiceHealth[unhealthyHost]
+			assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
+				unhealthyHost, expectedServiceStatus, actualServiceStatus)
+		})
 }
 
 func TestHealthyServiceStatus(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	serviceName := defaultPodinfoServiceName
-	expectedServiceStatus := k8gbv1beta1.Healthy
-	healthyHost := "roundrobin.cloud.example.com"
-	defer deleteHealthyService(t, &settings, serviceName)
-	createHealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	// act
-	actualServiceStatus := settings.gslb.Status.ServiceHealth[healthyHost]
-	// assert
-	assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
-		healthyHost, expectedServiceStatus, actualServiceStatus)
-}
-
-func TestHostsInStatusAreAdded(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	settings.gslb.Status.Hosts = ""
-	hostsInStatusBeforeReconciliation := settings.gslb.Status.Hosts
-	expectedHostsInStatus := settings.reconciler.hostsToCSV(settings.gslb)
-
-	reconcileAndUpdateGslb(t, settings)
-	// act
-	actualHostsInStatus := settings.gslb.Status.Hosts
-
-	// assert
-	assert.Empty(t, hostsInStatusBeforeReconciliation, "for gslb: '%s', the '.status.hosts' should be empty before reconciliation, but was: '%s'",
-		settings.gslb.Name, hostsInStatusBeforeReconciliation)
-	assert.NotEmpty(t, actualHostsInStatus, "for gslb: '%s', expected status.hosts to be not empty", settings.gslb.Name)
-	assert.Equal(t, expectedHostsInStatus, actualHostsInStatus)
-}
-
-func TestHostsInStatusAllPresent(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	var expectedHosts []string
-	for _, h := range settings.gslb.Spec.Ingress.Rules {
-		expectedHosts = append(expectedHosts, h.Host)
-	}
-
-	reconcileAndUpdateGslb(t, settings)
-	// act
-	actualHostsInStatus := settings.reconciler.hostsToCSV(settings.gslb)
-
-	// assert
-	for _, expectedHost := range expectedHosts {
-		assert.Contains(t, actualHostsInStatus, expectedHost, "for gslb: %s, expecting %s to be present in status.hosts (%s)",
-			settings.gslb.Name, expectedHost, actualHostsInStatus)
-	}
-}
-
-func TestIngressHostsPerStatusMetric(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	expectedHostsMetricCount := 3
-	// act
-	ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbServiceStatusNum).AsGaugeVec()
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
-	actualHostsMetricCount := testutil.CollectAndCount(ingressHostsPerStatusMetric)
-	// assert
-	assert.NoError(t, err, "Failed to get expected gslb")
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v",
-		expectedHostsMetricCount, actualHostsMetricCount)
-}
-
-func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
-	// I'm running test multiple times to check that it work properly when healthy service is up and down multiple times
-	for i := 0; i < 4; i++ {
-		func() {
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
 			// arrange
 			settings := provideSettings(t, predefinedConfig)
 			serviceName := defaultPodinfoServiceName
+			expectedServiceStatus := k8gbv1beta1.Healthy
+			healthyHost := "roundrobin.cloud.example.com"
 			defer deleteHealthyService(t, &settings, serviceName)
-			expectedHostsMetric := 1.
 			createHealthyService(t, &settings, serviceName)
 			reconcileAndUpdateGslb(t, settings)
 			// act
-			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+			actualServiceStatus := settings.gslb.Status.ServiceHealth[healthyHost]
+			// assert
+			assert.Equal(t, expectedServiceStatus, actualServiceStatus, "expected %s service status to be %s, but got %s",
+				healthyHost, expectedServiceStatus, actualServiceStatus)
+		})
+}
+
+func TestHostsInStatusAreAdded(t *testing.T) {
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			settings.gslb.Status.Hosts = ""
+			hostsInStatusBeforeReconciliation := settings.gslb.Status.Hosts
+			expectedHostsInStatus := settings.reconciler.hostsToCSV(settings.gslb)
+
+			reconcileAndUpdateGslb(t, settings)
+			// act
+			actualHostsInStatus := settings.gslb.Status.Hosts
+
+			// assert
+			assert.Empty(t, hostsInStatusBeforeReconciliation, "for gslb: '%s', the '.status.hosts' should be empty before reconciliation, but was: '%s'",
+				settings.gslb.Name, hostsInStatusBeforeReconciliation)
+			assert.NotEmpty(t, actualHostsInStatus, "for gslb: '%s', expected status.hosts to be not empty", settings.gslb.Name)
+			assert.Equal(t, expectedHostsInStatus, actualHostsInStatus)
+		})
+}
+
+func TestHostsInStatusAllPresent(t *testing.T) {
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			var expectedHosts []string
+			for _, h := range settings.gslb.Spec.Ingress.Rules {
+				expectedHosts = append(expectedHosts, h.Host)
+			}
+
+			reconcileAndUpdateGslb(t, settings)
+			// act
+			actualHostsInStatus := settings.reconciler.hostsToCSV(settings.gslb)
+
+			// assert
+			for _, expectedHost := range expectedHosts {
+				assert.Contains(t, actualHostsInStatus, expectedHost, "for gslb: %s, expecting %s to be present in status.hosts (%s)",
+					settings.gslb.Name, expectedHost, actualHostsInStatus)
+			}
+		})
+}
+
+func TestIngressHostsPerStatusMetric(t *testing.T) {
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			expectedHostsMetricCount := 3
+			// act
 			ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbServiceStatusNum).AsGaugeVec()
-			healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
-				"name": settings.gslb.Name, "status": k8gbv1beta1.Healthy.String()})
-			actualHostsMetric := testutil.ToFloat64(healthyHosts)
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+			actualHostsMetricCount := testutil.CollectAndCount(ingressHostsPerStatusMetric)
 			// assert
 			assert.NoError(t, err, "Failed to get expected gslb")
-			assert.Equal(t, expectedHostsMetric, actualHostsMetric, "expected %v managed hosts with Healthy status, but got %v",
-				expectedHostsMetric, actualHostsMetric)
-		}()
-	}
+			assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v",
+				expectedHostsMetricCount, actualHostsMetricCount)
+		})
+}
+
+func TestIngressHostsPerStatusMetricReflectionForHealthyStatus(t *testing.T) {
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// I'm running test multiple times to check that it work properly when healthy service is up and down multiple times
+			for i := 0; i < 4; i++ {
+				func() {
+					// arrange
+					settings := provideSettings(t, predefinedConfig)
+					serviceName := defaultPodinfoServiceName
+					defer deleteHealthyService(t, &settings, serviceName)
+					expectedHostsMetric := 1.
+					createHealthyService(t, &settings, serviceName)
+					reconcileAndUpdateGslb(t, settings)
+					// act
+					err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+					ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbServiceStatusNum).AsGaugeVec()
+					healthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
+						"name": settings.gslb.Name, "status": k8gbv1beta1.Healthy.String()})
+					actualHostsMetric := testutil.ToFloat64(healthyHosts)
+					// assert
+					assert.NoError(t, err, "Failed to get expected gslb")
+					assert.Equal(t, expectedHostsMetric, actualHostsMetric, "expected %v managed hosts with Healthy status, but got %v",
+						expectedHostsMetric, actualHostsMetric)
+				}()
+			}
+		})
 }
 
 func TestIngressHostsPerStatusMetricReflectionForUnhealthyStatus(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
-	expectedHostsMetricCount := 0.
-	// act
-	ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbServiceStatusNum).AsGaugeVec()
-	unhealthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
-		"name": settings.gslb.Name, "status": k8gbv1beta1.Unhealthy.String()})
-	actualHostsMetricCount := testutil.ToFloat64(unhealthyHosts)
-	// assert
-	assert.NoError(t, err, "Failed to get expected gslb")
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v",
-		expectedHostsMetricCount, actualHostsMetricCount)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+			expectedHostsMetricCount := 0.
+			// act
+			ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbServiceStatusNum).AsGaugeVec()
+			unhealthyHosts := ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
+				"name": settings.gslb.Name, "status": k8gbv1beta1.Unhealthy.String()})
+			actualHostsMetricCount := testutil.ToFloat64(unhealthyHosts)
+			// assert
+			assert.NoError(t, err, "Failed to get expected gslb")
+			assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts, but got %v",
+				expectedHostsMetricCount, actualHostsMetricCount)
 
-	// arrange
-	serviceName := defaultUnhealthyServiceName
-	createUnhealthyService(t, &settings, serviceName)
-	defer deleteUnhealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	expectedHostsMetricCount = 1
-	// act
-	unhealthyHosts =
-		ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
-			"name": settings.gslb.Name, "status": k8gbv1beta1.Unhealthy.String()})
-	actualHostsMetricCount = testutil.ToFloat64(unhealthyHosts)
-	// assert
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with Healthy status, but got %v",
-		expectedHostsMetricCount, actualHostsMetricCount)
+			// arrange
+			serviceName := defaultUnhealthyServiceName
+			createUnhealthyService(t, &settings, serviceName)
+			defer deleteUnhealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			expectedHostsMetricCount = 1
+			// act
+			unhealthyHosts =
+				ingressHostsPerStatusMetric.With(prometheus.Labels{"namespace": settings.gslb.Namespace,
+					"name": settings.gslb.Name, "status": k8gbv1beta1.Unhealthy.String()})
+			actualHostsMetricCount = testutil.ToFloat64(unhealthyHosts)
+			// assert
+			assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with Healthy status, but got %v",
+				expectedHostsMetricCount, actualHostsMetricCount)
+		})
 }
 
 func TestIngressHostsPerStatusMetricReflectionForNotFoundStatus(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	expectedHostsMetricCount := 2.0
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			expectedHostsMetricCount := 2.0
 
-	serviceName := defaultUnhealthyServiceName
-	createUnhealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	deleteUnhealthyService(t, &settings, serviceName)
+			serviceName := defaultUnhealthyServiceName
+			createUnhealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			deleteUnhealthyService(t, &settings, serviceName)
 
-	// act
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
-	require.NoError(t, err, "Failed to get expected gslb")
-	ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbServiceStatusNum).AsGaugeVec()
-	unknownHosts, err := ingressHostsPerStatusMetric.GetMetricWith(
-		prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": k8gbv1beta1.NotFound.String()})
-	require.NoError(t, err, "Failed to get ingress metrics")
-	actualHostsMetricCount := testutil.ToFloat64(unknownHosts)
-	// assert
-	assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with NotFound status, but got %v",
-		expectedHostsMetricCount, actualHostsMetricCount)
+			// act
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+			require.NoError(t, err, "Failed to get expected gslb")
+			ingressHostsPerStatusMetric := metrics.Metrics().Get(metrics.K8gbGslbServiceStatusNum).AsGaugeVec()
+			unknownHosts, err := ingressHostsPerStatusMetric.GetMetricWith(
+				prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name, "status": k8gbv1beta1.NotFound.String()})
+			require.NoError(t, err, "Failed to get ingress metrics")
+			actualHostsMetricCount := testutil.ToFloat64(unknownHosts)
+			// assert
+			assert.Equal(t, expectedHostsMetricCount, actualHostsMetricCount, "expected %v managed hosts with NotFound status, but got %v",
+				expectedHostsMetricCount, actualHostsMetricCount)
+		})
 }
 
 func TestHealthyRecordMetric(t *testing.T) {
-	// arrange
-	expectedHealthyRecordsMetricCount := 3.0
-	ingressIPs := []netv1.IngressLoadBalancerIngress{
-		{IP: "10.0.0.1"},
-		{IP: "10.0.0.2"},
-		{IP: "10.0.0.3"},
-	}
-	serviceName := defaultPodinfoServiceName
-	settings := provideSettings(t, predefinedConfig)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
-	require.NoError(t, err, "Failed to get expected gslb")
-	defer deleteHealthyService(t, &settings, serviceName)
-	createHealthyService(t, &settings, serviceName)
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
-	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
-	reconcileAndUpdateGslb(t, settings)
-	// act
-	healthyRecordsMetric := metrics.Metrics().Get(metrics.K8gbGslbHealthyRecords).AsGaugeVec()
-	actualHealthyRecordsMetricCount := testutil.ToFloat64(healthyRecordsMetric)
-	reconcileAndUpdateGslb(t, settings)
-	// assert
-	assert.Equal(t, expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount, "expected %v healthy records, but got %v",
-		expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			expectedHealthyRecordsMetricCount := 3.0
+			ingressIPs := []netv1.IngressLoadBalancerIngress{
+				{IP: "10.0.0.1"},
+				{IP: "10.0.0.2"},
+				{IP: "10.0.0.3"},
+			}
+			serviceName := defaultPodinfoServiceName
+			settings := provideSettings(t, predefinedConfig)
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.gslb)
+			require.NoError(t, err, "Failed to get expected gslb")
+			defer deleteHealthyService(t, &settings, serviceName)
+			createHealthyService(t, &settings, serviceName)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
+			reconcileAndUpdateGslb(t, settings)
+			// act
+			healthyRecordsMetric := metrics.Metrics().Get(metrics.K8gbGslbHealthyRecords).AsGaugeVec()
+			actualHealthyRecordsMetricCount := testutil.ToFloat64(healthyRecordsMetric)
+			reconcileAndUpdateGslb(t, settings)
+			// assert
+			assert.Equal(t, expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount, "expected %v healthy records, but got %v",
+				expectedHealthyRecordsMetricCount, actualHealthyRecordsMetricCount)
+		})
 }
 
 func TestGslbReconciliationTotalIncrement(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
-	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounterVec())
-	// act
-	_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
-	cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounterVec())
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, cnt+1, cnt2)
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
+			cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounterVec())
+			// act
+			_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
+			cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbReconciliationLoopsTotal).AsCounterVec())
+			// assert
+			assert.NoError(t, err)
+			assert.Equal(t, cnt+1, cnt2)
+		})
 }
 
 func TestGslbErrorsIncrement(t *testing.T) {
-	// arrange
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	settings := provideSettings(t, predefinedConfig)
-	var label = prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name}
-	m := mocks.NewMockProvider(ctrl)
-	cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
-	m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
-	m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(fmt.Errorf("save DNS error")).Times(1)
-	m.EXPECT().GetExternalTargets(gomock.Any()).Return(assistant.Targets{}).AnyTimes()
-	m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
-	settings.reconciler.DNSProvider = m
-	// act
-	_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
-	require.Error(t, err)
-	// let's break it on different place
-	m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, fmt.Errorf("exposed IP's error")).AnyTimes()
-	_, err = settings.reconciler.Reconcile(context.TODO(), settings.request)
-	cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
-	// assert
-	assert.Error(t, err)
-	assert.Equal(t, cnt+2, cnt2)
+	utils.NewFakeDNS(fakeDNSSettings).
+		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			settings := provideSettings(t, predefinedConfig)
+			var label = prometheus.Labels{"namespace": settings.gslb.Namespace, "name": settings.gslb.Name}
+			m := mocks.NewMockProvider(ctrl)
+			cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
+			m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, nil).Times(1)
+			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(fmt.Errorf("save DNS error")).Times(1)
+			m.EXPECT().GetExternalTargets(gomock.Any()).Return(assistant.Targets{}).AnyTimes()
+			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
+			settings.reconciler.DNSProvider = m
+			// act
+			_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
+			require.Error(t, err)
+			// let's break it on different place
+			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+			m.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return([]string{}, fmt.Errorf("exposed IP's error")).AnyTimes()
+			_, err = settings.reconciler.Reconcile(context.TODO(), settings.request)
+			cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
+			// assert
+			assert.Error(t, err)
+			assert.Equal(t, cnt+2, cnt2)
+		})
 }
 
 func TestGslbCreatesDNSEndpointCRForHealthyIngressHosts(t *testing.T) {
-	// arrange
-	serviceName := defaultPodinfoServiceName
-	dnsEndpoint := &externaldns.DNSEndpoint{}
-	want := []*externaldns.Endpoint{
-		{
-			DNSName:    "localtargets-roundrobin.cloud.example.com",
-			RecordTTL:  30,
-			RecordType: "A",
-			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
-		{
-			DNSName:    "roundrobin.cloud.example.com",
-			RecordTTL:  30,
-			RecordType: "A",
-			Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
-			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
-	}
-	ingressIPs := []netv1.IngressLoadBalancerIngress{
-		{IP: "10.0.0.1"},
-		{IP: "10.0.0.2"},
-		{IP: "10.0.0.3"},
-	}
-	settings := provideSettings(t, predefinedConfig)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
-	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
-	createHealthyService(t, &settings, serviceName)
-	defer deleteHealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			serviceName := defaultPodinfoServiceName
+			dnsEndpoint := &externaldns.DNSEndpoint{}
+			want := []*externaldns.Endpoint{
+				{
+					DNSName:    "localtargets-roundrobin.cloud.example.com",
+					RecordTTL:  30,
+					RecordType: "A",
+					Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"}},
+				{
+					DNSName:    "roundrobin.cloud.example.com",
+					RecordTTL:  30,
+					RecordType: "A",
+					Targets:    externaldns.Targets{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+					Labels:     externaldns.Labels{"strategy": "roundRobin"}},
+			}
+			ingressIPs := []netv1.IngressLoadBalancerIngress{
+				{IP: "10.0.0.1"},
+				{IP: "10.0.0.2"},
+				{IP: "10.0.0.3"},
+			}
+			settings := provideSettings(t, predefinedConfig)
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
+			createHealthyService(t, &settings, serviceName)
+			defer deleteHealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
 
-	// act
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
-	require.NoError(t, err, "Failed to load DNS endpoint")
-	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := str.ToString(got)
-	prettyWant := str.ToString(want)
+			// act
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to load DNS endpoint")
+			got := dnsEndpoint.Spec.Endpoints
+			prettyGot := str.ToString(got)
+			prettyWant := str.ToString(want)
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			// assert
+			assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		})
 }
 
 func TestDNSRecordReflectionInStatus(t *testing.T) {
-	// arrange
-	serviceName := defaultPodinfoServiceName
-	dnsEndpoint := &externaldns.DNSEndpoint{}
-	want := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
-	ingressIPs := []netv1.IngressLoadBalancerIngress{
-		{IP: "10.0.0.1"},
-		{IP: "10.0.0.2"},
-		{IP: "10.0.0.3"},
-	}
-	settings := provideSettings(t, predefinedConfig)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
-	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			serviceName := defaultPodinfoServiceName
+			dnsEndpoint := &externaldns.DNSEndpoint{}
+			want := map[string][]string{"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"}}
+			ingressIPs := []netv1.IngressLoadBalancerIngress{
+				{IP: "10.0.0.1"},
+				{IP: "10.0.0.2"},
+				{IP: "10.0.0.3"},
+			}
+			settings := provideSettings(t, predefinedConfig)
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
-	// act
-	createHealthyService(t, &settings, serviceName)
-	defer deleteHealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
-	require.NoError(t, err, "Failed to load DNS endpoint")
-	got := settings.gslb.Status.HealthyRecords
+			// act
+			createHealthyService(t, &settings, serviceName)
+			defer deleteHealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to load DNS endpoint")
+			got := settings.gslb.Status.HealthyRecords
 
-	// assert
-	assert.Equal(t, got, want, "got:\n %s healthyRecordsMetric status,\n\n want:\n %s", got, want)
+			// assert
+			assert.Equal(t, got, want, "got:\n %s healthyRecordsMetric status,\n\n want:\n %s", got, want)
+		})
 }
 
 func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
@@ -442,7 +501,7 @@ func TestLocalDNSRecordsHasSpecialAnnotation(t *testing.T) {
 		{IP: "10.0.0.2"},
 		{IP: "10.0.0.3"},
 	}
-	utils2.NewFakeDNS(fakeDNSSettings).
+	utils.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
@@ -495,7 +554,7 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 		{IP: "10.0.0.3"},
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
-	utils2.NewFakeDNS(fakeDNSSettings).
+	utils.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
@@ -518,18 +577,25 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 
 			got := dnsEndpoint.Spec.Endpoints
 			hrGot := settings.gslb.Status.HealthyRecords
+
+			sort.Strings(got[0].Targets)
+			sort.Strings(want[0].Targets)
+			sort.Strings(got[1].Targets)
+			sort.Strings(want[1].Targets)
 			prettyGot := str.ToString(got)
 			prettyWant := str.ToString(want)
 
 			// assert
 			assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			sort.Strings(hrGot["roundrobin.cloud.example.com"])
+			sort.Strings(hrWant["roundrobin.cloud.example.com"])
 			assert.Equal(t, hrGot, hrWant, "got:\n %s Gslb Records status,\n\n want:\n %s", hrGot, hrWant)
 		}).RequireNoError(t)
 }
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
 	// arrange
-	utils2.NewFakeDNS(fakeDNSSettings).
+	utils.NewFakeDNS(fakeDNSSettings).
 		AddTXTRecord("test-gslb-heartbeat-eu.example.com.", oldEdgeTimestamp("10m")).
 		Start().
 		RunTestFunc(func() {
@@ -544,7 +610,7 @@ func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing
 
 func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
 	// arrange
-	utils2.NewFakeDNS(fakeDNSSettings).
+	utils.NewFakeDNS(fakeDNSSettings).
 		AddTXTRecord("test-gslb-heartbeat-za.example.com.", oldEdgeTimestamp("3m")).
 		Start().
 		RunTestFunc(func() {
@@ -581,33 +647,37 @@ func TestReturnsOwnRecordsUsingFailoverStrategyWhenPrimary(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "eu"
-	settings := provideSettings(t, customConfig)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
 
-	// ingress
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
-	settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
+			// ingress
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
+			settings.ingress.Status.LoadBalancer.Ingress = append(settings.ingress.Status.LoadBalancer.Ingress, ingressIPs...)
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
-	// enable failover strategy
-	settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
-	settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
-	err = settings.client.Update(context.TODO(), settings.gslb)
-	require.NoError(t, err, "Can't update gslb")
+			// enable failover strategy
+			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
+			err = settings.client.Update(context.TODO(), settings.gslb)
+			require.NoError(t, err, "Can't update gslb")
 
-	// act
-	createHealthyService(t, &settings, serviceName)
-	defer deleteHealthyService(t, &settings, serviceName)
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
-	require.NoError(t, err, "Failed to get expected DNSEndpoint")
-	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := str.ToString(got)
-	prettyWant := str.ToString(want)
+			// act
+			createHealthyService(t, &settings, serviceName)
+			defer deleteHealthyService(t, &settings, serviceName)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to get expected DNSEndpoint")
+			got := dnsEndpoint.Spec.Endpoints
+			prettyGot := str.ToString(got)
+			prettyWant := str.ToString(want)
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			// assert
+			assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		})
 }
 
 func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
@@ -636,13 +706,13 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
-	customConfig.EdgeDNSServers = []utils2.DNSServer{
+	customConfig.EdgeDNSServers = []utils.DNSServer{
 		{
 			Host: "localhost",
 			Port: 7753,
 		},
 	}
-	utils2.NewFakeDNS(fakeDNSSettings).
+	utils.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
@@ -703,7 +773,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
 	customConfig.ClusterGeoTag = "za"
-	customConfig.EdgeDNSServers = []utils2.DNSServer{
+	customConfig.EdgeDNSServers = []utils.DNSServer{
 		{ // this one will be tried frist, but fails
 			Host: "localhost",
 			Port: 7752,
@@ -717,7 +787,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 			Port: 7754,
 		},
 	}
-	utils2.NewFakeDNS(fakeDNSSettings).
+	utils.NewFakeDNS(fakeDNSSettings).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
 		AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
 		Start().
@@ -753,65 +823,81 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 }
 
 func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
-	// arrange
-	expectedAnnotations := map[string]string{"annotation": "test", "k8gb.io/strategy": "roundRobin"}
-	settings := provideSettings(t, predefinedConfig)
-	settings.gslb.Annotations = map[string]string{"annotation": "test"}
-	err := settings.client.Update(context.TODO(), settings.gslb)
-	require.NoError(t, err, "Can't update gslb")
-	// act
-	reconcileAndUpdateGslb(t, settings)
-	err2 := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	// assert
-	assert.NoError(t, err2, "Failed to get expected ingress")
-	assert.Equal(t, expectedAnnotations, settings.ingress.Annotations)
-	assert.Equal(t, expectedAnnotations, settings.gslb.ObjectMeta.Annotations)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			expectedAnnotations := map[string]string{"annotation": "test", "k8gb.io/strategy": "roundRobin"}
+			settings := provideSettings(t, predefinedConfig)
+			settings.gslb.Annotations = map[string]string{"annotation": "test"}
+			err := settings.client.Update(context.TODO(), settings.gslb)
+			require.NoError(t, err, "Can't update gslb")
+			// act
+			reconcileAndUpdateGslb(t, settings)
+			err2 := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			// assert
+			assert.NoError(t, err2, "Failed to get expected ingress")
+			assert.Equal(t, expectedAnnotations, settings.ingress.Annotations)
+			assert.Equal(t, expectedAnnotations, settings.gslb.ObjectMeta.Annotations)
+		})
 }
 
 func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
-	// arrange
-	want := "us-west-1"
-	settings := provideSettings(t, predefinedConfig)
-	// act
-	reconcileAndUpdateGslb(t, settings)
-	got := settings.gslb.Status.GeoTag
-	// assert
-	assert.Equal(t, want, got, "got: '%s' GeoTag status, want:'%s'", got, want)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			want := "us-west-1"
+			settings := provideSettings(t, predefinedConfig)
+			// act
+			reconcileAndUpdateGslb(t, settings)
+			got := settings.gslb.Status.GeoTag
+			// assert
+			assert.Equal(t, want, got, "got: '%s' GeoTag status, want:'%s'", got, want)
+		})
 }
 
 func TestReflectGeoTagInTheStatus(t *testing.T) {
-	// arrange
-	want := "eu"
-	customConfig := predefinedConfig
-	customConfig.ClusterGeoTag = "eu"
-	settings := provideSettings(t, customConfig)
-	// act
-	reconcileAndUpdateGslb(t, settings)
-	got := settings.gslb.Status.GeoTag
-	// assert
-	assert.Equal(t, want, got, "got: '%s' GeoTag status, want:'%s'", got, want)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			want := "eu"
+			customConfig := predefinedConfig
+			customConfig.ClusterGeoTag = "eu"
+			settings := provideSettings(t, customConfig)
+			// act
+			reconcileAndUpdateGslb(t, settings)
+			got := settings.gslb.Status.GeoTag
+			// assert
+			assert.Equal(t, want, got, "got: '%s' GeoTag status, want:'%s'", got, want)
+		})
 }
 
 func TestDetectsIngressHostnameMismatch(t *testing.T) {
-	// arrange
-	// getting Gslb and Reconciler
-	predefinedSettings := provideSettings(t, predefinedConfig)
-	customConfig := predefinedConfig
-	customConfig.EdgeDNSZone = "otherdnszone.com"
-	predefinedSettings.config = customConfig
-	req := reconcile.Request{
-		NamespacedName: types.NamespacedName{
-			Name:      predefinedSettings.gslb.Name,
-			Namespace: predefinedSettings.gslb.Namespace,
-		},
-	}
-	// injecting custom config to reconciler created from predefined config
-	predefinedSettings.reconciler.Config = &customConfig
-	// act
-	_, err := predefinedSettings.reconciler.Reconcile(context.TODO(), req)
-	// assert
-	assert.Error(t, err, "expected controller to detect Ingress hostname and edgeDNSZone mismatch")
-	assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone otherdnszone.com"))
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			// getting Gslb and Reconciler
+			predefinedSettings := provideSettings(t, predefinedConfig)
+			customConfig := predefinedConfig
+			customConfig.EdgeDNSZone = "otherdnszone.com"
+			predefinedSettings.config = customConfig
+			req := reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      predefinedSettings.gslb.Name,
+					Namespace: predefinedSettings.gslb.Namespace,
+				},
+			}
+			// injecting custom config to reconciler created from predefined config
+			predefinedSettings.reconciler.Config = &customConfig
+			// act
+			_, err := predefinedSettings.reconciler.Reconcile(context.TODO(), req)
+			// assert
+			assert.Error(t, err, "expected controller to detect Ingress hostname and edgeDNSZone mismatch")
+			assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone otherdnszone.com"))
+		})
 }
 
 func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
@@ -855,36 +941,40 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 	serviceIPs := []corev1.LoadBalancerIngress{
 		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
 	}
-	settings := provideSettings(t, customConfig)
-	err := settings.client.Create(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
-	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
-	err = settings.client.Status().Update(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to update coredns service lb hostname")
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
+			err := settings.client.Create(context.TODO(), coreDNSService)
+			require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
+			coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
+			err = settings.client.Status().Update(context.TODO(), coreDNSService)
+			require.NoError(t, err, "Failed to update coredns service lb hostname")
 
-	// act
-	customConfig.EdgeDNSType = depresolver.DNSTypeExternal
-	customConfig.ClusterGeoTag = "eu"
-	customConfig.ExtClustersGeoTags = []string{"za", "us"}
-	customConfig.DNSZone = dnsZone
-	// apply new environment variables and update config only
-	settings.reconciler.Config = &customConfig
-	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
-	// configuration at another time than startup
-	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
-	settings.reconciler.DNSProvider = f.Provider()
+			// act
+			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
+			customConfig.ClusterGeoTag = "eu"
+			customConfig.ExtClustersGeoTags = []string{"za", "us"}
+			customConfig.DNSZone = dnsZone
+			// apply new environment variables and update config only
+			settings.reconciler.Config = &customConfig
+			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
+			// configuration at another time than startup
+			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
+			settings.reconciler.DNSProvider = f.Provider()
 
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
-	require.NoError(t, err, "Failed to get expected DNSEndpoint")
-	got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
-	gotEp := dnsEndpoint.Spec.Endpoints
-	prettyGot := str.ToString(gotEp)
-	prettyWant := str.ToString(wantEp)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+			require.NoError(t, err, "Failed to get expected DNSEndpoint")
+			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+			gotEp := dnsEndpoint.Spec.Endpoints
+			prettyGot := str.ToString(gotEp)
+			prettyWant := str.ToString(wantEp)
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
-	assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			// assert
+			assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+			assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		})
 }
 
 func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
@@ -927,36 +1017,40 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 	serviceIPs := []corev1.LoadBalancerIngress{
 		{IP: "1.1.1.1"},
 	}
-	settings := provideSettings(t, customConfig)
-	err := settings.client.Create(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
-	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
-	err = settings.client.Status().Update(context.TODO(), coreDNSService)
-	require.NoError(t, err, "Failed to update coredns service lb hostname")
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
+			err := settings.client.Create(context.TODO(), coreDNSService)
+			require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
+			coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
+			err = settings.client.Status().Update(context.TODO(), coreDNSService)
+			require.NoError(t, err, "Failed to update coredns service lb hostname")
 
-	// act
-	customConfig.EdgeDNSType = depresolver.DNSTypeExternal
-	customConfig.ClusterGeoTag = "eu"
-	customConfig.ExtClustersGeoTags = []string{"za", "us"}
-	customConfig.DNSZone = dnsZone
-	// apply new environment variables and update config only
-	settings.reconciler.Config = &customConfig
-	// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
-	// configuration at another time than startup
-	f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
-	settings.reconciler.DNSProvider = f.Provider()
+			// act
+			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
+			customConfig.ClusterGeoTag = "eu"
+			customConfig.ExtClustersGeoTags = []string{"za", "us"}
+			customConfig.DNSZone = dnsZone
+			// apply new environment variables and update config only
+			settings.reconciler.Config = &customConfig
+			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
+			// configuration at another time than startup
+			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
+			settings.reconciler.DNSProvider = f.Provider()
 
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
-	require.NoError(t, err, "Failed to get expected DNSEndpoint")
-	got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
-	gotEp := dnsEndpoint.Spec.Endpoints
-	prettyGot := str.ToString(gotEp)
-	prettyWant := str.ToString(wantEp)
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+			require.NoError(t, err, "Failed to get expected DNSEndpoint")
+			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+			gotEp := dnsEndpoint.Spec.Endpoints
+			prettyGot := str.ToString(gotEp)
+			prettyWant := str.ToString(wantEp)
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
-	assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			// assert
+			assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+			assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		})
 }
 
 func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
@@ -977,29 +1071,33 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 			Targets:    externaldns.Targets{defaultEdgeDNS0, defaultEdgeDNS1},
 			Labels:     externaldns.Labels{"strategy": "roundRobin"}},
 	}
-	settings := provideSettings(t, customConfig)
-	dnsEndpoint := &externaldns.DNSEndpoint{ObjectMeta: metav1.ObjectMeta{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}}
-	createHealthyService(t, &settings, serviceName)
-	defer deleteHealthyService(t, &settings, serviceName)
-	err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
-	require.NoError(t, err, "Failed to get expected ingress")
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			settings := provideSettings(t, customConfig)
+			dnsEndpoint := &externaldns.DNSEndpoint{ObjectMeta: metav1.ObjectMeta{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}}
+			createHealthyService(t, &settings, serviceName)
+			defer deleteHealthyService(t, &settings, serviceName)
+			err := settings.client.Get(context.TODO(), settings.request.NamespacedName, settings.ingress)
+			require.NoError(t, err, "Failed to get expected ingress")
 
-	settings.ingress.Status.LoadBalancer.Ingress = []netv1.IngressLoadBalancerIngress{{Hostname: "one.one.one.one"}}
-	err = settings.client.Status().Update(context.TODO(), settings.ingress)
-	require.NoError(t, err, "Failed to update gslb Ingress Address")
+			settings.ingress.Status.LoadBalancer.Ingress = []netv1.IngressLoadBalancerIngress{{Hostname: "one.one.one.one"}}
+			err = settings.client.Status().Update(context.TODO(), settings.ingress)
+			require.NoError(t, err, "Failed to update gslb Ingress Address")
 
-	// act
-	err = settings.client.Delete(context.Background(), dnsEndpoint)
-	require.NoError(t, err, "Failed to update DNSEndpoint")
-	reconcileAndUpdateGslb(t, settings)
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
-	require.NoError(t, err, "Failed to get expected DNSEndpoint")
-	got := dnsEndpoint.Spec.Endpoints
-	prettyGot := str.ToString(got)
-	prettyWant := str.ToString(want)
+			// act
+			err = settings.client.Delete(context.Background(), dnsEndpoint)
+			require.NoError(t, err, "Failed to update DNSEndpoint")
+			reconcileAndUpdateGslb(t, settings)
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, dnsEndpoint)
+			require.NoError(t, err, "Failed to get expected DNSEndpoint")
+			got := dnsEndpoint.Spec.Endpoints
+			prettyGot := str.ToString(got)
+			prettyWant := str.ToString(want)
 
-	// assert
-	assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+			// assert
+			assert.Equal(t, want, got, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
+		})
 }
 
 func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
@@ -1015,6 +1113,7 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 	serviceIPs := []corev1.LoadBalancerIngress{
 		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
 	}
+
 	err := settings.client.Create(context.TODO(), coreDNSService)
 	require.NoError(t, err, "Failed to create testing %s service", defaultCoreDNSExtServiceName)
 	coreDNSService.Status.LoadBalancer.Ingress = append(coreDNSService.Status.LoadBalancer.Ingress, serviceIPs...)
@@ -1041,71 +1140,87 @@ func TestRoute53ZoneDelegationGarbageCollection(t *testing.T) {
 }
 
 func TestGslbSetsAnnotationsOnTheIngress(t *testing.T) {
-	// arrange
-	settings := provideSettings(t, predefinedConfig)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			settings := provideSettings(t, predefinedConfig)
 
-	// act
-	reconcileAndUpdateGslb(t, settings)
+			// act
+			reconcileAndUpdateGslb(t, settings)
 
-	// assert
-	ingress := &netv1.Ingress{}
-	err := settings.client.Get(context.Background(), client.ObjectKey{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}, ingress)
-	require.NoError(t, err, "Gslb should be created from annotated Ingress")
+			// assert
+			ingress := &netv1.Ingress{}
+			err := settings.client.Get(context.Background(), client.ObjectKey{Namespace: settings.gslb.Namespace, Name: settings.gslb.Name}, ingress)
+			require.NoError(t, err, "Gslb should be created from annotated Ingress")
 
-	assert.Equal(t, map[string]string{strategyAnnotation: "roundRobin"}, ingress.Annotations)
+			assert.Equal(t, map[string]string{strategyAnnotation: "roundRobin"}, ingress.Annotations)
+		})
 }
 
 func TestGslbGetFinalizer(t *testing.T) {
-	// arrange
-	gslb := &k8gbv1beta1.Gslb{}
-	settings := provideSettings(t, predefinedConfig)
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			gslb := &k8gbv1beta1.Gslb{}
+			settings := provideSettings(t, predefinedConfig)
 
-	// act
-	reconcileAndUpdateGslb(t, settings)
+			// act
+			reconcileAndUpdateGslb(t, settings)
 
-	// assert
-	err := settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
-	require.NoError(t, err)
-	assert.Len(t, gslb.Finalizers, 1)
+			// assert
+			err := settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
+			require.NoError(t, err)
+			assert.Len(t, gslb.Finalizers, 1)
+		})
 }
 
 func TestGslbRemoveDefaultFinalizer(t *testing.T) {
-	// arrange
-	gslb := &k8gbv1beta1.Gslb{}
-	var dt = metav1.Now()
-	settings := provideSettings(t, predefinedConfig)
-	settings.gslb.SetDeletionTimestamp(&dt)
-	err := settings.reconciler.Update(context.Background(), settings.gslb)
-	require.NoError(t, err, "Failed to update Gslb")
-	settings.finalCall = true // Gslb is about to be deleted, no requeue expected
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			gslb := &k8gbv1beta1.Gslb{}
+			var dt = metav1.Now()
+			settings := provideSettings(t, predefinedConfig)
+			settings.gslb.SetDeletionTimestamp(&dt)
+			err := settings.reconciler.Update(context.Background(), settings.gslb)
+			require.NoError(t, err, "Failed to update Gslb")
+			settings.finalCall = true // Gslb is about to be deleted, no requeue expected
 
-	// act
-	reconcileAndUpdateGslb(t, settings)
+			// act
+			reconcileAndUpdateGslb(t, settings)
 
-	// assert
-	err = settings.client.Get(context.TODO(), settings.request.NamespacedName, gslb)
-	require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
-	assert.Len(t, gslb.Finalizers, 0)
+			// assert
+			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, gslb)
+			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
+			assert.Len(t, gslb.Finalizers, 0)
+		})
 }
 
 func TestGslbRemoveBothFinalizers(t *testing.T) {
-	// arrange
-	gslb := &k8gbv1beta1.Gslb{}
-	var dt = metav1.Now()
-	settings := provideSettings(t, predefinedConfig)
-	settings.gslb.SetDeletionTimestamp(&dt)
-	settings.gslb.Finalizers = append(settings.gslb.Finalizers, "finalizer.k8gb.absa.oss")
-	err := settings.client.Update(context.Background(), settings.gslb)
-	require.NoError(t, err, "Failed to update Gslb")
-	settings.finalCall = true // Gslb is about to be deleted, no requeue expected
+	utils.NewFakeDNS(fakeDNSSettings).
+		Start().
+		RunTestFunc(func() {
+			// arrange
+			gslb := &k8gbv1beta1.Gslb{}
+			var dt = metav1.Now()
+			settings := provideSettings(t, predefinedConfig)
+			settings.gslb.SetDeletionTimestamp(&dt)
+			settings.gslb.Finalizers = append(settings.gslb.Finalizers, "finalizer.k8gb.absa.oss")
+			err := settings.client.Update(context.Background(), settings.gslb)
+			require.NoError(t, err, "Failed to update Gslb")
+			settings.finalCall = true // Gslb is about to be deleted, no requeue expected
 
-	// act
-	reconcileAndUpdateGslb(t, settings)
+			// act
+			reconcileAndUpdateGslb(t, settings)
 
-	// assert
-	err = settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
-	require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
-	assert.Len(t, gslb.Finalizers, 0)
+			// assert
+			err = settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
+			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
+			assert.Len(t, gslb.Finalizers, 0)
+		})
 }
 
 func createHealthyService(t *testing.T, s *testSettings, serviceName string) {
@@ -1285,7 +1400,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		t.Fatalf("Can't open example CR file: %s", crSampleYaml)
 	}
 	// Set the log to development mode for verbose logs.
-	gslb, err := utils2.YamlToGslb(gslbYaml)
+	gslb, err := utils.YamlToGslb(gslbYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
