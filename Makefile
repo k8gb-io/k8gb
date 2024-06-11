@@ -389,7 +389,7 @@ k8gb: lint
 
 .PHONY: mocks
 mocks:
-	go install github.com/golang/mock/mockgen@v1.5.0
+	go install go.uber.org/mock/mockgen@v0.4.0
 	mockgen -package=mocks -destination=controllers/mocks/assistant_mock.go -source=controllers/providers/assistant/assistant.go Assistant
 	mockgen -package=mocks -destination=controllers/mocks/infoblox-client_mock.go -source=controllers/providers/dns/infoblox-client.go InfobloxClient
 	mockgen -package=mocks -destination=controllers/mocks/infoblox-connection_mock.go github.com/infobloxopen/infoblox-go-client IBConnector
