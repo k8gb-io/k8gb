@@ -24,9 +24,10 @@ import (
 	"reflect"
 	"testing"
 
+	utils2 "github.com/k8gb-io/k8gb/controllers/utils"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 
 	"github.com/stretchr/testify/require"
@@ -55,7 +56,7 @@ var a = struct {
 		ReconcileRequeueSeconds: 30,
 		ClusterGeoTag:           "us",
 		ExtClustersGeoTags:      []string{"za", "eu"},
-		EdgeDNSServers: []utils.DNSServer{
+		EdgeDNSServers: []utils2.DNSServer{
 			{
 				Host: "dns.cloud.example.com",
 				Port: 53,
@@ -68,7 +69,7 @@ var a = struct {
 	Gslb: func() *k8gbv1beta1.Gslb {
 		var crSampleYaml = "../../../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
 		gslbYaml, _ := os.ReadFile(crSampleYaml)
-		gslb, _ := utils.YamlToGslb(gslbYaml)
+		gslb, _ := utils2.YamlToGslb(gslbYaml)
 		return gslb
 	}(),
 	TargetIPs: []string{

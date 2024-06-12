@@ -48,6 +48,30 @@ linters-settings:
   lll:
     line-length: 150
 
+  depguard:
+    # https://golangci-lint.run/usage/linters/#depguard
+    # https://github.com/OpenPeeDeeP/depguard
+    rules:
+      main:
+        allow:
+          - $gostd
+          - k8s.io/apimachinery
+          - k8s.io/client-go
+          - k8s.io/api
+          - sigs.k8s.io/controller-runtime
+          - sigs.k8s.io/external-dns
+          - github.com/AbsaOSS
+          - github.com/ghodss/yaml
+          - github.com/go-logr
+          - github.com/golang/mock/
+          - github.com/infobloxopen
+          - github.com/k8gb-io
+          - github.com/miekg
+          - github.com/prometheus
+          - github.com/rs/zerolog
+          - github.com/stretchr/testify
+          - go.opentelemetry.io/otel
+
 issues:
   exclude-rules:
     - path: _test\.go

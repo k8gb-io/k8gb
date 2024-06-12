@@ -22,7 +22,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	netv1 "k8s.io/api/networking/v1"

@@ -143,7 +143,7 @@ func TestWeight(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			injectWeight := func(ctx context.Context, gslb *k8gbv1beta1.Gslb, client client.Client) error {
+			injectWeight := func(_ context.Context, gslb *k8gbv1beta1.Gslb, _ client.Client) error {
 				if !test.injectWeights {
 					return nil
 				}

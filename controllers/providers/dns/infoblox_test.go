@@ -22,9 +22,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 
@@ -190,7 +191,7 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 	cl := mocks.NewMockInfobloxClient(ctrl)
 	con := mocks.NewMockIBConnector(ctrl)
 	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
-	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, arg1 interface{}) {
+	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, _ interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-east-1.example.com", fqdn)
 	}).Return(nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
@@ -198,7 +199,7 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
-		Return(nil).Do(func(arg0 *ibclient.RecordTXT, arg1, arg2 interface{}) {
+		Return(nil).Do(func(arg0 *ibclient.RecordTXT, _, _ interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
 	}).AnyTimes()
 	config := defaultConfig
@@ -248,7 +249,7 @@ func TestInfobloxFinalize(t *testing.T) {
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).
 		Return(nil).Times(1)
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
-		Return(nil).Do(func(arg0 *ibclient.RecordTXT, arg1, arg2 interface{}) {
+		Return(nil).Do(func(arg0 *ibclient.RecordTXT, _, _ interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
 	}).Times(1)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)

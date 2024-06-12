@@ -22,11 +22,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	"github.com/k8gb-io/k8gb/controllers/internal/utils"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"go.opentelemetry.io/otel/codes"
