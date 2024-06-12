@@ -71,6 +71,7 @@ linters-settings:
           - github.com/rs/zerolog
           - github.com/stretchr/testify
           - go.opentelemetry.io/otel
+          - go.uber.org/mock/gomock
 
 issues:
   exclude-rules:

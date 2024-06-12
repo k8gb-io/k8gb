@@ -59,7 +59,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@dd84a9531a6f8e72c321f2aa3b9048ed359670e4
         with:
-          go-version: 1.19.1
+          go-version: 1.22.3
       - name: Login to Dockerhub
         uses: docker/login-action@40891eba8c2bcd1309b07ba8b11232f313e86779
         with:

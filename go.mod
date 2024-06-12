@@ -1,13 +1,12 @@
 module github.com/k8gb-io/k8gb
 
-go 1.19
+go 1.22.3
 
 require (
 	github.com/AbsaOSS/env-binder v1.0.1
 	github.com/AbsaOSS/gopkg v0.1.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.3
-	github.com/golang/mock v1.4.4
 	github.com/infobloxopen/infoblox-go-client v1.1.1
 	github.com/miekg/dns v1.1.52
 	github.com/prometheus/client_golang v1.14.0
