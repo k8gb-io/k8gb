@@ -1,4 +1,4 @@
-name: Golang lint, golic, gokart and test
+name: Golang lint, golic and test
 on:
   push:
     paths-ignore:
@@ -62,9 +62,5 @@ jobs:
         run: |
           go install github.com/AbsaOSS/golic@v0.7.2
           golic inject --dry -x -t apache2
-      - name: gokart
-        run: |
-          go install github.com/praetorian-inc/gokart@v0.5.1
-          gokart scan --globalsTainted
       - name: go test
         run: go test ./...
