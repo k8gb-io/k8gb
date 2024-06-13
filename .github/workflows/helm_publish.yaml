@@ -46,7 +46,7 @@ jobs:
         continue-on-error: true
         uses: benc-uk/workflow-dispatch@25b02cc069be46d637e8fe2f1e8484008e9e9609
         with:
-          workflow: OLM bundle and PR
+          workflow: olm_pr.yaml
           token: ${{ secrets.CR_TOKEN }}
           inputs: '{ "bundleVersion": "master" }' # during the release 'master' is what we want here
       - name: Invoke workflow for OLM (community-operators-prod)
@@ -54,7 +54,7 @@ jobs:
         continue-on-error: true
         uses: benc-uk/workflow-dispatch@25b02cc069be46d637e8fe2f1e8484008e9e9609
         with:
-          workflow: OLM bundle and PR
+          workflow: olm_pr.yaml
           token: ${{ secrets.CR_TOKEN }}
           inputs: |
             {
