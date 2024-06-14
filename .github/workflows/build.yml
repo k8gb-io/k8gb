@@ -50,7 +50,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@bfd2fb341f32be7281829126376a12a780ca79fc
         with:
-          go-version: 1.19.1
+          go-version: 1.22.3
       - uses: actions/checkout@b80ff79f1755d06ba70441c368a6fe801f5f3a62
       # see: https://golangci-lint.run/usage/configuration/#config-file
       - name: golangci-lint
