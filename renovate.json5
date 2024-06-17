@@ -4,7 +4,6 @@
     "config:base",
     "group:allNonMajor",
   ],
-  "includeForks": true,
   "ignoreDeps": [
     "github.com/infobloxopen/infoblox-go-client",
     "zricethezav/gitleaks-action",
