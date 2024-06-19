@@ -62,7 +62,7 @@ spec:
                     properties:
                       resource:
                         description: |-
-                          Resource is an ObjectRef to another Kubernetes resource in the namespace
+                          resource is an ObjectRef to another Kubernetes resource in the namespace
                           of the Ingress object. If resource is specified, a service.Name and
                           service.Port must not be specified.
                           This is a mutually exclusive setting with "Service".
@@ -86,27 +86,27 @@ spec:
                         x-kubernetes-map-type: atomic
                       service:
                         description: |-
-                          Service references a Service as a Backend.
+                          service references a service as a backend.
                           This is a mutually exclusive setting with "Resource".
                         properties:
                           name:
                             description: |-
-                              Name is the referenced service. The service must exist in
+                              name is the referenced service. The service must exist in
                               the same namespace as the Ingress object.
                             type: string
                           port:
                             description: |-
-                              Port of the referenced service. A port name or port number
+                              port of the referenced service. A port name or port number
                               is required for a IngressServiceBackend.
                             properties:
                               name:
                                 description: |-
-                                  Name is the name of the port on the Service.
+                                  name is the name of the port on the Service.
                                   This is a mutually exclusive setting with "Number".
                                 type: string
                               number:
                                 description: |-
-                                  Number is the numerical port number (e.g. 80) on the Service.
+                                  number is the numerical port number (e.g. 80) on the Service.
                                   This is a mutually exclusive setting with "Name".
                                 format: int32
                                 type: integer
@@ -175,8 +175,8 @@ spec:
                             or '#'.
                           properties:
                             paths:
-                              description: A collection of paths that map requests
-                                to backends.
+                              description: paths is a collection of paths that map
+                                requests to backends.
                               items:
                                 description: |-
                                   HTTPIngressPath associates a path with a backend. Incoming urls matching the
@@ -184,12 +184,12 @@ spec:
                                 properties:
                                   backend:
                                     description: |-
-                                      Backend defines the referenced service endpoint to which the traffic
+                                      backend defines the referenced service endpoint to which the traffic
                                       will be forwarded to.
                                     properties:
                                       resource:
                                         description: |-
-                                          Resource is an ObjectRef to another Kubernetes resource in the namespace
+                                          resource is an ObjectRef to another Kubernetes resource in the namespace
                                           of the Ingress object. If resource is specified, a service.Name and
                                           service.Port must not be specified.
                                           This is a mutually exclusive setting with "Service".
@@ -215,27 +215,27 @@ spec:
                                         x-kubernetes-map-type: atomic
                                       service:
                                         description: |-
-                                          Service references a Service as a Backend.
+                                          service references a service as a backend.
                                           This is a mutually exclusive setting with "Resource".
                                         properties:
                                           name:
                                             description: |-
-                                              Name is the referenced service. The service must exist in
+                                              name is the referenced service. The service must exist in
                                               the same namespace as the Ingress object.
                                             type: string
                                           port:
                                             description: |-
-                                              Port of the referenced service. A port name or port number
+                                              port of the referenced service. A port name or port number
                                               is required for a IngressServiceBackend.
                                             properties:
                                               name:
                                                 description: |-
-                                                  Name is the name of the port on the Service.
+                                                  name is the name of the port on the Service.
                                                   This is a mutually exclusive setting with "Number".
                                                 type: string
                                               number:
                                                 description: |-
-                                                  Number is the numerical port number (e.g. 80) on the Service.
+                                                  number is the numerical port number (e.g. 80) on the Service.
                                                   This is a mutually exclusive setting with "Name".
                                                 format: int32
                                                 type: integer
@@ -246,14 +246,14 @@ spec:
                                     type: object
                                   path:
                                     description: |-
-                                      Path is matched against the path of an incoming request. Currently it can
+                                      path is matched against the path of an incoming request. Currently it can
                                       contain characters disallowed from the conventional "path" part of a URL
                                       as defined by RFC 3986. Paths must begin with a '/' and must be present
                                       when using PathType with value "Exact" or "Prefix".
                                     type: string
                                   pathType:
                                     description: |-
-                                      PathType determines the interpretation of the Path matching. PathType can
+                                      pathType determines the interpretation of the path matching. PathType can
                                       be one of the following values:
                                       * Exact: Matches the URL path exactly.
                                       * Prefix: Matches based on a URL path prefix split by '/'. Matching is
@@ -290,11 +290,11 @@ spec:
                       ingress supports SNI.
                     items:
                       description: IngressTLS describes the transport layer security
-                        associated with an Ingress.
+                        associated with an ingress.
                       properties:
                         hosts:
                           description: |-
-                            Hosts are a list of hosts included in the TLS certificate. The values in
+                            hosts is a list of hosts included in the TLS certificate. The values in
                             this list must match the name/s used in the tlsSecret. Defaults to the
                             wildcard host setting for the loadbalancer controller fulfilling this
                             Ingress, if left unspecified.
@@ -304,11 +304,11 @@ spec:
                           x-kubernetes-list-type: atomic
                         secretName:
                           description: |-
-                            SecretName is the name of the secret used to terminate TLS traffic on
+                            secretName is the name of the secret used to terminate TLS traffic on
                             port 443. Field is left optional to allow TLS routing based on SNI
                             hostname alone. If the SNI host in a listener conflicts with the "Host"
                             header field used by an IngressRule, the SNI host is used for termination
-                            and value of the Host header is used for routing.
+                            and value of the "Host" header is used for routing.
                           type: string
                       type: object
                     type: array
