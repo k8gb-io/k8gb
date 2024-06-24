@@ -35,6 +35,7 @@ archives:
 dockers:
 - image_templates:
   - "absaoss/k8gb:v{{ .Version }}-amd64"
+  use: buildx
   build_flag_templates:
   - "--platform=linux/amd64"
   - &LABEL1
@@ -47,6 +48,7 @@ dockers:
     "--label=org.opencontainers.image.version={{ .Version }}"
 - image_templates:
   - "absaoss/k8gb:v{{ .Version }}-arm64"
+  use: buildx
   goarch: arm64
   build_flag_templates:
   - "--platform=linux/arm64"
