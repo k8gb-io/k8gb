@@ -99,6 +99,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 	}
 	opts := &client.ListOptions{
 		LabelSelector: selector,
+		Namespace:     gslb.Namespace,
 	}
 
 	err = k8sClient.List(context.TODO(), ingressList, opts)
