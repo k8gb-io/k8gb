@@ -14,7 +14,7 @@
     ".github/workflows/scorecard.yml",
   ],
   "labels": ["dependencies", "renovate"],
-  "prConcurrentLimit": 5,
+  "prConcurrentLimit": 15,
   "packageRules": [
     {
       "matchPackagePatterns": [
@@ -26,7 +26,8 @@
       ],
       "matchCurrentVersion": "!/^v?0/",
       "groupName": "all non-major dependencies",
-      "groupSlug": "all-minor-patch"
+      "groupSlug": "all-minor-patch",
+      "automerge": true,
     }, {
         "matchPackageNames": [
         "k8gb-io/k8gb",
