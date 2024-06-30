@@ -24,6 +24,7 @@ import (
 
 	yamlConv "github.com/ghodss/yaml"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 )
 
 // YamlToGslb takes yaml and returns Gslb object
@@ -41,4 +42,21 @@ func YamlToGslb(yaml []byte) (*k8gbv1beta1.Gslb, error) {
 		return &k8gbv1beta1.Gslb{}, err
 	}
 	return gslb, nil
+}
+
+// YamlToIngress takes yaml and returns Gslb object
+func YamlToIngress(yaml []byte) (*netv1.Ingress, error) {
+	// yamlBytes contains a []byte of my yaml job spec
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &netv1.Ingress{}, err
+	}
+	// unmarshal the json into the kube struct
+	ingress := &netv1.Ingress{}
+	err = json.Unmarshal(jsonBytes, &ingress)
+	if err != nil {
+		return &netv1.Ingress{}, err
+	}
+	return ingress, nil
 }

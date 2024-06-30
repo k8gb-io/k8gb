@@ -58,9 +58,9 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			reconcileRequests := []reconcile.Request{}
 		GslbLoop:
 			for _, gslb := range gslbList.Items {
-				for _, rule := range gslb.Spec.Ingress.Rules {
-					for _, path := range rule.HTTP.Paths {
-						if path.Backend.Service != nil && path.Backend.Service.Name == a.GetName() {
+				for _, server := range gslb.Status.Servers {
+					for _, service := range server.Services {
+						if service.Name == a.GetName() {
 							reconcileRequests = append(reconcileRequests, reconcile.Request{
 								NamespacedName: types.NamespacedName{
 									Name:      gslb.Name,

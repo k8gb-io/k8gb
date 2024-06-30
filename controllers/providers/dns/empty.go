@@ -42,10 +42,6 @@ func (p *EmptyDNSProvider) CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb)
 	return
 }
 
-func (p *EmptyDNSProvider) GslbIngressExposedIPs(gslb *k8gbv1beta1.Gslb) (r []string, err error) {
-	return p.assistant.GslbIngressExposedIPs(gslb)
-}
-
 func (p *EmptyDNSProvider) GetExternalTargets(host string) (targets assistant.Targets) {
 	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
 }

@@ -27,8 +27,6 @@ import (
 type Provider interface {
 	// CreateZoneDelegationForExternalDNS handles delegated zone in Edge DNS
 	CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb) error
-	// GslbIngressExposedIPs retrieves list of IP's exposed by all GSLB ingresses
-	GslbIngressExposedIPs(*k8gbv1beta1.Gslb) ([]string, error)
 	// GetExternalTargets retrieves list of external targets for specified host
 	GetExternalTargets(string) assistant.Targets
 	// SaveDNSEndpoint update DNS endpoint in gslb or create new one if doesn't exist

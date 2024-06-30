@@ -71,7 +71,6 @@ var (
 	}
 
 	defaultGslb = new(k8gbv1beta1.Gslb)
-	ipRange     = []string{"10.0.0.1", "10.0.0.2"}
 )
 
 func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
@@ -169,7 +168,6 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	a := mocks.NewMockAssistant(ctrl)
 	cl := mocks.NewMockInfobloxClient(ctrl)
 	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
@@ -190,7 +188,6 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 	a := mocks.NewMockAssistant(ctrl)
 	cl := mocks.NewMockInfobloxClient(ctrl)
 	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
 	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, _ interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-east-1.example.com", fqdn)
 	}).Return(nil).Times(1)
@@ -219,7 +216,6 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreating
 	a := mocks.NewMockAssistant(ctrl)
 	cl := mocks.NewMockInfobloxClient(ctrl)
 	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().GslbIngressExposedIPs(gomock.Any()).Return(ipRange, nil).Times(1)
 	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)

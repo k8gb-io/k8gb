@@ -125,7 +125,15 @@ func (w *Workflow) WithIngress(path string) *Workflow {
 	if path == "" {
 		w.error = fmt.Errorf("empty ingress resource path")
 	}
-	w.settings.ingressResourcePath = path
+	var err error
+	w.settings.ingressResourcePath, err = filepath.Abs(path)
+	if err != nil {
+		w.error = fmt.Errorf("reading %s; %s", path, err)
+	}
+	w.settings.ingressName, err = w.getManifestName(w.settings.ingressResourcePath)
+	if err != nil {
+		w.error = err
+	}
 	return w
 }
 
@@ -148,9 +156,6 @@ func (w *Workflow) WithGslb(path, host string) *Workflow {
 		w.error = err
 	}
 	w.state.gslb.host = host
-	if err != nil {
-		w.error = err
-	}
 	return w
 }
 
@@ -211,12 +216,20 @@ func (w *Workflow) Start() (*Instance, error) {
 
 	// gslb
 	if w.settings.gslbResourcePath != "" {
-		w.t.Logf("Create ingress %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
-		k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
-		k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.state.gslb.name, 100, 1*time.Second)
-		ingress := k8s.GetIngress(w.t, w.k8sOptions, w.state.gslb.name)
-		require.Equal(w.t, ingress.Name, w.state.gslb.name)
-		w.settings.ingressName = w.state.gslb.name
+		if w.settings.ingressResourcePath == "" {
+			w.t.Logf("Create ingress %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
+			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
+			k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.state.gslb.name, 100, 5*time.Second)
+			ingress := k8s.GetIngress(w.t, w.k8sOptions, w.state.gslb.name)
+			require.Equal(w.t, ingress.Name, w.state.gslb.name)
+			w.settings.ingressName = w.state.gslb.name
+		} else {
+			w.t.Logf("Create ingress %s from %s", w.settings.ingressName, w.settings.ingressResourcePath)
+			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.ingressResourcePath)
+			k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.settings.ingressName, 100, 5*time.Second)
+			w.t.Logf("Create gslb %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
+			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
+		}
 	}
 
 	return &Instance{
@@ -258,7 +271,7 @@ func (i *Instance) ReapplyIngress(path string) {
 	require.NoError(i.w.t, err)
 	k8s.KubectlApply(i.w.t, i.w.k8sOptions, i.w.settings.ingressResourcePath)
 	// modifying inner state.gslb.name and ingress.Name has nothing to do with reading these values dynamically afterwards.
-	k8s.WaitUntilIngressAvailable(i.w.t, i.w.k8sOptions, i.w.state.gslb.name, 60, 1*time.Second)
+	k8s.WaitUntilIngressAvailable(i.w.t, i.w.k8sOptions, i.w.state.gslb.name, 60, 5*time.Second)
 	ingress := k8s.GetIngress(i.w.t, i.w.k8sOptions, i.w.state.gslb.name)
 	require.Equal(i.w.t, ingress.Name, i.w.state.gslb.name)
 	i.w.settings.ingressName = i.w.state.gslb.name

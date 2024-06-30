@@ -43,10 +43,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		return nil, err
 	}
 
-	localTargets, err := r.DNSProvider.GslbIngressExposedIPs(gslb)
-	if err != nil {
-		return nil, err
-	}
+	localTargets := gslb.Status.LoadBalancer.ExposedIPs
 
 	for host, health := range serviceHealth {
 		var finalTargets = assistant.NewTargets()

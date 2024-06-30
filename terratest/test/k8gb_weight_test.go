@@ -28,21 +28,47 @@ import (
 
 func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
 	t.Parallel()
+
+	tests := []struct {
+		gslbPath    string
+		ingressPath string
+	}{
+		{
+			gslbPath:    "../examples/roundrobin-weight1.yaml",
+			ingressPath: "",
+		},
+		{
+			gslbPath:    "../examples/roundrobin-weight1-ref-gslb.yaml",
+			ingressPath: "../examples/roundrobin-weight1-ref-ingress.yaml",
+		},
+	}
+
+	for _, test := range tests {
+		abstractTestWeightsExistsInLocalDNSEndpoint(t, test.gslbPath, test.ingressPath)
+	}
+}
+
+func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, gslbPath string, ingressPath string) {
 	const host = "terratest-roundrobin.cloud.example.com"
 	const endpointDNSNameEU = "gslb-ns-eu-cloud.example.com"
 	const endpointDNSNameUS = "gslb-ns-us-cloud.example.com"
-	const gslbPath = "../examples/roundrobin_weight1.yaml"
-	instanceEU, err := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
+	workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
 		WithGslb(gslbPath, host).
-		WithTestApp("eu").
-		Start()
+		WithTestApp("eu")
+	if ingressPath != "" {
+		workflowEU.WithIngress(ingressPath)
+	}
+	instanceEU, err := workflowEU.Start()
 	require.NoError(t, err)
 	defer instanceEU.Kill()
 
-	instanceUS, err := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
+	workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
 		WithGslb(gslbPath, host).
-		WithTestApp("us").
-		Start()
+		WithTestApp("us")
+	if ingressPath != "" {
+		workflowUS.WithIngress(ingressPath)
+	}
+	instanceUS, err := workflowUS.Start()
 	require.NoError(t, err)
 	defer instanceUS.Kill()
 
