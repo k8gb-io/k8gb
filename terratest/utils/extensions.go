@@ -86,21 +86,22 @@ type TestAppResult struct {
 
 // InstanceStatus provides a simplified overview of the instance status
 type InstanceStatus struct {
-	Annotation       string   `json:"annotation"`
-	AppMessage       string   `json:"app-msg"`
-	AppRunning       bool     `json:"podinfo-running"`
-	AppReplicas      string   `json:"podinfo-replicas"`
-	LocalTargets     []string `json:"local-targets-ip"`
-	Ingresses        []string `json:"ingress-ip"`
-	Dig              []string `json:"dig-result"`
-	CoreDNS          string   `json:"coredns-ip"`
-	GslbHealthStatus string   `json:"gslb-status"`
-	Cluster          string   `json:"cluster"`
-	Namespace        string   `json:"namespace"`
-	Endpoint0DNSName string   `json:"ep0-dns-name"`
-	Endpoint0Targets string   `json:"ep0-dns-targets"`
-	Endpoint1DNSName string   `json:"ep1-dns-name"`
-	Endpoint1Targets string   `json:"ep1-dns-targets"`
+	i                     *Instance
+	Annotation            string   `json:"annotation"`
+	AppMessage            string   `json:"app-msg"`
+	AppRunning            bool     `json:"podinfo-running"`
+	AppReplicas           string   `json:"podinfo-replicas"`
+	LocalTargets          []string `json:"local-targets-ip"`
+	Ingresses             []string `json:"ingress-ip"`
+	Dig                   []string `json:"dig-result"`
+	CoreDNS               string   `json:"coredns-ip"`
+	GslbHealthStatus      string   `json:"gslb-status"`
+	Cluster               string   `json:"cluster"`
+	Namespace             string   `json:"namespace"`
+	EndpointLocalDNSName  string   `json:"ep0-dns-name"`
+	EndpointLocalTargets  string   `json:"ep0-dns-targets"`
+	EndpointGlobalDNSName string   `json:"ep1-dns-name"`
+	EndpointGlobalTargets string   `json:"ep1-dns-targets"`
 }
 
 func NewWorkflow(t *testing.T, cluster string, port int) *Workflow {
@@ -340,7 +341,7 @@ func (i *Instance) WaitForLocalDNSEndpointExists() error {
 
 func (i *Instance) WaitForExternalDNSEndpointExists() error {
 	periodic := func() (result bool, err error) {
-		lep := i.Resources().GetExternalDNSEndpoint()
+		lep := i.Resources().GetK8gbExternalDNSEndpoint()
 		result = len(lep.Spec.Endpoints) > 0
 		return result, err
 	}
@@ -349,7 +350,7 @@ func (i *Instance) WaitForExternalDNSEndpointExists() error {
 
 func (r *Resources) WaitForExternalDNSEndpointHasTargets(epName string) error {
 	periodic := func() (result bool, err error) {
-		epx, err := r.GetExternalDNSEndpoint().GetEndpointByName(epName)
+		epx, err := r.GetK8gbExternalDNSEndpoint().GetEndpointByName(epName)
 		if err != nil {
 			return false, nil
 		}
@@ -381,22 +382,26 @@ func (i *Instance) WaitForExpected(expectedIPs []string) (err error) {
 
 // WaitForAppIsRunning waits until app has one pod running
 func (i *Instance) WaitForAppIsRunning() (err error) {
-	return i.waitForApp(func(instances int) bool { return instances > 0 })
+	return i.waitForApp(func(instances int) bool { return instances > 0 }, false)
 }
 
 // WaitForAppIsStopped waits until app has 0 pods running
 func (i *Instance) WaitForAppIsStopped() (err error) {
-	return i.waitForApp(func(instances int) bool { return instances == 0 })
+	return i.waitForApp(func(instances int) bool { return instances == 0 }, true)
 }
 
 // WaitForAppIsRunning waits until app has one pod running
-func (i *Instance) waitForApp(predicate func(instances int) bool) (err error) {
+func (i *Instance) waitForApp(predicate func(instances int) bool, stop bool) (err error) {
 	const (
 		description = "Wait for app is running"
 		maxRetries  = 50
 		waitSeconds = 2
 	)
-
+	op := "stop"
+	if !stop {
+		op = "start"
+	}
+	// first condition is to have replicas
 	for n := 0; n < maxRetries; n++ {
 		var r int
 		rep := i.GetStatus("").AppReplicas
@@ -410,12 +415,39 @@ func (i *Instance) waitForApp(predicate func(instances int) bool) (err error) {
 		}
 		if predicate(r) {
 			i.w.t.Logf("%s found match: Expected:(%v)", description, r)
-			return nil
+			break
 		}
 		i.w.t.Logf("Application %s is not in expected state. Waiting for %d seconds...", i.w.state.testApp.name, waitSeconds)
 		time.Sleep(waitSeconds * time.Second)
 	}
-	return retry.MaxRetriesExceeded{Description: "Unable to start Podinfo app", MaxRetries: maxRetries}
+	i.w.t.Logf("Wait for ExternalDNSEndpoint %s.%s to be filled by targets %s", i.w.state.gslb.name, i.w.namespace, i.w.state.gslb.host)
+	// second conditions
+	for n := 0; n < maxRetries/2; n++ {
+		ep, err := i.Resources().GetExternalDNSEndpointByName(i.w.state.gslb.name, i.w.namespace).GetEndpointByName(i.w.state.gslb.host)
+		if err != nil {
+			// app is already stopped and cant be found
+			if stop && err.Error() == notFoundError {
+				i.w.t.Logf("App is stopped %s", i.w.state.testApp.name)
+				return nil
+			}
+			i.w.t.Logf("Error waiting for the app %s. %s", i.w.state.testApp.name, err)
+			require.NoError(i.w.t, err)
+		}
+		// waiting for the start
+		if !stop && len(ep.Targets) == 0 {
+			i.w.t.Logf("Waiting for %s to be started. Waiting for %d seconds...", i.w.state.testApp.name, waitSeconds)
+			time.Sleep(waitSeconds * time.Second)
+			continue
+		}
+		// waiting for the stop
+		if stop && len(ep.Targets) != 0 {
+			i.w.t.Logf("Waiting for %s to be stopped. Waiting for %d seconds...", i.w.state.testApp.name, waitSeconds)
+			time.Sleep(waitSeconds * time.Second)
+			continue
+		}
+		return nil
+	}
+	return retry.MaxRetriesExceeded{Description: "Unable to " + op + " Podinfo app", MaxRetries: maxRetries}
 }
 
 // String retrieves rough information about cluster
@@ -496,25 +528,25 @@ func (i *Instance) GetStatus(annotation string) (s *InstanceStatus) {
 	if err != nil {
 		s.GslbHealthStatus = na
 	}
-	s.Endpoint0DNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointLocalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[0].dnsName", "--no-headers")
 	if err != nil {
-		s.Endpoint0DNSName = na
+		s.EndpointLocalDNSName = na
 	}
-	s.Endpoint0Targets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointLocalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[0].targets", "--no-headers")
 	if err != nil {
-		s.Endpoint0Targets = na
+		s.EndpointLocalTargets = na
 	}
-	s.Endpoint1DNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointGlobalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[1].dnsName", "--no-headers")
 	if err != nil {
-		s.Endpoint1DNSName = na
+		s.EndpointGlobalDNSName = na
 	}
-	s.Endpoint1Targets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointGlobalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[1].targets", "--no-headers")
 	if err != nil {
-		s.Endpoint1Targets = na
+		s.EndpointGlobalTargets = na
 	}
 	return
 }
@@ -588,8 +620,12 @@ func (r *Resources) GetLocalDNSEndpoint() DNSEndpoint {
 	return ep
 }
 
-func (r *Resources) GetExternalDNSEndpoint() DNSEndpoint {
-	ep, err := r.getDNSEndpoint("k8gb-ns-extdns", "k8gb")
+func (r *Resources) GetK8gbExternalDNSEndpoint() DNSEndpoint {
+	return r.GetExternalDNSEndpointByName("k8gb-ns-extdns", "k8gb")
+}
+
+func (r *Resources) GetExternalDNSEndpointByName(name, namespace string) DNSEndpoint {
+	ep, err := r.getDNSEndpoint(name, namespace)
 	r.i.continueIfK8sResourceNotFound(err)
 	return ep
 }

@@ -92,9 +92,9 @@ func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, gslbPath string, 
 	err = instanceUS.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameUS)
 	require.NoError(t, err)
 
-	epExternalEU, err := instanceEU.Resources().GetExternalDNSEndpoint().GetEndpointByName(endpointDNSNameEU)
+	epExternalEU, err := instanceEU.Resources().GetK8gbExternalDNSEndpoint().GetEndpointByName(endpointDNSNameEU)
 	require.NoError(t, err, "missing EU endpoint %s", endpointDNSNameEU)
-	epExternalUS, err := instanceUS.Resources().GetExternalDNSEndpoint().GetEndpointByName(endpointDNSNameUS)
+	epExternalUS, err := instanceUS.Resources().GetK8gbExternalDNSEndpoint().GetEndpointByName(endpointDNSNameUS)
 	require.NoError(t, err, "missing US endpoint %s", endpointDNSNameUS)
 	t.Logf("ExternalDNS targets: EU: %v; US: %v", epExternalEU.Targets, epExternalUS.Targets)
 	expectedTargets := append(epExternalEU.Targets, epExternalUS.Targets...)

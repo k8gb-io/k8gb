@@ -106,7 +106,8 @@ func abstractTestFailoverPlayground(t *testing.T, testPrefix string, gslbPath st
 
 	t.Run(fmt.Sprintf("%s stop podinfo on eu cluster", testPrefix), func(t *testing.T) {
 		instanceEU.StopTestApp()
-		require.NoError(t, instanceEU.WaitForAppIsStopped())
+		err = instanceEU.WaitForAppIsStopped()
+		require.NoError(t, err, "Expecting Test App on EU cluster to be stopped")
 		actAndAssert(t.Name(), usGeoTag, usLocalTargets)
 	})
 

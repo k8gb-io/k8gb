@@ -40,7 +40,7 @@ import (
 	record "k8s.io/client-go/tools/record"
 	cache "sigs.k8s.io/controller-runtime/pkg/cache"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
-	v1alpha1 "sigs.k8s.io/controller-runtime/pkg/config/v1alpha1"
+	config "sigs.k8s.io/controller-runtime/pkg/config"
 	healthz "sigs.k8s.io/controller-runtime/pkg/healthz"
 	manager "sigs.k8s.io/controller-runtime/pkg/manager"
 	webhook "sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -97,18 +97,18 @@ func (mr *MockManagerMockRecorder) AddHealthzCheck(arg0, arg1 any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddHealthzCheck", reflect.TypeOf((*MockManager)(nil).AddHealthzCheck), arg0, arg1)
 }
 
-// AddMetricsExtraHandler mocks base method.
-func (m *MockManager) AddMetricsExtraHandler(arg0 string, arg1 http.Handler) error {
+// AddMetricsServerExtraHandler mocks base method.
+func (m *MockManager) AddMetricsServerExtraHandler(arg0 string, arg1 http.Handler) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddMetricsExtraHandler", arg0, arg1)
+	ret := m.ctrl.Call(m, "AddMetricsServerExtraHandler", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AddMetricsExtraHandler indicates an expected call of AddMetricsExtraHandler.
-func (mr *MockManagerMockRecorder) AddMetricsExtraHandler(arg0, arg1 any) *gomock.Call {
+// AddMetricsServerExtraHandler indicates an expected call of AddMetricsServerExtraHandler.
+func (mr *MockManagerMockRecorder) AddMetricsServerExtraHandler(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddMetricsExtraHandler", reflect.TypeOf((*MockManager)(nil).AddMetricsExtraHandler), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddMetricsServerExtraHandler", reflect.TypeOf((*MockManager)(nil).AddMetricsServerExtraHandler), arg0, arg1)
 }
 
 // AddReadyzCheck mocks base method.
@@ -196,10 +196,10 @@ func (mr *MockManagerMockRecorder) GetConfig() *gomock.Call {
 }
 
 // GetControllerOptions mocks base method.
-func (m *MockManager) GetControllerOptions() v1alpha1.ControllerConfigurationSpec {
+func (m *MockManager) GetControllerOptions() config.Controller {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetControllerOptions")
-	ret0, _ := ret[0].(v1alpha1.ControllerConfigurationSpec)
+	ret0, _ := ret[0].(config.Controller)
 	return ret0
 }
 
@@ -235,6 +235,20 @@ func (m *MockManager) GetFieldIndexer() client.FieldIndexer {
 func (mr *MockManagerMockRecorder) GetFieldIndexer() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFieldIndexer", reflect.TypeOf((*MockManager)(nil).GetFieldIndexer))
+}
+
+// GetHTTPClient mocks base method.
+func (m *MockManager) GetHTTPClient() *http.Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetHTTPClient")
+	ret0, _ := ret[0].(*http.Client)
+	return ret0
+}
+
+// GetHTTPClient indicates an expected call of GetHTTPClient.
+func (mr *MockManagerMockRecorder) GetHTTPClient() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHTTPClient", reflect.TypeOf((*MockManager)(nil).GetHTTPClient))
 }
 
 // GetLogger mocks base method.
@@ -280,10 +294,10 @@ func (mr *MockManagerMockRecorder) GetScheme() *gomock.Call {
 }
 
 // GetWebhookServer mocks base method.
-func (m *MockManager) GetWebhookServer() *webhook.Server {
+func (m *MockManager) GetWebhookServer() webhook.Server {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWebhookServer")
-	ret0, _ := ret[0].(*webhook.Server)
+	ret0, _ := ret[0].(webhook.Server)
 	return ret0
 }
 
@@ -291,20 +305,6 @@ func (m *MockManager) GetWebhookServer() *webhook.Server {
 func (mr *MockManagerMockRecorder) GetWebhookServer() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWebhookServer", reflect.TypeOf((*MockManager)(nil).GetWebhookServer))
-}
-
-// SetFields mocks base method.
-func (m *MockManager) SetFields(arg0 any) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetFields", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetFields indicates an expected call of SetFields.
-func (mr *MockManagerMockRecorder) SetFields(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetFields", reflect.TypeOf((*MockManager)(nil).SetFields), arg0)
 }
 
 // Start mocks base method.

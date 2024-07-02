@@ -35,7 +35,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -44,7 +43,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Figure out Gslb resource name to Reconcile when non controlled Name is updated
 
 	endpointMapHandler := handler.EnqueueRequestsFromMapFunc(
-		func(a client.Object) []reconcile.Request {
+		func(_ context.Context, a client.Object) []reconcile.Request {
 			gslbList := &k8gbv1beta1.GslbList{}
 			opts := []client.ListOption{
 				client.InNamespace(a.GetNamespace()),
@@ -76,7 +75,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		})
 
 	ingressMapHandler := handler.EnqueueRequestsFromMapFunc(
-		func(a client.Object) []reconcile.Request {
+		func(_ context.Context, a client.Object) []reconcile.Request {
 			annotations := a.GetAnnotations()
 			if annotationValue, found := annotations[strategyAnnotation]; found {
 				c := mgr.GetClient()
@@ -89,8 +88,8 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&externaldns.DNSEndpoint{}).
-		Watches(&source.Kind{Type: &corev1.Endpoints{}}, endpointMapHandler).
-		Watches(&source.Kind{Type: &netv1.Ingress{}}, ingressMapHandler).
+		Watches(&corev1.Endpoints{}, endpointMapHandler).
+		Watches(&netv1.Ingress{}, ingressMapHandler).
 		Complete(r)
 }
 

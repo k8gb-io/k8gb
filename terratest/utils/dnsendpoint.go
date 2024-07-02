@@ -42,11 +42,13 @@ type Endpoint struct {
 	Labels     map[string]string `json:"labels,omitempty"`
 }
 
+const notFoundError string = "not found"
+
 func (dep DNSEndpoint) GetEndpointByName(name string) (Endpoint, error) {
 	for _, ep := range dep.Spec.Endpoints {
 		if ep.Name == name {
 			return ep, nil
 		}
 	}
-	return Endpoint{}, fmt.Errorf("not found")
+	return Endpoint{}, fmt.Errorf(notFoundError)
 }
