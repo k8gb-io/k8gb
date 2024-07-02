@@ -153,7 +153,7 @@ replace (
 )
 
 exclude (
-	github.com/Azure/go-autorest/autorest/adal v0.9.0
-	github.com/Azure/go-autorest/autorest/adal v0.9.2
-	github.com/Azure/go-autorest/autorest/adal v0.9.5
+	github.com/Azure/go-autorest/autorest/adal v0.9.24
+	github.com/Azure/go-autorest/autorest/adal v0.9.24
+	github.com/Azure/go-autorest/autorest/adal v0.9.24
 )
