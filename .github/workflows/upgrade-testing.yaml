@@ -53,7 +53,7 @@ jobs:
           go-version: 1.22.3
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200
+        uses: goreleaser/goreleaser-action@d33b6f6aeabd7fed8bb3fbf32c4d890d29f48545
         with:
           version: v1.9.2
           args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign
