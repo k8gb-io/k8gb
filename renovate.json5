@@ -27,7 +27,6 @@
       "matchCurrentVersion": "!/^v?0/",
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
-      "automerge": true,
     }, {
         "matchPackageNames": [
         "k8gb-io/k8gb",
