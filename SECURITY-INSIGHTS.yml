@@ -36,7 +36,7 @@ contribution-policy:
     - Dockerfile
     - chart/k8gb/values.yaml
   contributing-policy: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md
-  code-of-conduct: https://github.com/k8gb-io/k8gb/blob/master/code-of-conduct.md
+  code-of-conduct: https://github.com/k8gb-io/k8gb/blob/master/CODE_OF_CONDUCT.md
 
 documentation:
   - https://www.k8gb.io/docs/

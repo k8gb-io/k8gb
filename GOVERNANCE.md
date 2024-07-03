@@ -14,7 +14,7 @@ The k8gb project community adheres to the following principles:
 
 ## Code of Conduct
 
-k8gb follows [Code of Conduct](./code-of-conduct.md), which is aligned with the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
+k8gb follows [Code of Conduct](./CODE_OF_CONDUCT.md), which is aligned with the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
 
 ## Contributors
 
