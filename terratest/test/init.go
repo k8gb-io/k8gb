@@ -48,6 +48,5 @@ func init() {
 		Cluster3:        env.GetEnvAsStringOrFallback("K8GB_CLUSTER3", "k3d-test-gslb3"),
 		PodinfoImage:    env.GetEnvAsStringOrFallback("PODINFO_IMAGE_REPO", "ghcr.io/stefanprodan/podinfo"),
 		ClustersNumber:  clNum,
-		DigUsingUDP:     env.GetEnvAsBoolOrFallback("DIG_USING_UDP", false),
 	}
 }

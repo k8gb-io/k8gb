@@ -9,13 +9,13 @@ spec:
       - host: terratest-failover.cloud.example.com
         http:
           paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
-                port:
-                  name: http
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
+                  port:
+                    name: http
   strategy:
     type: failover
     dnsTtlSeconds: 5

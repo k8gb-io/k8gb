@@ -1,0 +1,15 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: test-gslb
+spec:
+  resourceRef:
+    istioVirtualService:
+      matchLabels:
+        app: test-gslb
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
+    weight:
+      eu: 5
+      us: 5

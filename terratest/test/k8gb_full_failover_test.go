@@ -30,47 +30,26 @@ import (
 )
 
 func TestFullFailover(t *testing.T) {
-	tests := []struct {
-		name        string
-		gslbPath    string
-		ingressPath string
-	}{
-		{
-			name:        "embedded ingress",
-			gslbPath:    "../examples/failover.yaml",
-			ingressPath: "",
-		},
-		{
-			name:        "referenced ingress",
-			gslbPath:    "../examples/failover-ref-gslb.yaml",
-			ingressPath: "../examples/failover-ref-ingress.yaml",
-		},
-	}
+	for _, ingressType := range utils.IngressTypes {
+		const basePath = "../examples/failover"
+		const host = "terratest-failover.cloud.example.com"
 
-	for _, test := range tests {
-		abstractTestFullFailover(t, test.name, test.gslbPath, test.ingressPath)
+		workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053)
+		workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054)
+		abstractTestFullFailover(t, ingressType.String(),
+			workflowEU.Enrich(basePath, host, ingressType),
+			workflowUS.Enrich(basePath, host, ingressType),
+		)
 	}
 }
 
-func abstractTestFullFailover(t *testing.T, testPrefix string, gslbPath string, ingressPath string) {
-	const host = "terratest-failover.cloud.example.com"
-
-	workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
-		WithGslb(gslbPath, host).
-		WithTestApp("eu")
-	if ingressPath != "" {
-		workflowEU = workflowEU.WithIngress(ingressPath)
-	}
+func abstractTestFullFailover(t *testing.T, testPrefix string, workflowEU, workflowUS *utils.Workflow) {
+	workflowEU = workflowEU.WithTestApp("eu")
 	instanceEU, err := workflowEU.Start()
 	require.NoError(t, err)
 	defer instanceEU.Kill()
 
-	workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
-		WithGslb(gslbPath, host).
-		WithTestApp("us")
-	if ingressPath != "" {
-		workflowUS = workflowUS.WithIngress(ingressPath)
-	}
+	workflowUS = workflowUS.WithTestApp("us")
 	instanceUS, err := workflowUS.Start()
 	require.NoError(t, err)
 	defer instanceUS.Kill()

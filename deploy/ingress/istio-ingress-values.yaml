@@ -1,0 +1,20 @@
+# ingress port is open only on the agent-0 node
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3d-test-gslb1-agent-0
+          - k3d-test-gslb2-agent-0
+          - k3d-test-gslb3-agent-0
+autoscaling:
+  enabled: false
+service:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080

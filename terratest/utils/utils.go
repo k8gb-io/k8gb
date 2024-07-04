@@ -231,7 +231,7 @@ func WaitForLocalGSLB(t *testing.T, dnsServer string, dnsPort int, settings Test
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
 		300,
-		time.Second*1,
+		time.Second*3,
 		func() ([]string, error) { return Dig(t, dnsServer, dnsPort, host+settings.DNSZone, additionalArgs...) },
 		expectedResult)
 }
@@ -261,7 +261,7 @@ func RunBusyBoxCommand(t *testing.T, options *k8s.KubectlOptions, dns string, co
 	dnsOverride := fmt.Sprintf("{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"%s\"]},\"dnsPolicy\": \"None\"}}", dns)
 	args := []string{}
 	kubectlCtx := []string{"--context", options.ContextName, "-n", options.Namespace}
-	containerArgs := []string{"run", "-i", "--rm", "busybox", "--restart", "Never", "--image", "busybox"}
+	containerArgs := []string{"run", "-i", "--rm", "busybox", "--restart", "Never", "--image", "busybox", "--labels", "sidecar.istio.io/inject=false"}
 	containerDNS := []string{"--overrides", dnsOverride}
 	appArgs := append([]string{"--"}, command...)
 	args = append(kubectlCtx, containerArgs...)

@@ -1,0 +1,12 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: roundrobin-test-gslb
+spec:
+  resourceRef:
+    istioVirtualService:
+      matchLabels:
+        app: roundrobin-test
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
