@@ -1,0 +1,24 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: test-gslb
+  annotations:
+      example.io/origin: gslb
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: test-gslb-annotation.cloud.example.com # This is the GSLB enabled host that clients would use
+        http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: frontend-podinfo # Gslb should reflect NotFound status
+                  port:
+                    name: http
+  strategy:
+    type: failover # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
+    dnsTtlSeconds: 5
+    primaryGeoTag: "eu"

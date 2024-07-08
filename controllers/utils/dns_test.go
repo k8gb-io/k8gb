@@ -64,6 +64,10 @@ func TestValidDig(t *testing.T) {
 	fqdn := defaultFqdn
 	// act
 	result, err := Dig(fqdn, defaultEdgeDNSServer)
+	if err != nil && strings.HasSuffix(err.Error(), "->8.8.8.8:53: i/o timeout") {
+		// udp 8.8.8.8:53 may be blocked on some local environments
+		t.Skip()
+	}
 	// assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
@@ -118,6 +122,10 @@ func TestOneValidEdgeDNSInTheList(t *testing.T) {
 	// act
 	result, err := Dig(fqdn, edgeDNSServers...)
 	// assert
+	if err != nil && strings.HasSuffix(err.Error(), "->8.8.8.8:253: i/o timeout") {
+		// udp 8.8.8.8:253 may be blocked on some local environments
+		t.Skip()
+	}
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
 	assert.NotEmpty(t, result[0])

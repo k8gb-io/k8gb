@@ -59,6 +59,8 @@ const (
 	splitBrainThresholdSecondsAnnotation = "k8gb.io/splitbrain-threshold-seconds"
 )
 
+var k8gbAnnotations = []string{strategyAnnotation, primaryGeoTagAnnotation, dnsTTLSecondsAnnotation, splitBrainThresholdSecondsAnnotation}
+
 var log = logging.Logger()
 
 var m = metrics.Metrics()

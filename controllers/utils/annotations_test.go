@@ -26,11 +26,12 @@ import (
 
 var a2 = map[string]string{"k8gb.io/primary-geotag": "eu", "k8gb.io/strategy": "failover"}
 var a1 = map[string]string{"field.cattle.io/publicEndpoints": "dummy"}
+var annotations = []string{"k8gb.io/primary-geotag", "k8gb.io/strategy", "k8gb.io/dns-ttl-seconds", "k8gb.io/splitbrain-threshold-seconds"}
 
 func TestAddNewAnnotations(t *testing.T) {
 	// arrange
 	// act
-	repaired := MergeAnnotations(a1, a2)
+	repaired := MergeAnnotations(a1, a2, annotations...)
 	// assert
 	assert.Equal(t, 3, len(repaired))
 	assert.Equal(t, "eu", repaired["k8gb.io/primary-geotag"])
@@ -43,7 +44,7 @@ func TestAddExistingAnnotations(t *testing.T) {
 		a1[k] = v
 	}
 	// act
-	repaired := MergeAnnotations(a1, a2)
+	repaired := MergeAnnotations(a1, a2, annotations...)
 	// assert
 	assert.Equal(t, 3, len(repaired))
 	assert.Equal(t, "eu", repaired["k8gb.io/primary-geotag"])
@@ -58,7 +59,7 @@ func TestUpdateExistingRecords(t *testing.T) {
 	}
 	a1["k8gb.io/primary-geotag"] = "us"
 	// act
-	repaired := MergeAnnotations(a1, a2)
+	repaired := MergeAnnotations(a1, a2, annotations...)
 	// assert
 	assert.Equal(t, 3, len(repaired))
 	assert.Equal(t, "eu", repaired["k8gb.io/primary-geotag"])
@@ -69,7 +70,7 @@ func TestUpdateExistingRecords(t *testing.T) {
 func TestEqualAnnotationsWithNilA1(t *testing.T) {
 	// arrange
 	// act
-	repaired := MergeAnnotations(nil, a2)
+	repaired := MergeAnnotations(nil, a2, annotations...)
 	// assert
 	assert.True(t, assert.ObjectsAreEqual(a2, repaired))
 }

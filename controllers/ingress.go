@@ -33,15 +33,16 @@ import (
 )
 
 func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, error) {
-	metav1.SetMetaDataAnnotation(&gslb.ObjectMeta, strategyAnnotation, gslb.Spec.Strategy.Type)
+	annotations := make(map[string]string)
+	annotations[strategyAnnotation] = gslb.Spec.Strategy.Type
 	if gslb.Spec.Strategy.PrimaryGeoTag != "" {
-		metav1.SetMetaDataAnnotation(&gslb.ObjectMeta, primaryGeoTagAnnotation, gslb.Spec.Strategy.PrimaryGeoTag)
+		annotations[primaryGeoTagAnnotation] = gslb.Spec.Strategy.PrimaryGeoTag
 	}
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        gslb.Name,
 			Namespace:   gslb.Namespace,
-			Annotations: gslb.Annotations,
+			Annotations: annotations,
 		},
 		Spec: k8gbv1beta1.ToV1IngressSpec(gslb.Spec.Ingress),
 	}
@@ -87,7 +88,7 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingres
 	// Update existing object with new spec and annotations
 	if !ingressEqual(found, i) {
 		found.Spec = i.Spec
-		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations)
+		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations, k8gbAnnotations...)
 		err = r.Update(context.TODO(), found)
 		if errors.IsConflict(err) {
 			log.Info().
@@ -110,10 +111,8 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingres
 }
 
 func ingressEqual(ing1 *netv1.Ingress, ing2 *netv1.Ingress) bool {
-	for k, v := range ing2.Annotations {
-		if ing1.Annotations[k] != v {
-			return false
-		}
+	if !utils.EqualPredefinedAnnotations(ing1.Annotations, ing2.Annotations, k8gbAnnotations...) {
+		return false
 	}
 	return reflect.DeepEqual(ing1.Spec, ing2.Spec)
 }

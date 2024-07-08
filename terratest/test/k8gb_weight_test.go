@@ -32,19 +32,24 @@ func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
 	tests := []struct {
 		gslbPath    string
 		ingressPath string
+		name        string
 	}{
 		{
+			name:        "with gslb only",
 			gslbPath:    "../examples/roundrobin-weight1.yaml",
 			ingressPath: "",
 		},
 		{
+			name:        "with ref",
 			gslbPath:    "../examples/roundrobin-weight1-ref-gslb.yaml",
 			ingressPath: "../examples/roundrobin-weight1-ref-ingress.yaml",
 		},
 	}
 
 	for _, test := range tests {
-		abstractTestWeightsExistsInLocalDNSEndpoint(t, test.gslbPath, test.ingressPath)
+		t.Run(test.name, func(t *testing.T) {
+			abstractTestWeightsExistsInLocalDNSEndpoint(t, test.gslbPath, test.ingressPath)
+		})
 	}
 }
 
@@ -77,32 +82,22 @@ func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, gslbPath string, 
 	err = instanceUS.WaitForAppIsRunning()
 	require.NoError(t, err)
 
-	err = instanceEU.WaitForExternalDNSEndpointExists()
-	require.NoError(t, err)
-	err = instanceUS.WaitForExternalDNSEndpointExists()
-	require.NoError(t, err)
-
-	err = instanceEU.WaitForLocalDNSEndpointExists()
-	require.NoError(t, err)
-	err = instanceUS.WaitForLocalDNSEndpointExists()
-	require.NoError(t, err)
-
 	err = instanceEU.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameEU)
 	require.NoError(t, err)
-	err = instanceUS.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameUS)
-	require.NoError(t, err)
-
 	epExternalEU, err := instanceEU.Resources().GetK8gbExternalDNSEndpoint().GetEndpointByName(endpointDNSNameEU)
 	require.NoError(t, err, "missing EU endpoint %s", endpointDNSNameEU)
+	err = instanceUS.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameUS)
+	require.NoError(t, err)
 	epExternalUS, err := instanceUS.Resources().GetK8gbExternalDNSEndpoint().GetEndpointByName(endpointDNSNameUS)
 	require.NoError(t, err, "missing US endpoint %s", endpointDNSNameUS)
-	t.Logf("ExternalDNS targets: EU: %v; US: %v", epExternalEU.Targets, epExternalUS.Targets)
+
 	expectedTargets := append(epExternalEU.Targets, epExternalUS.Targets...)
 
+	err = instanceEU.WaitForLocalDNSEndpointHasTargets(expectedTargets)
+	require.NoError(t, err, "EU expectedTargets %v but has %v for endpoint %s",
+		expectedTargets, epExternalEU.Targets, endpointDNSNameEU)
 	err = instanceUS.WaitForLocalDNSEndpointHasTargets(expectedTargets)
 	require.NoError(t, err, "US expectedTargets %v", expectedTargets)
-	err = instanceEU.WaitForLocalDNSEndpointHasTargets(expectedTargets)
-	require.NoError(t, err, "EU expectedTargets %v", expectedTargets)
 
 	for _, instance := range []*utils.Instance{instanceEU, instanceUS} {
 		ep, err := instance.Resources().GetLocalDNSEndpoint().GetEndpointByName(host)
@@ -115,7 +110,7 @@ func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, gslbPath string, 
 		for _, v := range epExternalEU.Targets {
 			require.True(t, Contains(v, ep.Targets))
 		}
-		for _, v := range epExternalEU.Targets {
+		for _, v := range epExternalUS.Targets {
 			require.True(t, Contains(v, ep.Targets))
 		}
 	}
