@@ -22,7 +22,7 @@ A Helm chart for Kubernetes Global Balancer
 | Dinar Valeev | <dinar.valeev@absa.africa> |  |
 | Jiri Kremser | <jiri.kremser@gmail.com> |  |
 | Michal Kuritka | <kuritka@gmail.com> |  |
-| Yury Tsarev | <yury.tsarev@absa.africa> |  |
+| Yury Tsarev | <yury@upbound.io> |  |
 
 ## Source Code
 
