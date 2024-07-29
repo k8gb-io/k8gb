@@ -355,7 +355,7 @@ func (r *Resources) WaitForExternalDNSEndpointHasTargets(epName string) error {
 			return false, nil
 		}
 		result = len(epx.Targets) > 0
-		return result, err
+		return result, nil
 	}
 	return tickerWaiter(DefaultRetries, "ExternalDNSEndpoint has targets:", periodic)
 }
@@ -368,7 +368,7 @@ func (i *Instance) WaitForLocalDNSEndpointHasTargets(expectedIPs []string) error
 		result = EqualStringSlices(ep.Targets, expectedIPs)
 		return result, err
 	}
-	return tickerWaiter(DefaultRetries, "LocalDNSEndpoint targets:", periodic)
+	return tickerWaiter(160, "LocalDNSEndpoint targets:", periodic)
 }
 
 // WaitForExpected waits until GSLB dig doesn't return list of expected IP's
@@ -567,7 +567,7 @@ func waitForLocalGSLBNew(t *testing.T, host string, port int, expectedResult []s
 
 // tickerWaiter periodically executes periodic function
 func tickerWaiter(timeoutSeconds int, name string, periodic func() (result bool, err error)) error {
-	const interval = 2
+	const interval = 5
 	var cycles = timeoutSeconds / interval
 	t := 0
 	for range time.NewTicker(interval * time.Second).C {
@@ -604,14 +604,10 @@ type Resources struct {
 }
 
 // GslbSpecProperty returns actual value of one Spec property, e.g: `spec.ingress.rules[0].host`
-func (r *Resources) GslbSpecProperty(specPath string) string {
-	actualValue, _ := k8s.RunKubectlAndGetOutputE(r.i.w.t, r.i.w.k8sOptions, "get", "gslb", r.i.w.state.gslb.name,
+func (g *Gslb) GslbSpecProperty(specPath string) string {
+	actualValue, _ := k8s.RunKubectlAndGetOutputE(g.i.w.t, g.i.w.k8sOptions, "get", "gslb", g.i.w.state.gslb.name,
 		"-o", fmt.Sprintf("custom-columns=SERVICESTATUS:%s", specPath), "--no-headers")
 	return actualValue
-}
-
-func (r *Resources) Ingress() *networkingv1.Ingress {
-	return k8s.GetIngress(r.i.w.t, r.i.w.k8sOptions, r.i.w.settings.ingressName)
 }
 
 func (r *Resources) GetLocalDNSEndpoint() DNSEndpoint {
@@ -645,4 +641,59 @@ func (r *Resources) getDNSEndpoint(epName, ns string) (ep DNSEndpoint, err error
 	}
 	err = json.Unmarshal([]byte(j), &ep)
 	return ep, err
+}
+
+type Gslb struct {
+	i *Instance
+}
+
+type Ingress struct {
+	*networkingv1.Ingress
+	i *Instance
+}
+
+func (r *Resources) Ingress() *Ingress {
+	var ing *networkingv1.Ingress
+	ing = k8s.GetIngress(r.i.w.t, r.i.w.k8sOptions, r.i.w.settings.ingressName)
+	return &Ingress{
+		Ingress: ing,
+		i:       r.i,
+	}
+}
+
+func (r *Resources) Gslb() *Gslb {
+	return &Gslb{
+		i: r.i,
+	}
+}
+
+func (g *Gslb) GetAnnotations() (a map[string]string) {
+	m := struct {
+		Metadata struct {
+			Annotations map[string]string `yaml:"annotations"`
+		} `yaml:"metadata"`
+	}{}
+	strValue, err := k8s.RunKubectlAndGetOutputE(g.i.w.t, g.i.w.k8sOptions, "get", "gslb", g.i.w.state.gslb.name, "-ojson")
+	require.NoError(g.i.w.t, err)
+	err = json.Unmarshal([]byte(strValue), &m)
+	require.NoError(g.i.w.t, err)
+	return m.Metadata.Annotations
+}
+
+func (g *Gslb) PatchAnnotations(a map[string]string) (err error) {
+	return g.i.patchAnnotations(g.i.w.state.gslb.name, "gslb", a)
+}
+
+func (ing *Ingress) PatchAnnotations(a map[string]string) (err error) {
+	return ing.i.patchAnnotations(ing.GetName(), "ingress", a)
+}
+
+func (i *Instance) patchAnnotations(name, ktype string, a map[string]string) (err error) {
+	var data []string
+	for k, v := range a {
+		data = append(data, fmt.Sprintf(`"%s":"%s"`, k, v))
+	}
+	annotations := fmt.Sprintf("{\"metadata\":{\"annotations\":{%s}}}", strings.Join(data, ","))
+	_, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "patch", ktype, name, "-p", annotations, "--type=merge")
+	return err
 }

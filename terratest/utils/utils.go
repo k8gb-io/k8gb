@@ -274,3 +274,17 @@ func RunBusyBoxCommand(t *testing.T, options *k8s.KubectlOptions, dns string, co
 	}
 	return shell.RunCommandAndGetOutputE(t, cmd)
 }
+
+// EqualAnnotations compares annotations of two maps
+// TODO: redundant to k8gb utils internal function.
+func EqualAnnotations(a, b map[string]string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k := range a {
+		if b[k] != a[k] {
+			return false
+		}
+	}
+	return true
+}

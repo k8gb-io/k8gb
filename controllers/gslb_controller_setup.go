@@ -23,9 +23,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +34,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
@@ -90,6 +93,18 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&externaldns.DNSEndpoint{}).
 		Watches(&corev1.Endpoints{}, endpointMapHandler).
 		Watches(&netv1.Ingress{}, ingressMapHandler).
+		WithEventFilter(predicate.Funcs{
+			UpdateFunc: func(e event.TypedUpdateEvent[client.Object]) bool {
+				if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {
+					return true
+				}
+				// Ignore reconciliation in case nothing has changed in k8gb annotations
+				oldAnnotations := e.ObjectOld.GetAnnotations()
+				newAnnotations := e.ObjectNew.GetAnnotations()
+				reconcile := !utils.EqualPredefinedAnnotations(oldAnnotations, newAnnotations, k8gbAnnotations...)
+				return reconcile
+			},
+		}).
 		Complete(r)
 }
 
@@ -123,9 +138,8 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 	}
 	gslb := &k8gbv1beta1.Gslb{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   a.GetNamespace(),
-			Name:        a.GetName(),
-			Annotations: a.GetAnnotations(),
+			Namespace: a.GetNamespace(),
+			Name:      a.GetName(),
 		},
 		Spec: k8gbv1beta1.GslbSpec{
 			Ingress: k8gbv1beta1.FromV1IngressSpec(ingressToReuse.Spec),

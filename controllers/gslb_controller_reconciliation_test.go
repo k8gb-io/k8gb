@@ -826,7 +826,7 @@ func TestGslbProperlyPropagatesAnnotationDownToIngress(t *testing.T) {
 		Start().
 		RunTestFunc(func() {
 			// arrange
-			expectedAnnotations := map[string]string{"annotation": "test", "k8gb.io/strategy": "roundRobin"}
+			expectedAnnotations := map[string]string{"k8gb.io/strategy": "roundRobin"}
 			settings := provideSettings(t, predefinedConfig)
 			settings.gslb.Annotations = map[string]string{"annotation": "test"}
 			err := settings.client.Update(context.TODO(), settings.gslb)
