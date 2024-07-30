@@ -24,7 +24,7 @@ spec:
             name: zone-volume
       containers:
       - name: bind
-        image: internetsystemsconsortium/bind9:9.16
+        image: internetsystemsconsortium/bind9:9.18
         ports:
         - containerPort: 1053
           protocol: TCP

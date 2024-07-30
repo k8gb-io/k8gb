@@ -33,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -98,10 +99,21 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {
 					return true
 				}
+
+				// endpoints don't have state, therefore they don't have a generation
+				// but when their subsets change they must be be reconciled
+				gvk, err := apiutil.GVKForObject(e.ObjectOld, r.Scheme)
+				if err != nil {
+					log.Warn().Msg("could not fetch GroupVersionKind for object")
+				} else if gvk.Kind == "Endpoints" {
+					return true
+				}
+
 				// Ignore reconciliation in case nothing has changed in k8gb annotations
 				oldAnnotations := e.ObjectOld.GetAnnotations()
 				newAnnotations := e.ObjectNew.GetAnnotations()
 				reconcile := !utils.EqualPredefinedAnnotations(oldAnnotations, newAnnotations, k8gbAnnotations...)
+
 				return reconcile
 			},
 		}).
