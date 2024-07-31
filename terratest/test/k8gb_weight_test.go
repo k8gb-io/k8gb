@@ -27,8 +27,6 @@ import (
 )
 
 func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		gslbPath    string
 		ingressPath string

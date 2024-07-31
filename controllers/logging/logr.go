@@ -61,6 +61,7 @@ func (a *logrSinkAdapter) Info(_ int, msg string, keysAndValues ...interface{}) 
 	a.WithValues(keysAndValues)
 	if a.name != "" {
 		a.z.Info().Msgf("%s: %s %s", a.name, msg, a.valuesAsJSON())
+		return
 	}
 	a.z.Info().Msgf("%s %s", msg, a.valuesAsJSON())
 }
