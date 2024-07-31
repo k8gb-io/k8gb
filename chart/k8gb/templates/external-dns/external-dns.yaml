@@ -28,7 +28,7 @@ spec:
         - --managed-record-types=A
         - --managed-record-types=CNAME
         - --managed-record-types=NS
-        - --interval={{ .Values.externaldns.interval | default "1m" }}
+        - --interval={{ .Values.externaldns.interval }}
         - --annotation-filter=k8gb.absa.oss/dnstype=extdns # filter out only relevant DNSEntrypoints
         - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
         - --txt-prefix=k8gb-{{ .Values.k8gb.clusterGeoTag }}- # add custom prefix to TXT records, critical for Cloudflare NS record creation
