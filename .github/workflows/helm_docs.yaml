@@ -28,7 +28,7 @@ jobs:
       with:
         args: --template-files=_helm-docs-template.gotmpl
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@d884c1e53f6f67d5ba26f3abc0159ad6c12c16d8
+      uses: peter-evans/create-pull-request@93bc7fd9cd1938384c12473694ae8d435e400bd8
       with:
         title: "Update Helm Docs"
         branch: ci-helm-doc
