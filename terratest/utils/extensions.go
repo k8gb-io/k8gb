@@ -445,8 +445,18 @@ func (i *Instance) waitForApp(predicate func(instances int) bool, stop bool) (er
 			time.Sleep(waitSeconds * time.Second)
 			continue
 		}
+	}
+	i.w.t.Logf("Wait for coreDNS to be filled by local targets %s", i.w.state.gslb.host)
+	for n := 0; n < maxRetries/2; n++ {
+		localTargets := i.GetLocalTargets()
+		if len(localTargets) == 0 {
+			i.w.t.Logf("Waiting for coreDNS to be filled by local targets %s. Waiting for %d seconds...", i.w.state.gslb.host, waitSeconds)
+			time.Sleep(waitSeconds * time.Second)
+			continue
+		}
 		return nil
 	}
+
 	return retry.MaxRetriesExceeded{Description: "Unable to " + op + " Podinfo app", MaxRetries: maxRetries}
 }
 
