@@ -423,12 +423,12 @@ func (i *Instance) waitForApp(predicate func(instances int) bool, stop bool) (er
 	i.w.t.Logf("Wait for ExternalDNSEndpoint %s.%s to be filled by targets %s", i.w.state.gslb.name, i.w.namespace, i.w.state.gslb.host)
 	// second conditions
 	for n := 0; n < maxRetries/2; n++ {
-		ep, err := i.Resources().GetExternalDNSEndpointByName(i.w.state.gslb.name, i.w.namespace).GetEndpointByName(i.w.state.gslb.host)
+		ep, err := i.Resources().GetExternalDNSEndpointByName(i.w.state.gslb.name, i.w.namespace).GetEndpointByName(fmt.Sprintf("localtargets-%s", i.w.state.gslb.host))
 		if err != nil {
 			// app is already stopped and cant be found
 			if stop && err.Error() == notFoundError {
 				i.w.t.Logf("App is stopped %s", i.w.state.testApp.name)
-				return nil
+				break
 			}
 			i.w.t.Logf("Error waiting for the app %s. %s", i.w.state.testApp.name, err)
 			require.NoError(i.w.t, err)
@@ -449,7 +449,7 @@ func (i *Instance) waitForApp(predicate func(instances int) bool, stop bool) (er
 	i.w.t.Logf("Wait for coreDNS to be filled by local targets %s", i.w.state.gslb.host)
 	for n := 0; n < maxRetries/2; n++ {
 		localTargets := i.GetLocalTargets()
-		if len(localTargets) == 0 {
+		if (!stop && len(localTargets) == 0) || (stop && len(localTargets) != 0) {
 			i.w.t.Logf("Waiting for coreDNS to be filled by local targets %s. Waiting for %d seconds...", i.w.state.gslb.host, waitSeconds)
 			time.Sleep(waitSeconds * time.Second)
 			continue
