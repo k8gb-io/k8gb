@@ -65,7 +65,7 @@ resource "aws_ec2_tag" "eks_elb" {
 module "eks-cluster" {
   tags            = var.eks_tags
   source          = "terraform-aws-modules/eks/aws"
-  version         = "20.20.0"
+  version         = "20.22.0"
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
   subnets         = data.aws_subnet_ids.private.ids
