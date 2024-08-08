@@ -1,0 +1,13 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: playground-failover
+spec:
+  resourceRef:
+    istioVirtualService:
+      matchLabels:
+        app: playground-failover
+  strategy:
+    type: failover
+    dnsTtlSeconds: 5
+    primaryGeoTag: "eu"

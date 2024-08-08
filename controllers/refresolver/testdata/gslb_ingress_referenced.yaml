@@ -1,13 +1,13 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: referenced
+  name: ingress-referenced
   namespace: test-gslb
 spec:
   resourceRef:
     ingress:
       matchLabels:
-        app: referenced
+        app: ingress-referenced
   strategy:
     type: roundRobin
     splitBrainThresholdSeconds: 300

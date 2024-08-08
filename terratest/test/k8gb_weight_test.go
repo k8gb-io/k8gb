@@ -27,50 +27,30 @@ import (
 )
 
 func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
-	tests := []struct {
-		gslbPath    string
-		ingressPath string
-		name        string
-	}{
-		{
-			name:        "with gslb only",
-			gslbPath:    "../examples/roundrobin-weight1.yaml",
-			ingressPath: "",
-		},
-		{
-			name:        "with ref",
-			gslbPath:    "../examples/roundrobin-weight1-ref-gslb.yaml",
-			ingressPath: "../examples/roundrobin-weight1-ref-ingress.yaml",
-		},
-	}
+	for _, ingressType := range utils.IngressTypes {
+		const basePath = "../examples/roundrobin-weight1"
+		const host = "terratest-roundrobin.cloud.example.com"
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			abstractTestWeightsExistsInLocalDNSEndpoint(t, test.gslbPath, test.ingressPath)
+		workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053)
+		workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054)
+		t.Run(ingressType.String(), func(t *testing.T) {
+			abstractTestWeightsExistsInLocalDNSEndpoint(t, host,
+				workflowEU.Enrich(basePath, host, ingressType),
+				workflowUS.Enrich(basePath, host, ingressType),
+			)
 		})
 	}
 }
 
-func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, gslbPath string, ingressPath string) {
-	const host = "terratest-roundrobin.cloud.example.com"
+func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, host string, workflowEU, workflowUS *utils.Workflow) {
 	const endpointDNSNameEU = "gslb-ns-eu-cloud.example.com"
 	const endpointDNSNameUS = "gslb-ns-us-cloud.example.com"
-	workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
-		WithGslb(gslbPath, host).
-		WithTestApp("eu")
-	if ingressPath != "" {
-		workflowEU.WithIngress(ingressPath)
-	}
+	workflowEU = workflowEU.WithTestApp("eu")
 	instanceEU, err := workflowEU.Start()
 	require.NoError(t, err)
 	defer instanceEU.Kill()
 
-	workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
-		WithGslb(gslbPath, host).
-		WithTestApp("us")
-	if ingressPath != "" {
-		workflowUS.WithIngress(ingressPath)
-	}
+	workflowUS = workflowUS.WithTestApp("us")
 	instanceUS, err := workflowUS.Start()
 	require.NoError(t, err)
 	defer instanceUS.Kill()

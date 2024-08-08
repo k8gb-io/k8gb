@@ -26,33 +26,25 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func abstractTestFullRoundRobin(t *testing.T, n int, testPrefix string, gslbPath string, ingressPath string) {
-	if n < 2 || n > 8 {
-		t.Logf("Use value of n that represents the number of clusters from interval [2,8]")
+func abstractTestFullRoundRobin(t *testing.T, testPrefix string, workflows []*utils.Workflow) {
+	if len(workflows) < 2 || len(workflows) > 8 {
+		t.Logf("Number of cluster must be in the interval [2,8]")
 		t.FailNow()
 	}
-	t.Logf(fmt.Sprintf("Running TestFullRoundRobin for %d clusters", n))
+	t.Logf(fmt.Sprintf("Running TestFullRoundRobin for %d clusters", len(workflows)))
 	tags := []string{"eu", "us", "cz", "af", "ru", "ap", "uk", "ca"}
 	var instances []*utils.Instance
 
-	const host = "roundrobin-test.cloud.example.com"
-
 	// start all the test apps on all the clusters
-	for i := 0; i < n; i += 1 {
-		workflow := utils.NewWorkflow(t, fmt.Sprintf("k3d-test-gslb%d", i+1), 5053+i).
-			WithGslb(gslbPath, host).
-			WithTestApp(tags[i])
-		if ingressPath != "" {
-			workflow = workflow.WithIngress(ingressPath)
-		}
-
+	for i, workflow := range workflows {
+		workflow = workflow.WithTestApp(tags[i])
 		instance, er := workflow.Start()
 		require.NoError(t, er)
 		instances = append(instances, instance)
 		defer instance.Kill()
 	}
 	var err error
-	t.Run(fmt.Sprintf("%s round-robin on %d concurrent clusters with podinfo running", testPrefix, n), func(t *testing.T) {
+	t.Run(fmt.Sprintf("%s round-robin on %d concurrent clusters with podinfo running", testPrefix, len(workflows)), func(t *testing.T) {
 		for _, ins := range instances {
 			err = ins.WaitForAppIsRunning()
 			require.NoError(t, err)
@@ -64,7 +56,7 @@ func abstractTestFullRoundRobin(t *testing.T, n int, testPrefix string, gslbPath
 	for _, ins := range instances {
 		workingTargets = append(workingTargets, ins.GetLocalTargets()...)
 	}
-	t.Run(fmt.Sprintf("%s all %d clusters should be interconnected", testPrefix, n), func(t *testing.T) {
+	t.Run(fmt.Sprintf("%s all %d clusters should be interconnected", testPrefix, len(workflows)), func(t *testing.T) {
 		allShouldExpectTheseTargets(t, instances, workingTargets)
 	})
 

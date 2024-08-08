@@ -44,7 +44,8 @@ type Strategy struct {
 // +k8s:openapi-gen=true
 type ResourceRef struct {
 	// Ingress selects a kubernetes.networking.k8s.io/v1.Ingress resource
-	Ingress metav1.LabelSelector `json:"ingress,omitempty"`
+	Ingress             metav1.LabelSelector `json:"ingress,omitempty"`
+	IstioVirtualService metav1.LabelSelector `json:"istioVirtualService,omitempty"`
 }
 
 // GslbSpec defines the desired state of Gslb

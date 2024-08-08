@@ -71,7 +71,7 @@ type testSettings struct {
 	assistant  assistant.Assistant
 }
 
-var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
+var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml"
 
 var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
@@ -1190,7 +1190,7 @@ func TestGslbRemoveDefaultFinalizer(t *testing.T) {
 
 			// assert
 			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, gslb)
-			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
+			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"roundrobin-ingress\" not found")
 			assert.Len(t, gslb.Finalizers, 0)
 		})
 }
@@ -1212,7 +1212,7 @@ func TestGslbRemoveWithFinalizer(t *testing.T) {
 
 			// assert
 			err = settings.client.Get(context.TODO(), settings.request.NamespacedName, gslb)
-			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
+			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"roundrobin-ingress\" not found")
 			assert.Len(t, gslb.Finalizers, 0)
 		})
 }
@@ -1234,7 +1234,7 @@ func TestGslbRemoveBothFinalizers(t *testing.T) {
 
 			// assert
 			err = settings.reconciler.Get(context.TODO(), settings.request.NamespacedName, gslb)
-			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"test-gslb\" not found")
+			require.EqualError(t, err, "gslbs.k8gb.absa.oss \"roundrobin-ingress\" not found")
 			assert.Len(t, gslb.Finalizers, 0)
 		})
 }

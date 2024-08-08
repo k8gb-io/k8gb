@@ -33,50 +33,29 @@ import (
 // TestFailoverPlayground is equal to k8gb failover test running on local playground.
 // see: https://github.com/k8gb-io/k8gb/blob/master/docs/local.md#failover
 func TestFailoverPlayground(t *testing.T) {
-	tests := []struct {
-		name        string
-		gslbPath    string
-		ingressPath string
-	}{
-		{
-			name:        "embedded ingress",
-			gslbPath:    "../examples/failover-playground.yaml",
-			ingressPath: "",
-		},
-		{
-			name:        "referenced ingress",
-			gslbPath:    "../examples/failover-playground-ref-gslb.yaml",
-			ingressPath: "../examples/failover-playground-ref-ingress.yaml",
-		},
-	}
+	for _, ingressType := range utils.IngressTypes {
+		const basePath = "../examples/failover-playground"
+		const host = "playground-failover.cloud.example.com"
 
-	for _, test := range tests {
-		abstractTestFailoverPlayground(t, test.name, test.gslbPath, test.ingressPath)
+		workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053)
+		workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054)
+		abstractTestFailoverPlayground(t, ingressType.String(),
+			workflowEU.Enrich(basePath, host, ingressType),
+			workflowUS.Enrich(basePath, host, ingressType),
+		)
 	}
 }
 
-func abstractTestFailoverPlayground(t *testing.T, testPrefix string, gslbPath string, ingressPath string) {
-	const host = "playground-failover.cloud.example.com"
-
+func abstractTestFailoverPlayground(t *testing.T, testPrefix string, workflowEU, workflowUS *utils.Workflow) {
 	const euGeoTag = "eu"
 	const usGeoTag = "us"
 
-	workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053).
-		WithGslb(gslbPath, host).
-		WithTestApp(euGeoTag)
-	if ingressPath != "" {
-		workflowEU = workflowEU.WithIngress(ingressPath)
-	}
+	workflowEU = workflowEU.WithTestApp(euGeoTag)
 	instanceEU, err := workflowEU.Start()
 	require.NoError(t, err)
 	defer instanceEU.Kill()
 
-	workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054).
-		WithGslb(gslbPath, host).
-		WithTestApp(usGeoTag)
-	if ingressPath != "" {
-		workflowUS = workflowUS.WithIngress(ingressPath)
-	}
+	workflowUS = workflowUS.WithTestApp(usGeoTag)
 	instanceUS, err := workflowUS.Start()
 	require.NoError(t, err)
 	defer instanceUS.Kill()

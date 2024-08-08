@@ -95,6 +95,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	log.Debug().
 		Str("gslb", gslb.Name).
+		Str("namespace", gslb.Namespace).
 		Interface("strategy", gslb.Spec.Strategy).
 		Msg("Resolved strategy")
 	// == Finalizer business ==
@@ -143,7 +144,8 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	// == Ingress ==========
-	if reflect.DeepEqual(gslb.Spec.ResourceRef.Ingress, metav1.LabelSelector{}) {
+	if reflect.DeepEqual(gslb.Spec.ResourceRef.Ingress, metav1.LabelSelector{}) &&
+		reflect.DeepEqual(gslb.Spec.ResourceRef.IstioVirtualService, metav1.LabelSelector{}) {
 		ingress, err := r.gslbIngress(gslb)
 		if err != nil {
 			m.IncrementError(gslb)
@@ -170,7 +172,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	gslb.Status.Servers = servers
 
-	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(r.Client, r.Config.EdgeDNSServers)
+	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(r.Config.EdgeDNSServers)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting load balancer exposed IPs (%s)", err))

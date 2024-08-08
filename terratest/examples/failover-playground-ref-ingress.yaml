@@ -1,9 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: test-gslb
+  name: playground-failover
   labels:
-    app: test-gslb
+    app: playground-failover
 spec:
   ingressClassName: nginx
   rules:

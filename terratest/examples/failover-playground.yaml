@@ -1,7 +1,7 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: test-gslb
+  name: playground-failover
 spec:
   ingress:
     ingressClassName: nginx

@@ -137,7 +137,7 @@ make destroy-full-local-setup
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - roundrobin.cloud.example.com` and depending
 on the region, podinfo will return **us** or **eu**. In the current round robin implementation IP addresses are randomly picked.
-See [Gslb manifest with round robin strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
+See [Gslb manifest with round robin strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml)
 
 Try to run the following command several times and watch the `message` field.
 ```sh
@@ -167,7 +167,7 @@ As expected result you should see podinfo message changing
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending
 on whether podinfo is running inside the cluster it returns only **eu** or **us**.
-See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress.yaml)
 
 Switch GLSB to failover mode:
 ```sh
