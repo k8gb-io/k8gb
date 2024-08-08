@@ -28,7 +28,7 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f0db2aa8a570959027d6be2a227028ad19fd9e8f
+      uses: step-security/harden-runner@951b48540b429070694bc8abd82fd6901eb123ca
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
