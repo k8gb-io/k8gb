@@ -1508,7 +1508,7 @@ func cleanup() {
 		ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey, TracingEnabled,
-		TracingSamplingRatio, OtelExporterOtlpEndpoint} {
+		TracingSamplingRatio, OtelExporterOtlpEndpoint, AnnotationCreatesGSLBWithEmbeddedIngress} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1542,6 +1542,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(TracingEnabled, strconv.FormatBool(config.TracingEnabled))
 	_ = os.Setenv(TracingSamplingRatio, strconv.FormatFloat(config.TracingSamplingRatio, 'f', 2, 64))
 	_ = os.Setenv(OtelExporterOtlpEndpoint, config.OtelExporterOtlpEndpoint)
+	_ = os.Setenv(AnnotationCreatesGSLBWithEmbeddedIngress, strconv.FormatBool(config.AnnotationCreatesGSLBWithEmbeddedIngress))
 }
 
 func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {

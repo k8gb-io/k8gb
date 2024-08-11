@@ -157,6 +157,8 @@ type Config struct {
 	// OtelExporterOtlpEndpoint where the traces should be sent to (in case of otel collector deployed on the same pod as sidecar -> localhost:4318)
 	// otel collector itself can be configured via a configmap to send it somewhere else
 	OtelExporterOtlpEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT, default=localhost:4318"`
+	// AnnotationCreatesGSLBWithEmbeddedIngress flag (will be deprecated in v1.1)
+	AnnotationCreatesGSLBWithEmbeddedIngress bool `env:"ANNOTATION_CREATES_GSLB_WITH_EMBEDDED_INGRESS, default=false"`
 }
 
 // DependencyResolver resolves configuration for GSLB

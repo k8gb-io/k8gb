@@ -4,6 +4,8 @@ metadata:
   annotations:
     k8gb.io/strategy: roundRobin
     k8gb.io/dns-ttl-seconds: "5"
+  labels:
+    app: ingress-rr
   name: test-gslb-annotation
 spec:
   ingressClassName: nginx
