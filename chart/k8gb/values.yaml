@@ -52,6 +52,10 @@ k8gb:
   # -- enable ServiceMonitor
   serviceMonitor:
     enabled: false
+  # -- pod annotations
+  podAnnotations: {}
+  # -- pod labels
+  podLabels: {}
 
 externaldns:
   # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment

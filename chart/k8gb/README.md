@@ -102,6 +102,8 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
 | k8gb.log.level | string | `"info"` | log level (panic,fatal,error,warn,info,debug,trace) |
 | k8gb.metricsAddress | string | `"0.0.0.0:8080"` | Metrics server address |
+| k8gb.podAnnotations | object | `{}` | pod annotations |
+| k8gb.podLabels | object | `{}` | pod labels |
 | k8gb.reconcileRequeueSeconds | int | `30` | Reconcile time in seconds |
 | k8gb.securityContext.allowPrivilegeEscalation | bool | `false` |  |
 | k8gb.securityContext.readOnlyRootFilesystem | bool | `true` |  |
