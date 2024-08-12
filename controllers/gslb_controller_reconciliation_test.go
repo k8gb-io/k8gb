@@ -704,7 +704,6 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.ClusterGeoTag = "za"
 	customConfig.EdgeDNSServers = []utils.DNSServer{
 		{
 			Host: "localhost",
@@ -728,7 +727,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 
 			// enable failover strategy
 			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
-			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "us-east-1"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
 
@@ -771,7 +770,6 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.ClusterGeoTag = "za"
 	customConfig.EdgeDNSServers = []utils.DNSServer{
 		{ // this one will be tried frist, but fails
 			Host: "localhost",
@@ -802,7 +800,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 
 			// enable failover strategy
 			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
-			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "us-east-1"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
 
