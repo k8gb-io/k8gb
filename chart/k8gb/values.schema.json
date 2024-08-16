@@ -32,7 +32,7 @@
                 },
                 "azuredns": {
                     "$ref": "#/definitions/AzureDNS"
-                },                
+                },
                 "cloudflare": {
                     "$ref": "#/definitions/Cloudflare"
                 },
@@ -360,6 +360,9 @@
                         "array",
                         "null"
                     ]
+                },
+                "extraServerBlocks": {
+                    "type": "string"
                 }
             },
             "title": "k8gbCoredns"
@@ -628,42 +631,42 @@
                 },
                 "createAuthSecret": {
                     "type": "object",
-		    "additionalProperties": false,
-		    "properties": {
-			"enabled": {
-			    "type": "boolean"
-			},
-			"tenantId": {
-			    "type": "string",
-			    "minLength": 1
-			},
-			"subscriptionId": {
-			    "type": "string",
-			    "minLength": 1
-			},
-			"resourceGroup": {
-			    "type": "string",
-			    "minLength": 1
-			},
-			"aadClientId": {
-			    "type": "string"
-			},
-			"aadClientSecret": {
-			    "type": "string"
-			},
-			"useManagedIdentityExtension": {
-			    "type": "boolean",
-			    "default": false
-			},
-			"userAssignedIdentityID": {
-			    "type": "string"
-			},
-			"useWorkloadIdentityExtension": {
-			    "type": "boolean",
-			    "default": false
-			}
-		    }
-		}
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "tenantId": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "subscriptionId": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "resourceGroup": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "aadClientId": {
+                            "type": "string"
+                        },
+                        "aadClientSecret": {
+                            "type": "string"
+                        },
+                        "useManagedIdentityExtension": {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "userAssignedIdentityID": {
+                            "type": "string"
+                        },
+                        "useWorkloadIdentityExtension": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                }
             },
             "required": [
                 "enabled"

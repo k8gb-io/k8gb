@@ -21,16 +21,18 @@ k8gb:
   edgeDNSZone: "example.com" # main zone which would contain gslb zone to delegate
   # -- host/ip[:port] format is supported here where port defaults to 53
   edgeDNSServers:
-      # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
-      - "1.1.1.1"
+    # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
+    - "1.1.1.1"
   # -- used for places where we need to distinguish between different Gslb instances
   clusterGeoTag: "eu"
   # -- comma-separated list of external gslb geo tags to pair with
   extGslbClustersGeoTags: "us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
-  # -- Extra CoreDNS plugins to be enabled (yaml object)
   coredns:
+    # -- Extra CoreDNS server blocks
+    extraServerBlocks: ""
+    # -- Extra CoreDNS plugins to be enabled
     extra_plugins: []
   log:
     # -- log format (simple,json)
@@ -171,12 +173,11 @@ azuredns:
     # -- Azure client secret that is associated with the Service Principal.
     aadClientSecret: myAadClientSecret
     # -- Use either AKS Kubelet Identity or AAD Pod Identities
-    useManagedIdentityExtension : false
+    useManagedIdentityExtension: false
     # -- Client id from the Managed identitty when using the AAD Pod Identities
     userAssignedIdentityID: myUserAssignedIdentityID
     # -- Use AKS workload identity extension
     useWorkloadIdentityExtension: false
-
 
 cloudflare:
   # -- Enable Cloudflare provider

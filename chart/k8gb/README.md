@@ -87,7 +87,8 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
 | k8gb.clusterGeoTag | string | `"eu"` | used for places where we need to distinguish between different Gslb instances |
-| k8gb.coredns | object | `{"extra_plugins":[]}` | Extra CoreDNS plugins to be enabled (yaml object) |
+| k8gb.coredns.extraServerBlocks | string | `""` | Extra CoreDNS server blocks |
+| k8gb.coredns.extra_plugins | list | `[]` | Extra CoreDNS plugins to be enabled |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
 | k8gb.dnsZone | string | `"cloud.example.com"` | dnsZone controlled by gslb |
