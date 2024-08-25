@@ -59,18 +59,18 @@ func (m *MockGslbReferenceResolver) EXPECT() *MockGslbReferenceResolverMockRecor
 }
 
 // GetGslbExposedIPs mocks base method.
-func (m *MockGslbReferenceResolver) GetGslbExposedIPs(arg0 utils.DNSList) ([]string, error) {
+func (m *MockGslbReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, edgeDNSServers utils.DNSList) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGslbExposedIPs", arg0)
+	ret := m.ctrl.Call(m, "GetGslbExposedIPs", gslbAnnotations, edgeDNSServers)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetGslbExposedIPs indicates an expected call of GetGslbExposedIPs.
-func (mr *MockGslbReferenceResolverMockRecorder) GetGslbExposedIPs(arg0 any) *gomock.Call {
+func (mr *MockGslbReferenceResolverMockRecorder) GetGslbExposedIPs(gslbAnnotations, edgeDNSServers any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGslbExposedIPs", reflect.TypeOf((*MockGslbReferenceResolver)(nil).GetGslbExposedIPs), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGslbExposedIPs", reflect.TypeOf((*MockGslbReferenceResolver)(nil).GetGslbExposedIPs), gslbAnnotations, edgeDNSServers)
 }
 
 // GetServers mocks base method.
