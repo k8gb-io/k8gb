@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-ingress
+  labels:
+    app: istio-ingressgateway
+  annotations:
+    k8gb.io/exposed-ip-addresses: "185.199.110.153,185.199.109.153"
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: istio-ingressgateway
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+      - ip: 10.0.0.1
