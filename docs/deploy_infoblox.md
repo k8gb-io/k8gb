@@ -83,29 +83,39 @@ NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AG
 podinfo         ClusterIP   10.96.250.84    <none>        9898/TCP,9999/TCP   9m39s
 ```
 
-* Create a custom resource `~/k8gb/podinfogslb.yaml` describing `Gslb` as per the sample below:
+* Create a custom resource `~/k8gb/podinfogslb.yaml` describing an `Ingress` and a `Gslb` as per the sample below:
 ```yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: podinfo
+  namespace: test-gslb
+  labels:
+    app: podinfo
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: podinfo.cloud.example.com
+      http:
+        paths:
+        - path: /
+          backend:
+            service:
+              name: podinfo # This should point to Service name of testing application
+              port:
+                name: http
+---
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: podinfo
   namespace: test-gslb
 spec:
-  ingress:
-    ingressClassName: nginx
-    rules:
-      - host: podinfo.cloud.example.com
-        http:
-          paths:
-          - path: /
-            backend:
-              service:
-                name: podinfo # This should point to Service name of testing application
-                port:
-                  name: http
-
-  strategy:
-    type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
+  resourceRef:
+    ingress:
+      matchLabels:
+        app: podinfo
 ```
 
 * And apply the resource in the target app namespace
