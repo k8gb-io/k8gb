@@ -74,7 +74,7 @@ kubectl -n k8gb create secret generic cloudflare --from-literal=token=<api-secre
 
 Note: you can create Cloudflare API tokens at https://dash.cloudflare.com/profile/api-tokens
 
-### Create test Gslb resource
+### Create test Ingress and Gslb resources
 
 Now we can test the setup with a pretty standard Gslb resource configuration.
 
@@ -85,19 +85,10 @@ metadata:
   name: test-gslb-failover
   namespace: test-gslb
 spec:
-  ingress:
-    ingressClassName: nginx
-    rules:
-    - host: failover.cloudflare-test.k8gb.io
-      http:
-        paths:
-        - backend:
-            service:
-              name: frontend-podinfo
-              port:
-                name: http
-          path: /
-          pathType: Prefix
+  resourceRef:
+    ingress:
+      matchLabels:
+        app: test-gslb-failover
   strategy:
     dnsTtlSeconds: 60 # Minimum for non-Enterprise Cloudflare https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/
     primaryGeoTag: eu
@@ -109,7 +100,7 @@ The only unusual thing here is `spec.strategy.dnsTtlSeconds` that should be of a
 minimum 60-second value in case you are operating a non-Enterprise Cloudflare
 subscription. The lower values will be rejected by Cloudflare API.
 
-Apply Gslb resource to each cluster.
+Apply the Gslb and Ingress resources to each cluster.
 
 ```sh
 kubectl apply -f ./docs/examples/cloudflare/test-gslb-failover.yaml

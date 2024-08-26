@@ -30,19 +30,10 @@ metadata:
   name: test-gslb-failover
   namespace: test-gslb
 spec:
-  ingress:
-    ingressClassName: nginx # or any other existing ingressclasses.networking.k8s.io
-    rules:
-      - host: failover.test.k8gb.io # Desired GSLB enabled FQDN
-        http:
-          paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend-podinfo # Service name to enable GSLB for
-                port:
-                  name: http
+  resourceRef:
+    ingress:
+      matchLabels: # ingresses.networking.k8s.io resource selector
+        app: test-gslb-failover
   strategy:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag

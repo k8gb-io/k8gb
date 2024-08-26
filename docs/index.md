@@ -44,7 +44,7 @@ At it's simplest, an HTTP request should be handled by a healthy service. This s
 
 In the use case above, the following resources are configured by the _application_ team:
 
-**A.** The Kubernetes `Gslb` CRD (Custom Resource Definition) is created which indicates to an  k8gb controller that it should create the necessary GSLB configuration for the cluster.
+**A.** The Kubernetes `Gslb` CRD (Custom Resource Definition) is created which indicates to an k8gb controller that it should create the necessary GSLB configuration for the cluster.
 
 A potential example of what this `Gslb` resource would look like:
 
@@ -54,26 +54,16 @@ kind: Gslb
 metadata:
   name: app
 spec:
-  ingress:
-    ingressClassName: nginx
-    rules:
-    - host: app.cloud.example.com # This is the GSLB enabled host that clients would use
-      http: # This section mirrors the same structure as that of an Ingress resource and will be used verbatim when creating the corresponding Ingress resource that will match the GSLB host
-        paths:
-        - path: /
-          backend:
-            service:
-              name: app
-              port:
-                name: http
+  resourceRef:
+    ingress:
+      matchLabels:
+        app: app
   strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
-  tls:
-    secretName: app-glsb-tls # Use this Secret to add to the TLS configuration for the new Ingress resource that will be created for the GSLB host
 ```
 
 On creating this `Gslb` resource, the k8gb controller watching the cluster where this resource is created, will:
 
-1. Create a new `Ingress` resource that will allow requests with the GSLB host (`app.cloud.example.com`) to be handled by the cluster's Ingress controller
+1. Lookup an `Ingress` resource that allow requests with the GSLB host (`app.cloud.example.com`). The ingress is handled by the cluster's Ingress controller
 2. Configure a health check strategy on the underlying `app` Pods. The Pods here are the Pods matched by the Service configured by `service.name`
 3. Based on the health (see [Service health](#service-health)) of those Pods, if at least one of the Pods is healthy, add DNS records with the external addresses of the cluster's nodes running the Ingress controllers
 
