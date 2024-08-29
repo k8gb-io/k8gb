@@ -316,6 +316,9 @@
                 },
                 "serviceMonitor": {
                     "$ref": "#/definitions/k8gbServiceMonitor"
+                },
+                "annotationCreatesGSLBWithEmbeddedIngress": {
+                    "type": "boolean"
                 }
             },
             "required": [

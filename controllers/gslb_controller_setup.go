@@ -148,14 +148,38 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 			Msg("Gslb already exists. Skipping Gslb creation...")
 		return
 	}
-	gslb := &k8gbv1beta1.Gslb{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: a.GetNamespace(),
-			Name:      a.GetName(),
-		},
-		Spec: k8gbv1beta1.GslbSpec{
-			Ingress: k8gbv1beta1.FromV1IngressSpec(ingressToReuse.Spec),
-		},
+
+	if len(ingressToReuse.Labels) == 0 {
+		log.Warn().
+			Str("ingress", a.GetName()).
+			Msg("Deprecated: Ingress does not have labels. From v1.1 every Ingress must have unique labels")
+	}
+	var gslb *k8gbv1beta1.Gslb
+	// TODO replace this config option by an annotation on the ingress; tests that broke should set it
+	if r.Config.AnnotationCreatesGSLBWithEmbeddedIngress {
+		gslb = &k8gbv1beta1.Gslb{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: a.GetNamespace(),
+				Name:      a.GetName(),
+			},
+			Spec: k8gbv1beta1.GslbSpec{
+				Ingress: k8gbv1beta1.FromV1IngressSpec(ingressToReuse.Spec),
+			},
+		}
+	} else {
+		gslb = &k8gbv1beta1.Gslb{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: a.GetNamespace(),
+				Name:      a.GetName(),
+			},
+			Spec: k8gbv1beta1.GslbSpec{
+				ResourceRef: k8gbv1beta1.ResourceRef{
+					Ingress: metav1.LabelSelector{
+						MatchLabels: ingressToReuse.Labels,
+					},
+				},
+			},
+		}
 	}
 
 	gslb.Spec.Strategy, err = r.parseStrategy(a.GetAnnotations(), strategy)

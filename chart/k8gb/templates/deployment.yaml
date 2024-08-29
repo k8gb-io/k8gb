@@ -60,7 +60,9 @@ spec:
             - name: DNS_ZONE
               value: {{ .Values.k8gb.dnsZone }}
             - name: RECONCILE_REQUEUE_SECONDS
-              value: {{ quote .Values.k8gb.reconcileRequeueSeconds}}
+              value: {{ quote .Values.k8gb.reconcileRequeueSeconds }}
+            - name: ANNOTATION_CREATES_GSLB_WITH_EMBEDDED_INGRESS
+              value: {{ quote .Values.k8gb.annotationCreatesGSLBWithEmbeddedIngress }}
             {{- if .Values.infoblox.enabled }}
             - name: INFOBLOX_GRID_HOST
               valueFrom:

@@ -4,6 +4,8 @@ metadata:
   annotations:
     k8gb.io/strategy: failover
     k8gb.io/primary-geotag: "eu"
+  labels:
+    app: test-ingress-annotation-failover
   name: test-gslb
 spec:
   ingressClassName: nginx

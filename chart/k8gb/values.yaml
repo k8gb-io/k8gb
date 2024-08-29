@@ -52,6 +52,8 @@ k8gb:
   # -- enable ServiceMonitor
   serviceMonitor:
     enabled: false
+  # -- whether annotations on ingress create a GSLB with an embedded or a referenced ingress
+  annotationCreatesGSLBWithEmbeddedIngress: false
 
 externaldns:
   # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment
