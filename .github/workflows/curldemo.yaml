@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@a8d35412fb758de9162fd63e3fa3f0942bdedb4d
+        uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85
         with:
           context: ./deploy/test-apps/curldemo/
           file: ./deploy/test-apps/curldemo/Dockerfile
