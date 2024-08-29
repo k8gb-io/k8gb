@@ -14,8 +14,14 @@ spec:
     metadata:
       labels:
         name: k8gb
+        {{- with .Values.k8gb.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
         kubectl.kubernetes.io/default-container: k8gb
+        {{- with .Values.k8gb.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: k8gb
       containers:
