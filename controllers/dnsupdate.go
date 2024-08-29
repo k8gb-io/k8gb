@@ -79,7 +79,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 				// If cluster is Primary
 				if isPrimary {
 					// If cluster is Primary and Healthy return only own targets
-					// If cluster is Primary and Unhealthy return Secondary external targets
+					// If cluster is Primary and Unhealthy return all external targets
 					if !isHealthy {
 						finalTargets = externalTargets
 						log.Info().
@@ -91,9 +91,14 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 					}
 				} else {
 					// If cluster is Secondary and Primary external cluster is Healthy
-					// then return Primary external targets.
-					// Return own targets by default.
-					finalTargets = externalTargets
+					// then return Primary external targets
+					// otherwise return all other targets
+					if _, ok := externalTargets[gslb.Spec.Strategy.PrimaryGeoTag]; ok {
+						finalTargets = assistant.NewTargets()
+						finalTargets.Append(gslb.Spec.Strategy.PrimaryGeoTag, externalTargets[gslb.Spec.Strategy.PrimaryGeoTag].IPs)
+					} else {
+						finalTargets.AppendTargets(externalTargets)
+					}
 					log.Info().
 						Str("gslb", gslb.Name).
 						Str("cluster", gslb.Spec.Strategy.PrimaryGeoTag).
