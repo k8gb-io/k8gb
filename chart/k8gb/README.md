@@ -19,6 +19,7 @@ A Helm chart for Kubernetes Global Balancer
 
 | Name | Email | Url |
 | ---- | ------ | --- |
+| Andre Baptista Aguas | <andre.aguas@protonmail.com> |  |
 | Dinar Valeev | <dinar.valeev@absa.africa> |  |
 | Jiri Kremser | <jiri.kremser@gmail.com> |  |
 | Michal Kuritka | <kuritka@gmail.com> |  |
