@@ -25,6 +25,8 @@ keywords:
   - multi-cluster
 
 maintainers:
+  - email: andre.aguas@protonmail.com
+    name: Andre Baptista Aguas
   - email: dinar.valeev@absa.africa
     name: Dinar Valeev
   - email: jiri.kremser@gmail.com
