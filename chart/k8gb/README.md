@@ -34,7 +34,7 @@ Kubernetes: `>= 1.19.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://absaoss.github.io/coredns-helm | coredns | 1.15.3 |
+| https://k8gb-io.github.io/coredns-helm | coredns | 1.15.3 |
 
 For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
