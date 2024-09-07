@@ -30,17 +30,17 @@ linters:
     - dupl
     - gochecknoinits
 
- # don't enable:
- #  - golint        # deprecated
- #  - whitespace
- #  - funlen
- #  - exhaustive
- #  - gomnd
- #  - gofmt
- #  - deadcode      # deprecated since v1.49.0
- #  - structcheck   # deprecated since v1.49.0
- #  - varcheck      # deprecated since v1.49.0
- #  - rowserrcheck  # rowserrcheck is disabled because of generics. You can track the evolution of the generics support by following the https://github.com/golangci/golangci-lint/issues/2649
+  # don't enable:
+  #  - golint        # deprecated
+  #  - whitespace
+  #  - funlen
+  #  - exhaustive
+  #  - gomnd
+  #  - gofmt
+  #  - deadcode      # deprecated since v1.49.0
+  #  - structcheck   # deprecated since v1.49.0
+  #  - varcheck      # deprecated since v1.49.0
+  #  - rowserrcheck  # rowserrcheck is disabled because of generics. You can track the evolution of the generics support by following the https://github.com/golangci/golangci-lint/issues/2649
 
 run:
   deadline: 3m
@@ -55,6 +55,7 @@ linters-settings:
       main:
         allow:
           - $gostd
+          - istio.io/client-go
           - k8s.io/apimachinery
           - k8s.io/client-go
           - k8s.io/api

@@ -72,7 +72,7 @@ var a = struct {
 		K8gbNamespace: "k8gb",
 	},
 	Gslb: func() *k8gbv1beta1.Gslb {
-		var crSampleYaml = "../../../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml"
+		var crSampleYaml = "../../../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml"
 		gslbYaml, _ := os.ReadFile(crSampleYaml)
 		gslb, _ := utils2.YamlToGslb(gslbYaml)
 		gslb.Status.LoadBalancer.ExposedIPs = targetIPs

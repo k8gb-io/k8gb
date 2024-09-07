@@ -44,11 +44,13 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
     steps:
-      - uses: actions/checkout@6d193bf28034eafb982f37bd894289fe649468fc
+      - name: Checkout
+        uses: actions/checkout@6d193bf28034eafb982f37bd894289fe649468fc
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@bfd2fb341f32be7281829126376a12a780ca79fc
+      - name: Setup golang
+        uses: actions/setup-go@bfd2fb341f32be7281829126376a12a780ca79fc
         with:
           go-version: 1.22.3
 

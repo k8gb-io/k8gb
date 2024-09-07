@@ -32,7 +32,7 @@
                 },
                 "azuredns": {
                     "$ref": "#/definitions/AzureDNS"
-                },                
+                },
                 "cloudflare": {
                     "$ref": "#/definitions/Cloudflare"
                 },
@@ -41,6 +41,9 @@
                 },
                 "tracing": {
                     "$ref": "#/definitions/Tracing"
+                },
+                "istio": {
+                    "$ref": "#/definitions/Istio"
                 }
             }
         },
@@ -634,42 +637,42 @@
                 },
                 "createAuthSecret": {
                     "type": "object",
-		    "additionalProperties": false,
-		    "properties": {
-			"enabled": {
-			    "type": "boolean"
-			},
-			"tenantId": {
-			    "type": "string",
-			    "minLength": 1
-			},
-			"subscriptionId": {
-			    "type": "string",
-			    "minLength": 1
-			},
-			"resourceGroup": {
-			    "type": "string",
-			    "minLength": 1
-			},
-			"aadClientId": {
-			    "type": "string"
-			},
-			"aadClientSecret": {
-			    "type": "string"
-			},
-			"useManagedIdentityExtension": {
-			    "type": "boolean",
-			    "default": false
-			},
-			"userAssignedIdentityID": {
-			    "type": "string"
-			},
-			"useWorkloadIdentityExtension": {
-			    "type": "boolean",
-			    "default": false
-			}
-		    }
-		}
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "tenantId": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "subscriptionId": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "resourceGroup": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "aadClientId": {
+                            "type": "string"
+                        },
+                        "aadClientSecret": {
+                            "type": "string"
+                        },
+                        "useManagedIdentityExtension": {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "userAssignedIdentityID": {
+                            "type": "string"
+                        },
+                        "useWorkloadIdentityExtension": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                }
             },
             "required": [
                 "enabled"
@@ -735,6 +738,19 @@
                 "enabled"
             ],
             "title": "Tracing"
+        },
+        "Istio": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "enabled"
+            ],
+            "title": "Istio"
         }
     }
 }

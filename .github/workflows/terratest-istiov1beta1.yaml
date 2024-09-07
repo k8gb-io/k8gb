@@ -1,0 +1,80 @@
+name: Terratest for istio's v1beta1 API version
+
+on:
+  pull_request:
+    types:
+      - labeled
+
+permissions:
+  contents: read
+
+jobs:
+  terratest-istio:
+    runs-on: ubuntu-22.04
+    if: ${{ github.event.label.name == 'istio' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9a9194f87191a7e9055e3e9b95b8cfb13023bb08
+        with:
+          fetch-depth: 0
+
+      - name: Set networking.istio.io/v1beta1 API version
+        run: |
+         find . -name "*.yaml" -exec sed -i 's/networking\.istio\.io\/v1/networking.istio.io\/v1beta1/g' {} +
+
+      - name: Setup Golang
+        uses: actions/setup-go@bfd2fb341f32be7281829126376a12a780ca79fc
+        with:
+          go-version: 1.22.3
+
+      - name: Build artifacts
+        uses: goreleaser/goreleaser-action@d33b6f6aeabd7fed8bb3fbf32c4d890d29f48545
+        with:
+          version: v1.9.2
+          args: release --rm-dist --skip-publish --skip-validate --snapshot --skip-sbom --skip-sign
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create edgeDNS k3s Cluster
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
+        with:
+          cluster-name: "edgedns"
+          args: -c k3d/edge-dns.yaml
+
+      - name: Create 1st k3s Cluster
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
+        with:
+          cluster-name: "test-gslb1"
+          args: -c k3d/test-gslb1.yaml
+
+      - name: Create 2nd k3s Cluster
+        uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
+        with:
+          cluster-name: "test-gslb2"
+          args: -c k3d/test-gslb2.yaml
+
+      - name: K8GB deployment
+        run: |
+          make deploy-test-version list-running-pods
+          echo "Cluster 1 (eu):"
+          kubectl get no -owide --context=k3d-test-gslb1
+          echo "Cluster 2 (us):"
+          kubectl get no -owide --context=k3d-test-gslb2
+
+      - name: Run Terratest
+        run: |
+          mkdir -p ${{ github.workspace }}/tmp/terratest
+          set -o pipefail
+          echo "::group::Terratest logs"
+          make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
+          echo "::endgroup::"
+
+      - name: Print debug info
+        if: always()
+        uses: ./.github/actions/print-debug
+
+      - uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029
+        if: always()
+        with:
+          name: terratest-logs
+          path: ${{ github.workspace }}/tmp/terratest

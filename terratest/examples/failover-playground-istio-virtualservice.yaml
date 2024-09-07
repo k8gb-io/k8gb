@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: playground-failover
+  labels:
+    app: playground-failover
+spec:
+  gateways:
+    - istio-ingress/playground-failover
+  hosts:
+    - playground-failover.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: frontend-podinfo
+            port:
+              number: 9898

@@ -44,16 +44,21 @@ import (
 )
 
 type Workflow struct {
-	error      error
-	namespace  string
-	cluster    string
-	k8sOptions *k8s.KubectlOptions
-	t          *testing.T
-	settings   struct {
-		ingressResourcePath string
-		gslbResourcePath    string
-		ingressName         string
-		digUsingUDP         bool
+	error                  error
+	namespace              string
+	cluster                string
+	k8sOptions             *k8s.KubectlOptions
+	k8sOptionsIstioIngress *k8s.KubectlOptions
+	t                      *testing.T
+	settings               struct {
+		ingressType                     IngressType
+		istioVirtualServiceResourcePath string
+		istioGatewayResourcePath        string
+		ingressResourcePath             string
+		gslbResourcePath                string
+		ingressName                     string
+		ingressPort                     int
+		digUsingUDP                     bool
 	}
 	state struct {
 		namespaceCreated bool
@@ -104,6 +109,40 @@ type InstanceStatus struct {
 	EndpointGlobalTargets string   `json:"ep1-dns-targets"`
 }
 
+type IngressType int
+
+const (
+	IngressEmbedded IngressType = iota
+	IngressReferenced
+	IngressIstio
+)
+
+const (
+	istioIngressNamespace           = "istio-ingress"
+	istioIngressLoadBalancerService = "istio-ingressgateway"
+	kubernetesIngressPort           = 80
+	istioIngressPort                = 8080
+)
+
+var IngressTypes = []IngressType{
+	IngressEmbedded,
+	IngressReferenced,
+	IngressIstio,
+}
+
+func (it IngressType) String() string {
+	switch it {
+	case IngressEmbedded:
+		return "ingress embedded"
+	case IngressReferenced:
+		return "ingress referenced"
+	case IngressIstio:
+		return "ingress istio"
+	default:
+		return "ingress unknown"
+	}
+}
+
 func NewWorkflow(t *testing.T, cluster string, port int) *Workflow {
 	var err error
 	if cluster == "" {
@@ -116,9 +155,37 @@ func NewWorkflow(t *testing.T, cluster string, port int) *Workflow {
 	w.cluster = cluster
 	w.namespace = fmt.Sprintf("k8gb-test-%s", strings.ToLower(random.UniqueId()))
 	w.k8sOptions = k8s.NewKubectlOptions(cluster, "", w.namespace)
+	w.k8sOptionsIstioIngress = k8s.NewKubectlOptions(cluster, "", istioIngressNamespace)
 	w.t = t
 	w.state.gslb.port = port
 	w.error = err
+	return w
+}
+
+// Enrich enriches the workflow with the relevant resources depending on the ingressType
+func (w *Workflow) Enrich(basePath string, host string, ingressType IngressType) *Workflow {
+	gslbPath := ""
+	ingressPort := kubernetesIngressPort
+
+	switch ingressType {
+	case IngressEmbedded:
+		gslbPath = basePath + ".yaml"
+	case IngressReferenced:
+		gslbPath = basePath + "-ref-gslb.yaml"
+		ingressPath := basePath + "-ref-ingress.yaml"
+		w = w.WithIngress(ingressPath)
+	case IngressIstio:
+		gslbPath = basePath + "-istio-gslb.yaml"
+		virtualServicePath := basePath + "-istio-virtualservice.yaml"
+		gatewayPath := basePath + "-istio-gateway.yaml"
+		w = w.WithIstio(virtualServicePath, gatewayPath)
+		ingressPort = istioIngressPort
+	}
+
+	w = w.WithGslb(gslbPath, host)
+	w.settings.ingressType = ingressType
+	w.settings.ingressPort = ingressPort
+
 	return w
 }
 
@@ -135,6 +202,27 @@ func (w *Workflow) WithIngress(path string) *Workflow {
 	if err != nil {
 		w.error = err
 	}
+	return w
+}
+
+func (w *Workflow) WithIstio(virtualServicePath, gatewayPath string) *Workflow {
+	if virtualServicePath == "" {
+		w.error = fmt.Errorf("empty istio virtual service resource path")
+	}
+	if gatewayPath == "" {
+		w.error = fmt.Errorf("empty istio gateway resource path")
+	}
+
+	var err error
+	w.settings.istioVirtualServiceResourcePath, err = filepath.Abs(virtualServicePath)
+	if err != nil {
+		w.error = fmt.Errorf("reading %s; %s", virtualServicePath, err)
+	}
+	w.settings.istioGatewayResourcePath, err = filepath.Abs(gatewayPath)
+	if err != nil {
+		w.error = fmt.Errorf("reading %s; %s", gatewayPath, err)
+	}
+
 	return w
 }
 
@@ -179,7 +267,14 @@ func (w *Workflow) Start() (*Instance, error) {
 
 	// namespace
 	w.t.Logf("Create namespace %s", w.namespace)
-	k8s.CreateNamespace(w.t, w.k8sOptions, w.namespace)
+	istioInjection := "disabled"
+	if w.settings.ingressType == IngressIstio {
+		istioInjection = "enabled"
+	}
+	k8s.CreateNamespaceWithMetadata(w.t, w.k8sOptions, metav1.ObjectMeta{
+		Name:   w.namespace,
+		Labels: map[string]string{"istio-injection": istioInjection},
+	})
 	w.state.namespaceCreated = true
 
 	// app
@@ -217,17 +312,25 @@ func (w *Workflow) Start() (*Instance, error) {
 
 	// gslb
 	if w.settings.gslbResourcePath != "" {
-		if w.settings.ingressResourcePath == "" {
+		switch w.settings.ingressType {
+		case IngressEmbedded:
 			w.t.Logf("Create ingress %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
 			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
 			k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.state.gslb.name, 100, 5*time.Second)
 			ingress := k8s.GetIngress(w.t, w.k8sOptions, w.state.gslb.name)
 			require.Equal(w.t, ingress.Name, w.state.gslb.name)
 			w.settings.ingressName = w.state.gslb.name
-		} else {
+		case IngressReferenced:
 			w.t.Logf("Create ingress %s from %s", w.settings.ingressName, w.settings.ingressResourcePath)
 			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.ingressResourcePath)
 			k8s.WaitUntilIngressAvailable(w.t, w.k8sOptions, w.settings.ingressName, 100, 5*time.Second)
+			w.t.Logf("Create gslb %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
+			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
+		case IngressIstio:
+			w.t.Logf("Create istio virtual service from %s", w.settings.istioVirtualServiceResourcePath)
+			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.istioVirtualServiceResourcePath)
+			w.t.Logf("Create istio gateway from %s", w.settings.istioGatewayResourcePath)
+			k8s.KubectlApply(w.t, w.k8sOptionsIstioIngress, w.settings.istioGatewayResourcePath)
 			w.t.Logf("Create gslb %s from %s", w.state.gslb.name, w.settings.gslbResourcePath)
 			k8s.KubectlApply(w.t, w.k8sOptions, w.settings.gslbResourcePath)
 		}
@@ -261,6 +364,9 @@ func (i *Instance) Kill() {
 	if i.w.state.namespaceCreated {
 		k8s.DeleteNamespace(i.w.t, i.w.k8sOptions, i.w.namespace)
 	}
+	if i.w.settings.istioGatewayResourcePath != "" {
+		k8s.KubectlDelete(i.w.t, i.w.k8sOptionsIstioIngress, i.w.settings.istioGatewayResourcePath)
+	}
 }
 
 func (i *Instance) ReapplyIngress(path string) {
@@ -293,9 +399,17 @@ func (i *Instance) GetCoreDNSIP() string {
 
 func (i *Instance) GetIngressIPs() []string {
 	var ingressIPs []string
-	ingress := k8s.GetIngress(i.w.t, i.w.k8sOptions, i.w.settings.ingressName)
-	for _, ip := range ingress.Status.LoadBalancer.Ingress {
-		ingressIPs = append(ingressIPs, ip.IP)
+	switch i.w.settings.ingressType {
+	case IngressIstio:
+		lbService := k8s.GetService(i.w.t, i.w.k8sOptionsIstioIngress, istioIngressLoadBalancerService)
+		for _, ip := range lbService.Status.LoadBalancer.Ingress {
+			ingressIPs = append(ingressIPs, ip.IP)
+		}
+	default:
+		ingress := k8s.GetIngress(i.w.t, i.w.k8sOptions, i.w.settings.ingressName)
+		for _, ip := range ingress.Status.LoadBalancer.Ingress {
+			ingressIPs = append(ingressIPs, ip.IP)
+		}
 	}
 	return ingressIPs
 }
@@ -487,7 +601,7 @@ func (i *Instance) HitTestApp() (result *TestAppResult) {
 	var err error
 	result = new(TestAppResult)
 	coreDNSIP := i.GetCoreDNSIP()
-	command := []string{"sh", "-c", fmt.Sprintf("wget -qO - %s", i.w.state.gslb.host)}
+	command := []string{"sh", "-c", fmt.Sprintf("wget -qO - %s:%d", i.w.state.gslb.host, i.w.settings.ingressPort)}
 	for t := 0; t < 60; t++ {
 		result.Body, err = RunBusyBoxCommand(i.w.t, i.w.k8sOptions, coreDNSIP, command)
 		if strings.Contains(result.Body, "503") {
@@ -570,7 +684,7 @@ func waitForLocalGSLBNew(t *testing.T, host string, port int, expectedResult []s
 		t,
 		"Wait for failover to happen and coredns to pickup new values...",
 		DefaultRetries,
-		time.Second*1,
+		time.Second*3,
 		func() ([]string, error) { return dns.Dig("localhost:"+strconv.Itoa(port), host, isUdp) },
 		expectedResult)
 }

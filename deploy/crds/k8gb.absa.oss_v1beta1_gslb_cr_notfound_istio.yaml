@@ -1,0 +1,51 @@
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: notfound-istio
+  namespace: test-gslb-istio
+  labels:
+    app: notfound-istio
+spec:
+  gateways:
+    - istio-ingress/notfound-istio
+  hosts:
+    - notfound-istio.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: non-existing-app
+            port:
+              number: 9898
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: notfound-istio
+  namespace: istio-ingress
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+    - hosts:
+        - notfound-istio.cloud.example.com
+      port:
+        number: 8080
+        name: http
+        protocol: http
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: notfound-istio
+  namespace: test-gslb-istio
+spec:
+  resourceRef:
+    apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    matchLabels:
+      app: notfound-istio
+  strategy:
+    type: roundRobin
+    splitBrainThresholdSeconds: 300
+    dnsTtlSeconds: 30

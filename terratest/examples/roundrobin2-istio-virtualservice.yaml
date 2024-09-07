@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: roundrobin-test-gslb
+  labels:
+    app: roundrobin-test
+spec:
+  gateways:
+    - istio-ingress/roundrobin-test-gslb
+  hosts:
+    - roundrobin-test.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: frontend-podinfo
+            port:
+              number: 9898

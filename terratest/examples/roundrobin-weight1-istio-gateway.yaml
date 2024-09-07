@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: test-gslb
+  namespace: istio-ingress
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+    - hosts:
+        - terratest-roundrobin.cloud.example.com
+      port:
+        name: http
+        number: 8080
+        protocol: http

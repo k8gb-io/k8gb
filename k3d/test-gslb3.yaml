@@ -11,6 +11,9 @@ ports:
   - port: 82:80
     nodeFilters:
       - agent:0:direct
+  - port: 8082:8080
+    nodeFilters:
+      - agent:0:direct
   - port: 445:443
     nodeFilters:
       - agent:0:direct
@@ -28,7 +31,7 @@ options:
     disableLoadbalancer: true
   k3s:
     extraArgs:
-      - arg: --disable=traefik,servicelb,metrics-server,local-storage
+      - arg: --disable=traefik,metrics-server,local-storage
         nodeFilters:
           - server:*
 registries:

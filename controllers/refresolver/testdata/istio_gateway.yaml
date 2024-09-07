@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: istio
+  namespace: istio-ingress
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+    - hosts:
+        - istio.cloud.example.com
+      port:
+        name: http
+        number: 8080
+        protocol: http

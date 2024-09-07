@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: test-gslb
+  labels:
+    app: test-gslb
+spec:
+  gateways:
+    - istio-ingress/test-gslb
+  hosts:
+    - terratest-roundrobin.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: frontend-podinfo
+            port:
+              number: 9898

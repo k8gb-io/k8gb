@@ -4,9 +4,10 @@ metadata:
   name: test-gslb
 spec:
   resourceRef:
-    ingress:
-      matchLabels:
-        app: test-gslb
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: test-gslb
   strategy:
     type: failover
     dnsTtlSeconds: 5
