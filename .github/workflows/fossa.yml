@@ -29,7 +29,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Checkout code
-        uses: actions/checkout@9a9194f87191a7e9055e3e9b95b8cfb13023bb08
+        uses: actions/checkout@6d193bf28034eafb982f37bd894289fe649468fc
 
       - name: Run FOSSA scan and upload build data
         uses: fossa-contrib/fossa-action@eaa7ead45540cff770b815fdf6bcea019539370b
