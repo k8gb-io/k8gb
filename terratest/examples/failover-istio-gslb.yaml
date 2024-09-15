@@ -1,0 +1,14 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: terratest-failover
+spec:
+  resourceRef:
+    apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    matchLabels:
+      app: terratest-failover
+  strategy:
+    type: failover
+    dnsTtlSeconds: 5
+    primaryGeoTag: "eu"

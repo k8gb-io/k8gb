@@ -27,9 +27,10 @@ metadata:
   namespace: test-gslb
 spec:
   resourceRef:
-    ingress:
-      matchLabels:
-        app: test-gslb-failover
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: test-gslb-failover
   strategy:
     dnsTtlSeconds: 60 # Minimum for non-Enterprise Cloudflare https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/
     primaryGeoTag: eu

@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: istio
+  namespace: test-gslb
+  labels:
+    app: istio
+spec:
+  gateways:
+    - istio-ingress/istio
+  hosts:
+    - istio1.cloud.example.com
+    - istio2.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: istio
+            port:
+              number: 80

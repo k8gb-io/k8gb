@@ -31,6 +31,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.6.1"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 const (
@@ -48,8 +49,7 @@ type Settings struct {
 func SetupTracing(ctx context.Context, cfg Settings, log *zerolog.Logger) (func(), trace.Tracer) {
 	if !cfg.Enabled {
 		log.Info().Msg("OTLP tracing is disabled")
-		//nolint:staticcheck
-		return func() {}, trace.NewNoopTracerProvider().Tracer(instrumentationName)
+		return func() {}, noop.NewTracerProvider().Tracer(instrumentationName)
 	}
 	log.Info().Msg("OTLP tracing is ON")
 	client := otlptracehttp.NewClient(

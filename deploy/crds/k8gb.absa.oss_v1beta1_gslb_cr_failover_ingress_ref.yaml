@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: test-gslb-failover
+  name: failover-ingress
+  namespace: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: failover.cloud.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: frontend-podinfo
+            port:
+              name: http
+        path: /
+        pathType: Prefix
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-ingress
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: test-gslb-failover
+  strategy:
+    type: failover
+    primaryGeoTag: eu

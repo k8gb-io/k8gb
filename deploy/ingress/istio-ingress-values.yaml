@@ -1,0 +1,26 @@
+# the ingress port on k3d is open only on the agent-0 node
+# so we need to make sure the ingress controller runs on that node
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3d-test-gslb1-agent-0
+          - k3d-test-gslb2-agent-0
+          - k3d-test-gslb3-agent-0
+          - k3d-test-gslb4-agent-0
+          - k3d-test-gslb5-agent-0
+          - k3d-test-gslb6-agent-0
+          - k3d-test-gslb7-agent-0
+          - k3d-test-gslb8-agent-0
+autoscaling:
+  enabled: false
+service:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080

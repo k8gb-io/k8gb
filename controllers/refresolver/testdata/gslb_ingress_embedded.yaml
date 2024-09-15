@@ -1,20 +1,20 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: embedded
+  name: ingress-embedded
   namespace: test-gslb
 spec:
   ingress:
     ingressClassName: nginx
     rules:
-      - host: embedded.cloud.example.com
+      - host: ingress-embedded.cloud.example.com
         http:
           paths:
             - path: /
               pathType: Prefix
               backend:
                 service:
-                  name: embedded
+                  name: ingress-embedded
                   port:
                     name: http
   strategy:

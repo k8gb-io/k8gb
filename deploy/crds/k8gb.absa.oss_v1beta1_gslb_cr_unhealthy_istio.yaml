@@ -1,0 +1,51 @@
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: unhealthy-istio
+  namespace: test-gslb-istio
+  labels:
+    app: unhealthy-istio
+spec:
+  gateways:
+    - istio-ingress/unhealthy-istio
+  hosts:
+    - unhealthy-istio.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: unhealthy-istio-app
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: unhealthy-istio
+  namespace: istio-ingress
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+    - hosts:
+        - unhealthy-istio.cloud.example.com
+      port:
+        number: 8080
+        name: http
+        protocol: http
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: unhealthy-istio
+  namespace: test-gslb-istio
+spec:
+  resourceRef:
+    apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    matchLabels:
+      app: unhealthy-istio
+  strategy:
+    type: roundRobin
+    splitBrainThresholdSeconds: 300
+    dnsTtlSeconds: 30

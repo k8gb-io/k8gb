@@ -84,6 +84,7 @@ STABLE_VERSION := "stable"
 BUNDLE_IMG ?= controller-bundle:$(VERSION)
 
 NGINX_INGRESS_VALUES_PATH ?= deploy/ingress/nginx-ingress-values.yaml
+ISTIO_INGRESS_VALUES_PATH ?= deploy/ingress/istio-ingress-values.yaml
 
 # options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)
@@ -188,6 +189,20 @@ deploy-local-cluster:
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
+	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
+	kubectl create namespace istio-system
+	helm repo add --force-update istio https://istio-release.storage.googleapis.com/charts
+	helm repo update
+	helm upgrade -i istio-base istio/base -n istio-system
+
+	@echo -e "\n$(YELLOW)Install Istiod $(NC)"
+	helm upgrade -i istiod istio/istiod -n istio-system --wait
+
+	@echo -e "\n$(YELLOW)Install Istio Ingress Gateway $(NC)"
+	kubectl create namespace istio-ingress
+	helm upgrade -i istio-ingressgateway istio/gateway -n istio-ingress \
+		-f $(ISTIO_INGRESS_VALUES_PATH)
+
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
@@ -198,14 +213,25 @@ deploy-local-cluster:
 .PHONY: deploy-test-apps
 deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
 	@echo -e "\n$(YELLOW)Deploy GSLB cr $(NC)"
-	kubectl apply -f deploy/crds/test-namespace.yaml
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml)
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml)
+	kubectl apply -f deploy/crds/test-namespace-ingress.yaml
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml)
+
+	kubectl apply -f deploy/crds/test-namespace-istio.yaml
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_istio.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_istio.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_notfound_istio.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_unhealthy_istio.yaml)
 
 	@echo -e "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
 	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
+		--set ui.message="`$(call get-cluster-geo-tag)`" \
+		--set image.repository="$(PODINFO_IMAGE_REPO)" \
+		podinfo/podinfo \
+		--version 5.1.1
+	helm upgrade --install frontend --namespace test-gslb-istio -f deploy/test-apps/podinfo/podinfo-values.yaml \
 		--set ui.message="`$(call get-cluster-geo-tag)`" \
 		--set image.repository="$(PODINFO_IMAGE_REPO)" \
 		podinfo/podinfo \
@@ -342,11 +368,11 @@ docker-push: test
 
 .PHONY: init-failover
 init-failover:
-	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover.yaml")
+	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml")
 
 .PHONY: init-round-robin
 init-round-robin:
-	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml")
+	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml")
 
 # creates infoblox secret in current cluster
 .PHONY: infoblox-secret
@@ -554,9 +580,9 @@ endef
 
 define debug
 	$(call manifest)
-	kubectl apply -f deploy/crds/test-namespace.yaml
+	kubectl apply -f deploy/crds/test-namespace-ingress.yaml
 	kubectl apply -f ./chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
-	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr.yaml
+	kubectl apply -f ./deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml
 	dlv $1
 endef
 

@@ -1,13 +1,14 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: referenced
+  name: istio
   namespace: test-gslb
 spec:
   resourceRef:
-    ingress:
-      matchLabels:
-        app: referenced
+    apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    matchLabels:
+      app: istio
   strategy:
     type: roundRobin
     splitBrainThresholdSeconds: 300

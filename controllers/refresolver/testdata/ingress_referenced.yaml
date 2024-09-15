@@ -2,23 +2,24 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   labels:
-    app: referenced
-  name: referenced
+    app: ingress-referenced
+  name: ingress-referenced
   namespace: test-gslb
   resourceVersion: "999"
 spec:
   ingressClassName: nginx
   rules:
-    - host: referenced.cloud.example.com
+    - host: ingress-referenced.cloud.example.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: referenced
+                name: ingress-referenced
                 port:
                   name: http
 status:
   loadBalancer:
     ingress:
+      - ip: 10.0.0.1

@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: terratest-failover
+  labels:
+    app: terratest-failover
+spec:
+  gateways:
+    - istio-ingress/terratest-failover
+  hosts:
+    - terratest-failover.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: frontend-podinfo
+            port:
+              number: 9898

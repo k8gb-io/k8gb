@@ -113,9 +113,10 @@ metadata:
   namespace: test-gslb
 spec:
   resourceRef:
-    ingress:
-      matchLabels:
-        app: podinfo
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: podinfo
 ```
 
 * And apply the resource in the target app namespace

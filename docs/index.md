@@ -55,9 +55,10 @@ metadata:
   name: app
 spec:
   resourceRef:
-    ingress:
-      matchLabels:
-        app: app
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: app
   strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
 ```
 

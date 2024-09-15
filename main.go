@@ -29,6 +29,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 	"github.com/k8gb-io/k8gb/controllers/tracing"
+	istio "istio.io/client-go/pkg/apis/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -49,8 +50,8 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(runtimescheme))
-
 	utilruntime.Must(k8gbv1beta1.AddToScheme(runtimescheme))
+	utilruntime.Must(istio.AddToScheme(runtimescheme))
 	// +kubebuilder:scaffold:scheme
 }
 

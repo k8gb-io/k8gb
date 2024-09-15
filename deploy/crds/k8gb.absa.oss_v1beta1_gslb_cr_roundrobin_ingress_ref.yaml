@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: roundrobin-test-gslb
+  name: roundrobin-ingress
+  namespace: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: notfound.cloud.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: non-existing-app
+            port:
+              name: http
+        path: /
+        pathType: Prefix
+  - host: unhealthy.cloud.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: unhealthy-app
+            port:
+              name: http
+        path: /
+        pathType: Prefix
+  - host: roundrobin.cloud.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: frontend-podinfo
+            port:
+              name: http
+        path: /
+        pathType: Prefix
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: roundrobin-ingress
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: roundrobin-test-gslb
+  strategy:
+    type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients to
+    splitBrainThresholdSeconds: 300 # Threshold after which external cluster is filtered out from delegated zone when it doesn't look alive
+    dnsTtlSeconds: 30 # TTL value for automatically created DNS records

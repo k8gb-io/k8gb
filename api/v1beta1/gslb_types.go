@@ -43,8 +43,12 @@ type Strategy struct {
 // ResourceRef selects a resource defining the GSLB's load balancer and server
 // +k8s:openapi-gen=true
 type ResourceRef struct {
-	// Ingress selects a kubernetes.networking.k8s.io/v1.Ingress resource
-	Ingress metav1.LabelSelector `json:"ingress,omitempty"`
+	// APIVersion of the referenced resource
+	APIVersion string `json:"apiVersion"`
+	// Kind of the referenced resource
+	Kind string `json:"kind"`
+	// LabelSelector of the referenced resource
+	metav1.LabelSelector `json:",inline"`
 }
 
 // GslbSpec defines the desired state of Gslb
