@@ -214,8 +214,8 @@ deploy-local-cluster:
 deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
 	@echo -e "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace-ingress.yaml
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml)
-	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml)
+	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml)
 
 	kubectl apply -f deploy/crds/test-namespace-istio.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_istio.yaml)
@@ -368,11 +368,11 @@ docker-push: test
 
 .PHONY: init-failover
 init-failover:
-	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress.yaml")
+	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml")
 
 .PHONY: init-round-robin
 init-round-robin:
-	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml")
+	$(call init-test-strategy, "deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml")
 
 # creates infoblox secret in current cluster
 .PHONY: infoblox-secret
