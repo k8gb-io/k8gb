@@ -67,7 +67,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | cloudflare.zoneID | string | `"replaceme"` | Cloudflare Zone ID follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/ to find your zoneID value |
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
 | coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.0.11"` | image tag |
+| coredns.image.tag | string | `"v0.1.0"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
 | externaldns.dnsPolicy | string | `"ClusterFirst"` | `.spec.template.spec.dnsPolicy` for ExternalDNS deployment |
@@ -87,6 +87,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | infoblox.sslVerify | bool | `true` | use SSL |
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
+| istio.enabled | bool | `true` | install istio RBAC |
 | k8gb.clusterGeoTag | string | `"eu"` | used for places where we need to distinguish between different Gslb instances |
 | k8gb.coredns | object | `{"extra_plugins":[]}` | Extra CoreDNS plugins to be enabled (yaml object) |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
