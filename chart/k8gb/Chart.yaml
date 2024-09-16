@@ -3,8 +3,8 @@ name: k8gb
 description: A Helm chart for Kubernetes Global Balancer
 icon: https://www.k8gb.io/assets/images/icon-192x192.png
 type: application
-version: v0.13.0
-appVersion: v0.13.0
+version: v0.14.0
+appVersion: v0.14.0
 kubeVersion: ">= 1.19.0-0"
 
 dependencies:
