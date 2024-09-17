@@ -369,6 +369,9 @@
                         "array",
                         "null"
                     ]
+                },
+                "extraServerBlocks": {
+                    "type": "string"
                 }
             },
             "title": "k8gbCoredns"

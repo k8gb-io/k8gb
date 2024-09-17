@@ -24,4 +24,7 @@ data:
             loadbalance weight
         }
     }
+    {{- with .Values.k8gb.coredns.extraServerBlocks -}}
+    {{- tpl . $ | nindent 4 }}
+    {{- end }}
 {{- end }}

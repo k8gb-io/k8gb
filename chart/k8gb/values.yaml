@@ -29,8 +29,10 @@ k8gb:
   extGslbClustersGeoTags: "us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
-  # -- Extra CoreDNS plugins to be enabled (yaml object)
   coredns:
+    # -- Extra CoreDNS server blocks
+    extraServerBlocks: ""
+    # -- Extra CoreDNS plugins to be enabled
     extra_plugins: []
   log:
     # -- log format (simple,json)
