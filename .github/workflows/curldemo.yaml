@@ -25,7 +25,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Login to Dockerhub
-        uses: docker/login-action@3b8fed7e4b60203b2aa0ecc6c6d6d91d12c06760
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -37,4 +37,3 @@ jobs:
           file: ./deploy/test-apps/curldemo/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USER }}/k8gb-demo-curl:latest
-
