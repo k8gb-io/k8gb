@@ -14,9 +14,7 @@ k8gb:
   # -- whether it should also deploy the service account, cluster role and cluster role binding
   deployRbac: true
   # -- dnsZone controlled by gslb
-  dnsZone: "cloud.example.com"
-  # -- Negative TTL for SOA record
-  dnsZoneNegTTL: 300
+  dnsZone: &dnsZone "cloud.example.com"
   # -- main zone which would contain gslb zone to delegate
   edgeDNSZone: "example.com" # main zone which would contain gslb zone to delegate
   # -- host/ip[:port] format is supported here where port defaults to 53
@@ -29,11 +27,6 @@ k8gb:
   extGslbClustersGeoTags: "us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
-  coredns:
-    # -- Extra CoreDNS server blocks
-    extraServerBlocks: ""
-    # -- Extra CoreDNS plugins to be enabled
-    extra_plugins: []
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)
@@ -86,9 +79,6 @@ externaldns:
 coredns:
   # -- service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps
   isClusterService: false
-  deployment:
-    # -- Skip CoreDNS creation and uses the one shipped by k8gb instead
-    skipConfig: true
   image:
     # -- CoreDNS CRD plugin image
     repository: absaoss/k8s_crd
@@ -98,6 +88,27 @@ coredns:
   serviceAccount:
     create: true
     name: coredns
+  securityContext:
+    capabilities:
+      add: []
+  servers:
+  - zones: 
+    - zone: *dnsZone
+    port: 5353
+    servicePort: 53
+    plugins:
+    - name: errors
+    - name: health
+    - name: ready
+    - name: prometheus
+      parameters: 0.0.0.0:9153
+    - name: forward
+      parameters: . /etc/resolv.conf
+    - name: k8s_crd
+      configBlock: |-
+        filter k8gb.absa.oss/dnstype=local
+        negttl 300
+        loadbalance weight
 
 infoblox:
   # -- infoblox provider enabled
