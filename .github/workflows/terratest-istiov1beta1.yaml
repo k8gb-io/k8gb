@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   terratest-istio:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: ${{ github.event.label.name == 'istio' }}
     steps:
       - name: Checkout
