@@ -115,6 +115,21 @@ func TestGetGslbExposedIPs(t *testing.T) {
 			ingressYaml: "./testdata/ingress_multiple_ips.yaml",
 			expectedIPs: []string{"10.0.0.1", "10.0.0.2"},
 		},
+		{
+			name:        "annotation with no exposed IPs",
+			ingressYaml: "./testdata/ingress_annotation_no_ips.yaml",
+			expectedIPs: []string{""},
+		},
+		{
+			name:        "annotation with single exposed IP",
+			ingressYaml: "./testdata/ingress_annotation_single_ip.yaml",
+			expectedIPs: []string{"185.199.110.153"},
+		},
+		{
+			name:        "annotation with multiple exposed IPs",
+			ingressYaml: "./testdata/ingress_annotation_multiple_ips.yaml",
+			expectedIPs: []string{"185.199.110.153", "185.199.109.153"},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
