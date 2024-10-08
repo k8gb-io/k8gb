@@ -270,10 +270,6 @@
                     "format": "idn-hostname",
                     "minLength": 1
                 },
-                "dnsZoneNegTTL": {
-                    "type": "integer",
-                    "minimum": 0
-                },
                 "edgeDNSZone": {
                     "format": "idn-hostname",
                     "minLength": 1
@@ -299,9 +295,6 @@
                 },
                 "log": {
                     "$ref": "#/definitions/k8gbLog"
-                },
-                "coredns": {
-                    "$ref": "#/definitions/k8gbCoreDNS"
                 },
                 "splitBrainCheck": {
                     "type": "boolean"
@@ -359,22 +352,6 @@
                 }
             },
             "title": "Log"
-        },
-        "k8gbCoreDNS": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "extra_plugins": {
-                    "type": [
-                        "array",
-                        "null"
-                    ]
-                },
-                "extraServerBlocks": {
-                    "type": "string"
-                }
-            },
-            "title": "k8gbCoredns"
         },
         "k8gbSecurityContext": {
             "type": "object",
