@@ -97,23 +97,45 @@ func TestGetServers(t *testing.T) {
 func TestGetGslbExposedIPs(t *testing.T) {
 	var tests = []struct {
 		name        string
+		annotations map[string]string
 		ingressYaml string
 		expectedIPs []string
 	}{
 		{
 			name:        "no exposed IPs",
+			annotations: map[string]string{},
 			ingressYaml: "./testdata/ingress_no_ips.yaml",
 			expectedIPs: []string{},
 		},
 		{
 			name:        "single exposed IP",
+			annotations: map[string]string{},
 			ingressYaml: "../testdata/ingress_referenced.yaml",
 			expectedIPs: []string{"10.0.0.1"},
 		},
 		{
 			name:        "multiple exposed IPs",
+			annotations: map[string]string{},
 			ingressYaml: "./testdata/ingress_multiple_ips.yaml",
 			expectedIPs: []string{"10.0.0.1", "10.0.0.2"},
+		},
+		{
+			name:        "annotation with no exposed IPs",
+			annotations: map[string]string{"k8gb.io/exposed-ip-addresses": ""},
+			ingressYaml: "./testdata/ingress_multiple_ips.yaml",
+			expectedIPs: []string{""},
+		},
+		{
+			name:        "annotation with single exposed IP",
+			annotations: map[string]string{"k8gb.io/exposed-ip-addresses": "185.199.110.153"},
+			ingressYaml: "./testdata/ingress_multiple_ips.yaml",
+			expectedIPs: []string{"185.199.110.153"},
+		},
+		{
+			name:        "annotation with multiple exposed IPs",
+			annotations: map[string]string{"k8gb.io/exposed-ip-addresses": "185.199.110.153,185.199.109.153"},
+			ingressYaml: "./testdata/ingress_multiple_ips.yaml",
+			expectedIPs: []string{"185.199.110.153", "185.199.109.153"},
 		},
 	}
 	for _, test := range tests {
@@ -125,7 +147,7 @@ func TestGetGslbExposedIPs(t *testing.T) {
 			}
 
 			// act
-			IPs, err := resolver.GetGslbExposedIPs([]utils.DNSServer{})
+			IPs, err := resolver.GetGslbExposedIPs(test.annotations, []utils.DNSServer{})
 			assert.NoError(t, err)
 
 			// assert

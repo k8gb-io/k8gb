@@ -34,7 +34,7 @@ type GslbReferenceResolver interface {
 	// GetServers retrieves GSLB the server configuration
 	GetServers() ([]*k8gbv1beta1.Server, error)
 	// GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
-	GetGslbExposedIPs(utils.DNSList) ([]string, error)
+	GetGslbExposedIPs(gslbAnnotations map[string]string, edgeDNSServers utils.DNSList) ([]string, error)
 }
 
 // New creates a new GSLBReferenceResolver
