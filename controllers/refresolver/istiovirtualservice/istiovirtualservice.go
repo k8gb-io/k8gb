@@ -184,6 +184,10 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 				})
 			}
 		}
+		server.Services = append(server.Services, &k8gbv1beta1.NamespacedName{
+			Name:      rr.lbService.Name,
+			Namespace: rr.lbService.Namespace,
+		})
 		servers = append(servers, server)
 	}
 
