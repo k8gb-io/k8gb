@@ -1,0 +1,21 @@
+coredns:
+  serviceType: LoadBalancer
+
+  servers:
+  - zones: 
+    - zone: cloud.example.com
+    port: 5353
+    servicePort: 53
+    plugins:
+    - name: errors
+    - name: health
+    - name: ready
+    - name: prometheus
+      parameters: 0.0.0.0:9153
+    - name: forward
+      parameters: . /etc/resolv.conf
+    - name: k8s_crd
+      configBlock: |-
+        filter k8gb.absa.oss/dnstype=local
+        negttl 10
+        loadbalance weight

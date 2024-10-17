@@ -28,6 +28,10 @@ jobs:
           VALUES_FILE=chart/k8gb/values.yaml
           SCHEMA_FILE=chart/k8gb/values.schema.json
 
+          # Create a virtual environment
+          python3 -m venv venv
+          source venv/bin/activate
+
           # check if the values.json is covered by the schema
           pip3 install json-spec
           yq -o=json eval ${VALUES_FILE} > /tmp/values.json

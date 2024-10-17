@@ -38,7 +38,7 @@ CLUSTER_GSLB_GATEWAY = docker network inspect ${CLUSTER_GSLB_NETWORK} -f '{{ (in
 GSLB_DOMAIN ?= cloud.example.com
 REPO := absaoss/k8gb
 SHELL := bash
-VALUES_YAML ?= ""
+VALUES_YAML ?= deploy/k8gb/values.yaml
 PODINFO_IMAGE_REPO ?= ghcr.io/stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
@@ -157,7 +157,6 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-$(ARCH) CHART='./chart/k8gb' ;\
-		kubectl apply -n k8gb -f ./deploy/test/coredns-tcp-svc.yaml ;\
 	done
 
 .PHONY: list-running-pods
@@ -178,7 +177,7 @@ deploy-local-cluster:
 	kubectl config use-context k3d-$(CLUSTER_NAME)$(CLUSTER_ID)
 
 	@echo -e "\n$(YELLOW)Create namespace $(NC)"
-	kubectl apply -f deploy/namespace.yaml
+	kubectl apply -f deploy/k8gb-namespace.yaml
 
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
@@ -190,18 +189,18 @@ deploy-local-cluster:
 		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
-	kubectl create namespace istio-system
+	kubectl apply -f deploy/istio-system-namespace.yaml
 	helm repo add --force-update istio https://istio-release.storage.googleapis.com/charts
 	helm repo update
-	helm upgrade -i istio-base istio/base -n istio-system
+	helm upgrade -i istio-base istio/base -n istio-system --version 1.23.2
 
 	@echo -e "\n$(YELLOW)Install Istiod $(NC)"
-	helm upgrade -i istiod istio/istiod -n istio-system --wait
+	helm upgrade -i istiod istio/istiod -n istio-system --version 1.23.2 --wait
 
 	@echo -e "\n$(YELLOW)Install Istio Ingress Gateway $(NC)"
-	kubectl create namespace istio-ingress
+	kubectl apply -f deploy/istio-ingress-namespace.yaml
 	helm upgrade -i istio-ingressgateway istio/gateway -n istio-ingress \
-		-f $(ISTIO_INGRESS_VALUES_PATH)
+		--version 1.23.2 -f $(ISTIO_INGRESS_VALUES_PATH)
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
@@ -254,7 +253,6 @@ deploy-k8gb-with-helm:
 	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
 		--set $(call get-helm-args,$(CLUSTER_ID)) \
 		--set k8gb.reconcileRequeueSeconds=10 \
-		--set k8gb.dnsZoneNegTTL=10 \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
 		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL) \
@@ -264,7 +262,7 @@ deploy-k8gb-with-helm:
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: ## Deploy k8gb operator
-	kubectl apply -f deploy/namespace.yaml
+	kubectl apply -f deploy/k8gb-namespace.yaml
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS) \
 		--set k8gb.log.format=$(LOG_FORMAT)
