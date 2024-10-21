@@ -1,0 +1,42 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: failover-playground-embedded
+spec:
+  namespace: failover-playground-embedded
+  steps:
+  - name: init EU
+    description: setup dummy application and GSLB on EU cluster
+    cluster: eu
+    use:
+      template: ../../step_templates/init.yaml
+  - name: init US
+    description: setup dummy application and GSLB on US cluster
+    cluster: us
+    use:
+      template: ../../step_templates/init.yaml
+  - name: DNS resolves to EU pre failover
+    description: verify that coredns on both clusters resolves to EU
+    cluster: eu
+    use:
+      template: ../../step_templates/assert_dns.yaml
+  - name: failover
+    description: stop app on EU cluster
+    cluster: eu
+    use:
+      template: ../../step_templates/stop_podinfo.yaml
+  - name: DNS resolves to US post failover
+    description: assert that coredns on both clusters resolves to US
+    cluster: us
+    use:
+      template: ../../step_templates/assert_dns.yaml
+  - name: failback
+    description: restore application on EU cluster
+    cluster: eu
+    use:
+      template: ../../step_templates/apply_podinfo.yaml
+  - name: DNS resolves to EU post failback
+    description: assert that coredns on both clusters resolves to EU
+    cluster: eu
+    use:
+      template: ../../step_templates/assert_dns.yaml
