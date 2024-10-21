@@ -10,6 +10,6 @@
   Add the [`heavy-tests`](/k8gb-io/k8gb/issues?q=is%3A*+label%3Aheavy-tests) label on this PR if you want full-blown tests that include more than 2-cluster scenarios.
 
   ### Debug tests
-  If the test suite is failing for you, you may want to try triggering `Re-run all jobs` (top right) with [debug logging](https://docs.github.com/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging) enabled. It will also make the [print debug](/k8gb-io/k8gb/blob/master/.github/actions/print-debug/action.yaml) action more verbose.
+  If the test suite is failing for you, you may want to try triggering `Re-run all jobs` (top right) with [debug logging](https://docs.github.com/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging) enabled. It will also make the [print debug](/k8gb-io/k8gb/blob/master/.github/actions/print-terratest-debug/action.yaml) action more verbose.
 
 </details>
