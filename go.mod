@@ -19,9 +19,9 @@ require (
 	go.opentelemetry.io/otel/trace v1.30.0
 	go.uber.org/mock v0.5.0
 	istio.io/client-go v1.23.2
-	k8s.io/api v0.31.0
-	k8s.io/apimachinery v0.31.0
-	k8s.io/client-go v0.31.0
+	k8s.io/api v0.31.2
+	k8s.io/apimachinery v0.31.2
+	k8s.io/client-go v0.31.2
 	sigs.k8s.io/controller-runtime v0.19.0
 	sigs.k8s.io/external-dns v0.14.2
 )
