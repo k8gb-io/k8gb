@@ -227,7 +227,7 @@ tracing:
   jaegerImage:
     # -- if `tracing.deployJaeger==true` this image will be used in the deployment for Jaeger
     repository: jaegertracing/all-in-one
-    tag: 1.61.0
+    tag: 1.62.0
     pullPolicy: Always
 
 istio:
