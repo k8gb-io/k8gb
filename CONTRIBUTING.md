@@ -98,7 +98,7 @@ Overrides done this way can persist between terminal sessions and can be used as
 
 ## Testing
 
-- Any functional GSLB controller code change should be secured by the corresponding [unit tests](https://github.com/k8gb-io/k8gb/tree/master/controllers/gslb_controller_test.go).
+- Any functional GSLB controller code change should be secured by the corresponding [unit tests](https://github.com/k8gb-io/k8gb/tree/master/controllers/gslb_controller_reconciliation_test.go).
 - Integration terratest suite is located [here](https://github.com/k8gb-io/k8gb/tree/master/terratest).
   These tests are updated only if the change is substantial enough to affect the main end-to-end flow.
 - See the [local playground guide](https://github.com/k8gb-io/k8gb/blob/master/docs/local.md) for local testing environment setup and integration test execution.
