@@ -55,6 +55,7 @@ const (
 
 var predefinedConfig = Config{
 	ReconcileRequeueSeconds: 30,
+	NSRecordTTL:             30,
 	ClusterGeoTag:           "us",
 	ExtClustersGeoTags:      []string{"za", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
@@ -260,6 +261,24 @@ func TestResolveConfigWithZeroReconcileRequeueSecondsKey(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.ReconcileRequeueSeconds = 0
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestResolveConfigWithNegativeNSRecordTTL(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.NSRecordTTL = -1
+	// act,assert
+	arrangeVariablesAndAssert(t, expected, assert.Error)
+}
+
+func TestResolveConfigWithZeroReconcileNSRecordTTL(t *testing.T) {
+	// arrange
+	defer cleanup()
+	expected := predefinedConfig
+	expected.NSRecordTTL = 0
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -1504,8 +1523,8 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 }
 
 func cleanup() {
-	for _, s := range []string{ReconcileRequeueSecondsKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey, EdgeDNSServersKey,
-		ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
+	for _, s := range []string{ReconcileRequeueSecondsKey, NSRecordTTLKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey,
+		EdgeDNSServersKey, ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey, TracingEnabled,
 		TracingSamplingRatio, OtelExporterOtlpEndpoint} {
@@ -1519,6 +1538,7 @@ func configureEnvVar(config Config) {
 	_ = os.Unsetenv(EdgeDNSServerKey)
 	_ = os.Unsetenv(EdgeDNSServerPortKey)
 	_ = os.Setenv(ReconcileRequeueSecondsKey, strconv.Itoa(config.ReconcileRequeueSeconds))
+	_ = os.Setenv(NSRecordTTLKey, strconv.Itoa(config.NSRecordTTL))
 	_ = os.Setenv(ClusterGeoTagKey, config.ClusterGeoTag)
 	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
 	_ = os.Setenv(EdgeDNSServersKey, config.EdgeDNSServers.String())

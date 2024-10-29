@@ -297,6 +297,10 @@
                     "type": "integer",
                     "minimum": 0
                 },
+                "nsRecordTTL": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "log": {
                     "$ref": "#/definitions/k8gbLog"
                 },

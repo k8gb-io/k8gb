@@ -253,7 +253,7 @@ func TestInfobloxFinalize(t *testing.T) {
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.Finalize(defaultGslb)
+	err := provider.Finalize(defaultGslb, nil)
 
 	// assert
 	assert.NoError(t, err)
