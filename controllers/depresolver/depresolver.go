@@ -120,6 +120,8 @@ type Infoblox struct {
 type Config struct {
 	// Reschedule of Reconcile loop to pickup external Gslb targets
 	ReconcileRequeueSeconds int `env:"RECONCILE_REQUEUE_SECONDS, default=30"`
+	// TTL of the NS and respective glue record used by external DNS
+	NSRecordTTL int `env:"NS_RECORD_TTL, default=30"`
 	// ClusterGeoTag to determine specific location
 	ClusterGeoTag string `env:"CLUSTER_GEO_TAG"`
 	// ExtClustersGeoTags to identify clusters in other locations in format separated by comma. i.e.: "eu,uk,us"

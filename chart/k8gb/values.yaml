@@ -29,6 +29,8 @@ k8gb:
   extGslbClustersGeoTags: "us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
+  # -- TTL of the NS and respective glue record used by external DNS
+  nsRecordTTL: 30
   coredns:
     # -- Extra CoreDNS server blocks
     extraServerBlocks: ""

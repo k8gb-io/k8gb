@@ -22,6 +22,7 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -50,7 +51,7 @@ func (p *EmptyDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldn
 	return p.assistant.SaveDNSEndpoint(gslb.Namespace, i)
 }
 
-func (p *EmptyDNSProvider) Finalize(gslb *k8gbv1beta1.Gslb) (err error) {
+func (p *EmptyDNSProvider) Finalize(gslb *k8gbv1beta1.Gslb, _ client.Client) (err error) {
 	return p.assistant.RemoveEndpoint(gslb.Name)
 }
 

@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"time"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
 	ibcl "github.com/infobloxopen/infoblox-go-client"
@@ -156,7 +157,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	return nil
 }
 
-func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb) error {
+func (p *InfobloxProvider) Finalize(gslb *k8gbv1beta1.Gslb, _ client.Client) error {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		return err
