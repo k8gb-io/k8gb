@@ -111,62 +111,73 @@ func TestGetServers(t *testing.T) {
 
 func TestGetGslbExposedIPs(t *testing.T) {
 	var tests = []struct {
-		name        string
-		annotations map[string]string
-		serviceYaml string
-		expectedIPs []string
+		name          string
+		annotations   map[string]string
+		serviceYaml   string
+		expectedIPs   []string
+		expectedError bool
 	}{
 		{
-			name:        "no exposed IPs",
-			serviceYaml: "./testdata/istio_service_no_ips.yaml",
-			annotations: map[string]string{},
-			expectedIPs: []string{},
+			name:          "no exposed IPs",
+			serviceYaml:   "./testdata/istio_service_no_ips.yaml",
+			annotations:   map[string]string{},
+			expectedIPs:   []string{},
+			expectedError: false,
 		},
 		{
-			name:        "single exposed IP",
-			annotations: map[string]string{},
-			serviceYaml: "../testdata/istio_service.yaml",
-			expectedIPs: []string{"10.0.0.1"},
+			name:          "single exposed IP",
+			annotations:   map[string]string{},
+			serviceYaml:   "../testdata/istio_service.yaml",
+			expectedIPs:   []string{"10.0.0.1"},
+			expectedError: false,
 		},
 		{
-			name:        "multiple exposed IPs",
-			annotations: map[string]string{},
-			serviceYaml: "./testdata/istio_service_multiple_ips.yaml",
-			expectedIPs: []string{"10.0.0.1", "10.0.0.2"},
+			name:          "multiple exposed IPs",
+			annotations:   map[string]string{},
+			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
+			expectedError: false,
 		},
 		{
-			name:        "annotation with no exposed IPs",
-			annotations: map[string]string{"k8gb.io/exposed-ip-addresses": ""},
-			serviceYaml: "./testdata/istio_service_multiple_ips.yaml",
-			expectedIPs: []string{""},
+			name:          "annotation with no exposed IPs",
+			annotations:   map[string]string{"k8gb.io/exposed-ip-addresses": ""},
+			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			expectedIPs:   []string{},
+			expectedError: true,
 		},
 		{
-			name:        "annotation with single exposed IP",
-			annotations: map[string]string{"k8gb.io/exposed-ip-addresses": "185.199.110.153"},
-			serviceYaml: "./testdata/istio_service_multiple_ips.yaml",
-			expectedIPs: []string{"185.199.110.153"},
+			name:          "annotation with single exposed IP",
+			annotations:   map[string]string{"k8gb.io/exposed-ip-addresses": "185.199.110.153"},
+			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			expectedIPs:   []string{"185.199.110.153"},
+			expectedError: false,
 		},
 		{
-			name:        "annotation with multiple exposed IPs",
-			annotations: map[string]string{"k8gb.io/exposed-ip-addresses": "185.199.110.153,185.199.109.153"},
-			serviceYaml: "./testdata/istio_service_multiple_ips.yaml",
-			expectedIPs: []string{"185.199.110.153", "185.199.109.153"},
+			name:          "annotation with invalid IP",
+			annotations:   map[string]string{"k8gb.io/exposed-ip-addresses": "192.169.0.test"},
+			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			expectedIPs:   []string{},
+			expectedError: true,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			// arrange
-			svc := utils.FileToService(test.serviceYaml)
+			svc := utils.FileToService(tt.serviceYaml)
 			resolver := ReferenceResolver{
 				lbService: svc,
 			}
 
 			// act
-			IPs, err := resolver.GetGslbExposedIPs(test.annotations, []utils.DNSServer{})
-			assert.NoError(t, err)
+			IPs, err := resolver.GetGslbExposedIPs(tt.annotations, []utils.DNSServer{})
+			if tt.expectedError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 
 			// assert
-			assert.Equal(t, test.expectedIPs, IPs)
+			assert.Equal(t, tt.expectedIPs, IPs)
 		})
 	}
 }

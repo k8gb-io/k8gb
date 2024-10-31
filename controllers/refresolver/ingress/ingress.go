@@ -22,7 +22,6 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"strings"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
@@ -167,7 +166,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, edgeDNSServers utils.DNSList) ([]string, error) {
 	// fetch the IP addresses of the reverse proxy from an annotation if it exists
 	if ingressIPsFromAnnotation, ok := gslbAnnotations[externalIPsAnnotation]; ok {
-		return strings.Split(ingressIPsFromAnnotation, ","), nil
+		return utils.ParseIPAddresses(ingressIPsFromAnnotation)
 	}
 
 	// if there is no annotation -> fetch the IP addresses from the Status of the Ingress resource
