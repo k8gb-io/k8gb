@@ -23,7 +23,7 @@ linters:
     - unused
     - depguard
     - dogsled
-    - exportloopref
+    - copyloopvar
     - goconst
     - goprintffuncname
     - nolintlint

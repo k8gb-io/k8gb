@@ -51,5 +51,5 @@ func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver
 			return istiovirtualservice.NewReferenceResolver(gslb, k8sClient)
 		}
 	}
-	return nil, fmt.Errorf("incomplete gslb configuration, no ingress found")
+	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)
 }

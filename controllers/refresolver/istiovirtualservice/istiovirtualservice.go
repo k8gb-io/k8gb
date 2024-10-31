@@ -50,7 +50,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}
 
 	if len(virtualServiceList) != 1 {
-		return nil, fmt.Errorf("exactly one VirtualService resource expected but %d were found", len(virtualServiceList))
+		return nil, fmt.Errorf("exactly 1 VirtualService resource expected but %d were found", len(virtualServiceList))
 	}
 	virtualService := virtualServiceList[0]
 
@@ -98,7 +98,7 @@ func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (
 // getGateway retrieves the istio gateway referenced by the istio virtual service
 func getGateway(virtualService *istio.VirtualService, k8sClient client.Client) (*istio.Gateway, error) {
 	if len(virtualService.Spec.Gateways) != 1 {
-		return nil, fmt.Errorf("expected exactly one Gateway to be referenced by the VirtualService but %d were found", len(virtualService.Spec.Gateways))
+		return nil, fmt.Errorf("expected exactly 1 Gateway to be referenced by the VirtualService but %d were found", len(virtualService.Spec.Gateways))
 	}
 	gatewayRef := strings.Split(virtualService.Spec.Gateways[0], "/")
 	gatewayNamespace := gatewayRef[0]
@@ -140,7 +140,7 @@ func getLbService(gateway *istio.Gateway, k8sClient client.Client) (*corev1.Serv
 	}
 
 	if len(gatewayServiceList.Items) != 1 {
-		return nil, fmt.Errorf("exactly one Service resource expected but %d were found", len(gatewayServiceList.Items))
+		return nil, fmt.Errorf("exactly 1 Service resource expected but %d were found", len(gatewayServiceList.Items))
 	}
 
 	gatewayService := &gatewayServiceList.Items[0]
