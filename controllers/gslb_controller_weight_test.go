@@ -173,16 +173,16 @@ func TestWeight(t *testing.T) {
 			m := mocks.NewMockProvider(ctrl)
 			r := mocks.NewMockGslbResolver(ctrl)
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Do(assertAnnotation).Return(fmt.Errorf("save DNS error")).Times(1)
-			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
+			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 			r.EXPECT().ResolveGslbSpec(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(injectWeight).AnyTimes()
 
 			ts := assistant.Targets{}
 			for k, w := range test.data {
 				ts[k] = &assistant.Target{IPs: w.targets}
 			}
-			m.EXPECT().GetExternalTargets("roundrobin.cloud.example.com").Return(ts).Times(1)
-			m.EXPECT().GetExternalTargets("notfound.cloud.example.com").Return(assistant.Targets{}).Times(1)
-			m.EXPECT().GetExternalTargets("unhealthy.cloud.example.com").Return(assistant.Targets{}).Times(1)
+			m.EXPECT().GetExternalTargets("roundrobin.cloud.example.com", gomock.Any()).Return(ts).Times(1)
+			m.EXPECT().GetExternalTargets("notfound.cloud.example.com", gomock.Any()).Return(assistant.Targets{}).Times(1)
+			m.EXPECT().GetExternalTargets("unhealthy.cloud.example.com", gomock.Any()).Return(assistant.Targets{}).Times(1)
 
 			settings := provideSettings(t, predefinedConfig)
 			settings.reconciler.DNSProvider = m

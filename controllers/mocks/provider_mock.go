@@ -32,6 +32,7 @@ import (
 
 	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	assistant "github.com/k8gb-io/k8gb/controllers/providers/assistant"
+	utils "github.com/k8gb-io/k8gb/controllers/utils"
 	gomock "go.uber.org/mock/gomock"
 	endpoint "sigs.k8s.io/external-dns/endpoint"
 )
@@ -60,45 +61,45 @@ func (m *MockProvider) EXPECT() *MockProviderMockRecorder {
 }
 
 // CreateZoneDelegationForExternalDNS mocks base method.
-func (m *MockProvider) CreateZoneDelegationForExternalDNS(arg0 *v1beta1.Gslb) error {
+func (m *MockProvider) CreateZoneDelegationForExternalDNS(arg0 *v1beta1.Gslb, arg1 utils.DNSZone) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateZoneDelegationForExternalDNS", arg0)
+	ret := m.ctrl.Call(m, "CreateZoneDelegationForExternalDNS", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateZoneDelegationForExternalDNS indicates an expected call of CreateZoneDelegationForExternalDNS.
-func (mr *MockProviderMockRecorder) CreateZoneDelegationForExternalDNS(arg0 any) *gomock.Call {
+func (mr *MockProviderMockRecorder) CreateZoneDelegationForExternalDNS(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateZoneDelegationForExternalDNS", reflect.TypeOf((*MockProvider)(nil).CreateZoneDelegationForExternalDNS), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateZoneDelegationForExternalDNS", reflect.TypeOf((*MockProvider)(nil).CreateZoneDelegationForExternalDNS), arg0, arg1)
 }
 
 // Finalize mocks base method.
-func (m *MockProvider) Finalize(arg0 *v1beta1.Gslb) error {
+func (m *MockProvider) Finalize(arg0 *v1beta1.Gslb, arg1 utils.DNSZone) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Finalize", arg0)
+	ret := m.ctrl.Call(m, "Finalize", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Finalize indicates an expected call of Finalize.
-func (mr *MockProviderMockRecorder) Finalize(arg0 any) *gomock.Call {
+func (mr *MockProviderMockRecorder) Finalize(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalize", reflect.TypeOf((*MockProvider)(nil).Finalize), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalize", reflect.TypeOf((*MockProvider)(nil).Finalize), arg0, arg1)
 }
 
 // GetExternalTargets mocks base method.
-func (m *MockProvider) GetExternalTargets(arg0 string) assistant.Targets {
+func (m *MockProvider) GetExternalTargets(arg0 string, arg1 utils.DNSZone) assistant.Targets {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetExternalTargets", arg0)
+	ret := m.ctrl.Call(m, "GetExternalTargets", arg0, arg1)
 	ret0, _ := ret[0].(assistant.Targets)
 	return ret0
 }
 
 // GetExternalTargets indicates an expected call of GetExternalTargets.
-func (mr *MockProviderMockRecorder) GetExternalTargets(arg0 any) *gomock.Call {
+func (mr *MockProviderMockRecorder) GetExternalTargets(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalTargets", reflect.TypeOf((*MockProvider)(nil).GetExternalTargets), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalTargets", reflect.TypeOf((*MockProvider)(nil).GetExternalTargets), arg0, arg1)
 }
 
 // SaveDNSEndpoint mocks base method.

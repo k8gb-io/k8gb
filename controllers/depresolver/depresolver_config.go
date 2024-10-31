@@ -38,8 +38,7 @@ const (
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
 	ExtDNSEnabledKey           = "EXTDNS_ENABLED"
 	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"
-	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
-	DNSZoneKey                 = "DNS_ZONE"
+	DNSZonesKey                = "DNS_ZONES"
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
 	InfobloxVersionKey         = "INFOBLOX_WAPI_VERSION"
 	InfobloxPortKey            = "INFOBLOX_WAPI_PORT"
@@ -67,6 +66,12 @@ const (
 
 	// Deprecated: Please use EDGE_DNS_SERVERS instead.
 	EdgeDNSServerPortKey = "EDGE_DNS_SERVER_PORT"
+
+	// Deprecated: Please use DNS_ZONES instead.
+	EdgeDNSZoneKey = "EDGE_DNS_ZONE"
+
+	// Deprecated: Please use DNS_ZONES instead.
+	DNSZoneKey = "DNS_ZONE"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -87,6 +92,9 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
 		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
 		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
+		fallbackDNSZone := fmt.Sprintf("%s:%s", dr.config.fallbackEdgeDNSZone, dr.config.fallbackDNSZone)
+		DNSZoneList := env.GetEnvAsArrayOfStringsOrFallback(DNSZonesKey, []string{fallbackDNSZone})
+		dr.config.DNSZones = parseDNSZones(DNSZoneList)
 		dr.config.ExtClustersGeoTags = excludeGeoTag(dr.config.ExtClustersGeoTags, dr.config.ClusterGeoTag)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
@@ -156,11 +164,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return fmt.Errorf("error for port of edge dns server(%v): it must be a positive integer between 1 and 65535", s)
 		}
 	}
-	err = field(EdgeDNSZoneKey, config.EdgeDNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
-	if err != nil {
-		return err
-	}
-	err = field(DNSZoneKey, config.DNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
+	err = field(DNSZonesKey, config.DNSZones).isNotEmpty().matchRegexp(dnsZonesRegex).err
 	if err != nil {
 		return err
 	}
@@ -181,15 +185,17 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 		return nil
 	}
 
-	serverNames := config.GetExternalClusterNSNames()
-	serverNames[config.ClusterGeoTag] = config.GetClusterNSName()
-	for geoTag, nsName := range serverNames {
-		if len(nsName) > dnsNameMax {
-			return fmt.Errorf("ns name '%s' exceeds %v charactes limit for [GeoTag: '%s', %s: '%s', %s: '%s']",
-				nsName, dnsLabelMax, geoTag, EdgeDNSZoneKey, config.EdgeDNSZone, DNSZoneKey, config.DNSZone)
-		}
-		if err := validateLabels(nsName); err != nil {
-			return fmt.Errorf("error for geo tag: %s. %s in ns name %s", geoTag, err, nsName)
+	for _, zone := range config.DNSZones {
+		serverNames := config.GetExternalClusterNSNames(zone)
+		serverNames[config.ClusterGeoTag] = config.GetClusterNSName(zone)
+		for geoTag, nsName := range serverNames {
+			if len(nsName) > dnsNameMax {
+				return fmt.Errorf("ns name '%s' exceeds %v charactes limit for [GeoTag: '%s', %s: '%s']",
+					nsName, dnsLabelMax, geoTag, DNSZonesKey, zone)
+			}
+			if err := validateLabels(nsName); err != nil {
+				return fmt.Errorf("error for geo tag: %s. %s in ns name %s", geoTag, err, nsName)
+			}
 		}
 	}
 
@@ -272,6 +278,14 @@ func (dr *DependencyResolver) GetDeprecations() (deprecations []string) {
 			Msg: "Port is an optional item in the comma-separated list of dns edge servers, in following form: dns1:53,dns2 (if not provided after the " +
 				"hostname and colon, it defaults to '53')",
 		},
+		EdgeDNSZoneKey: newVar{
+			Name: EdgeDNSZoneKey,
+			Msg:  "Pass the DNS zone as comma-separated list in following form: edgezone1:zone1,edgezone2:zone2",
+		},
+		DNSZoneKey: newVar{
+			Name: DNSZoneKey,
+			Msg:  "Pass the DNS zone as comma-separated list in following form: edgezone1:zone1,edgezone2:zone2",
+		},
 	}
 
 	for k, v := range deprecated {
@@ -279,6 +293,7 @@ func (dr *DependencyResolver) GetDeprecations() (deprecations []string) {
 			deprecations = append(deprecations, fmt.Sprintf("'%s' has been deprecated, use %s instead. Details: %s", k, v.Name, v.Msg))
 		}
 	}
+	//nolint:nakedret
 	return
 }
 
@@ -327,6 +342,28 @@ func parseEdgeDNSServers(serverList []string) (r []utils.DNSServer) {
 	return r
 }
 
+func parseDNSZones(zones []string) (r []utils.DNSZone) {
+	r = []utils.DNSZone{}
+	var edgeZone, zone string
+	for _, chunk := range zones {
+		chunk = strings.TrimSpace(chunk)
+		switch strings.Count(chunk, ":") {
+		case 1:
+			chunks := strings.Split(chunk, ":")
+			edgeZone = chunks[0]
+			zone = chunks[1]
+			r = append(r, utils.DNSZone{
+				EdgeZone: edgeZone,
+				Zone:     zone,
+			})
+		default:
+			// not supported
+			continue
+		}
+	}
+	return r
+}
+
 // excludeGeoTag excludes the clusterGeoTag from external geo tags
 func excludeGeoTag(tags []string, tag string) (r []string) {
 	r = []string{}
@@ -366,28 +403,28 @@ func parseLogOutputFormat(value string) LogFormat {
 	return NoFormat
 }
 
-func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
+func (c *Config) GetExternalClusterNSNames(zone utils.DNSZone) (m map[string]string) {
 	m = make(map[string]string, len(c.ExtClustersGeoTags))
 	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getNsName(tag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServers[0].Host)
+		m[tag] = getNsName(tag, c.EdgeDNSServers[0].Host, zone)
 	}
 	return
 }
 
-func (c *Config) GetClusterNSName() string {
-	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServers[0].Host)
+func (c *Config) GetClusterNSName(zone utils.DNSZone) string {
+	return getNsName(c.ClusterGeoTag, c.EdgeDNSServers[0].Host, zone)
 }
 
-func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string) (m map[string]string) {
+func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string, zone utils.DNSZone) (m map[string]string) {
 	m = make(map[string]string, len(c.ExtClustersGeoTags))
 	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getHeartbeatFQDN(gslbName, tag, c.EdgeDNSZone)
+		m[tag] = getHeartbeatFQDN(gslbName, tag, zone)
 	}
 	return
 }
 
-func (c *Config) GetClusterHeartbeatFQDN(gslbName string) string {
-	return getHeartbeatFQDN(gslbName, c.ClusterGeoTag, c.EdgeDNSZone)
+func (c *Config) GetClusterHeartbeatFQDN(gslbName string, zone utils.DNSZone) string {
+	return getHeartbeatFQDN(gslbName, c.ClusterGeoTag, zone)
 }
 
 // getNsName returns NS for geo tag.
@@ -398,14 +435,14 @@ func (c *Config) GetClusterHeartbeatFQDN(gslbName string) string {
 // will generate "gslb-ns-us-k8gb-test-gslb.cloud.example.com"
 // If edgeDNSServer == localhost or 127.0.0.1 than edgeDNSServer is returned.
 // The function is private and expects only valid inputs.
-func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
+func getNsName(tag, edgeDNSServer string, zone utils.DNSZone) string {
 	if edgeDNSServer == "127.0.0.1" || edgeDNSServer == "localhost" {
 		return edgeDNSServer
 	}
 	const prefix = "gslb-ns"
-	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
+	d := strings.TrimSuffix(zone.Zone, "."+zone.EdgeZone)
 	domainX := strings.ReplaceAll(d, ".", "-")
-	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edgeDNSZone)
+	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, zone.EdgeZone)
 }
 
 // getHeartbeatFQDN returns heartbeat for geo tag.
@@ -415,6 +452,6 @@ func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
 // gslb.Name: test-gslb-1
 // will generate "test-gslb-1-heartbeat-us.cloud.example.com"
 // The function is private and expects only valid inputs.
-func getHeartbeatFQDN(name, geoTag, edgeDNSZone string) string {
-	return fmt.Sprintf("%s-heartbeat-%s.%s", name, geoTag, edgeDNSZone)
+func getHeartbeatFQDN(name, geoTag string, zone utils.DNSZone) string {
+	return fmt.Sprintf("%s-heartbeat-%s.%s", name, geoTag, zone.EdgeZone)
 }

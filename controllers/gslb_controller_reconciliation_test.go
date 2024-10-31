@@ -83,8 +83,12 @@ var predefinedConfig = depresolver.Config{
 			Port: 7753,
 		},
 	},
-	EdgeDNSZone:   "example.com",
-	DNSZone:       "cloud.example.com",
+	DNSZones: []utils.DNSZone{
+		{
+			EdgeZone: "example.com",
+			Zone:     "cloud.example.com",
+		},
+	},
 	K8gbNamespace: "k8gb",
 	Infoblox: depresolver.Infoblox{
 		Host:                "fakeinfoblox.example.com",
@@ -394,14 +398,14 @@ func TestGslbErrorsIncrement(t *testing.T) {
 			m := mocks.NewMockProvider(ctrl)
 			cnt := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(fmt.Errorf("save DNS error")).Times(1)
-			m.EXPECT().GetExternalTargets(gomock.Any()).Return(assistant.Targets{}).AnyTimes()
+			m.EXPECT().GetExternalTargets(gomock.Any(), gomock.Any()).Return(assistant.Targets{}).AnyTimes()
 			settings.reconciler.DNSProvider = m
 			// act
 			_, err := settings.reconciler.Reconcile(context.TODO(), settings.request)
 			require.Error(t, err)
 			// let's break it on different place
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(fmt.Errorf("zone delegation error")).AnyTimes()
+			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any(), gomock.Any()).Return(fmt.Errorf("zone delegation error")).AnyTimes()
 			_, err = settings.reconciler.Reconcile(context.TODO(), settings.request)
 			cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
 			// assert
@@ -880,8 +884,7 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 			// getting Gslb and Reconciler
 			predefinedSettings := provideSettings(t, predefinedConfig)
 			customConfig := predefinedConfig
-			customConfig.EdgeDNSZone = "otherdnszone.com"
-			predefinedSettings.config = customConfig
+			customConfig.DNSZones = []utils.DNSZone{{EdgeZone: "otherdnszone.com"}}
 			req := reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      predefinedSettings.gslb.Name,
@@ -953,7 +956,7 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
 			customConfig.ExtClustersGeoTags = []string{"za", "us"}
-			customConfig.DNSZone = dnsZone
+			customConfig.DNSZones[0].Zone = dnsZone
 			// apply new environment variables and update config only
 			settings.reconciler.Config = &customConfig
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
@@ -1029,7 +1032,7 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
 			customConfig.ExtClustersGeoTags = []string{"za", "us"}
-			customConfig.DNSZone = dnsZone
+			customConfig.DNSZones[0].Zone = dnsZone
 			// apply new environment variables and update config only
 			settings.reconciler.Config = &customConfig
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider

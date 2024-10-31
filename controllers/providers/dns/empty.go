@@ -22,6 +22,7 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -38,19 +39,19 @@ func NewEmptyDNS(config depresolver.Config, assistant assistant.Assistant) *Empt
 	}
 }
 
-func (p *EmptyDNSProvider) CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb) (err error) {
+func (p *EmptyDNSProvider) CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb, utils.DNSZone) (err error) {
 	return
 }
 
-func (p *EmptyDNSProvider) GetExternalTargets(host string) (targets assistant.Targets) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+func (p *EmptyDNSProvider) GetExternalTargets(host string, zone utils.DNSZone) (targets assistant.Targets) {
+	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames(zone))
 }
 
 func (p *EmptyDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {
 	return p.assistant.SaveDNSEndpoint(gslb.Namespace, i)
 }
 
-func (p *EmptyDNSProvider) Finalize(gslb *k8gbv1beta1.Gslb) (err error) {
+func (p *EmptyDNSProvider) Finalize(gslb *k8gbv1beta1.Gslb, _ utils.DNSZone) (err error) {
 	return p.assistant.RemoveEndpoint(gslb.Name)
 }
 

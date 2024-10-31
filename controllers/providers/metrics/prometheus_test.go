@@ -33,6 +33,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/testutil"
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,7 +48,7 @@ const (
 var (
 	defaultGslb     = new(k8gbv1beta1.Gslb)
 	defaultEndpoint = new(externaldns.DNSEndpoint)
-	defaultConfig   = depresolver.Config{K8gbNamespace: namespace, DNSZone: "cloud.example.com"}
+	defaultConfig   = depresolver.Config{K8gbNamespace: namespace, DNSZones: []utils.DNSZone{{Zone: "cloud.example.com"}}}
 )
 
 func TestMetricsSingletonIsNotNil(t *testing.T) {

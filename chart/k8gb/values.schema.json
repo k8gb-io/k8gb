@@ -266,17 +266,11 @@
                 "deployRbac": {
                     "type": "boolean"
                 },
-                "dnsZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
-                },
-                "dnsZoneNegTTL": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "edgeDNSZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
+                "dnsZones": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/k8gbDnsZone"
+                    }
                 },
                 "edgeDNSServers": {
                     "type": "array",
@@ -330,9 +324,8 @@
             "required": [
                 "clusterGeoTag",
                 "extGslbClustersGeoTags",
-                "dnsZone",
                 "edgeDNSServers",
-                "edgeDNSZone"
+                "dnsZones"
             ],
             "title": "k8gb"
         },
@@ -404,6 +397,28 @@
                     "type": "boolean"
                 }
             }
+        },
+        "k8gbDnsZone": {
+            "type": "object",
+            "properties": {
+              "edgeZone": {
+                "type": "string",
+                "format": "idn-hostname"
+              },
+              "zone": {
+                "type": "string",
+                "format": "idn-hostname"
+              },
+              "dnsZoneNegTTL": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+                "zone", 
+                "dnsZoneNegTTL", 
+                "edgeZone"
+            ]
         },
         "Ns1": {
             "type": "object",

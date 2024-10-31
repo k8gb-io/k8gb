@@ -132,10 +132,14 @@ type Config struct {
 	fallbackEdgeDNSServerName string `env:"EDGE_DNS_SERVER"`
 	// to avoid breaking changes is used as fallback server port for EdgeDNSServers
 	fallbackEdgeDNSServerPort int `env:"EDGE_DNS_SERVER_PORT, default=53"`
+	// DNSZones
+	DNSZones utils.DNSZoneList
 	// EdgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
-	EdgeDNSZone string `env:"EDGE_DNS_ZONE"`
+	// to avoid breaking changes is used as fallback server for DNSZones
+	fallbackEdgeDNSZone string `env:"EDGE_DNS_ZONE"`
 	// DNSZone controlled by gslb; e.g. cloud.example.com
-	DNSZone string `env:"DNS_ZONE"`
+	// to avoid breaking changes is used as fallback server for DNSZones
+	fallbackDNSZone string `env:"DNS_ZONE"`
 	// K8gbNamespace k8gb namespace
 	K8gbNamespace string `env:"POD_NAMESPACE"`
 	// Infoblox configuration
