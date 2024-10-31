@@ -46,6 +46,8 @@ import (
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Figure out Gslb resource name to Reconcile when non controlled Name is updated
 
+	r.Recorder = mgr.GetEventRecorderFor("gslb-controller")
+
 	endpointMapHandler := handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, a client.Object) []reconcile.Request {
 			gslbList := &k8gbv1beta1.GslbList{}

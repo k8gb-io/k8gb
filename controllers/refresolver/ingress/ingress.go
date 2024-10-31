@@ -52,7 +52,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}
 
 	if len(ingressList) != 1 {
-		return nil, fmt.Errorf("exactly one Ingress resource expected but %d were found", len(ingressList))
+		return nil, fmt.Errorf("exactly 1 Ingress resource expected but %d were found", len(ingressList))
 	}
 
 	return &ReferenceResolver{
@@ -93,7 +93,7 @@ func NewEmbeddedResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Refe
 		return nil, err
 	}
 	if ingressEmbedded == nil {
-		return nil, fmt.Errorf("exactly one Ingress resource expected but none was found")
+		return nil, fmt.Errorf("exactly 1 Ingress resource expected but none was found")
 	}
 
 	return &ReferenceResolver{

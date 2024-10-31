@@ -28,14 +28,18 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 	"github.com/k8gb-io/k8gb/controllers/refresolver"
 
+	"errors"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"k8s.io/apimachinery/pkg/api/errors"
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -47,6 +51,7 @@ type GslbReconciler struct {
 	Config      *depresolver.Config
 	DepResolver depresolver.GslbResolver
 	DNSProvider dns.Provider
+	Recorder    record.EventRecorder
 	Tracer      trace.Tracer
 }
 
@@ -66,6 +71,7 @@ var m = metrics.Metrics()
 
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile runs main reconciliation loop
 func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -77,7 +83,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	gslb := &k8gbv1beta1.Gslb{}
 	err := r.Get(ctx, req.NamespacedName, gslb)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
@@ -161,7 +167,9 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	refResolver, err := refresolver.New(gslb, r.Client)
 	if err != nil {
 		m.IncrementError(gslb)
-		return result.RequeueError(fmt.Errorf("error resolving references to the refresolver object (%s)", err))
+		errorMsg := fmt.Sprintf("error resolving references (%s)", err)
+		r.Recorder.Event(gslb, corev1.EventTypeWarning, "ReconcileError", errorMsg)
+		return result.RequeueError(errors.New(errorMsg))
 	}
 	servers, err := refResolver.GetServers()
 	if err != nil {
