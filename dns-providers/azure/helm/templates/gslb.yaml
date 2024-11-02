@@ -1,0 +1,51 @@
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-playground-istio
+  namespace: test-azure
+spec:
+  resourceRef:
+    apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    matchLabels:
+      app: failover-playground-istio
+  strategy:
+    type: failover
+    dnsTtlSeconds: 5
+    primaryGeoTag: "eu"
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: failover-playground-istio
+  namespace: test-azure
+  labels:
+    app: failover-playground-istio
+spec:
+  gateways:
+    - istio-ingress/failover-playground-istio
+  hosts:
+    - failover-playground-istio.{{ .Values.k8gb.k8gb.dnsZone }}
+  http:
+    - route:
+        - destination:
+            host: frontend-podinfo
+            port:
+              number: 9898
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: failover-playground-istio
+  namespace: istio-ingress
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+    - hosts:
+        - failover-playground-istio.{{ .Values.k8gb.k8gb.dnsZone }}
+      port:
+        name: http
+        number: 8080
+        protocol: http
