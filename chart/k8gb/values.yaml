@@ -198,6 +198,12 @@ azuredns:
     userAssignedIdentityID: myUserAssignedIdentityID
     # -- Use AKS workload identity extension
     useWorkloadIdentityExtension: false
+  
+clouddns:
+  # -- Enable CloudDNS (GCP) provider
+  enabled: false
+  # -- External-dns secret name which contains GCP credentials.
+  authSecretName: external-dns-secret-gcp
 
 cloudflare:
   # -- Enable Cloudflare provider

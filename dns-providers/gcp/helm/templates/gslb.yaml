@@ -3,7 +3,7 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: failover-playground-istio
-  namespace: test-azure
+  namespace: test-gcp
 spec:
   resourceRef:
     apiVersion: networking.istio.io/v1
@@ -19,7 +19,7 @@ apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: failover-playground-istio
-  namespace: test-azure
+  namespace: test-gcp
   labels:
     app: failover-playground-istio
 spec:
