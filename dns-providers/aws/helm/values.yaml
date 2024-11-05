@@ -1,0 +1,27 @@
+k8gb:
+  k8gb:
+    dnsZones: null
+    dnsZone: "<helm set>"
+    edgeDNSZone: "<helm set>"
+    edgeDNSServers:
+    - "<helm set"
+
+  extdns:
+    enabled: true
+    provider:
+      name: aws
+    domainFilters:
+    - "<helm set>"
+    env:
+    - name: AWS_DEFAULT_REGION
+      value: "us-east-1"
+    - name: AWS_SHARED_CREDENTIALS_FILE
+      value: .aws/credentials
+    extraVolumes:
+    - name: aws-credentials
+      secret:
+        secretName: external-dns-secret-aws
+    extraVolumeMounts:
+    - name: aws-credentials
+      mountPath: /.aws
+      readOnly: true
