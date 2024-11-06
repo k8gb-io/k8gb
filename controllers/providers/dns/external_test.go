@@ -59,6 +59,7 @@ var a = struct {
 }{
 	Config: depresolver.Config{
 		ReconcileRequeueSeconds: 30,
+		NSRecordTTL:             30,
 		ClusterGeoTag:           "us",
 		ExtClustersGeoTags:      []string{"za", "eu"},
 		EdgeDNSServers: []utils2.DNSServer{
@@ -96,13 +97,13 @@ var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 		Endpoints: []*externaldns.Endpoint{
 			{
 				DNSName:    a.Config.DNSZone,
-				RecordTTL:  30,
+				RecordTTL:  externaldns.TTL(a.Config.NSRecordTTL),
 				RecordType: "NS",
 				Targets:    a.TargetNSNamesSorted,
 			},
 			{
 				DNSName:    "gslb-ns-us-cloud.example.com",
-				RecordTTL:  30,
+				RecordTTL:  externaldns.TTL(a.Config.NSRecordTTL),
 				RecordType: "A",
 				Targets:    a.TargetIPs,
 			},

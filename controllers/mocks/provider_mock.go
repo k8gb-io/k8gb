@@ -33,6 +33,7 @@ import (
 	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	assistant "github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	gomock "go.uber.org/mock/gomock"
+	client "sigs.k8s.io/controller-runtime/pkg/client"
 	endpoint "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -74,17 +75,17 @@ func (mr *MockProviderMockRecorder) CreateZoneDelegationForExternalDNS(arg0 any)
 }
 
 // Finalize mocks base method.
-func (m *MockProvider) Finalize(arg0 *v1beta1.Gslb) error {
+func (m *MockProvider) Finalize(arg0 *v1beta1.Gslb, arg1 client.Client) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Finalize", arg0)
+	ret := m.ctrl.Call(m, "Finalize", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Finalize indicates an expected call of Finalize.
-func (mr *MockProviderMockRecorder) Finalize(arg0 any) *gomock.Call {
+func (mr *MockProviderMockRecorder) Finalize(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalize", reflect.TypeOf((*MockProvider)(nil).Finalize), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalize", reflect.TypeOf((*MockProvider)(nil).Finalize), arg0, arg1)
 }
 
 // GetExternalTargets mocks base method.

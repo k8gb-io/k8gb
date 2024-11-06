@@ -28,7 +28,7 @@ func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) (err error) {
 	// needs to do before the CR can be deleted. Examples
 	// of finalizers include performing backups and deleting
 	// resources that are not owned by this CR, like a PVC.
-	err = r.DNSProvider.Finalize(gslb)
+	err = r.DNSProvider.Finalize(gslb, r.Client)
 	if err != nil {
 		log.Err(err).
 			Str("gslb", gslb.Name).

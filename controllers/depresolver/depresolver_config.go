@@ -34,6 +34,7 @@ import (
 // Environment variables keys
 const (
 	ReconcileRequeueSecondsKey = "RECONCILE_REQUEUE_SECONDS"
+	NSRecordTTLKey             = "NS_RECORD_TTL"
 	ClusterGeoTagKey           = "CLUSTER_GEO_TAG"
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
 	ExtDNSEnabledKey           = "EXTDNS_ENABLED"
@@ -117,6 +118,10 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 		return err
 	}
 	err = field(ReconcileRequeueSecondsKey, config.ReconcileRequeueSeconds).isHigherThanZero().err
+	if err != nil {
+		return err
+	}
+	err = field(NSRecordTTLKey, config.NSRecordTTL).isHigherThanZero().err
 	if err != nil {
 		return err
 	}
