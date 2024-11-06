@@ -45,6 +45,25 @@ func (l DNSList) String() string {
 	return strings.Join(aux, ",")
 }
 
+type DNSZone struct {
+	EdgeZone string
+	Zone     string
+}
+
+type DNSZoneList []DNSZone
+
+func (s DNSZone) String() string {
+	return fmt.Sprintf("%s:%s", s.EdgeZone, s.Zone)
+}
+
+func (l DNSZoneList) String() string {
+	var aux []string
+	for _, el := range l {
+		aux = append(aux, el.String())
+	}
+	return strings.Join(aux, ",")
+}
+
 // Dig returns a list of IP addresses for a given FQDN by using the dns servers from edgeDNSServers
 // dns servers are tried one by one from the edgeDNSServers and if there is a non-error response it is returned and the rest is not tried
 func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {

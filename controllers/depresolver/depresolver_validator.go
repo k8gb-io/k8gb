@@ -36,6 +36,7 @@ const (
 	hostNamesWithPortsRegex1 = "^(" + hostNamePart + "(:\\d{1,5})?(\\s*,\\s*)?)+$"
 	// doesn't end with comma or space (golang doesn't support negative lookbehind regexps)
 	hostNamesWithPortsRegex2 = "^.*[^,]$"
+	dnsZonesRegex            = "^(" + hostNamePart + ":[^,]+)(,(" + hostNamePart + ":[^,]+))*?$"
 	// ipAddressRegex matches valid IPv4 addresses
 	ipAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
 	// versionNumberRegex matches version in formats 0.1.2, v0.1.2, v0.1.2-alpha
@@ -73,6 +74,8 @@ func field(name string, value interface{}) *validator {
 	case []string:
 		validator.strArr = v
 	case utils.DNSList:
+		validator.strValue = v.String()
+	case utils.DNSZoneList:
 		validator.strValue = v.String()
 	default:
 		// float32, float64, bool, interface{}, maps, slices, Custom Types

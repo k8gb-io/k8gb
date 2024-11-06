@@ -67,8 +67,12 @@ var a = struct {
 				Port: 53,
 			},
 		},
-		EdgeDNSZone:   "example.com",
-		DNSZone:       "cloud.example.com",
+		DNSZones: []utils2.DNSZone{
+			{
+				EdgeZone: "example.com",
+				Zone:     "cloud.example.com",
+			},
+		},
 		K8gbNamespace: "k8gb",
 	},
 	Gslb: func() *k8gbv1beta1.Gslb {
@@ -95,7 +99,7 @@ var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 	Spec: externaldns.DNSEndpointSpec{
 		Endpoints: []*externaldns.Endpoint{
 			{
-				DNSName:    a.Config.DNSZone,
+				DNSName:    a.Config.DNSZones[0].Zone,
 				RecordTTL:  30,
 				RecordType: "NS",
 				Targets:    a.TargetNSNamesSorted,
@@ -123,7 +127,8 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 		})
 
 	// act
-	err := p.CreateZoneDelegationForExternalDNS(a.Gslb)
+	zone := a.Config.DNSZones[0]
+	err := p.CreateZoneDelegationForExternalDNS(a.Gslb, zone)
 	// assert
 	assert.NoError(t, err)
 }

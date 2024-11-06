@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/k8gb-io/k8gb/controllers/logging"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	assistant2 "github.com/k8gb-io/k8gb/controllers/providers/assistant"
 
@@ -51,13 +52,13 @@ func NewExternalDNS(config depresolver.Config, assistant assistant2.Assistant) *
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
+func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb, zone utils.DNSZone) error {
 	ttl := externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 	log.Info().
 		Interface("provider", p).
 		Msg("Creating/Updating DNSEndpoint CRDs")
-	NSServerList := []string{p.config.GetClusterNSName()}
-	for _, v := range p.config.GetExternalClusterNSNames() {
+	NSServerList := []string{p.config.GetClusterNSName(zone)}
+	for _, v := range p.config.GetExternalClusterNSNames(zone) {
 		NSServerList = append(NSServerList, v)
 	}
 	sort.Strings(NSServerList)
@@ -80,13 +81,13 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 		Spec: externaldns.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{
 				{
-					DNSName:    p.config.DNSZone,
+					DNSName:    zone.Zone,
 					RecordTTL:  ttl,
 					RecordType: "NS",
 					Targets:    NSServerList,
 				},
 				{
-					DNSName:    p.config.GetClusterNSName(),
+					DNSName:    p.config.GetClusterNSName(zone),
 					RecordTTL:  ttl,
 					RecordType: "A",
 					Targets:    NSServerIPs,
@@ -101,12 +102,12 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 	return nil
 }
 
-func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb) error {
+func (p *ExternalDNSProvider) Finalize(*k8gbv1beta1.Gslb, utils.DNSZone) error {
 	return p.assistant.RemoveEndpoint(p.endpointName)
 }
 
-func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets assistant2.Targets) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+func (p *ExternalDNSProvider) GetExternalTargets(host string, zone utils.DNSZone) (targets assistant2.Targets) {
+	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames(zone))
 }
 
 func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {

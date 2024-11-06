@@ -25,6 +25,7 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,7 +33,7 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.DNSEndpoint, error) {
+func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb, zone utils.DNSZone) (*externaldns.DNSEndpoint, error) {
 	_, s := r.Tracer.Start(context.Background(), "gslbDNSEndpoint")
 	defer s.End()
 	var gslbHosts []*externaldns.Endpoint
@@ -48,8 +49,8 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 	for host, health := range serviceHealth {
 		var finalTargets = assistant.NewTargets()
 
-		if !strings.Contains(host, r.Config.EdgeDNSZone) {
-			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", host, r.Config.EdgeDNSZone)
+		if !strings.Contains(host, zone.EdgeZone) {
+			return nil, fmt.Errorf("ingress host %s does not match delegated zone %s", host, zone.EdgeZone)
 		}
 
 		isPrimary := gslb.Spec.Strategy.PrimaryGeoTag == r.Config.ClusterGeoTag
@@ -68,7 +69,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		}
 
 		// Check if host is alive on external Gslb
-		externalTargets := r.DNSProvider.GetExternalTargets(host)
+		externalTargets := r.DNSProvider.GetExternalTargets(host, zone)
 		externalTargets.Sort()
 
 		if len(externalTargets) > 0 {

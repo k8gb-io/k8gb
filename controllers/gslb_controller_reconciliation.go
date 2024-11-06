@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
@@ -103,42 +104,6 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Str("namespace", gslb.Namespace).
 		Interface("strategy", gslb.Spec.Strategy).
 		Msg("Resolved strategy")
-	// == Finalizer business ==
-
-	// Check if the Gslb instance is marked to be deleted, which is
-	// indicated by the deletion timestamp being set.
-	isGslbMarkedToBeDeleted := gslb.GetDeletionTimestamp() != nil
-	if isGslbMarkedToBeDeleted {
-		// For the legacy reasons, delete all finalizers that corresponds with the slice
-		// see: https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.4.0/#change-your-operators-finalizer-names
-		_, fSpan := r.Tracer.Start(ctx, "finalize")
-		for _, f := range []string{gslbFinalizer, "finalizer.k8gb.absa.oss"} {
-			if contains(gslb.GetFinalizers(), f) {
-				// Run finalization logic for gslbFinalizer. If the
-				// finalization logic fails, don't remove the finalizer so
-				// that we can retry during the next reconciliation.
-				if err := r.finalizeGslb(gslb); err != nil {
-					fSpan.RecordError(err)
-					fSpan.SetStatus(codes.Error, err.Error())
-					return result.RequeueError(err)
-				}
-
-				// Remove gslbFinalizer. Once all finalizers have been
-				// removed, the object will be deleted.
-				gslb.SetFinalizers(remove(gslb.GetFinalizers(), f))
-				err := r.Update(ctx, gslb)
-				if err != nil {
-					fSpan.RecordError(err)
-					fSpan.SetStatus(codes.Error, err.Error())
-					return result.RequeueError(err)
-				}
-			}
-
-		}
-		fSpan.End()
-		log.Info().Msg("reconciler exit")
-		return result.Stop()
-	}
 
 	// Add finalizer for this CR
 	if !contains(gslb.GetFinalizers(), gslbFinalizer) {
@@ -176,7 +141,74 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting GSLB servers (%s)", err))
 	}
-	gslb.Status.Servers = servers
+
+	var zone utils.DNSZone
+	var matchedServers []*k8gbv1beta1.Server
+	for _, server := range servers {
+		log.Debug().
+			Str("server", server.Host).
+			Msg("Checking server")
+		for _, z := range r.Config.DNSZones {
+			log.Debug().
+				Str("zone", z.Zone).
+				Msg("Checking zone")
+			if strings.HasSuffix(server.Host, z.Zone) {
+				log.Debug().
+					Str("server", server.Host).
+					Str("zone", z.Zone).
+					Msg("Matched zone to server host")
+				zone = z
+				matchedServers = append(matchedServers, server)
+			}
+		}
+	}
+
+	if zone == (utils.DNSZone{}) {
+		log.Error().
+			Str("zones", r.Config.DNSZones.String()).
+			Msg("No configured zones match Gslb hosts")
+		m.IncrementError(gslb)
+		return result.Requeue()
+	}
+
+	// these are the matched servers for the Ingress of the service being Gslb'd
+	gslb.Status.Servers = matchedServers
+
+	// == Finalizer business ==
+	// Check if the Gslb instance is marked to be deleted, which is
+	// indicated by the deletion timestamp being set.
+	isGslbMarkedToBeDeleted := gslb.GetDeletionTimestamp() != nil
+	if isGslbMarkedToBeDeleted {
+		// For the legacy reasons, delete all finalizers that corresponds with the slice
+		// see: https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.4.0/#change-your-operators-finalizer-names
+		_, fSpan := r.Tracer.Start(ctx, "finalize")
+		for _, f := range []string{gslbFinalizer, "finalizer.k8gb.absa.oss"} {
+			if contains(gslb.GetFinalizers(), f) {
+				// Run finalization logic for gslbFinalizer. If the
+				// finalization logic fails, don't remove the finalizer so
+				// that we can retry during the next reconciliation.
+				if err := r.finalizeGslb(gslb, zone); err != nil {
+					fSpan.RecordError(err)
+					fSpan.SetStatus(codes.Error, err.Error())
+					return result.RequeueError(err)
+				}
+
+				// Remove gslbFinalizer. Once all finalizers have been
+				// removed, the object will be deleted.
+				gslb.SetFinalizers(remove(gslb.GetFinalizers(), f))
+				err := r.Update(ctx, gslb)
+				if err != nil {
+					fSpan.RecordError(err)
+					fSpan.SetStatus(codes.Error, err.Error())
+					return result.RequeueError(err)
+				}
+			}
+
+		}
+		fSpan.End()
+		log.Info().Msg("reconciler exit")
+		return result.Stop()
+	}
 
 	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(r.Config.EdgeDNSServers)
 	if err != nil {
@@ -190,7 +222,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Msg("Resolved LoadBalancer and Server configuration referenced by Ingress")
 
 	// == external-dns dnsendpoints CRs ==
-	dnsEndpoint, err := r.gslbDNSEndpoint(gslb)
+	dnsEndpoint, err := r.gslbDNSEndpoint(gslb, zone)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
@@ -206,7 +238,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	// == handle delegated zone in Edge DNS
 	_, szd := r.Tracer.Start(ctx, "CreateZoneDelegationForExternalDNS")
-	err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
+	err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb, zone)
 	if err != nil {
 		log.Err(err).Msg("Unable to create zone delegation")
 		m.IncrementError(gslb)

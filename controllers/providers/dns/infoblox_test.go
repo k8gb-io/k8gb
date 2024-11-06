@@ -52,8 +52,12 @@ var (
 				Port: 53,
 			},
 		},
-		EdgeDNSZone:   "example.com",
-		DNSZone:       "cloud.example.com",
+		DNSZones: []utils.DNSZone{
+			{
+				EdgeZone: "example.com",
+				Zone:     "cloud.example.com",
+			},
+		},
 		K8gbNamespace: "k8gb",
 		Infoblox: depresolver.Infoblox{
 			Host:     "fakeinfoblox.example.com",
@@ -65,7 +69,7 @@ var (
 	}
 
 	defaultDelegatedZone = ibclient.ZoneDelegated{
-		Fqdn:       defaultConfig.DNSZone,
+		Fqdn:       defaultConfig.DNSZones[0].Zone,
 		DelegateTo: []ibclient.NameServer{},
 		Ref:        ref,
 	}
@@ -89,7 +93,6 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
 	}
 	customConfig := defaultConfig
-	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
 	ctrl := gomock.NewController(t)
@@ -97,11 +100,13 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	m := mocks.NewMockInfobloxClient(ctrl)
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
-	extClusters := customConfig.GetExternalClusterNSNames()
+	zone := customConfig.DNSZones[0]
+	extClusters := customConfig.GetExternalClusterNSNames(zone)
 	got := provider.filterOutDelegateTo(delegateTo, extClusters["za"])
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 }
+
 func TestCanSanitizeDelegatedZone(t *testing.T) {
 	// arrange
 	local := []ibclient.NameServer{
@@ -126,7 +131,6 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	customConfig := defaultConfig
-	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	customConfig.ClusterGeoTag = "eu"
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
@@ -135,7 +139,8 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 	m := mocks.NewMockInfobloxClient(ctrl)
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
-	got := provider.sanitizeDelegateZone(local, upstream)
+	zone := customConfig.DNSZones[0]
+	got := provider.sanitizeDelegateZone(local, upstream, zone)
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 }
@@ -176,7 +181,8 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
+	zone := defaultConfig.DNSZones[0]
+	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb, zone)
 	// assert
 	assert.NoError(t, err)
 }
@@ -204,7 +210,8 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
+	zone := defaultConfig.DNSZones[0]
+	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb, zone)
 	// assert
 	assert.NoError(t, err)
 }
@@ -227,7 +234,8 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreating
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
+	zone := defaultConfig.DNSZones[0]
+	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb, zone)
 	// assert
 	assert.NoError(t, err)
 }
@@ -253,7 +261,8 @@ func TestInfobloxFinalize(t *testing.T) {
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.Finalize(defaultGslb)
+	zone := defaultConfig.DNSZones[0]
+	err := provider.Finalize(defaultGslb, zone)
 
 	// assert
 	assert.NoError(t, err)
