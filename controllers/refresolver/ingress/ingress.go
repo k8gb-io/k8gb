@@ -129,7 +129,7 @@ func getGslbIngressEmbedded(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*n
 }
 
 // GetServers retrieves the GSLB server configuration from the gateway resource
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
+func (rr *ReferenceResolver) GetServers(_ string) ([]*k8gbv1beta1.Server, error) {
 	servers := []*k8gbv1beta1.Server{}
 
 	for _, rule := range rr.ingress.Spec.Rules {

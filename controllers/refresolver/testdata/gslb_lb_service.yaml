@@ -1,0 +1,15 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: lb-service
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: v1
+    kind: Service
+    matchLabels:
+      app: lb-service
+  strategy:
+    type: roundRobin
+    splitBrainThresholdSeconds: 300
+    dnsTtlSeconds: 30

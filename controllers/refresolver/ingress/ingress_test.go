@@ -85,7 +85,7 @@ func TestGetServers(t *testing.T) {
 			}
 
 			// act
-			servers, err := resolver.GetServers()
+			servers, err := resolver.GetServers("")
 			assert.NoError(t, err)
 
 			// assert

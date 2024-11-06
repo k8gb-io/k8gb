@@ -171,7 +171,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		r.Recorder.Event(gslb, corev1.EventTypeWarning, "ReconcileError", errorMsg)
 		return result.RequeueError(errors.New(errorMsg))
 	}
-	servers, err := refResolver.GetServers()
+	servers, err := refResolver.GetServers(r.Config.DNSZone)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting GSLB servers (%s)", err))

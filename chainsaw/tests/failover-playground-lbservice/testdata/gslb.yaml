@@ -1,0 +1,31 @@
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-playground-lbservice
+spec:
+  resourceRef:
+    apiVersion: v1
+    kind: Service
+    matchLabels:
+      app: failover-playground-lbservice
+  strategy:
+    type: failover
+    dnsTtlSeconds: 5
+    primaryGeoTag: "eu"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: failover-playground-lbservice
+  labels:
+    app: failover-playground-lbservice
+spec:
+  ports:
+    - port: 9898
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: frontend-podinfo
+  type: LoadBalancer

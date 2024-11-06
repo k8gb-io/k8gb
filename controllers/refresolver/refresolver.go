@@ -32,9 +32,9 @@ import (
 // GslbReferenceResolver resolves references to other kubernetes resources concerning ingress configuration
 type GslbReferenceResolver interface {
 	// GetServers retrieves GSLB the server configuration
-	GetServers() ([]*k8gbv1beta1.Server, error)
+	GetServers(dnsZone string) ([]*k8gbv1beta1.Server, error)
 	// GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
-	GetGslbExposedIPs(utils.DNSList) ([]string, error)
+	GetGslbExposedIPs(edgeDNSServers utils.DNSList) ([]string, error)
 }
 
 // New creates a new GSLBReferenceResolver
@@ -51,5 +51,7 @@ func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver
 			return istiovirtualservice.NewReferenceResolver(gslb, k8sClient)
 		}
 	}
+	// FIXME instantiate a lbservice.Reference resolver if the APIVersion and Kind are configured accordingly
+
 	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)
 }

@@ -481,6 +481,19 @@ terratest: # Run terratest suite
 	fi
 	cd terratest/test/ && go mod download && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) go test -v -timeout 25m -parallel=12 --tags=$(TEST_TAGS)
 
+.PHONY: chainsaw
+chainsaw:
+	mkdir -p chainsaw/kubeconfig
+	k3d kubeconfig get test-gslb1 > chainsaw/kubeconfig/eu.config
+	k3d kubeconfig get test-gslb2 > chainsaw/kubeconfig/us.config
+	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
+	@if [ "$(RUNNING_CLUSTERS)" -lt 2 ] ; then \
+		echo -e "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
+		exit 1;\
+	fi
+	cd chainsaw && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) chainsaw test --config ./config.yaml --values ./values.yaml
+	rm -r chainsaw/kubeconfig
+
 .PHONY: website
 website:
 	@if [ "$(CI)" = "true" ]; then\

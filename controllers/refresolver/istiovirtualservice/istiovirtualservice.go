@@ -148,7 +148,7 @@ func getLbService(gateway *istio.Gateway, k8sClient client.Client) (*corev1.Serv
 }
 
 // GetServers retrieves the GSLB server configuration from the istio virtual service resource
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
+func (rr *ReferenceResolver) GetServers(_ string) ([]*k8gbv1beta1.Server, error) {
 	hosts := rr.virtualService.Spec.Hosts
 	if len(hosts) < 1 {
 		return nil, fmt.Errorf("can't find hosts in VirtualService %s", rr.virtualService.Name)

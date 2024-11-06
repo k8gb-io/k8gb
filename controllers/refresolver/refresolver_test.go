@@ -65,6 +65,12 @@ func TestNew(t *testing.T) {
 			expectedReferenceResolverType: "*ingress.ReferenceResolver",
 			expectedError:                 nil,
 		},
+		{
+			name:                          "loadbalancer service",
+			gslbYaml:                      "./testdata/gslb_lb_service.yaml",
+			expectedReferenceResolverType: "*lbservice.ReferenceResolver",
+			expectedError:                 nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -93,6 +99,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 		utils.FileToIstioVirtualService("./testdata/istio_virtualservice.yaml"),
 		utils.FileToIstioGateway("./testdata/istio_gateway.yaml"),
 		utils.FileToService("./testdata/istio_service.yaml"),
+		utils.FileToService("./testdata/lb_service.yaml"),
 	}
 	// Register operator types with the runtime scheme.
 	s := scheme.Scheme
