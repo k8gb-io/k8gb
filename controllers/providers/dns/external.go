@@ -116,7 +116,7 @@ func (p *ExternalDNSProvider) Finalize(_ *k8gbv1beta1.Gslb, k8sClient client.Cli
 		return err
 	}
 
-	// only remove the DNSEndpoint if there are no more GSLB resourced
+	// only remove the DNSEndpoint if there are no more GSLB resources
 	if len(gslbList.Items) > 1 {
 		return nil
 	}
