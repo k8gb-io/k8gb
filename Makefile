@@ -35,6 +35,7 @@ CLUSTER_GEO_TAGS ?= eu us cz af ru ap uk ca
 CHART ?= k8gb/k8gb
 CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
 CLUSTER_GSLB_GATEWAY = docker network inspect ${CLUSTER_GSLB_NETWORK} -f '{{ (index .IPAM.Config 0).Gateway }}'
+FULL_LOCAL_SETUP_WITH_APPS ?= true
 GSLB_DOMAIN ?= cloud.example.com
 REPO := absaoss/k8gb
 SHELL := bash
@@ -136,7 +137,7 @@ deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster s
 		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
 	done
 	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
-	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=true
+	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=$(FULL_LOCAL_SETUP_WITH_APPS)
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
