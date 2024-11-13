@@ -54,7 +54,7 @@ EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
 EDGE_DNS_SERVER ?= 1.1.1.1
 EDGE_DNS_ZONE ?= example.com
 DNS_ZONE ?= cloud.example.com
-DEMO_URL ?= http://failover.cloud.example.com
+DEMO_STRATEGY ?= failover
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
 GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
@@ -124,7 +124,7 @@ debug-idea:
 
 .PHONY: demo
 demo: ## Execute end-to-end demo
-	@$(call demo-host, $(DEMO_URL))
+	@$(call demo-host,$(DEMO_STRATEGY))
 
 K8GB_LOCAL_VERSION ?= stable
 # Spin-up local environment. Deploys stable released version by default
@@ -254,7 +254,7 @@ deploy-k8gb-with-helm:
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
 		--set $(call get-helm-args,$(CLUSTER_ID)) \
-		--set k8gb.reconcileRequeueSeconds=10 \
+		--set k8gb.reconcileRequeueSeconds=3 \
 		--set k8gb.dnsZoneNegTTL=10 \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
 		--set k8gb.log.format=$(LOG_FORMAT) \
@@ -549,8 +549,11 @@ define testapp-set-replicas
 endef
 
 define demo-host
-	kubectl run -it --rm k8gb-demo --restart=Never --image=absaoss/k8gb-demo-curl --env="DELAY=$(DEMO_DELAY)" --env="DEBUG=$(DEMO_DEBUG)" \
-	"`$(K8GB_COREDNS_IP)`" $1
+	@trap 'echo "cleanup" && kubectl delete pod k8gb-demo' INT; \
+	kubectl -n k8gb run "k8gb-demo-${1}" --restart=Never --image=absaoss/k8gb-demo-curl --env="DELAY=$(DEMO_DELAY)" --env="DEBUG=$(DEMO_DEBUG)" \
+	"`$(K8GB_COREDNS_IP)`" http://${1}.cloud.example.com; \
+	sleep 10; \
+	kubectl -n k8gb logs "k8gb-demo-${1}" --tail 0 -f
 endef
 
 # waits for NGINX, GSLB are ready

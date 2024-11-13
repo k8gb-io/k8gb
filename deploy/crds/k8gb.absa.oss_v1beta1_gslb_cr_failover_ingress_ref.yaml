@@ -33,3 +33,4 @@ spec:
   strategy:
     type: failover
     primaryGeoTag: eu
+    dnsTtlSeconds: 1

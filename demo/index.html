@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8GB Demo</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column; /* Arrange children in a column */
+            height: 100vh;
+            margin: 0;
+            padding: 10px; /* Add some padding to the body */
+        }
+        #displayContainer {
+            display: flex;
+            flex-direction: row; /* Place items side by side */
+            gap: 20px; /* Add space between the sections */
+            max-width: 100%; /* Allow full width */
+            justify-content: center; /* Center the items horizontally */
+        }
+        /* Style for each display area with title */
+        .displayWrapper {
+            flex: 1; /* Make each section take up equal width */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .displayArea {
+            padding: 15px;
+            border: 1px solid #ddd;
+            height: 400px;
+            width: 100%;
+            overflow-y: auto
+        }
+        .logoWrapper {
+            display: flex;
+            align-items: center; /* Center logo vertically */
+            justify-content: center;
+        }
+        .logoImage {
+            width: 300px; /* Adjust size as needed */
+            height: 300px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 48px;
+        }
+        h3 {
+            margin-bottom: 5px; /* Space below titles */
+            text-align: center;
+        }
+        h4 {
+            margin-bottom: 0px;
+        }
+        #buttonContainer {
+            display: flex; /* Use flexbox for buttons */
+            justify-content: space-between; /* Space buttons evenly */
+        }
+        .buttonGroup {
+            display: flex; /* Stack buttons vertically */
+            flex-direction: column; /* Arrange buttons in a column */
+            flex: 1; /* Allow this group to take equal space */
+            margin: 5px; /* Add some margin for spacing */
+        }
+        .button {
+            margin: 5px;
+        }
+        #stopButtonEU, #startButtonEU {
+            background-color: green;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #stopButtonUS, #startButtonUS {
+            background-color: darkblue;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .response {
+            margin: 5px; /* Add some margin for response areas */
+            padding: 10px; /* Add some padding for aesthetics */
+            border: 1px solid #ccc; /* Border around response areas */
+        }
+        #legendEU {
+            background-color: green;
+            color: white;
+            text-align: center;
+        }
+        #legendUS {
+            background-color: darkblue;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>K8GB - K8s Global Server Load Balancer</h1>
+
+    <div id="displayContainer">
+        <div class="displayWrapper">
+            <h2>Failover</h2>
+            <div id="displayAreaFailover" class="displayArea">Waiting for data...</div>
+        </div>
+
+        <div class="logoWrapper">
+            <img src="https://www.k8gb.io/assets/images/icon-192x192.png" alt="Logo" class="logoImage">
+        </div>
+        
+        <div class="displayWrapper">
+            <h2>Roundrobin</h2>
+            <div id="displayAreaRoundrobin" class="displayArea">Waiting for data...</div>
+        </div>
+    </div>
+
+    <div id="buttonContainer">
+        <div class="buttonGroup">
+            <button id="startButtonEU">Start EU</button>
+            <div id="responseStartEU" class="response"></div>
+            <button id="stopButtonEU">Stop EU</button>
+            <div id="responseStopEU" class="response"></div>
+
+        </div>
+        <div class="buttonGroup">
+            <button id="startButtonUS">Start US</button>
+            <div id="responseStartUS" class="response"></div>
+            <button id="stopButtonUS">Stop US</button>
+            <div id="responseStopUS" class="response"></div>
+        </div>
+    </div>
+
+    <!-- Button container for grouping buttons -->
+    <h4>Legend:</h4>
+    <div id="buttonContainer">
+        <div class="buttonGroup">
+            <div id="legendEU" class="response">client hits EU cluster: green</div>
+
+        </div>
+        <div class="buttonGroup">
+            <div id="legendUS" class="response">client hits US cluster: blue</div>
+        </div>
+    </div>
+
+    <script>
+        const updateReplicas = async (replicas, context, responseElementId) => {
+            try {
+                const response = await fetch('http://127.0.0.1:4000/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ replicas, context })
+                });
+
+                document.getElementById("responseStopEU").innerText = '';
+                document.getElementById("responseStartEU").innerText = '';
+                document.getElementById("responseStopUS").innerText = '';
+                document.getElementById("responseStartUS").innerText = '';
+
+                const result = await response.text();
+                document.getElementById(responseElementId).innerText = result;
+            } catch (error) {
+                document.getElementById(responseElementId).innerText = 'Error: ' + error.message;
+            }
+        };
+
+        document.getElementById('stopButtonEU').addEventListener('click', () => {
+            updateReplicas(0, "k3d-test-gslb1", 'responseStopEU');
+        });
+        document.getElementById('stopButtonUS').addEventListener('click', () => {
+            updateReplicas(0, "k3d-test-gslb2", 'responseStopUS');
+        }); 
+        document.getElementById('startButtonEU').addEventListener('click', () => {
+            updateReplicas(1, "k3d-test-gslb1", 'responseStartEU');
+        });
+        document.getElementById('startButtonUS').addEventListener('click', () => {
+            updateReplicas(1, "k3d-test-gslb2", 'responseStartUS');
+        }); 
+
+        const displayAreaFailover = document.getElementById('displayAreaFailover');
+        displayAreaFailover.innerText += "\n";
+        const failoverSource = new EventSource('http://127.0.0.1:4000/stream?strategy=failover');
+
+        // Listen for messages from the server
+        failoverSource.onmessage = (event) => {
+            // displayAreaFailover.innerText += event.data + '\n';
+            // displayAreaFailover.scrollTop = displayAreaFailover.scrollHeight;
+            displayAreaFailover.innerText = '';
+
+            console.log(event.data)
+
+            if (event.data.includes('"message": "eu"')) {
+                displayAreaFailover.style.backgroundColor = 'green';
+            } else if (event.data.includes('"message": "us"')) {
+                displayAreaFailover.style.backgroundColor = 'darkblue';
+            } else if (event.data.includes('000')) {
+                displayAreaFailover.style.backgroundColor = 'indianred';
+            }
+        };
+
+        failoverSource.onerror = (error) => {
+            console.error('SSE error:', error);
+            displayAreaFailover.innerText += 'Connection lost.\n';
+            failoverSource.close();
+        };
+
+        // Close the connection when the process finishes
+        failoverSource.addEventListener('end', () => {
+            failoverSource.close();
+        });
+
+        const displayAreaRoundrobin = document.getElementById('displayAreaRoundrobin');
+        displayAreaRoundrobin.innerText += "\n";
+        const roundrobinSource = new EventSource('http://127.0.0.1:4000/stream?strategy=roundrobin');
+
+        // Listen for messages from the server
+        roundrobinSource.onmessage = (event) => {
+            // displayAreaRoundrobin.innerText += event.data + '\n';
+            // displayAreaRoundrobin.scrollTop = displayAreaRoundrobin.scrollHeight;
+            displayAreaRoundrobin.innerText = '';
+
+            if (event.data.includes('"message": "eu"')) {
+                displayAreaRoundrobin.style.backgroundColor = 'green';
+            } else if (event.data.includes('"message": "us"')) {
+                displayAreaRoundrobin.style.backgroundColor = 'darkblue';
+            } else if (event.data.includes('000')) {
+                displayAreaRoundrobin.style.backgroundColor = 'indianred';
+            }
+        };
+
+        roundrobinSource.onerror = (error) => {
+            console.error('SSE error:', error);
+            displayAreaRoundrobin.innerText += 'Connection lost.\n';
+            roundrobinSource.close();
+        };
+
+        // Close the connection when the process finishes
+        roundrobinSource.addEventListener('end', () => {
+            roundrobinSource.close();
+        });
+    </script>
+</body>
+</html>
