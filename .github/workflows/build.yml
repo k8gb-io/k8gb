@@ -48,16 +48,15 @@ jobs:
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
       - name: Set up Go
-        uses: actions/setup-go@bfd2fb341f32be7281829126376a12a780ca79fc
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
         with:
-          go-version: 1.22.3
+          go-version: 1.23.3
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       # see: https://golangci-lint.run/usage/configuration/#config-file
       - name: golangci-lint
         uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6.1.1
         with:
-          version: v1.59.1
-          skip-go-installation: true
+          version: v1.60.3
           args: --timeout=3m
       - name: golic
         run: |
