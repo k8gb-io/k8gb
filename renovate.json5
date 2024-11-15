@@ -6,7 +6,6 @@
   "ignoreDeps": [
     "github.com/infobloxopen/infoblox-go-client",
     "zricethezav/gitleaks-action",
-    "actions/setup-go",
   ],
   "ignorePaths": [
     ".github/workflows/release.yaml",
