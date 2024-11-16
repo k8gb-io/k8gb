@@ -1,0 +1,12 @@
+apiVersion: chainsaw.kyverno.io/v1alpha2
+kind: Configuration
+metadata:
+  name: custom-config
+spec:
+  clusters:
+    eu:
+      kubeconfig: kubeconfig/eu.config
+      context: k3d-test-gslb1
+    us:
+      kubeconfig: kubeconfig/us.config
+      context: k3d-test-gslb2
