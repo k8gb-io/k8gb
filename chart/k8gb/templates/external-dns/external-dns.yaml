@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
+  namespace: {{ .Release.Namespace }}
 spec:
   strategy:
     type: Recreate
@@ -97,6 +98,6 @@ spec:
       volumes:
         - name: azure-config-file
           secret:
-            secretName: {{ .Values.azuredns.authSecretName | default "external-dns-secret-azure" }}
+            secretName: {{ .Values.azuredns.authSecretName }}
       {{- end }}
 {{- end }}
