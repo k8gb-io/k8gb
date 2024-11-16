@@ -37,6 +37,11 @@ import (
 
 var log = logging.Logger()
 
+const (
+	// comma separated list of external IP addresses
+	externalIPsAnnotation = "k8gb.io/exposed-ip-addresses"
+)
+
 type ReferenceResolver struct {
 	virtualService *istio.VirtualService
 	lbService      *corev1.Service
@@ -191,9 +196,14 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 }
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
-func (rr *ReferenceResolver) GetGslbExposedIPs(edgeDNSServers utils.DNSList) ([]string, error) {
-	gslbIngressIPs := []string{}
+func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, edgeDNSServers utils.DNSList) ([]string, error) {
+	// fetch the IP addresses of the reverse proxy from an annotation if it exists
+	if ingressIPsFromAnnotation, ok := gslbAnnotations[externalIPsAnnotation]; ok {
+		return utils.ParseIPAddresses(ingressIPsFromAnnotation)
+	}
 
+	// if there is no annotation -> fetch the IP addresses from the Status of the Ingress resource
+	gslbIngressIPs := []string{}
 	for _, ip := range rr.lbService.Status.LoadBalancer.Ingress {
 		if len(ip.IP) > 0 {
 			gslbIngressIPs = append(gslbIngressIPs, ip.IP)

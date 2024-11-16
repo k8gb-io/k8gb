@@ -56,6 +56,9 @@ k8gb:
   # -- enable ServiceMonitor
   serviceMonitor:
     enabled: false
+  # -- enable validating admission policies
+  validatingAdmissionPolicy:
+    enabled: true
   # -- pod annotations
   podAnnotations: {}
   # -- pod labels

@@ -324,6 +324,9 @@
                 "serviceMonitor": {
                     "$ref": "#/definitions/k8gbServiceMonitor"
                 },
+                "validatingAdmissionPolicy": {
+                    "$ref": "#/definitions/k8gbValidatingAdmissionPolicy"
+                },
                 "podAnnotations": {
                     "type": "object"
                 },
@@ -401,6 +404,15 @@
             "title": "k8gbSecurityContext"
         },
         "k8gbServiceMonitor": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "k8gbValidatingAdmissionPolicy": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
