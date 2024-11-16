@@ -32,15 +32,10 @@ import (
 )
 
 func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb, ep *externaldns.DNSEndpoint) error {
-	var err error
-
-	gslb.Status.ServiceHealth, err = r.getServiceHealthStatus(gslb)
-	if err != nil {
-		return err
-	}
 
 	m.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
 
+	var err error
 	gslb.Status.HealthyRecords, err = r.getHealthyRecords(gslb)
 	if err != nil {
 		return err
