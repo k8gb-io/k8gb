@@ -33,8 +33,8 @@ spec:
           namespace: ($namespace)
         spec: 
           endpoints:
-            - targets:
-                (length(@)): 2
-            - targets:
-                (length(@)): 2
-      timeout: 15s
+          - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
+            targets:
+              (length(@)): 2
+          - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
+      timeout: 30s
