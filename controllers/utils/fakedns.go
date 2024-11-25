@@ -125,6 +125,15 @@ func (m *DNSMock) AddAAAARecord(ip net.IP) *DNSMock {
 	return m
 }
 
+func (m *DNSMock) AddCNAMERecord(fqdn string, cname string) *DNSMock {
+	rr := &dns.CNAME{
+		Hdr:    dns.RR_Header{Name: fqdn, Rrtype: dns.TypeCNAME, Class: dns.ClassINET, Ttl: 0},
+		Target: cname,
+	}
+	m.records[dns.TypeA] = append(m.records[dns.TypeA], rr)
+	return m
+}
+
 func (m *DNSMock) listen() (err error) {
 	dns.HandleFunc(m.settings.EdgeDNSZoneFQDN, m.handleReflect)
 	for e := range m.serve() {
