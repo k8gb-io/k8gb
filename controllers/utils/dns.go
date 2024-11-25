@@ -64,8 +64,30 @@ func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("dig error: %s", err)
 	}
+	aRecords := make([]*dns.A, 0)
+	cnameRecords := make([]*dns.CNAME, 0)
 	for _, a := range ack.Answer {
-		ips = append(ips, a.(*dns.A).A.String())
+		switch v := a.(type) {
+		case *dns.A:
+			ips = append(ips, v.A.String())
+			aRecords = append(aRecords, v)
+		case *dns.CNAME:
+			cnameRecords = append(cnameRecords, v)
+		}
+	outer:
+		for _, cname := range cnameRecords {
+			for _, a := range aRecords {
+				if cname.Target == a.A.String() {
+					continue outer
+				}
+			}
+			// We do not have an A record for this CNAME
+			cnameIPs, err := Dig(cname.Target, edgeDNSServers...)
+			if err != nil {
+				return nil, err
+			}
+			ips = append(ips, cnameIPs...)
+		}
 	}
 	sort.Strings(ips)
 	return
