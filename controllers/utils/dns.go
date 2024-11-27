@@ -47,7 +47,12 @@ func (l DNSList) String() string {
 
 // Dig returns a list of IP addresses for a given FQDN by using the dns servers from edgeDNSServers
 // dns servers are tried one by one from the edgeDNSServers and if there is a non-error response it is returned and the rest is not tried
-func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {
+func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []string, err error) {
+	if maxRecursion < 1 {
+		return []string{}, nil
+	}
+	maxRecursion--
+
 	if len(edgeDNSServers) == 0 {
 		return nil, fmt.Errorf("empty edgeDNSServers, provide at least one")
 	}
@@ -86,7 +91,7 @@ func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {
 	// Check for non-resolved CNAMEs
 	for _, cname := range cnameRecords {
 		if !resolved(cname) {
-			cnameIPs, err := Dig(cname.Target, edgeDNSServers...)
+			cnameIPs, err := Dig(cname.Target, maxRecursion, edgeDNSServers...)
 			if err != nil {
 				return nil, err
 			}
