@@ -74,14 +74,18 @@ func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {
 		case *dns.CNAME:
 			cnameRecords = append(cnameRecords, v)
 		}
-	outer:
-		for _, cname := range cnameRecords {
-			for _, a := range aRecords {
-				if cname.Target == a.A.String() {
-					continue outer
-				}
+	}
+	resolved := func(c *dns.CNAME) bool {
+		for _, a := range aRecords {
+			if c.Target == a.A.String() {
+				return true
 			}
-			// We do not have an A record for this CNAME
+		}
+		return false
+	}
+	// Check for non-resolved CNAMEs
+	for _, cname := range cnameRecords {
+		if !resolved(cname) {
 			cnameIPs, err := Dig(cname.Target, edgeDNSServers...)
 			if err != nil {
 				return nil, err
