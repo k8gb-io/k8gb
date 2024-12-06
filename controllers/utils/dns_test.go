@@ -114,14 +114,13 @@ func TestValidDigButMaxRecursion(t *testing.T) {
 		Port: port,
 	}
 	NewFakeDNS(testSettings).
+		AddCNAMERecord("foo.cloud.example.com.", "bar.cloud.example.com.").
 		AddARecord("bar.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		Start().
 		RunTestFunc(func() {
-			result, err := Dig("foo.cloud.example.com", 0, testServer)
-			if err != nil {
-				panic(err)
-			}
-			assert.Equal(t, result, []string{})
+			result, err := Dig("foo.cloud.example.com", 1, testServer)
+			assert.Error(t, err)
+			assert.Nil(t, result)
 		})
 
 }
@@ -215,9 +214,41 @@ func TestDigCNAME(t *testing.T) {
 		Host: server,
 		Port: port,
 	}
+	testSettings := FakeDNSSettings{
+		FakeDNSPort:     port,
+		EdgeDNSZoneFQDN: "example.com.",
+		DNSZoneFQDN:     "cloud.example.com.",
+		Dump:            true,
+	}
 	NewFakeDNS(testSettings).
 		AddCNAMERecord("foo.cloud.example.com.", "bar.cloud.example.com.").
 		AddARecord("bar.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+		Start().
+		RunTestFunc(func() {
+			result, err := Dig("foo.cloud.example.com", 8, testServer)
+			if err != nil {
+				panic(err)
+			}
+			assert.Equal(t, result, []string{"10.1.0.3"})
+		})
+
+}
+
+func TestDigCNAMERecursion(t *testing.T) {
+	testServer := DNSServer{
+		Host: server,
+		Port: port,
+	}
+	testSettings := FakeDNSSettings{
+		FakeDNSPort:     port,
+		EdgeDNSZoneFQDN: "example.com.",
+		DNSZoneFQDN:     "cloud.example.com.",
+		Dump:            true,
+	}
+	NewFakeDNS(testSettings).
+		AddCNAMERecord("foo.cloud.example.com.", "bar.cloud.example.com.").
+		AddCNAMERecord("bar.cloud.example.com.", "baz.cloud.example.com.").
+		AddARecord("baz.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		Start().
 		RunTestFunc(func() {
 			result, err := Dig("foo.cloud.example.com", 8, testServer)
