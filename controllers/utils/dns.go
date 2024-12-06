@@ -80,9 +80,17 @@ func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []stri
 			cnameRecords = append(cnameRecords, v)
 		}
 	}
-	resolved := func(c *dns.CNAME) bool {
+	aResolved := func(c *dns.CNAME) bool {
 		for _, a := range aRecords {
-			if c.Target == a.A.String() {
+			if c.Target == a.Hdr.Name {
+				return true
+			}
+		}
+		return false
+	}
+	cResolved := func(c *dns.CNAME) bool {
+		for _, cname := range cnameRecords {
+			if c.Target == cname.Hdr.Name {
 				return true
 			}
 		}
@@ -90,7 +98,7 @@ func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []stri
 	}
 	// Check for non-resolved CNAMEs
 	for _, cname := range cnameRecords {
-		if !resolved(cname) {
+		if !aResolved(cname) && !cResolved(cname) {
 			cnameIPs, err := Dig(cname.Target, maxRecursion, edgeDNSServers...)
 			if err != nil {
 				return nil, err
