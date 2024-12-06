@@ -49,7 +49,7 @@ func (l DNSList) String() string {
 // dns servers are tried one by one from the edgeDNSServers and if there is a non-error response it is returned and the rest is not tried
 func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []string, err error) {
 	if maxRecursion < 1 {
-		return []string{}, nil
+		return nil, fmt.Errorf("maximum recursion limit reached")
 	}
 	maxRecursion--
 
