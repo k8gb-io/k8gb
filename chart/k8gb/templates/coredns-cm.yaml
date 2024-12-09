@@ -4,6 +4,7 @@ metadata:
   labels:
 {{ include "chart.labels" . | indent 4  }}
   name: {{ .Release.Name }}-coredns
+  namespace: {{ .Release.Namespace }}
 apiVersion: v1
 data:
   Corefile: |-
