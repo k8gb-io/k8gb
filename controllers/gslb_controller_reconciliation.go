@@ -189,6 +189,14 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Str("gslb", gslb.Name).
 		Msg("Resolved LoadBalancer and Server configuration referenced by Ingress")
 
+	// == health status of applications ==
+	serviceHealth, err := r.getServiceHealthStatus(gslb)
+	if err != nil {
+		m.IncrementError(gslb)
+		return result.RequeueError(err)
+	}
+	gslb.Status.ServiceHealth = serviceHealth
+
 	// == external-dns dnsendpoints CRs ==
 	dnsEndpoint, err := r.gslbDNSEndpoint(gslb)
 	if err != nil {

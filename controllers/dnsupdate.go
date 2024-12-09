@@ -38,14 +38,9 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 	var gslbHosts []*externaldns.Endpoint
 	var ttl = externaldns.TTL(gslb.Spec.Strategy.DNSTtlSeconds)
 
-	serviceHealth, err := r.getServiceHealthStatus(gslb)
-	if err != nil {
-		return nil, err
-	}
-
 	localTargets := gslb.Status.LoadBalancer.ExposedIPs
 
-	for host, health := range serviceHealth {
+	for host, health := range gslb.Status.ServiceHealth {
 		var finalTargets = assistant.NewTargets()
 
 		if !strings.Contains(host, r.Config.EdgeDNSZone) {
@@ -149,7 +144,7 @@ func (r *GslbReconciler) gslbDNSEndpoint(gslb *k8gbv1beta1.Gslb) (*externaldns.D
 		Spec: dnsEndpointSpec,
 	}
 
-	err = controllerutil.SetControllerReference(gslb, dnsEndpoint, r.Scheme)
+	err := controllerutil.SetControllerReference(gslb, dnsEndpoint, r.Scheme)
 	if err != nil {
 		return nil, err
 	}
