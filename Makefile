@@ -48,6 +48,7 @@ LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION  ?= v0.16.5
 GOLIC_VERSION  ?= v0.7.2
 GOLANGCI_VERSION ?= v1.60.3
+ISTIO_VERSION ?= v1.23.3
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -179,7 +180,7 @@ deploy-local-cluster:
 	kubectl config use-context k3d-$(CLUSTER_NAME)$(CLUSTER_ID)
 
 	@echo -e "\n$(YELLOW)Create namespace $(NC)"
-	kubectl apply -f deploy/namespace.yaml
+	kubectl create namespace k8gb --dry-run=client -o yaml | kubectl apply -f -
 
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
@@ -191,18 +192,18 @@ deploy-local-cluster:
 		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
-	kubectl create namespace istio-system
+	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
 	helm repo add --force-update istio https://istio-release.storage.googleapis.com/charts
 	helm repo update
-	helm upgrade -i istio-base istio/base -n istio-system
+	helm upgrade -i istio-base istio/base -n istio-system --version "$(ISTIO_VERSION)"
 
 	@echo -e "\n$(YELLOW)Install Istiod $(NC)"
-	helm upgrade -i istiod istio/istiod -n istio-system --wait
+	helm upgrade -i istiod istio/istiod -n istio-system --version "$(ISTIO_VERSION)" --wait
 
 	@echo -e "\n$(YELLOW)Install Istio Ingress Gateway $(NC)"
-	kubectl create namespace istio-ingress
+	kubectl create namespace istio-ingress --dry-run=client -o yaml | kubectl apply -f -
 	helm upgrade -i istio-ingressgateway istio/gateway -n istio-ingress \
-		-f $(ISTIO_INGRESS_VALUES_PATH)
+		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
@@ -265,7 +266,7 @@ deploy-k8gb-with-helm:
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: ## Deploy k8gb operator
-	kubectl apply -f deploy/namespace.yaml
+	kubectl create namespace k8gb --dry-run=client -o yaml | kubectl apply -f -
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS) \
 		--set k8gb.log.format=$(LOG_FORMAT)
