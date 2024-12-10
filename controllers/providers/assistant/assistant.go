@@ -25,6 +25,8 @@ import (
 )
 
 type Assistant interface {
+	//CoreDNSClusterIPs retrieves a list of ClusterIPs assigned to CoreDNS
+	CoreDNSClusterIPs() ([]string, error)
 	// CoreDNSExposedIPs retrieves list of exposed IP by CoreDNS
 	CoreDNSExposedIPs() ([]string, error)
 	// GetExternalTargets retrieves slice of targets from external clusters
