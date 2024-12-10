@@ -144,6 +144,8 @@ type Config struct {
 	Infoblox Infoblox
 	// CoreDNSExposed flag
 	CoreDNSExposed bool `env:"COREDNS_EXPOSED, default=false"`
+	// CoreDNSClusterIPs flag
+	CoreDNSClusterIPs bool `env:"COREDNS_CLUSTERIPS, default=false"`
 	// Log configuration
 	Log Log
 	// MetricsAddress in format address:port where address can be empty, IP address, or hostname, default: 0.0.0.0:8080

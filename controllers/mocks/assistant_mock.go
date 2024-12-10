@@ -59,6 +59,21 @@ func (m *MockAssistant) EXPECT() *MockAssistantMockRecorder {
 	return m.recorder
 }
 
+// CoreDNSClusterIPs mocks base method.
+func (m *MockAssistant) CoreDNSClusterIPs() ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CoreDNSClusterIPs")
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CoreDNSClusterIPs indicates an expected call of CoreDNSClusterIPs.
+func (mr *MockAssistantMockRecorder) CoreDNSClusterIPs() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CoreDNSClusterIPs", reflect.TypeOf((*MockAssistant)(nil).CoreDNSClusterIPs))
+}
+
 // CoreDNSExposedIPs mocks base method.
 func (m *MockAssistant) CoreDNSExposedIPs() ([]string, error) {
 	m.ctrl.T.Helper()

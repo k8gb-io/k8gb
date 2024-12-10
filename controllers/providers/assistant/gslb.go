@@ -58,8 +58,7 @@ func NewGslbAssistant(client client.Client, k8gbNamespace string, edgeDNSServers
 	}
 }
 
-// CoreDNSExposedIPs retrieves list of IP's exposed by CoreDNS
-func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
+func (r *Gslb) GetCoreDNSService() (*corev1.Service, error) {
 	serviceList := &corev1.ServiceList{}
 	sel, err := labels.Parse(coreDNSServiceLabel)
 	if err != nil {
@@ -88,7 +87,32 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		return nil, err
 	}
 	coreDNSService := &serviceList.Items[0]
+	return coreDNSService, nil
+}
 
+// CoreDNSClusterIPs retrieves list of ClusterIPs assigned to CoreDNS
+func (r *Gslb) CoreDNSClusterIPs() ([]string, error) {
+	coreDNSService, err := r.GetCoreDNSService()
+	if err != nil {
+		return nil, err
+	}
+	if len(coreDNSService.Spec.ClusterIPs) == 0 {
+		errMessage := "no ClusterIPs found"
+		log.Warn().
+			Str("serviceName", coreDNSService.Name).
+			Msg(errMessage)
+		err := coreerrors.New(errMessage)
+		return nil, err
+	}
+	return coreDNSService.Spec.ClusterIPs, nil
+}
+
+// CoreDNSExposedIPs retrieves list of IP's exposed by CoreDNS
+func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
+	coreDNSService, err := r.GetCoreDNSService()
+	if err != nil {
+		return nil, err
+	}
 	var lb corev1.LoadBalancerIngress
 	if len(coreDNSService.Status.LoadBalancer.Ingress) == 0 {
 		errMessage := "no LoadBalancer ExternalIPs are found"
