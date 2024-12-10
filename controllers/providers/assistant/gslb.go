@@ -104,7 +104,7 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 
 func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
 	if lb.Hostname != "" {
-		IPs, err := utils.Dig(lb.Hostname, ns...)
+		IPs, err := utils.Dig(lb.Hostname, 8, ns...)
 		if err != nil {
 			log.Warn().Err(err).
 				Str("loadBalancerHostname", lb.Hostname).
