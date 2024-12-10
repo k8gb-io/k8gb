@@ -1,0 +1,10 @@
+---
+# Creates a namespace, a service, a pod and a gslb
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: namespace
+spec:
+  try:
+  - apply:
+      file: ../../testdata/namespace.yaml
