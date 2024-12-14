@@ -1,0 +1,23 @@
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-playground-embedded
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: failover-playground-embedded.cloud.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo
+                port:
+                  name: http
+  strategy:
+    type: failover
+    dnsTtlSeconds: 5
+    primaryGeoTag: "eu"
