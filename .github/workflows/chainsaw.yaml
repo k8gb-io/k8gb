@@ -39,7 +39,7 @@ jobs:
         skip_after_successful_duplicate: 'true'
         do_not_skip: '["workflow_dispatch", "schedule"]'
 
-  terratest:
+  chainsaw:
     runs-on: ubuntu-24.04
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
