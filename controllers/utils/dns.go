@@ -57,7 +57,7 @@ func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []stri
 		return nil, fmt.Errorf("empty edgeDNSServers, provide at least one")
 	}
 	if len(fqdn) == 0 {
-		return
+		return ips, nil
 	}
 
 	if !strings.HasSuffix(fqdn, ".") {
@@ -107,7 +107,7 @@ func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []stri
 		}
 	}
 	sort.Strings(ips)
-	return
+	return ips, nil
 }
 
 func Exchange(m *dns.Msg, edgeDNSServers []DNSServer) (msg *dns.Msg, err error) {
