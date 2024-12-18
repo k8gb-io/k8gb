@@ -70,11 +70,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 
 	var addresses []string
 	if p.config.CoreDNSExposed {
-		if p.config.CoreDNSClusterIPs {
-			addresses, err = p.assistant.CoreDNSClusterIPs()
-		} else {
-			addresses, err = p.assistant.CoreDNSExposedIPs()
-		}
+		addresses, err = p.assistant.CoreDNSExposedIPs()
 	} else {
 		addresses = gslb.Status.LoadBalancer.ExposedIPs
 	}

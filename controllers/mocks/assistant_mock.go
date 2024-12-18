@@ -33,6 +33,7 @@ import (
 
 	assistant "github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	gomock "go.uber.org/mock/gomock"
+	v1 "k8s.io/api/core/v1"
 	endpoint "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -59,21 +60,6 @@ func (m *MockAssistant) EXPECT() *MockAssistantMockRecorder {
 	return m.recorder
 }
 
-// CoreDNSClusterIPs mocks base method.
-func (m *MockAssistant) CoreDNSClusterIPs() ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CoreDNSClusterIPs")
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CoreDNSClusterIPs indicates an expected call of CoreDNSClusterIPs.
-func (mr *MockAssistantMockRecorder) CoreDNSClusterIPs() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CoreDNSClusterIPs", reflect.TypeOf((*MockAssistant)(nil).CoreDNSClusterIPs))
-}
-
 // CoreDNSExposedIPs mocks base method.
 func (m *MockAssistant) CoreDNSExposedIPs() ([]string, error) {
 	m.ctrl.T.Helper()
@@ -87,6 +73,21 @@ func (m *MockAssistant) CoreDNSExposedIPs() ([]string, error) {
 func (mr *MockAssistantMockRecorder) CoreDNSExposedIPs() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CoreDNSExposedIPs", reflect.TypeOf((*MockAssistant)(nil).CoreDNSExposedIPs))
+}
+
+// GetCoreDNSService mocks base method.
+func (m *MockAssistant) GetCoreDNSService() (*v1.Service, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoreDNSService")
+	ret0, _ := ret[0].(*v1.Service)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoreDNSService indicates an expected call of GetCoreDNSService.
+func (mr *MockAssistantMockRecorder) GetCoreDNSService() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoreDNSService", reflect.TypeOf((*MockAssistant)(nil).GetCoreDNSService))
 }
 
 // GetExternalTargets mocks base method.
