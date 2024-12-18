@@ -115,7 +115,8 @@ func TestValidDigButMaxRecursion(t *testing.T) {
 	}
 	NewFakeDNS(testSettings).
 		AddCNAMERecord("foo.cloud.example.com.", "bar.cloud.example.com.").
-		AddARecord("bar.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+		AddCNAMERecord("bar.cloud.example.com.", "baz.cloud.example.com.").
+		AddARecord("baz.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
 		Start().
 		RunTestFunc(func() {
 			result, err := Dig("foo.cloud.example.com", 1, testServer)
