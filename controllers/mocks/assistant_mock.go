@@ -33,6 +33,7 @@ import (
 
 	assistant "github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	gomock "go.uber.org/mock/gomock"
+	v1 "k8s.io/api/core/v1"
 	endpoint "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -72,6 +73,21 @@ func (m *MockAssistant) CoreDNSExposedIPs() ([]string, error) {
 func (mr *MockAssistantMockRecorder) CoreDNSExposedIPs() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CoreDNSExposedIPs", reflect.TypeOf((*MockAssistant)(nil).CoreDNSExposedIPs))
+}
+
+// GetCoreDNSService mocks base method.
+func (m *MockAssistant) GetCoreDNSService() (*v1.Service, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoreDNSService")
+	ret0, _ := ret[0].(*v1.Service)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoreDNSService indicates an expected call of GetCoreDNSService.
+func (mr *MockAssistantMockRecorder) GetCoreDNSService() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoreDNSService", reflect.TypeOf((*MockAssistant)(nil).GetCoreDNSService))
 }
 
 // GetExternalTargets mocks base method.
