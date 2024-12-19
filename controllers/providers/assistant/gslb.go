@@ -89,7 +89,6 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 	}
 	coreDNSService := &serviceList.Items[0]
 
-	var lb corev1.LoadBalancerIngress
 	if len(coreDNSService.Status.LoadBalancer.Ingress) == 0 {
 		errMessage := "no LoadBalancer ExternalIPs are found"
 		log.Warn().
@@ -98,25 +97,29 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	lb = coreDNSService.Status.LoadBalancer.Ingress[0]
-	return extractIPFromLB(lb, r.edgeDNSServers)
+
+	ips := []string{}
+	for _, lb := range coreDNSService.Status.LoadBalancer.Ingress {
+		ips = append(ips, extractIPFromLB(lb, r.edgeDNSServers)...)
+	}
+	return ips, nil
 }
 
-func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
+func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string) {
 	if lb.Hostname != "" {
 		IPs, err := utils.Dig(lb.Hostname, ns...)
 		if err != nil {
 			log.Warn().Err(err).
 				Str("loadBalancerHostname", lb.Hostname).
 				Msg("Can't dig CoreDNS service LoadBalancer FQDN")
-			return nil, err
+			return nil
 		}
-		return IPs, nil
+		return IPs
 	}
 	if lb.IP != "" {
-		return []string{lb.IP}, nil
+		return []string{lb.IP}
 	}
-	return nil, nil
+	return nil
 }
 
 // SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist
