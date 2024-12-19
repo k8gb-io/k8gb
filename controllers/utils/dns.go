@@ -47,12 +47,17 @@ func (l DNSList) String() string {
 
 // Dig returns a list of IP addresses for a given FQDN by using the dns servers from edgeDNSServers
 // dns servers are tried one by one from the edgeDNSServers and if there is a non-error response it is returned and the rest is not tried
-func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {
+func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []string, err error) {
+	if maxRecursion < 0 {
+		return nil, fmt.Errorf("maximum recursion limit reached")
+	}
+	maxRecursion--
+
 	if len(edgeDNSServers) == 0 {
 		return nil, fmt.Errorf("empty edgeDNSServers, provide at least one")
 	}
 	if len(fqdn) == 0 {
-		return
+		return ips, nil
 	}
 
 	if !strings.HasSuffix(fqdn, ".") {
@@ -64,11 +69,45 @@ func Dig(fqdn string, edgeDNSServers ...DNSServer) (ips []string, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("dig error: %s", err)
 	}
+	aRecords := make([]*dns.A, 0)
+	cnameRecords := make([]*dns.CNAME, 0)
 	for _, a := range ack.Answer {
-		ips = append(ips, a.(*dns.A).A.String())
+		switch v := a.(type) {
+		case *dns.A:
+			ips = append(ips, v.A.String())
+			aRecords = append(aRecords, v)
+		case *dns.CNAME:
+			cnameRecords = append(cnameRecords, v)
+		}
+	}
+	aResolved := func(c *dns.CNAME) bool {
+		for _, a := range aRecords {
+			if c.Target == a.Hdr.Name {
+				return true
+			}
+		}
+		return false
+	}
+	cResolved := func(c *dns.CNAME) bool {
+		for _, cname := range cnameRecords {
+			if c.Target == cname.Hdr.Name {
+				return true
+			}
+		}
+		return false
+	}
+	// Check for non-resolved CNAMEs
+	for _, cname := range cnameRecords {
+		if !aResolved(cname) && !cResolved(cname) {
+			cnameIPs, err := Dig(cname.Target, maxRecursion, edgeDNSServers...)
+			if err != nil {
+				return nil, err
+			}
+			ips = append(ips, cnameIPs...)
+		}
 	}
 	sort.Strings(ips)
-	return
+	return ips, nil
 }
 
 func Exchange(m *dns.Msg, edgeDNSServers []DNSServer) (msg *dns.Msg, err error) {

@@ -36,6 +36,7 @@ type FakeDNSSettings struct {
 	FakeDNSPort     int
 	EdgeDNSZoneFQDN string
 	DNSZoneFQDN     string
+	Dump            bool
 }
 
 // DNSMock acts as DNS server but returns mock values
@@ -125,6 +126,15 @@ func (m *DNSMock) AddAAAARecord(ip net.IP) *DNSMock {
 	return m
 }
 
+func (m *DNSMock) AddCNAMERecord(fqdn string, cname string) *DNSMock {
+	rr := &dns.CNAME{
+		Hdr:    dns.RR_Header{Name: fqdn, Rrtype: dns.TypeCNAME, Class: dns.ClassINET, Ttl: 0},
+		Target: cname,
+	}
+	m.records[dns.TypeA] = append(m.records[dns.TypeA], rr)
+	return m
+}
+
 func (m *DNSMock) listen() (err error) {
 	dns.HandleFunc(m.settings.EdgeDNSZoneFQDN, m.handleReflect)
 	for e := range m.serve() {
@@ -190,7 +200,7 @@ func (m *DNSMock) handleReflect(w dns.ResponseWriter, r *dns.Msg) {
 	if m.records[r.Question[0].Qtype] != nil {
 		for _, rr := range m.records[r.Question[0].Qtype] {
 			fqdn := strings.Split(rr.String(), "\t")[0]
-			if fqdn == r.Question[0].Name {
+			if fqdn == r.Question[0].Name || m.settings.Dump {
 				msg.Answer = append(msg.Answer, rr)
 			}
 		}

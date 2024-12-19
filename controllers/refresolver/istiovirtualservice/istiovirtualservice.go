@@ -199,7 +199,7 @@ func (rr *ReferenceResolver) GetGslbExposedIPs(edgeDNSServers utils.DNSList) ([]
 			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
 		}
 		if len(ip.Hostname) > 0 {
-			IPs, err := utils.Dig(ip.Hostname, edgeDNSServers...)
+			IPs, err := utils.Dig(ip.Hostname, 8, edgeDNSServers...)
 			if err != nil {
 				log.Warn().Err(err).Msg("Dig error")
 				return nil, err
