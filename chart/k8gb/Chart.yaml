@@ -9,8 +9,8 @@ kubeVersion: ">= 1.19.0-0"
 
 dependencies:
   - name: coredns
-    repository: https://k8gb-io.github.io/coredns-helm
-    version: 1.15.3
+    repository: https://coredns.github.io/helm
+    version: 1.36.1
 
 home: https://www.k8gb.io/
 sources:

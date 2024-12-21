@@ -100,6 +100,17 @@ coredns:
   serviceAccount:
     create: true
     name: coredns
+  # -- Disables all permissions since we don't open privileged ports
+  securityContext:
+    capabilities:
+      add: []
+  # -- Only meant to open the correct service and container ports, has no other impact on the coredns configuration
+  servers:
+  - port: 5353
+    servicePort: 53
+    plugins:
+    - name: prometheus
+      parameters: 0.0.0.0:9153
 
 infoblox:
   # -- infoblox provider enabled
