@@ -35,7 +35,7 @@ Kubernetes: `>= 1.19.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://k8gb-io.github.io/coredns-helm | coredns | 1.15.3 |
+| https://coredns.github.io/helm | coredns | 1.36.1 |
 
 For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
@@ -69,6 +69,8 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
 | coredns.image.tag | string | `"v0.1.1"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
+| coredns.securityContext | object | `{"capabilities":{"add":[]}}` | Disables all permissions since we don't open privileged ports |
+| coredns.servers | list | `[{"plugins":[{"name":"prometheus","parameters":"0.0.0.0:9153"}],"port":5353,"servicePort":53}]` | Only meant to open the correct service and container ports, has no other impact on the coredns configuration |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
 | externaldns.dnsPolicy | string | `"ClusterFirst"` | `.spec.template.spec.dnsPolicy` for ExternalDNS deployment |
 | externaldns.extraEnv | list | `[]` | extra environment variables |
