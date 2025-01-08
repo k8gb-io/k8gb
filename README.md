@@ -5,12 +5,12 @@
 <p align="center"><a href="https://landscape.cncf.io/?item=orchestration-management--coordination-service-discovery--k8gb">CNCF Sandbox Project</a> | <a href="https://github.com/orgs/k8gb-io/projects/2/views/2">Roadmap</a> | <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a></p>
 
 [![License: Apache_2](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://github.com/k8gb-io/k8gb/workflows/Golang%20lint,%20golic,%20gokart%20and%20test/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang%20lint,%20golic,%20gokart%20and%20test%22+branch%3Amaster)
-[![Terratest Status](https://github.com/k8gb-io/k8gb/workflows/Terratest/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ATerratest+branch%3Amaster)
-[![CodeQL](https://github.com/k8gb-io/k8gb/workflows/CodeQL/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ACodeQL+branch%3Amaster)
+[![Build Status](https://github.com/k8gb-io/k8gb/workflows/Golang%20lint,%20golic%20and%20test/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang%20lint,%20golic%20and%20test%22+branch%3Amaster)
+[![Terratest Status](https://github.com/k8gb-io/k8gb/workflows/Terratest/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ATerratest+branch%3Amaster)
+[![CodeQL](https://github.com/k8gb-io/k8gb/workflows/CodeQL/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ACodeQL+branch%3Amaster)
 [![Go Report Card](https://goreportcard.com/badge/github.com/k8gb-io/k8gb)](https://goreportcard.com/report/github.com/k8gb-io/k8gb)
 [![Helm Publish](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml/badge.svg)](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml)
-[![KubeLinter](https://github.com/k8gb-io/k8gb/workflows/KubeLinter/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3AKubeLinter+branch%3Amaster)
+[![KubeLinter](https://github.com/k8gb-io/k8gb/workflows/KubeLinter/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3AKubeLinter+branch%3Amaster)
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8gb)](https://artifacthub.io/packages/search?repo=k8gb)
 [![doc.crds.dev](https://img.shields.io/badge/doc-crds-purple)](https://doc.crds.dev/github.com/k8gb-io/k8gb)
