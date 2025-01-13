@@ -58,7 +58,7 @@ k8gb:
     enabled: false
   # -- enable validating admission policies
   validatingAdmissionPolicy:
-    enabled: true
+    enabled: false
   # -- pod annotations
   podAnnotations: {}
   # -- pod labels
