@@ -138,6 +138,10 @@ type Config struct {
 	EdgeDNSZone string `env:"EDGE_DNS_ZONE"`
 	// DNSZone controlled by gslb; e.g. cloud.example.com
 	DNSZone string `env:"DNS_ZONE"`
+	// DelegationZones
+	DelegationZones []DelegationZoneInfo
+	// DelegationZones pairs of DNSZone ad EdgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io
+	dnsZones string `env:"DNS_ZONES"`
 	// K8gbNamespace k8gb namespace
 	K8gbNamespace string `env:"POD_NAMESPACE"`
 	// Infoblox configuration
@@ -159,6 +163,13 @@ type Config struct {
 	// OtelExporterOtlpEndpoint where the traces should be sent to (in case of otel collector deployed on the same pod as sidecar -> localhost:4318)
 	// otel collector itself can be configured via a configmap to send it somewhere else
 	OtelExporterOtlpEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT, default=localhost:4318"`
+}
+
+type DelegationZoneInfo struct {
+	Domain  string
+	NSNames []string
+	IPs     []string
+	Zone    string
 }
 
 // DependencyResolver resolves configuration for GSLB

@@ -31,6 +31,9 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// TODO: refactor with kong.CLI to read envvars into Config
+// TODO: refactor with go-playground/validator to validate
+
 // Environment variables keys
 const (
 	ReconcileRequeueSecondsKey = "RECONCILE_REQUEUE_SECONDS"
@@ -41,6 +44,7 @@ const (
 	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"
 	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
 	DNSZoneKey                 = "DNS_ZONE"
+	DNSZonesKey                = "DNS_ZONES"
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
 	InfobloxVersionKey         = "INFOBLOX_WAPI_VERSION"
 	InfobloxPortKey            = "INFOBLOX_WAPI_PORT"
@@ -87,6 +91,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		// calculation
 		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
 		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
+		dr.config.DelegationZones = parseDelegationZones(dr.config.dnsZones, dr.config.EdgeDNSZone, dr.config.DNSZone)
 		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
 		dr.config.ExtClustersGeoTags = excludeGeoTag(dr.config.ExtClustersGeoTags, dr.config.ClusterGeoTag)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
@@ -422,4 +427,44 @@ func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
 // The function is private and expects only valid inputs.
 func getHeartbeatFQDN(name, geoTag, edgeDNSZone string) string {
 	return fmt.Sprintf("%s-heartbeat-%s.%s", name, geoTag, edgeDNSZone)
+}
+
+func parseDelegationZones(zones, edgeDNSZone, dnsZone string) []DelegationZoneInfo {
+	getEnvAsArrayOfPairsOrFallback := func(zones string, fallback map[string]string) map[string]string {
+		pairs := make(map[string]string)
+		slice := strings.Split(zones, ";")
+		if len(slice) == 0 {
+			return fallback
+		}
+		for _, z := range slice {
+			pair := strings.Split(z, ":")
+			if len(pair) != 2 {
+				return fallback
+			}
+			pairs[strings.Trim(pair[0], " ")] = strings.Trim(pair[1], " ")
+		}
+		for k, v := range fallback {
+			if _, found := pairs[k]; !found {
+				pairs[k] = v
+			}
+		}
+		return pairs
+	}
+	var dzi []DelegationZoneInfo
+	if edgeDNSZone == "" || dnsZone == "" {
+		return dzi
+	}
+	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
+	fallbackDNSZone := map[string]string{edgeDNSZone: dnsZone}
+	di := getEnvAsArrayOfPairsOrFallback(zones, fallbackDNSZone)
+
+	for e, d := range di {
+		dzi = append(dzi, DelegationZoneInfo{
+			Domain:  d,
+			Zone:    e,
+			IPs:     []string{},
+			NSNames: []string{},
+		})
+	}
+	return dzi
 }

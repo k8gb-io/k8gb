@@ -45,7 +45,7 @@ import (
 // SetupWithManager configures controller manager
 func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Figure out Gslb resource name to Reconcile when non controlled Name is updated
-
+	const coreDNSService = "k8gb-coredns"
 	r.Recorder = mgr.GetEventRecorderFor("gslb-controller")
 
 	endpointMapHandler := handler.EnqueueRequestsFromMapFunc(
@@ -90,14 +90,30 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			return nil
 		})
 
+	coreDNSServiceHandler := handler.EnqueueRequestsFromMapFunc(
+		func(_ context.Context, object client.Object) []reconcile.Request {
+			if object.GetNamespace() == r.Config.K8gbNamespace && object.GetName() == coreDNSService {
+				log.Info().Msg("Configure DNS Zones")
+				// reading IPs
+				// setup delegated zone
+			}
+			return nil
+		})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&externaldns.DNSEndpoint{}).
 		Watches(&corev1.Endpoints{}, endpointMapHandler).
 		Watches(&netv1.Ingress{}, ingressMapHandler).
+		Watches(&corev1.Service{}, coreDNSServiceHandler).
 		WithEventFilter(predicate.Funcs{
 			UpdateFunc: func(e event.TypedUpdateEvent[client.Object]) bool {
+				svc, isSvc := e.ObjectNew.(*corev1.Service)
+				if isSvc && svc.GetNamespace() == r.Config.K8gbNamespace && svc.GetName() == coreDNSService {
+					return true
+				}
+
 				if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {
 					return true
 				}
