@@ -227,6 +227,7 @@ func (p *InfobloxProvider) saveHeartbeatTXTRecord(objMgr *ibcl.ObjectManager, gs
 		log.Info().
 			Str("HeartbeatTXTName", heartbeatTXTName).
 			Msg("Creating split brain TXT record")
+		//nolint:gosec // in the edge case there is possible integer overflow conversion int -> uint
 		_, err = p.createTXTRecord(objMgr, heartbeatTXTName, edgeTimestamp, uint(gslb.Spec.Strategy.DNSTtlSeconds))
 		if err != nil {
 			m.InfobloxIncrementHeartbeatError(gslb)
