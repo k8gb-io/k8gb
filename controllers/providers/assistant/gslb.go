@@ -109,7 +109,6 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		return coreDNSService.Spec.ClusterIPs, nil
 	}
 	// LoadBalancer / ExternalName / NodePort service
-	var lb corev1.LoadBalancerIngress
 	if len(coreDNSService.Status.LoadBalancer.Ingress) == 0 {
 		errMessage := "no LoadBalancer ExternalIPs are found"
 		log.Warn().
@@ -118,25 +117,11 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	lb = coreDNSService.Status.LoadBalancer.Ingress[0]
-	return extractIPFromLB(lb, r.edgeDNSServers)
-}
-
-func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
-	if lb.Hostname != "" {
-		IPs, err := utils.Dig(lb.Hostname, 8, ns...)
-		if err != nil {
-			log.Warn().Err(err).
-				Str("loadBalancerHostname", lb.Hostname).
-				Msg("Can't dig CoreDNS service LoadBalancer FQDN")
-			return nil, err
-		}
-		return IPs, nil
+	var ipList []string
+	for _, v := range coreDNSService.Status.LoadBalancer.Ingress {
+		ipList = append(ipList, v.IP)
 	}
-	if lb.IP != "" {
-		return []string{lb.IP}, nil
-	}
-	return nil, nil
+	return ipList, nil
 }
 
 // SaveDNSEndpoint update DNS endpoint or create new one if doesnt exist

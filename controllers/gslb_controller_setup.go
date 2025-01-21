@@ -23,10 +23,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/k8gb-io/k8gb/controllers/utils"
-
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/providers/dns"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,10 +92,20 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	coreDNSServiceHandler := handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, object client.Object) []reconcile.Request {
-			if object.GetNamespace() == r.Config.K8gbNamespace && object.GetName() == coreDNSService {
+			// TODO: At the moment I only implement CoreDNSExposed=true. Implement for r.Config.CoreDNSExposed == false as well
+			if r.Config.CoreDNSExposed && object.GetNamespace() == r.Config.K8gbNamespace && object.GetName() == coreDNSService {
 				log.Info().Msg("Configure DNS Zones")
-				// reading IPs
+				// TODO: provide standalone module for reaching IPs from k8s cluster (from nodes( workernodes or all nodes), path, predefined list of IP's etc..)
+				// TODO: e.g: ipresolver.provideIPs(ctx, "from-path:k8gb.k8gb-coredns.status.loadBalancer.ingress[*].ip")
+				// TODO: after implementing CoreDNSExposed=false, move whole zone delegation here, GSLB is needed as CreateZoneDelegationForExternalDNS argument
+				f, _ := dns.NewDNSProviderFactory(r.Client, *r.Config)
 				// setup delegated zone
+				dummyGslb := &k8gbv1beta1.Gslb{}
+				// create k8gb-ns-extdns endpoint
+				err := f.Provider().CreateZoneDelegationForExternalDNS(dummyGslb)
+				if err != nil {
+					log.Err(err).Msg("can't create zone delegation")
+				}
 			}
 			return nil
 		})

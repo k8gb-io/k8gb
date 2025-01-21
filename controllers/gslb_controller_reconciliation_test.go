@@ -938,7 +938,8 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 		},
 	}
 	serviceIPs := []corev1.LoadBalancerIngress{
-		{Hostname: "one.one.one.one"}, // rely on 1.1.1.1 response from Cloudflare
+		{Hostname: "VIP0", IP: defaultEdgeDNS0}, // rely on 1.1.1.1 response from Cloudflare
+		{Hostname: "VIP1", IP: defaultEdgeDNS1},
 	}
 	utils.NewFakeDNS(fakeDNSSettings).
 		Start().
@@ -961,6 +962,9 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			// configuration at another time than startup
 			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
 			settings.reconciler.DNSProvider = f.Provider()
+			// dnsendpoint k8gb-ns-extdns is precreated during startup
+			err = f.Provider().CreateZoneDelegationForExternalDNS(&k8gbv1beta1.Gslb{})
+			assert.NoError(t, err)
 
 			reconcileAndUpdateGslb(t, settings)
 			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
@@ -1037,6 +1041,8 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			// configuration at another time than startup
 			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
 			settings.reconciler.DNSProvider = f.Provider()
+			err = f.Provider().CreateZoneDelegationForExternalDNS(&k8gbv1beta1.Gslb{})
+			assert.NoError(t, err)
 
 			reconcileAndUpdateGslb(t, settings)
 			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)

@@ -458,10 +458,10 @@ func parseDelegationZones(zones, edgeDNSZone, dnsZone string) []DelegationZoneIn
 	fallbackDNSZone := map[string]string{edgeDNSZone: dnsZone}
 	di := getEnvAsArrayOfPairsOrFallback(zones, fallbackDNSZone)
 
-	for e, d := range di {
+	for edge, zone := range di {
 		dzi = append(dzi, DelegationZoneInfo{
-			Domain:  d,
-			Zone:    e,
+			Domain:  zone,
+			Zone:    edge,
 			IPs:     []string{},
 			NSNames: []string{},
 		})
