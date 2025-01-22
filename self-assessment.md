@@ -1,6 +1,6 @@
 # k8gb Self-assessment
 
-Security reviewers: Yury Tsarev
+Security reviewers: Yury Tsarev, Jirka Kremser
 
 k8gb is a Global Service Load Balancing solution with a focus on having cloud native qualities and working natively in a Kubernetes context.
 
