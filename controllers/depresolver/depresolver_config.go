@@ -51,6 +51,7 @@ const (
 	InfobloxHTTPPoolConnectionsKey = "INFOBLOX_HTTP_POOL_CONNECTIONS"
 	K8gbNamespaceKey               = "POD_NAMESPACE"
 	CoreDNSExposedKey              = "COREDNS_EXPOSED"
+	IngressPathKey                 = "INGRESS_PATH"
 	LogLevelKey                    = "LOG_LEVEL"
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
@@ -99,6 +100,9 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 	return dr.config, dr.errorConfig
 }
 
+// TODO: refactor with go-playground/validators (https://github.com/go-playground/validator)
+//
+//nolint:gocyclo // The function body is too long and would need to be divided into several smaller functions.
 func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes []EdgeDNSType) (err error) {
 	const dnsNameMax = 253
 	const dnsLabelMax = 63
@@ -210,6 +214,15 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
+	if !config.CoreDNSExposed {
+		if len(config.IngressPath) == 0 {
+			return fmt.Errorf("if %s is not set, IngressPath must be filled in", CoreDNSExposedKey)
+		}
+		if len(strings.Split(config.IngressPath, ".")) != 2 {
+			return fmt.Errorf("invalid %s format, expecting format: ingress_namespace.ingress_name", IngressPathKey)
+		}
+	}
+
 	return nil
 }
 

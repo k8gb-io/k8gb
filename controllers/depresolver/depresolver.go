@@ -33,6 +33,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// TODO: refactor with kong (https://github.com/alecthomas/kong)
+
 // LogFormat specifies how the logger prints values
 type LogFormat int8
 
@@ -144,6 +146,8 @@ type Config struct {
 	Infoblox Infoblox
 	// CoreDNSExposed flag
 	CoreDNSExposed bool `env:"COREDNS_EXPOSED, default=false"`
+	// IngressPath if not CoreDNSExposed the IngressPath must be set to get exposed IP's. Any ingress containing exposed IP's can be used.
+	IngressPath string `env:"INGRESS_PATH"`
 	// Log configuration
 	Log Log
 	// MetricsAddress in format address:port where address can be empty, IP address, or hostname, default: 0.0.0.0:8080

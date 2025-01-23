@@ -53,7 +53,7 @@ func NewExternalDNS(config depresolver.Config, assistant assistant2.Assistant) *
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
+func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS() error {
 	ttl := externaldns.TTL(p.config.NSRecordTTL)
 	log.Info().
 		Interface("provider", p).
@@ -66,14 +66,12 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 	var NSServerIPs []string
 	var err error
 	if p.config.CoreDNSExposed {
-		NSServerIPs, err = p.assistant.CoreDNSExposedIPs()
+		NSServerIPs, err = p.assistant.GetCoreDNSLoadBalancerServiceIPs()
 	} else {
-		if len(gslb.Status.LoadBalancer.ExposedIPs) == 0 {
-			// do not update DNS Endpoint for External DNS if no IPs are exposed
-			// new GSLB resources may have this field empty
-			return nil
+		NSServerIPs, err = p.assistant.GetIngressStatusIPs()
+		if len(NSServerIPs) == 0 {
+			log.Warn().Msgf("No NS Servers IPs found for ingress %s", p.config.IngressPath)
 		}
-		NSServerIPs = gslb.Status.LoadBalancer.ExposedIPs
 	}
 	if err != nil {
 		return err

@@ -173,7 +173,7 @@ func TestWeight(t *testing.T) {
 			m := mocks.NewMockProvider(ctrl)
 			r := mocks.NewMockGslbResolver(ctrl)
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Do(assertAnnotation).Return(fmt.Errorf("save DNS error")).Times(1)
-			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(nil).AnyTimes()
+			m.EXPECT().CreateZoneDelegationForExternalDNS().Return(nil).AnyTimes()
 			r.EXPECT().ResolveGslbSpec(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(injectWeight).AnyTimes()
 
 			ts := assistant.Targets{}

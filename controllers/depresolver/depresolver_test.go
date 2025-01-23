@@ -69,6 +69,7 @@ var predefinedConfig = Config{
 	fallbackEdgeDNSServerPort: 53,
 	EdgeDNSZone:               "example.com",
 	DNSZone:                   defaultEdgeDNSZone,
+	IngressPath:               "test-gslb1.ingress",
 	K8gbNamespace:             "k8gb",
 	SplitBrainCheck:           true,
 	MetricsAddress:            "0.0.0.0:8080",
@@ -1525,7 +1526,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, NSRecordTTLKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey,
 		EdgeDNSServersKey, ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
-		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
+		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, IngressPathKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey, TracingEnabled,
 		TracingSamplingRatio, OtelExporterOtlpEndpoint} {
 		if os.Unsetenv(s) != nil {
@@ -1547,6 +1548,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)
 	_ = os.Setenv(ExtDNSEnabledKey, strconv.FormatBool(config.extDNSEnabled))
 	_ = os.Setenv(CoreDNSExposedKey, strconv.FormatBool(config.CoreDNSExposed))
+	_ = os.Setenv(IngressPathKey, config.IngressPath)
 	_ = os.Setenv(InfobloxGridHostKey, config.Infoblox.Host)
 	_ = os.Setenv(InfobloxVersionKey, config.Infoblox.Version)
 	_ = os.Setenv(InfobloxPortKey, strconv.Itoa(config.Infoblox.Port))

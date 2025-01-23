@@ -61,17 +61,17 @@ func (m *MockProvider) EXPECT() *MockProviderMockRecorder {
 }
 
 // CreateZoneDelegationForExternalDNS mocks base method.
-func (m *MockProvider) CreateZoneDelegationForExternalDNS(arg0 *v1beta1.Gslb) error {
+func (m *MockProvider) CreateZoneDelegationForExternalDNS() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateZoneDelegationForExternalDNS", arg0)
+	ret := m.ctrl.Call(m, "CreateZoneDelegationForExternalDNS")
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateZoneDelegationForExternalDNS indicates an expected call of CreateZoneDelegationForExternalDNS.
-func (mr *MockProviderMockRecorder) CreateZoneDelegationForExternalDNS(arg0 any) *gomock.Call {
+func (mr *MockProviderMockRecorder) CreateZoneDelegationForExternalDNS() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateZoneDelegationForExternalDNS", reflect.TypeOf((*MockProvider)(nil).CreateZoneDelegationForExternalDNS), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateZoneDelegationForExternalDNS", reflect.TypeOf((*MockProvider)(nil).CreateZoneDelegationForExternalDNS))
 }
 
 // Finalize mocks base method.
