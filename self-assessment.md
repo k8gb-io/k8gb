@@ -58,16 +58,54 @@ Global enterprises moving to the cloud need a global load balancer to make decis
 k8gb is a vendor-neutral, CNCF Sandbox project. It is the only cloud native Kubernetes Global Load Balancer. k8gb does not require any special software or hardware - it relies only on OSS / CNCF projects, and fits with existing Kubernetes workflows like: GitOps, Kustomize, and Helm.
 
 ### Actors
-  TODO: Different parts of your project that act upon each other.
+
+@ytsarev please check this section.
+
+The individual parts of k8gb that interact to provide the desired functionality.
+
+- CoreDNS
+  - Role: Embedded custom CoreDNS to serve DNS requests.
+  - Isolation: runs as its own Pod
+- ExternalDNS
+  - Role: Integrated ExternalDNS to automate zone delegation configuration.  
+  - Isolation: runs as its own Pod
+- k8gb Controller
+  - Role: Coordinates logic according to the GSLB strategy.
+  - Isolation: runs as its own Pod
 
 ### Actions
-  TODO: Details about how your actors act.
+
+@ytsarev please check this section.
+
+The steps that k8gb performs in order to provide the desired functionality.
+
+- CoreDNS
+  - Functionality:
+    - Serves external DNS requests with dynamically constructed DNS responses.
+- ExternalDNS
+  - Functionality:
+    - Reads data from DNSEndpoint CR to update an external DNS provider (e.g., Route53).
+- k8gb Controller
+  - Functionality:
+    - Watches all namespaces for `Gslb` custom resources.
+    - Creates DNSEndpoint CR populated with information from `Gslb` Ingress status (application FQDN and active IP addresses, which are used for dynamic A record composition).
+    - Creates DNSEndpoint to configure DNS zone delegation in an external DNS provider.
 
 ### Goals
-  TODO: What your project intends to do, and what security considerations are intended.
+
+@ytsarev please check this section.
+
+The intended goals of k8gb, including the security guarantees it provides.
+
+k8gb is architected to be an environment agnostic, pluggable, Kubernetes native Gslb solution. k8gb runs on top of any CNCF-conformant Kubernetes cluster and Ingress controller (Gateway API is coming soon). It has no dedicated management cluster and no single point of failure. You should need no special hardware or software to run k8gb - it operates in any on-prem, cloud, or hybrid scenario, and you should be able to use it with your existing Kubernetes workflows.
+
+See also [Intended use](#intended-use).
 
 ### Non-goals
-  TODO: What security considerations are not intended, and why.
+
+@ytsarev please check this section.
+
+Non-goals that a reasonable reader of k8gb’s documentation could believe may be in scope.
 
 ## Self-assessment use
 
@@ -79,6 +117,8 @@ This document provides the CNCF TAG-Security with an initial understanding of k8
 
 ## Security functions and features
 
+@ytsarev please check this section.
+
 | Component | Applicability | Description of Importance |
 | --------- | ------------- | ------------------------- |
 | Component Name 1 | `Critical` or `Security Relevant` | why this feature is an important part of k8gb’s design and why it should be part of the threat model |
@@ -86,13 +126,19 @@ This document provides the CNCF TAG-Security with an initial understanding of k8
 
 ## Project compliance
 
+@ytsarev please check this section.
+
 List of what standards k8gb is compliant with, and how that compliance has been validated, or Future State
 
 ### Future state
 
+@ytsarev please check this section.
+
 If k8gb is not compliant with any standards, note that here. Why is k8gb not compliant with any standards, and why that is the case. Will it need to be compliant in the future?
 
 ## Secure development practices
+
+@ytsarev please check this section.
 
 k8gb strives to implement the highest standard of secure development best practices, as noted below.
 
