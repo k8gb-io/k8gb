@@ -59,8 +59,6 @@ k8gb is a vendor-neutral, CNCF Sandbox project. It is the only cloud native Kube
 
 ### Actors
 
-@ytsarev please check this section.
-
 The individual parts of k8gb that interact to provide the desired functionality.
 
 - CoreDNS
@@ -75,9 +73,7 @@ The individual parts of k8gb that interact to provide the desired functionality.
 
 ### Actions
 
-@ytsarev please check this section.
-
-The steps that k8gb performs in order to provide the desired functionality.
+The steps that k8gb performs in order to provide the desired functionality. See https://www.k8gb.io/docs/images/k8gb-components.svg. 
 
 - CoreDNS
   - Functionality:
@@ -92,8 +88,6 @@ The steps that k8gb performs in order to provide the desired functionality.
     - Creates DNSEndpoint to configure DNS zone delegation in an external DNS provider.
 
 ### Goals
-
-@ytsarev please check this section.
 
 The intended goals of k8gb, including the security guarantees it provides.
 
@@ -115,8 +109,6 @@ See also [Intended use](#intended-use).
 
 ### Non-goals
 
-@ytsarev please check this section.
-
 Non-goals that a reasonable reader of k8gb’s documentation could believe may be in scope.
 
 ## Self-assessment use
@@ -129,8 +121,6 @@ This document provides the CNCF TAG-Security with an initial understanding of k8
 
 ## Security functions and features
 
-@ytsarev please check this section.
-
 | Component | Applicability | Description of Importance |
 | --------- | ------------- | ------------------------- |
 | DNS-Based Traffic Management| `Critical`| k8gb uses DNS for global load balancing and failover, ensuring that traffic is routed to healthy clusters without passing through k8gb itself. This design minimizes the attack surface and reduces the risk of traffic interception or manipulation. |
@@ -141,19 +131,13 @@ This document provides the CNCF TAG-Security with an initial understanding of k8
 
 ## Project compliance
 
-@ytsarev please check this section.
-
 List of what standards k8gb is compliant with, and how that compliance has been validated, or Future State
 
 ### Future state
 
-@ytsarev please check this section.
-
 If k8gb is not compliant with any standards, note that here. Why is k8gb not compliant with any standards, and why that is the case. Will it need to be compliant in the future?
 
 ## Secure development practices
-
-@ytsarev please check this section.
 
 k8gb strives to implement the highest standard of secure development best practices, as noted below.
 
