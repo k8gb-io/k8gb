@@ -97,7 +97,19 @@ The steps that k8gb performs in order to provide the desired functionality.
 
 The intended goals of k8gb, including the security guarantees it provides.
 
-k8gb is architected to be an environment agnostic, pluggable, Kubernetes native Gslb solution. k8gb runs on top of any CNCF-conformant Kubernetes cluster and Ingress controller (Gateway API is coming soon). It has no dedicated management cluster and no single point of failure. You should need no special hardware or software to run k8gb - it operates in any on-prem, cloud, or hybrid scenario, and you should be able to use it with your existing Kubernetes workflows.
+#### Secure and Verified Builds
+
+Ensure all K8GB releases are signed and verified to guarantee authenticity and integrity, protecting users from tampered or malicious builds.
+
+#### Minimal Attack Surface
+
+Expose only the necessary ports for GSLB operations, such as DNS (53/tcp and 53/udp), to reduce the attack surface and enhance security.
+
+#### Secure Deployment Practices
+
+Provide secure default configurations and documentation to help users deploy K8GB in a way that aligns with Kubernetes security best practices.
+
+These goals aim to make K8GB a reliable and secure solution for global load balancing while minimizing risks and ensuring trust in the project's artifacts.
 
 See also [Intended use](#intended-use).
 
