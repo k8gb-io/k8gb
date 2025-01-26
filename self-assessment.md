@@ -64,7 +64,7 @@ k8gb is a vendor-neutral, CNCF Sandbox project. It is the only cloud native Kube
 The individual parts of k8gb that interact to provide the desired functionality.
 
 - CoreDNS
-  - Role: Embedded custom CoreDNS to serve DNS requests.
+  - Role: Embedded [custom CoreDNS](https://github.com/k8gb-io/coredns-crd-plugin) to serve DNS requests.
   - Isolation: runs as its own Pod
 - ExternalDNS
   - Role: Integrated ExternalDNS to automate zone delegation configuration.  
