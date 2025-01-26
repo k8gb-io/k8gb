@@ -133,8 +133,11 @@ This document provides the CNCF TAG-Security with an initial understanding of k8
 
 | Component | Applicability | Description of Importance |
 | --------- | ------------- | ------------------------- |
-| Component Name 1 | `Critical` or `Security Relevant` | why this feature is an important part of k8gb’s design and why it should be part of the threat model |
-| Component Name N | `Critical` or `Security Relevant` | why this feature is an important part of k8gb’s design and why it should be part of the threat model |
+| DNS-Based Traffic Management| `Critical`| k8gb uses DNS for global load balancing and failover, ensuring that traffic is routed to healthy clusters without passing through k8gb itself. This design minimizes the attack surface and reduces the risk of traffic interception or manipulation. |
+| Minimal Port Exposure | `Critical` | k8gb exposes only essential ports (53/tcp and 53/udp) for DNS operations, reducing the attack surface and limiting potential entry points for attackers. |
+| Integration with Kubernetes RBAC | `Critical` | k8gb relies on Kubernetes Role-Based Access Control (RBAC) to enforce authorization, ensuring that only authorized users can configure or modify k8gb resources. |
+| Kubernetes Secrets for Sensitive Data | `Security Relevant` | k8gb uses Kubernetes secrets to store sensitive information, such as credentials and certificates, ensuring that this data is encrypted at rest and accessible only to authorized components. |
+| Secure Default Configurations | `Security Relevant` | K8GB provides secure default configurations to help users deploy the project in a way that aligns with Kubernetes security best practices, reducing the risk of misconfiguration. |
 
 ## Project compliance
 
