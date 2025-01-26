@@ -2,7 +2,7 @@
 
 Security reviewers: Yury Tsarev, Jirka Kremser
 
-k8gb is a Global Service Load Balancing solution with a focus on having cloud native qualities and working natively in a Kubernetes context.
+This document provides a self-assessment of the k8gb project following the guidelines outlined by the CNCF TAG Security group. The purpose is to evaluate k8gb’s current security posture and alignment with best practices, ensuring that it is suitable for adoption at a CNCF incubation level.
 
 ## Table of Contents
 
@@ -33,9 +33,9 @@ k8gb is a Global Service Load Balancing solution with a focus on having cloud na
 |   |  |
 | - | - |
 | Software | https://github.com/k8gb-io/k8gb  |
-| Security Provider | No |
+| Security Provider | No, k8gb is not a security provider. It relies on Kubernetes' built-in security mechanisms (e.g., RBAC, network policies) and does not implement standalone security features. |
 | Languages | Golang |
-| SBOM | https://github.com/k8gb-io/k8gb/releases/download/v0.11.5/k8gb_0.11.5_linux_amd64.tar.gz.sbom.json |
+| SBOM | https://github.com/k8gb-io/k8gb/releases/download/v0.14.0/k8gb_0.14.0_linux_amd64.tar.gz.sbom.json |
 | Security Insights | https://github.com/k8gb-io/k8gb/blob/master/SECURITY-INSIGHTS.yml |
 | Security File | https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md |
 | Cosign pub-key | https://github.com/k8gb-io/k8gb/blob/master/cosign.pub |
@@ -43,7 +43,7 @@ k8gb is a Global Service Load Balancing solution with a focus on having cloud na
 
 ### Intended use
 
-To increase the software supply chain security, we encourage our users to consume k8gb container images with Kyverno's admission webhook 
+To increase the software supply chain security, we encourage our users to consume k8gb container images with Kyverno's admission webhook
 ([/policy](https://kyverno.io/docs/writing-policies/verify-images/sigstore/#verifying-image-signatures)) that will ensure that
 images are signed and nobody had tempered with them. Our public key that can be used to verify this is in the root or our repository.
 
@@ -139,13 +139,13 @@ If k8gb is not compliant with any standards, note that here. Why is k8gb not com
 
 ## Secure development practices
 
-k8gb strives to implement the highest standard of secure development best practices, as noted below.
+k8gb is committed to maintaining a secure software development lifecycle (SDLC) by implementing robust practices and automation. Below are the key measures in place to ensure the security and integrity of the project.
 
-### Deployment pipeline
+### Development pipeline
 
 In order to secure the SDLC from development to deployment, the following measures are in place. Please consult the roadmap for information about how this list is growing.
 
-- Branch protection on the default (`main`) branch:
+- Branch protection on the default (`master`) branch:
   - Require signed commits
   - Require a pull request before merging
     - Require approvals: 1
@@ -155,6 +155,28 @@ In order to secure the SDLC from development to deployment, the following measur
     - Require conversation resolution before merging
   - Require status checks to pass before merging
     - Require branches to be up to date before merging
+
+- CI/CD Pipeline:
+  - Use GitHub Actions for continuous integration and deployment (CI/CD)
+  - Include linting, unit testing, and integration testing in the pipeline to catch issues early
+    - golangci-lint pipeline
+    - go report pipeline https://goreportcard.com/report/github.com/k8gb-io/k8gb
+    - KubeLinter pipeline
+    - Terratest end-to-end testing pipeline
+    - Chainsaw end-to-end testing pipeline
+  - Integration of security scanning tools (e.g., static analysis, vulnerability scanning)
+    - CodeQL static analysis pipeline
+    - OpenSSF Scorecard pipeline
+
+- Release Process:
+  - Automate the release process to reduce human error and ensure consistency.
+    - Release pipeline
+  - Sign releases to guarantee their authenticity and integrity.
+  - Generation a Software Bill of Materials (SBOM) for each release to improve transparency.
+
+- Software Composition Analysis
+  - Integration of dependency management tool (Mend Renovate) to monitor and secure third-party dependencies.
+  - FOSSA scan pipeline
 
 ### Communication channels
 
@@ -183,7 +205,17 @@ The k8gb incident response process is outline in the security policy https://git
 ## Appendix
 - Known Issues Over Time
   - Known issues are currently tracked in the project roadmap.
+  - k8gb has not had any reported security vulnerabilities to date. All known issues and bugs are tracked in the project's GitHub Issues and are addressed promptly by the maintainers.
+  - The project has a strong track record of catching issues during code review and automated testing, with no critical vulnerabilities discovered post-release.
 - OpenSSF Best Practices
   - [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/k8gb-io/k8gb/badge)](https://securityscorecards.dev/viewer/?uri=github.com/k8gb-io/k8gb)
 - Case Studies
+  - Disaster Recovery for Financial Services
+    A financial services company leverages k8gb for disaster recovery, ensuring that critical applications remain available even during data center failures. The k8gb failover mechanism automatically redirects traffic to backup clusters, maintaining business continuity. More in this KubeCon presentation: https://www.youtube.com/watch?v=U46hlF0Z3xs
 - Related Projects / Vendors
+  - Kubernetes Ingress Controllers:
+    k8gb is often compared to Kubernetes Ingress controllers (e.g., NGINX Ingress, Traefik). While Ingress controllers handle traffic routing within a single cluster, k8gb focuses on global load balancing and failover across multiple clusters, making it complementary to Ingress solutions.
+  - External DNS Providers:
+    k8gb integrates with external DNS providers (e.g., Route 53, Cloudflare) to manage DNS-based traffic routing. Unlike standalone DNS solutions, k8gb provides Kubernetes-native automation for global load balancing and failover.
+  - Service Meshes:
+    Service meshes (e.g., Istio, Linkerd) provide advanced traffic management and security features within a cluster. k8gb, on the other hand, operates at the DNS level, enabling cross-cluster traffic management without requiring changes to application code.
