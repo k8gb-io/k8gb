@@ -58,16 +58,58 @@ Global enterprises moving to the cloud need a global load balancer to make decis
 k8gb is a vendor-neutral, CNCF Sandbox project. It is the only cloud native Kubernetes Global Load Balancer. k8gb does not require any special software or hardware - it relies only on OSS / CNCF projects, and fits with existing Kubernetes workflows like: GitOps, Kustomize, and Helm.
 
 ### Actors
-  TODO: Different parts of your project that act upon each other.
+
+The individual parts of k8gb that interact to provide the desired functionality.
+
+- CoreDNS
+  - Role: Embedded [custom CoreDNS](https://github.com/k8gb-io/coredns-crd-plugin) to serve DNS requests.
+  - Isolation: runs as its own Pod
+- ExternalDNS
+  - Role: Integrated ExternalDNS to automate zone delegation configuration.  
+  - Isolation: runs as its own Pod
+- k8gb Controller
+  - Role: Coordinates logic according to the GSLB strategy.
+  - Isolation: runs as its own Pod
 
 ### Actions
-  TODO: Details about how your actors act.
+
+The steps that k8gb performs in order to provide the desired functionality. See https://www.k8gb.io/docs/images/k8gb-components.svg. 
+
+- CoreDNS
+  - Functionality:
+    - Serves external DNS requests with dynamically constructed DNS responses.
+- ExternalDNS
+  - Functionality:
+    - Reads data from DNSEndpoint CR to update an external DNS provider (e.g., Route53).
+- k8gb Controller
+  - Functionality:
+    - Watches all namespaces for `Gslb` custom resources.
+    - Creates DNSEndpoint CR populated with information from `Gslb` Ingress status (application FQDN and active IP addresses, which are used for dynamic A record composition).
+    - Creates DNSEndpoint to configure DNS zone delegation in an external DNS provider.
 
 ### Goals
-  TODO: What your project intends to do, and what security considerations are intended.
+
+The intended goals of k8gb, including the security guarantees it provides.
+
+#### Secure and Verified Builds
+
+Ensure all K8GB releases are signed and verified to guarantee authenticity and integrity, protecting users from tampered or malicious builds.
+
+#### Minimal Attack Surface
+
+Expose only the necessary ports for GSLB operations, such as DNS (53/tcp and 53/udp), to reduce the attack surface and enhance security.
+
+#### Secure Deployment Practices
+
+Provide secure default configurations and documentation to help users deploy K8GB in a way that aligns with Kubernetes security best practices.
+
+These goals aim to make K8GB a reliable and secure solution for global load balancing while minimizing risks and ensuring trust in the project's artifacts.
+
+See also [Intended use](#intended-use).
 
 ### Non-goals
-  TODO: What security considerations are not intended, and why.
+
+Non-goals that a reasonable reader of k8gb’s documentation could believe may be in scope.
 
 ## Self-assessment use
 
@@ -81,8 +123,11 @@ This document provides the CNCF TAG-Security with an initial understanding of k8
 
 | Component | Applicability | Description of Importance |
 | --------- | ------------- | ------------------------- |
-| Component Name 1 | `Critical` or `Security Relevant` | why this feature is an important part of k8gb’s design and why it should be part of the threat model |
-| Component Name N | `Critical` or `Security Relevant` | why this feature is an important part of k8gb’s design and why it should be part of the threat model |
+| DNS-Based Traffic Management| `Critical`| k8gb uses DNS for global load balancing and failover, ensuring that traffic is routed to healthy clusters without passing through k8gb itself. This design minimizes the attack surface and reduces the risk of traffic interception or manipulation. |
+| Minimal Port Exposure | `Critical` | k8gb exposes only essential ports (53/tcp and 53/udp) for DNS operations, reducing the attack surface and limiting potential entry points for attackers. |
+| Integration with Kubernetes RBAC | `Critical` | k8gb relies on Kubernetes Role-Based Access Control (RBAC) to enforce authorization, ensuring that only authorized users can configure or modify k8gb resources. |
+| Kubernetes Secrets for Sensitive Data | `Security Relevant` | k8gb uses Kubernetes secrets to store sensitive information, such as credentials and certificates, ensuring that this data is encrypted at rest and accessible only to authorized components. |
+| Secure Default Configurations | `Security Relevant` | K8GB provides secure default configurations to help users deploy the project in a way that aligns with Kubernetes security best practices, reducing the risk of misconfiguration. |
 
 ## Project compliance
 
