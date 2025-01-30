@@ -1,0 +1,38 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-gslb-failover
+  namespace: test-gslb
+  labels:
+    app: test-gslb-failover
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: failover.cloudflare-test.k8gb.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: frontend-podinfo
+            port:
+              name: http
+        path: /
+        pathType: Prefix
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: test-gslb-failover
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: test-gslb-failover
+  strategy:
+    dnsTtlSeconds: 60 # Minimum for non-Enterprise Cloudflare https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/
+    primaryGeoTag: eu
+    splitBrainThresholdSeconds: 300
+    type: failover

@@ -8,8 +8,8 @@ Cloudflare for automated zone delegation configuration.
 As a prerequisite, we will need two Kubernetes clusters where you want to deploy
 k8gb and enable global load balancing between them.
 
-You can reuse local clusters from the [Infoblox tutorial](../docs/deploy_infoblox.html),
-the EKS-based setup from [Route53 tutorial](../docs/deploy_route53.md)
+You can reuse local clusters from the [Infoblox tutorial](deploy_infoblox.html),
+the EKS-based setup from [Route53 tutorial](.deploy_route53.md)
 or any Kubernetes deployment method that is convenient to you.
 
 The specific Kubernetes deployment method is not essential for the focus of this documentation guide.
@@ -58,12 +58,12 @@ to find your `zoneID`
 
 In `eu` cluster, execute
 ```sh
-helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/cloudflare/k8gb-cluster-cloudflare-eu.yaml
+helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f examples/cloudflare/k8gb-cluster-cloudflare-eu.yaml
 ```
 
 In `us` cluster, execute
 ```sh
-helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/cloudflare/k8gb-cluster-cloudflare-us.yaml
+helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f examples/cloudflare/k8gb-cluster-cloudflare-us.yaml
 ```
 
 ### Create a Cloudflare secret in each cluster
@@ -93,7 +93,6 @@ spec:
   strategy:
     dnsTtlSeconds: 60 # Minimum for non-Enterprise Cloudflare https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/
     primaryGeoTag: eu
-    splitBrainThresholdSeconds: 300
     type: failover
 ```
 
@@ -104,7 +103,7 @@ subscription. The lower values will be rejected by Cloudflare API.
 Apply the Gslb and Ingress resources to each cluster.
 
 ```sh
-kubectl apply -f ./docs/examples/cloudflare/test-gslb-failover.yaml
+kubectl apply -f examples/cloudflare/test-gslb-failover.yaml
 ```
 
 ## Check Zone Delegation configuration

@@ -31,6 +31,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// TODO: refactor with kong.CLI to read envvars into Config
+// TODO: refactor with go-playground/validator to validate
+// TODO: Remove EdgeDNSZone and DNSZone from Config
+
 // Environment variables keys
 const (
 	ReconcileRequeueSecondsKey = "RECONCILE_REQUEUE_SECONDS"
@@ -41,6 +45,7 @@ const (
 	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"
 	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
 	DNSZoneKey                 = "DNS_ZONE"
+	DNSZonesKey                = "DNS_ZONES"
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
 	InfobloxVersionKey         = "INFOBLOX_WAPI_VERSION"
 	InfobloxPortKey            = "INFOBLOX_WAPI_PORT"
@@ -54,7 +59,6 @@ const (
 	LogLevelKey                    = "LOG_LEVEL"
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
-	SplitBrainCheckKey             = "SPLIT_BRAIN_CHECK"
 	TracingEnabled                 = "TRACING_ENABLED"
 	OtelExporterOtlpEndpoint       = "OTEL_EXPORTER_OTLP_ENDPOINT"
 	TracingSamplingRatio           = "TRACING_SAMPLING_RATIO"
@@ -68,6 +72,12 @@ const (
 
 	// Deprecated: Please use EDGE_DNS_SERVERS instead.
 	EdgeDNSServerPortKey = "EDGE_DNS_SERVER_PORT"
+)
+
+const (
+	localhost = "localhost"
+
+	localhostIPv4 = "127.0.0.1"
 )
 
 // ResolveOperatorConfig executes once. It reads operator's configuration
@@ -88,13 +98,17 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
 		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
 		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
-		dr.config.ExtClustersGeoTags = excludeGeoTag(dr.config.ExtClustersGeoTags, dr.config.ClusterGeoTag)
+		dr.config.extClustersGeoTags = excludeGeoTag(dr.config.extClustersGeoTags, dr.config.ClusterGeoTag)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
 
-		// validation
+		// replace validations by go-playground/validator
 		dr.errorConfig = dr.validateConfig(dr.config, recognizedDNSTypes)
+		// validation
+		if dr.errorConfig == nil {
+			dr.config.DelegationZones, dr.errorConfig = parseDelegationZones(dr.config)
+		}
 	})
 	return dr.config, dr.errorConfig
 }
@@ -117,7 +131,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(ReconcileRequeueSecondsKey, config.ReconcileRequeueSeconds).isHigherThanZero().err
+	err = field(ReconcileRequeueSecondsKey, config.ReconcileRequeueSeconds).isHigherOrEqualToZero().err
 	if err != nil {
 		return err
 	}
@@ -129,11 +143,11 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(ExtClustersGeoTagsKey, config.ExtClustersGeoTags).hasItems().hasUniqueItems().err
+	err = field(ExtClustersGeoTagsKey, config.extClustersGeoTags).hasItems().hasUniqueItems().err
 	if err != nil {
 		return err
 	}
-	for i, geoTag := range config.ExtClustersGeoTags {
+	for i, geoTag := range config.extClustersGeoTags {
 		err = field(fmt.Sprintf("%s[%v]", ExtClustersGeoTagsKey, i), geoTag).
 			isNotEmpty().matchRegexp(geoTagRegex).err
 		if err != nil {
@@ -161,11 +175,11 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return fmt.Errorf("error for port of edge dns server(%v): it must be a positive integer between 1 and 65535", s)
 		}
 	}
-	err = field(EdgeDNSZoneKey, config.EdgeDNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
+	err = field(EdgeDNSZoneKey, config.edgeDNSZone).matchRegexp(hostNameRegex).err
 	if err != nil {
 		return err
 	}
-	err = field(DNSZoneKey, config.DNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
+	err = field(DNSZoneKey, config.dnsZone).matchRegexp(hostNameRegex).err
 	if err != nil {
 		return err
 	}
@@ -186,12 +200,12 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 		return nil
 	}
 
-	serverNames := config.GetExternalClusterNSNames()
-	serverNames[config.ClusterGeoTag] = config.GetClusterNSName()
+	serverNames := config.getExternalClusterNSNames()
+	serverNames[config.ClusterGeoTag] = config.getClusterNSName()
 	for geoTag, nsName := range serverNames {
 		if len(nsName) > dnsNameMax {
 			return fmt.Errorf("ns name '%s' exceeds %v charactes limit for [GeoTag: '%s', %s: '%s', %s: '%s']",
-				nsName, dnsLabelMax, geoTag, EdgeDNSZoneKey, config.EdgeDNSZone, DNSZoneKey, config.DNSZone)
+				nsName, dnsLabelMax, geoTag, EdgeDNSZoneKey, config.edgeDNSZone, DNSZoneKey, config.dnsZone)
 		}
 		if err := validateLabels(nsName); err != nil {
 			return fmt.Errorf("error for geo tag: %s. %s in ns name %s", geoTag, err, nsName)
@@ -216,7 +230,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 func validateLocalhostNotAmongDNSServers(config *Config) error {
 	containsLocalhost := func(list utils.DNSList) bool {
 		for i := 1; i < len(list); i++ { // skipping first because localhost or 127.0.0.1 can occur on the first position
-			if list[i].Host == "localhost" || list[i].Host == "127.0.0.1" {
+			if list[i].Host == localhost || list[i].Host == localhostIPv4 {
 				return true
 			}
 		}
@@ -371,32 +385,22 @@ func parseLogOutputFormat(value string) LogFormat {
 	return NoFormat
 }
 
-func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
-	m = make(map[string]string, len(c.ExtClustersGeoTags))
-	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getNsName(tag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServers[0].Host)
+// deprecated, used for validations only
+func (c *Config) getExternalClusterNSNames() (m map[string]string) {
+	m = make(map[string]string, len(c.extClustersGeoTags))
+	for _, tag := range c.extClustersGeoTags {
+		m[tag] = getNsName(tag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
 	}
 	return
 }
 
-func (c *Config) GetClusterNSName() string {
-	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServers[0].Host)
-}
-
-func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string) (m map[string]string) {
-	m = make(map[string]string, len(c.ExtClustersGeoTags))
-	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getHeartbeatFQDN(gslbName, tag, c.EdgeDNSZone)
-	}
-	return
-}
-
-func (c *Config) GetClusterHeartbeatFQDN(gslbName string) string {
-	return getHeartbeatFQDN(gslbName, c.ClusterGeoTag, c.EdgeDNSZone)
+// deprecated, used for validations only
+func (c *Config) getClusterNSName() string {
+	return getNsName(c.ClusterGeoTag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
 }
 
 // getNsName returns NS for geo tag.
-// The values is combination of DNSZone, EdgeDNSZone and (Ext)ClusterGeoTag, see:
+// The values is combination of dnsZone, edgeDNSZone and (Ext)ClusterGeoTag, see:
 // DNS_ZONE k8gb-test.gslb.cloud.example.com
 // EDGE_DNS_ZONE: cloud.example.com
 // CLUSTER_GEOTAG: us
@@ -411,15 +415,4 @@ func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
 	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
 	domainX := strings.ReplaceAll(d, ".", "-")
 	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edgeDNSZone)
-}
-
-// getHeartbeatFQDN returns heartbeat for geo tag.
-// The values is combination of EdgeDNSZone and (Ext)ClusterGeoTag, and GSLB name see:
-// EDGE_DNS_ZONE: cloud.example.com
-// CLUSTER_GEOTAG: us
-// gslb.Name: test-gslb-1
-// will generate "test-gslb-1-heartbeat-us.cloud.example.com"
-// The function is private and expects only valid inputs.
-func getHeartbeatFQDN(name, geoTag, edgeDNSZone string) string {
-	return fmt.Sprintf("%s-heartbeat-%s.%s", name, geoTag, edgeDNSZone)
 }

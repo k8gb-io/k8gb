@@ -44,16 +44,21 @@ const (
 var (
 	defaultConfig = depresolver.Config{
 		ReconcileRequeueSeconds: 30,
-		ClusterGeoTag:           "us-west-1",
-		ExtClustersGeoTags:      []string{"us-east-1"},
+		ClusterGeoTag:           "us",
 		EdgeDNSServers: []utils.DNSServer{
 			{
 				Host: "8.8.8.8",
 				Port: 53,
 			},
 		},
-		EdgeDNSZone:   "example.com",
-		DNSZone:       "cloud.example.com",
+		DelegationZones: depresolver.DelegationZones{
+			{
+				Domain:            "cloud.example.com",
+				Zone:              "example.com",
+				ClusterNSName:     "gslb-ns-us-west-1-cloud.example.com",
+				ExtClusterNSNames: map[string]string{"us": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
+			},
+		},
 		K8gbNamespace: "k8gb",
 		Infoblox: depresolver.Infoblox{
 			Host:     "fakeinfoblox.example.com",
@@ -65,7 +70,7 @@ var (
 	}
 
 	defaultDelegatedZone = ibclient.ZoneDelegated{
-		Fqdn:       defaultConfig.DNSZone,
+		Fqdn:       defaultConfig.DelegationZones[0].Domain,
 		DelegateTo: []ibclient.NameServer{},
 		Ref:        ref,
 	}
@@ -89,15 +94,14 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
 	}
 	customConfig := defaultConfig
-	customConfig.EdgeDNSZone = "example.com"
-	customConfig.ExtClustersGeoTags = []string{"za"}
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
+	// customConfig.DelegationZones[0].ExtClusterNSNames = map[string]string{"za": "gslb-ns-za-cloud.example.com"}
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockInfobloxClient(ctrl)
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
-	extClusters := customConfig.GetExternalClusterNSNames()
+	extClusters := customConfig.DelegationZones[0].ExtClusterNSNames
 	got := provider.filterOutDelegateTo(delegateTo, extClusters["za"])
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
@@ -126,16 +130,17 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	customConfig := defaultConfig
-	customConfig.EdgeDNSZone = "example.com"
-	customConfig.ExtClustersGeoTags = []string{"za"}
-	customConfig.ClusterGeoTag = "eu"
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockInfobloxClient(ctrl)
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
-	got := provider.sanitizeDelegateZone(local, upstream)
+	got := provider.sanitizeDelegateZone(local, upstream, &depresolver.DelegationZoneInfo{
+		Domain:        "cloud.example.com",
+		Zone:          "example.com",
+		ClusterNSName: "gslb-ns-eu-cloud.example.com",
+	})
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)
 }
@@ -165,70 +170,41 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	// arrange
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+	defaultDelegatedZone2 := defaultDelegatedZone
+	defaultDelegatedZone2.Fqdn = "cloud.example.org"
+	defaultDelegatedZone2.Ref = "zone_delegated/ZG5zLnpvbmUkLl9kZWZhdWx0LnphLmNvLmFic2EuY2Fhcy5vaG15Z2xiLmdzbGJpYmNsaWVudA:cloud.example.org/default"
 	a := mocks.NewMockAssistant(ctrl)
 	cl := mocks.NewMockInfobloxClient(ctrl)
 	con := mocks.NewMockIBConnector(ctrl)
-	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
-	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
-	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	config := defaultConfig
-	provider := NewInfobloxDNS(config, a, cl)
-
-	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
-	// assert
-	assert.NoError(t, err)
-}
-
-func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *testing.T) {
-	// arrange
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	a := mocks.NewMockAssistant(ctrl)
-	cl := mocks.NewMockInfobloxClient(ctrl)
-	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, _ interface{}) {
-		require.Equal(t, "test-gslb-heartbeat-us-east-1.example.com", fqdn)
-	}).Return(nil).Times(1)
 	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(2)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
-	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
-		Return(nil).Do(func(arg0 *ibclient.RecordTXT, _, _ interface{}) {
-		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
-	}).AnyTimes()
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil).Times(1)
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone2}).Return(nil).Times(1)
+	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(2)
 	config := defaultConfig
-	config.SplitBrainCheck = true
+	config.DelegationZones = []depresolver.DelegationZoneInfo{
+		{
+			Domain: "cloud.example.com",
+			Zone:   "example.com",
+		},
+		{
+			Domain: "cloud.example.org",
+			Zone:   "example.org",
+		},
+	}
+	gslb1 := defaultGslb.DeepCopy()
+	gslb2 := defaultGslb.DeepCopy()
+	gslb1.Status.Servers = []*k8gbv1beta1.Server{{Host: "cloud.example.com"}}
+	gslb1.Status.LoadBalancer.ExposedIPs = []string{"10.0.0.1"}
+	gslb2.Status.Servers = []*k8gbv1beta1.Server{{Host: "cloud.example.org"}}
+	gslb2.Status.LoadBalancer.ExposedIPs = []string{"10.0.0.1"}
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
 	// assert
+	err := provider.CreateZoneDelegationForExternalDNS(gslb1)
 	assert.NoError(t, err)
-}
-
-func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreatingNewHeartBeatRecord(t *testing.T) {
-	// arrange
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	a := mocks.NewMockAssistant(ctrl)
-	cl := mocks.NewMockInfobloxClient(ctrl)
-	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Return(nil).Times(1)
-	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
-	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
-	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{}).Return(nil).AnyTimes()
-	config := defaultConfig
-	config.SplitBrainCheck = true
-	provider := NewInfobloxDNS(config, a, cl)
-
-	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
-	// assert
+	err = provider.CreateZoneDelegationForExternalDNS(gslb2)
 	assert.NoError(t, err)
 }
 
@@ -236,6 +212,8 @@ func TestInfobloxFinalize(t *testing.T) {
 	// arrange
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+	defaultDelegatedZone2 := defaultDelegatedZone
+	defaultDelegatedZone2.Fqdn = "cloud.example.org"
 	a := mocks.NewMockAssistant(ctrl)
 	cl := mocks.NewMockInfobloxClient(ctrl)
 	con := mocks.NewMockIBConnector(ctrl)
@@ -244,14 +222,21 @@ func TestInfobloxFinalize(t *testing.T) {
 	}).AnyTimes()
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).
 		Return(nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
-		Return(nil).Do(func(arg0 *ibclient.RecordTXT, _, _ interface{}) {
-		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
-	}).Times(1)
+	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone2}).
+		Return(nil).Times(1)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
 	config := defaultConfig
+	config.DelegationZones = []depresolver.DelegationZoneInfo{
+		{
+			Domain: "cloud.example.com",
+			Zone:   "example.com",
+		},
+		{
+			Domain: "cloud.example.org",
+			Zone:   "example.org",
+		},
+	}
 	provider := NewInfobloxDNS(config, a, cl)
-
 	// act
 	err := provider.Finalize(defaultGslb, nil)
 

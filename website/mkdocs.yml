@@ -1,0 +1,12 @@
+site_name: K8gb
+site_url: https://www.k8gb.io
+use_directory_urls: true
+nav:
+  - Home: index.md
+  - Concepts: concepts.md
+  - Architecture: components.md
+  - Tutorials: index.md#installation-and-configuration-tutorials
+  - Changelog: CHANGELOG.md
+theme:
+  name: material
+  logo: https://www.k8gb.io/docs/images/k8gb-logo-vertical.svg

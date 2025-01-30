@@ -22,8 +22,8 @@ import (
 	"context"
 	coreerrors "errors"
 	"fmt"
-	"strings"
-	"time"
+
+	"github.com/k8gb-io/k8gb/controllers/depresolver"
 
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
@@ -43,18 +43,18 @@ const coreDNSServiceLabel = "app.kubernetes.io/name=coredns"
 // Gslb is common wrapper operating on GSLB instance.
 // It uses apimachinery client to call kubernetes API
 type Gslb struct {
-	client         client.Client
-	k8gbNamespace  string
-	edgeDNSServers utils.DNSList
+	client        client.Client
+	k8gbNamespace string
+	config        depresolver.Config
 }
 
 var log = logging.Logger()
 
-func NewGslbAssistant(client client.Client, k8gbNamespace string, edgeDNSServers []utils.DNSServer) *Gslb {
+func NewGslbAssistant(client client.Client, k8gbNamespace string, config depresolver.Config) *Gslb {
 	return &Gslb{
-		client:         client,
-		k8gbNamespace:  k8gbNamespace,
-		edgeDNSServers: edgeDNSServers,
+		client:        client,
+		k8gbNamespace: k8gbNamespace,
+		config:        config,
 	}
 }
 
@@ -109,7 +109,6 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		return coreDNSService.Spec.ClusterIPs, nil
 	}
 	// LoadBalancer / ExternalName / NodePort service
-	var lb corev1.LoadBalancerIngress
 	if len(coreDNSService.Status.LoadBalancer.Ingress) == 0 {
 		errMessage := "no LoadBalancer ExternalIPs are found"
 		log.Warn().
@@ -118,8 +117,17 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	lb = coreDNSService.Status.LoadBalancer.Ingress[0]
-	return extractIPFromLB(lb, r.edgeDNSServers)
+
+	var ipList []string
+	for _, ingressStatusIP := range coreDNSService.Status.LoadBalancer.Ingress {
+		var confirmedIPs, err = extractIPFromLB(ingressStatusIP, r.config.EdgeDNSServers)
+		if err != nil {
+			return nil, err
+		}
+		ipList = append(ipList, confirmedIPs...)
+	}
+	return ipList, nil
+
 }
 
 func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
@@ -210,49 +218,6 @@ func (r *Gslb) RemoveEndpoint(endpointName string) error {
 	return err
 }
 
-// InspectTXTThreshold inspects fqdn TXT record from edgeDNSServer. If record doesn't exists or timestamp is greater than
-// splitBrainThreshold the error is returned.
-func (r *Gslb) InspectTXTThreshold(fqdn string, splitBrainThreshold time.Duration) error {
-	m := new(dns.Msg)
-	m.SetQuestion(dns.Fqdn(fqdn), dns.TypeTXT)
-	txt, err := utils.Exchange(m, r.edgeDNSServers)
-	if err != nil {
-		log.Info().
-			Interface("edgeDNSServers", r.edgeDNSServers).
-			Err(err).
-			Msg("Contacting EdgeDNS server for TXT split brain record")
-		return err
-	}
-	if len(txt.Answer) > 0 {
-		if t, ok := txt.Answer[0].(*dns.TXT); ok {
-			timestamp := strings.Split(t.String(), "\t")[4]
-			timestamp = strings.Trim(timestamp, "\"") // Otherwise time.Parse() will miserably fail
-			timeFromTXT, err := time.Parse("2006-01-02T15:04:05", timestamp)
-			if err != nil {
-				log.Err(err).
-					Str("rawRecord", t.String()).
-					Str("rawTimestamp", timestamp).
-					Msg("Split brain TXT: can't parse timestamp")
-				return err
-			}
-			now := time.Now().UTC()
-			diff := now.Sub(timeFromTXT)
-			log.Debug().
-				Str("rawRecord", t.String()).
-				Str("rawTimestamp", timestamp).
-				Time("parsed", timeFromTXT).
-				Str("diff", diff.String()).
-				Msg("Split brain TXT")
-
-			if diff > splitBrainThreshold {
-				return errors.NewResourceExpired(fmt.Sprintf("Split brain TXT record expired the time threshold: (%s)", splitBrainThreshold))
-			}
-			return nil
-		}
-	}
-	return errors.NewResourceExpired(fmt.Sprintf("Can't find split brain TXT record at EdgeDNS servers(%+v) and record %s ", r.edgeDNSServers, fqdn))
-}
-
 func getARecords(msg *dns.Msg) []string {
 	var ARecords []string
 	for _, nsA := range msg.Answer {
@@ -284,13 +249,13 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		log.Info().
 			Str("cluster", cluster).
 			Msg("Adding external Gslb targets from cluster")
-		glueA, err := dnsQuery(cluster, r.edgeDNSServers)
+		glueA, err := dnsQuery(cluster, r.config.EdgeDNSServers)
 		if err != nil {
 			return targets
 		}
 		log.Info().
 			Str("nameserver", cluster).
-			Interface("edgeDNSServers", r.edgeDNSServers).
+			Interface("edgeDNSServers", r.config.EdgeDNSServers).
 			Interface("glueARecord", glueA.Answer).
 			Msg("Resolved glue A record for NS")
 		glueARecords := getARecords(glueA)
@@ -300,7 +265,7 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 		} else {
 			hostToUse = cluster
 		}
-		nameServersToUse := getNSCombinations(r.edgeDNSServers, hostToUse)
+		nameServersToUse := getNSCombinations(r.config.EdgeDNSServers, hostToUse)
 		lHost := fmt.Sprintf("localtargets-%s", host)
 		a, err := dnsQuery(lHost, nameServersToUse)
 		if err != nil {
