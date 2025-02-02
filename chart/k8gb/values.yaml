@@ -77,6 +77,8 @@ externaldns:
   image: registry.k8s.io/external-dns/external-dns:v0.15.1
   # -- external-dns sync interval
   interval: "20s"
+  # -- external-dns log level
+  logLevel: debug
   securityContext:
     # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core
     runAsUser: 1000
@@ -140,6 +142,8 @@ route53:
   # this can be useful when IRSA is not present or when using say Azure cluster and Route53
   # docs: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#create-iam-user-and-attach-the-policy
   secret: null
+  # -- AWS default region
+  region: us-west-1
 
 ns1:
   # -- Enable NS1 provider
