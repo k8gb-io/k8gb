@@ -262,6 +262,7 @@ deploy-k8gb-with-helm:
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--set rfc2136.enabled=true \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
+		--set coredns.serviceType="LoadBalancer" \
 		--wait --timeout=10m0s
 
 .PHONY: deploy-gslb-operator

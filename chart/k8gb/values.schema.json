@@ -301,6 +301,10 @@
                     "type": "integer",
                     "minimum": 0
                 },
+                "ingressPath": {
+                    "type": "string",
+                    "minLength": 1
+                },
                 "log": {
                     "$ref": "#/definitions/k8gbLog"
                 },

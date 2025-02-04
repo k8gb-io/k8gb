@@ -69,7 +69,7 @@ var predefinedConfig = Config{
 	fallbackEdgeDNSServerPort: 53,
 	EdgeDNSZone:               "example.com",
 	DNSZone:                   defaultEdgeDNSZone,
-	IngressPath:               "test-gslb1.ingress",
+	IngressPath:               "test-gslb1/ingress",
 	K8gbNamespace:             "k8gb",
 	SplitBrainCheck:           true,
 	MetricsAddress:            "0.0.0.0:8080",

@@ -36,6 +36,11 @@ k8gb:
     extraServerBlocks: ""
     # -- Extra CoreDNS plugins to be enabled
     extra_plugins: []
+  # -- ingressPath field specifies the IP addresses for zone delegation. If coredns.serviceType is not loadBalancer,
+  # this value defines the ingress path in the format namespace.ingress with exposed IP addresses.
+  # If coredns.serviceType is set to LoadBalancer, this value is ignored, and the IP addresses are loaded
+  # directly from the CoreDNS service.
+  ingressPath: "namesapce/ingress-to-fetch-ips"
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)

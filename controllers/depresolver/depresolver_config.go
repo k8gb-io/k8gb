@@ -218,8 +218,8 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 		if len(config.IngressPath) == 0 {
 			return fmt.Errorf("if %s is not set, IngressPath must be filled in", CoreDNSExposedKey)
 		}
-		if len(strings.Split(config.IngressPath, ".")) != 2 {
-			return fmt.Errorf("invalid %s format, expecting format: ingress_namespace.ingress_name", IngressPathKey)
+		if len(strings.Split(config.IngressPath, "/")) != 2 {
+			return fmt.Errorf("invalid %s format, expecting format: ingress_namespace/ingress_name", IngressPathKey)
 		}
 	}
 

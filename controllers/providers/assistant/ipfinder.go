@@ -41,9 +41,9 @@ func NewIngressFiner(context context.Context, client client.Client) *IngressFine
 }
 
 func (f *IngressFiner) Find(path string) (ips []string, err error) {
-	arr := strings.Split(path, ".")
+	arr := strings.Split(path, "/")
 	if len(arr) != 2 {
-		return nil, fmt.Errorf("path format error (namespace.name): %s", path)
+		return nil, fmt.Errorf("path format error (namespace/name): %s", path)
 	}
 	selector := client.ObjectKey{Namespace: arr[0], Name: arr[1]}
 	ingress := &netv1.Ingress{}
