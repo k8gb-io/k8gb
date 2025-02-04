@@ -93,7 +93,7 @@ The intended goals of k8gb, including the security guarantees it provides.
 
 #### Secure and Verified Builds
 
-Ensure all K8GB releases are signed and verified to guarantee authenticity and integrity, protecting users from tampered or malicious builds.
+Ensure all k8gb releases are signed and verified to guarantee authenticity and integrity, protecting users from tampered or malicious builds.
 
 #### Minimal Attack Surface
 
@@ -101,15 +101,27 @@ Expose only the necessary ports for GSLB operations, such as DNS (53/tcp and 53/
 
 #### Secure Deployment Practices
 
-Provide secure default configurations and documentation to help users deploy K8GB in a way that aligns with Kubernetes security best practices.
+Provide secure default configurations and documentation to help users deploy k8gb in a way that aligns with Kubernetes security best practices.
 
-These goals aim to make K8GB a reliable and secure solution for global load balancing while minimizing risks and ensuring trust in the project's artifacts.
+These goals aim to make k8gb a reliable and secure solution for global load balancing while minimizing risks and ensuring trust in the project's artifacts.
 
 See also [Intended use](#intended-use).
 
 ### Non-goals
 
-Non-goals that a reasonable reader of k8gb’s documentation could believe may be in scope.
+The k8gb project is focused on providing global load balancing and failover capabilities for Kubernetes applications. However, there are certain security-related features and responsibilities that are intentionally out of scope. Below are the non-goals, along with explanations for why they are not within the project's scope:
+
+#### Traffic Handling and TLS Termination:
+
+k8gb does not pass application traffic through itself or handle TLS/HTTP connections directly. These responsibilities are offloaded to referenced networking resources, such as Kubernetes Ingress controllers or service meshes.
+
+**Reason**: k8gb is designed to manage DNS-based global load balancing and failover, not to act as a proxy or gateway for application traffic.
+
+#### Security of Referenced Networking Resources:
+
+k8gb does not enforce or manage security configurations (e.g., TLS settings) for the networking resources it references, such as Ingress controllers.
+
+**Reason**: Security configurations for these resources are the responsibility of the user or the specific networking solution being used.
 
 ## Self-assessment use
 
@@ -127,7 +139,7 @@ This document provides the CNCF TAG-Security with an initial understanding of k8
 | Minimal Port Exposure | `Critical` | k8gb exposes only essential ports (53/tcp and 53/udp) for DNS operations, reducing the attack surface and limiting potential entry points for attackers. |
 | Integration with Kubernetes RBAC | `Critical` | k8gb relies on Kubernetes Role-Based Access Control (RBAC) to enforce authorization, ensuring that only authorized users can configure or modify k8gb resources. |
 | Kubernetes Secrets for Sensitive Data | `Security Relevant` | k8gb uses Kubernetes secrets to store sensitive information, such as credentials and certificates, ensuring that this data is encrypted at rest and accessible only to authorized components. |
-| Secure Default Configurations | `Security Relevant` | K8GB provides secure default configurations to help users deploy the project in a way that aligns with Kubernetes security best practices, reducing the risk of misconfiguration. |
+| Secure Default Configurations | `Security Relevant` | k8gb provides secure default configurations to help users deploy the project in a way that aligns with Kubernetes security best practices, reducing the risk of misconfiguration. |
 
 ## Project compliance
 
