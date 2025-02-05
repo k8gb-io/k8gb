@@ -216,6 +216,7 @@ deploy-local-cluster:
 deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
 	@echo -e "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace-ingress.yaml
+	kubectl apply -f deploy/crds/test-ingress-init
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml)
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml)
 
@@ -262,7 +263,6 @@ deploy-k8gb-with-helm:
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--set rfc2136.enabled=true \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
-		--set coredns.serviceType="LoadBalancer" \
 		--wait --timeout=10m0s
 
 .PHONY: deploy-gslb-operator

@@ -40,7 +40,8 @@ k8gb:
   # this value defines the ingress path in the format namespace.ingress with exposed IP addresses.
   # If coredns.serviceType is set to LoadBalancer, this value is ignored, and the IP addresses are loaded
   # directly from the CoreDNS service.
-  ingressPath: "namesapce/ingress-to-fetch-ips"
+  # ingressPath: "namespace/ingress-to-fetch-ips"
+  ingressPath: "test-gslb/init-ingress"
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)
