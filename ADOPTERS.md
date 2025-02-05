@@ -18,3 +18,4 @@ This list is sorted in the order that organizations were added to it.
 [Eficode](https://eficode.com/) | @punasusi | As a cloud-native and devops consulting firm, we have used k8gb in customer engagements
 [Open Systems](https://www.open-systems.com/) | @abaguas | Multi-cluster load balancing in private WAN
 [PagBank](https://pagbank.com/) | @altieresfreitas | Multicloud global load balancing across multiple regions
+[Darede](https://darede.com.br/) | @diego7marques | As a cloud consulting company, we support customers using k8gb
