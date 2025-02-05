@@ -182,9 +182,6 @@ deploy-local-cluster:
 	@echo -e "\n$(YELLOW)Create namespace $(NC)"
 	kubectl create namespace k8gb --dry-run=client -o yaml | kubectl apply -f -
 
-	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
-	$(MAKE) deploy-k8gb-with-helm
-
 	@echo -e "\n$(YELLOW)Deploy Ingress $(NC)"
 	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
 	helm repo update
@@ -205,10 +202,16 @@ deploy-local-cluster:
 	helm upgrade -i istio-ingressgateway istio/gateway -n istio-ingress \
 		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
+	@echo -e "\n$(YELLOW)Deploy apps $(NC)"
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
+
+	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
+	$(MAKE) deploy-k8gb-with-helm
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait-for-ingress)
+	@echo -e "\n$(YELLOW)Wait until CoreDNS is ready $(NC)"
+	$(call wait-for-k8gb)
 
 	@echo -e "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
 
@@ -216,6 +219,7 @@ deploy-local-cluster:
 deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
 	@echo -e "\n$(YELLOW)Deploy GSLB cr $(NC)"
 	kubectl apply -f deploy/crds/test-namespace-ingress.yaml
+	kubectl apply -f deploy/crds/test-ingress-init.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml)
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml)
 
@@ -262,7 +266,6 @@ deploy-k8gb-with-helm:
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--set rfc2136.enabled=true \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
-		--set coredns.serviceType="LoadBalancer" \
 		--wait --timeout=10m0s
 
 .PHONY: deploy-gslb-operator
@@ -573,6 +576,11 @@ endef
 define wait-for-ingress
 	kubectl -n k8gb wait --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx --timeout=600s
 endef
+
+define wait-for-k8gb
+	kubectl -n k8gb wait --for=condition=Ready pod -l app.kubernetes.io/name=coredns --timeout=200s
+endef
+
 
 define generate
 	$(call install-controller-gen)

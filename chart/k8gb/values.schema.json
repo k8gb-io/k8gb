@@ -301,15 +301,14 @@
                     "type": "integer",
                     "minimum": 0
                 },
-                "ingressPath": {
-                    "type": "string",
-                    "minLength": 1
-                },
                 "log": {
                     "$ref": "#/definitions/k8gbLog"
                 },
                 "coredns": {
                     "$ref": "#/definitions/k8gbCoreDNS"
+                },
+                "ingressPath": {
+                    "type": "string"
                 },
                 "splitBrainCheck": {
                     "type": "boolean"

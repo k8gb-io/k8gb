@@ -69,13 +69,11 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS() error {
 		NSServerIPs, err = p.assistant.GetCoreDNSLoadBalancerServiceIPs()
 	} else {
 		NSServerIPs, err = p.assistant.GetIngressStatusIPs()
-		if len(NSServerIPs) == 0 {
-			log.Warn().Msgf("No NS Servers IPs found for ingress %s", p.config.IngressPath)
-		}
 	}
 	if err != nil {
 		return err
 	}
+	log.Info().Msgf("Found NS Server IPs: %v", NSServerIPs)
 	NSRecord := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        p.endpointName,
