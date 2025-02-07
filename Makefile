@@ -188,6 +188,12 @@ deploy-local-cluster:
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
+
+	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
+	$(call wait-for-ingress)
+	$(call wait-for-ingress-ip)
+	kubectl get ing -A
+
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
 
@@ -209,12 +215,6 @@ deploy-local-cluster:
 		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
-
-	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
-	$(call wait-for-ingress)
-	$(call wait-for-ingress-ip)
-	$(call wait-for-k8gb)
-	kubectl get ing -A
 
 	@echo -e "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
 
