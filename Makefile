@@ -205,14 +205,16 @@ deploy-local-cluster:
 	helm upgrade -i istio-ingressgateway istio/gateway -n istio-ingress \
 		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
+	@echo -e "\n$(YELLOW) Installing ingress to fetch IP's $(NC)"
+	kubectl apply -f deploy/crds/init.yaml
+
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
 	$(call wait-for-ingress)
 	$(call wait-for-k8gb)
 
-	@echo -e "\n$(YELLOW) Installing ingress to fetch IP's $(NC)"
-	kubectl apply -f deploy/crds/init.yaml
+
 
 	@echo -e "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
 
