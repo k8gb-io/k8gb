@@ -188,6 +188,8 @@ deploy-local-cluster:
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
+	@echo -e "\n$(YELLOW) Installing ingress to fetch IP's $(NC)"
+	kubectl apply -f deploy/crds/init.yaml
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
 	$(call wait-for-ingress)
@@ -196,9 +198,6 @@ deploy-local-cluster:
 
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
-
-	@echo -e "\n$(YELLOW) Installing ingress to fetch IP's $(NC)"
-	kubectl apply -f deploy/crds/init.yaml
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
