@@ -212,9 +212,9 @@ deploy-local-cluster:
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
 	$(call wait-for-ingress)
+	$(call wait-for-ingress-ip)
 	$(call wait-for-k8gb)
 	kubectl get ing -A
-
 
 	@echo -e "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
 
@@ -582,6 +582,13 @@ endef
 
 define wait-for-k8gb
 	kubectl -n k8gb wait --for=condition=Ready pod -l app.kubernetes.io/name=coredns --timeout=200s
+endef
+
+define wait-for-ingress-ip
+	@until kubectl get ingress init-ingress -n default -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+'; do \
+	  echo "Waiting for ingress IP..."; \
+	  sleep 5; \
+	done
 endef
 
 define generate
