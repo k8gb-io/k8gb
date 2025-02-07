@@ -213,7 +213,7 @@ deploy-local-cluster:
 	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
 	$(call wait-for-ingress)
 	$(call wait-for-k8gb)
-
+	kubectl get ing -A
 
 
 	@echo -e "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
