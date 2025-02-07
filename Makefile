@@ -191,6 +191,9 @@ deploy-local-cluster:
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
 
+	@echo -e "\n$(YELLOW) Installing ingress to fetch IP's $(NC)"
+	kubectl apply -f deploy/crds/init.yaml
+
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
 	helm repo add --force-update istio https://istio-release.storage.googleapis.com/charts
@@ -205,9 +208,6 @@ deploy-local-cluster:
 	helm upgrade -i istio-ingressgateway istio/gateway -n istio-ingress \
 		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
-	@echo -e "\n$(YELLOW) Installing ingress to fetch IP's $(NC)"
-	kubectl apply -f deploy/crds/init.yaml
-
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
@@ -221,8 +221,6 @@ deploy-local-cluster:
 .PHONY: deploy-test-apps
 deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
 	@echo -e "\n$(YELLOW)Deploy GSLB cr $(NC)"
-
-	kubectl apply -f deploy/crds/init.yaml
 
 	kubectl apply -f deploy/crds/test-namespace-ingress.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml)
