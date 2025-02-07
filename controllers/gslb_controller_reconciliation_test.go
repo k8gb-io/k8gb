@@ -900,7 +900,7 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
 			settings.reconciler.DNSProvider = f.Provider()
 			// zone delegation is executed during operator bootstrap
-			err = settings.reconciler.DNSProvider.CreateZoneDelegationForExternalDNS()
+			err = settings.reconciler.DNSProvider.CreateZoneDelegationForExternalDNS([]string{"1.0.0.1", "1.1.1.1"})
 			require.NoError(t, err, "Failed to create zone delegation")
 
 			reconcileAndUpdateGslb(t, settings)
@@ -979,7 +979,7 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
 			settings.reconciler.DNSProvider = f.Provider()
 			// zone delegation is executed during operator bootstrap
-			err = settings.reconciler.DNSProvider.CreateZoneDelegationForExternalDNS()
+			err = settings.reconciler.DNSProvider.CreateZoneDelegationForExternalDNS([]string{"1.1.1.1"})
 			require.NoError(t, err, "Failed to create zone delegation")
 
 			reconcileAndUpdateGslb(t, settings)
@@ -1387,9 +1387,10 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	defer cleanup()
 	// Create a GslbReconciler object with the scheme and fake client.
 	r := &GslbReconciler{
-		Client: cl,
-		Scheme: s,
-		Tracer: tracer,
+		Client:         cl,
+		Scheme:         s,
+		Tracer:         tracer,
+		zoneDelegation: []string{"1.1.1.1", "1.1.1.2"},
 	}
 	r.DepResolver = depresolver.NewDependencyResolver()
 	r.Config = &expected

@@ -128,7 +128,7 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 	m.EXPECT().GetCoreDNSLoadBalancerServiceIPs().Return(a.TargetIPs, nil).AnyTimes()
 
 	// act
-	err := p.CreateZoneDelegationForExternalDNS()
+	err := p.CreateZoneDelegationForExternalDNS(a.TargetIPs)
 	// assert
 	assert.NoError(t, err)
 }

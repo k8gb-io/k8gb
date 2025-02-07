@@ -164,6 +164,7 @@ func TestSortNameServer(t *testing.T) {
 
 func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	// arrange
+	ips := []string{"1.1.1.1", "1.1.1.2"}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	a := mocks.NewMockAssistant(ctrl)
@@ -173,18 +174,19 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	a.EXPECT().GetIngressStatusIPs().Return([]string{"1.1.1.1", "1.1.1.2"}, nil).AnyTimes()
+	a.EXPECT().GetIngressStatusIPs().Return(ips, nil).AnyTimes()
 	config := defaultConfig
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.CreateZoneDelegationForExternalDNS()
+	err := provider.CreateZoneDelegationForExternalDNS(ips)
 	// assert
 	assert.NoError(t, err)
 }
 
 func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *testing.T) {
 	// arrange
+	ips := []string{"1.1.1.1", "1.1.1.2"}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	a := mocks.NewMockAssistant(ctrl)
@@ -198,19 +200,20 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *test
 		Return(nil).Do(func(arg0 *ibclient.RecordTXT, _, _ interface{}) {
 		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
 	}).AnyTimes()
-	a.EXPECT().GetIngressStatusIPs().Return([]string{"1.1.1.1", "1.1.1.2"}, nil).AnyTimes()
+	a.EXPECT().GetIngressStatusIPs().Return(ips, nil).AnyTimes()
 	config := defaultConfig
 	config.SplitBrainCheck = true
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.CreateZoneDelegationForExternalDNS()
+	err := provider.CreateZoneDelegationForExternalDNS(ips)
 	// assert
 	assert.NoError(t, err)
 }
 
 func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreatingNewHeartBeatRecord(t *testing.T) {
 	// arrange
+	ips := []string{"1.1.1.1", "1.1.1.2"}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	a := mocks.NewMockAssistant(ctrl)
@@ -221,13 +224,13 @@ func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreating
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{}).Return(nil).AnyTimes()
-	a.EXPECT().GetIngressStatusIPs().Return([]string{"1.1.1.1", "1.1.1.2"}, nil).AnyTimes()
+	a.EXPECT().GetIngressStatusIPs().Return(ips, nil).AnyTimes()
 	config := defaultConfig
 	config.SplitBrainCheck = true
 	provider := NewInfobloxDNS(config, a, cl)
 
 	// act
-	err := provider.CreateZoneDelegationForExternalDNS()
+	err := provider.CreateZoneDelegationForExternalDNS(ips)
 	// assert
 	assert.NoError(t, err)
 }
