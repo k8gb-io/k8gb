@@ -436,3 +436,11 @@ func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
 func getHeartbeatFQDN(name, geoTag, edgeDNSZone string) string {
 	return fmt.Sprintf("%s-heartbeat-%s.%s", name, geoTag, edgeDNSZone)
 }
+
+func (c *Config) ParseIngressPath() (string, string, error) {
+	arr := strings.Split(c.IngressPath, "/")
+	if len(arr) != 2 {
+		return "", "", fmt.Errorf("path format error (namespace/name): %s", c.IngressPath)
+	}
+	return arr[1], arr[0], nil
+}

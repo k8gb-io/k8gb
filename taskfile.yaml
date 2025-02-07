@@ -1,0 +1,84 @@
+# https://taskfile.dev/usage/
+version: '3'
+env:
+  VERSION: test008
+
+tasks:
+
+  start-*:
+    vars:
+      CLUSTER: '{{index .MATCH 0}}'
+    cmds:
+      - echo "starting k3d-test-gslb{{ .CLUSTER }}"
+      - kubectl -n k8gb scale deployment k8gb --replicas=1 --context=k3d-test-gslb{{ .CLUSTER }}
+    description: "k3d-test-gslb2 = us, k3d-test-gslb1 = eu"
+    silent: true
+
+  stop-*:
+    vars:
+      CLUSTER: '{{index .MATCH 0}}'
+    cmds:
+      - echo "stopping k3d-test-gslb{{ .CLUSTER }}"
+      - kubectl -n k8gb scale deployment k8gb --replicas=0 --context=k3d-test-gslb{{ .CLUSTER }}
+    description: "k3d-test-gslb2 = us, k3d-test-gslb1 = eu"
+    silent: true
+
+  install:
+    cmds:
+      - defer: { task: us}
+      - echo "Installing current k8gb $VERSION"
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w -X main.version=$VERSION -X main.commit=123" -o ./k8gb main.go
+      - docker build . -t docker.io/kuritka/k8gb:$VERSION
+      - k3d image import docker.io/kuritka/k8gb:$VERSION -c test-gslb1
+      - k3d image import docker.io/kuritka/k8gb:$VERSION -c test-gslb2
+      - kubectl apply -f deploy/crds/init.yaml --context=k3d-test-gslb2 # for INGRESS_PATH=test-gslb/init-ingress
+      - kubectl apply -f deploy/crds/init.yaml --context=k3d-test-gslb1 # for INGRESS_PATH=test-gslb/init-ingress
+      - task: stop
+      - task: patch-deployment
+      - kubectl -n k8gb set image deployment/k8gb k8gb=kuritka/k8gb:$VERSION --context=k3d-test-gslb2
+      - kubectl -n k8gb set image deployment/k8gb k8gb=kuritka/k8gb:$VERSION --context=k3d-test-gslb1
+      - task: start-1
+    silent: true
+
+  stop:
+    cmds:
+      - task: stop-1
+      - task: stop-2
+
+  start:
+    cmds:
+      - task: start-1
+      - task: start-2
+
+  us:
+    cmds:
+      - kubectl config use-context k3d-test-gslb2
+  eu:
+    cmds:
+      - kubectl config use-context k3d-test-gslb1
+
+  patch-deployment:
+    desc: "Patch the deployment to add the environment variable"
+    cmds:
+      - |
+        kubectl patch deployment k8gb -n k8gb \
+        --patch '
+        {
+          "spec": {
+            "template": {
+              "spec": {
+                "containers": [
+                  {
+                    "name": "k8gb",
+                    "env": [
+                      {
+                        "name": "INGRESS_PATH",
+                        "value": "default/init"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }'

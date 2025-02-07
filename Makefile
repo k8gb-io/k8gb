@@ -188,6 +188,9 @@ deploy-local-cluster:
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
 
+	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
+	$(MAKE) deploy-k8gb-with-helm
+
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
 	helm repo add --force-update istio https://istio-release.storage.googleapis.com/charts
@@ -202,24 +205,24 @@ deploy-local-cluster:
 	helm upgrade -i istio-ingressgateway istio/gateway -n istio-ingress \
 		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
-	@echo -e "\n$(YELLOW)Deploy apps $(NC)"
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
 
-	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
-	$(MAKE) deploy-k8gb-with-helm
-
-	@echo -e "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
+	@echo -e "\n$(YELLOW)Wait until Ingress controllers are ready $(NC)"
 	$(call wait-for-ingress)
-	@echo -e "\n$(YELLOW)Wait until CoreDNS is ready $(NC)"
 	$(call wait-for-k8gb)
+
+	@echo -e "\n$(YELLOW) Installing ingress to fetch IP's $(NC)"
+	kubectl apply -f deploy/crds/init.yaml
 
 	@echo -e "\n$(CYAN)$(CLUSTER_NAME)$(CLUSTER_ID) $(YELLOW)deployed! $(NC)"
 
 .PHONY: deploy-test-apps
 deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resources
 	@echo -e "\n$(YELLOW)Deploy GSLB cr $(NC)"
+
+	kubectl apply -f deploy/crds/init.yaml
+
 	kubectl apply -f deploy/crds/test-namespace-ingress.yaml
-	kubectl apply -f deploy/crds/test-ingress-init.yaml
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml)
 	$(call apply-cr,deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml)
 
@@ -580,7 +583,6 @@ endef
 define wait-for-k8gb
 	kubectl -n k8gb wait --for=condition=Ready pod -l app.kubernetes.io/name=coredns --timeout=200s
 endef
-
 
 define generate
 	$(call install-controller-gen)

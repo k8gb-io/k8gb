@@ -47,12 +47,13 @@ import (
 // GslbReconciler reconciles a Gslb object
 type GslbReconciler struct {
 	client.Client
-	Scheme      *runtime.Scheme
-	Config      *depresolver.Config
-	DepResolver depresolver.GslbResolver
-	DNSProvider dns.Provider
-	Recorder    record.EventRecorder
-	Tracer      trace.Tracer
+	Scheme         *runtime.Scheme
+	Config         *depresolver.Config
+	DepResolver    depresolver.GslbResolver
+	DNSProvider    dns.Provider
+	Recorder       record.EventRecorder
+	Tracer         trace.Tracer
+	zoneDelegation []string
 }
 
 const (
@@ -77,8 +78,13 @@ var m = metrics.Metrics()
 func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	ctx, span := r.Tracer.Start(ctx, "Reconcile")
 	defer span.End()
-
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+
+	if !r.HasZoneDelegationSet() {
+		log.Error().Msg("No zone delegation set, nothing to reconcile. Expose CoreDNS LoadBalancer service or set INGRESS_PATH")
+		return result.Stop()
+	}
+
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
 	err := r.Get(ctx, req.NamespacedName, gslb)
@@ -225,4 +231,12 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// TODO: potentially enhance with smarter reaction to external Event
 	m.IncrementReconciliation(gslb)
 	return result.Requeue()
+}
+
+func (r *GslbReconciler) SetIPs(ips []string) {
+	r.zoneDelegation = ips
+}
+
+func (r *GslbReconciler) HasZoneDelegationSet() bool {
+	return len(r.zoneDelegation) != 0
 }

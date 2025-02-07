@@ -5,7 +5,7 @@ metadata:
   labels:
     app: init-ingress
   name: init-ingress
-  namespace: test-gslb
+  namespace: default
 spec:
   ingressClassName: nginx
   rules:

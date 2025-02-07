@@ -53,7 +53,7 @@ func NewExternalDNS(config depresolver.Config, assistant assistant2.Assistant) *
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS() error {
+func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(nsServerIPs []string) error {
 	ttl := externaldns.TTL(p.config.NSRecordTTL)
 	log.Info().
 		Interface("provider", p).
@@ -63,17 +63,6 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS() error {
 		NSServerList = append(NSServerList, v)
 	}
 	sort.Strings(NSServerList)
-	var NSServerIPs []string
-	var err error
-	if p.config.CoreDNSExposed {
-		NSServerIPs, err = p.assistant.GetCoreDNSLoadBalancerServiceIPs()
-	} else {
-		NSServerIPs, err = p.assistant.GetIngressStatusIPs()
-	}
-	if err != nil {
-		return err
-	}
-	log.Info().Msgf("Found NS Server IPs: %v", NSServerIPs)
 	NSRecord := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        p.endpointName,
@@ -92,12 +81,12 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS() error {
 					DNSName:    p.config.GetClusterNSName(),
 					RecordTTL:  ttl,
 					RecordType: "A",
-					Targets:    NSServerIPs,
+					Targets:    nsServerIPs,
 				},
 			},
 		},
 	}
-	err = p.assistant.SaveDNSEndpoint(p.config.K8gbNamespace, NSRecord)
+	err := p.assistant.SaveDNSEndpoint(p.config.K8gbNamespace, NSRecord)
 	if err != nil {
 		return err
 	}

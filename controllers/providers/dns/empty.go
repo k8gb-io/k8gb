@@ -39,7 +39,7 @@ func NewEmptyDNS(config depresolver.Config, assistant assistant.Assistant) *Empt
 	}
 }
 
-func (p *EmptyDNSProvider) CreateZoneDelegationForExternalDNS() (err error) {
+func (p *EmptyDNSProvider) CreateZoneDelegationForExternalDNS(_ []string) (err error) {
 	return
 }
 

@@ -41,7 +41,7 @@ k8gb:
   # If coredns.serviceType is set to LoadBalancer, this value is ignored, and the IP addresses are loaded
   # directly from the CoreDNS service.
   # ingressPath: "namespace/ingress-to-fetch-ips"
-  ingressPath: "test-gslb/init-ingress"
+  ingressPath: "default/init-ingress"
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)

@@ -61,24 +61,15 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServe
 	return final
 }
 
-func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS() error {
+func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(nsServerIPs []string) error {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		return err
 	}
 
-	var addresses []string
-	if p.config.CoreDNSExposed {
-		addresses, err = p.assistant.GetCoreDNSLoadBalancerServiceIPs()
-	} else {
-		addresses, err = p.assistant.GetIngressStatusIPs()
-	}
-	if err != nil {
-		return err
-	}
 	var delegateTo []ibcl.NameServer
 
-	for _, address := range addresses {
+	for _, address := range nsServerIPs {
 		nameServer := ibcl.NameServer{Address: address, Name: p.config.GetClusterNSName()}
 		delegateTo = append(delegateTo, nameServer)
 	}
