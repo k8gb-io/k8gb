@@ -7,5 +7,7 @@ k8gb:
   log:
     format: simple
     level: debug
+coredns:
+  serviceType: LoadBalancer
 rfc2136:
   enabled: true

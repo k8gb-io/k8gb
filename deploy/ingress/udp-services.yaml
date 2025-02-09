@@ -1,9 +1,0 @@
-# Standalone ConfigMap to expose coredns in Rancher
-# without any other ingress contoller reconfiguration
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: udp-services
-  namespace: k8gb
-data:
-  53: "k8gb/k8gb-coredns:53"

@@ -21,9 +21,3 @@ controller:
 
   service:
     enabled: false
-
-# UDP service key:value pairs
-# Ref: https://github.com/kubernetes/contrib/tree/master/ingress/controllers/nginx/examples/udp
-##
-udp:
-  53: "k8gb/k8gb-coredns:53"

@@ -156,7 +156,6 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 
 	@for c in $(CLUSTER_IDS); do \
 		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-$(ARCH) CHART='./chart/k8gb' ;\
-		kubectl apply -n k8gb -f ./deploy/test/coredns-tcp-svc.yaml ;\
 	done
 
 .PHONY: list-running-pods
@@ -268,7 +267,14 @@ deploy-k8gb-with-helm:
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} -f $(call get-helm-values-file,$(CHART)) -f $(VALUES_YAML) \
+	# Deletion of the coredns service is needed because of the bug below
+	# The bug is triggered by the local setup change where we start exposing the port tcp/53 using a LoadBalancer service
+	# Can be removed once we upgrade to k8gb v0.16.0
+	# https://github.com/kubernetes/kubernetes/issues/105610
+	kubectl -n k8gb delete svc k8gb-coredns --ignore-not-found
+	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} \
+		-f $(call get-helm-values-file,$(CHART)) \
+		-f $(VALUES_YAML) \
 		$(call get-helm-args,$(CLUSTER_ID)) \
 		$(call get-next-args,$(CHART),$(CLUSTER_ID)) \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
