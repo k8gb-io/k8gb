@@ -51,6 +51,7 @@ const (
 	defaultClusterGeoTagUs2 = "us-east-1"
 	defaultClusterGeoTagEu  = "eu-central-1"
 	defaultEdgeDNSServerIP  = "10.0.40.2"
+	defaultDNSZones         = "example.com:cloud.example.com"
 )
 
 var predefinedConfig = Config{
@@ -67,10 +68,19 @@ var predefinedConfig = Config{
 	},
 	fallbackEdgeDNSServerName: "",
 	fallbackEdgeDNSServerPort: 53,
-	EdgeDNSZone:               "example.com",
-	DNSZone:                   defaultEdgeDNSZone,
-	K8gbNamespace:             "k8gb",
-	MetricsAddress:            "0.0.0.0:8080",
+	dnsZones:                  defaultDNSZones,
+	DelegationZones: []DelegationZoneInfo{
+		{
+			Zone:    "example.com",
+			Domain:  "cloud.example.com",
+			NSNames: []string{},
+			IPs:     []string{},
+		},
+	},
+	EdgeDNSZone:    "example.com",
+	DNSZone:        defaultEdgeDNSZone,
+	K8gbNamespace:  "k8gb",
+	MetricsAddress: "0.0.0.0:8080",
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
@@ -577,6 +587,7 @@ func TestResolveConfigWithEmptyEdgeDnsZone(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSZone = ""
+	expected.DelegationZones = nil
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -586,6 +597,20 @@ func TestResolveConfigWithHostnameEdgeDnsZone(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSZone = "company.2l.com"
+	expected.DelegationZones = []DelegationZoneInfo{
+		{
+			Domain:  "cloud.example.com",
+			NSNames: []string{},
+			IPs:     []string{},
+			Zone:    "example.com",
+		},
+		{
+			Domain:  "cloud.example.com",
+			NSNames: []string{},
+			IPs:     []string{},
+			Zone:    "company.2l.com",
+		},
+	}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -595,6 +620,20 @@ func TestResolveConfigWithInvalidHostnameEdgeDnsZone(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSZone = "https://zone.com"
+	expected.DelegationZones = []DelegationZoneInfo{
+		{
+			Domain:  "cloud.example.com",
+			NSNames: []string{},
+			IPs:     []string{},
+			Zone:    "example.com",
+		},
+		{
+			Domain:  "cloud.example.com",
+			NSNames: []string{},
+			IPs:     []string{},
+			Zone:    "https://zone.com",
+		},
+	}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -635,6 +674,7 @@ func TestResolveEmptyExtGeoTags(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.DNSZone = ""
+	expected.DelegationZones = nil
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, DNSZoneKey)
 }
@@ -1442,7 +1482,7 @@ func cleanup() {
 		EdgeDNSServersKey, ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, TracingEnabled,
-		TracingSamplingRatio, OtelExporterOtlpEndpoint} {
+		TracingSamplingRatio, OtelExporterOtlpEndpoint, DNSZonesKey} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
 		}
@@ -1476,6 +1516,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(TracingEnabled, strconv.FormatBool(config.TracingEnabled))
 	_ = os.Setenv(TracingSamplingRatio, strconv.FormatFloat(config.TracingSamplingRatio, 'f', 2, 64))
 	_ = os.Setenv(OtelExporterOtlpEndpoint, config.OtelExporterOtlpEndpoint)
+	_ = os.Setenv(DNSZonesKey, config.dnsZones)
 }
 
 func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {
@@ -1498,4 +1539,114 @@ func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {
 	s.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
 	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
 	return cl, gslb
+}
+
+//nolint:goconst
+func TestParseDNSZones(t *testing.T) {
+	contains := func(dzi []DelegationZoneInfo, compare func(info DelegationZoneInfo) bool) bool {
+		for _, v := range dzi {
+			if compare(v) {
+				return true
+			}
+		}
+		return false
+	}
+
+	tests := []struct {
+		name        string
+		dnsZones    string
+		dnsZone     string
+		edgeDNSZone string
+		expectedLen int
+		assert      func(zoneInfo []DelegationZoneInfo)
+	}{
+		{
+			name:        "multiple zones",
+			dnsZones:    "example.com:cloud.example.com;example.io:cloud.example.io",
+			dnsZone:     "cloud.example.org",
+			edgeDNSZone: "example.org",
+			expectedLen: 3,
+			assert: func(zoneInfo []DelegationZoneInfo) {
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
+				}))
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.io" && info.Domain == "cloud.example.io"
+				}))
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.org" && info.Domain == "cloud.example.org"
+				}))
+			},
+		},
+		{
+			name:        "backward compatibility",
+			dnsZones:    "",
+			dnsZone:     "cloud.example.org",
+			edgeDNSZone: "example.org",
+			expectedLen: 1,
+			assert: func(zoneInfo []DelegationZoneInfo) {
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.org" && info.Domain == "cloud.example.org"
+				}))
+			},
+		},
+		{
+			name:        "override",
+			dnsZones:    "example.com:cloud.example.com;example.io:cloud.example.io",
+			dnsZone:     "dc.example.com",
+			edgeDNSZone: "example.com",
+			expectedLen: 2,
+			assert: func(zoneInfo []DelegationZoneInfo) {
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
+				}))
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.io" && info.Domain == "cloud.example.io"
+				}))
+			},
+		},
+		{
+			name:        "ends with semicolon",
+			dnsZones:    "example.com:cloud.example.com;example.io:cloud.example.io;",
+			dnsZone:     "cloud.example.org",
+			edgeDNSZone: "example.org",
+			expectedLen: 3,
+			assert: func(zoneInfo []DelegationZoneInfo) {
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
+				}))
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.io" && info.Domain == "cloud.example.io"
+				}))
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.org" && info.Domain == "cloud.example.org"
+				}))
+			},
+		},
+		{
+			name:        "trimmed spaces and semicolons",
+			dnsZones:    "example.com: cloud.example.com; example.io:cloud.example.io ;",
+			dnsZone:     "cloud.example.org",
+			edgeDNSZone: "example.org",
+			expectedLen: 3,
+			assert: func(zoneInfo []DelegationZoneInfo) {
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
+				}))
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.io" && info.Domain == "cloud.example.io"
+				}))
+				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+					return info.Zone == "example.org" && info.Domain == "cloud.example.org"
+				}))
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			zoneInfo := parseDelegationZones(test.dnsZones, test.edgeDNSZone, test.dnsZone)
+			test.assert(zoneInfo)
+			assert.Equal(t, test.expectedLen, len(zoneInfo))
+		})
+	}
 }
