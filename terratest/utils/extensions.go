@@ -581,7 +581,7 @@ func (i *Instance) String() (out string) {
 
 // Dig  returns a list of IP addresses from CoreDNS that belong to the instance
 func (i *Instance) Dig() []string {
-	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), i.w.state.gslb.host, i.w.settings.digUsingUDP)
+	dig, err := dns.Dig("127.0.0.1:"+strconv.Itoa(i.w.state.gslb.port), i.w.state.gslb.host, i.w.settings.digUsingUDP)
 	require.NoError(i.w.t, err)
 	return dig
 }
@@ -589,7 +589,7 @@ func (i *Instance) Dig() []string {
 // GetLocalTargets returns instance local targets
 func (i *Instance) GetLocalTargets() []string {
 	dnsName := fmt.Sprintf("localtargets-%s", i.w.state.gslb.host)
-	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), dnsName, i.w.settings.digUsingUDP)
+	dig, err := dns.Dig("127.0.0.1:"+strconv.Itoa(i.w.state.gslb.port), dnsName, i.w.settings.digUsingUDP)
 	i.logIfError(err, "GetLocalTargets(), dig: %s", err)
 	return dig
 }
@@ -685,7 +685,7 @@ func waitForLocalGSLBNew(t *testing.T, host string, port int, expectedResult []s
 		"Wait for failover to happen and coredns to pickup new values...",
 		DefaultRetries,
 		time.Second*3,
-		func() ([]string, error) { return dns.Dig("localhost:"+strconv.Itoa(port), host, isUdp) },
+		func() ([]string, error) { return dns.Dig("127.0.0.1:"+strconv.Itoa(port), host, isUdp) },
 		expectedResult)
 }
 
