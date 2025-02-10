@@ -105,7 +105,7 @@ func testAnnotations(t *testing.T, test struct {
 	err = instanceEU.WaitForAppIsRunning()
 	require.NoError(t, err)
 
-	err = instanceEU.WaitForExternalDNSEndpointExists()
+	err = instanceEU.WaitForExternalDNSEndpointExists("cloud.example.com")
 	require.NoError(t, err)
 
 	err = instanceEU.Resources().Ingress().PatchAnnotations(test.patch)

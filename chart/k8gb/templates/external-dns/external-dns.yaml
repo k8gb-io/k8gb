@@ -22,7 +22,13 @@ spec:
         image: {{ .Values.externaldns.image }}
         args:
         - --source=crd
-        - --domain-filter={{ .Values.k8gb.edgeDNSZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
+{{- $dnsZonesRaw := include "k8gb.dnsZonesString" . }}
+{{- $dnsZones := split ";" $dnsZonesRaw }}
+{{- range $dnsZones }}
+        {{- $parts := split ":" . }}
+        {{- $zone := index $parts "_0" }}
+        - --domain-filter={{ $zone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
+{{- end }}
         - --policy=sync # enable full synchronization including record removal
         - --log-level=debug # debug only
         - --managed-record-types=A
