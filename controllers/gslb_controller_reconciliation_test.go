@@ -1434,7 +1434,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		t.Fatalf("reconcile: (%v)", err)
 	}
 	r.DNSProvider = f.Provider()
-	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServers)
+	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, *r.Config)
 	res, err := r.Reconcile(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)

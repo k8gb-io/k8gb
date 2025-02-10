@@ -91,7 +91,7 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	customConfig := defaultConfig
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockInfobloxClient(ctrl)
@@ -129,7 +129,7 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 	customConfig.EdgeDNSZone = "example.com"
 	customConfig.ExtClustersGeoTags = []string{"za"}
 	customConfig.ClusterGeoTag = "eu"
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig.EdgeDNSServers)
+	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockInfobloxClient(ctrl)
