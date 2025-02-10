@@ -49,12 +49,12 @@ func NewInfobloxDNS(config depresolver.Config, assistant assistant.Assistant, cl
 	}
 }
 
-func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServer) []ibcl.NameServer {
+func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServer, zoneInfo *depresolver.DelegationZoneInfo) []ibcl.NameServer {
 	// Drop own records for straight away update
 	// And ensure local entries are up to date
 	// And final list is sorted
 	final := local
-	remote := p.filterOutDelegateTo(upstream, p.config.GetClusterNSName())
+	remote := p.filterOutDelegateTo(upstream, zoneInfo.ClusterNSName)
 	final = append(final, remote...)
 	sortZones(final)
 
@@ -81,18 +81,22 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	var delegateTo []ibcl.NameServer
 
 	for _, address := range addresses {
-		nameServer := ibcl.NameServer{Address: address, Name: p.config.GetClusterNSName()}
+		nameServer := ibcl.NameServer{Address: address, Name: p.config.DelegationZones.GetClusterNSNameByGslb(gslb)}
 		delegateTo = append(delegateTo, nameServer)
 	}
 
-	findZone, err := p.getZoneDelegated(objMgr, p.config.DNSZone)
+	zoneInfo := p.config.DelegationZones.FindByGslbStatusHostname(gslb)
+	if zoneInfo == nil {
+		return fmt.Errorf("domainInfo not found for GSLB: %s. Check if the gslb.Status.Servers[*].Host property matches any of the DNSZones", gslb.Name)
+	}
+	findZone, err := p.getZoneDelegated(objMgr, zoneInfo.Domain)
 	if err != nil {
 		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
 	}
 
 	if findZone != nil {
-		err = p.checkZoneDelegated(findZone)
+		err = p.checkZoneDelegated(findZone, zoneInfo)
 		if err != nil {
 			m.InfobloxIncrementZoneUpdateError(gslb)
 			return err
@@ -101,13 +105,13 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		if len(findZone.Ref) > 0 {
 
 			sortZones(findZone.DelegateTo)
-			currentList := p.sanitizeDelegateZone(delegateTo, findZone.DelegateTo)
+			currentList := p.sanitizeDelegateZone(delegateTo, findZone.DelegateTo, zoneInfo)
 			if !reflect.DeepEqual(findZone.DelegateTo, currentList) {
 				log.Info().
 					Interface("records", findZone.DelegateTo).
 					Msg("Found delegated zone records")
 				log.Info().
-					Str("DNSZone", p.config.DNSZone).
+					Str("DNSZone", zoneInfo.Domain).
 					Interface("serverList", currentList).
 					Msg("Updating delegated zone with the server list")
 				_, err = p.updateZoneDelegated(objMgr, findZone.Ref, currentList)
@@ -120,13 +124,13 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 		}
 	} else {
 		log.Info().
-			Str("DNSZone", p.config.DNSZone).
+			Str("DNSZone", zoneInfo.Domain).
 			Msg("Creating delegated zone")
 		sortZones(delegateTo)
 		log.Debug().
 			Interface("records", delegateTo).
 			Msg("Delegated records")
-		_, err = p.createZoneDelegated(objMgr, p.config.DNSZone, delegateTo)
+		_, err = p.createZoneDelegated(objMgr, zoneInfo.Domain, delegateTo)
 		if err != nil {
 			m.InfobloxIncrementZoneUpdateError(gslb)
 			return err
@@ -141,23 +145,25 @@ func (p *InfobloxProvider) Finalize(_ *k8gbv1beta1.Gslb, _ client.Client) error 
 	if err != nil {
 		return err
 	}
-	findZone, err := p.getZoneDelegated(objMgr, p.config.DNSZone)
-	if err != nil {
-		return err
-	}
-
-	if findZone != nil {
-		err = p.checkZoneDelegated(findZone)
+	for _, zoneInfo := range p.config.DelegationZones {
+		findZone, err := p.getZoneDelegated(objMgr, zoneInfo.Domain)
 		if err != nil {
 			return err
 		}
-		if len(findZone.Ref) > 0 {
-			log.Info().
-				Str("DNSZone", p.config.DNSZone).
-				Msg("Deleting delegated zone")
-			_, err := p.deleteZoneDelegated(objMgr, findZone.Ref)
+
+		if findZone != nil {
+			err = p.checkZoneDelegated(findZone, &zoneInfo)
 			if err != nil {
 				return err
+			}
+			if len(findZone.Ref) > 0 {
+				log.Info().
+					Str("DNSZone", zoneInfo.Domain).
+					Msg("Deleting delegated zone")
+				_, err := p.deleteZoneDelegated(objMgr, findZone.Ref)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -165,7 +171,7 @@ func (p *InfobloxProvider) Finalize(_ *k8gbv1beta1.Gslb, _ client.Client) error 
 }
 
 func (p *InfobloxProvider) GetExternalTargets(host string) (targets assistant.Targets) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+	return p.assistant.GetExternalTargets(host, p.config.DelegationZones.GetExternalClusterNSNamesByHostname(host))
 }
 
 func (p *InfobloxProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {
@@ -176,9 +182,9 @@ func (p *InfobloxProvider) String() string {
 	return "Infoblox"
 }
 
-func (p *InfobloxProvider) checkZoneDelegated(findZone *ibcl.ZoneDelegated) error {
-	if findZone.Fqdn != p.config.DNSZone {
-		err := fmt.Errorf("delegated zone returned from infoblox(%s) does not match requested gslb zone(%s)", findZone.Fqdn, p.config.DNSZone)
+func (p *InfobloxProvider) checkZoneDelegated(findZone *ibcl.ZoneDelegated, info *depresolver.DelegationZoneInfo) error {
+	if findZone.Fqdn != info.Domain {
+		err := fmt.Errorf("delegated zone returned from infoblox(%s) does not match requested gslb zone(%s)", findZone.Fqdn, info.Domain)
 		return err
 	}
 	return nil

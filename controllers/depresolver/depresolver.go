@@ -124,8 +124,8 @@ type Config struct {
 	NSRecordTTL int `env:"NS_RECORD_TTL, default=30"`
 	// ClusterGeoTag to determine specific location
 	ClusterGeoTag string `env:"CLUSTER_GEO_TAG"`
-	// ExtClustersGeoTags to identify clusters in other locations in format separated by comma. i.e.: "eu,uk,us"
-	ExtClustersGeoTags []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS, default=[]"`
+	// extClustersGeoTags to identify clusters in other locations in format separated by comma. i.e.: "eu,uk,us"
+	extClustersGeoTags []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS, default=[]"`
 	// EdgeDNSType is READONLY and is set automatically by configuration
 	EdgeDNSType EdgeDNSType
 	// EdgeDNSServers
@@ -134,10 +134,14 @@ type Config struct {
 	fallbackEdgeDNSServerName string `env:"EDGE_DNS_SERVER"`
 	// to avoid breaking changes is used as fallback server port for EdgeDNSServers
 	fallbackEdgeDNSServerPort int `env:"EDGE_DNS_SERVER_PORT, default=53"`
-	// EdgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
-	EdgeDNSZone string `env:"EDGE_DNS_ZONE"`
-	// DNSZone controlled by gslb; e.g. cloud.example.com
-	DNSZone string `env:"DNS_ZONE"`
+	// edgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
+	edgeDNSZone string `env:"EDGE_DNS_ZONE"`
+	// dnsZone controlled by gslb; e.g. cloud.example.com
+	dnsZone string `env:"DNS_ZONE"`
+	// DelegationZones
+	DelegationZones DelegationZones
+	// DelegationZones pairs of dnsZone ad edgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io
+	dnsZones string `env:"DNS_ZONES"`
 	// K8gbNamespace k8gb namespace
 	K8gbNamespace string `env:"POD_NAMESPACE"`
 	// Infoblox configuration

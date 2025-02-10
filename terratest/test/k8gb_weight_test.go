@@ -45,6 +45,7 @@ func TestWeightsExistsInLocalDNSEndpoint(t *testing.T) {
 func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, host string, workflowEU, workflowUS *utils.Workflow) {
 	const endpointDNSNameEU = "gslb-ns-eu-cloud.example.com"
 	const endpointDNSNameUS = "gslb-ns-us-cloud.example.com"
+	const zone = "cloud.example.com"
 	workflowEU = workflowEU.WithTestApp("eu")
 	instanceEU, err := workflowEU.Start()
 	require.NoError(t, err)
@@ -60,13 +61,13 @@ func abstractTestWeightsExistsInLocalDNSEndpoint(t *testing.T, host string, work
 	err = instanceUS.WaitForAppIsRunning()
 	require.NoError(t, err)
 
-	err = instanceEU.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameEU)
+	err = instanceEU.Resources().WaitForExternalDNSEndpointHasTargets(zone, endpointDNSNameEU)
 	require.NoError(t, err)
-	epExternalEU, err := instanceEU.Resources().GetK8gbExternalDNSEndpoint().GetEndpointByName(endpointDNSNameEU)
+	epExternalEU, err := instanceEU.Resources().GetK8gbExternalDNSEndpoint(zone).GetEndpointByName(endpointDNSNameEU)
 	require.NoError(t, err, "missing EU endpoint %s", endpointDNSNameEU)
-	err = instanceUS.Resources().WaitForExternalDNSEndpointHasTargets(endpointDNSNameUS)
+	err = instanceUS.Resources().WaitForExternalDNSEndpointHasTargets(zone, endpointDNSNameUS)
 	require.NoError(t, err)
-	epExternalUS, err := instanceUS.Resources().GetK8gbExternalDNSEndpoint().GetEndpointByName(endpointDNSNameUS)
+	epExternalUS, err := instanceUS.Resources().GetK8gbExternalDNSEndpoint(zone).GetEndpointByName(endpointDNSNameUS)
 	require.NoError(t, err, "missing US endpoint %s", endpointDNSNameUS)
 
 	expectedTargets := append(epExternalEU.Targets, epExternalUS.Targets...)

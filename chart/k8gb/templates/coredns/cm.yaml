@@ -8,11 +8,12 @@ metadata:
 {{ include "chart.labels" . | indent 4  }}
 data:
   Corefile: |-
-    {{ .Values.k8gb.dnsZone }}:5353 {
+{{- range .Values.k8gb.dnsZones }}
+    {{ .domain }}:5353 {
         errors
         health
-{{- if .Values.k8gb.coredns.extra_plugins }}
-{{- range .Values.k8gb.coredns.extra_plugins }}
+{{- if $.Values.k8gb.coredns.extra_plugins }}
+{{- range $.Values.k8gb.coredns.extra_plugins }}
         {{ . }}
 {{- end }}
 {{- end }}
@@ -21,10 +22,11 @@ data:
         forward . /etc/resolv.conf
         k8s_crd {
             filter k8gb.absa.oss/dnstype=local
-            negttl {{ .Values.k8gb.dnsZoneNegTTL }}
+            negttl {{ .dnsZoneNegTTL | default 30 }}
             loadbalance weight
         }
     }
+{{- end }}
     {{- with .Values.k8gb.coredns.extraServerBlocks -}}
     {{- tpl . $ | nindent 4 }}
     {{- end }}

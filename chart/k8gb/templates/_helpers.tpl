@@ -96,6 +96,28 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- end -}}
 {{- end -}}
 
+{{- define "k8gb.dnsZones" -}}
+{{- $entries := list -}}
+{{- range .Values.k8gb.dnsZones }}
+  {{- $entry := printf "%s:%s" .zone .domain }}
+  {{- $entries = append $entries $entry }}
+{{- end }}
+{{- if and .Values.k8gb.dnsZone .Values.k8gb.edgeDNSZone }}
+  {{- $extraEntry := printf "%s:%s" .Values.k8gb.edgeDNSZone .Values.k8gb.dnsZone }}
+  {{- $entries = append $entries $extraEntry }}
+{{- end }}
+{{- join ";" $entries }}
+{{- end }}
+
+
+{{- define "k8gb.coredns.extraPlugins" -}}
+{{- if .Values.k8gb.coredns.extra_plugins }}
+{{- range .Values.k8gb.coredns.extra_plugins }}
+        {{ . }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- define "k8gb.extdnsProviderOpts" -}}
 {{- if .Values.ns1.enabled -}}
 {{- if .Values.ns1.endpoint -}}

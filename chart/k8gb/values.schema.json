@@ -266,6 +266,12 @@
                 "deployRbac": {
                     "type": "boolean"
                 },
+                "dnsZones": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/k8gbDnsZone"
+                    }
+                },
                 "dnsZone": {
                     "format": "idn-hostname",
                     "minLength": 1
@@ -334,12 +340,24 @@
                     "type": "object"
                 }
             },
-            "required": [
-                "clusterGeoTag",
-                "extGslbClustersGeoTags",
-                "dnsZone",
-                "edgeDNSServers",
-                "edgeDNSZone"
+            "oneOf": [
+                {
+                    "required": [
+                        "clusterGeoTag",
+                        "extGslbClustersGeoTags",
+                        "edgeDNSServers",
+                        "dnsZone",
+                        "edgeDNSZone"
+                    ]
+                },
+                {
+                    "required": [
+                        "clusterGeoTag",
+                        "extGslbClustersGeoTags",
+                        "edgeDNSServers",
+                        "dnsZones"
+                    ]
+                }
             ],
             "title": "k8gb"
         },
@@ -420,6 +438,28 @@
                     "type": "boolean"
                 }
             }
+        },
+        "k8gbDnsZone": {
+            "type": "object",
+            "properties": {
+                "zone": {
+                    "type": "string",
+                    "format": "idn-hostname"
+                },
+                "domain": {
+                    "type": "string",
+                    "format": "idn-hostname"
+                },
+                "dnsZoneNegTTL": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 300
+                }
+            },
+            "required": [
+                "zone",
+                "domain"
+            ]
         },
         "Ns1": {
             "type": "object",
