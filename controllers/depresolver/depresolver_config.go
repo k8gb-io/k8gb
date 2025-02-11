@@ -73,6 +73,12 @@ const (
 	EdgeDNSServerPortKey = "EDGE_DNS_SERVER_PORT"
 )
 
+const (
+	localhost = "localhost"
+
+	localhostIPv4 = "127.0.0.1"
+)
+
 // ResolveOperatorConfig executes once. It reads operator's configuration
 // from environment variables into &Config and validates
 func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
@@ -90,15 +96,17 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		// calculation
 		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
 		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
-		dr.config.DelegationZones = parseDelegationZones(dr.config.dnsZones, dr.config.EdgeDNSZone, dr.config.DNSZone)
 		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
 		dr.config.ExtClustersGeoTags = excludeGeoTag(dr.config.ExtClustersGeoTags, dr.config.ClusterGeoTag)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
 
-		// validation
 		dr.errorConfig = dr.validateConfig(dr.config, recognizedDNSTypes)
+		// validation
+		if dr.errorConfig == nil {
+			dr.config.DelegationZones = parseDelegationZones(dr.config)
+		}
 	})
 	return dr.config, dr.errorConfig
 }
@@ -220,7 +228,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 func validateLocalhostNotAmongDNSServers(config *Config) error {
 	containsLocalhost := func(list utils.DNSList) bool {
 		for i := 1; i < len(list); i++ { // skipping first because localhost or 127.0.0.1 can occur on the first position
-			if list[i].Host == "localhost" || list[i].Host == "127.0.0.1" {
+			if list[i].Host == localhost || list[i].Host == localhostIPv4 {
 				return true
 			}
 		}
@@ -403,44 +411,4 @@ func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
 	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
 	domainX := strings.ReplaceAll(d, ".", "-")
 	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edgeDNSZone)
-}
-
-func parseDelegationZones(zones, edgeDNSZone, dnsZone string) []DelegationZoneInfo {
-	getEnvAsArrayOfPairsOrFallback := func(zones string, fallback map[string]string) map[string]string {
-		pairs := make(map[string]string)
-		slice := strings.Split(zones, ";")
-		if len(slice) == 0 {
-			return fallback
-		}
-		for _, z := range slice {
-			pair := strings.Split(z, ":")
-			if len(pair) != 2 {
-				return fallback
-			}
-			pairs[strings.Trim(pair[0], " ")] = strings.Trim(pair[1], " ")
-		}
-		for k, v := range fallback {
-			if _, found := pairs[k]; !found {
-				pairs[k] = v
-			}
-		}
-		return pairs
-	}
-	var dzi []DelegationZoneInfo
-	if edgeDNSZone == "" || dnsZone == "" {
-		return dzi
-	}
-	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
-	fallbackDNSZone := map[string]string{edgeDNSZone: dnsZone}
-	di := getEnvAsArrayOfPairsOrFallback(zones, fallbackDNSZone)
-
-	for edge, zone := range di {
-		dzi = append(dzi, DelegationZoneInfo{
-			Domain:  zone,
-			Zone:    edge,
-			IPs:     []string{},
-			NSNames: []string{},
-		})
-	}
-	return dzi
 }

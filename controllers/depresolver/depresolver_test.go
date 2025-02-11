@@ -69,18 +69,10 @@ var predefinedConfig = Config{
 	fallbackEdgeDNSServerName: "",
 	fallbackEdgeDNSServerPort: 53,
 	dnsZones:                  defaultDNSZones,
-	DelegationZones: []DelegationZoneInfo{
-		{
-			Zone:    "example.com",
-			Domain:  "cloud.example.com",
-			NSNames: []string{},
-			IPs:     []string{},
-		},
-	},
-	EdgeDNSZone:    "example.com",
-	DNSZone:        defaultEdgeDNSZone,
-	K8gbNamespace:  "k8gb",
-	MetricsAddress: "0.0.0.0:8080",
+	EdgeDNSZone:               "example.com",
+	DNSZone:                   defaultEdgeDNSZone,
+	K8gbNamespace:             "k8gb",
+	MetricsAddress:            "0.0.0.0:8080",
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
 		"0.0.3",
@@ -282,6 +274,7 @@ func TestResolveConfigWithDeprecatedEdgeDNSServerKey(t *testing.T) {
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	depr := resolver.GetDeprecations()
+	config.DelegationZones = nil
 	// assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, depr)
@@ -330,10 +323,12 @@ func TestConfigRunOnce(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	config1, err1 := resolver.ResolveOperatorConfig()
+	config1.DelegationZones = nil
 	depr1 := resolver.GetDeprecations()
 	_ = os.Setenv(ReconcileRequeueSecondsKey, "100")
 	// resolve again with new values
 	config2, err2 := resolver.ResolveOperatorConfig()
+	config2.DelegationZones = nil
 	depr2 := resolver.GetDeprecations()
 	// assert
 	assert.NoError(t, err1)
@@ -597,20 +592,6 @@ func TestResolveConfigWithHostnameEdgeDnsZone(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSZone = "company.2l.com"
-	expected.DelegationZones = []DelegationZoneInfo{
-		{
-			Domain:  "cloud.example.com",
-			NSNames: []string{},
-			IPs:     []string{},
-			Zone:    "example.com",
-		},
-		{
-			Domain:  "cloud.example.com",
-			NSNames: []string{},
-			IPs:     []string{},
-			Zone:    "company.2l.com",
-		},
-	}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -620,20 +601,6 @@ func TestResolveConfigWithInvalidHostnameEdgeDnsZone(t *testing.T) {
 	defer cleanup()
 	expected := predefinedConfig
 	expected.EdgeDNSZone = "https://zone.com"
-	expected.DelegationZones = []DelegationZoneInfo{
-		{
-			Domain:  "cloud.example.com",
-			NSNames: []string{},
-			IPs:     []string{},
-			Zone:    "example.com",
-		},
-		{
-			Domain:  "cloud.example.com",
-			NSNames: []string{},
-			IPs:     []string{},
-			Zone:    "https://zone.com",
-		},
-	}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -737,6 +704,7 @@ func TestResolveGeoTagExistsWithinExtGeoTags(t *testing.T) {
 		resolver := NewDependencyResolver()
 		// act
 		config, err := resolver.ResolveOperatorConfig()
+		config.DelegationZones = nil
 		// assert
 		assert.NoError(t, err)
 		assert.Equal(t, expected, *config)
@@ -1473,6 +1441,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 	if config == nil {
 		t.Fatal("nil *config returned")
 	}
+	config.DelegationZones = nil
 	assert.Equal(t, expected, *config)
 	errf(t, err)
 }
@@ -1551,20 +1520,22 @@ func TestParseDNSZones(t *testing.T) {
 		}
 		return false
 	}
-
 	tests := []struct {
 		name        string
-		dnsZones    string
-		dnsZone     string
-		edgeDNSZone string
 		expectedLen int
+		config      *Config
 		assert      func(zoneInfo []DelegationZoneInfo)
 	}{
 		{
-			name:        "multiple zones",
-			dnsZones:    "example.com:cloud.example.com;example.io:cloud.example.io",
-			dnsZone:     "cloud.example.org",
-			edgeDNSZone: "example.org",
+			name: "multiple zones",
+			config: &Config{
+				dnsZones:           "example.com:cloud.example.com;example.io:cloud.example.io",
+				EdgeDNSZone:        "example.org",
+				DNSZone:            "cloud.example.org",
+				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:      "us",
+				ExtClustersGeoTags: []string{"za", "eu"},
+			},
 			expectedLen: 3,
 			assert: func(zoneInfo []DelegationZoneInfo) {
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
@@ -1579,10 +1550,15 @@ func TestParseDNSZones(t *testing.T) {
 			},
 		},
 		{
-			name:        "backward compatibility",
-			dnsZones:    "",
-			dnsZone:     "cloud.example.org",
-			edgeDNSZone: "example.org",
+			name: "backward compatibility",
+			config: &Config{
+				dnsZones:           "",
+				EdgeDNSZone:        "example.org",
+				DNSZone:            "cloud.example.org",
+				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:      "us",
+				ExtClustersGeoTags: []string{"za", "eu"},
+			},
 			expectedLen: 1,
 			assert: func(zoneInfo []DelegationZoneInfo) {
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
@@ -1591,10 +1567,15 @@ func TestParseDNSZones(t *testing.T) {
 			},
 		},
 		{
-			name:        "override",
-			dnsZones:    "example.com:cloud.example.com;example.io:cloud.example.io",
-			dnsZone:     "dc.example.com",
-			edgeDNSZone: "example.com",
+			name: "override",
+			config: &Config{
+				dnsZones:           "example.com:cloud.example.com;example.io:cloud.example.io",
+				EdgeDNSZone:        "example.com",
+				DNSZone:            "dc.example.com",
+				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:      "us",
+				ExtClustersGeoTags: []string{"za", "eu"},
+			},
 			expectedLen: 2,
 			assert: func(zoneInfo []DelegationZoneInfo) {
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
@@ -1606,10 +1587,15 @@ func TestParseDNSZones(t *testing.T) {
 			},
 		},
 		{
-			name:        "ends with semicolon",
-			dnsZones:    "example.com:cloud.example.com;example.io:cloud.example.io;",
-			dnsZone:     "cloud.example.org",
-			edgeDNSZone: "example.org",
+			name: "ends with semicolon",
+			config: &Config{
+				dnsZones:           "example.com:cloud.example.com;example.io:cloud.example.io;",
+				EdgeDNSZone:        "example.org",
+				DNSZone:            "cloud.example.org",
+				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:      "us",
+				ExtClustersGeoTags: []string{"za", "eu"},
+			},
 			expectedLen: 3,
 			assert: func(zoneInfo []DelegationZoneInfo) {
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
@@ -1624,10 +1610,15 @@ func TestParseDNSZones(t *testing.T) {
 			},
 		},
 		{
-			name:        "trimmed spaces and semicolons",
-			dnsZones:    "example.com: cloud.example.com; example.io:cloud.example.io ;",
-			dnsZone:     "cloud.example.org",
-			edgeDNSZone: "example.org",
+			name: "trimmed spaces and semicolons",
+			config: &Config{
+				dnsZones:           "example.com: cloud.example.com; example.io:cloud.example.io ;",
+				EdgeDNSZone:        "example.org",
+				DNSZone:            "cloud.example.org",
+				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:      "us",
+				ExtClustersGeoTags: []string{"za", "eu"},
+			},
 			expectedLen: 3,
 			assert: func(zoneInfo []DelegationZoneInfo) {
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
@@ -1644,7 +1635,7 @@ func TestParseDNSZones(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			zoneInfo := parseDelegationZones(test.dnsZones, test.edgeDNSZone, test.dnsZone)
+			zoneInfo := parseDelegationZones(test.config)
 			test.assert(zoneInfo)
 			assert.Equal(t, test.expectedLen, len(zoneInfo))
 		})
