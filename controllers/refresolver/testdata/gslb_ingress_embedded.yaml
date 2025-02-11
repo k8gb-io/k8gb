@@ -19,5 +19,4 @@ spec:
                     name: http
   strategy:
     type: roundRobin
-    splitBrainThresholdSeconds: 300
     dnsTtlSeconds: 30

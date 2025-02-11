@@ -50,5 +50,4 @@ spec:
       app: test-gslb
   strategy:
     type: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
-    splitBrainThresholdSeconds: 300 # Threshold after which external cluster is filtered out from delegated zone when it doesn't look alive
     dnsTtlSeconds: 30 # TTL value for automatically created DNS records

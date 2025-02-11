@@ -67,7 +67,6 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 	utils.AssertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.type", "failover")
 	utils.AssertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.primaryGeoTag", settings.PrimaryGeoTag)
 	utils.AssertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.dnsTtlSeconds", "5")
-	utils.AssertGslbSpec(t, options, "test-gslb-annotation-failover", ".spec.strategy.splitBrainThresholdSeconds", "600")
 
 	t.Run("Broken ingress is not proccessed", func(t *testing.T) {
 		utils.CreateGslb(t, options, settings, brokenResourcePath)
