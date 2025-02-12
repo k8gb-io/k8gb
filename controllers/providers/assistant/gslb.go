@@ -116,8 +116,16 @@ func (r *Gslb) CoreDNSExposedIPs() ([]string, error) {
 		err := coreerrors.New(errMessage)
 		return nil, err
 	}
-	lb = coreDNSService.Status.LoadBalancer.Ingress[0]
-	return extractIPFromLB(lb, r.edgeDNSServers)
+	lbIPs := []string{}
+	for _, lb = range coreDNSService.Status.LoadBalancer.Ingress {
+		ips, err := extractIPFromLB(lb, r.edgeDNSServers)
+		lbIPs = append(lbIPs, ips...)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return lbIPs, nil
 }
 
 func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
