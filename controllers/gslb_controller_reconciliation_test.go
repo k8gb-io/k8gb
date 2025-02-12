@@ -49,7 +49,6 @@ import (
 	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -590,35 +589,6 @@ func TestCanGetExternalTargetsFromK8gbInAnotherLocation(t *testing.T) {
 			sort.Strings(hrGot["roundrobin.cloud.example.com"])
 			sort.Strings(hrWant["roundrobin.cloud.example.com"])
 			assert.Equal(t, hrGot, hrWant, "got:\n %s Gslb Records status,\n\n want:\n %s", hrGot, hrWant)
-		}).RequireNoError(t)
-}
-
-func TestCanCheckExternalGslbTXTRecordForValidityAndFailIfItIsExpired(t *testing.T) {
-	// arrange
-	utils.NewFakeDNS(fakeDNSSettings).
-		AddTXTRecord("test-gslb-heartbeat-eu.example.com.", oldEdgeTimestamp("10m")).
-		Start().
-		RunTestFunc(func() {
-			settings := provideSettings(t, predefinedConfig)
-			// act
-			got := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-eu.example.com", time.Minute*5)
-			want := errors.NewResourceExpired("Split brain TXT record expired the time threshold: (5m0s)")
-			// assert
-			assert.Equal(t, want, got, "got:\n %s from TXT split brain check,\n\n want error:\n %v", got, want)
-		}).RequireNoError(t)
-}
-
-func TestCanCheckExternalGslbTXTRecordForValidityAndPAssIfItISNotExpired(t *testing.T) {
-	// arrange
-	utils.NewFakeDNS(fakeDNSSettings).
-		AddTXTRecord("test-gslb-heartbeat-za.example.com.", oldEdgeTimestamp("3m")).
-		Start().
-		RunTestFunc(func() {
-			settings := provideSettings(t, predefinedConfig)
-			// act
-			err2 := settings.assistant.InspectTXTThreshold("test-gslb-heartbeat-za.example.com", time.Minute*5)
-			// assert
-			assert.NoError(t, err2, "got:\n %s from TXT split brain check,\n\n want error:\n %v", err2, nil)
 		}).RequireNoError(t)
 }
 
@@ -1493,14 +1463,6 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 	}
 	reconcileAndUpdateGslb(t, settings)
 	return settings
-}
-
-func oldEdgeTimestamp(threshold string) string {
-	now := time.Now()
-	duration, _ := time.ParseDuration(threshold)
-	before := now.Add(-duration)
-	edgeTimestamp := fmt.Sprint(before.UTC().Format("2006-01-02T15:04:05"))
-	return edgeTimestamp
 }
 
 func TestMain(m *testing.M) {

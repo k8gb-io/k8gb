@@ -47,5 +47,4 @@ spec:
       app: notfound-istio
   strategy:
     type: roundRobin
-    splitBrainThresholdSeconds: 300
     dnsTtlSeconds: 30

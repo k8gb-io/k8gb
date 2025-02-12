@@ -132,8 +132,6 @@ spec:
               value: {{ quote .Values.k8gb.log.level }}
             - name: NO_COLOR
               value: "true"
-            - name: SPLIT_BRAIN_CHECK
-              value: {{ quote .Values.k8gb.splitBrainCheck }}
             - name: METRICS_ADDRESS
               value: {{ .Values.k8gb.metricsAddress }}
       {{- if .Values.tracing.enabled }}

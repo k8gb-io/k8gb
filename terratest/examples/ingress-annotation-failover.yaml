@@ -5,7 +5,6 @@ metadata:
     k8gb.io/strategy: failover
     k8gb.io/primary-geotag: "eu"
     k8gb.io/dns-ttl-seconds: "5"
-    k8gb.io/splitbrain-threshold-seconds: "600"
   name: test-gslb-annotation-failover
 spec:
   ingressClassName: nginx

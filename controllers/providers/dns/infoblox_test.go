@@ -181,57 +181,6 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabled(t *testing.T) {
-	// arrange
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	a := mocks.NewMockAssistant(ctrl)
-	cl := mocks.NewMockInfobloxClient(ctrl)
-	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Do(func(fqdn string, _ interface{}) {
-		require.Equal(t, "test-gslb-heartbeat-us-east-1.example.com", fqdn)
-	}).Return(nil).Times(1)
-	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
-	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(2)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
-	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
-		Return(nil).Do(func(arg0 *ibclient.RecordTXT, _, _ interface{}) {
-		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
-	}).AnyTimes()
-	config := defaultConfig
-	config.SplitBrainCheck = true
-	provider := NewInfobloxDNS(config, a, cl)
-
-	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
-	// assert
-	assert.NoError(t, err)
-}
-
-func TestInfobloxCreateZoneDelegationForExternalDNSWithSplitBrainEnabledCreatingNewHeartBeatRecord(t *testing.T) {
-	// arrange
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	a := mocks.NewMockAssistant(ctrl)
-	cl := mocks.NewMockInfobloxClient(ctrl)
-	con := mocks.NewMockIBConnector(ctrl)
-	a.EXPECT().InspectTXTThreshold(gomock.Any(), gomock.Any()).Return(nil).Times(1)
-	con.EXPECT().CreateObject(gomock.Any()).Return(ref, nil).AnyTimes()
-	con.EXPECT().UpdateObject(gomock.Any(), gomock.Any()).Return(ref, nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).Return(nil)
-	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{}).Return(nil).AnyTimes()
-	config := defaultConfig
-	config.SplitBrainCheck = true
-	provider := NewInfobloxDNS(config, a, cl)
-
-	// act
-	err := provider.CreateZoneDelegationForExternalDNS(defaultGslb)
-	// assert
-	assert.NoError(t, err)
-}
-
 func TestInfobloxFinalize(t *testing.T) {
 	// arrange
 	ctrl := gomock.NewController(t)
@@ -244,10 +193,6 @@ func TestInfobloxFinalize(t *testing.T) {
 	}).AnyTimes()
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).
 		Return(nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.RecordTXT{{Ref: ref}}).
-		Return(nil).Do(func(arg0 *ibclient.RecordTXT, _, _ interface{}) {
-		require.Equal(t, "test-gslb-heartbeat-us-west-1.example.com", arg0.Name)
-	}).Times(1)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
 	config := defaultConfig
 	provider := NewInfobloxDNS(config, a, cl)
