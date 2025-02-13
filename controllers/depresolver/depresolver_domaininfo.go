@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 )
 
 type DelegationZones []DelegationZoneInfo
@@ -31,7 +33,6 @@ type DelegationZoneInfo struct {
 	Zone              string
 	ClusterNSName     string
 	ExtClusterNSNames map[string]string
-	ClusterHeartBeat  string
 }
 
 func parseDelegationZones(config *Config) []DelegationZoneInfo {
@@ -97,6 +98,7 @@ func parseDelegationZones(config *Config) []DelegationZoneInfo {
 	return dzi
 }
 
+// GetNSServerList returns a sorted list of all NS servers for the delegation zone
 func (z *DelegationZoneInfo) GetNSServerList() []string {
 	list := []string{z.ClusterNSName}
 	for _, v := range z.ExtClusterNSNames {
@@ -104,4 +106,24 @@ func (z *DelegationZoneInfo) GetNSServerList() []string {
 	}
 	sort.Strings(list)
 	return list
+}
+
+// GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
+func (z *DelegationZoneInfo) GetExternalDNSEndpointName() string {
+	const externalDNSTypeCommon = "extdns"
+	var suffix = strings.Trim(strings.ReplaceAll(z.Domain, ".", "-"), " ")
+	return fmt.Sprintf("gslb-ns-%s-%s", externalDNSTypeCommon, suffix)
+}
+
+// FindByHostname returns DelegationZoneInfo for the hostname
+func (d *DelegationZones) FindByHostname(gslb *k8gbv1beta1.Gslb) *DelegationZoneInfo {
+	if len(gslb.Status.Servers) == 0 {
+		return nil
+	}
+	for _, z := range *d {
+		if strings.HasSuffix(gslb.Status.Servers[0].Host, z.Domain) {
+			return &z
+		}
+	}
+	return nil
 }

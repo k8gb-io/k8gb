@@ -116,13 +116,71 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockAssistant(ctrl)
+	a.Config.DelegationZones = []depresolver.DelegationZoneInfo{
+		{
+			Domain:            a.Config.DNSZone,
+			Zone:              a.Config.EdgeDNSZone,
+			ClusterNSName:     a.Config.GetClusterNSName(),
+			ExtClusterNSNames: a.Config.GetExternalClusterNSNames(),
+		},
+	}
+	ep1 := expectedDNSEndpoint.DeepCopy()
+	ep1.Name = "gslb-ns-extdns-cloud-example-com"
 	p := NewExternalDNS(a.Config, m)
-	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(expectedDNSEndpoint)).Return(nil).Times(1).
+	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(ep1)).Return(nil).Times(1).
 		Do(func(ns string, ep *externaldns.DNSEndpoint) {
-			require.True(t, reflect.DeepEqual(ep, expectedDNSEndpoint))
+			require.True(t, reflect.DeepEqual(ep, ep1))
 			require.Equal(t, ns, a.Config.K8gbNamespace)
 		})
 
+	// act
+	err := p.CreateZoneDelegationForExternalDNS(a.Gslb)
+	// assert
+	assert.NoError(t, err)
+}
+
+func TestCreateZoneDelegationOnExternalDNSWithMultipleEndpoints(t *testing.T) {
+	// arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := mocks.NewMockAssistant(ctrl)
+	a.Config.DelegationZones = []depresolver.DelegationZoneInfo{
+		{
+			Domain:            a.Config.DNSZone,
+			Zone:              a.Config.EdgeDNSZone,
+			ClusterNSName:     a.Config.GetClusterNSName(),
+			ExtClusterNSNames: a.Config.GetExternalClusterNSNames(),
+		},
+		{
+			Domain:            "common.sampledomain.com",
+			Zone:              "sampledomain.com",
+			ClusterNSName:     "gslb-ns-us-common.sampledomain.com",
+			ExtClusterNSNames: map[string]string{"za": "gslb-ns-za-common.sampledomain.com", "eu": "gslb-ns-eu-common.sampledomain.com"},
+		},
+	}
+	ep1 := expectedDNSEndpoint.DeepCopy()
+	ep1.Name = "gslb-ns-extdns-cloud-example-com"
+	ep2 := expectedDNSEndpoint.DeepCopy()
+	ep2.Name = "gslb-ns-extdns-common-sampledomain-com"
+	ep2.Spec.Endpoints[0].DNSName = "common.sampledomain.com"
+	ep2.Spec.Endpoints[1].DNSName = "gslb-ns-us-common.sampledomain.com"
+	ep2.Spec.Endpoints[0].Targets = []string{
+		"gslb-ns-eu-common.sampledomain.com",
+		"gslb-ns-us-common.sampledomain.com",
+		"gslb-ns-za-common.sampledomain.com",
+	}
+	p := NewExternalDNS(a.Config, m)
+	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(ep1)).Return(nil).Times(1).
+		Do(func(ns string, ep *externaldns.DNSEndpoint) {
+			require.True(t, reflect.DeepEqual(ep, ep1))
+			require.Equal(t, ns, a.Config.K8gbNamespace)
+		})
+
+	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(ep2)).Return(nil).Times(1).
+		Do(func(ns string, ep *externaldns.DNSEndpoint) {
+			require.True(t, reflect.DeepEqual(ep, ep2))
+			require.Equal(t, ns, a.Config.K8gbNamespace)
+		})
 	// act
 	err := p.CreateZoneDelegationForExternalDNS(a.Gslb)
 	// assert

@@ -925,6 +925,14 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			customConfig.ClusterGeoTag = "eu"
 			customConfig.ExtClustersGeoTags = []string{"za", "us"}
 			customConfig.DNSZone = dnsZone
+			customConfig.DelegationZones = depresolver.DelegationZones{
+				{
+					Domain:            dnsZone,
+					Zone:              "example.com",
+					ClusterNSName:     customConfig.GetClusterNSName(),
+					ExtClusterNSNames: customConfig.GetExternalClusterNSNames(),
+				},
+			}
 			// apply new environment variables and update config only
 			settings.reconciler.Config = &customConfig
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
@@ -933,7 +941,10 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			settings.reconciler.DNSProvider = f.Provider()
 
 			reconcileAndUpdateGslb(t, settings)
-			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+			err = settings.client.Get(
+				context.TODO(),
+				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "gslb-ns-extdns-cloud-example-com"},
+				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
 			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
 			gotEp := dnsEndpoint.Spec.Endpoints
@@ -1001,6 +1012,14 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			customConfig.ClusterGeoTag = "eu"
 			customConfig.ExtClustersGeoTags = []string{"za", "us"}
 			customConfig.DNSZone = dnsZone
+			customConfig.DelegationZones = depresolver.DelegationZones{
+				{
+					Domain:            dnsZone,
+					Zone:              "example.com",
+					ClusterNSName:     customConfig.GetClusterNSName(),
+					ExtClusterNSNames: customConfig.GetExternalClusterNSNames(),
+				},
+			}
 			// apply new environment variables and update config only
 			settings.reconciler.Config = &customConfig
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
@@ -1009,7 +1028,10 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			settings.reconciler.DNSProvider = f.Provider()
 
 			reconcileAndUpdateGslb(t, settings)
-			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+			err = settings.client.Get(
+				context.TODO(),
+				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "gslb-ns-extdns-cloud-example-com"},
+				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
 			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
 			gotEp := dnsEndpoint.Spec.Endpoints
