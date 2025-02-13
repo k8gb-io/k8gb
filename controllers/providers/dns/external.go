@@ -74,34 +74,36 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 		return err
 	}
 
-	for _, domainInfo := range p.config.DelegationZones {
-		NSRecord := &externaldns.DNSEndpoint{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        domainInfo.GetExternalDNSEndpointName(),
-				Namespace:   p.config.K8gbNamespace,
-				Annotations: map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
-			},
-			Spec: externaldns.DNSEndpointSpec{
-				Endpoints: []*externaldns.Endpoint{
-					{
-						DNSName:    domainInfo.Domain,
-						RecordTTL:  ttl,
-						RecordType: "NS",
-						Targets:    domainInfo.GetNSServerList(),
-					},
-					{
-						DNSName:    domainInfo.ClusterNSName,
-						RecordTTL:  ttl,
-						RecordType: "A",
-						Targets:    NSServerIPs,
-					},
+	domainInfo := p.config.DelegationZones.FindByGslbStatusHostname(gslb)
+	if domainInfo == nil {
+		return fmt.Errorf("domainInfo not found for GSLB: %s. Check if the gslb.Status.Servers[*].Host property matches any of the DNSZones", gslb.Name)
+	}
+	NSRecord := &externaldns.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        domainInfo.GetExternalDNSEndpointName(),
+			Namespace:   p.config.K8gbNamespace,
+			Annotations: map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
+		},
+		Spec: externaldns.DNSEndpointSpec{
+			Endpoints: []*externaldns.Endpoint{
+				{
+					DNSName:    domainInfo.Domain,
+					RecordTTL:  ttl,
+					RecordType: "NS",
+					Targets:    domainInfo.GetNSServerList(),
+				},
+				{
+					DNSName:    domainInfo.ClusterNSName,
+					RecordTTL:  ttl,
+					RecordType: "A",
+					Targets:    NSServerIPs,
 				},
 			},
-		}
-		err = p.assistant.SaveDNSEndpoint(p.config.K8gbNamespace, NSRecord)
-		if err != nil {
-			return err
-		}
+		},
+	}
+	err = p.assistant.SaveDNSEndpoint(p.config.K8gbNamespace, NSRecord)
+	if err != nil {
+		return err
 	}
 	return nil
 }

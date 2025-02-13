@@ -132,9 +132,14 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 			require.True(t, reflect.DeepEqual(ep, ep1))
 			require.Equal(t, ns, a.Config.K8gbNamespace)
 		})
-
+	gslb := a.Gslb.DeepCopy()
+	gslb.Status.Servers = []*k8gbv1beta1.Server{
+		{
+			Host: "cloud.example.com",
+		},
+	}
 	// act
-	err := p.CreateZoneDelegationForExternalDNS(a.Gslb)
+	err := p.CreateZoneDelegationForExternalDNS(gslb)
 	// assert
 	assert.NoError(t, err)
 }
@@ -181,10 +186,31 @@ func TestCreateZoneDelegationOnExternalDNSWithMultipleEndpoints(t *testing.T) {
 			require.True(t, reflect.DeepEqual(ep, ep2))
 			require.Equal(t, ns, a.Config.K8gbNamespace)
 		})
+	gslb1 := a.Gslb.DeepCopy()
+	gslb1.Status.Servers = []*k8gbv1beta1.Server{
+		{
+			Host: "cloud.example.com",
+		},
+	}
+	gslb2 := a.Gslb.DeepCopy()
+	gslb2.Status.Servers = []*k8gbv1beta1.Server{
+		{
+			Host: "common.sampledomain.com",
+		},
+	}
+	gslb3 := a.Gslb.DeepCopy()
+	gslb3.Status.Servers = []*k8gbv1beta1.Server{
+		{
+			Host: "common.dummy.com",
+		},
+	}
 	// act
-	err := p.CreateZoneDelegationForExternalDNS(a.Gslb)
-	// assert
+	err := p.CreateZoneDelegationForExternalDNS(gslb1)
 	assert.NoError(t, err)
+	err = p.CreateZoneDelegationForExternalDNS(gslb2)
+	assert.NoError(t, err)
+	err = p.CreateZoneDelegationForExternalDNS(gslb3)
+	assert.Error(t, err)
 }
 
 func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {

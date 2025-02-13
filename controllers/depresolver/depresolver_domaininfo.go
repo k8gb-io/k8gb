@@ -115,8 +115,8 @@ func (z *DelegationZoneInfo) GetExternalDNSEndpointName() string {
 	return fmt.Sprintf("gslb-ns-%s-%s", externalDNSTypeCommon, suffix)
 }
 
-// FindByHostname returns DelegationZoneInfo for the hostname
-func (d *DelegationZones) FindByHostname(gslb *k8gbv1beta1.Gslb) *DelegationZoneInfo {
+// FindByGslbStatusHostname returns DelegationZoneInfo for the hostname
+func (d *DelegationZones) FindByGslbStatusHostname(gslb *k8gbv1beta1.Gslb) *DelegationZoneInfo {
 	if len(gslb.Status.Servers) == 0 {
 		return nil
 	}
