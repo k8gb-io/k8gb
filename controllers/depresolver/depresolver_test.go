@@ -1552,21 +1552,21 @@ func TestParseDNSZones(t *testing.T) {
 						info.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.com" &&
 						info.GetNSServerList()[1] == "gslb-ns-us-cloud.example.com" &&
 						info.GetNSServerList()[2] == "gslb-ns-za-cloud.example.com" &&
-						info.GetExternalDNSEndpointName() == "gslb-ns-extdns-cloud-example-com"
+						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-com"
 				}))
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-cloud.example.org" &&
 						info.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.org" &&
 						info.GetNSServerList()[1] == "gslb-ns-us-cloud.example.org" &&
 						info.GetNSServerList()[2] == "gslb-ns-za-cloud.example.org" &&
-						info.GetExternalDNSEndpointName() == "gslb-ns-extdns-cloud-example-org"
+						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-org"
 				}))
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-cloud.example.io" &&
 						info.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.io" &&
 						info.GetNSServerList()[1] == "gslb-ns-us-cloud.example.io" &&
 						info.GetNSServerList()[2] == "gslb-ns-za-cloud.example.io" &&
-						info.GetExternalDNSEndpointName() == "gslb-ns-extdns-cloud-example-io"
+						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-io"
 				}))
 			},
 		},

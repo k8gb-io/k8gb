@@ -192,11 +192,20 @@ func TestInfobloxFinalize(t *testing.T) {
 		require.Equal(t, arg0, ref)
 	}).AnyTimes()
 	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).
-		Return(nil).Times(1)
+		Return(nil).Times(2)
 	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
 	config := defaultConfig
+	config.DelegationZones = []depresolver.DelegationZoneInfo{
+		{
+			Domain: "cloud.example.com",
+			Zone:   "example.com",
+		},
+		{
+			Domain: "cloud.example.org",
+			Zone:   "example.org",
+		},
+	}
 	provider := NewInfobloxDNS(config, a, cl)
-
 	// act
 	err := provider.Finalize(defaultGslb, nil)
 

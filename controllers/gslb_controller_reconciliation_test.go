@@ -943,7 +943,7 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			reconcileAndUpdateGslb(t, settings)
 			err = settings.client.Get(
 				context.TODO(),
-				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "gslb-ns-extdns-cloud-example-com"},
+				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},
 				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
 			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
@@ -1030,7 +1030,7 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			reconcileAndUpdateGslb(t, settings)
 			err = settings.client.Get(
 				context.TODO(),
-				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "gslb-ns-extdns-cloud-example-com"},
+				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},
 				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
 			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
