@@ -37,18 +37,16 @@ import (
 const externalDNSTypeCommon = "extdns"
 
 type ExternalDNSProvider struct {
-	assistant    assistant2.Assistant
-	config       depresolver.Config
-	endpointName string
+	assistant assistant2.Assistant
+	config    depresolver.Config
 }
 
 var log = logging.Logger()
 
 func NewExternalDNS(config depresolver.Config, assistant assistant2.Assistant) *ExternalDNSProvider {
 	return &ExternalDNSProvider{
-		assistant:    assistant,
-		config:       config,
-		endpointName: fmt.Sprintf("k8gb-ns-%s", externalDNSTypeCommon),
+		assistant: assistant,
+		config:    config,
 	}
 }
 
