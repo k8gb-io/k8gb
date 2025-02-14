@@ -125,7 +125,7 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 		},
 	}
 	ep1 := expectedDNSEndpoint.DeepCopy()
-	ep1.Name = "gslb-ns-extdns-cloud-example-com"
+	ep1.Name = "k8gb-ns-extdns-cloud-example-com"
 	p := NewExternalDNS(a.Config, m)
 	m.EXPECT().SaveDNSEndpoint(a.Config.K8gbNamespace, gomock.Eq(ep1)).Return(nil).Times(1).
 		Do(func(ns string, ep *externaldns.DNSEndpoint) {
@@ -164,9 +164,9 @@ func TestCreateZoneDelegationOnExternalDNSWithMultipleEndpoints(t *testing.T) {
 		},
 	}
 	ep1 := expectedDNSEndpoint.DeepCopy()
-	ep1.Name = "gslb-ns-extdns-cloud-example-com"
+	ep1.Name = "k8gb-ns-extdns-cloud-example-com"
 	ep2 := expectedDNSEndpoint.DeepCopy()
-	ep2.Name = "gslb-ns-extdns-common-sampledomain-com"
+	ep2.Name = "k8gb-ns-extdns-common-sampledomain-com"
 	ep2.Spec.Endpoints[0].DNSName = "common.sampledomain.com"
 	ep2.Spec.Endpoints[1].DNSName = "gslb-ns-us-common.sampledomain.com"
 	ep2.Spec.Endpoints[0].Targets = []string{

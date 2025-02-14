@@ -141,23 +141,25 @@ func (p *InfobloxProvider) Finalize(_ *k8gbv1beta1.Gslb, _ client.Client) error 
 	if err != nil {
 		return err
 	}
-	findZone, err := p.getZoneDelegated(objMgr, p.config.DNSZone)
-	if err != nil {
-		return err
-	}
-
-	if findZone != nil {
-		err = p.checkZoneDelegated(findZone)
+	for _, zoneInfo := range p.config.DelegationZones {
+		findZone, err := p.getZoneDelegated(objMgr, zoneInfo.Domain)
 		if err != nil {
 			return err
 		}
-		if len(findZone.Ref) > 0 {
-			log.Info().
-				Str("DNSZone", p.config.DNSZone).
-				Msg("Deleting delegated zone")
-			_, err := p.deleteZoneDelegated(objMgr, findZone.Ref)
+
+		if findZone != nil {
+			err = p.checkZoneDelegated(findZone)
 			if err != nil {
 				return err
+			}
+			if len(findZone.Ref) > 0 {
+				log.Info().
+					Str("DNSZone", zoneInfo.Domain).
+					Msg("Deleting delegated zone")
+				_, err := p.deleteZoneDelegated(objMgr, findZone.Ref)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

@@ -110,9 +110,8 @@ func (z *DelegationZoneInfo) GetNSServerList() []string {
 
 // GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
 func (z *DelegationZoneInfo) GetExternalDNSEndpointName() string {
-	const externalDNSTypeCommon = "extdns"
 	var suffix = strings.Trim(strings.ReplaceAll(z.Domain, ".", "-"), " ")
-	return fmt.Sprintf("gslb-ns-%s-%s", externalDNSTypeCommon, suffix)
+	return fmt.Sprintf("k8gb-ns-extdns-%s", suffix)
 }
 
 // FindByGslbStatusHostname returns DelegationZoneInfo for the hostname
