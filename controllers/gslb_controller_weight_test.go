@@ -183,8 +183,8 @@ func TestWeight(t *testing.T) {
 			m.EXPECT().GetExternalTargets("roundrobin.cloud.example.com").Return(ts).Times(1)
 			m.EXPECT().GetExternalTargets("notfound.cloud.example.com").Return(assistant.Targets{}).Times(1)
 			m.EXPECT().GetExternalTargets("unhealthy.cloud.example.com").Return(assistant.Targets{}).Times(1)
-
-			settings := provideSettings(t, predefinedConfig)
+			config := predefinedConfig
+			settings := provideSettings(t, config)
 			settings.reconciler.DNSProvider = m
 			settings.reconciler.DepResolver = r
 

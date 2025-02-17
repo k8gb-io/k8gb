@@ -115,6 +115,7 @@ func (z *DelegationZoneInfo) GetExternalDNSEndpointName() string {
 }
 
 // FindByGslbStatusHostname returns DelegationZoneInfo for the hostname
+// todo: noelements
 func (d *DelegationZones) FindByGslbStatusHostname(gslb *k8gbv1beta1.Gslb) *DelegationZoneInfo {
 	if len(gslb.Status.Servers) == 0 {
 		return nil
@@ -125,4 +126,21 @@ func (d *DelegationZones) FindByGslbStatusHostname(gslb *k8gbv1beta1.Gslb) *Dele
 		}
 	}
 	return nil
+}
+
+func (d *DelegationZones) ContainsZone(host string) bool {
+	for _, z := range *d {
+		if strings.Contains(host, z.Zone) {
+			return true
+		}
+	}
+	return false
+}
+
+func (d *DelegationZones) ListZones() []string {
+	var zones []string
+	for _, z := range *d {
+		zones = append(zones, z.Zone)
+	}
+	return zones
 }

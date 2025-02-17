@@ -83,8 +83,14 @@ var predefinedConfig = depresolver.Config{
 			Port: 7753,
 		},
 	},
-	EdgeDNSZone:   "example.com",
-	DNSZone:       "cloud.example.com",
+	EdgeDNSZone: "example.com",
+	DNSZone:     "cloud.example.com",
+	DelegationZones: []depresolver.DelegationZoneInfo{
+		{
+			Domain: "cloud.example.com",
+			Zone:   "example.com",
+		},
+	},
 	K8gbNamespace: "k8gb",
 	Infoblox: depresolver.Infoblox{
 		Host:                "fakeinfoblox.example.com",
@@ -851,7 +857,12 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 			// getting Gslb and Reconciler
 			predefinedSettings := provideSettings(t, predefinedConfig)
 			customConfig := predefinedConfig
-			customConfig.EdgeDNSZone = "otherdnszone.com"
+			customConfig.DelegationZones = depresolver.DelegationZones{
+				{
+					Domain: "cloud.example.com",
+					Zone:   "otherdnszone.com",
+				},
+			}
 			predefinedSettings.config = customConfig
 			req := reconcile.Request{
 				NamespacedName: types.NamespacedName{
@@ -865,7 +876,7 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 			_, err := predefinedSettings.reconciler.Reconcile(context.TODO(), req)
 			// assert
 			assert.Error(t, err, "expected controller to detect Ingress hostname and edgeDNSZone mismatch")
-			assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone otherdnszone.com"))
+			assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone [otherdnszone.com]"))
 		})
 }
 
