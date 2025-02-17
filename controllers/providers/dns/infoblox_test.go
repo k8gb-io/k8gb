@@ -44,15 +44,22 @@ const (
 var (
 	defaultConfig = depresolver.Config{
 		ReconcileRequeueSeconds: 30,
-		ClusterGeoTag:           "us-west-1",
-		ExtClustersGeoTags:      []string{"us-east-1"},
+		ClusterGeoTag:           "us",
+		ExtClustersGeoTags:      []string{"eu"},
 		EdgeDNSServers: []utils.DNSServer{
 			{
 				Host: "8.8.8.8",
 				Port: 53,
 			},
 		},
-		EdgeDNSZone:   "example.com",
+		DelegationZones: depresolver.DelegationZones{
+			{
+				Domain:            "cloud.example.com",
+				Zone:              "example.com",
+				ClusterNSName:     "gslb-ns-us-west-1-cloud.example.com",
+				ExtClusterNSNames: map[string]string{"us": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
+			},
+		},
 		DNSZone:       "cloud.example.com",
 		K8gbNamespace: "k8gb",
 		Infoblox: depresolver.Infoblox{
@@ -89,15 +96,14 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 		{Address: "10.0.0.3", Name: "gslb-ns-eu-cloud.example.com"},
 	}
 	customConfig := defaultConfig
-	customConfig.EdgeDNSZone = "example.com"
-	customConfig.ExtClustersGeoTags = []string{"za"}
+	// customConfig.DelegationZones[0].ExtClusterNSNames = map[string]string{"za": "gslb-ns-za-cloud.example.com"}
 	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockInfobloxClient(ctrl)
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
-	extClusters := customConfig.GetExternalClusterNSNames()
+	extClusters := customConfig.DelegationZones[0].ExtClusterNSNames
 	got := provider.filterOutDelegateTo(delegateTo, extClusters["za"])
 	// assert
 	assert.Equal(t, want, got, "got:\n %q filtered out delegation records,\n\n want:\n %q", got, want)

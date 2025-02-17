@@ -83,12 +83,13 @@ var predefinedConfig = depresolver.Config{
 			Port: 7753,
 		},
 	},
-	EdgeDNSZone: "example.com",
-	DNSZone:     "cloud.example.com",
+	DNSZone: "cloud.example.com",
 	DelegationZones: []depresolver.DelegationZoneInfo{
 		{
-			Domain: "cloud.example.com",
-			Zone:   "example.com",
+			Domain:            "cloud.example.com",
+			Zone:              "example.com",
+			ClusterNSName:     "gslb-ns-us-cloud.example.com",
+			ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
 		},
 	},
 	K8gbNamespace: "k8gb",
@@ -940,8 +941,8 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 				{
 					Domain:            dnsZone,
 					Zone:              "example.com",
-					ClusterNSName:     customConfig.GetClusterNSName(),
-					ExtClusterNSNames: customConfig.GetExternalClusterNSNames(),
+					ClusterNSName:     "gslb-ns-eu-cloud.example.com",
+					ExtClusterNSNames: map[string]string{"us": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
 				},
 			}
 			// apply new environment variables and update config only
@@ -1027,8 +1028,8 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 				{
 					Domain:            dnsZone,
 					Zone:              "example.com",
-					ClusterNSName:     customConfig.GetClusterNSName(),
-					ExtClusterNSNames: customConfig.GetExternalClusterNSNames(),
+					ClusterNSName:     "gslb-ns-eu-cloud.example.com",
+					ExtClusterNSNames: map[string]string{"eu": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
 				},
 			}
 			// apply new environment variables and update config only

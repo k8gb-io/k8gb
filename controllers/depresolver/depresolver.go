@@ -134,13 +134,13 @@ type Config struct {
 	fallbackEdgeDNSServerName string `env:"EDGE_DNS_SERVER"`
 	// to avoid breaking changes is used as fallback server port for EdgeDNSServers
 	fallbackEdgeDNSServerPort int `env:"EDGE_DNS_SERVER_PORT, default=53"`
-	// EdgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
-	EdgeDNSZone string `env:"EDGE_DNS_ZONE"`
+	// edgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
+	edgeDNSZone string `env:"EDGE_DNS_ZONE"`
 	// DNSZone controlled by gslb; e.g. cloud.example.com
 	DNSZone string `env:"DNS_ZONE"`
 	// DelegationZones
 	DelegationZones DelegationZones
-	// DelegationZones pairs of DNSZone ad EdgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io
+	// DelegationZones pairs of DNSZone ad edgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io
 	dnsZones string `env:"DNS_ZONES"`
 	// K8gbNamespace k8gb namespace
 	K8gbNamespace string `env:"POD_NAMESPACE"`

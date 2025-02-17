@@ -68,7 +68,14 @@ var a = struct {
 				Port: 53,
 			},
 		},
-		EdgeDNSZone:   "example.com",
+		DelegationZones: depresolver.DelegationZones{
+			{
+				Domain:            "cloud.example.com",
+				Zone:              "example.com",
+				ClusterNSName:     "gslb-ns-us-cloud.example.com",
+				ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
+			},
+		},
 		DNSZone:       "cloud.example.com",
 		K8gbNamespace: "k8gb",
 	},
@@ -116,14 +123,6 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockAssistant(ctrl)
-	a.Config.DelegationZones = []depresolver.DelegationZoneInfo{
-		{
-			Domain:            a.Config.DNSZone,
-			Zone:              a.Config.EdgeDNSZone,
-			ClusterNSName:     a.Config.GetClusterNSName(),
-			ExtClusterNSNames: a.Config.GetExternalClusterNSNames(),
-		},
-	}
 	ep1 := expectedDNSEndpoint.DeepCopy()
 	ep1.Name = "k8gb-ns-extdns-cloud-example-com"
 	p := NewExternalDNS(a.Config, m)
@@ -149,20 +148,13 @@ func TestCreateZoneDelegationOnExternalDNSWithMultipleEndpoints(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockAssistant(ctrl)
-	a.Config.DelegationZones = []depresolver.DelegationZoneInfo{
-		{
-			Domain:            a.Config.DNSZone,
-			Zone:              a.Config.EdgeDNSZone,
-			ClusterNSName:     a.Config.GetClusterNSName(),
-			ExtClusterNSNames: a.Config.GetExternalClusterNSNames(),
-		},
-		{
-			Domain:            "common.sampledomain.com",
-			Zone:              "sampledomain.com",
-			ClusterNSName:     "gslb-ns-us-common.sampledomain.com",
-			ExtClusterNSNames: map[string]string{"za": "gslb-ns-za-common.sampledomain.com", "eu": "gslb-ns-eu-common.sampledomain.com"},
-		},
+	di := depresolver.DelegationZoneInfo{
+		Domain:            "common.sampledomain.com",
+		Zone:              "sampledomain.com",
+		ClusterNSName:     "gslb-ns-us-common.sampledomain.com",
+		ExtClusterNSNames: map[string]string{"za": "gslb-ns-za-common.sampledomain.com", "eu": "gslb-ns-eu-common.sampledomain.com"},
 	}
+	a.Config.DelegationZones = append(a.Config.DelegationZones, di)
 	ep1 := expectedDNSEndpoint.DeepCopy()
 	ep1.Name = "k8gb-ns-extdns-cloud-example-com"
 	ep2 := expectedDNSEndpoint.DeepCopy()

@@ -38,7 +38,7 @@ type DelegationZoneInfo struct {
 func parseDelegationZones(config *Config) []DelegationZoneInfo {
 
 	zones := config.dnsZones
-	edgeDNSZone := config.EdgeDNSZone
+	edgeDNSZone := config.edgeDNSZone
 	dnsZone := config.DNSZone
 
 	getNsName := func(tag, edgeDNSServer, zone, edge string) string {
@@ -73,11 +73,11 @@ func parseDelegationZones(config *Config) []DelegationZoneInfo {
 		return pairs
 	}
 	var dzi []DelegationZoneInfo
-	if edgeDNSZone == "" || dnsZone == "" {
-		return dzi
-	}
 	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
-	fallbackDNSZone := map[string]string{edgeDNSZone: dnsZone}
+	fallbackDNSZone := map[string]string{}
+	if !(edgeDNSZone == "" && dnsZone == "") {
+		fallbackDNSZone[edgeDNSZone] = dnsZone
+	}
 	di := getEnvAsArrayOfPairsOrFallback(zones, fallbackDNSZone)
 
 	for edge, zone := range di {
@@ -115,7 +115,6 @@ func (z *DelegationZoneInfo) GetExternalDNSEndpointName() string {
 }
 
 // FindByGslbStatusHostname returns DelegationZoneInfo for the hostname
-// todo: noelements
 func (d *DelegationZones) FindByGslbStatusHostname(gslb *k8gbv1beta1.Gslb) *DelegationZoneInfo {
 	if len(gslb.Status.Servers) == 0 {
 		return nil

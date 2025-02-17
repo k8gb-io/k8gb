@@ -69,7 +69,7 @@ var predefinedConfig = Config{
 	fallbackEdgeDNSServerName: "",
 	fallbackEdgeDNSServerPort: 53,
 	dnsZones:                  defaultDNSZones,
-	EdgeDNSZone:               "example.com",
+	edgeDNSZone:               "example.com",
 	DNSZone:                   defaultEdgeDNSZone,
 	K8gbNamespace:             "k8gb",
 	MetricsAddress:            "0.0.0.0:8080",
@@ -581,7 +581,7 @@ func TestResolveConfigWithEmptyEdgeDnsZone(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSZone = ""
+	expected.edgeDNSZone = ""
 	expected.DelegationZones = nil
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
@@ -591,7 +591,7 @@ func TestResolveConfigWithHostnameEdgeDnsZone(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSZone = "company.2l.com"
+	expected.edgeDNSZone = "company.2l.com"
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -600,7 +600,7 @@ func TestResolveConfigWithInvalidHostnameEdgeDnsZone(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSZone = "https://zone.com"
+	expected.edgeDNSZone = "https://zone.com"
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -1169,7 +1169,7 @@ func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
 	defer cleanup()
 	customConfig := predefinedConfig
 	customConfig.DNSZone = defaultDNSZone
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
 	customConfig.ExtClustersGeoTags = []string{defaultClusterGeoTagUs2, defaultClusterGeoTagEu}
 	configureEnvVar(customConfig)
@@ -1215,7 +1215,7 @@ func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 	defer cleanup()
 	customConfig := predefinedConfig
 	customConfig.DNSZone = defaultDNSZone
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
 	customConfig.ExtClustersGeoTags = []string{"location-2"}
 	configureEnvVar(customConfig)
@@ -1236,7 +1236,7 @@ func TestNsServerNamesWithExtClusterGeoTagsContainingClusterGeoTag(t *testing.T)
 	defer cleanup()
 	customConfig := predefinedConfig
 	customConfig.DNSZone = defaultDNSZone
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
 	customConfig.ExtClustersGeoTags = []string{"location-2", defaultClusterGeoTagUs1}
 	configureEnvVar(customConfig)
@@ -1257,7 +1257,7 @@ func TestNsServerNamesLargeDNSZone(t *testing.T) {
 	// arrange DNSZone exceeds
 	customConfig := predefinedConfig
 	customConfig.DNSZone = "k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah.gslb.cloud.example.com"
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = "us"
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
@@ -1280,7 +1280,7 @@ func TestNsServerNamesWithLargeExtClusterGeoTag(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
 	customConfig.DNSZone = defaultDNSZone
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = "us"
 	customConfig.ExtClustersGeoTags = []string{}
 	customConfig.ExtClustersGeoTags = append(customConfig.ExtClustersGeoTags, predefinedConfig.ExtClustersGeoTags...)
@@ -1306,7 +1306,7 @@ func TestNsServerNamesWithLargeClusterGeoTag(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
 	customConfig.DNSZone = defaultDNSZone
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
+	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = "us-lorem-ipsum-donor-blah-blah-blah-blah"
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
@@ -1328,10 +1328,10 @@ func TestNsServerNamesWithExceededDNSNameSize(t *testing.T) {
 	// arrange
 	defer cleanup()
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSZone = "seo.cloud.example01.lorem.ipsum.alfa.bravo.charlie.delta.echo.foxtrot.golf.hotel.india." +
+	customConfig.edgeDNSZone = "seo.cloud.example01.lorem.ipsum.alfa.bravo.charlie.delta.echo.foxtrot.golf.hotel.india." +
 		"juliett.kilo.lima.mike.november.oscar.papa.quebec.romeo.sierra.tango.uniform.victor.whiskey.x-ray.yenkee.zulu." +
 		"zero.cloud.example.com"
-	customConfig.DNSZone = "k8gb-test-preprod.gslb." + customConfig.EdgeDNSZone
+	customConfig.DNSZone = "k8gb-test-preprod.gslb." + customConfig.edgeDNSZone
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 	// act
@@ -1466,7 +1466,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(ClusterGeoTagKey, config.ClusterGeoTag)
 	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
 	_ = os.Setenv(EdgeDNSServersKey, config.EdgeDNSServers.String())
-	_ = os.Setenv(EdgeDNSZoneKey, config.EdgeDNSZone)
+	_ = os.Setenv(EdgeDNSZoneKey, config.edgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.DNSZone)
 	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)
 	_ = os.Setenv(ExtDNSEnabledKey, strconv.FormatBool(config.extDNSEnabled))
@@ -1530,7 +1530,7 @@ func TestParseDNSZones(t *testing.T) {
 			name: "multiple zones",
 			config: &Config{
 				dnsZones:           "example.com:cloud.example.com;example.io:cloud.example.io",
-				EdgeDNSZone:        "example.org",
+				edgeDNSZone:        "example.org",
 				DNSZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
@@ -1574,7 +1574,7 @@ func TestParseDNSZones(t *testing.T) {
 			name: "backward compatibility",
 			config: &Config{
 				dnsZones:           "",
-				EdgeDNSZone:        "example.org",
+				edgeDNSZone:        "example.org",
 				DNSZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
@@ -1591,7 +1591,7 @@ func TestParseDNSZones(t *testing.T) {
 			name: "override",
 			config: &Config{
 				dnsZones:           "example.com:cloud.example.com;example.io:cloud.example.io",
-				EdgeDNSZone:        "example.com",
+				edgeDNSZone:        "example.com",
 				DNSZone:            "dc.example.com",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
@@ -1611,7 +1611,7 @@ func TestParseDNSZones(t *testing.T) {
 			name: "ends with semicolon",
 			config: &Config{
 				dnsZones:           "example.com:cloud.example.com;example.io:cloud.example.io;",
-				EdgeDNSZone:        "example.org",
+				edgeDNSZone:        "example.org",
 				DNSZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
@@ -1634,7 +1634,7 @@ func TestParseDNSZones(t *testing.T) {
 			name: "trimmed spaces and semicolons",
 			config: &Config{
 				dnsZones:           "example.com: cloud.example.com; example.io:cloud.example.io ;",
-				EdgeDNSZone:        "example.org",
+				edgeDNSZone:        "example.org",
 				DNSZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
@@ -1651,6 +1651,23 @@ func TestParseDNSZones(t *testing.T) {
 				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
 					return info.Zone == "example.org" && info.Domain == "cloud.example.org"
 				}))
+			},
+		},
+		{
+			name: "check nsNames",
+			config: &Config{
+				dnsZones:           "cloud.example.com: k8gb-test.gslb.cloud.example.com;",
+				edgeDNSZone:        "",
+				DNSZone:            "",
+				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:      "us",
+				ExtClustersGeoTags: []string{"za", "eu"},
+			},
+			expectedLen: 1,
+			assert: func(zoneInfo []DelegationZoneInfo) {
+				assert.True(t, zoneInfo[0].ClusterNSName == "gslb-ns-us-k8gb-test-gslb.cloud.example.com" &&
+					zoneInfo[0].ExtClusterNSNames["za"] == "gslb-ns-za-k8gb-test-gslb.cloud.example.com" &&
+					zoneInfo[0].ExtClusterNSNames["eu"] == "gslb-ns-eu-k8gb-test-gslb.cloud.example.com")
 			},
 		},
 	}
