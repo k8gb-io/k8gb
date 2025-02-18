@@ -47,7 +47,15 @@ const (
 var (
 	defaultGslb     = new(k8gbv1beta1.Gslb)
 	defaultEndpoint = new(externaldns.DNSEndpoint)
-	defaultConfig   = depresolver.Config{K8gbNamespace: namespace, DNSZone: "cloud.example.com"}
+	defaultConfig   = depresolver.Config{
+		K8gbNamespace: namespace,
+		DelegationZones: depresolver.DelegationZones{
+			{
+				Domain: "cloud.example.com",
+				Zone:   "example.com",
+			},
+		},
+	}
 )
 
 func TestMetricsSingletonIsNotNil(t *testing.T) {

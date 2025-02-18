@@ -39,7 +39,7 @@ func parseDelegationZones(config *Config) []DelegationZoneInfo {
 
 	zones := config.dnsZones
 	edgeDNSZone := config.edgeDNSZone
-	dnsZone := config.DNSZone
+	dnsZone := config.dnsZone
 
 	getNsName := func(tag, edgeDNSServer, zone, edge string) string {
 		if edgeDNSServer == localhost || edgeDNSServer == localhostIPv4 {

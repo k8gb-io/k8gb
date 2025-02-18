@@ -177,7 +177,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(DNSZoneKey, config.DNSZone).isNotEmpty().matchRegexp(hostNameRegex).err
+	err = field(DNSZoneKey, config.dnsZone).isNotEmpty().matchRegexp(hostNameRegex).err
 	if err != nil {
 		return err
 	}
@@ -203,7 +203,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	for geoTag, nsName := range serverNames {
 		if len(nsName) > dnsNameMax {
 			return fmt.Errorf("ns name '%s' exceeds %v charactes limit for [GeoTag: '%s', %s: '%s', %s: '%s']",
-				nsName, dnsLabelMax, geoTag, EdgeDNSZoneKey, config.edgeDNSZone, DNSZoneKey, config.DNSZone)
+				nsName, dnsLabelMax, geoTag, EdgeDNSZoneKey, config.edgeDNSZone, DNSZoneKey, config.dnsZone)
 		}
 		if err := validateLabels(nsName); err != nil {
 			return fmt.Errorf("error for geo tag: %s. %s in ns name %s", geoTag, err, nsName)
@@ -386,17 +386,17 @@ func parseLogOutputFormat(value string) LogFormat {
 func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
 	m = make(map[string]string, len(c.ExtClustersGeoTags))
 	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getNsName(tag, c.DNSZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
+		m[tag] = getNsName(tag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
 	}
 	return
 }
 
 func (c *Config) GetClusterNSName() string {
-	return getNsName(c.ClusterGeoTag, c.DNSZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
+	return getNsName(c.ClusterGeoTag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
 }
 
 // getNsName returns NS for geo tag.
-// The values is combination of DNSZone, edgeDNSZone and (Ext)ClusterGeoTag, see:
+// The values is combination of dnsZone, edgeDNSZone and (Ext)ClusterGeoTag, see:
 // DNS_ZONE k8gb-test.gslb.cloud.example.com
 // EDGE_DNS_ZONE: cloud.example.com
 // CLUSTER_GEOTAG: us

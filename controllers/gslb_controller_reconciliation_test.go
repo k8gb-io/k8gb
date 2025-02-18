@@ -83,7 +83,6 @@ var predefinedConfig = depresolver.Config{
 			Port: 7753,
 		},
 	},
-	DNSZone: "cloud.example.com",
 	DelegationZones: []depresolver.DelegationZoneInfo{
 		{
 			Domain:            "cloud.example.com",
@@ -936,7 +935,6 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
 			customConfig.ExtClustersGeoTags = []string{"za", "us"}
-			customConfig.DNSZone = dnsZone
 			customConfig.DelegationZones = depresolver.DelegationZones{
 				{
 					Domain:            dnsZone,
@@ -1023,7 +1021,6 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
 			customConfig.ExtClustersGeoTags = []string{"za", "us"}
-			customConfig.DNSZone = dnsZone
 			customConfig.DelegationZones = depresolver.DelegationZones{
 				{
 					Domain:            dnsZone,

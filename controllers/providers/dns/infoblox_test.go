@@ -60,7 +60,6 @@ var (
 				ExtClusterNSNames: map[string]string{"us": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
 			},
 		},
-		DNSZone:       "cloud.example.com",
 		K8gbNamespace: "k8gb",
 		Infoblox: depresolver.Infoblox{
 			Host:     "fakeinfoblox.example.com",
@@ -72,7 +71,7 @@ var (
 	}
 
 	defaultDelegatedZone = ibclient.ZoneDelegated{
-		Fqdn:       defaultConfig.DNSZone,
+		Fqdn:       defaultConfig.DelegationZones[0].Domain,
 		DelegateTo: []ibclient.NameServer{},
 		Ref:        ref,
 	}
@@ -187,9 +186,11 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	config.DelegationZones = []depresolver.DelegationZoneInfo{
 		{
 			Domain: "cloud.example.com",
+			Zone:   "example.com",
 		},
 		{
 			Domain: "cloud.example.org",
+			Zone:   "example.org",
 		},
 	}
 	gslb1 := defaultGslb.DeepCopy()

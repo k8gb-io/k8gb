@@ -76,7 +76,6 @@ var a = struct {
 				ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
 			},
 		},
-		DNSZone:       "cloud.example.com",
 		K8gbNamespace: "k8gb",
 	},
 	Gslb: func() *k8gbv1beta1.Gslb {
@@ -103,7 +102,7 @@ var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 	Spec: externaldns.DNSEndpointSpec{
 		Endpoints: []*externaldns.Endpoint{
 			{
-				DNSName:    a.Config.DNSZone,
+				DNSName:    a.Config.DelegationZones[0].Domain,
 				RecordTTL:  externaldns.TTL(a.Config.NSRecordTTL),
 				RecordType: "NS",
 				Targets:    a.TargetNSNamesSorted,
