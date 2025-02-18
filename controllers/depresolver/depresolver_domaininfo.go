@@ -127,13 +127,24 @@ func (d *DelegationZones) FindByGslbStatusHostname(gslb *k8gbv1beta1.Gslb) *Dele
 	return nil
 }
 
-func (d *DelegationZones) ContainsZone(host string) bool {
-	for _, z := range *d {
-		if strings.Contains(host, z.Zone) {
-			return true
-		}
+func (d *DelegationZones) GetClusterNSNameByGslb(gslb *k8gbv1beta1.Gslb) string {
+	z := d.FindByGslbStatusHostname(gslb)
+	if z != nil {
+		return z.ClusterNSName
 	}
-	return false
+	return ""
+}
+
+func (d *DelegationZones) GetExternalClusterNSNamesByHostname(host string) map[string]string {
+	z := d.getZone(host)
+	if z != nil {
+		return z.ExtClusterNSNames
+	}
+	return map[string]string{}
+}
+
+func (d *DelegationZones) ContainsZone(host string) bool {
+	return d.getZone(host) != nil
 }
 
 func (d *DelegationZones) ListZones() []string {
@@ -142,4 +153,13 @@ func (d *DelegationZones) ListZones() []string {
 		zones = append(zones, z.Zone)
 	}
 	return zones
+}
+
+func (d *DelegationZones) getZone(host string) *DelegationZoneInfo {
+	for _, z := range *d {
+		if strings.Contains(host, z.Zone) {
+			return &z
+		}
+	}
+	return nil
 }

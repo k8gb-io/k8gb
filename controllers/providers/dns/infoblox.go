@@ -81,7 +81,7 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 	var delegateTo []ibcl.NameServer
 
 	for _, address := range addresses {
-		nameServer := ibcl.NameServer{Address: address, Name: p.config.GetClusterNSName()}
+		nameServer := ibcl.NameServer{Address: address, Name: p.config.DelegationZones.GetClusterNSNameByGslb(gslb)}
 		delegateTo = append(delegateTo, nameServer)
 	}
 
