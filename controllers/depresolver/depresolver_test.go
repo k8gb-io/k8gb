@@ -1180,11 +1180,11 @@ func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
 
 	// assert
 	assert.NoError(t, err)
-	assert.Len(t, config.GetExternalClusterNSNames(), 2)
-	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
+	assert.Len(t, config.getExternalClusterNSNames(), 2)
+	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.getClusterNSName())
 	for k, v := range map[string]string{defaultClusterGeoTagUs2: "gslb-ns-us-east-1-k8gb-test-preprod-gslb.cloud.example.com",
 		defaultClusterGeoTagEu: "gslb-ns-eu-central-1-k8gb-test-preprod-gslb.cloud.example.com"} {
-		assert.Equal(t, config.GetExternalClusterNSNames()[k], v)
+		assert.Equal(t, config.getExternalClusterNSNames()[k], v)
 	}
 }
 
@@ -1205,8 +1205,8 @@ func TestNsServerNamesForLocalEdgeDNS(t *testing.T) {
 		config, err := resolver.ResolveOperatorConfig()
 		// assert
 		assert.NoError(t, err)
-		assert.Equal(t, config.GetClusterNSName(), edgeDNSServer)
-		assert.True(t, reflect.DeepEqual(config.GetExternalClusterNSNames(), map[string]string{"za": edgeDNSServer, "eu": edgeDNSServer}))
+		assert.Equal(t, config.getClusterNSName(), edgeDNSServer)
+		assert.True(t, reflect.DeepEqual(config.getExternalClusterNSNames(), map[string]string{"za": edgeDNSServer, "eu": edgeDNSServer}))
 	}
 }
 
@@ -1226,9 +1226,9 @@ func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 
 	// assert
 	assert.NoError(t, err)
-	assert.Len(t, config.GetExternalClusterNSNames(), 1)
-	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
-	assert.Equal(t, config.GetExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
+	assert.Len(t, config.getExternalClusterNSNames(), 1)
+	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.getClusterNSName())
+	assert.Equal(t, config.getExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
 }
 
 func TestNsServerNamesWithExtClusterGeoTagsContainingClusterGeoTag(t *testing.T) {
@@ -1247,9 +1247,9 @@ func TestNsServerNamesWithExtClusterGeoTagsContainingClusterGeoTag(t *testing.T)
 
 	// assert
 	assert.NoError(t, err)
-	assert.Len(t, config.GetExternalClusterNSNames(), 1)
-	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
-	assert.Equal(t, config.GetExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
+	assert.Len(t, config.getExternalClusterNSNames(), 1)
+	assert.Equal(t, "gslb-ns-us-west-1-k8gb-test-preprod-gslb.cloud.example.com", config.getClusterNSName())
+	assert.Equal(t, config.getExternalClusterNSNames()["location-2"], "gslb-ns-location-2-k8gb-test-preprod-gslb.cloud.example.com")
 }
 
 func TestNsServerNamesLargeDNSZone(t *testing.T) {
@@ -1267,8 +1267,8 @@ func TestNsServerNamesLargeDNSZone(t *testing.T) {
 
 	// assert
 	assert.Error(t, err)
-	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com", config.GetClusterNSName())
-	extNsNames := config.GetExternalClusterNSNames()
+	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com", config.getClusterNSName())
+	extNsNames := config.getExternalClusterNSNames()
 	expectedExtNsNames := map[string]string{"za": "gslb-ns-za-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com",
 		"eu": "gslb-ns-eu-k8gb-test-preprod-lorem-ipsum-donor-blah-blah-blah-gslb.cloud.example.com"}
 	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
@@ -1293,8 +1293,8 @@ func TestNsServerNamesWithLargeExtClusterGeoTag(t *testing.T) {
 
 	// assert
 	assert.Error(t, err)
-	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
-	extNsNames := config.GetExternalClusterNSNames()
+	assert.Equal(t, "gslb-ns-us-k8gb-test-preprod-gslb.cloud.example.com", config.getClusterNSName())
+	extNsNames := config.getExternalClusterNSNames()
 	expectedExtNsNames := map[string]string{largeGeoTag: "gslb-ns-za-lorem-ipsum-donor-b-blah-lorem-k8gb-test-preprod-gslb.cloud.example.com",
 		"eu": "gslb-ns-eu-k8gb-test-preprod-gslb.cloud.example.com"}
 	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
@@ -1316,8 +1316,8 @@ func TestNsServerNamesWithLargeClusterGeoTag(t *testing.T) {
 
 	// assert
 	assert.Error(t, err)
-	assert.Equal(t, "gslb-ns-us-lorem-ipsum-donor-blah-blah-blah-blah-k8gb-test-preprod-gslb.cloud.example.com", config.GetClusterNSName())
-	extNsNames := config.GetExternalClusterNSNames()
+	assert.Equal(t, "gslb-ns-us-lorem-ipsum-donor-blah-blah-blah-blah-k8gb-test-preprod-gslb.cloud.example.com", config.getClusterNSName())
+	extNsNames := config.getExternalClusterNSNames()
 	expectedExtNsNames := map[string]string{"za": "gslb-ns-za-k8gb-test-preprod-gslb.cloud.example.com",
 		"eu": "gslb-ns-eu-k8gb-test-preprod-gslb.cloud.example.com"}
 	assert.True(t, reflect.DeepEqual(extNsNames, expectedExtNsNames), "maps must be equal: \n %v\n %v", extNsNames, expectedExtNsNames)
@@ -1338,9 +1338,9 @@ func TestNsServerNamesWithExceededDNSNameSize(t *testing.T) {
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Len(t, config.GetClusterNSName(), 253)
-	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
-	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
+	assert.Len(t, config.getClusterNSName(), 253)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
 
 	// arrange
 	// extend cluster geo tag with one character so NsServerName exceeds length limit
@@ -1351,9 +1351,9 @@ func TestNsServerNamesWithExceededDNSNameSize(t *testing.T) {
 	config, err = resolver.ResolveOperatorConfig()
 	// assert
 	assert.Error(t, err)
-	assert.Len(t, config.GetClusterNSName(), 254)
-	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
-	assert.Len(t, config.GetExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
+	assert.Len(t, config.getClusterNSName(), 254)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
 }
 
 func TestMetricsAddressIsValid(t *testing.T) {

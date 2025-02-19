@@ -102,6 +102,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
 
+		// replace validations by go-playground/validator
 		dr.errorConfig = dr.validateConfig(dr.config, recognizedDNSTypes)
 		// validation
 		if dr.errorConfig == nil {
@@ -198,8 +199,8 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 		return nil
 	}
 
-	serverNames := config.GetExternalClusterNSNames()
-	serverNames[config.ClusterGeoTag] = config.GetClusterNSName()
+	serverNames := config.getExternalClusterNSNames()
+	serverNames[config.ClusterGeoTag] = config.getClusterNSName()
 	for geoTag, nsName := range serverNames {
 		if len(nsName) > dnsNameMax {
 			return fmt.Errorf("ns name '%s' exceeds %v charactes limit for [GeoTag: '%s', %s: '%s', %s: '%s']",
@@ -383,7 +384,8 @@ func parseLogOutputFormat(value string) LogFormat {
 	return NoFormat
 }
 
-func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
+// deprecated, used for validations only
+func (c *Config) getExternalClusterNSNames() (m map[string]string) {
 	m = make(map[string]string, len(c.ExtClustersGeoTags))
 	for _, tag := range c.ExtClustersGeoTags {
 		m[tag] = getNsName(tag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
@@ -391,7 +393,8 @@ func (c *Config) GetExternalClusterNSNames() (m map[string]string) {
 	return
 }
 
-func (c *Config) GetClusterNSName() string {
+// deprecated, used for validations only
+func (c *Config) getClusterNSName() string {
 	return getNsName(c.ClusterGeoTag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
 }
 
