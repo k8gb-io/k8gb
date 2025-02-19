@@ -171,7 +171,7 @@ func (p *InfobloxProvider) Finalize(_ *k8gbv1beta1.Gslb, _ client.Client) error 
 }
 
 func (p *InfobloxProvider) GetExternalTargets(host string) (targets assistant.Targets) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+	return p.assistant.GetExternalTargets(host, p.config.DelegationZones.GetExternalClusterNSNamesByHostname(host))
 }
 
 func (p *InfobloxProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {

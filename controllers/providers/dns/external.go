@@ -129,7 +129,7 @@ func (p *ExternalDNSProvider) Finalize(_ *k8gbv1beta1.Gslb, k8sClient client.Cli
 }
 
 func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets assistant2.Targets) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+	return p.assistant.GetExternalTargets(host, p.config.DelegationZones.GetExternalClusterNSNamesByHostname(host))
 }
 
 func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {

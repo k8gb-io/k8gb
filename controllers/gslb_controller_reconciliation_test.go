@@ -75,8 +75,8 @@ var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingr
 var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	NSRecordTTL:             30,
-	ClusterGeoTag:           "us-west-1",
-	ExtClustersGeoTags:      []string{"us-east-1"},
+	ClusterGeoTag:           "us",
+	ExtClustersGeoTags:      []string{"eu"},
 	EdgeDNSServers: []utils.DNSServer{
 		{
 			Host: "127.0.0.1",
@@ -87,8 +87,8 @@ var predefinedConfig = depresolver.Config{
 		{
 			Domain:            "cloud.example.com",
 			Zone:              "example.com",
-			ClusterNSName:     "gslb-ns-us-cloud.example.com",
-			ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
+			ClusterNSName:     "localhost",
+			ExtClusterNSNames: map[string]string{"eu": "localhost"},
 		},
 	},
 	K8gbNamespace: "k8gb",
@@ -704,7 +704,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 
 			// enable failover strategy
 			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
-			settings.gslb.Spec.Strategy.PrimaryGeoTag = "us-east-1"
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
 
@@ -777,7 +777,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 
 			// enable failover strategy
 			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
-			settings.gslb.Spec.Strategy.PrimaryGeoTag = "us-east-1"
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
 
@@ -822,7 +822,7 @@ func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
 		Start().
 		RunTestFunc(func() {
 			// arrange
-			want := "us-west-1"
+			want := "us"
 			settings := provideSettings(t, predefinedConfig)
 			// act
 			reconcileAndUpdateGslb(t, settings)

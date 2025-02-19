@@ -44,7 +44,7 @@ func (p *EmptyDNSProvider) CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb)
 }
 
 func (p *EmptyDNSProvider) GetExternalTargets(host string) (targets assistant.Targets) {
-	return p.assistant.GetExternalTargets(host, p.config.GetExternalClusterNSNames())
+	return p.assistant.GetExternalTargets(host, p.config.DelegationZones.GetExternalClusterNSNamesByHostname(host))
 }
 
 func (p *EmptyDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {
