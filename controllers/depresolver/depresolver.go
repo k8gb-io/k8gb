@@ -124,8 +124,8 @@ type Config struct {
 	NSRecordTTL int `env:"NS_RECORD_TTL, default=30"`
 	// ClusterGeoTag to determine specific location
 	ClusterGeoTag string `env:"CLUSTER_GEO_TAG"`
-	// ExtClustersGeoTags to identify clusters in other locations in format separated by comma. i.e.: "eu,uk,us"
-	ExtClustersGeoTags []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS, default=[]"`
+	// extClustersGeoTags to identify clusters in other locations in format separated by comma. i.e.: "eu,uk,us"
+	extClustersGeoTags []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS, default=[]"`
 	// EdgeDNSType is READONLY and is set automatically by configuration
 	EdgeDNSType EdgeDNSType
 	// EdgeDNSServers

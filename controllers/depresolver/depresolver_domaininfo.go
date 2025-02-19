@@ -87,7 +87,7 @@ func parseDelegationZones(config *Config) []DelegationZoneInfo {
 			ClusterNSName: getNsName(config.ClusterGeoTag, config.EdgeDNSServers[0].Host, zone, edge),
 			ExtClusterNSNames: func(zone, edge string) map[string]string {
 				m := map[string]string{}
-				for _, tag := range config.ExtClustersGeoTags {
+				for _, tag := range config.extClustersGeoTags {
 					m[tag] = getNsName(tag, config.EdgeDNSServers[0].Host, zone, edge)
 				}
 				return m

@@ -61,7 +61,6 @@ var a = struct {
 		ReconcileRequeueSeconds: 30,
 		NSRecordTTL:             30,
 		ClusterGeoTag:           "us",
-		ExtClustersGeoTags:      []string{"za", "eu"},
 		EdgeDNSServers: []utils2.DNSServer{
 			{
 				Host: "dns.cloud.example.com",

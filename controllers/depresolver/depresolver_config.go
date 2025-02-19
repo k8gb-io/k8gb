@@ -97,7 +97,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
 		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
 		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
-		dr.config.ExtClustersGeoTags = excludeGeoTag(dr.config.ExtClustersGeoTags, dr.config.ClusterGeoTag)
+		dr.config.extClustersGeoTags = excludeGeoTag(dr.config.extClustersGeoTags, dr.config.ClusterGeoTag)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
 		dr.config.EdgeDNSType, recognizedDNSTypes = getEdgeDNSType(dr.config)
@@ -142,11 +142,11 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(ExtClustersGeoTagsKey, config.ExtClustersGeoTags).hasItems().hasUniqueItems().err
+	err = field(ExtClustersGeoTagsKey, config.extClustersGeoTags).hasItems().hasUniqueItems().err
 	if err != nil {
 		return err
 	}
-	for i, geoTag := range config.ExtClustersGeoTags {
+	for i, geoTag := range config.extClustersGeoTags {
 		err = field(fmt.Sprintf("%s[%v]", ExtClustersGeoTagsKey, i), geoTag).
 			isNotEmpty().matchRegexp(geoTagRegex).err
 		if err != nil {
@@ -386,8 +386,8 @@ func parseLogOutputFormat(value string) LogFormat {
 
 // deprecated, used for validations only
 func (c *Config) getExternalClusterNSNames() (m map[string]string) {
-	m = make(map[string]string, len(c.ExtClustersGeoTags))
-	for _, tag := range c.ExtClustersGeoTags {
+	m = make(map[string]string, len(c.extClustersGeoTags))
+	for _, tag := range c.extClustersGeoTags {
 		m[tag] = getNsName(tag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
 	}
 	return

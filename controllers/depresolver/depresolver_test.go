@@ -58,7 +58,7 @@ var predefinedConfig = Config{
 	ReconcileRequeueSeconds: 30,
 	NSRecordTTL:             30,
 	ClusterGeoTag:           "us",
-	ExtClustersGeoTags:      []string{"za", "eu"},
+	extClustersGeoTags:      []string{"za", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
 	EdgeDNSServers: []utils2.DNSServer{
 		{
@@ -650,7 +650,7 @@ func TestResolveMultipleExtGeoTags(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.ExtClustersGeoTags = []string{"foo", "blah", "boom"}
+	expected.extClustersGeoTags = []string{"foo", "blah", "boom"}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
@@ -659,7 +659,7 @@ func TestResolveUnsetExtGeoTags(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.ExtClustersGeoTags = []string{}
+	expected.extClustersGeoTags = []string{}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error, ExtClustersGeoTagsKey)
 }
@@ -669,7 +669,7 @@ func TestResolveInvalidExtGeoTags(t *testing.T) {
 	defer cleanup()
 	for _, arr := range [][]string{{"good-tag", ".wrong.tag?"}, {"", ""}} {
 		expected := predefinedConfig
-		expected.ExtClustersGeoTags = arr
+		expected.extClustersGeoTags = arr
 		// act,assert
 		arrangeVariablesAndAssert(t, expected, assert.Error)
 	}
@@ -681,7 +681,7 @@ func TestResolveOnlyGeoTagExistsWithinExtGeoTags(t *testing.T) {
 	tag := "us-west1"
 	expected := predefinedConfig
 	expected.ClusterGeoTag = tag
-	expected.ExtClustersGeoTags = []string{}
+	expected.extClustersGeoTags = []string{}
 	configureEnvVar(expected)
 	os.Setenv(ExtClustersGeoTagsKey, tag)
 	resolver := NewDependencyResolver()
@@ -697,7 +697,7 @@ func TestResolveGeoTagExistsWithinExtGeoTags(t *testing.T) {
 	for _, arr := range [][]string{{"good-tag"}, {"us-east1", "eu"}} {
 		expected := predefinedConfig
 		expected.ClusterGeoTag = tag
-		expected.ExtClustersGeoTags = arr
+		expected.extClustersGeoTags = arr
 		configureEnvVar(expected)
 		os.Setenv(ExtClustersGeoTagsKey, strings.Join(append(arr, tag), ","))
 		// act,assert
@@ -715,7 +715,7 @@ func TestResolveGeoTagWithRepeatingExtGeoTags(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.ExtClustersGeoTags = []string{"foo", "blah", "foo"}
+	expected.extClustersGeoTags = []string{"foo", "blah", "foo"}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -1171,7 +1171,7 @@ func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
 	customConfig.dnsZone = defaultDNSZone
 	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
-	customConfig.ExtClustersGeoTags = []string{defaultClusterGeoTagUs2, defaultClusterGeoTagEu}
+	customConfig.extClustersGeoTags = []string{defaultClusterGeoTagUs2, defaultClusterGeoTagEu}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
@@ -1217,7 +1217,7 @@ func TestNsServerNamesWithOneExtClusterGeoTag(t *testing.T) {
 	customConfig.dnsZone = defaultDNSZone
 	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
-	customConfig.ExtClustersGeoTags = []string{"location-2"}
+	customConfig.extClustersGeoTags = []string{"location-2"}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
@@ -1238,7 +1238,7 @@ func TestNsServerNamesWithExtClusterGeoTagsContainingClusterGeoTag(t *testing.T)
 	customConfig.dnsZone = defaultDNSZone
 	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
-	customConfig.ExtClustersGeoTags = []string{"location-2", defaultClusterGeoTagUs1}
+	customConfig.extClustersGeoTags = []string{"location-2", defaultClusterGeoTagUs1}
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
@@ -1282,9 +1282,9 @@ func TestNsServerNamesWithLargeExtClusterGeoTag(t *testing.T) {
 	customConfig.dnsZone = defaultDNSZone
 	customConfig.edgeDNSZone = defaultEdgeDNSZone
 	customConfig.ClusterGeoTag = "us"
-	customConfig.ExtClustersGeoTags = []string{}
-	customConfig.ExtClustersGeoTags = append(customConfig.ExtClustersGeoTags, predefinedConfig.ExtClustersGeoTags...)
-	customConfig.ExtClustersGeoTags[0] = largeGeoTag
+	customConfig.extClustersGeoTags = []string{}
+	customConfig.extClustersGeoTags = append(customConfig.extClustersGeoTags, predefinedConfig.extClustersGeoTags...)
+	customConfig.extClustersGeoTags[0] = largeGeoTag
 	configureEnvVar(customConfig)
 	resolver := NewDependencyResolver()
 
@@ -1339,8 +1339,8 @@ func TestNsServerNamesWithExceededDNSNameSize(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Len(t, config.getClusterNSName(), 253)
-	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
-	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.extClustersGeoTags[0]], 253)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.extClustersGeoTags[1]], 253)
 
 	// arrange
 	// extend cluster geo tag with one character so NsServerName exceeds length limit
@@ -1352,8 +1352,8 @@ func TestNsServerNamesWithExceededDNSNameSize(t *testing.T) {
 	// assert
 	assert.Error(t, err)
 	assert.Len(t, config.getClusterNSName(), 254)
-	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[0]], 253)
-	assert.Len(t, config.getExternalClusterNSNames()[customConfig.ExtClustersGeoTags[1]], 253)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.extClustersGeoTags[0]], 253)
+	assert.Len(t, config.getExternalClusterNSNames()[customConfig.extClustersGeoTags[1]], 253)
 }
 
 func TestMetricsAddressIsValid(t *testing.T) {
@@ -1464,7 +1464,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(ReconcileRequeueSecondsKey, strconv.Itoa(config.ReconcileRequeueSeconds))
 	_ = os.Setenv(NSRecordTTLKey, strconv.Itoa(config.NSRecordTTL))
 	_ = os.Setenv(ClusterGeoTagKey, config.ClusterGeoTag)
-	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.ExtClustersGeoTags, ","))
+	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.extClustersGeoTags, ","))
 	_ = os.Setenv(EdgeDNSServersKey, config.EdgeDNSServers.String())
 	_ = os.Setenv(EdgeDNSZoneKey, config.edgeDNSZone)
 	_ = os.Setenv(DNSZoneKey, config.dnsZone)
@@ -1534,7 +1534,7 @@ func TestParseDNSZones(t *testing.T) {
 				dnsZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
-				ExtClustersGeoTags: []string{"za", "eu"},
+				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 3,
 			assert: func(zoneInfo []DelegationZoneInfo) {
@@ -1578,7 +1578,7 @@ func TestParseDNSZones(t *testing.T) {
 				dnsZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
-				ExtClustersGeoTags: []string{"za", "eu"},
+				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(zoneInfo []DelegationZoneInfo) {
@@ -1595,7 +1595,7 @@ func TestParseDNSZones(t *testing.T) {
 				dnsZone:            "dc.example.com",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
-				ExtClustersGeoTags: []string{"za", "eu"},
+				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []DelegationZoneInfo) {
@@ -1615,7 +1615,7 @@ func TestParseDNSZones(t *testing.T) {
 				dnsZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
-				ExtClustersGeoTags: []string{"za", "eu"},
+				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 3,
 			assert: func(zoneInfo []DelegationZoneInfo) {
@@ -1638,7 +1638,7 @@ func TestParseDNSZones(t *testing.T) {
 				dnsZone:            "cloud.example.org",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
-				ExtClustersGeoTags: []string{"za", "eu"},
+				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 3,
 			assert: func(zoneInfo []DelegationZoneInfo) {
@@ -1661,7 +1661,7 @@ func TestParseDNSZones(t *testing.T) {
 				dnsZone:            "",
 				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:      "us",
-				ExtClustersGeoTags: []string{"za", "eu"},
+				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(zoneInfo []DelegationZoneInfo) {

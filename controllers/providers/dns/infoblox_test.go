@@ -45,7 +45,6 @@ var (
 	defaultConfig = depresolver.Config{
 		ReconcileRequeueSeconds: 30,
 		ClusterGeoTag:           "us",
-		ExtClustersGeoTags:      []string{"eu"},
 		EdgeDNSServers: []utils.DNSServer{
 			{
 				Host: "8.8.8.8",

@@ -76,7 +76,6 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	NSRecordTTL:             30,
 	ClusterGeoTag:           "us",
-	ExtClustersGeoTags:      []string{"eu"},
 	EdgeDNSServers: []utils.DNSServer{
 		{
 			Host: "127.0.0.1",
@@ -934,7 +933,6 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			// act
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
-			customConfig.ExtClustersGeoTags = []string{"za", "us"}
 			customConfig.DelegationZones = depresolver.DelegationZones{
 				{
 					Domain:            dnsZone,
@@ -1020,7 +1018,6 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			// act
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
-			customConfig.ExtClustersGeoTags = []string{"za", "us"}
 			customConfig.DelegationZones = depresolver.DelegationZones{
 				{
 					Domain:            dnsZone,
