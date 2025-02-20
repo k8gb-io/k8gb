@@ -38,8 +38,6 @@ type DelegationZoneInfo struct {
 func parseDelegationZones(config *Config) []DelegationZoneInfo {
 
 	zones := config.dnsZones
-	edgeDNSZone := config.edgeDNSZone
-	dnsZone := config.dnsZone
 
 	getNsName := func(tag, edgeDNSServer, zone, edge string) string {
 		if edgeDNSServer == localhost || edgeDNSServer == localhostIPv4 {
@@ -52,33 +50,21 @@ func parseDelegationZones(config *Config) []DelegationZoneInfo {
 	}
 
 	// parse example.com:cloud.example.com;example.io:cloud.example.io into map[string]string
-	getEnvAsArrayOfPairsOrFallback := func(zones string, fallback map[string]string) map[string]string {
+	getEnvAsArrayOfPairsOrFallback := func(zones string) map[string]string {
 		pairs := make(map[string]string)
 		slice := strings.Split(zones, ";")
-		if len(slice) == 0 {
-			return fallback
-		}
 		for _, z := range slice {
 			pair := strings.Split(z, ":")
 			if len(pair) != 2 {
-				return fallback
+				return pairs
 			}
 			pairs[strings.Trim(pair[0], " ")] = strings.Trim(pair[1], " ")
-		}
-		for k, v := range fallback {
-			if _, found := pairs[k]; !found {
-				pairs[k] = v
-			}
 		}
 		return pairs
 	}
 	var dzi []DelegationZoneInfo
 	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
-	fallbackDNSZone := map[string]string{}
-	if !(edgeDNSZone == "" && dnsZone == "") {
-		fallbackDNSZone[edgeDNSZone] = dnsZone
-	}
-	di := getEnvAsArrayOfPairsOrFallback(zones, fallbackDNSZone)
+	di := getEnvAsArrayOfPairsOrFallback(zones)
 
 	for edge, zone := range di {
 		zoneInfo := DelegationZoneInfo{

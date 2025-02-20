@@ -39,7 +39,7 @@ type LogFormat int8
 const (
 	// JSONFormat prints messages as single json record
 	JSONFormat LogFormat = 1 << iota
-	// SimpleFormat prints messages in human readable way
+	// SimpleFormat prints messages in human-readable way
 	SimpleFormat
 	// NoFormat, returned in situation when format is not recognised
 	NoFormat
@@ -134,10 +134,6 @@ type Config struct {
 	fallbackEdgeDNSServerName string `env:"EDGE_DNS_SERVER"`
 	// to avoid breaking changes is used as fallback server port for EdgeDNSServers
 	fallbackEdgeDNSServerPort int `env:"EDGE_DNS_SERVER_PORT, default=53"`
-	// edgeDNSZone main zone which would contain gslb zone to delegate; e.g. example.com
-	edgeDNSZone string `env:"EDGE_DNS_ZONE"`
-	// dnsZone controlled by gslb; e.g. cloud.example.com
-	dnsZone string `env:"DNS_ZONE"`
 	// DelegationZones
 	DelegationZones DelegationZones
 	// DelegationZones pairs of dnsZone ad edgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io
