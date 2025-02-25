@@ -258,7 +258,7 @@ func (r *Gslb) GetExternalTargets(host string, extClusterNsNames map[string]stri
 			Interface("edgeDNSServers", r.config.EdgeDNSServers).
 			Interface("glueARecord", glueA.Answer).
 			Msg("Resolved glue A record for NS")
-		glueARecords := getARecords(glueA)
+		glueARecords := getARecords(glueA) // get IP of CoreDNS
 		var hostToUse string
 		if len(glueARecords) > 0 {
 			hostToUse = glueARecords[0]
@@ -290,6 +290,13 @@ func getNSCombinations(original []utils.DNSServer, hostToUse string) []utils.DNS
 			Host: hostToUse,
 			Port: portToUse,
 		},
+		// use this only when you attach process in debugger
+		// and debug against local setup.
+		// use 5054 for EU cluster and 5053 for US cluster
+		// {
+		// 	 Host: "127.0.0.1",
+		//	 Port: 5053,
+		// },
 	}
 	defaultPortAdded := false
 	for _, s := range original {

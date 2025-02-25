@@ -36,13 +36,9 @@ type DelegationZoneInfo struct {
 }
 
 func parseDelegationZones(config *Config) []DelegationZoneInfo {
-
 	zones := config.dnsZones
-
-	getNsName := func(tag, edgeDNSServer, zone, edge string) string {
-		if edgeDNSServer == localhost || edgeDNSServer == localhostIPv4 {
-			return edgeDNSServer
-		}
+	getNsName := func(tag, _, zone, edge string) string {
+		// terratests doesnt use localhost as edegeDNSServer anymnore
 		const prefix = "gslb-ns"
 		d := strings.TrimSuffix(zone, "."+edge)
 		domainX := strings.ReplaceAll(d, ".", "-")
