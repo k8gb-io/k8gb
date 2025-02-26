@@ -272,8 +272,11 @@ func (w *Workflow) Start() (*Instance, error) {
 		istioInjection = "enabled"
 	}
 	k8s.CreateNamespaceWithMetadata(w.t, w.k8sOptions, metav1.ObjectMeta{
-		Name:   w.namespace,
-		Labels: map[string]string{"istio-injection": istioInjection},
+		Name: w.namespace,
+		Labels: map[string]string{
+			"istio-injection":   istioInjection,
+			"k8gb.io/terratest": "true",
+		},
 	})
 	w.state.namespaceCreated = true
 
@@ -417,12 +420,14 @@ func (i *Instance) GetIngressIPs() []string {
 func (i *Instance) StopTestApp() {
 	k8s.RunKubectl(i.w.t, i.w.k8sOptions, "scale", "deploy", i.w.state.testApp.name, "--replicas=0")
 	AssertGslbStatus(i.w.t, i.w.k8sOptions, i.w.state.gslb.name, i.w.state.gslb.host+":Unhealthy")
+	i.w.t.Logf("Application is stopped now, gslb %s:Unhealthy", i.w.state.gslb.host)
 	i.w.state.testApp.isRunning = false
 }
 
 func (i *Instance) StartTestApp() {
 	k8s.RunKubectl(i.w.t, i.w.k8sOptions, "scale", "deploy", i.w.state.testApp.name, "--replicas=1")
 	AssertGslbStatus(i.w.t, i.w.k8sOptions, i.w.state.gslb.name, i.w.state.gslb.host+":Healthy")
+	i.w.t.Logf("Application is started now, gslb %s:Healthy", i.w.state.gslb.host)
 	i.w.state.testApp.isRunning = true
 }
 
@@ -652,22 +657,22 @@ func (i *Instance) GetStatus(annotation string) (s *InstanceStatus) {
 	if err != nil {
 		s.GslbHealthStatus = na
 	}
-	s.EndpointLocalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointLocalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", i.w.state.gslb.name, "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[0].dnsName", "--no-headers")
 	if err != nil {
 		s.EndpointLocalDNSName = na
 	}
-	s.EndpointLocalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointLocalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", i.w.state.gslb.name, "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[0].targets", "--no-headers")
 	if err != nil {
 		s.EndpointLocalTargets = na
 	}
-	s.EndpointGlobalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointGlobalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", i.w.state.gslb.name, "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[1].dnsName", "--no-headers")
 	if err != nil {
 		s.EndpointGlobalDNSName = na
 	}
-	s.EndpointGlobalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
+	s.EndpointGlobalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", i.w.state.gslb.name, "-o",
 		"custom-columns=SERVICESTATUS:.spec.endpoints[1].targets", "--no-headers")
 	if err != nil {
 		s.EndpointGlobalTargets = na
@@ -735,7 +740,7 @@ func (g *Gslb) GslbSpecProperty(specPath string) string {
 }
 
 func (r *Resources) GetLocalDNSEndpoint() DNSEndpoint {
-	ep, err := r.getDNSEndpoint("test-gslb", r.i.w.namespace)
+	ep, err := r.getDNSEndpoint(r.i.w.state.gslb.name, r.i.w.namespace)
 	r.i.continueIfK8sResourceNotFound(err)
 	return ep
 }
