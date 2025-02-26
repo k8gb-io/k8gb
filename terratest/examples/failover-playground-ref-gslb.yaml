@@ -1,13 +1,13 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: playground-failover
+  name: playground-failover-1
 spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
     matchLabels:
-      app: playground-failover
+      app: playground-failover-1
   strategy:
     type: failover
     dnsTtlSeconds: 5

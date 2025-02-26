@@ -1,13 +1,13 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: playground-failover
+  name: playground-failover-1
   labels:
-    app: playground-failover
+    app: playground-failover-1
 spec:
   ingressClassName: nginx
   rules:
-    - host: playground-failover.cloud.example.com
+    - host: playground-failover-1.cloud.example.com
       http:
         paths:
         - path: /

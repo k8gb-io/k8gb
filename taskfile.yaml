@@ -1,7 +1,9 @@
 # https://taskfile.dev/usage/
+# use this to get: k8gb.edgeDNSServers[0]
+# docker network inspect k3d-action-bridge-network -f '{{ (index .IPAM.Config 0).Gateway }}'
 version: '3'
 env:
-  VERSION: test010
+  VERSION: test013
 
 tasks:
 
@@ -30,15 +32,21 @@ tasks:
       - k3d image import docker.io/kuritka/k8gb:$VERSION -c test-gslb1
       - k3d image import docker.io/kuritka/k8gb:$VERSION -c test-gslb2
       - task: stop
-      - kubectl -n k8gb set image deployment/k8gb k8gb=kuritka/k8gb:$VERSION --context=k3d-test-gslb2
-      - kubectl -n k8gb set image deployment/k8gb k8gb=kuritka/k8gb:$VERSION --context=k3d-test-gslb1
-      - task: start-eu
+      - task: install-helm
     silent: true
 
   stop:
     cmds:
       - task: stop-k3d-test-gslb1
       - task: stop-k3d-test-gslb2
+
+  stop-us:
+    cmds:
+      - task: stop-k3d-test-gslb2
+
+  stop-eu:
+    cmds:
+      - task: stop-k3d-test-gslb1
 
   start-us:
     cmds:
@@ -54,3 +62,49 @@ tasks:
   eu:
     cmds:
       - kubectl config use-context k3d-test-gslb1
+
+  install-helm:
+    cmds:
+      - task: stop
+      - task: us
+      - helm -n k8gb upgrade -i k8gb ./chart/k8gb -f ./chart/k8gb/values.yaml
+        --set k8gb.imageRepo=docker.io/kuritka/k8gb
+        --set k8gb.clusterGeoTag=us
+        --set k8gb.extGslbClustersGeoTags=eu
+        --set k8gb.reconcileRequeueSeconds=10
+        --set k8gb.imageTag=$VERSION
+        --set k8gb.log.format=simple
+        --set k8gb.log.level=debug
+        --set rfc2136.enabled=true
+        # to get edgeDNSServerIP
+        # docker network inspect k3d-action-bridge-network -f '{{ (index .IPAM.Config 0).Gateway }}'
+        --set k8gb.edgeDNSServers[0]=172.18.0.1:1053
+        --wait --timeout=10m0s
+      - task: eu
+      - helm -n k8gb upgrade -i k8gb ./chart/k8gb -f ./chart/k8gb/values.yaml
+        --set k8gb.imageRepo=docker.io/kuritka/k8gb
+        --set k8gb.clusterGeoTag=eu
+        --set k8gb.extGslbClustersGeoTags=us
+        --set k8gb.reconcileRequeueSeconds=10
+        --set k8gb.imageTag=$VERSION
+        --set k8gb.log.format=simple
+        --set k8gb.log.level=debug
+        --set rfc2136.enabled=true
+        # to get edgeDNSServerIP
+        # docker network inspect k3d-action-bridge-network -f '{{ (index .IPAM.Config 0).Gateway }}'
+        --set k8gb.edgeDNSServers[0]=172.18.0.1:1053
+        --wait --timeout=10m0s
+
+  clean:
+    silent: true
+    cmds:
+      - |
+        kubectl config use-context k3d-test-gslb1 &&
+        for ns in $(kubectl get ns --no-headers -o custom-columns=":metadata.name" | grep '^k8gb-test-'); do
+          kubectl patch ns "$ns" -p '{"metadata":{"finalizers":[]}}' --type=merge && kubectl delete ns "$ns";
+        done
+      - |
+        kubectl config use-context k3d-test-gslb2 &&
+        for ns in $(kubectl get ns --no-headers -o custom-columns=":metadata.name" | grep '^k8gb-test-'); do
+          kubectl patch ns "$ns" -p '{"metadata":{"finalizers":[]}}' --type=merge && kubectl delete ns "$ns";
+        done

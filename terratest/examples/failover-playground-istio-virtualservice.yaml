@@ -1,14 +1,14 @@
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: playground-failover
+  name: playground-failover-2
   labels:
-    app: playground-failover
+    app: playground-failover-2
 spec:
   gateways:
-    - istio-ingress/playground-failover
+    - istio-ingress/playground-failover-2
   hosts:
-    - playground-failover.cloud.example.com
+    - playground-failover-2.cloud.example.com
   http:
     - route:
         - destination:

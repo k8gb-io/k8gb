@@ -1,12 +1,12 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: playground-failover
+  name: playground-failover-0
 spec:
   ingress:
     ingressClassName: nginx
     rules:
-      - host: playground-failover.cloud.example.com
+      - host: playground-failover-0.cloud.example.com
         http:
           paths:
           - path: /

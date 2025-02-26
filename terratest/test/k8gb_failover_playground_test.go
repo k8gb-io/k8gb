@@ -33,9 +33,9 @@ import (
 // TestFailoverPlayground is equal to k8gb failover test running on local playground.
 // see: https://github.com/k8gb-io/k8gb/blob/master/docs/local.md#failover
 func TestFailoverPlayground(t *testing.T) {
-	for _, ingressType := range utils.IngressTypes {
+	for i, ingressType := range utils.IngressTypes {
 		const basePath = "../examples/failover-playground"
-		const host = "playground-failover.cloud.example.com"
+		var host = fmt.Sprintf("playground-failover-%v.cloud.example.com", i)
 
 		workflowEU := utils.NewWorkflow(t, "k3d-test-gslb1", 5053)
 		workflowUS := utils.NewWorkflow(t, "k3d-test-gslb2", 5054)

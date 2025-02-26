@@ -1,13 +1,13 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: playground-failover
+  name: playground-failover-2
 spec:
   resourceRef:
     apiVersion: networking.istio.io/v1
     kind: VirtualService
     matchLabels:
-      app: playground-failover
+      app: playground-failover-2
   strategy:
     type: failover
     dnsTtlSeconds: 5
