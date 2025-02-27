@@ -92,6 +92,8 @@ jobs:
           kubectl -n k8gb get pods --context=k3d-test-gslb2
           kubectl -n k8gb get deployment k8gb -oyaml --context=k3d-test-gslb1
           kubectl -n k8gb get deployment k8gb -oyaml --context=k3d-test-gslb2
+          kubectl -n k8gb get cm --context=k3d-test-gslb2
+          kubectl -n k8gb get cm --context=k3d-test-gslb1
 
       - name: Run Terratest
         run: |
