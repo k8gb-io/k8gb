@@ -32,4 +32,4 @@ spec:
         [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ] || { echo "US expected targets '$EXPECTED_SORTED' but found '$ACTUAL_US_SORTED'"; }
 
         kubectl get cm k8gb-coredns -n k8gb -oyaml
-        kubectl logs -n k8gb -l app.kubernetes.io/name=k8gb --tail=100
+        kubectl logs -n k8gb -l name=k8gb --tail=100
