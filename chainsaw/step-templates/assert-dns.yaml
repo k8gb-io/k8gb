@@ -37,3 +37,6 @@ spec:
         dig @localhost gslb-ns-eu-cloud.example.com -p 1053
         dig @localhost gslb-ns-us-cloud.example.com -p 1053 
         dig @localhost cloud.example.com -p 1053 NS
+
+
+        kubectl logs -n k8gb -l app=external-dns --tail=100
