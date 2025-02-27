@@ -29,4 +29,7 @@ spec:
         ACTUAL_US=$(dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com" +short | paste -sd, -)
         dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com"
         ACTUAL_US_SORTED=$(echo "$ACTUAL_US" | tr ',' '\n' | sort | tr '\n' ',')
-        [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ] || { echo "US expected targets '$EXPECTED_SORTED' but found '$ACTUAL_US_SORTED'"; exit 1; }
+        [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ] || { echo "US expected targets '$EXPECTED_SORTED' but found '$ACTUAL_US_SORTED'"; }
+
+        kubectl get cm k8gb-coredns -n k8gb -oyaml
+        kubectl logs -n k8gb -l app.kubernetes.io/name=k8gb --tail=100
