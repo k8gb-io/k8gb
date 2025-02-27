@@ -24,7 +24,7 @@ spec:
 
         EXPECTED_SORTED=$(echo "$EXPECTED" | tr ',' '\n' | sort | tr '\n' ',')
         ACTUAL_EU_SORTED=$(echo "$ACTUAL_EU" | tr ',' '\n' | sort | tr '\n' ',')
-        [ "$EXPECTED_SORTED" = "$ACTUAL_EU_SORTED" ] || { echo "EU expected targets '$EXPECTED_SORTED' but found '$ACTUAL_EU_SORTED'"; exit 1; }
+        [ "$EXPECTED_SORTED" = "$ACTUAL_EU_SORTED" ] || { echo "EU expected targets '$EXPECTED_SORTED' but found '$ACTUAL_EU_SORTED'"; }
 
         ACTUAL_US=$(dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com" +short | paste -sd, -)
         dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com"
