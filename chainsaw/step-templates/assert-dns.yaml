@@ -33,3 +33,4 @@ spec:
 
         kubectl get cm k8gb-coredns -n k8gb -oyaml
         kubectl logs -n k8gb -l name=k8gb --tail=100
+        kubectl -n k8gb get dnsendpoints -oyaml
