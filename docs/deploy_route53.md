@@ -38,10 +38,10 @@ helm repo update
 
 
 #switch kubectl context to eu-west-1
-helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/route53/k8gb/k8gb-cluster-eu-west-1.yaml
+helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f examples/route53/k8gb/k8gb-cluster-eu-west-1.yaml
 
 #switch kubectl context to us-east-1
-helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/route53/k8gb/k8gb-cluster-us-east-1.yaml
+helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f examples/route53/k8gb/k8gb-cluster-us-east-1.yaml
 ```
 
 ## Test
@@ -60,7 +60,7 @@ make deploy-test-apps
 * Apply Gslb CR to *each* cluster
 
 ```sh
-kubectl apply -f ./docs/examples/route53/k8gb/gslb-failover.yaml
+kubectl apply -f examples/route53/k8gb/gslb-failover.yaml
 ```
 
 * Check Gslb status.

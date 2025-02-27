@@ -44,7 +44,7 @@ spec:
 
 k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.
 
-k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](./docs/strategy.md) to meet requirements such as region failover for high availability.
+k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](strategy.md) to meet requirements such as region failover for high availability.
 
 Global load balancing for any Kubernetes Service can now be enabled and managed by any operations or development teams in the same Kubernetes native way as any other custom resource.
 
@@ -63,7 +63,7 @@ Simply run
 make deploy-full-local-setup
 ```
 
-It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](./docs/exposing_dns.md)), and install k8gb with test applications and two sample Gslb resources on top.
+It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](exposing_dns.md)), and install k8gb with test applications and two sample Gslb resources on top.
 
 This setup is adapted for local scenarios and works without external DNS provider dependency.
 
