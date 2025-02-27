@@ -518,6 +518,10 @@ help: ## Show this help
 #		FUNCTIONS
 ###############################
 
+
+deploy-edge:
+	$(call deploy-edgedns)
+
 define deploy-edgedns
 	@echo -e "\n$(YELLOW)Deploying EdgeDNS $(NC)"
 	kubectl --context k3d-edgedns apply -f deploy/edge/
