@@ -47,14 +47,6 @@
   ],
   "regexManagers": [
     {
-      "fileMatch": ["^deploy/edge/deployment.yaml$"],
-      "datasourceTemplate": "docker",
-      "matchStrings": [
-      "image: ['\"]?(?<depName>[^'\"]+):(?<currentValue>[^'\"]+)['\"]?"
-      ],
-      "extractVersionTemplate": "^v?(?<version>.*)$"
-    }, 
-    {
       "fileMatch": ["^SECURITY-INSIGHTS.yml$"],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "k8gb-io/k8gb",
