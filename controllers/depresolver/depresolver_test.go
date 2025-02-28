@@ -70,7 +70,6 @@ var predefinedConfig = Config{
 	EdgeDNSZone:               "example.com",
 	DNSZone:                   defaultEdgeDNSZone,
 	K8gbNamespace:             "k8gb",
-	SplitBrainCheck:           true,
 	MetricsAddress:            "0.0.0.0:8080",
 	Infoblox: Infoblox{
 		"Infoblox.host.com",
@@ -97,7 +96,6 @@ func TestResolveSpecWithFilledFields(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, 305, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
 	assert.False(t, len(gslb.Spec.Strategy.Weight) == 0)
 	assert.Equal(t, 15, gslb.Spec.Strategy.Weight["za"])
 	assert.Equal(t, 25, gslb.Spec.Strategy.Weight["eu"])
@@ -114,20 +112,7 @@ func TestResolveSpecWithoutFields(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
 	assert.True(t, len(gslb.Spec.Strategy.Weight) == 0)
-}
-
-func TestResolveSpecWithZeroSplitBrain(t *testing.T) {
-	// arrange
-	cl, gslb := getTestContext("./testdata/filled_omitempty_with_zero_splitbrain.yaml")
-	resolver := NewDependencyResolver()
-	// act
-	err := resolver.ResolveGslbSpec(context.TODO(), gslb, cl)
-	// assert
-	assert.NoError(t, err)
-	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
 }
 
 func TestResolveSpecWithEmptyFields(t *testing.T) {
@@ -139,17 +124,6 @@ func TestResolveSpecWithEmptyFields(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Equal(t, predefinedStrategy.DNSTtlSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
-}
-
-func TestResolveSpecWithNegativeFields(t *testing.T) {
-	// arrange
-	cl, gslb := getTestContext("./testdata/invalid_omitempty_negative.yaml")
-	resolver := NewDependencyResolver()
-	// act
-	err := resolver.ResolveGslbSpec(context.TODO(), gslb, cl)
-	// assert
-	assert.Error(t, err)
 }
 
 func TestResolveSpecWithType(t *testing.T) {
@@ -227,13 +201,11 @@ func TestSpecRunWhenChanged(t *testing.T) {
 	resolver := NewDependencyResolver()
 	// act
 	err1 := resolver.ResolveGslbSpec(ctx, gslb, cl)
-	gslb.Spec.Strategy.SplitBrainThresholdSeconds = 0
 	err2 := resolver.ResolveGslbSpec(ctx, gslb, cl)
 	// assert
 	assert.NoError(t, err1)
 	// err2 would not be empty
 	assert.NoError(t, err2)
-	assert.Equal(t, predefinedStrategy.SplitBrainThresholdSeconds, gslb.Spec.Strategy.SplitBrainThresholdSeconds)
 	assert.Equal(t, 35, gslb.Spec.Strategy.DNSTtlSeconds)
 }
 
@@ -1184,63 +1156,6 @@ func TestResolveLoggerOutputWithInvalidValue(t *testing.T) {
 	assert.Equal(t, NoFormat, config.Log.Format)
 }
 
-func TestResolveConfigSplitBrainCheckEnabled(t *testing.T) {
-	// arrange
-	defer cleanup()
-	expected := predefinedConfig
-	expected.SplitBrainCheck = true
-	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.NoError)
-}
-
-func TestHeartBeatWithMultipleExtClusterGeoTag(t *testing.T) {
-	const geoTag = "test-gslb-1"
-	// arrange
-	defer cleanup()
-	customConfig := predefinedConfig
-	customConfig.DNSZone = defaultDNSZone
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
-	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
-	customConfig.ExtClustersGeoTags = []string{defaultClusterGeoTagUs2, defaultClusterGeoTagEu}
-	configureEnvVar(customConfig)
-	resolver := NewDependencyResolver()
-
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-
-	// assert
-	assert.NoError(t, err)
-	assert.Len(t, config.GetExternalClusterHeartbeatFQDNs(geoTag), 2)
-	assert.Equal(t, "test-gslb-1-heartbeat-us-west-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
-
-	for k, v := range map[string]string{defaultClusterGeoTagUs2: "test-gslb-1-heartbeat-us-east-1.cloud.example.com",
-		defaultClusterGeoTagEu: "test-gslb-1-heartbeat-eu-central-1.cloud.example.com"} {
-		assert.Equal(t, config.GetExternalClusterHeartbeatFQDNs(geoTag)[k], v)
-	}
-}
-
-func TestHeartBeatWithOneExtClusterGeoTag(t *testing.T) {
-	const geoTag = "test-gslb-1"
-	// arrange
-	defer cleanup()
-	customConfig := predefinedConfig
-	customConfig.DNSZone = defaultDNSZone
-	customConfig.EdgeDNSZone = defaultEdgeDNSZone
-	customConfig.ClusterGeoTag = defaultClusterGeoTagUs1
-	customConfig.ExtClustersGeoTags = []string{defaultClusterGeoTagUs2}
-	configureEnvVar(customConfig)
-	resolver := NewDependencyResolver()
-
-	// act
-	config, err := resolver.ResolveOperatorConfig()
-
-	// assert
-	assert.NoError(t, err)
-	assert.Len(t, config.GetExternalClusterHeartbeatFQDNs(geoTag), 1)
-	assert.Equal(t, "test-gslb-1-heartbeat-us-west-1.cloud.example.com", config.GetClusterHeartbeatFQDN(geoTag))
-	assert.Equal(t, config.GetExternalClusterHeartbeatFQDNs(geoTag)[defaultClusterGeoTagUs2], "test-gslb-1-heartbeat-us-east-1.cloud.example.com")
-}
-
 func TestNsServerNamesWithMultipleExtClusterGeoTag(t *testing.T) {
 	// arrange
 	defer cleanup()
@@ -1526,7 +1441,7 @@ func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, NSRecordTTLKey, ClusterGeoTagKey, ExtClustersGeoTagsKey, EdgeDNSZoneKey, DNSZoneKey,
 		EdgeDNSServersKey, ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
-		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, SplitBrainCheckKey, TracingEnabled,
+		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, TracingEnabled,
 		TracingSamplingRatio, OtelExporterOtlpEndpoint} {
 		if os.Unsetenv(s) != nil {
 			panic(fmt.Errorf("cleanup %s", s))
@@ -1558,7 +1473,6 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(LogFormatKey, config.Log.Format.String())
 	_ = os.Setenv(LogNoColorKey, strconv.FormatBool(config.Log.NoColor))
 	_ = os.Setenv(MetricsAddressKey, config.MetricsAddress)
-	_ = os.Setenv(SplitBrainCheckKey, strconv.FormatBool(config.SplitBrainCheck))
 	_ = os.Setenv(TracingEnabled, strconv.FormatBool(config.TracingEnabled))
 	_ = os.Setenv(TracingSamplingRatio, strconv.FormatFloat(config.TracingSamplingRatio, 'f', 2, 64))
 	_ = os.Setenv(OtelExporterOtlpEndpoint, config.OtelExporterOtlpEndpoint)

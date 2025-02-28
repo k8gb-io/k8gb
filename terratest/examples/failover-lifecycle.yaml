@@ -20,5 +20,4 @@ spec:
   strategy:
     type: failover
     primaryGeoTag: "eu"
-    splitBrainThresholdSeconds: 600
     dnsTtlSeconds: 5

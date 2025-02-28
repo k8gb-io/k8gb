@@ -150,8 +150,6 @@ type Config struct {
 	MetricsAddress string `env:"METRICS_ADDRESS, default=0.0.0.0:8080"`
 	// extDNSEnabled hidden. EdgeDNSType defines all enabled Enabled types
 	extDNSEnabled bool `env:"EXTDNS_ENABLED, default=false"`
-	// SplitBrainCheck flag decides whether split brain TXT records will be stored in edge DNS
-	SplitBrainCheck bool `env:"SPLIT_BRAIN_CHECK, default=false"`
 	// TracingEnabled flag decides whether to use a real otlp tracer or a noop one
 	TracingEnabled bool `env:"TRACING_ENABLED, default=false"`
 	// TracingSamplingRatio how many traces should be kept and sent (1.0 - all, 0.0 - none)

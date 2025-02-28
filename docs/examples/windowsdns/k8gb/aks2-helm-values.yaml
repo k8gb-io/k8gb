@@ -23,8 +23,6 @@ k8gb:
     format: json # log format (simple,json)
     # -- log level (panic,fatal,error,warn,info,debug,trace)
     level: info # log level (panic,fatal,error,warn,info,debug,trace)
-  # -- Enable SplitBrain check (Infoblox only)
-  splitBrainCheck: false
   # -- Metrics server address
   metricsAddress: "0.0.0.0:8080"
   securityContext:

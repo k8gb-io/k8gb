@@ -13,7 +13,7 @@ jobs:
   release:
     permissions:
       contents: write
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     outputs:
       container_tags: ${{ steps.container_info.outputs.container_tags }}
       container_info: ${{ steps.container_info.outputs.container_info }}
@@ -95,7 +95,7 @@ jobs:
   sbom:
     name: sbom
     needs: [release]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       TAGS: "${{ needs.release.outputs.container_tags }}"
 
@@ -137,7 +137,7 @@ jobs:
   provenance:
     name: provenance
     needs: [release]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -187,7 +187,7 @@ jobs:
   container-provenance:
     name: container-provenance
     needs: [release]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 
@@ -242,7 +242,7 @@ jobs:
   slsa-summary:
     name: Release Summary
     needs: [sbom, provenance, container-provenance, release]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       TAGS: "${{ needs.release.outputs.container_tags }}"
       CONTAINER_INFO: "${{ needs.release.outputs.container_info }}"

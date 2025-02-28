@@ -93,7 +93,6 @@ spec:
   strategy:
     dnsTtlSeconds: 60 # Minimum for non-Enterprise Cloudflare https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/
     primaryGeoTag: eu
-    splitBrainThresholdSeconds: 300
     type: failover
 ```
 

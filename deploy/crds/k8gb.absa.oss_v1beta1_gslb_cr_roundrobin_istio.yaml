@@ -47,5 +47,4 @@ spec:
       app: roundrobin-istio
   strategy:
     type: roundRobin
-    splitBrainThresholdSeconds: 300
     dnsTtlSeconds: 30

@@ -56,14 +56,13 @@ type GslbReconciler struct {
 }
 
 const (
-	gslbFinalizer                        = "k8gb.absa.oss/finalizer"
-	primaryGeoTagAnnotation              = "k8gb.io/primary-geotag"
-	strategyAnnotation                   = "k8gb.io/strategy"
-	dnsTTLSecondsAnnotation              = "k8gb.io/dns-ttl-seconds"
-	splitBrainThresholdSecondsAnnotation = "k8gb.io/splitbrain-threshold-seconds"
+	gslbFinalizer           = "k8gb.absa.oss/finalizer"
+	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
+	strategyAnnotation      = "k8gb.io/strategy"
+	dnsTTLSecondsAnnotation = "k8gb.io/dns-ttl-seconds"
 )
 
-var k8gbAnnotations = []string{strategyAnnotation, primaryGeoTagAnnotation, dnsTTLSecondsAnnotation, splitBrainThresholdSecondsAnnotation}
+var k8gbAnnotations = []string{strategyAnnotation, primaryGeoTagAnnotation, dnsTTLSecondsAnnotation}
 
 var log = logging.Logger()
 

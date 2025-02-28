@@ -36,7 +36,7 @@ type Strategy struct {
 	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
 	// Defines DNS record TTL in seconds
 	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty"`
-	// Split brain TXT record expiration in seconds
+	// Split brain TXT record expiration in seconds. The field is deprecated and not used.
 	SplitBrainThresholdSeconds int `json:"splitBrainThresholdSeconds,omitempty"`
 }
 

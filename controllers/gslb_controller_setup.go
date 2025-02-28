@@ -204,10 +204,6 @@ func (r *GslbReconciler) parseStrategy(annotations map[string]string, strategy s
 			if result.DNSTtlSeconds, err = toInt(annotationKey, annotationValue); err != nil {
 				return result, err
 			}
-		case splitBrainThresholdSecondsAnnotation:
-			if result.SplitBrainThresholdSeconds, err = toInt(annotationKey, annotationValue); err != nil {
-				return result, err
-			}
 		case primaryGeoTagAnnotation:
 			result.PrimaryGeoTag = annotationValue
 		}

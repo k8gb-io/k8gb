@@ -54,7 +54,6 @@ const (
 	LogLevelKey                    = "LOG_LEVEL"
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
-	SplitBrainCheckKey             = "SPLIT_BRAIN_CHECK"
 	TracingEnabled                 = "TRACING_ENABLED"
 	OtelExporterOtlpEndpoint       = "OTEL_EXPORTER_OTLP_ENDPOINT"
 	TracingSamplingRatio           = "TRACING_SAMPLING_RATIO"
@@ -383,18 +382,6 @@ func (c *Config) GetClusterNSName() string {
 	return getNsName(c.ClusterGeoTag, c.DNSZone, c.EdgeDNSZone, c.EdgeDNSServers[0].Host)
 }
 
-func (c *Config) GetExternalClusterHeartbeatFQDNs(gslbName string) (m map[string]string) {
-	m = make(map[string]string, len(c.ExtClustersGeoTags))
-	for _, tag := range c.ExtClustersGeoTags {
-		m[tag] = getHeartbeatFQDN(gslbName, tag, c.EdgeDNSZone)
-	}
-	return
-}
-
-func (c *Config) GetClusterHeartbeatFQDN(gslbName string) string {
-	return getHeartbeatFQDN(gslbName, c.ClusterGeoTag, c.EdgeDNSZone)
-}
-
 // getNsName returns NS for geo tag.
 // The values is combination of DNSZone, EdgeDNSZone and (Ext)ClusterGeoTag, see:
 // DNS_ZONE k8gb-test.gslb.cloud.example.com
@@ -411,15 +398,4 @@ func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
 	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
 	domainX := strings.ReplaceAll(d, ".", "-")
 	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edgeDNSZone)
-}
-
-// getHeartbeatFQDN returns heartbeat for geo tag.
-// The values is combination of EdgeDNSZone and (Ext)ClusterGeoTag, and GSLB name see:
-// EDGE_DNS_ZONE: cloud.example.com
-// CLUSTER_GEOTAG: us
-// gslb.Name: test-gslb-1
-// will generate "test-gslb-1-heartbeat-us.cloud.example.com"
-// The function is private and expects only valid inputs.
-func getHeartbeatFQDN(name, geoTag, edgeDNSZone string) string {
-	return fmt.Sprintf("%s-heartbeat-%s.%s", name, geoTag, edgeDNSZone)
 }

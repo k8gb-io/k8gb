@@ -26,7 +26,7 @@ import (
 
 var a2 = map[string]string{"k8gb.io/primary-geotag": "eu", "k8gb.io/strategy": "failover"}
 var a1 = map[string]string{"field.cattle.io/publicEndpoints": "dummy"}
-var annotations = []string{"k8gb.io/primary-geotag", "k8gb.io/strategy", "k8gb.io/dns-ttl-seconds", "k8gb.io/splitbrain-threshold-seconds"}
+var annotations = []string{"k8gb.io/primary-geotag", "k8gb.io/strategy", "k8gb.io/dns-ttl-seconds"}
 
 func TestAddNewAnnotations(t *testing.T) {
 	// arrange
