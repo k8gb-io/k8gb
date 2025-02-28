@@ -505,13 +505,6 @@ website:
 		git checkout - README.md CONTRIBUTING.md CHANGELOG.md docs/ ;\
 		$(MAKE) website ;\
 	fi
-
-.PHONY: renovate
-renovate:
-	docker run --rm \
-		-e RENOVATE_TOKEN=$(RENOVATE_TOKEN) \
-		-v $(PWD)/renovate.json5:/usr/src/app/renovate.json5 \
-		renovate/renovate falconcr/k8gb
 		
 .PHONY: version
 version:
