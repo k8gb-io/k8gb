@@ -236,7 +236,7 @@ func TestResolveConfigWithZeroReconcileRequeueSecondsKey(t *testing.T) {
 	expected := predefinedConfig
 	expected.ReconcileRequeueSeconds = 0
 	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error)
+	arrangeVariablesAndAssert(t, expected, assert.NoError)
 }
 
 func TestResolveConfigWithNegativeNSRecordTTL(t *testing.T) {

@@ -131,7 +131,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(ReconcileRequeueSecondsKey, config.ReconcileRequeueSeconds).isHigherThanZero().err
+	err = field(ReconcileRequeueSecondsKey, config.ReconcileRequeueSeconds).isHigherOrEqualToZero().err
 	if err != nil {
 		return err
 	}
