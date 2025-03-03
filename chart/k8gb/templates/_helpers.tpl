@@ -78,6 +78,9 @@ Create the name of the service account to use
 {{- if .Values.cloudflare.enabled }}
 {{- print "cloudflare" -}}
 {{- end -}}
+{{- if .Values.clouddns.enabled }}
+{{- print "google" -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "k8gb.extdnsOwnerID" -}}
