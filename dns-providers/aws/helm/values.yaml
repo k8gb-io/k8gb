@@ -1,0 +1,10 @@
+k8gb:
+  k8gb:
+    dnsZone: "<helm set>"
+    edgeDNSZone: "<helm set>"
+    edgeDNSServers:
+    - "<helm set"
+
+  route53:
+    enabled: true
+    secret: external-dns-secret-aws
