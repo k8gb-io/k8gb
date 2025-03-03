@@ -272,8 +272,11 @@ func (w *Workflow) Start() (*Instance, error) {
 		istioInjection = "enabled"
 	}
 	k8s.CreateNamespaceWithMetadata(w.t, w.k8sOptions, metav1.ObjectMeta{
-		Name:   w.namespace,
-		Labels: map[string]string{"istio-injection": istioInjection},
+		Name: w.namespace,
+		Labels: map[string]string{
+			"istio-injection":   istioInjection,
+			"k8gb.io/terratest": "true",
+		},
 	})
 	w.state.namespaceCreated = true
 
