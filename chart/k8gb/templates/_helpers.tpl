@@ -84,7 +84,7 @@ Create the name of the service account to use
 {{- if .Values.route53.enabled -}}
 k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- else -}}
-k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
+k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_0")) "_1" }}-{{ .Values.k8gb.clusterGeoTag }}
 {{- end -}}
 {{- end -}}
 
@@ -95,6 +95,29 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
 {{ join "," .Values.k8gb.edgeDNSServers }}
 {{- end -}}
 {{- end -}}
+
+{{- define "k8gb.dnsZonesString" -}}
+{{- $entries := list -}}
+{{- range .Values.k8gb.dnsZones }}
+  {{- $dnsZoneNegTTL := toString (.dnsZoneNegTTL | default "300") }}
+  {{- $entry := printf "%s:%s:%s" .zone .domain $dnsZoneNegTTL }}
+  {{- $entries = append $entries $entry }}
+{{- end }}
+{{- if and (or (not .Values.k8gb.dnsZones) (eq (len .Values.k8gb.dnsZones) 0)) .Values.k8gb.dnsZone .Values.k8gb.edgeDNSZone }}
+  {{- $extraEntry := printf "%s:%s:%s" .Values.k8gb.edgeDNSZone .Values.k8gb.dnsZone "300" }}
+  {{- $entries = append $entries $extraEntry }}
+{{- end }}
+{{- join ";" $entries }}
+{{- end }}
+
+
+{{- define "k8gb.coredns.extraPlugins" -}}
+{{- if .Values.k8gb.coredns.extra_plugins }}
+{{- range .Values.k8gb.coredns.extra_plugins }}
+        {{ . }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 {{- define "k8gb.extdnsProviderOpts" -}}
 {{- if .Values.ns1.enabled -}}
@@ -139,7 +162,13 @@ k8gb-{{ .Values.k8gb.dnsZone }}-{{ .Values.k8gb.clusterGeoTag }}
         - --rfc2136-{{ $kk }}={{ $vv }}
 {{- end }}
 {{- end }}
-        - --rfc2136-zone={{ .Values.k8gb.edgeDNSZone }}
+{{- $dnsZonesRaw := include "k8gb.dnsZonesString" . }}
+{{- $dnsZones := split ";" $dnsZonesRaw }}
+{{- range $dnsZones }}
+    {{- $parts := split ":" . }}
+    {{- $zone := index $parts "_0" }}
+        - --rfc2136-zone={{ $zone }}
+{{- end }}
         env:
         - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
           valueFrom:
