@@ -31,7 +31,6 @@ import (
 
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
@@ -205,42 +204,6 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	err := provider.CreateZoneDelegation(&config.DelegationZones[0], gslb1.Status.LoadBalancer.ExposedIPs)
 	assert.NoError(t, err)
 	err = provider.CreateZoneDelegation(&config.DelegationZones[1], gslb2.Status.LoadBalancer.ExposedIPs)
-	assert.NoError(t, err)
-}
-
-func TestInfobloxFinalize(t *testing.T) {
-	// arrange
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	defaultDelegatedZone2 := defaultDelegatedZone
-	defaultDelegatedZone2.Fqdn = "cloud.example.org"
-	a := mocks.NewMockAssistant(ctrl)
-	cl := mocks.NewMockInfobloxClient(ctrl)
-	con := mocks.NewMockIBConnector(ctrl)
-	con.EXPECT().DeleteObject(gomock.Any()).Return(ref, nil).Do(func(arg0 string) {
-		require.Equal(t, arg0, ref)
-	}).AnyTimes()
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone}).
-		Return(nil).Times(1)
-	con.EXPECT().GetObject(gomock.Any(), gomock.Any(), gomock.Any()).SetArg(2, []ibclient.ZoneDelegated{defaultDelegatedZone2}).
-		Return(nil).Times(1)
-	cl.EXPECT().GetObjectManager().Return(ibclient.NewObjectManager(con, "k8gbclient", ""), nil).Times(1)
-	config := defaultConfig
-	config.DelegationZones = []depresolver.DelegationZoneInfo{
-		{
-			Domain: "cloud.example.com",
-			Zone:   "example.com",
-		},
-		{
-			Domain: "cloud.example.org",
-			Zone:   "example.org",
-		},
-	}
-	provider := NewInfobloxDNS(config, a, cl)
-	// act
-	err := provider.Finalize(defaultGslb, nil)
-
-	// assert
 	assert.NoError(t, err)
 }
 

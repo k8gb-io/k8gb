@@ -174,10 +174,3 @@ func (p *InfobloxProvider) updateZoneDelegated(o *ibcl.ObjectManager, fqdn strin
 	m.InfobloxObserveRequestDuration(start, metrics.UpdateZoneDelegated, err == nil)
 	return
 }
-
-func (p *InfobloxProvider) deleteZoneDelegated(o *ibcl.ObjectManager, fqdn string) (res string, err error) {
-	start := time.Now()
-	res, err = o.DeleteZoneDelegated(fqdn)
-	m.InfobloxObserveRequestDuration(start, metrics.DeleteZoneDelegated, err == nil)
-	return
-}
