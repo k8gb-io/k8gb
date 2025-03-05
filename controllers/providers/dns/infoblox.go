@@ -120,32 +120,6 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 }
 
 func (p *InfobloxProvider) Finalize(_ *k8gbv1beta1.Gslb, _ client.Client) error {
-	objMgr, err := p.client.GetObjectManager()
-	if err != nil {
-		return err
-	}
-	for _, zoneInfo := range p.config.DelegationZones {
-		findZone, err := p.getZoneDelegated(objMgr, zoneInfo.Domain)
-		if err != nil {
-			return err
-		}
-
-		if findZone != nil {
-			err = p.checkZoneDelegated(findZone, &zoneInfo)
-			if err != nil {
-				return err
-			}
-			if len(findZone.Ref) > 0 {
-				log.Info().
-					Str("DNSZone", zoneInfo.Domain).
-					Msg("Deleting delegated zone")
-				_, err := p.deleteZoneDelegated(objMgr, findZone.Ref)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
 	return nil
 }
 
