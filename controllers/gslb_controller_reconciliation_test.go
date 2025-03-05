@@ -1031,7 +1031,6 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			// configuration at another time than startup
 			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
 			_ = f.Provider().CreateZoneDelegation(&customConfig.DelegationZones[0], []string{serviceIPs[0].IP})
-			//reconcileAndUpdateGslb(t, settings)
 			err = settings.client.Get(
 				context.TODO(),
 				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},

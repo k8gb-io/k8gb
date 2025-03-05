@@ -152,9 +152,23 @@ func TestCreateZoneDelegationOnExternalDNSWithMultipleEndpoints(t *testing.T) {
 		})
 	// act
 
-	err := p.CreateZoneDelegation(&depresolver.DelegationZoneInfo{Domain: "cloud.example.com", Zone: "example.com", ClusterNSName: "gslb-ns-us-cloud.example.com", ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"}}, []string{"10.0.1.38", "10.0.1.40", "10.0.1.39"})
+	err := p.CreateZoneDelegation(&depresolver.DelegationZoneInfo{
+		Domain:        "cloud.example.com",
+		Zone:          "example.com",
+		ClusterNSName: "gslb-ns-us-cloud.example.com",
+		ExtClusterNSNames: map[string]string{
+			"eu": "gslb-ns-eu-cloud.example.com",
+			"za": "gslb-ns-za-cloud.example.com"},
+	}, []string{"10.0.1.38", "10.0.1.40", "10.0.1.39"})
 	assert.NoError(t, err)
-	err = p.CreateZoneDelegation(&depresolver.DelegationZoneInfo{Domain: "common.sampledomain.com", Zone: "sampledomain.com", ClusterNSName: "gslb-ns-us-common.sampledomain.com", ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-common.sampledomain.com", "za": "gslb-ns-za-common.sampledomain.com"}}, []string{"10.0.1.38", "10.0.1.40", "10.0.1.39"})
+	err = p.CreateZoneDelegation(&depresolver.DelegationZoneInfo{
+		Domain:        "common.sampledomain.com",
+		Zone:          "sampledomain.com",
+		ClusterNSName: "gslb-ns-us-common.sampledomain.com",
+		ExtClusterNSNames: map[string]string{
+			"eu": "gslb-ns-eu-common.sampledomain.com",
+			"za": "gslb-ns-za-common.sampledomain.com"},
+	}, []string{"10.0.1.38", "10.0.1.40", "10.0.1.39"})
 	assert.NoError(t, err)
 }
 

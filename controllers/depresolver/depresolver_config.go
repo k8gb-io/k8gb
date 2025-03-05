@@ -114,6 +114,7 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 	return dr.config, dr.errorConfig
 }
 
+//nolint:gocyclo
 func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes []EdgeDNSType) (err error) {
 	const dnsNameMax = 253
 	const dnsLabelMax = 63
@@ -233,7 +234,6 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return fmt.Errorf("invalid %s format, expecting format: ingress_namespace/ingress_name", IngressPathKey)
 		}
 	}
-
 	return nil
 }
 
