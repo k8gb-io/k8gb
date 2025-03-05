@@ -61,44 +61,27 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServe
 	return final
 }
 
-func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
+func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.DelegationZoneInfo, nsServerIPs []string) error {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
-		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
 	}
 
-	var addresses []string
-	if p.config.CoreDNSExposed {
-		addresses, err = p.assistant.CoreDNSExposedIPs()
-	} else {
-		addresses = gslb.Status.LoadBalancer.ExposedIPs
-	}
-	if err != nil {
-		m.InfobloxIncrementZoneUpdateError(gslb)
-		return err
-	}
 	var delegateTo []ibcl.NameServer
 
-	for _, address := range addresses {
-		nameServer := ibcl.NameServer{Address: address, Name: p.config.DelegationZones.GetClusterNSNameByGslb(gslb)}
+	for _, address := range nsServerIPs {
+		nameServer := ibcl.NameServer{Address: address, Name: zoneInfo.ClusterNSName}
 		delegateTo = append(delegateTo, nameServer)
 	}
 
-	zoneInfo := p.config.DelegationZones.FindByGslbStatusHostname(gslb)
-	if zoneInfo == nil {
-		return fmt.Errorf("domainInfo not found for GSLB: %s. Check if the gslb.Status.Servers[*].Host property matches any of the DNSZones", gslb.Name)
-	}
 	findZone, err := p.getZoneDelegated(objMgr, zoneInfo.Domain)
 	if err != nil {
-		m.InfobloxIncrementZoneUpdateError(gslb)
 		return err
 	}
 
 	if findZone != nil {
 		err = p.checkZoneDelegated(findZone, zoneInfo)
 		if err != nil {
-			m.InfobloxIncrementZoneUpdateError(gslb)
 			return err
 		}
 
@@ -116,10 +99,8 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 					Msg("Updating delegated zone with the server list")
 				_, err = p.updateZoneDelegated(objMgr, findZone.Ref, currentList)
 				if err != nil {
-					m.InfobloxIncrementZoneUpdateError(gslb)
 					return err
 				}
-				m.InfobloxIncrementZoneUpdate(gslb)
 			}
 		}
 	} else {
@@ -132,10 +113,8 @@ func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.
 			Msg("Delegated records")
 		_, err = p.createZoneDelegated(objMgr, zoneInfo.Domain, delegateTo)
 		if err != nil {
-			m.InfobloxIncrementZoneUpdateError(gslb)
 			return err
 		}
-		m.InfobloxIncrementZoneUpdate(gslb)
 	}
 	return nil
 }

@@ -68,7 +68,7 @@ func (r *Gslb) GetCoreDNSService() (*corev1.Service, error) {
 	}
 	listOption := &client.ListOptions{
 		LabelSelector: sel,
-		Namespace:     r.k8gbNamespace,
+		Namespace:     r.config.K8gbNamespace,
 	}
 
 	err = r.client.List(context.TODO(), serviceList, listOption)

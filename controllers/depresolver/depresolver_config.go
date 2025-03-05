@@ -56,6 +56,7 @@ const (
 	InfobloxHTTPPoolConnectionsKey = "INFOBLOX_HTTP_POOL_CONNECTIONS"
 	K8gbNamespaceKey               = "POD_NAMESPACE"
 	CoreDNSExposedKey              = "COREDNS_EXPOSED"
+	IngressPathKey                 = "INGRESS_PATH"
 	LogLevelKey                    = "LOG_LEVEL"
 	LogFormatKey                   = "LOG_FORMAT"
 	LogNoColorKey                  = "NO_COLOR"
@@ -224,6 +225,15 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
+	if !config.CoreDNSExposed {
+		if len(config.IngressPath) == 0 {
+			return fmt.Errorf("if %s is not set, %s must be filled in", CoreDNSExposedKey, IngressPathKey)
+		}
+		if len(strings.Split(config.IngressPath, "/")) != 2 {
+			return fmt.Errorf("invalid %s format, expecting format: ingress_namespace/ingress_name", IngressPathKey)
+		}
+	}
+
 	return nil
 }
 
@@ -299,6 +309,14 @@ func (dr *DependencyResolver) GetDeprecations() (deprecations []string) {
 		}
 	}
 	return
+}
+
+func (c *Config) ParseIngressPath() (string, string, error) {
+	arr := strings.Split(c.IngressPath, "/")
+	if len(arr) != 2 {
+		return "", "", fmt.Errorf("path format error (namespace/name): %s", c.IngressPath)
+	}
+	return arr[1], arr[0], nil
 }
 
 func parseMetricsAddr(metricsAddr string) (host string, port int, err error) {

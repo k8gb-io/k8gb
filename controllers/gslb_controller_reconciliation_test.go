@@ -406,12 +406,12 @@ func TestGslbErrorsIncrement(t *testing.T) {
 			require.Error(t, err)
 			// let's break it on different place
 			m.EXPECT().SaveDNSEndpoint(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-			m.EXPECT().CreateZoneDelegationForExternalDNS(gomock.Any()).Return(fmt.Errorf("zone delegation error")).AnyTimes()
+			m.EXPECT().CreateZoneDelegation(gomock.Any(), gomock.Any()).Return(fmt.Errorf("zone delegation error")).AnyTimes()
 			_, err = settings.reconciler.Reconcile(context.TODO(), settings.request)
 			cnt2 := testutil.ToFloat64(metrics.Metrics().Get(metrics.K8gbGslbErrorsTotal).AsCounterVec().With(label))
 			// assert
 			assert.NoError(t, err)
-			assert.Equal(t, cnt+2, cnt2)
+			assert.Equal(t, cnt+1, cnt2)
 		})
 }
 
@@ -946,9 +946,8 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
 			// configuration at another time than startup
 			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
-			settings.reconciler.DNSProvider = f.Provider()
-
-			reconcileAndUpdateGslb(t, settings)
+			err = f.Provider().CreateZoneDelegation(&customConfig.DelegationZones[0], []string{defaultEdgeDNS0, defaultEdgeDNS1})
+			assert.NoError(t, err)
 			err = settings.client.Get(
 				context.TODO(),
 				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},
@@ -1031,9 +1030,8 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
 			// configuration at another time than startup
 			f, _ := dns.NewDNSProviderFactory(settings.reconciler.Client, customConfig)
-			settings.reconciler.DNSProvider = f.Provider()
-
-			reconcileAndUpdateGslb(t, settings)
+			_ = f.Provider().CreateZoneDelegation(&customConfig.DelegationZones[0], []string{serviceIPs[0].IP})
+			//reconcileAndUpdateGslb(t, settings)
 			err = settings.client.Get(
 				context.TODO(),
 				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},

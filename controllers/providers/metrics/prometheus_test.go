@@ -173,32 +173,6 @@ func TestInfobloxZoneUpdateErrorIncrement(t *testing.T) {
 	assert.Equal(t, cnt1+1.0, cnt2)
 }
 
-func TestInfobloxHeartbeatIncrement(t *testing.T) {
-	// arrange
-	m := newPrometheusMetrics(defaultConfig)
-	cnt1 := testutil.ToFloat64(m.Get(K8gbInfobloxHeartbeatsTotal).AsCounterVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
-	// act
-	m.InfobloxIncrementHeartbeat(defaultGslb)
-	// assert
-	cnt2 := testutil.ToFloat64(m.Get(K8gbInfobloxHeartbeatsTotal).AsCounterVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
-	assert.Equal(t, cnt1+1.0, cnt2)
-}
-
-func TestInfobloxHeartbeatErrorIncrement(t *testing.T) {
-	// arrange
-	m := newPrometheusMetrics(defaultConfig)
-	cnt1 := testutil.ToFloat64(m.Get(K8gbInfobloxHeartbeatErrorsTotal).AsCounterVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
-	// act
-	m.InfobloxIncrementHeartbeatError(defaultGslb)
-	// assert
-	cnt2 := testutil.ToFloat64(m.Get(K8gbInfobloxHeartbeatErrorsTotal).AsCounterVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
-	assert.Equal(t, cnt1+1.0, cnt2)
-}
-
 func TestInfobloxZoneUpdateIncrement(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)

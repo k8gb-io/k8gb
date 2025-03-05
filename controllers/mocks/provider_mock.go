@@ -31,6 +31,7 @@ import (
 	reflect "reflect"
 
 	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	depresolver "github.com/k8gb-io/k8gb/controllers/depresolver"
 	assistant "github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	gomock "go.uber.org/mock/gomock"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
@@ -60,18 +61,18 @@ func (m *MockProvider) EXPECT() *MockProviderMockRecorder {
 	return m.recorder
 }
 
-// CreateZoneDelegationForExternalDNS mocks base method.
-func (m *MockProvider) CreateZoneDelegationForExternalDNS(arg0 *v1beta1.Gslb) error {
+// CreateZoneDelegation mocks base method.
+func (m *MockProvider) CreateZoneDelegation(arg0 *depresolver.DelegationZoneInfo, arg1 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateZoneDelegationForExternalDNS", arg0)
+	ret := m.ctrl.Call(m, "CreateZoneDelegation", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateZoneDelegationForExternalDNS indicates an expected call of CreateZoneDelegationForExternalDNS.
-func (mr *MockProviderMockRecorder) CreateZoneDelegationForExternalDNS(arg0 any) *gomock.Call {
+// CreateZoneDelegation indicates an expected call of CreateZoneDelegation.
+func (mr *MockProviderMockRecorder) CreateZoneDelegation(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateZoneDelegationForExternalDNS", reflect.TypeOf((*MockProvider)(nil).CreateZoneDelegationForExternalDNS), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateZoneDelegation", reflect.TypeOf((*MockProvider)(nil).CreateZoneDelegation), arg0, arg1)
 }
 
 // Finalize mocks base method.
