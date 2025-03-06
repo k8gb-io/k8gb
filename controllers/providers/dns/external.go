@@ -23,117 +23,51 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/logging"
-
-	assistant2 "github.com/k8gb-io/k8gb/controllers/providers/assistant"
-
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/k8gb-io/k8gb/controllers/logging"
+	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
 const externalDNSTypeCommon = "extdns"
 
 type ExternalDNSProvider struct {
-	assistant assistant2.Assistant
-	config    depresolver.Config
+	config  depresolver.Config
+	client  client.Client
+	context context.Context
 }
 
 var log = logging.Logger()
 
-func NewExternalDNS(config depresolver.Config, assistant assistant2.Assistant) *ExternalDNSProvider {
+func NewExternalDNS(ctx context.Context, client client.Client, config depresolver.Config) *ExternalDNSProvider {
 	return &ExternalDNSProvider{
-		assistant: assistant,
-		config:    config,
+		context: ctx,
+		client:  client,
+		config:  config,
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
-	ttl := externaldns.TTL(p.config.NSRecordTTL)
+func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *depresolver.DelegationZoneInfo) error {
 	log.Info().
 		Interface("provider", p).
-		Msg("Creating/Updating DNSEndpoint CRDs")
-
-	var NSServerIPs []string
-	var err error
-	if p.config.CoreDNSExposed {
-		NSServerIPs, err = p.assistant.CoreDNSExposedIPs()
-	} else {
-		if len(gslb.Status.LoadBalancer.ExposedIPs) == 0 {
-			// do not update DNS Endpoint for External DNS if no IPs are exposed
-			// new GSLB resources may have this field empty
-			return nil
-		}
-		NSServerIPs = gslb.Status.LoadBalancer.ExposedIPs
-	}
+		Msg("Creating/Updating DNSEndpoint CR")
+	// design break for testability - should be passed via constructor
+	// consider move this into provider
+	dze := k8gbendpoint.NewDelegationDNSEndpoint(p.context, p.client, p.config, log, *zoneInfo)
+	ep, err := dze.GetDNSEndpoint()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create delegationDNSEndpoint %v", err)
 	}
-
-	domainInfo := p.config.DelegationZones.FindByGslbStatusHostname(gslb)
-	if domainInfo == nil {
-		return fmt.Errorf("domainInfo not found for GSLB: %s. Check if the gslb.Status.Servers[*].Host property matches any of the DNSZones", gslb.Name)
-	}
-	NSRecord := &externaldns.DNSEndpoint{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      domainInfo.GetExternalDNSEndpointName(),
-			Namespace: p.config.K8gbNamespace,
-			Labels:    map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
-		},
-		Spec: externaldns.DNSEndpointSpec{
-			Endpoints: []*externaldns.Endpoint{
-				{
-					DNSName:    domainInfo.Domain,
-					RecordTTL:  ttl,
-					RecordType: "NS",
-					Targets:    domainInfo.GetNSServerList(),
-				},
-				{
-					DNSName:    domainInfo.ClusterNSName,
-					RecordTTL:  ttl,
-					RecordType: "A",
-					Targets:    NSServerIPs,
-				},
-			},
-		},
-	}
-	err = p.assistant.SaveDNSEndpoint(p.config.K8gbNamespace, NSRecord)
+	err = dze.SaveDNSEndpoint(ep)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save delegationDNSEndpoint %v", err)
 	}
 	return nil
 }
 
-func (p *ExternalDNSProvider) Finalize(_ *k8gbv1beta1.Gslb, k8sClient client.Client) error {
-	gslbList := &k8gbv1beta1.GslbList{}
-
-	err := k8sClient.List(context.TODO(), gslbList)
-	if err != nil {
-		return err
-	}
-
-	// only remove the DNSEndpoint if there are no more GSLB resources
-	if len(gslbList.Items) > 1 {
-		return nil
-	}
-
-	for _, domainInfo := range p.config.DelegationZones {
-		err = p.assistant.RemoveEndpoint(domainInfo.GetExternalDNSEndpointName())
-		if err != nil {
-			return err
-		}
-	}
+func (p *ExternalDNSProvider) Finalize(zoneInfo *depresolver.DelegationZoneInfo) error {
+	log.Info().Msgf("Domain %s will be deleted by removing delegation DNSEndpoint %s", zoneInfo.Domain, zoneInfo.GetExternalDNSEndpointName())
 	return nil
-}
-
-func (p *ExternalDNSProvider) GetExternalTargets(host string) (targets assistant2.Targets) {
-	return p.assistant.GetExternalTargets(host, p.config.DelegationZones.GetExternalClusterNSNamesByHostname(host))
-}
-
-func (p *ExternalDNSProvider) SaveDNSEndpoint(gslb *k8gbv1beta1.Gslb, i *externaldns.DNSEndpoint) error {
-	return p.assistant.SaveDNSEndpoint(gslb.Namespace, i)
 }
 
 func (p *ExternalDNSProvider) String() string {

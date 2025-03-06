@@ -1,4 +1,4 @@
-package assistant
+package k8gbendpoint
 
 import "sort"
 

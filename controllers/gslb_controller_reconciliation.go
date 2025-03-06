@@ -23,6 +23,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
@@ -34,7 +37,6 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -56,7 +58,6 @@ type GslbReconciler struct {
 }
 
 const (
-	gslbFinalizer           = "k8gb.absa.oss/finalizer"
 	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
 	strategyAnnotation      = "k8gb.io/strategy"
 	dnsTTLSecondsAnnotation = "k8gb.io/dns-ttl-seconds"
@@ -102,50 +103,6 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Str("namespace", gslb.Namespace).
 		Interface("strategy", gslb.Spec.Strategy).
 		Msg("Resolved strategy")
-	// == Finalizer business ==
-
-	// Check if the Gslb instance is marked to be deleted, which is
-	// indicated by the deletion timestamp being set.
-	isGslbMarkedToBeDeleted := gslb.GetDeletionTimestamp() != nil
-	if isGslbMarkedToBeDeleted {
-		// For the legacy reasons, delete all finalizers that corresponds with the slice
-		// see: https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.4.0/#change-your-operators-finalizer-names
-		_, fSpan := r.Tracer.Start(ctx, "finalize")
-		for _, f := range []string{gslbFinalizer, "finalizer.k8gb.absa.oss"} {
-			if contains(gslb.GetFinalizers(), f) {
-				// Run finalization logic for gslbFinalizer. If the
-				// finalization logic fails, don't remove the finalizer so
-				// that we can retry during the next reconciliation.
-				if err := r.finalizeGslb(gslb); err != nil {
-					fSpan.RecordError(err)
-					fSpan.SetStatus(codes.Error, err.Error())
-					return result.RequeueError(err)
-				}
-
-				// Remove gslbFinalizer. Once all finalizers have been
-				// removed, the object will be deleted.
-				gslb.SetFinalizers(remove(gslb.GetFinalizers(), f))
-				err := r.Update(ctx, gslb)
-				if err != nil {
-					fSpan.RecordError(err)
-					fSpan.SetStatus(codes.Error, err.Error())
-					return result.RequeueError(err)
-				}
-			}
-
-		}
-		fSpan.End()
-		log.Info().Msg("reconciler exit")
-		return result.Stop()
-	}
-
-	// Add finalizer for this CR
-	if !contains(gslb.GetFinalizers(), gslbFinalizer) {
-		if err := r.addFinalizer(gslb); err != nil {
-			m.IncrementError(gslb)
-			return result.RequeueError(err)
-		}
-	}
 
 	// == Ingress ==========
 	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
@@ -197,29 +154,27 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	gslb.Status.ServiceHealth = serviceHealth
 
 	// == external-dns dnsendpoints CRs ==
-	dnsEndpoint, err := r.gslbDNSEndpoint(gslb)
+	_, s := r.Tracer.Start(context.Background(), "gslbDNSEndpoint")
+	epProvider := k8gbendpoint.NewApplicationDNSEndpoint(context.TODO(), r.Client, r.Config, gslb, log, r.updateRuntimeStatus)
+	dnsEndpoint, err := epProvider.GetDNSEndpoint()
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
 	}
-
-	_, s := r.Tracer.Start(ctx, "SaveDNSEndpoint")
-	err = r.DNSProvider.SaveDNSEndpoint(gslb, dnsEndpoint)
+	err = controllerutil.SetControllerReference(gslb, dnsEndpoint, r.Scheme)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
 	}
 	s.End()
 
-	// == handle delegated zone in Edge DNS
-	_, szd := r.Tracer.Start(ctx, "CreateZoneDelegationForExternalDNS")
-	err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
+	_, s = r.Tracer.Start(ctx, "SaveDNSEndpoint")
+	err = epProvider.SaveDNSEndpoint(dnsEndpoint)
 	if err != nil {
-		log.Err(err).Msg("Unable to create zone delegation")
 		m.IncrementError(gslb)
-		return result.Requeue()
+		return result.RequeueError(err)
 	}
-	szd.End()
+	s.End()
 
 	// == Status =
 	err = r.updateGslbStatus(gslb, dnsEndpoint)
