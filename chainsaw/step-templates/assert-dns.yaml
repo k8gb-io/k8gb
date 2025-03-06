@@ -7,7 +7,7 @@ metadata:
 spec:
   try:
   - sleep: 
-      duration: 30s # reconcile requeue seconds + coreDNS
+      duration: 40s # reconcile requeue seconds + coreDNS
   - script:
       env:
       - name: NAME
