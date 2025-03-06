@@ -272,8 +272,11 @@ func (w *Workflow) Start() (*Instance, error) {
 		istioInjection = "enabled"
 	}
 	k8s.CreateNamespaceWithMetadata(w.t, w.k8sOptions, metav1.ObjectMeta{
-		Name:   w.namespace,
-		Labels: map[string]string{"istio-injection": istioInjection},
+		Name: w.namespace,
+		Labels: map[string]string{
+			"istio-injection":   istioInjection,
+			"k8gb.io/terratest": "true",
+		},
 	})
 	w.state.namespaceCreated = true
 
@@ -453,18 +456,18 @@ func (i *Instance) WaitForLocalDNSEndpointExists() error {
 	return tickerWaiter(DefaultRetries, "LocalDNSEndpoint exists:", periodic)
 }
 
-func (i *Instance) WaitForExternalDNSEndpointExists() error {
+func (i *Instance) WaitForExternalDNSEndpointExists(zone string) error {
 	periodic := func() (result bool, err error) {
-		lep := i.Resources().GetK8gbExternalDNSEndpoint()
+		lep := i.Resources().GetK8gbExternalDNSEndpoint(zone)
 		result = len(lep.Spec.Endpoints) > 0
 		return result, err
 	}
 	return tickerWaiter(DefaultRetries, "ExternalDNSEndpoint exists:", periodic)
 }
 
-func (r *Resources) WaitForExternalDNSEndpointHasTargets(epName string) error {
+func (r *Resources) WaitForExternalDNSEndpointHasTargets(zone, epName string) error {
 	periodic := func() (result bool, err error) {
-		epx, err := r.GetK8gbExternalDNSEndpoint().GetEndpointByName(epName)
+		epx, err := r.GetK8gbExternalDNSEndpoint(zone).GetEndpointByName(epName)
 		if err != nil {
 			return false, nil
 		}
@@ -740,8 +743,9 @@ func (r *Resources) GetLocalDNSEndpoint() DNSEndpoint {
 	return ep
 }
 
-func (r *Resources) GetK8gbExternalDNSEndpoint() DNSEndpoint {
-	return r.GetExternalDNSEndpointByName("k8gb-ns-extdns", "k8gb")
+func (r *Resources) GetK8gbExternalDNSEndpoint(zone string) DNSEndpoint {
+	var suffix = strings.Trim(strings.ReplaceAll(zone, ".", "-"), " ")
+	return r.GetExternalDNSEndpointByName("k8gb-ns-extdns-"+suffix, "k8gb")
 }
 
 func (r *Resources) GetExternalDNSEndpointByName(name, namespace string) DNSEndpoint {

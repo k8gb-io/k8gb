@@ -75,16 +75,21 @@ var crSampleYaml = "../deploy/crds/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingr
 var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	NSRecordTTL:             30,
-	ClusterGeoTag:           "us-west-1",
-	ExtClustersGeoTags:      []string{"us-east-1"},
+	ClusterGeoTag:           "us",
 	EdgeDNSServers: []utils.DNSServer{
 		{
 			Host: "127.0.0.1",
 			Port: 7753,
 		},
 	},
-	EdgeDNSZone:   "example.com",
-	DNSZone:       "cloud.example.com",
+	DelegationZones: []depresolver.DelegationZoneInfo{
+		{
+			Domain:            "cloud.example.com",
+			Zone:              "example.com",
+			ClusterNSName:     "localhost",
+			ExtClusterNSNames: map[string]string{"eu": "localhost"},
+		},
+	},
 	K8gbNamespace: "k8gb",
 	Infoblox: depresolver.Infoblox{
 		Host:                "fakeinfoblox.example.com",
@@ -698,7 +703,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 
 			// enable failover strategy
 			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
-			settings.gslb.Spec.Strategy.PrimaryGeoTag = "us-east-1"
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
 
@@ -771,7 +776,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 
 			// enable failover strategy
 			settings.gslb.Spec.Strategy.Type = depresolver.FailoverStrategy
-			settings.gslb.Spec.Strategy.PrimaryGeoTag = "us-east-1"
+			settings.gslb.Spec.Strategy.PrimaryGeoTag = "eu"
 			err = settings.client.Update(context.TODO(), settings.gslb)
 			require.NoError(t, err, "Can't update gslb")
 
@@ -816,7 +821,7 @@ func TestReflectGeoTagInStatusAsUnsetByDefault(t *testing.T) {
 		Start().
 		RunTestFunc(func() {
 			// arrange
-			want := "us-west-1"
+			want := "us"
 			settings := provideSettings(t, predefinedConfig)
 			// act
 			reconcileAndUpdateGslb(t, settings)
@@ -851,7 +856,12 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 			// getting Gslb and Reconciler
 			predefinedSettings := provideSettings(t, predefinedConfig)
 			customConfig := predefinedConfig
-			customConfig.EdgeDNSZone = "otherdnszone.com"
+			customConfig.DelegationZones = depresolver.DelegationZones{
+				{
+					Domain: "cloud.example.com",
+					Zone:   "otherdnszone.com",
+				},
+			}
 			predefinedSettings.config = customConfig
 			req := reconcile.Request{
 				NamespacedName: types.NamespacedName{
@@ -865,7 +875,7 @@ func TestDetectsIngressHostnameMismatch(t *testing.T) {
 			_, err := predefinedSettings.reconciler.Reconcile(context.TODO(), req)
 			// assert
 			assert.Error(t, err, "expected controller to detect Ingress hostname and edgeDNSZone mismatch")
-			assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone otherdnszone.com"))
+			assert.True(t, strings.HasSuffix(err.Error(), "cloud.example.com does not match delegated zone [otherdnszone.com]"))
 		})
 }
 
@@ -923,8 +933,14 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			// act
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
-			customConfig.ExtClustersGeoTags = []string{"za", "us"}
-			customConfig.DNSZone = dnsZone
+			customConfig.DelegationZones = depresolver.DelegationZones{
+				{
+					Domain:            dnsZone,
+					Zone:              "example.com",
+					ClusterNSName:     "gslb-ns-eu-cloud.example.com",
+					ExtClusterNSNames: map[string]string{"us": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
+				},
+			}
 			// apply new environment variables and update config only
 			settings.reconciler.Config = &customConfig
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
@@ -933,7 +949,10 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 			settings.reconciler.DNSProvider = f.Provider()
 
 			reconcileAndUpdateGslb(t, settings)
-			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+			err = settings.client.Get(
+				context.TODO(),
+				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},
+				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
 			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
 			gotEp := dnsEndpoint.Spec.Endpoints
@@ -999,8 +1018,14 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			// act
 			customConfig.EdgeDNSType = depresolver.DNSTypeExternal
 			customConfig.ClusterGeoTag = "eu"
-			customConfig.ExtClustersGeoTags = []string{"za", "us"}
-			customConfig.DNSZone = dnsZone
+			customConfig.DelegationZones = depresolver.DelegationZones{
+				{
+					Domain:            dnsZone,
+					Zone:              "example.com",
+					ClusterNSName:     "gslb-ns-eu-cloud.example.com",
+					ExtClusterNSNames: map[string]string{"eu": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
+				},
+			}
 			// apply new environment variables and update config only
 			settings.reconciler.Config = &customConfig
 			// If config is changed, new Route53 provider needs to be re-created. There is no way and reason to change provider
@@ -1009,7 +1034,10 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 			settings.reconciler.DNSProvider = f.Provider()
 
 			reconcileAndUpdateGslb(t, settings)
-			err = settings.client.Get(context.TODO(), client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns"}, dnsEndpoint)
+			err = settings.client.Get(
+				context.TODO(),
+				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},
+				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
 			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
 			gotEp := dnsEndpoint.Spec.Endpoints
@@ -1434,7 +1462,7 @@ func provideSettings(t *testing.T, expected depresolver.Config) (settings testSe
 		t.Fatalf("reconcile: (%v)", err)
 	}
 	r.DNSProvider = f.Provider()
-	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, r.Config.EdgeDNSServers)
+	a := assistant.NewGslbAssistant(r.Client, r.Config.K8gbNamespace, *r.Config)
 	res, err := r.Reconcile(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)

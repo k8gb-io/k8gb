@@ -59,12 +59,10 @@ spec:
               value: {{ quote .Values.k8gb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS
               value: {{ quote .Values.k8gb.extGslbClustersGeoTags }}
-            - name: EDGE_DNS_ZONE
-              value: {{ .Values.k8gb.edgeDNSZone }}
             - name: EDGE_DNS_SERVERS
               value: {{ include "k8gb.edgeDNSServers" . }}
-            - name: DNS_ZONE
-              value: {{ .Values.k8gb.dnsZone }}
+            - name: DNS_ZONES
+              value: {{ include "k8gb.dnsZonesString" . }}
             - name: RECONCILE_REQUEUE_SECONDS
               value: {{ quote .Values.k8gb.reconcileRequeueSeconds }}
             - name: NS_RECORD_TTL
