@@ -23,6 +23,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
@@ -197,13 +200,20 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	gslb.Status.ServiceHealth = serviceHealth
 
 	// == external-dns dnsendpoints CRs ==
-	dnsEndpoint, err := r.gslbDNSEndpoint(gslb)
+	_, s := r.Tracer.Start(context.Background(), "gslbDNSEndpoint")
+	dnsEndpoint, err := k8gbendpoint.NewApplicationDNSEndpoint(context.TODO(), r.Client, r.Config, gslb, log, r.updateRuntimeStatus).GetDNSEndpoint()
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
 	}
+	err = controllerutil.SetControllerReference(gslb, dnsEndpoint, r.Scheme)
+	if err != nil {
+		m.IncrementError(gslb)
+		return result.RequeueError(err)
+	}
+	s.End()
 
-	_, s := r.Tracer.Start(ctx, "SaveDNSEndpoint")
+	_, s = r.Tracer.Start(ctx, "SaveDNSEndpoint")
 	err = r.DNSProvider.SaveDNSEndpoint(gslb, dnsEndpoint)
 	if err != nil {
 		m.IncrementError(gslb)

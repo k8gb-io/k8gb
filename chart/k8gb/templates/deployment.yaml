@@ -108,10 +108,6 @@ spec:
             - name: EXTDNS_ENABLED
               value: "true"
             {{- end }}
-            {{- if eq "LoadBalancer" ( toString .Values.coredns.serviceType ) }}
-            - name: COREDNS_EXPOSED
-              value: "true"
-            {{- end }}
             {{- if .Values.tracing.enabled }}
               {{- with .Values.tracing }}
             - name: TRACING_ENABLED
