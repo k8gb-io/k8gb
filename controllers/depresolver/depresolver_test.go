@@ -1492,7 +1492,7 @@ func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {
 
 //nolint:goconst
 func TestParseDNSZones(t *testing.T) {
-	contains := func(dzi []DelegationZoneInfo, compare func(info DelegationZoneInfo) bool) bool {
+	contains := func(dzi []*DelegationZoneInfo, compare func(info *DelegationZoneInfo) bool) bool {
 		for _, v := range dzi {
 			if compare(v) {
 				return true
@@ -1504,7 +1504,7 @@ func TestParseDNSZones(t *testing.T) {
 		name        string
 		expectedLen int
 		config      *Config
-		assert      func(zoneInfo []DelegationZoneInfo, err error)
+		assert      func(zoneInfo []*DelegationZoneInfo, err error)
 	}{
 		{
 			name: "invalid negTTL",
@@ -1515,7 +1515,7 @@ func TestParseDNSZones(t *testing.T) {
 				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 0,
-			assert: func(_ []DelegationZoneInfo, err error) {
+			assert: func(_ []*DelegationZoneInfo, err error) {
 				assert.Error(t, err)
 			},
 		},
@@ -1528,22 +1528,22 @@ func TestParseDNSZones(t *testing.T) {
 				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []DelegationZoneInfo, err error) {
+			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.io" && info.Domain == "cloud.example.io"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-cloud.example.com" &&
 						info.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.com" &&
 						info.GetNSServerList()[1] == "gslb-ns-us-cloud.example.com" &&
 						info.GetNSServerList()[2] == "gslb-ns-za-cloud.example.com" &&
 						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-cloud.example.io" &&
 						info.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.io" &&
 						info.GetNSServerList()[1] == "gslb-ns-us-cloud.example.io" &&
@@ -1561,22 +1561,22 @@ func TestParseDNSZones(t *testing.T) {
 				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []DelegationZoneInfo, err error) {
+			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.com" && info.Domain == "pair.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-cloud.example.com" &&
 						info.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.com" &&
 						info.GetNSServerList()[1] == "gslb-ns-us-cloud.example.com" &&
 						info.GetNSServerList()[2] == "gslb-ns-za-cloud.example.com" &&
 						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-pair.example.com" &&
 						info.GetNSServerList()[0] == "gslb-ns-eu-pair.example.com" &&
 						info.GetNSServerList()[1] == "gslb-ns-us-pair.example.com" &&
@@ -1594,12 +1594,12 @@ func TestParseDNSZones(t *testing.T) {
 				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []DelegationZoneInfo, err error) {
+			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.io" && info.Domain == "cloud.example.io"
 				}))
 			},
@@ -1613,12 +1613,12 @@ func TestParseDNSZones(t *testing.T) {
 				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []DelegationZoneInfo, err error) {
+			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.com" && info.Domain == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info DelegationZoneInfo) bool {
+				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.Zone == "example.io" && info.Domain == "cloud.example.io"
 				}))
 			},
@@ -1632,7 +1632,7 @@ func TestParseDNSZones(t *testing.T) {
 				extClustersGeoTags: []string{"za", "eu"},
 			},
 			expectedLen: 1,
-			assert: func(zoneInfo []DelegationZoneInfo, err error) {
+			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
 				assert.True(t, zoneInfo[0].ClusterNSName == "gslb-ns-us-k8gb-test-gslb.cloud.example.com" &&
 					zoneInfo[0].ExtClusterNSNames["za"] == "gslb-ns-za-k8gb-test-gslb.cloud.example.com" &&

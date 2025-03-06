@@ -111,13 +111,6 @@ func run() error {
 		return err
 	}
 
-	reconciler := &controllers.GslbReconciler{
-		Config:      config,
-		Client:      mgr.GetClient(),
-		DepResolver: resolver,
-		Scheme:      mgr.GetScheme(),
-	}
-
 	log.Info().Msg("Starting metrics")
 	metrics.Init(config)
 	defer metrics.Metrics().Unregister()
@@ -128,20 +121,36 @@ func run() error {
 	}
 
 	log.Info().Msg("Resolving DNS provider")
-	f, err = dns.NewDNSProviderFactory(reconciler.Client, *reconciler.Config)
+	f, err = dns.NewDNSProviderFactory(context.TODO(), mgr.GetClient(), *config)
 	if err != nil {
 		log.Err(err).Msg("Unable to create DNS provider factory")
 		return err
 	}
-	reconciler.DNSProvider = f.Provider()
-	log.Info().
-		Str("provider", reconciler.DNSProvider.String()).
-		Msg("Started DNS provider")
 
-	if err = reconciler.SetupWithManager(mgr); err != nil {
-		log.Err(err).Msg("Unable to create Gslb controller")
+	gslbReconciler := &controllers.GslbReconciler{
+		Config:      config,
+		Client:      mgr.GetClient(),
+		DepResolver: resolver,
+		Scheme:      mgr.GetScheme(),
+	}
+
+	corednsReconciler := &controllers.CoreDNSReconciler{
+		Config:      config,
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		DNSProvider: f.Provider(),
+	}
+
+	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
+		log.Err(err).Msg("Unable to create Gslb reconciler")
 		return err
 	}
+
+	if err = corednsReconciler.SetupWithManager(mgr); err != nil {
+		log.Err(err).Msg("Unable to create coreDNS reconciler")
+		return err
+	}
+
 	metrics.Metrics().SetRuntimeInfo(version, commit)
 
 	// tracing
@@ -153,7 +162,7 @@ func run() error {
 		AppVersion:    version,
 	}
 	cleanup, tracer := tracing.SetupTracing(context.Background(), cfg, log)
-	reconciler.Tracer = tracer
+	gslbReconciler.Tracer = tracer
 	defer cleanup()
 
 	// +kubebuilder:scaffold:builder
