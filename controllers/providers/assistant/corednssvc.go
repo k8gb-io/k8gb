@@ -50,7 +50,7 @@ type Gslb struct {
 
 var log = logging.Logger()
 
-func NewGslbAssistant(client client.Client, k8gbNamespace string, config depresolver.Config) *Gslb {
+func NewCoreDNSAssistant(client client.Client, k8gbNamespace string, config depresolver.Config) *Gslb {
 	return &Gslb{
 		client:        client,
 		k8gbNamespace: k8gbNamespace,

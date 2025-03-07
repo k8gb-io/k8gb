@@ -95,7 +95,7 @@ func TestCanFilterOutDelegatedZoneEntryAccordingFQDNProvided(t *testing.T) {
 	}
 	customConfig := defaultConfig
 	// customConfig.DelegationZones[0].ExtClusterNSNames = map[string]string{"za": "gslb-ns-za-cloud.example.com"}
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig)
+	a := assistant.NewCoreDNSAssistant(nil, customConfig.K8gbNamespace, customConfig)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockInfobloxClient(ctrl)
@@ -130,7 +130,7 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 		{Address: "10.1.0.3", Name: "gslb-ns-za-cloud.example.com"},
 	}
 	customConfig := defaultConfig
-	a := assistant.NewGslbAssistant(nil, customConfig.K8gbNamespace, customConfig)
+	a := assistant.NewCoreDNSAssistant(nil, customConfig.K8gbNamespace, customConfig)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	m := mocks.NewMockInfobloxClient(ctrl)

@@ -182,6 +182,9 @@ deploy-local-cluster:
 	@echo -e "\n$(YELLOW)Create namespace $(NC)"
 	kubectl create namespace k8gb --dry-run=client -o yaml | kubectl apply -f -
 
+	@echo -e "\n$(YELLOW)Create coredns init-ingress $(NC)"
+	kubectl apply -f ./deploy/crds/init-ingress.yaml
+
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
 
@@ -261,6 +264,7 @@ deploy-k8gb-with-helm:
 		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL) \
 		--set rfc2136.enabled=true \
+		--set coredns.service.annotations.k8gb\\.io/coredns-ingress-ref="k8gb/init-ingress" \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
 		--wait --timeout=10m0s
 

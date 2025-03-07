@@ -118,10 +118,11 @@ func run() error {
 		Scheme:      mgr.GetScheme(),
 	}
 
-	//corednsReconciler := &controllers.CoreDNSReconciler{
-	//	Config: config,
-	//	Client: mgr.GetClient(),
-	//}
+	corednsReconciler := &controllers.CoreDNSReconciler{
+		Config: config,
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}
 
 	log.Info().Msg("Starting metrics")
 	metrics.Init(config)
@@ -139,19 +140,16 @@ func run() error {
 		return err
 	}
 	gslbReconciler.DNSProvider = f.Provider()
+
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create Gslb reconciler")
 		return err
 	}
 
-	//corednsReconciler.DNSProvider = f.Provider()
-	//log.Info().
-	//	Str("provider", corednsReconciler.DNSProvider.String()).
-	//	Msg("Started DNS provider")
-	//if err = corednsReconciler.SetupWithManager(mgr); err != nil {
-	//	log.Err(err).Msg("Unable to create coreDNS reconciler")
-	//	return err
-	//}
+	if err = corednsReconciler.SetupWithManager(mgr); err != nil {
+		log.Err(err).Msg("Unable to create coreDNS reconciler")
+		return err
+	}
 
 	metrics.Metrics().SetRuntimeInfo(version, commit)
 

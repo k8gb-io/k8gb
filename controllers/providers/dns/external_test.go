@@ -227,7 +227,7 @@ func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {
 
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(ep).Build()
 
-	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config)
+	assistant := assistant.NewCoreDNSAssistant(cl, a.Config.K8gbNamespace, a.Config)
 	p := NewExternalDNS(a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, expectedDNSEndpoint)
@@ -247,7 +247,7 @@ func TestSaveExistingDNSEndpointOnExternalDNS(t *testing.T) {
 	require.NoError(t, schemeBuilder.AddToScheme(runtimeScheme))
 
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(endpointToSave).Build()
-	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config)
+	assistant := assistant.NewCoreDNSAssistant(cl, a.Config.K8gbNamespace, a.Config)
 	p := NewExternalDNS(a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, endpointToSave)
