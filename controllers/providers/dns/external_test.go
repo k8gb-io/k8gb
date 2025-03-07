@@ -136,7 +136,7 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 		},
 	}
 	// act
-	err := p.CreateZoneDelegationForExternalDNS(gslb)
+	err := p.CreateZoneDelegation(nil)
 	// assert
 	assert.NoError(t, err)
 }
@@ -195,11 +195,11 @@ func TestCreateZoneDelegationOnExternalDNSWithMultipleEndpoints(t *testing.T) {
 		},
 	}
 	// act
-	err := p.CreateZoneDelegationForExternalDNS(gslb1)
+	err := p.CreateZoneDelegation(nil)
 	assert.NoError(t, err)
-	err = p.CreateZoneDelegationForExternalDNS(gslb2)
+	err = p.CreateZoneDelegation(nil)
 	assert.NoError(t, err)
-	err = p.CreateZoneDelegationForExternalDNS(gslb3)
+	err = p.CreateZoneDelegation(nil)
 	assert.Error(t, err)
 }
 

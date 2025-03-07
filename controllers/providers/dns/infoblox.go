@@ -61,7 +61,7 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServe
 	return final
 }
 
-func (p *InfobloxProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1beta1.Gslb) error {
+func (p *InfobloxProvider) CreateZoneDelegation(depresolver.DelegationZoneInfo) error {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		m.InfobloxIncrementZoneUpdateError(gslb)

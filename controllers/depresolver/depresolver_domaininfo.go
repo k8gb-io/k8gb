@@ -35,6 +35,7 @@ type DelegationZoneInfo struct {
 	NegativeTTL       int
 	ClusterNSName     string
 	ExtClusterNSNames map[string]string
+	IPs               []string
 }
 
 func parseDelegationZones(config *Config) ([]DelegationZoneInfo, error) {
@@ -160,4 +161,10 @@ func (d *DelegationZones) getZone(host string) *DelegationZoneInfo {
 		}
 	}
 	return nil
+}
+
+func (d *DelegationZones) SetIPs(ips []string) {
+	for _, z := range *d {
+		z.IPs = ips
+	}
 }

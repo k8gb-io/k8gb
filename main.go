@@ -111,19 +111,6 @@ func run() error {
 		return err
 	}
 
-	gslbReconciler := &controllers.GslbReconciler{
-		Config:      config,
-		Client:      mgr.GetClient(),
-		DepResolver: resolver,
-		Scheme:      mgr.GetScheme(),
-	}
-
-	corednsReconciler := &controllers.CoreDNSReconciler{
-		Config: config,
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}
-
 	log.Info().Msg("Starting metrics")
 	metrics.Init(config)
 	defer metrics.Metrics().Unregister()
@@ -134,12 +121,26 @@ func run() error {
 	}
 
 	log.Info().Msg("Resolving DNS provider")
-	f, err = dns.NewDNSProviderFactory(gslbReconciler.Client, *gslbReconciler.Config)
+	f, err = dns.NewDNSProviderFactory(mgr.GetClient(), *config)
 	if err != nil {
 		log.Err(err).Msg("Unable to create DNS provider factory")
 		return err
 	}
-	gslbReconciler.DNSProvider = f.Provider()
+
+	gslbReconciler := &controllers.GslbReconciler{
+		Config:      config,
+		Client:      mgr.GetClient(),
+		DepResolver: resolver,
+		Scheme:      mgr.GetScheme(),
+		DNSProvider: f.Provider(),
+	}
+
+	corednsReconciler := &controllers.CoreDNSReconciler{
+		Config:      config,
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		DNSProvider: f.Provider(),
+	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create Gslb reconciler")

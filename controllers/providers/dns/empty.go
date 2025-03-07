@@ -39,7 +39,7 @@ func NewEmptyDNS(config depresolver.Config, assistant assistant.Assistant) *Empt
 	}
 }
 
-func (p *EmptyDNSProvider) CreateZoneDelegationForExternalDNS(*k8gbv1beta1.Gslb) (err error) {
+func (p *EmptyDNSProvider) CreateZoneDelegation(depresolver.DelegationZoneInfo) (err error) {
 	return
 }
 

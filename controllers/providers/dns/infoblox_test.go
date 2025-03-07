@@ -202,9 +202,9 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 
 	// act
 	// assert
-	err := provider.CreateZoneDelegationForExternalDNS(gslb1)
+	err := provider.CreateZoneDelegation(nil)
 	assert.NoError(t, err)
-	err = provider.CreateZoneDelegationForExternalDNS(gslb2)
+	err = provider.CreateZoneDelegation(nil)
 	assert.NoError(t, err)
 }
 

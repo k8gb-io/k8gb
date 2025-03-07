@@ -223,8 +223,8 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	s.End()
 
 	// == handle delegated zone in Edge DNS
-	//_, szd := r.Tracer.Start(ctx, "CreateZoneDelegationForExternalDNS")
-	// err = r.DNSProvider.CreateZoneDelegationForExternalDNS(gslb)
+	//_, szd := r.Tracer.Start(ctx, "CreateZoneDelegation")
+	// err = r.DNSProvider.CreateZoneDelegation(gslb)
 	//if err != nil {
 	//	log.Err(err).Msg("Unable to create zone delegation")
 	//	m.IncrementError(gslb)
