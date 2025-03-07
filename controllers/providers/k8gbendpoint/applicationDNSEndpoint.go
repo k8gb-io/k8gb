@@ -87,10 +87,10 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, err
 			finalTargets.Append(d.config.ClusterGeoTag, localTargets)
 			localTargetsHost := fmt.Sprintf("localtargets-%s", host)
 			dnsRecord := &externaldns.Endpoint{
-				DNSName:    localTargetsHost,
-				RecordTTL:  ttl,
 				RecordType: "A",
 				Targets:    localTargets,
+				RecordTTL:  ttl,
+				DNSName:    localTargetsHost,
 			}
 			gslbHosts = append(gslbHosts, dnsRecord)
 		}

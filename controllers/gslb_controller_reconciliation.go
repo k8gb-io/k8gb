@@ -201,7 +201,8 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	// == external-dns dnsendpoints CRs ==
 	_, s := r.Tracer.Start(context.Background(), "gslbDNSEndpoint")
-	dnsEndpoint, err := k8gbendpoint.NewApplicationDNSEndpoint(context.TODO(), r.Client, r.Config, gslb, log, r.updateRuntimeStatus).GetDNSEndpoint()
+	epProvider := k8gbendpoint.NewApplicationDNSEndpoint(context.TODO(), r.Client, r.Config, gslb, log, r.updateRuntimeStatus)
+	dnsEndpoint, err := epProvider.GetDNSEndpoint()
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
@@ -214,7 +215,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	s.End()
 
 	_, s = r.Tracer.Start(ctx, "SaveDNSEndpoint")
-	err = r.DNSProvider.SaveDNSEndpoint(gslb, dnsEndpoint)
+	err = epProvider.SaveDNSEndpoint(gslb.Namespace, dnsEndpoint)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
