@@ -24,7 +24,7 @@ import (
 )
 
 type DNSEndpoint interface {
-	SaveDNSEndpoint(namespace string, i *externaldns.DNSEndpoint) error
+	SaveDNSEndpoint(i *externaldns.DNSEndpoint) error
 
 	RemoveEndpoint(endpointKey client.ObjectKey) error
 

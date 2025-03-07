@@ -57,7 +57,7 @@ func NewDelegationDNSEndpoint(
 	}
 }
 
-func (d *DelegationDNSEndpoint) SaveDNSEndpoint(_ string, e *externaldns.DNSEndpoint) error {
+func (d *DelegationDNSEndpoint) SaveDNSEndpoint(e *externaldns.DNSEndpoint) error {
 	return saveDNSEndpoint(d.context, d.client, d.config.K8gbNamespace, e, d.logger)
 }
 

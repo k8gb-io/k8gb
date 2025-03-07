@@ -59,8 +59,8 @@ func NewApplicationDNSEndpoint(
 	}
 }
 
-func (d *ApplicationDNSEndpoint) SaveDNSEndpoint(namespace string, e *externaldns.DNSEndpoint) error {
-	return saveDNSEndpoint(d.context, d.client, namespace, e, d.logger)
+func (d *ApplicationDNSEndpoint) SaveDNSEndpoint(e *externaldns.DNSEndpoint) error {
+	return saveDNSEndpoint(d.context, d.client, d.gslb.Namespace, e, d.logger)
 }
 
 func (d *ApplicationDNSEndpoint) RemoveEndpoint(endpointKey client.ObjectKey) error {
