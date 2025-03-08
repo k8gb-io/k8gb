@@ -156,6 +156,34 @@ extdns:
   txtPrefix: "k8gb-<GEOTAG>"
   txtOwnerId: "k8gb-<GEOTAG>"
 
+extdns:
+  enabled: false
+  interval: 20s
+  labelFilter: "k8gb.absa.oss/dnstype=extdns"
+  logLevel: debug
+  managedRecordTypes:
+  - A
+  - CNAME
+  - NS
+  policy: sync
+  rbac:
+    create: true
+  sources:
+  - crd
+  domainFilters:
+  - "example.com"
+  txtPrefix: "k8gb-<GEOTAG>"
+  txtOwnerId: "k8gb-<GEOTAG>"
+
+  # replaces route53.irsaRole
+  #serviceAccount:
+  #  annotations:
+  #    eks.amazonaws.com/role-arn: arn:aws:iam::111111:role/external-dns
+
+  #extraArgs:
+  # TODO: add other mandator extra args
+  #- --aws-assume-role=assumeRoleArn # replaces route53.assumeRoleArn
+
 ns1:
   # -- Enable NS1 provider
   enabled: false
