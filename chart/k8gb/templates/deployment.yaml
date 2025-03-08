@@ -1,3 +1,6 @@
+{{ include "validateGeoTag" . }}
+{{ include "validateDnsZones" . }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -104,7 +107,7 @@ spec:
                   name: infoblox
                   key: INFOBLOX_WAPI_PASSWORD
             {{- end }}
-            {{- if or .Values.route53.enabled .Values.ns1.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
+            {{- if or .Values.extdns.enabled .Values.route53.enabled .Values.ns1.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
             - name: EXTDNS_ENABLED
               value: "true"
             {{- end }}
