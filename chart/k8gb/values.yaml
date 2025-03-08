@@ -137,6 +137,19 @@ infoblox:
   # -- Size of connections pool
   httpPoolConnections: 10
 
+route53:
+  enabled: false
+  # -- Route53 ZoneID
+  hostedZoneID: ZXXXSSS # -> available as part of extdns.txtOwnerId
+  # -- specify IRSA Role in AWS ARN format or disable it by setting to `null`
+  irsaRole: arn:aws:iam::111111:role/external-dns # -> available as extdns.serviceAccount.annotations: eks.amazonaws.com/role-arn = arn:aws:iam::111111:role/external-dns
+  # -- specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null`
+  assumeRoleArn: null # -> available as extdns.extraArgs.aws-assume-role
+  # -- alternatively specify the secret name with static credentials for IAM user (make sure this user has limited privileges)
+  # this can be useful when IRSA is not present or when using say Azure cluster and Route53
+  # docs: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#create-iam-user-and-attach-the-policy
+  secret: null
+
 extdns:
   enabled: false
   interval: 20s
@@ -153,8 +166,17 @@ extdns:
   - crd
   domainFilters:
   - "example.com"
-  txtPrefix: "k8gb-<GEOTAG>-"
+  txtPrefix: "k8gb-<GEOTAG>"
   txtOwnerId: "k8gb-<GEOTAG>"
+
+  # replaces route53.irsaRole
+  #serviceAccount:
+  #  annotations:
+  #    eks.amazonaws.com/role-arn: arn:aws:iam::111111:role/external-dns
+
+  #extraArgs:
+  # TODO: add other mandator extra args
+  #- --aws-assume-role=assumeRoleArn # replaces route53.assumeRoleArn
 
 ns1:
   # -- Enable NS1 provider
