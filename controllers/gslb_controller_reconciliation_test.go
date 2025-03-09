@@ -954,13 +954,13 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},
 				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
-			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+			got := dnsEndpoint.Labels["k8gb.absa.oss/dnstype"]
 			gotEp := dnsEndpoint.Spec.Endpoints
 			prettyGot := str.ToString(gotEp)
 			prettyWant := str.ToString(wantEp)
 
 			// assert
-			assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+			assert.Equal(t, want, got, "got:\n %q label value,\n\n want:\n %q", got, want)
 			assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		})
 }
@@ -1039,13 +1039,13 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 				client.ObjectKey{Namespace: predefinedConfig.K8gbNamespace, Name: "k8gb-ns-extdns-cloud-example-com"},
 				dnsEndpoint)
 			require.NoError(t, err, "Failed to get expected DNSEndpoint")
-			got := dnsEndpoint.Annotations["k8gb.absa.oss/dnstype"]
+			got := dnsEndpoint.Labels["k8gb.absa.oss/dnstype"]
 			gotEp := dnsEndpoint.Spec.Endpoints
 			prettyGot := str.ToString(gotEp)
 			prettyWant := str.ToString(wantEp)
 
 			// assert
-			assert.Equal(t, want, got, "got:\n %q annotation value,\n\n want:\n %q", got, want)
+			assert.Equal(t, want, got, "got:\n %q label value,\n\n want:\n %q", got, want)
 			assert.Equal(t, wantEp, gotEp, "got:\n %s DNSEndpoint,\n\n want:\n %s", prettyGot, prettyWant)
 		})
 }
