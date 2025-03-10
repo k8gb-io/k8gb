@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
-	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -47,7 +46,6 @@ func NewDNSProviderFactory(context context.Context, client client.Client, config
 }
 
 func (f *ProviderFactory) Provider() Provider {
-	a := assistant.NewCoreDNSAssistant(f.client, f.config.K8gbNamespace, f.config)
 	switch f.config.EdgeDNSType {
 	case depresolver.DNSTypeExternal:
 		return NewExternalDNS(f.context, f.client, f.config)
@@ -55,5 +53,5 @@ func (f *ProviderFactory) Provider() Provider {
 		ibx := NewInfobloxClient(f.config)
 		return NewInfobloxDNS(f.config, ibx)
 	}
-	return NewEmptyDNS(f.config, a)
+	return NewEmptyDNS(f.config)
 }

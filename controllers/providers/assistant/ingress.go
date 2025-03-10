@@ -23,37 +23,22 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/types"
-
 	netv1 "k8s.io/api/networking/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type Ingress interface {
-	FindIPs(path string) ([]string, error)
-	GetNamespacedName(path string) (types.NamespacedName, error)
-}
-
-type IngressAssistent struct {
+type Ingress struct {
 	client  client.Client
 	context context.Context
 	path    string
 }
 
-func NewIngressAssistant(context context.Context, client client.Client, path string) *IngressAssistent {
-	return &IngressAssistent{context: context, client: client, path: path}
+func NewIngressAssistant(context context.Context, client client.Client, path string) *Ingress {
+	return &Ingress{context: context, client: client, path: path}
 }
 
-func (f *IngressAssistent) GetObjectKey() (*client.ObjectKey, error) {
-	arr := strings.Split(f.path, "/")
-	if len(arr) != 2 {
-		return nil, fmt.Errorf("path format error (namespace/name): %s", f.path)
-	}
-	return &client.ObjectKey{Namespace: arr[0], Name: arr[1]}, nil
-}
-
-func (f *IngressAssistent) GetResource() (*netv1.Ingress, error) {
-	selector, err := f.GetObjectKey()
+func (f *Ingress) GetResource() (*netv1.Ingress, error) {
+	selector, err := f.getObjectKey()
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +51,7 @@ func (f *IngressAssistent) GetResource() (*netv1.Ingress, error) {
 
 }
 
-func (f *IngressAssistent) GetExposedIPs() (ips []string, err error) {
+func (f *Ingress) GetExposedIPs() (ips []string, err error) {
 	ingress, err := f.GetResource()
 	if err != nil {
 		return nil, fmt.Errorf("finding ingress %s (%s)", f.path, err)
@@ -77,4 +62,12 @@ func (f *IngressAssistent) GetExposedIPs() (ips []string, err error) {
 		}
 	}
 	return ips, nil
+}
+
+func (f *Ingress) getObjectKey() (*client.ObjectKey, error) {
+	arr := strings.Split(f.path, "/")
+	if len(arr) != 2 {
+		return nil, fmt.Errorf("path format error (namespace/name): %s", f.path)
+	}
+	return &client.ObjectKey{Namespace: arr[0], Name: arr[1]}, nil
 }

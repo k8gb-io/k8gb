@@ -46,8 +46,8 @@ func (r *CoreDNSReconciler) processIPSource(ctx context.Context, client client.C
 	const coreDNSIngressRefAnnotation = "k8gb.io/coredns-ingress-ref"
 	var err error
 	source := &ipSource{}
-	coreDNSAssistant := assistant.NewCoreDNSAssistant(client, r.Config.K8gbNamespace, *r.Config)
-	source.CoreDNSService, err = coreDNSAssistant.GetCoreDNSService()
+	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(client, *r.Config)
+	source.CoreDNSService, err = coreDNSAssistant.GetResource()
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (r *CoreDNSReconciler) processIPSource(ctx context.Context, client client.C
 		return source, err
 	}
 	// coreDNSService is ServiceTypeLoadBalancer
-	source.IPs, err = coreDNSAssistant.CoreDNSExposedIPs()
+	source.IPs, err = coreDNSAssistant.GetExposedIPs()
 	return source, err
 }
 
