@@ -119,12 +119,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 				// Run finalization logic for gslbFinalizer. If the
 				// finalization logic fails, don't remove the finalizer so
 				// that we can retry during the next reconciliation.
-				if err := r.finalizeGslb(gslb); err != nil {
-					fSpan.RecordError(err)
-					fSpan.SetStatus(codes.Error, err.Error())
-					return result.RequeueError(err)
-				}
-
+				r.finalizeGslb(gslb)
 				// Remove gslbFinalizer. Once all finalizers have been
 				// removed, the object will be deleted.
 				gslb.SetFinalizers(remove(gslb.GetFinalizers(), f))
@@ -223,14 +218,14 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	s.End()
 
 	// == handle delegated zone in Edge DNS
-	//_, szd := r.Tracer.Start(ctx, "CreateZoneDelegation")
+	// _, szd := r.Tracer.Start(ctx, "CreateZoneDelegation")
 	// err = r.DNSProvider.CreateZoneDelegation(gslb)
-	//if err != nil {
+	// if err != nil {
 	//	log.Err(err).Msg("Unable to create zone delegation")
 	//	m.IncrementError(gslb)
 	//	return result.Requeue()
-	//}
-	//szd.End()
+	// }
+	// szd.End()
 
 	// == Status =
 	err = r.updateGslbStatus(gslb, dnsEndpoint)

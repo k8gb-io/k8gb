@@ -24,21 +24,10 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 )
 
-func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) (err error) {
-	// needs to do before the CR can be deleted. Examples
-	// of finalizers include performing backups and deleting
-	// resources that are not owned by this CR, like a PVC.
-	err = r.DNSProvider.Finalize(gslb, r.Client)
-	if err != nil {
-		log.Err(err).
-			Str("gslb", gslb.Name).
-			Msg("Can't finalize GSLB")
-		return
-	}
+func (r *GslbReconciler) finalizeGslb(gslb *k8gbv1beta1.Gslb) {
 	log.Info().
 		Str("gslb", gslb.Name).
 		Msg("Successfully finalized Gslb")
-	return
 }
 
 func (r *GslbReconciler) addFinalizer(gslb *k8gbv1beta1.Gslb) error {

@@ -35,7 +35,6 @@ type DelegationDNSEndpoint struct {
 	client       client.Client
 	config       depresolver.Config
 	logger       *zerolog.Logger
-	nsServerIPs  []string
 	info         depresolver.DelegationZoneInfo
 }
 
@@ -44,15 +43,13 @@ func NewDelegationDNSEndpoint(
 	client client.Client,
 	config depresolver.Config,
 	logger *zerolog.Logger,
-	info depresolver.DelegationZoneInfo,
-	nsServerIPs []string) *DelegationDNSEndpoint {
+	info depresolver.DelegationZoneInfo) *DelegationDNSEndpoint {
 	return &DelegationDNSEndpoint{
 		context:      context,
 		client:       client,
 		config:       config,
 		logger:       logger,
 		endpointType: delegationDNSEndpoint,
-		nsServerIPs:  nsServerIPs,
 		info:         info,
 	}
 }
@@ -61,8 +58,8 @@ func (d *DelegationDNSEndpoint) SaveDNSEndpoint(e *externaldns.DNSEndpoint) erro
 	return saveDNSEndpoint(d.context, d.client, d.config.K8gbNamespace, e, d.logger)
 }
 
-func (d *DelegationDNSEndpoint) RemoveEndpoint(endpointKey client.ObjectKey) error {
-	return removeEndpoint(d.context, d.client, endpointKey, d.logger)
+func (d *DelegationDNSEndpoint) RemoveEndpoint() error {
+	return removeEndpoint(d.context, d.client, client.ObjectKey{Namespace: d.config.K8gbNamespace, Name: d.info.GetExternalDNSEndpointName()}, d.logger)
 }
 
 func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, error) {
@@ -90,7 +87,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, erro
 					DNSName:    d.info.ClusterNSName,
 					RecordTTL:  ttl,
 					RecordType: "A",
-					Targets:    d.nsServerIPs,
+					Targets:    d.info.IPs,
 				},
 			},
 		},
