@@ -116,7 +116,7 @@ $ kubectl -n k8gb get dnsendpoints.externaldns.k8s.io k8gb-ns-extdns -o yaml
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  annotations:
+  labels:
     k8gb.absa.oss/dnstype: extdns
   creationTimestamp: "2023-11-12T19:55:20Z"
   generation: 3
