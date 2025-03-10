@@ -52,7 +52,7 @@ func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegat
 		Interface("provider", p).
 		Msg("Creating/Updating DNSEndpoint CR")
 	// design break for testability - should be passed via constructor
-	// consider move thisn into provider
+	// consider move this into provider
 	dze := k8gbendpoint.NewDelegationDNSEndpoint(p.context, p.client, p.config, log, *zoneInfo)
 	ep, err := dze.GetDNSEndpoint()
 	if err != nil {

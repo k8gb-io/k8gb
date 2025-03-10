@@ -45,8 +45,6 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// todo: introduce variable for reconciliation interval
 	result := utils.NewReconcileResultHandler(0)
 	logger.Info().Msgf("Reconciling '%s' %s", req, r.source.IPs)
-	// TODO: identify finalization and call Provider.Finalize(zoneInfo)
-
 	source, err := r.processIPSource(ctx, r.Client)
 	if err != nil {
 		logger.Err(err).Msg("Error processing IP source for CoreDNS")
