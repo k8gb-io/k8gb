@@ -24,11 +24,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 )
 
-type DelegationZones []DelegationZoneInfo
+type DelegationZones []*DelegationZoneInfo
 
 type DelegationZoneInfo struct {
 	Domain            string // cloud.example.com
@@ -39,7 +37,7 @@ type DelegationZoneInfo struct {
 	IPs               []string
 }
 
-func parseDelegationZones(config *Config) ([]DelegationZoneInfo, error) {
+func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	type info struct {
 		domain string
 		zone   string
@@ -68,7 +66,7 @@ func parseDelegationZones(config *Config) ([]DelegationZoneInfo, error) {
 		}
 		return tuples, nil
 	}
-	var dzi []DelegationZoneInfo
+	var dzi []*DelegationZoneInfo
 	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
 	di, err := getEnvAsArrayOfPairsOrFallback(zones)
 	if err != nil {
@@ -80,7 +78,7 @@ func parseDelegationZones(config *Config) ([]DelegationZoneInfo, error) {
 		if err != nil {
 			return dzi, fmt.Errorf("invalid value of delegation zones: %s", zones)
 		}
-		zoneInfo := DelegationZoneInfo{
+		zoneInfo := &DelegationZoneInfo{
 			Domain:        inf.domain,
 			Zone:          inf.zone,
 			NegativeTTL:   negTTL,
@@ -130,27 +128,6 @@ func (z *DelegationZoneInfo) GetSortedIPs() []string {
 	return z.IPs
 }
 
-// FindByGslbStatusHostname returns DelegationZoneInfo for the hostname
-func (d *DelegationZones) FindByGslbStatusHostname(gslb *k8gbv1beta1.Gslb) *DelegationZoneInfo {
-	if len(gslb.Status.Servers) == 0 {
-		return nil
-	}
-	for _, z := range *d {
-		if strings.HasSuffix(gslb.Status.Servers[0].Host, z.Domain) {
-			return &z
-		}
-	}
-	return nil
-}
-
-func (d *DelegationZones) GetClusterNSNameByGslb(gslb *k8gbv1beta1.Gslb) string {
-	z := d.FindByGslbStatusHostname(gslb)
-	if z != nil {
-		return z.ClusterNSName
-	}
-	return ""
-}
-
 func (d *DelegationZones) GetExternalClusterNSNamesByHostname(host string) map[string]string {
 	z := d.getZone(host)
 	if z != nil {
@@ -174,7 +151,7 @@ func (d *DelegationZones) ListZones() []string {
 func (d *DelegationZones) getZone(host string) *DelegationZoneInfo {
 	for _, z := range *d {
 		if strings.Contains(host, z.Zone) {
-			return &z
+			return z
 		}
 	}
 	return nil
