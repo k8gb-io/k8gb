@@ -78,9 +78,9 @@ func (p *ExternalDNSProvider) CreateZoneDelegationForExternalDNS(gslb *k8gbv1bet
 	}
 	NSRecord := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        domainInfo.GetExternalDNSEndpointName(),
-			Namespace:   p.config.K8gbNamespace,
-			Annotations: map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
+			Name:      domainInfo.GetExternalDNSEndpointName(),
+			Namespace: p.config.K8gbNamespace,
+			Labels:    map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
 		},
 		Spec: externaldns.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{

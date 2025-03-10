@@ -94,9 +94,9 @@ var a = struct {
 
 var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:        fmt.Sprintf("k8gb-ns-%s", externalDNSTypeCommon),
-		Namespace:   a.Config.K8gbNamespace,
-		Annotations: map[string]string{"k8gb.absa.oss/dnstype": string(externalDNSTypeCommon)},
+		Name:      fmt.Sprintf("k8gb-ns-%s", externalDNSTypeCommon),
+		Namespace: a.Config.K8gbNamespace,
+		Labels:    map[string]string{"k8gb.absa.oss/dnstype": string(externalDNSTypeCommon)},
 	},
 	Spec: externaldns.DNSEndpointSpec{
 		Endpoints: []*externaldns.Endpoint{
