@@ -7,7 +7,7 @@ on:
       - master
     paths:
       - 'chart/k8gb/values.yaml'
-      - 'chart/k8gb/values.schema.json'
+      - '../../chart/k8gb/values.schema.json_'
 permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
 
