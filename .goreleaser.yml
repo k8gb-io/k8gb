@@ -11,27 +11,27 @@ builds:
       - linux
     goarch:
       - amd64
-#      - arm64
+      - arm64
     flags:
       - -trimpath
     ldflags:
       - -s -w -X main.version={{ .Tag }} -X main.commit={{ .Commit }}
-#archives:
-#  - id: binary
-#    format: binary
-#    name_template: "{{ .ProjectName }}_{{ .Os }}-{{ .Arch }}"
-#  - id: archive
-#    format: tar.gz
-#    replacements:
-#      darwin: macOS
-#    files:
-#      - LICENSE*
-#      - README*
-#      - cosign.pub
-#      - dist/*.sig
-#    format_overrides:
-#      - goos: windows
-#        format: zip
+archives:
+  - id: binary
+    format: binary
+    name_template: "{{ .ProjectName }}_{{ .Os }}-{{ .Arch }}"
+  - id: archive
+    format: tar.gz
+    replacements:
+      darwin: macOS
+    files:
+      - LICENSE*
+      - README*
+      - cosign.pub
+      - dist/*.sig
+    format_overrides:
+      - goos: windows
+        format: zip
 dockers:
 - image_templates:
   - "absaoss/k8gb:v{{ .Version }}-amd64"

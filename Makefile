@@ -267,12 +267,6 @@ deploy-k8gb-with-helm:
 		--set rfc2136.enabled=true \
 		--set coredns.service.annotations.k8gb\\.io/coredns-ingress-ref="k8gb/init-ingress" \
 		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
-	  	--set k8gb.dnsZones[0].zone="example.com" \
-	  	--set k8gb.dnsZones[0].domain="cloud.example.com" \
-	  	--set k8gb.dnsZones[0].dnsZoneNegTTL=30 \
-#	  	--set k8gb.dnsZones[1].zone="example.org" \
-#	  	--set k8gb.dnsZones[1].domain="cloud.example.org" \
-#	  	--set k8gb.dnsZones[1].dnsZoneNegTTL=30 \
 		--wait --timeout=10m0s
 
 .PHONY: deploy-gslb-operator
