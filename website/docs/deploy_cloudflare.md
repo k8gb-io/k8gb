@@ -9,7 +9,7 @@ As a prerequisite, we will need two Kubernetes clusters where you want to deploy
 k8gb and enable global load balancing between them.
 
 You can reuse local clusters from the [Infoblox tutorial](deploy_infoblox.html),
-the EKS-based setup from [Route53 tutorial](.deploy_route53.md)
+the EKS-based setup from [Route53 tutorial](deploy_route53.md)
 or any Kubernetes deployment method that is convenient to you.
 
 The specific Kubernetes deployment method is not essential for the focus of this documentation guide.
@@ -93,6 +93,7 @@ spec:
   strategy:
     dnsTtlSeconds: 60 # Minimum for non-Enterprise Cloudflare https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/
     primaryGeoTag: eu
+    splitBrainThresholdSeconds: 300
     type: failover
 ```
 
@@ -116,7 +117,7 @@ $ kubectl -n k8gb get dnsendpoints.externaldns.k8s.io k8gb-ns-extdns -o yaml
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  labels:
+  annotations:
     k8gb.absa.oss/dnstype: extdns
   creationTimestamp: "2023-11-12T19:55:20Z"
   generation: 3
