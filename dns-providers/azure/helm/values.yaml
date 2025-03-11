@@ -1,0 +1,11 @@
+k8gb:
+  k8gb:
+    dnsZone: "<helm set>"
+    edgeDNSZone: "<helm set>"
+    edgeDNSServers:
+    - "<helm set"
+
+  azuredns:
+    enabled: true
+    createAuthSecret:
+      enabled: false
