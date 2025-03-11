@@ -33,6 +33,9 @@
                 "azuredns": {
                     "$ref": "#/definitions/AzureDNS"
                 },
+                "clouddns": {
+                    "$ref": "#/definitions/CloudDNS"
+                },
                 "cloudflare": {
                     "$ref": "#/definitions/Cloudflare"
                 },
@@ -738,6 +741,24 @@
             ],
             "title": "azuredns"
         },
+        "CloudDNS": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "authSecretName": {
+                    "type": "string",
+                    "default": "external-dns-secret-gcp"
+                }
+            },
+            "required": [
+                "enabled"
+            ],
+            "title": "clouddns"
+        },
+
         "Cloudflare": {
             "type": "object",
             "additionalProperties": false,
