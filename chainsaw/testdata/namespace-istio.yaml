@@ -4,3 +4,4 @@ metadata:
   name: ($namespace)
   labels:
     istio-inject: enabled
+    k8gb.io/chainsaw: "true"
