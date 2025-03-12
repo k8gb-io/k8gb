@@ -51,20 +51,6 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| azuredns.authSecretName | string | `"external-dns-secret-azure"` | External-dns secret name which contains Azure credentials. See https://github.com/k8gb-io/external-dns/blob/master/docs/tutorials/azure.md#configuration-file for expected format |
-| azuredns.createAuthSecret.aadClientId | string | `"myAadClientId"` | Azure client ID that is associated with the Service Principal. |
-| azuredns.createAuthSecret.aadClientSecret | string | `"myAadClientSecret"` | Azure client secret that is associated with the Service Principal. |
-| azuredns.createAuthSecret.enabled | bool | `true` | Create an authentication secret for Azure DNS based on the values below alternatively, you can create the secret manually and pass its name in the `azuredns.authSecretName` value |
-| azuredns.createAuthSecret.resourceGroup | string | `"myDnsResourceGroup"` | Azure Resource Group which holds the Azure DNS Zone (which is defined as 'k8gb.edgeDNSZone') |
-| azuredns.createAuthSecret.subscriptionId | string | `"mySubscriptionId"` | subscription id which holds the Azure DNS zone |
-| azuredns.createAuthSecret.tenantId | string | `"myTenantId"` | Azure tenant ID which holds the managed identity |
-| azuredns.createAuthSecret.useManagedIdentityExtension | bool | `false` | Use either AKS Kubelet Identity or AAD Pod Identities |
-| azuredns.createAuthSecret.useWorkloadIdentityExtension | bool | `false` | Use AKS workload identity extension |
-| azuredns.createAuthSecret.userAssignedIdentityID | string | `"myUserAssignedIdentityID"` | Client id from the Managed identitty when using the AAD Pod Identities |
-| azuredns.enabled | bool | `false` |  |
-| cloudflare.dnsRecordsPerPage | int | `5000` | Configure how many DNS records to fetch per request see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling |
-| cloudflare.enabled | bool | `false` | Enable Cloudflare provider |
-| cloudflare.zoneID | string | `"replaceme"` | Cloudflare Zone ID follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/ to find your zoneID value |
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
 | coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
 | coredns.image.tag | string | `"v0.1.1"` | image tag |
@@ -72,15 +58,6 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | coredns.securityContext | object | `{"capabilities":{"add":[]}}` | Disables all permissions since we don't open privileged ports |
 | coredns.servers | list | `[{"plugins":[{"name":"prometheus","parameters":"0.0.0.0:9153"}],"port":5353,"servicePort":53}]` | Only meant to open the correct service and container ports, has no other impact on the coredns configuration |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
-| externaldns.dnsPolicy | string | `"ClusterFirst"` | `.spec.template.spec.dnsPolicy` for ExternalDNS deployment |
-| externaldns.extraEnv | list | `[]` | extra environment variables |
-| externaldns.extraVolumeMounts | list | `[]` | extra volume mounts |
-| externaldns.extraVolumes | list | `[]` | extra volumes |
-| externaldns.image | string | `"ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns-multiarch"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
-| externaldns.interval | string | `"20s"` | external-dns sync interval |
-| externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
-| externaldns.securityContext.runAsNonRoot | bool | `true` |  |
-| externaldns.securityContext.runAsUser | int | `1000` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core |
 | global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
 | infoblox.gridHost | string | `"10.0.0.1"` | WAPI address |
@@ -114,21 +91,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.securityContext.runAsUser | int | `1000` |  |
 | k8gb.serviceMonitor | object | `{"enabled":false}` | enable ServiceMonitor |
 | k8gb.validatingAdmissionPolicy | object | `{"enabled":false}` | enable validating admission policies |
-| ns1.enabled | bool | `false` | Enable NS1 provider |
-| ns1.ignoreSSL | bool | `false` | optional custom NS1 API endpoint for on-prem setups endpoint: https://api.nsone.net/v1/ |
 | openshift.enabled | bool | `false` | Install OpenShift specific RBAC |
-| rfc2136.enabled | bool | `false` |  |
-| rfc2136.rfc2136Opts[0].host | string | `"host.k3d.internal"` |  |
-| rfc2136.rfc2136Opts[1].port | int | `1053` |  |
-| rfc2136.rfc2136auth.gssTsig.enabled | bool | `false` |  |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[0].kerberos-username | string | `"ad-user"` |  |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[1].kerberos-password | string | `"ad-user-pass"` |  |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[2].kerberos-realm | string | `"ad-domain-realm"` |  |
-| rfc2136.rfc2136auth.gssTsig.kerberosConfigMap | string | `"kerberos-config"` |  |
-| rfc2136.rfc2136auth.insecure.enabled | bool | `false` |  |
-| rfc2136.rfc2136auth.tsig.enabled | bool | `true` |  |
-| rfc2136.rfc2136auth.tsig.tsigCreds[0].tsig-secret-alg | string | `"hmac-sha256"` |  |
-| rfc2136.rfc2136auth.tsig.tsigCreds[1].tsig-keyname | string | `"externaldns-key"` |  |
 | tracing.deployJaeger | bool | `false` | should the Jaeger be deployed together with the k8gb operator? In case of using another OpenTracing solution, make sure that configmap for OTEL agent has the correct exporters set up (`tracing.otelConfig`). |
 | tracing.enabled | bool | `false` | if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`) |
 | tracing.endpoint | string | `"localhost:4318"` | `host:port` where the spans from the applications (traces) should be sent, sets the `OTEL_EXPORTER_OTLP_ENDPOINT` env var This is not the final destination where all the traces are going. Otel collector has its configuration in the associated configmap (`tracing.otelConfig`). |

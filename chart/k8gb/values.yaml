@@ -70,30 +70,6 @@ k8gb:
   # -- pod labels
   podLabels: {}
 
-externaldns:
-  # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment
-  dnsPolicy: "ClusterFirst"
-  # -- extra environment variables
-  extraEnv: []
-  # -- extra volumes
-  extraVolumes: []
-  # -- extra volume mounts
-  extraVolumeMounts: []
-  # -- external-dns image repo:tag
-  # It is important to use the image from k8gb external-dns fork to get the full
-  # functionality. See links below
-  # https://github.com/k8gb-io/external-dns
-  # https://github.com/k8gb-io/external-dns/pkgs/container/external-dns
-  image: registry.k8s.io/external-dns/external-dns:v0.15.1
-  # -- external-dns sync interval
-  interval: "20s"
-  securityContext:
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core
-    runAsUser: 1000
-    # -- For ExternalDNS to be able to read Kubernetes and AWS token files
-    fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
-    runAsNonRoot: true
-
 coredns:
   # -- service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps
   isClusterService: false
