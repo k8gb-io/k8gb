@@ -23,11 +23,9 @@ import (
 	coreerrors "errors"
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
-
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	"github.com/k8gb-io/k8gb/controllers/logging"
-
+	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
@@ -41,14 +39,14 @@ const coreDNSServiceLabel = "app.kubernetes.io/name=coredns"
 type CoreDNSService struct {
 	client client.Client
 	config depresolver.Config
+	logger *zerolog.Logger
 }
 
-var log = logging.Logger()
-
-func NewCoreDNSServiceAssistant(client client.Client, config depresolver.Config) *CoreDNSService {
+func NewCoreDNSServiceAssistant(client client.Client, config depresolver.Config, logger *zerolog.Logger) *CoreDNSService {
 	return &CoreDNSService{
 		client: client,
 		config: config,
+		logger: logger,
 	}
 }
 
@@ -57,7 +55,7 @@ func (r *CoreDNSService) GetResource() (*corev1.Service, error) {
 	serviceList := &corev1.ServiceList{}
 	sel, err := labels.Parse(coreDNSServiceLabel)
 	if err != nil {
-		log.Err(err).Msg("Badly formed label selector")
+		r.logger.Err(err).Msg("Badly formed label selector")
 		return nil, err
 	}
 	listOption := &client.ListOptions{
@@ -68,13 +66,13 @@ func (r *CoreDNSService) GetResource() (*corev1.Service, error) {
 	err = r.client.List(context.TODO(), serviceList, listOption)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Warn().Err(err).Msg("Can't find CoreDNS service")
+			r.logger.Warn().Err(err).Msg("Can't find CoreDNS service")
 		}
 	}
 	if len(serviceList.Items) != 1 {
-		log.Warn().Msg("More than 1 CoreDNS service was found")
+		r.logger.Warn().Msg("More than 1 CoreDNS service was found")
 		for _, service := range serviceList.Items {
-			log.Info().
+			r.logger.Info().
 				Str("serviceName", service.Name).
 				Msg("Found CoreDNS service")
 		}
@@ -94,7 +92,7 @@ func (r *CoreDNSService) GetExposedIPs() ([]string, error) {
 	if coreDNSService.Spec.Type == "ClusterIP" {
 		if len(coreDNSService.Spec.ClusterIPs) == 0 {
 			errMessage := "no ClusterIPs found"
-			log.Warn().
+			r.logger.Warn().
 				Str("serviceName", coreDNSService.Name).
 				Msg(errMessage)
 			err := coreerrors.New(errMessage)
@@ -105,7 +103,7 @@ func (r *CoreDNSService) GetExposedIPs() ([]string, error) {
 	// LoadBalancer / ExternalName / NodePort service
 	if len(coreDNSService.Status.LoadBalancer.Ingress) == 0 {
 		errMessage := "no LoadBalancer ExternalIPs are found"
-		log.Warn().
+		r.logger.Warn().
 			Str("serviceName", coreDNSService.Name).
 			Msg(errMessage)
 		err := coreerrors.New(errMessage)
@@ -114,7 +112,7 @@ func (r *CoreDNSService) GetExposedIPs() ([]string, error) {
 
 	var ipList []string
 	for _, ingressStatusIP := range coreDNSService.Status.LoadBalancer.Ingress {
-		var confirmedIPs, err = extractIPFromLB(ingressStatusIP, r.config.EdgeDNSServers)
+		var confirmedIPs, err = r.extractIPFromLB(ingressStatusIP, r.config.EdgeDNSServers)
 		if err != nil {
 			return nil, err
 		}
@@ -124,11 +122,11 @@ func (r *CoreDNSService) GetExposedIPs() ([]string, error) {
 
 }
 
-func extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
+func (r *CoreDNSService) extractIPFromLB(lb corev1.LoadBalancerIngress, ns utils.DNSList) (ips []string, err error) {
 	if lb.Hostname != "" {
 		IPs, err := utils.Dig(lb.Hostname, 8, ns...)
 		if err != nil {
-			log.Warn().Err(err).
+			r.logger.Warn().Err(err).
 				Str("loadBalancerHostname", lb.Hostname).
 				Msg("Can't dig CoreDNS service LoadBalancer FQDN")
 			return nil, err

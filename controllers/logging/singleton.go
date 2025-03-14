@@ -27,17 +27,18 @@ import (
 
 var (
 	once sync.Once
-	log  zerolog.Logger
+	test zerolog.Logger
 )
 
-// Logger public static logger, providing instance of initialised logger
-func Logger() *zerolog.Logger {
-	return &log
+// TestLogger Logger public static logger used by tests
+func TestLogger() *zerolog.Logger {
+	once.Do(func() {
+		test = newLogger(&depresolver.Config{}).get()
+	})
+	return &test
 }
 
-// Init always initialise logger, no mif config is nil or not
-func Init(c *depresolver.Config) {
-	once.Do(func() {
-		log = newLogger(c).get()
-	})
+func NewLogger(c *depresolver.Config) *zerolog.Logger {
+	logger := newLogger(c).get()
+	return &logger
 }

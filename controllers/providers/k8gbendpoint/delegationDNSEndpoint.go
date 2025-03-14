@@ -23,7 +23,6 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
@@ -65,7 +64,7 @@ func (d *DelegationDNSEndpoint) RemoveEndpoint() error {
 func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, error) {
 	const externalDNSTypeCommon = "extdns"
 	ttl := externaldns.TTL(d.config.NSRecordTTL)
-	log.Info().
+	d.logger.Info().
 		Interface("provider", d.endpointType).
 		Msg("Creating/Updating DNSEndpoint CR")
 

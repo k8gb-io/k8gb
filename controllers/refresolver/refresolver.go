@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/rs/zerolog"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/istiovirtualservice"
@@ -38,17 +40,17 @@ type GslbReferenceResolver interface {
 }
 
 // New creates a new GSLBReferenceResolver
-func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver, error) {
+func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, logger *zerolog.Logger) (GslbReferenceResolver, error) {
 	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
-		return ingress.NewEmbeddedResolver(gslb, k8sClient)
+		return ingress.NewEmbeddedResolver(gslb, k8sClient, logger)
 	}
 	if gslb.Spec.ResourceRef.Kind == "Ingress" && gslb.Spec.ResourceRef.APIVersion == "networking.k8s.io/v1" {
-		return ingress.NewReferenceResolver(gslb, k8sClient)
+		return ingress.NewReferenceResolver(gslb, k8sClient, logger)
 	}
 	if gslb.Spec.ResourceRef.Kind == "VirtualService" {
 		if gslb.Spec.ResourceRef.APIVersion == "networking.istio.io/v1beta1" ||
 			gslb.Spec.ResourceRef.APIVersion == "networking.istio.io/v1" {
-			return istiovirtualservice.NewReferenceResolver(gslb, k8sClient)
+			return istiovirtualservice.NewReferenceResolver(gslb, k8sClient, logger)
 		}
 	}
 	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)

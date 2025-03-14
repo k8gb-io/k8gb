@@ -24,7 +24,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -40,13 +39,11 @@ type ipSource struct {
 	IPs            []string
 }
 
-var logger = logging.Logger()
-
 func (c *CoreDNSReconciler) processIPSource(ctx context.Context, client client.Client) (*ipSource, error) {
 	const coreDNSIngressRefAnnotation = "k8gb.io/coredns-ingress-ref"
 	var err error
 	source := &ipSource{}
-	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(client, *c.Config)
+	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(client, *c.Config, c.Logger)
 	source.CoreDNSService, err = coreDNSAssistant.GetResource()
 	if err != nil {
 		return nil, err

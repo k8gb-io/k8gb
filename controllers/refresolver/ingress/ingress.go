@@ -24,16 +24,14 @@ import (
 	"reflect"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
+	"github.com/rs/zerolog"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-var log = logging.Logger()
 
 const (
 	// comma separated list of external IP addresses
@@ -42,16 +40,17 @@ const (
 
 type ReferenceResolver struct {
 	ingress *netv1.Ingress
+	logger  *zerolog.Logger
 }
 
 // NewReferenceResolver creates a reference resolver capable of understanding referenced ingresses.networking.k8s.io resources
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
-	ingressList, err := getGslbIngressRef(gslb, k8sClient)
+func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, logger *zerolog.Logger) (*ReferenceResolver, error) {
+	ingressList, err := getGslbIngressRef(gslb, k8sClient, logger)
 	if err != nil {
 		return nil, err
 	}
 	for _, ingress := range ingressList {
-		log.Info().
+		logger.Info().
 			Str("Name", ingress.Name).
 			Msg("Found Ingress")
 	}
@@ -62,11 +61,12 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 
 	return &ReferenceResolver{
 		ingress: &ingressList[0],
+		logger:  logger,
 	}, nil
 }
 
 // getGslbIngressRef resolves a Kubernetes Ingress resource referenced by the Gslb spec
-func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1.Ingress, error) {
+func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, logger *zerolog.Logger) ([]netv1.Ingress, error) {
 	ingressList := &netv1.IngressList{}
 
 	selector, err := metav1.LabelSelectorAsSelector(&gslb.Spec.ResourceRef.LabelSelector)
@@ -81,7 +81,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 	err = k8sClient.List(context.TODO(), ingressList, opts)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info().
+			logger.Info().
 				Str("gslb", gslb.Name).
 				Msg("Can't find referenced Ingress resource")
 		}
@@ -92,8 +92,8 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 }
 
 // NewEmbeddedResolver creates a reference resolver capable of understanding embedded ingresses.networking.k8s.io resources
-func NewEmbeddedResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
-	ingressEmbedded, err := getGslbIngressEmbedded(gslb, k8sClient)
+func NewEmbeddedResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, logger *zerolog.Logger) (*ReferenceResolver, error) {
+	ingressEmbedded, err := getGslbIngressEmbedded(gslb, k8sClient, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -107,9 +107,9 @@ func NewEmbeddedResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Refe
 }
 
 // getGslbIngressEmbedded resolves a Kubernetes Ingress resource embedded in the Gslb spec
-func getGslbIngressEmbedded(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*netv1.Ingress, error) {
+func getGslbIngressEmbedded(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, logger *zerolog.Logger) (*netv1.Ingress, error) {
 	if reflect.DeepEqual(gslb.Spec.Ingress, k8gbv1beta1.IngressSpec{}) {
-		log.Info().
+		logger.Info().
 			Str("gslb", gslb.Name).
 			Msg("No configuration for embedded Ingress resource")
 		return nil, nil
@@ -123,7 +123,7 @@ func getGslbIngressEmbedded(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*n
 	err := k8sClient.Get(context.TODO(), nn, ingress)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Warn().
+			logger.Warn().
 				Str("gslb", gslb.Name).
 				Msg("Can't find gslb Ingress")
 		}
@@ -144,7 +144,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 		}
 		for _, path := range rule.HTTP.Paths {
 			if path.Backend.Service == nil || path.Backend.Service.Name == "" {
-				log.Warn().
+				rr.logger.Warn().
 					Str("ingress", rr.ingress.Name).
 					Interface("service", path.Backend.Service).
 					Msg("Malformed service definition")
@@ -178,7 +178,7 @@ func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string
 		if len(ip.Hostname) > 0 {
 			IPs, err := utils.Dig(ip.Hostname, 8, edgeDNSServers...)
 			if err != nil {
-				log.Warn().Err(err).Msg("Dig error")
+				rr.logger.Warn().Err(err).Msg("Dig error")
 				return nil, err
 			}
 			gslbIngressIPs = append(gslbIngressIPs, IPs...)

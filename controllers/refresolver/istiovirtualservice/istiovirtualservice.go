@@ -24,8 +24,8 @@ import (
 	"strings"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
+	"github.com/rs/zerolog"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -35,8 +35,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var log = logging.Logger()
-
 const (
 	// comma separated list of external IP addresses
 	externalIPsAnnotation = "k8gb.io/exposed-ip-addresses"
@@ -45,11 +43,12 @@ const (
 type ReferenceResolver struct {
 	virtualService *istio.VirtualService
 	lbService      *corev1.Service
+	logger         *zerolog.Logger
 }
 
 // NewReferenceResolver creates a new reference resolver capable of understanding `networking.istio.io/v1` resources
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
-	virtualServiceList, err := getGslbVirtualServiceRef(gslb, k8sClient)
+func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, logger *zerolog.Logger) (*ReferenceResolver, error) {
+	virtualServiceList, err := getGslbVirtualServiceRef(gslb, k8sClient, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +58,12 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}
 	virtualService := virtualServiceList[0]
 
-	gateway, err := getGateway(virtualService, k8sClient)
+	gateway, err := getGateway(virtualService, k8sClient, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	lbService, err := getLbService(gateway, k8sClient)
+	lbService, err := getLbService(gateway, k8sClient, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -72,11 +71,12 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	return &ReferenceResolver{
 		virtualService: virtualService,
 		lbService:      lbService,
+		logger:         logger,
 	}, nil
 }
 
 // getGslbVirtualServiceRef resolves an istio virtual service resource referenced by the Gslb spec
-func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]*istio.VirtualService, error) {
+func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, logger *zerolog.Logger) ([]*istio.VirtualService, error) {
 	virtualServiceList := &istio.VirtualServiceList{}
 
 	selector, err := metav1.LabelSelectorAsSelector(&gslb.Spec.ResourceRef.LabelSelector)
@@ -90,7 +90,7 @@ func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (
 	err = k8sClient.List(context.TODO(), virtualServiceList, opts)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info().
+			logger.Info().
 				Str("gslb", gslb.Name).
 				Msg("Can't find referenced VirtualService resource")
 		}
@@ -101,7 +101,7 @@ func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (
 }
 
 // getGateway retrieves the istio gateway referenced by the istio virtual service
-func getGateway(virtualService *istio.VirtualService, k8sClient client.Client) (*istio.Gateway, error) {
+func getGateway(virtualService *istio.VirtualService, k8sClient client.Client, logger *zerolog.Logger) (*istio.Gateway, error) {
 	var ingressGateways []string
 	for _, gateway := range virtualService.Spec.Gateways {
 		// count only dedicated ingress gateways
@@ -124,7 +124,7 @@ func getGateway(virtualService *istio.VirtualService, k8sClient client.Client) (
 	}, gateway)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info().
+			logger.Info().
 				Str("gatewayNamespace", gatewayNamespace).
 				Str("gatewayName", gatewayName).
 				Msg("Can't find Gateway resource referenced by VirtualService")
@@ -136,7 +136,7 @@ func getGateway(virtualService *istio.VirtualService, k8sClient client.Client) (
 }
 
 // getLbService retrieves the kubernetes service referenced by an istio gateway
-func getLbService(gateway *istio.Gateway, k8sClient client.Client) (*corev1.Service, error) {
+func getLbService(gateway *istio.Gateway, k8sClient client.Client, logger *zerolog.Logger) (*corev1.Service, error) {
 	gatewayServiceList := &corev1.ServiceList{}
 	opts := &client.ListOptions{
 		LabelSelector: labels.SelectorFromSet(gateway.Spec.Selector),
@@ -145,7 +145,7 @@ func getLbService(gateway *istio.Gateway, k8sClient client.Client) (*corev1.Serv
 	err := k8sClient.List(context.TODO(), gatewayServiceList, opts)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info().
+			logger.Info().
 				Str("gateway", gateway.Name).
 				Msg("Can't find any service with the gateway's selector")
 		}
@@ -219,7 +219,7 @@ func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string
 		if len(ip.Hostname) > 0 {
 			IPs, err := utils.Dig(ip.Hostname, 8, edgeDNSServers...)
 			if err != nil {
-				log.Warn().Err(err).Msg("Dig error")
+				rr.logger.Warn().Err(err).Msg("Dig error")
 				return nil, err
 			}
 			gslbIngressIPs = append(gslbIngressIPs, IPs...)

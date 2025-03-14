@@ -25,19 +25,22 @@ import (
 	ibcl "github.com/infobloxopen/infoblox-go-client"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
+	"github.com/rs/zerolog"
 )
 
 type InfobloxProvider struct {
 	config depresolver.Config
 	client InfobloxClient
+	logger *zerolog.Logger
 }
 
 var m = metrics.Metrics()
 
-func NewInfobloxDNS(config depresolver.Config, client InfobloxClient) *InfobloxProvider {
+func NewInfobloxDNS(config depresolver.Config, client InfobloxClient, logger *zerolog.Logger) *InfobloxProvider {
 	return &InfobloxProvider{
 		client: client,
 		config: config,
+		logger: logger,
 	}
 }
 
@@ -71,10 +74,10 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 	}
 
 	if findZone == nil {
-		log.Info().
+		p.logger.Info().
 			Str("DNSZone", zoneInfo.Domain).
 			Msg("Creating delegated zone")
-		log.Debug().
+		p.logger.Debug().
 			Interface("records", delegateTo).
 			Msg("Delegated records")
 		_, err = p.createZoneDelegated(objMgr, zoneInfo.Domain, delegateTo)
@@ -89,10 +92,10 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 		sortZones(findZone.DelegateTo)
 		currentList := p.sanitizeDelegateZone(delegateTo, findZone.DelegateTo, zoneInfo)
 		if !reflect.DeepEqual(findZone.DelegateTo, currentList) {
-			log.Info().
+			p.logger.Info().
 				Interface("records", findZone.DelegateTo).
 				Msg("Found delegated zone records")
-			log.Info().
+			p.logger.Info().
 				Str("DNSZone", zoneInfo.Domain).
 				Interface("serverList", currentList).
 				Msg("Updating delegated zone with the server list")
@@ -106,7 +109,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 }
 
 func (p *InfobloxProvider) Finalize(zoneInfo *depresolver.DelegationZoneInfo) error {
-	log.Info().Msgf("Domain %s must deleted by manually in Infoblox", zoneInfo.Domain)
+	p.logger.Info().Msgf("Domain %s must deleted by manually in Infoblox", zoneInfo.Domain)
 	return nil
 }
 

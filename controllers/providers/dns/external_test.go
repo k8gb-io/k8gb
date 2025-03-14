@@ -24,7 +24,9 @@ import (
 	"testing"
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/stretchr/testify/assert"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -114,7 +116,7 @@ func TestCreateZoneDelegation(t *testing.T) {
 	// assert
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			externalDNSProvider := NewExternalDNS(ctx, test.client, test.config)
+			externalDNSProvider := NewExternalDNS(ctx, test.client, test.config, logging.TestLogger())
 			for _, zone := range test.config.DelegationZones {
 				err := externalDNSProvider.CreateZoneDelegation(zone)
 				assert.Equal(t, test.expectedError, err != nil)

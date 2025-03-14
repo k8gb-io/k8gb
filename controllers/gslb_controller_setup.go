@@ -57,7 +57,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			c := mgr.GetClient()
 			err := c.List(context.TODO(), gslbList, opts...)
 			if err != nil {
-				log.Info().Msg("Can't fetch gslb objects")
+				r.Logger.Info().Msg("Can't fetch gslb objects")
 				return nil
 			}
 			reconcileRequests := []reconcile.Request{}
@@ -106,7 +106,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				// but when their subsets change they must be be reconciled
 				gvk, err := apiutil.GVKForObject(e.ObjectOld, r.Scheme)
 				if err != nil {
-					log.Warn().Msg("could not fetch GroupVersionKind for object")
+					r.Logger.Warn().Msg("could not fetch GroupVersionKind for object")
 				} else if gvk.Kind == "Endpoints" {
 					return true
 				}
@@ -123,7 +123,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object, strategy string) {
-	log.Info().
+	r.Logger.Info().
 		Str("annotation", fmt.Sprintf("(%s:%s)", strategyAnnotation, strategy)).
 		Str("ingress", a.GetName()).
 		Msg("Detected strategy annotation on ingress")
@@ -134,7 +134,7 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 		Name:      a.GetName(),
 	}, ingressToReuse)
 	if err != nil {
-		log.Info().
+		r.Logger.Info().
 			Str("ingress", a.GetName()).
 			Msg("Ingress does not exist anymore. Skipping Glsb creation...")
 		return
@@ -145,7 +145,7 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 		Name:      a.GetName(),
 	}, gslbExist)
 	if err == nil {
-		log.Info().
+		r.Logger.Info().
 			Str("gslb", gslbExist.Name).
 			Msg("Gslb already exists. Skipping Gslb creation...")
 		return
@@ -162,7 +162,7 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 
 	gslb.Spec.Strategy, err = r.parseStrategy(a.GetAnnotations(), strategy)
 	if err != nil {
-		log.Err(err).
+		r.Logger.Err(err).
 			Str("gslb", gslbExist.Name).
 			Msg("can't parse Gslb strategy")
 		return
@@ -170,18 +170,18 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 
 	err = controllerutil.SetControllerReference(ingressToReuse, gslb, r.Scheme)
 	if err != nil {
-		log.Err(err).
+		r.Logger.Err(err).
 			Str("ingress", ingressToReuse.Name).
 			Str("gslb", gslb.Name).
 			Msg("Cannot set the Ingress as the owner of the Gslb")
 	}
 
-	log.Info().
+	r.Logger.Info().
 		Str("gslb", gslb.Name).
 		Msg(fmt.Sprintf("Creating a new Gslb out of Ingress with '%s' annotation", strategyAnnotation))
 	err = c.Create(context.Background(), gslb)
 	if err != nil {
-		log.Err(err).Msg("Glsb creation failed")
+		r.Logger.Err(err).Msg("Glsb creation failed")
 	}
 }
 

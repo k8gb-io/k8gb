@@ -67,8 +67,7 @@ func run() error {
 	config, err := resolver.ResolveOperatorConfig()
 	deprecations := resolver.GetDeprecations()
 	// Initialize desired log or default log in case of configuration failed.
-	logging.Init(config)
-	log := logging.Logger()
+	log := logging.NewLogger(config)
 	log.Info().
 		Str("version", version).
 		Str("commit", commit).
@@ -121,7 +120,8 @@ func run() error {
 	}
 
 	log.Info().Msg("Resolving DNS provider")
-	f, err = dns.NewDNSProviderFactory(context.TODO(), mgr.GetClient(), *config)
+	coreDNSLogger := logging.NewLogger(config)
+	f, err = dns.NewDNSProviderFactory(context.TODO(), mgr.GetClient(), *config, coreDNSLogger)
 	if err != nil {
 		log.Err(err).Msg("Unable to create DNS provider factory")
 		return err
@@ -132,6 +132,7 @@ func run() error {
 		Client:      mgr.GetClient(),
 		DepResolver: resolver,
 		Scheme:      mgr.GetScheme(),
+		Logger:      logging.NewLogger(config),
 	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{
@@ -139,6 +140,7 @@ func run() error {
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
+		Logger:      coreDNSLogger,
 	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {

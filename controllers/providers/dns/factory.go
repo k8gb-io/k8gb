@@ -22,6 +22,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rs/zerolog"
+
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,9 +33,14 @@ type ProviderFactory struct {
 	config  depresolver.Config
 	client  client.Client
 	context context.Context
+	logger  *zerolog.Logger
 }
 
-func NewDNSProviderFactory(context context.Context, client client.Client, config depresolver.Config) (f *ProviderFactory, err error) {
+func NewDNSProviderFactory(
+	context context.Context,
+	client client.Client,
+	config depresolver.Config,
+	logger *zerolog.Logger) (f *ProviderFactory, err error) {
 	if client == nil {
 		err = fmt.Errorf("nil client")
 	}
@@ -41,6 +48,7 @@ func NewDNSProviderFactory(context context.Context, client client.Client, config
 		context: context,
 		config:  config,
 		client:  client,
+		logger:  logger,
 	}
 	return
 }
@@ -48,10 +56,10 @@ func NewDNSProviderFactory(context context.Context, client client.Client, config
 func (f *ProviderFactory) Provider() Provider {
 	switch f.config.EdgeDNSType {
 	case depresolver.DNSTypeExternal:
-		return NewExternalDNS(f.context, f.client, f.config)
+		return NewExternalDNS(f.context, f.client, f.config, f.logger)
 	case depresolver.DNSTypeInfoblox:
 		ibx := NewInfobloxClient(f.config)
-		return NewInfobloxDNS(f.config, ibx)
+		return NewInfobloxDNS(f.config, ibx, f.logger)
 	}
 	return NewEmptyDNS(f.config)
 }

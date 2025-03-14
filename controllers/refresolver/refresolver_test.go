@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/logging"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	utils "github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
@@ -72,7 +74,7 @@ func TestNew(t *testing.T) {
 			cl, gslb := getTestContext(test.gslbYaml)
 
 			// act
-			resolver, err := New(gslb, cl)
+			resolver, err := New(gslb, cl, logging.TestLogger())
 
 			// assert
 			assert.Equal(t, test.expectedError, err)
