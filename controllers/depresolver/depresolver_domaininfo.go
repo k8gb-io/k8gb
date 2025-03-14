@@ -128,6 +128,10 @@ func (z *DelegationZoneInfo) GetSortedIPs() []string {
 	return z.IPs
 }
 
+func (z *DelegationZoneInfo) String() string {
+	return fmt.Sprintf("Domain: %s, Zone: %s, IPs: %v", z.Domain, z.Zone, z.IPs)
+}
+
 func (d *DelegationZones) GetExternalClusterNSNamesByHostname(host string) map[string]string {
 	z := d.getZone(host)
 	if z != nil {

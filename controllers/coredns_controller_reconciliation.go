@@ -51,7 +51,17 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	r.Config.DelegationZones.SetIPs(source.IPs)
 	for _, zoneInfo := range r.Config.DelegationZones {
+		logger.Info().
+			Interface("zone", zoneInfo).
+			Msg("Creating/Updating DNSEndpoint CR")
 		err = r.DNSProvider.CreateZoneDelegation(zoneInfo)
+		log.Info().
+			Str("DNSZone", zoneInfo.Domain).
+			Msg("Creating delegated zone")
+		log.Debug().
+			Str("NSName", zoneInfo.ClusterNSName).
+			Strs("IPs", zoneInfo.IPs).
+			Msg("Delegated records")
 		if err != nil {
 			logger.Err(err).Msg("Error creating zone delegation")
 		}

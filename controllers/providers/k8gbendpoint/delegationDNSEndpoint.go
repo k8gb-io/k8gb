@@ -23,7 +23,6 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
@@ -42,13 +41,11 @@ func NewDelegationDNSEndpoint(
 	context context.Context,
 	client client.Client,
 	config depresolver.Config,
-	logger *zerolog.Logger,
 	info depresolver.DelegationZoneInfo) *DelegationDNSEndpoint {
 	return &DelegationDNSEndpoint{
 		context:      context,
 		client:       client,
 		config:       config,
-		logger:       logger,
 		endpointType: delegationDNSEndpoint,
 		info:         info,
 	}
@@ -65,9 +62,6 @@ func (d *DelegationDNSEndpoint) RemoveEndpoint() error {
 func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, error) {
 	const externalDNSTypeCommon = "extdns"
 	ttl := externaldns.TTL(d.config.NSRecordTTL)
-	log.Info().
-		Interface("provider", d.endpointType).
-		Msg("Creating/Updating DNSEndpoint CR")
 
 	NSRecord := &externaldns.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
