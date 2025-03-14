@@ -41,17 +41,17 @@ type CoreDNSReconciler struct {
 	source      *ipSource
 }
 
-func (r *CoreDNSReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (c *CoreDNSReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// todo: introduce variable for reconciliation interval
 	result := utils.NewReconcileResultHandler(0)
-	logger.Info().Msgf("Reconciling '%s' %s", req, r.source.IPs)
-	source, err := r.processIPSource(ctx, r.Client)
+	logger.Info().Msgf("Reconciling '%s' %s", req, c.source.IPs)
+	source, err := c.processIPSource(ctx, c.Client)
 	if err != nil {
 		logger.Err(err).Msg("Error processing IP source for CoreDNS")
 	}
-	r.Config.DelegationZones.SetIPs(source.IPs)
-	for _, zoneInfo := range r.Config.DelegationZones {
-		err = r.DNSProvider.CreateZoneDelegation(zoneInfo)
+	c.Config.DelegationZones.SetIPs(source.IPs)
+	for _, zoneInfo := range c.Config.DelegationZones {
+		err = c.DNSProvider.CreateZoneDelegation(zoneInfo)
 		if err != nil {
 			logger.Err(err).Msg("Error creating zone delegation")
 		}

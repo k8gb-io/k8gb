@@ -42,11 +42,11 @@ type ipSource struct {
 
 var logger = logging.Logger()
 
-func (r *CoreDNSReconciler) processIPSource(ctx context.Context, client client.Client) (*ipSource, error) {
+func (c *CoreDNSReconciler) processIPSource(ctx context.Context, client client.Client) (*ipSource, error) {
 	const coreDNSIngressRefAnnotation = "k8gb.io/coredns-ingress-ref"
 	var err error
 	source := &ipSource{}
-	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(client, *r.Config)
+	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(client, *c.Config)
 	source.CoreDNSService, err = coreDNSAssistant.GetResource()
 	if err != nil {
 		return nil, err
@@ -69,13 +69,13 @@ func (r *CoreDNSReconciler) processIPSource(ctx context.Context, client client.C
 	return source, err
 }
 
-func (r *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (c *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	var coreDNSWatcher = handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, obj client.Object) []reconcile.Request {
 			svc, _ := obj.(*corev1.Service)
-			if svc.GetName() == r.source.CoreDNSService.Name && svc.GetNamespace() == r.source.CoreDNSService.Namespace {
-				if r.source.Ingress == nil {
+			if svc.GetName() == c.source.CoreDNSService.Name && svc.GetNamespace() == c.source.CoreDNSService.Namespace {
+				if c.source.Ingress == nil {
 					return []reconcile.Request{{
 						NamespacedName: types.NamespacedName{
 							Namespace: svc.Namespace,
@@ -89,11 +89,14 @@ func (r *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	var ingressWatcher = handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, obj client.Object) []reconcile.Request {
-			ing, _ := obj.(*netv1.Ingress)
-			if r.source.Ingress == nil {
+			ing, isIngress := obj.(*netv1.Ingress)
+			if !isIngress {
 				return nil
 			}
-			if ing.GetName() == r.source.Ingress.Name && ing.GetNamespace() == r.source.Ingress.Namespace {
+			if c.source.Ingress == nil {
+				return nil
+			}
+			if ing.GetName() == c.source.Ingress.Name && ing.GetNamespace() == c.source.Ingress.Namespace {
 				return []reconcile.Request{{
 					NamespacedName: types.NamespacedName{
 						Namespace: ing.Namespace,
@@ -104,19 +107,19 @@ func (r *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			return nil
 		})
 
-	uncachedClient, err := client.New(mgr.GetConfig(), client.Options{Scheme: r.Scheme})
+	uncachedClient, err := client.New(mgr.GetConfig(), client.Options{Scheme: c.Scheme})
 	if err != nil {
 		return fmt.Errorf("failed to create uncached client: %w", err)
 	}
-	source, err := r.processIPSource(context.TODO(), uncachedClient)
+	source, err := c.processIPSource(context.TODO(), uncachedClient)
 	if err != nil {
 		return err
 	}
-	r.source = source
+	c.source = source
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(source.CoreDNSService.Name).
 		Watches(&corev1.Service{}, coreDNSWatcher).
 		Watches(&netv1.Ingress{}, ingressWatcher).
-		Complete(r)
+		Complete(c)
 }
