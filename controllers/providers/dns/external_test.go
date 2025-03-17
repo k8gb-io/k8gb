@@ -51,7 +51,7 @@ func (f *FakeClientWithFailingGet) Get(ctx context.Context, key client.ObjectKey
 	if f.getCount > 0 {
 		// Return NotFound error after the first call
 		//	gvk := obj.GetObjectKind().GroupVersionKind()
-		return nil //errors.NewNotFound(schema.GroupResource{Group: gvk.Group, Resource: gvk.Kind}, key.Name)
+		return nil // errors.NewNotFound(schema.GroupResource{Group: gvk.Group, Resource: gvk.Kind}, key.Name)
 	}
 
 	f.getCount++
@@ -60,27 +60,27 @@ func (f *FakeClientWithFailingGet) Get(ctx context.Context, key client.ObjectKey
 
 func TestCreateZoneDelegation(t *testing.T) {
 	// arrange
-	//getExistingEndpoint := func(name, namespace string) *externaldns.DNSEndpoint {
-	//	return &externaldns.DNSEndpoint{
-	//		ObjectMeta: metav1.ObjectMeta{
-	//			Name:      name,
-	//			Namespace: namespace},
-	//		Spec: externaldns.DNSEndpointSpec{Endpoints: []*externaldns.Endpoint{
-	//			{
-	//				DNSName:    "cloud.example.com",
-	//				RecordTTL:  60,
-	//				Targets:    []string{"gslb-ns-eu-k8gb-test-gslb.cloud.example.com", "gslb-ns-us-k8gb-test-gslb.cloud.example.com"},
-	//				RecordType: "NS",
-	//			},
-	//			{
-	//				DNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
-	//				RecordTTL:  60,
-	//				RecordType: "A",
-	//				Targets:    []string{"10.0.0.1", "10.0.0.2"},
-	//			},
-	//		}},
-	//	}
-	//}
+	getExistingEndpoint := func(name, namespace string) *externaldns.DNSEndpoint {
+		return &externaldns.DNSEndpoint{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace},
+			Spec: externaldns.DNSEndpointSpec{Endpoints: []*externaldns.Endpoint{
+				{
+					DNSName:    "cloud.example.com",
+					RecordTTL:  60,
+					Targets:    []string{"gslb-ns-eu-k8gb-test-gslb.cloud.example.com", "gslb-ns-us-k8gb-test-gslb.cloud.example.com"},
+					RecordType: "NS",
+				},
+				{
+					DNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
+					RecordTTL:  60,
+					RecordType: "A",
+					Targets:    []string{"10.0.0.1", "10.0.0.2"},
+				},
+			}},
+		}
+	}
 
 	getFakeClient := func(ctx context.Context, namespace string, names ...string) client.Client {
 		cl := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
@@ -96,18 +96,16 @@ func TestCreateZoneDelegation(t *testing.T) {
 		return cl
 	}
 
-	//getFakeClientForExistingEndpoint := func(ctx context.Context, ep *externaldns.DNSEndpoint) client.Client {
-	//	clok := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
-	//	//	nofail := &FakeClientWithFailingGet{Client: clok}
-	//	_ = clok.Get(ctx, client.ObjectKey{Name: ep.Name, Namespace: ep.Namespace}, ep)
-	//	_ = clok.Get(ctx, client.ObjectKey{Name: ep.Name, Namespace: ep.Namespace}, ep)
-	//	_ = clok.Update(ctx, &externaldns.DNSEndpoint{
-	//		ObjectMeta: metav1.ObjectMeta{
-	//			Name:      ep.Name,
-	//			Namespace: ep.Namespace},
-	//	})
-	//	return clok
-	//}
+	getFakeClientForExistingEndpoint := func(ctx context.Context, expectedEP *externaldns.DNSEndpoint) client.Client {
+		cl := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(expectedEP).Build()
+		_ = cl.Get(ctx, client.ObjectKey{Name: expectedEP.Name, Namespace: expectedEP.Namespace}, expectedEP)
+		_ = cl.Update(ctx, &externaldns.DNSEndpoint{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      expectedEP.Name,
+				Namespace: expectedEP.Namespace},
+		})
+		return cl
+	}
 
 	ctx := context.TODO()
 	var tests = []struct {
@@ -116,6 +114,27 @@ func TestCreateZoneDelegation(t *testing.T) {
 		expectedError bool
 		client        client.Client
 	}{
+		{
+			name: "existing cloud.example.com",
+			config: depresolver.Config{
+				K8gbNamespace: "k8gb",
+				NSRecordTTL:   60,
+				DelegationZones: []*depresolver.DelegationZoneInfo{
+					{
+						Domain:        "cloud.example.com",
+						Zone:          "example.com",
+						NegativeTTL:   60,
+						IPs:           []string{"10.0.0.1", "10.0.0.2"},
+						ClusterNSName: "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
+						ExtClusterNSNames: map[string]string{
+							"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
+						},
+					},
+				},
+			},
+			client:        getFakeClientForExistingEndpoint(ctx, getExistingEndpoint("k8gb-ns-extdns-cloud-example-com", "k8gb")),
+			expectedError: false,
+		},
 		{
 			name: "new cloud.example.com",
 			config: depresolver.Config{
@@ -168,27 +187,6 @@ func TestCreateZoneDelegation(t *testing.T) {
 			client:        getFakeClient(ctx, "k8gb", "k8gb-ns-extdns-cloud-example-com", "k8gb-ns-extdns-cloud-example-org"),
 			expectedError: false,
 		},
-		//{
-		//	name: "existing cloud.example.com",
-		//	config: depresolver.Config{
-		//		K8gbNamespace: "k8gb",
-		//		NSRecordTTL:   60,
-		//		DelegationZones: []*depresolver.DelegationZoneInfo{
-		//			{
-		//				Domain:        "cloud.example.com",
-		//				Zone:          "example.com",
-		//				NegativeTTL:   60,
-		//				IPs:           []string{"10.0.0.1", "10.0.0.2"},
-		//				ClusterNSName: "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
-		//				ExtClusterNSNames: map[string]string{
-		//					"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
-		//				},
-		//			},
-		//		},
-		//	},
-		//	client:        getFakeClientForExistingEndpoint(ctx, getExistingEndpoint("k8gb-ns-extdns-cloud-example-com", "k8gb")),
-		//	expectedError: false,
-		//},
 	}
 
 	// act
