@@ -456,8 +456,6 @@ spec:
             required:
             - geoTag
             - healthyRecords
-            - loadBalancer
-            - servers
             - serviceHealth
             type: object
         type: object

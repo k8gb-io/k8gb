@@ -29,14 +29,15 @@ import (
 
 // loggerFactory creates new logger
 type loggerFactory struct {
-	log depresolver.Log
+	log  depresolver.Log
+	name string
 }
 
-func newLogger(config *depresolver.Config) *loggerFactory {
+func newLogger(config *depresolver.Config, name string) *loggerFactory {
 	if config == nil {
 		return &loggerFactory{log: depresolver.Log{}}
 	}
-	return &loggerFactory{log: config.Log}
+	return &loggerFactory{log: config.Log, name: name}
 }
 
 // Get returns new logger even if it doesn't know level or format.
@@ -56,6 +57,7 @@ func (l *loggerFactory) get() zerolog.Logger {
 	case depresolver.JSONFormat:
 		logger = zerolog.New(os.Stdout).
 			With().
+			Str("logger", l.name).
 			Caller().
 			Timestamp().
 			Logger().
@@ -63,6 +65,7 @@ func (l *loggerFactory) get() zerolog.Logger {
 	case depresolver.SimpleFormat:
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339, NoColor: l.log.NoColor}).
 			With().
+			Str("logger", l.name).
 			Caller().
 			Timestamp().
 			Logger().

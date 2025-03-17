@@ -66,21 +66,21 @@ func run() error {
 	resolver := depresolver.NewDependencyResolver()
 	config, err := resolver.ResolveOperatorConfig()
 	deprecations := resolver.GetDeprecations()
-	// Initialize desired log or default log in case of configuration failed.
-	log := logging.NewLogger(config)
-	log.Info().
+	// Initialize desired logger or default logger in case of configuration failed.
+	logger := logging.NewLogger(config, "main")
+	logger.Info().
 		Str("version", version).
 		Str("commit", commit).
 		Msg("k8gb info")
 	if err != nil {
-		log.Err(err).Msg("Can't resolve environment variables")
+		logger.Err(err).Msg("Can't resolve environment variables")
 		return err
 	}
-	log.Debug().
+	logger.Debug().
 		Interface("config", config).
 		Msg("Resolved config")
 
-	ctrl.SetLogger(logging.NewLogrAdapter(log))
+	ctrl.SetLogger(logging.NewLogrAdapter(logger))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
@@ -91,39 +91,39 @@ func run() error {
 		LeaderElectionID: "8020e9ff.absa.oss",
 	})
 	if err != nil {
-		log.Err(err).Msg("Unable to create k8gb operator manager")
+		logger.Err(err).Msg("Unable to create k8gb operator manager")
 		return err
 	}
 
 	for _, d := range deprecations {
-		log.Warn().Msg(d)
+		logger.Warn().Msg(d)
 	}
 
-	log.Info().Msg("Registering components")
+	logger.Info().Msg("Registering components")
 
 	// Add external-dns DNSEndpoints resource
 	// https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md#adding-3rd-party-resources-to-your-operator
 	schemeBuilder := &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}}
 	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
 	if err := schemeBuilder.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Err(err).Msg("Unable to register ExternalDNS resource schemas")
+		logger.Err(err).Msg("Unable to register ExternalDNS resource schemas")
 		return err
 	}
 
-	log.Info().Msg("Starting metrics")
+	logger.Info().Msg("Starting metrics")
 	metrics.Init(config)
 	defer metrics.Metrics().Unregister()
 	err = metrics.Metrics().Register()
 	if err != nil {
-		log.Err(err).Msg("Unable to register metrics")
+		logger.Err(err).Msg("Unable to register metrics")
 		return err
 	}
 
-	log.Info().Msg("Resolving DNS provider")
-	coreDNSLogger := logging.NewLogger(config)
+	logger.Info().Msg("Resolving DNS provider")
+	coreDNSLogger := logging.NewLogger(config, "coredns")
 	f, err = dns.NewDNSProviderFactory(context.TODO(), mgr.GetClient(), *config, coreDNSLogger)
 	if err != nil {
-		log.Err(err).Msg("Unable to create DNS provider factory")
+		logger.Err(err).Msg("Unable to create DNS provider factory")
 		return err
 	}
 
@@ -132,7 +132,8 @@ func run() error {
 		Client:      mgr.GetClient(),
 		DepResolver: resolver,
 		Scheme:      mgr.GetScheme(),
-		Logger:      logging.NewLogger(config),
+		Logger:      logging.NewLogger(config, "gslb"),
+		//Recorder:    mgr.GetEventRecorderFor("gslb-controller"),
 	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{
@@ -141,15 +142,16 @@ func run() error {
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
 		Logger:      coreDNSLogger,
-	}
-
-	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
-		log.Err(err).Msg("Unable to create Gslb reconciler")
-		return err
+		//Recorder:    mgr.GetEventRecorderFor("coredns-controller"),
 	}
 
 	if err = corednsReconciler.SetupWithManager(mgr); err != nil {
-		log.Err(err).Msg("Unable to create coreDNS reconciler")
+		logger.Err(err).Msg("Unable to create coreDNS reconciler")
+		return err
+	}
+
+	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
+		logger.Err(err).Msg("Unable to create Gslb reconciler")
 		return err
 	}
 
@@ -163,16 +165,16 @@ func run() error {
 		Commit:        commit,
 		AppVersion:    version,
 	}
-	cleanup, tracer := tracing.SetupTracing(context.Background(), cfg, log)
+	cleanup, tracer := tracing.SetupTracing(context.Background(), cfg, logger)
 	gslbReconciler.Tracer = tracer
 	defer cleanup()
 
 	// +kubebuilder:scaffold:builder
-	log.Info().Msg("Starting k8gb")
+	logger.Info().Msg("Starting k8gb")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		log.Err(err).Msg("Problem running k8gb")
+		logger.Err(err).Msg("Problem running k8gb")
 		return err
 	}
-	log.Info().Msg("Gracefully finished, bye!")
+	logger.Info().Msg("Gracefully finished, bye!")
 	return nil
 }

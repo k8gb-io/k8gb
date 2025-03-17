@@ -33,12 +33,12 @@ var (
 // TestLogger Logger public static logger used by tests
 func TestLogger() *zerolog.Logger {
 	once.Do(func() {
-		test = newLogger(&depresolver.Config{}).get()
+		test = newLogger(&depresolver.Config{}, "test").get()
 	})
 	return &test
 }
 
-func NewLogger(c *depresolver.Config) *zerolog.Logger {
-	logger := newLogger(c).get()
+func NewLogger(c *depresolver.Config, s string) *zerolog.Logger {
+	logger := newLogger(c, s).get()
 	return &logger
 }
