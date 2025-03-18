@@ -22,6 +22,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/k8gb-io/k8gb/controllers/boot"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
@@ -83,6 +85,15 @@ func run() error {
 
 	ctrl.SetLogger(logging.NewLogrAdapter(log))
 
+	log.Info().Msg("Reading external IPs from cluster")
+	bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
+	if err != nil {
+		log.Err(err).Msg("Can't resolve external IPs")
+		return err
+	}
+	log.Info().Msgf("Found External IP's: %s", bootstrap)
+	config.DelegationZones.SetIPs(bootstrap.IPs)
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
 		Metrics: metricsserver.Options{
@@ -139,6 +150,7 @@ func run() error {
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
+		Bootstrap:   bootstrap,
 	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
