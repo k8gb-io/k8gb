@@ -1,0 +1,15 @@
+k8gb:
+  dnsZone: "test.k8gb.io" # dnsZone controlled by gslb
+  edgeDNSZone: "k8gb.io" # main zone which would contain gslb zone to delegate
+  edgeDNSServer: "169.254.169.253" # external DNS server to be used for resolution
+  clusterGeoTag: "eu-west-1" # used for places where we need to distinguish between differnet Gslb instances
+  extGslbClustersGeoTags: "us-east-1" # comma-separated list of external gslb geo tags to pair with
+
+ns1:
+  enabled: true
+
+coredns:
+  serviceType: LoadBalancer
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
