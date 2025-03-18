@@ -79,6 +79,20 @@ func (b *Bootstrap) HasIngress() bool {
 	return b.Ingress.Name != ""
 }
 
+func (b *Bootstrap) IsIngress(ing *netv1.Ingress) bool {
+	if ing == nil {
+		return false
+	}
+	return b.Ingress.Name == ing.Name && b.Ingress.Namespace == ing.Namespace
+}
+
+func (b *Bootstrap) IsService(svc *corev1.Service) bool {
+	if svc == nil {
+		return false
+	}
+	return b.CoreDNSService.Name == svc.Name && b.CoreDNSService.Namespace == svc.Namespace
+}
+
 func (b *Bootstrap) String() string {
 	if b.HasIngress() {
 		return fmt.Sprintf("Ingress %s/%s %s", b.Ingress.Namespace, b.Ingress.Name, b.IPs)
