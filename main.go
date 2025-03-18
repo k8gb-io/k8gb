@@ -22,11 +22,13 @@ import (
 	"context"
 	"os"
 
+	"github.com/k8gb-io/k8gb/controllers/boot"
+	"github.com/k8gb-io/k8gb/controllers/providers/dns"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/logging"
-	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
@@ -62,7 +64,6 @@ func main() {
 }
 
 func run() error {
-	var f *dns.ProviderFactory
 	resolver := depresolver.NewDependencyResolver()
 	config, err := resolver.ResolveOperatorConfig()
 	deprecations := resolver.GetDeprecations()
@@ -81,6 +82,14 @@ func run() error {
 		Msg("Resolved config")
 
 	ctrl.SetLogger(logging.NewLogrAdapter(log))
+
+	log.Info().Msg("Reading external IPs from cluster")
+	bootstrap, err := boot.GetBootstrap(context.TODO(), config, log, ctrl.GetConfigOrDie())
+	if err != nil {
+		log.Err(err).Msg("Can't resolve external IPs")
+		return err
+	}
+	log.Info().Msgf("Found External IP's: %s", bootstrap)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
@@ -119,6 +128,7 @@ func run() error {
 		return err
 	}
 
+	var f *dns.ProviderFactory
 	log.Info().Msg("Resolving DNS provider")
 	coreDNSLogger := logging.NewLogger(config)
 	f, err = dns.NewDNSProviderFactory(context.TODO(), mgr.GetClient(), *config, coreDNSLogger)
@@ -141,6 +151,7 @@ func run() error {
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
 		Logger:      coreDNSLogger,
+		Bootstrap:   bootstrap,
 	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
