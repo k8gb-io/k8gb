@@ -136,6 +136,9 @@
                 "interval": {
                     "type": "string"
                 },
+                "logLevel": {
+                    "type": "string"
+                },
                 "securityContext": {
                     "$ref": "#/definitions/ExternaldnsSecurityContext"
                 }
@@ -638,6 +641,10 @@
                     "type": "boolean"
                 },
                 "hostedZoneID": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "region": {
                     "type": "string",
                     "minLength": 2
                 },
