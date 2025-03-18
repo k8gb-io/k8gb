@@ -56,6 +56,7 @@ func (l *loggerFactory) get() zerolog.Logger {
 	case depresolver.JSONFormat:
 		logger = zerolog.New(os.Stdout).
 			With().
+			Str("controller", "k8gb").
 			Caller().
 			Timestamp().
 			Logger().
@@ -63,6 +64,7 @@ func (l *loggerFactory) get() zerolog.Logger {
 	case depresolver.SimpleFormat:
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339, NoColor: l.log.NoColor}).
 			With().
+			Str("controller", "k8gb").
 			Caller().
 			Timestamp().
 			Logger().
