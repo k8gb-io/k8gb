@@ -90,6 +90,7 @@ func run() error {
 		return err
 	}
 	log.Info().Msgf("Found External IP's: %s", bootstrap)
+	config.DelegationZones.SetIPs(bootstrap.IPs)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,

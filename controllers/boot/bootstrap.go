@@ -42,7 +42,14 @@ func GetBootstrap(ctx context.Context, config *depresolver.Config, logger *zerol
 	if err != nil {
 		return nil, err
 	}
-	return readIPs(ctx, cl, config, logger)
+	bootstrap, err := readIPs(ctx, cl, config, logger)
+	if err != nil {
+		return nil, err
+	}
+	if len(bootstrap.IPs) == 0 {
+		return nil, fmt.Errorf("no IP addresses found")
+	}
+	return bootstrap, nil
 }
 
 func readIPs(ctx context.Context, cl client.Client, config *depresolver.Config, logger *zerolog.Logger) (*Bootstrap, error) {
@@ -79,14 +86,14 @@ func (b *Bootstrap) HasIngress() bool {
 	return b.Ingress.Name != ""
 }
 
-func (b *Bootstrap) IsIngress(ing *netv1.Ingress) bool {
+func (b *Bootstrap) ContainsIngress(ing *netv1.Ingress) bool {
 	if ing == nil {
 		return false
 	}
 	return b.Ingress.Name == ing.Name && b.Ingress.Namespace == ing.Namespace
 }
 
-func (b *Bootstrap) IsService(svc *corev1.Service) bool {
+func (b *Bootstrap) ContainsService(svc *corev1.Service) bool {
 	if svc == nil {
 		return false
 	}

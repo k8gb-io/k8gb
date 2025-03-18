@@ -34,7 +34,7 @@ func (c *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	var coreDNSWatcher = handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, obj client.Object) []reconcile.Request {
 			svc, _ := obj.(*corev1.Service)
-			if c.Bootstrap.IsService(svc) {
+			if c.Bootstrap.ContainsService(svc) {
 				if !c.Bootstrap.HasIngress() {
 					return []reconcile.Request{{
 						NamespacedName: types.NamespacedName{
@@ -56,7 +56,7 @@ func (c *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			if !c.Bootstrap.HasIngress() {
 				return nil
 			}
-			if !c.Bootstrap.IsIngress(ing) {
+			if !c.Bootstrap.ContainsIngress(ing) {
 				return nil
 			}
 			return []reconcile.Request{{

@@ -49,7 +49,6 @@ func (c *CoreDNSReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl
 	// todo: introduce variable for reconciliation interval
 	result := utils.NewReconcileResultHandler(0)
 	c.Logger.Info().Msgf("Reconciling '%s' %s", req, c.Bootstrap.IPs)
-	c.Config.DelegationZones.SetIPs(c.Bootstrap.IPs)
 	for _, zoneInfo := range c.Config.DelegationZones {
 		err := c.DNSProvider.CreateZoneDelegation(zoneInfo)
 		if err != nil {
