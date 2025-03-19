@@ -4,10 +4,10 @@ go 1.23.4
 
 require (
 	github.com/AbsaOSS/env-binder v1.0.1
-	github.com/AbsaOSS/gopkg v0.1.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.2
 	github.com/infobloxopen/infoblox-go-client v1.1.1
+	github.com/infobloxopen/infoblox-go-client/v2 v2.9.0
 	github.com/miekg/dns v1.1.63
 	github.com/prometheus/client_golang v1.20.5
 	github.com/rs/zerolog v1.33.0
