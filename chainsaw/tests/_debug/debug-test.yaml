@@ -1,0 +1,12 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: _debug
+spec:
+  namespace: zone-delegation-on-bootstrap
+  steps:
+    - name: Debug on EU
+      description: Inspecting EU cluster
+      cluster: eu
+      use:
+        template: ../../step-templates/assert-dnsendpoint.yaml
