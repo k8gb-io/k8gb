@@ -34,7 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const coreDNSServiceLabel = "app.kubernetes.io/name=coredns"
+const CoreDNSServiceLabel = "app.kubernetes.io/name=coredns"
 
 // CoreDNSService is common wrapper operating on GSLB instance.
 // It uses apimachinery client to call kubernetes API
@@ -55,7 +55,7 @@ func NewCoreDNSServiceAssistant(client client.Client, config depresolver.Config)
 // GetResource returns the CoreDNS Service
 func (r *CoreDNSService) GetResource() (*corev1.Service, error) {
 	serviceList := &corev1.ServiceList{}
-	sel, err := labels.Parse(coreDNSServiceLabel)
+	sel, err := labels.Parse(CoreDNSServiceLabel)
 	if err != nil {
 		log.Err(err).Msg("Badly formed label selector")
 		return nil, err
@@ -72,13 +72,13 @@ func (r *CoreDNSService) GetResource() (*corev1.Service, error) {
 		}
 	}
 	if len(serviceList.Items) != 1 {
-		log.Warn().Msg("More than 1 CoreDNS service was found")
+		log.Warn().Msg("Multiple or no CoreDNS service was found")
 		for _, service := range serviceList.Items {
 			log.Info().
 				Str("serviceName", service.Name).
 				Msg("Found CoreDNS service")
 		}
-		err := coreerrors.New("more than 1 CoreDNS service was found. Check if CoreDNS exposed correctly")
+		err := coreerrors.New("multiple or no CoreDNS service was found. Check if CoreDNS exposed correctly")
 		return nil, err
 	}
 	coreDNSService := &serviceList.Items[0]
