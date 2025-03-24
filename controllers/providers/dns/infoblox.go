@@ -22,7 +22,9 @@ import (
 	"reflect"
 	"time"
 
-	ibcl "github.com/infobloxopen/infoblox-go-client"
+	"k8s.io/apimachinery/pkg/api/errors"
+
+	ibcl "github.com/infobloxopen/infoblox-go-client/v2"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 )
@@ -86,9 +88,9 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 
 	// if zone exists
 	if len(findZone.Ref) > 0 {
-		sortZones(findZone.DelegateTo)
-		currentList := p.sanitizeDelegateZone(delegateTo, findZone.DelegateTo, zoneInfo)
-		if !reflect.DeepEqual(findZone.DelegateTo, currentList) {
+		sortZones(findZone.DelegateTo.NameServers)
+		currentList := p.sanitizeDelegateZone(delegateTo, findZone.DelegateTo.NameServers, zoneInfo)
+		if !reflect.DeepEqual(findZone.DelegateTo.NameServers, currentList) {
 			log.Info().
 				Interface("records", findZone.DelegateTo).
 				Msg("Found delegated zone records")
@@ -125,28 +127,35 @@ func (p *InfobloxProvider) filterOutDelegateTo(delegateTo []ibcl.NameServer, fqd
 	return
 }
 
-func (p *InfobloxProvider) createZoneDelegated(o *ibcl.ObjectManager, fqdn string, d []ibcl.NameServer) (res *ibcl.ZoneDelegated, err error) {
+func (p *InfobloxProvider) createZoneDelegated(o ibcl.IBObjectManager, fqdn string, d []ibcl.NameServer) (res *ibcl.ZoneDelegated, err error) {
 	start := time.Now()
-	res, err = o.CreateZoneDelegated(fqdn, d)
+	ns := ibcl.NullableNameServers{NameServers: d, IsNull: false}
+	//nolint: gosec
+	res, err = o.CreateZoneDelegated(fqdn, ns, "created by k8gb", false, false, "", uint32(p.config.NSRecordTTL), true, ibcl.EA{}, "default", "FORWARD")
 	m.InfobloxObserveRequestDuration(start, metrics.CreateZoneDelegated, err == nil)
 	return
 }
 
-func (p *InfobloxProvider) getZoneDelegated(o *ibcl.ObjectManager, fqdn string) (res *ibcl.ZoneDelegated, err error) {
+func (p *InfobloxProvider) getZoneDelegated(o ibcl.IBObjectManager, fqdn string) (res *ibcl.ZoneDelegated, err error) {
 	start := time.Now()
 	res, err = o.GetZoneDelegated(fqdn)
 	m.InfobloxObserveRequestDuration(start, metrics.GetZoneDelegated, err == nil)
+	if err != nil && !errors.IsNotFound(err) {
+		return nil, nil
+	}
 	return
 }
 
-func (p *InfobloxProvider) updateZoneDelegated(o *ibcl.ObjectManager, fqdn string, d []ibcl.NameServer) (res *ibcl.ZoneDelegated, err error) {
+func (p *InfobloxProvider) updateZoneDelegated(o ibcl.IBObjectManager, fqdn string, d []ibcl.NameServer) (res *ibcl.ZoneDelegated, err error) {
 	start := time.Now()
-	res, err = o.UpdateZoneDelegated(fqdn, d)
+	ns := ibcl.NullableNameServers{NameServers: d, IsNull: false}
+	//nolint: gosec
+	res, err = o.UpdateZoneDelegated(fqdn, ns, "updated by k8gb", false, false, "", uint32(p.config.NSRecordTTL), true, ibcl.EA{})
 	m.InfobloxObserveRequestDuration(start, metrics.UpdateZoneDelegated, err == nil)
 	return
 }
 
-// func (p *InfobloxProvider) deleteZoneDelegated(o *ibcl.ObjectManager, fqdn string) (res string, err error) {
+// func (p *InfobloxProvider) deleteZoneDelegated(o ibcl.IBObjectManager, fqdn string) (res string, err error) {
 //	start := time.Now()
 //	res, err = o.DeleteZoneDelegated(fqdn)
 //	m.InfobloxObserveRequestDuration(start, metrics.DeleteZoneDelegated, err == nil)
