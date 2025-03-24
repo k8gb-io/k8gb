@@ -132,14 +132,6 @@ func getNSCombinations(original []utils.DNSServer, hostToUse string) []utils.DNS
 			Port: portToUse,
 		},
 	}
-	// if hostToUse == "172.18.0.7" || hostToUse == "172.18.0.6" {
-	//	nameServerToUse[0].Host = "127.0.0.1"
-	//	nameServerToUse[0].Port = 5053
-	// }
-	// if hostToUse == "172.18.0.10" || hostToUse == "172.18.0.11" {
-	//	nameServerToUse[0].Host = "127.0.0.1"
-	//	nameServerToUse[0].Port = 5054
-	// }
 	defaultPortAdded := false
 	for _, s := range original {
 		if s.Port != 53 {
