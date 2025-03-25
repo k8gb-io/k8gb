@@ -98,9 +98,9 @@ type GslbStatus struct {
 	// Comma-separated list of hosts
 	Hosts string `json:"hosts,omitempty"`
 	// LoadBalancer configuration
-	LoadBalancer LoadBalancer `json:"loadBalancer"`
+	LoadBalancer LoadBalancer `json:"loadBalancer,omitempty"`
 	// Servers configuration
-	Servers []*Server `json:"servers"`
+	Servers []*Server `json:"servers,omitempty"`
 }
 
 // +kubebuilder:object:root=true

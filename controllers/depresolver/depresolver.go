@@ -146,7 +146,7 @@ type Config struct {
 	K8gbNamespace string `env:"POD_NAMESPACE"`
 	// Infoblox configuration
 	Infoblox Infoblox
-	// CoreDNSExposed flag
+	// CoreDNSExposed flag, deprecated
 	CoreDNSExposed bool `env:"COREDNS_EXPOSED, default=false"`
 	// Log configuration
 	Log Log

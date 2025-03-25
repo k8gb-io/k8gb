@@ -102,10 +102,18 @@ func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (
 
 // getGateway retrieves the istio gateway referenced by the istio virtual service
 func getGateway(virtualService *istio.VirtualService, k8sClient client.Client) (*istio.Gateway, error) {
-	if len(virtualService.Spec.Gateways) != 1 {
-		return nil, fmt.Errorf("expected exactly 1 Gateway to be referenced by the VirtualService but %d were found", len(virtualService.Spec.Gateways))
+	var ingressGateways []string
+	for _, gateway := range virtualService.Spec.Gateways {
+		// count only dedicated ingress gateways
+		if gateway != "mesh" {
+			ingressGateways = append(ingressGateways, gateway)
+		}
 	}
-	gatewayRef := strings.Split(virtualService.Spec.Gateways[0], "/")
+
+	if len(ingressGateways) != 1 {
+		return nil, fmt.Errorf("expected exactly 1 Gateway to be referenced by the VirtualService but %d were found", len(ingressGateways))
+	}
+	gatewayRef := strings.Split(ingressGateways[0], "/")
 	gatewayNamespace := gatewayRef[0]
 	gatewayName := gatewayRef[1]
 

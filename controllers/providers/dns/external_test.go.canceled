@@ -94,9 +94,9 @@ var a = struct {
 
 var expectedDNSEndpoint = &externaldns.DNSEndpoint{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:        fmt.Sprintf("k8gb-ns-%s", externalDNSTypeCommon),
-		Namespace:   a.Config.K8gbNamespace,
-		Annotations: map[string]string{"k8gb.absa.oss/dnstype": string(externalDNSTypeCommon)},
+		Name:      fmt.Sprintf("k8gb-ns-%s", externalDNSTypeCommon),
+		Namespace: a.Config.K8gbNamespace,
+		Labels:    map[string]string{"k8gb.absa.oss/dnstype": string(externalDNSTypeCommon)},
 	},
 	Spec: externaldns.DNSEndpointSpec{
 		Endpoints: []*externaldns.Endpoint{
@@ -136,7 +136,7 @@ func TestCreateZoneDelegationOnExternalDNS(t *testing.T) {
 		},
 	}
 	// act
-	err := p.CreateZoneDelegationForExternalDNS(gslb)
+	err := p.CreateZoneDelegation(nil)
 	// assert
 	assert.NoError(t, err)
 }
@@ -195,14 +195,15 @@ func TestCreateZoneDelegationOnExternalDNSWithMultipleEndpoints(t *testing.T) {
 		},
 	}
 	// act
-	err := p.CreateZoneDelegationForExternalDNS(gslb1)
+	err := p.CreateZoneDelegation(nil)
 	assert.NoError(t, err)
-	err = p.CreateZoneDelegationForExternalDNS(gslb2)
+	err = p.CreateZoneDelegation(nil)
 	assert.NoError(t, err)
-	err = p.CreateZoneDelegationForExternalDNS(gslb3)
+	err = p.CreateZoneDelegation(nil)
 	assert.Error(t, err)
 }
 
+aaa
 func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {
 	// arrange
 	var ep = &corev1.Endpoints{
@@ -227,7 +228,7 @@ func TestSaveNewDNSEndpointOnExternalDNS(t *testing.T) {
 
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(ep).Build()
 
-	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config)
+	assistant := assistant.NewCoreDNSAssistant(cl, a.Config.K8gbNamespace, a.Config)
 	p := NewExternalDNS(a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, expectedDNSEndpoint)
@@ -247,7 +248,7 @@ func TestSaveExistingDNSEndpointOnExternalDNS(t *testing.T) {
 	require.NoError(t, schemeBuilder.AddToScheme(runtimeScheme))
 
 	var cl = fake.NewClientBuilder().WithScheme(runtimeScheme).WithObjects(endpointToSave).Build()
-	assistant := assistant.NewGslbAssistant(cl, a.Config.K8gbNamespace, a.Config)
+	assistant := assistant.NewCoreDNSAssistant(cl, a.Config.K8gbNamespace, a.Config)
 	p := NewExternalDNS(a.Config, assistant)
 	// act, assert
 	err := p.SaveDNSEndpoint(a.Gslb, endpointToSave)

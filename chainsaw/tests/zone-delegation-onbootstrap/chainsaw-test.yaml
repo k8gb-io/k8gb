@@ -1,0 +1,19 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: zone-delegation-on-bootstrap
+spec:
+  namespace: zone-delegation-on-bootstrap
+  steps:
+
+  - name: Verify k8gb-ns-extdns-cloud-example-com on EU
+    description: Verify k8gb-ns-extdns-cloud-example-com delegation zone endpoint
+    cluster: eu
+    use:
+      template: ../../step-templates/assert-dnsendpoint.yaml
+
+  - name: Verify k8gb-ns-extdns-cloud-example-com on US
+    description: Verify k8gb-ns-extdns-cloud-example-com delegation zone endpoint
+    cluster: us
+    use:
+      template: ../../step-templates/assert-dnsendpoint.yaml
