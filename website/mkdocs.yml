@@ -5,7 +5,7 @@ nav:
   - Home: index.md
   - Concepts: concepts.md
   - Architecture: components.md
-  - Tutorials: index.md#installation-and-configuration-tutorials
+  - Tutorials: tutoriales.md
   - Changelog: CHANGELOG.md
 theme:
   name: material
