@@ -3,7 +3,8 @@ apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: {{ .Values.azuredns.authSecretName | default "external-dns-secret-azure" }}
+  name: {{ .Values.azuredns.authSecretName }}
+  namespace: {{ .Release.Namespace }}
 data:
   azure.json: {{ include "external-dns.azure-credentials" . | b64enc }}
 {{- end }}
