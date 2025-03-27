@@ -22,6 +22,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/rs/zerolog"
@@ -39,6 +41,7 @@ type ApplicationDNSEndpoint struct {
 	gslb                *k8gbv1beta1.Gslb
 	logger              *zerolog.Logger
 	updateRuntimeStatus UpdateRuntimeStatus
+	queryService        utils.DNSQueryService
 }
 
 func NewApplicationDNSEndpoint(
@@ -47,6 +50,7 @@ func NewApplicationDNSEndpoint(
 	config *depresolver.Config,
 	gslb *k8gbv1beta1.Gslb,
 	logger *zerolog.Logger,
+	queryService utils.DNSQueryService,
 	urs UpdateRuntimeStatus) *ApplicationDNSEndpoint {
 	return &ApplicationDNSEndpoint{
 		context:             ctx,
@@ -55,6 +59,7 @@ func NewApplicationDNSEndpoint(
 		endpointType:        applicationDNSEndpoint,
 		gslb:                gslb,
 		logger:              logger,
+		queryService:        queryService,
 		updateRuntimeStatus: urs,
 	}
 }
@@ -187,8 +192,13 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		d.logger.Info().
 			Str("cluster", cluster).
 			Msg("Adding external Gslb targets from cluster")
-		glueA, err := dnsQuery(cluster, d.config.EdgeDNSServers, d.logger)
+		glueA, err := d.queryService.Query(cluster, d.config.EdgeDNSServers)
 		if err != nil {
+			d.logger.Warn().
+				Str("fqdn", cluster+".").
+				Interface("nameservers", d.config.EdgeDNSServers).
+				Err(err).
+				Msg("can't resolve FQDN using nameservers")
 			return targets
 		}
 		d.logger.Info().
@@ -196,7 +206,7 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 			Interface("edgeDNSServers", d.config.EdgeDNSServers).
 			Interface("glueARecord", glueA.Answer).
 			Msg("Resolved glue A record for NS")
-		glueARecords := getARecords(glueA)
+		glueARecords := d.queryService.ExtractARecords(glueA)
 		var hostToUse string
 		if len(glueARecords) > 0 {
 			hostToUse = glueARecords[0]
@@ -205,11 +215,16 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		}
 		nameServersToUse := getNSCombinations(d.config.EdgeDNSServers, hostToUse)
 		lHost := fmt.Sprintf("localtargets-%s", host)
-		a, err := dnsQuery(lHost, nameServersToUse, d.logger)
+		a, err := d.queryService.Query(lHost, nameServersToUse)
 		if err != nil {
+			d.logger.Warn().
+				Str("fqdn", lHost+".").
+				Interface("nameservers", nameServersToUse).
+				Err(err).
+				Msg("can't resolve FQDN using nameservers")
 			return targets
 		}
-		clusterTargets := getARecords(a)
+		clusterTargets := d.queryService.ExtractARecords(a)
 		if len(clusterTargets) > 0 {
 			targets[tag] = &Target{clusterTargets}
 			d.logger.Info().
