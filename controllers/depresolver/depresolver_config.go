@@ -43,8 +43,6 @@ const (
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
 	ExtDNSEnabledKey           = "EXTDNS_ENABLED"
 	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"
-	EdgeDNSZoneKey             = "EDGE_DNS_ZONE"
-	DNSZoneKey                 = "DNS_ZONE"
 	DNSZonesKey                = "DNS_ZONES"
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
 	InfobloxVersionKey         = "INFOBLOX_WAPI_VERSION"
@@ -114,8 +112,6 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 }
 
 func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes []EdgeDNSType) (err error) {
-	const dnsNameMax = 253
-	const dnsLabelMax = 63
 	if config.Log.Level == zerolog.NoLevel {
 		return fmt.Errorf("invalid '%s', allowed values ['','%s','%s','%s','%s','%s','%s','%s']", LogLevelKey,
 			zerolog.TraceLevel, zerolog.DebugLevel, zerolog.InfoLevel, zerolog.WarnLevel, zerolog.FatalLevel,
@@ -175,40 +171,12 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return fmt.Errorf("error for port of edge dns server(%v): it must be a positive integer between 1 and 65535", s)
 		}
 	}
-	err = field(EdgeDNSZoneKey, config.edgeDNSZone).matchRegexp(hostNameRegex).err
-	if err != nil {
-		return err
-	}
-	err = field(DNSZoneKey, config.dnsZone).matchRegexp(hostNameRegex).err
-	if err != nil {
-		return err
-	}
+
 	// do full Infoblox validation only in case that Host exists
 	if isNotEmpty(config.Infoblox.Host) {
 		err = validateConfigForInfoblox(config)
 		if err != nil {
 			return err
-		}
-	}
-	validateLabels := func(label string) error {
-		labels := strings.Split(label, ".")
-		for _, l := range labels {
-			if len(l) > dnsLabelMax {
-				return fmt.Errorf("%s exceeds %v characters limit", l, dnsLabelMax)
-			}
-		}
-		return nil
-	}
-
-	serverNames := config.getExternalClusterNSNames()
-	serverNames[config.ClusterGeoTag] = config.getClusterNSName()
-	for geoTag, nsName := range serverNames {
-		if len(nsName) > dnsNameMax {
-			return fmt.Errorf("ns name '%s' exceeds %v charactes limit for [GeoTag: '%s', %s: '%s', %s: '%s']",
-				nsName, dnsLabelMax, geoTag, EdgeDNSZoneKey, config.edgeDNSZone, DNSZoneKey, config.dnsZone)
-		}
-		if err := validateLabels(nsName); err != nil {
-			return fmt.Errorf("error for geo tag: %s. %s in ns name %s", geoTag, err, nsName)
 		}
 	}
 
@@ -383,36 +351,4 @@ func parseLogOutputFormat(value string) LogFormat {
 		return SimpleFormat
 	}
 	return NoFormat
-}
-
-// deprecated, used for validations only
-func (c *Config) getExternalClusterNSNames() (m map[string]string) {
-	m = make(map[string]string, len(c.extClustersGeoTags))
-	for _, tag := range c.extClustersGeoTags {
-		m[tag] = getNsName(tag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
-	}
-	return
-}
-
-// deprecated, used for validations only
-func (c *Config) getClusterNSName() string {
-	return getNsName(c.ClusterGeoTag, c.dnsZone, c.edgeDNSZone, c.EdgeDNSServers[0].Host)
-}
-
-// getNsName returns NS for geo tag.
-// The values is combination of dnsZone, edgeDNSZone and (Ext)ClusterGeoTag, see:
-// DNS_ZONE k8gb-test.gslb.cloud.example.com
-// EDGE_DNS_ZONE: cloud.example.com
-// CLUSTER_GEOTAG: us
-// will generate "gslb-ns-us-k8gb-test-gslb.cloud.example.com"
-// If edgeDNSServer == localhost or 127.0.0.1 than edgeDNSServer is returned.
-// The function is private and expects only valid inputs.
-func getNsName(tag, dnsZone, edgeDNSZone, edgeDNSServer string) string {
-	if edgeDNSServer == "127.0.0.1" || edgeDNSServer == "localhost" {
-		return edgeDNSServer
-	}
-	const prefix = "gslb-ns"
-	d := strings.TrimSuffix(dnsZone, "."+edgeDNSZone)
-	domainX := strings.ReplaceAll(d, ".", "-")
-	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edgeDNSZone)
 }
