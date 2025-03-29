@@ -154,8 +154,15 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	gslb.Status.ServiceHealth = serviceHealth
 
 	// == external-dns dnsendpoints CRs ==
-	_, s := r.Tracer.Start(ctx, "gslbDNSEndpoint")
-	epProvider := k8gbendpoint.NewApplicationDNSEndpoint(context.TODO(), r.Client, r.Config, gslb, log, r.updateRuntimeStatus)
+	_, s := r.Tracer.Start(context.Background(), "gslbDNSEndpoint")
+	epProvider := k8gbendpoint.NewApplicationDNSEndpoint(
+		context.TODO(),
+		r.Client,
+		r.Config,
+		gslb,
+		log,
+		utils.NewDNSQueryService(),
+		r.updateRuntimeStatus)
 	dnsEndpoint, err := epProvider.GetDNSEndpoint()
 	if err != nil {
 		m.IncrementError(gslb)
