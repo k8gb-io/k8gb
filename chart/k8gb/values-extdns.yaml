@@ -1,6 +1,10 @@
 k8gb:
   clusterGeoTag: "us"
   extGslbClustersGeoTags: "eu"
+  dnsZones:
+    - zone: "k8gb.io"
+      domain: "cloud.k8gb.io"
+      dnsZoneNegTTL: 30
 
 extdns:
   enabled: true
@@ -21,3 +25,5 @@ extdns:
   - name: aws-credentials
     mountPath: /.aws
     readOnly: true
+  domainFilters:
+  - k8gb.io
