@@ -548,7 +548,7 @@ $(shell echo $(foreach cl,$(filter-out $1,$(shell seq $(CLUSTERS_NUMBER))),$(cal
 endef
 
 define get-helm-args
-k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)'
+k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' --set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$1)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$1)'
 endef
 
 define hit-testapp-host
