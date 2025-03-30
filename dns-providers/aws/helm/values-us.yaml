@@ -1,0 +1,8 @@
+k8gb:
+  k8gb:
+    clusterGeoTag: "us"
+    extGslbClustersGeoTags: "eu"
+
+  extdns:
+    txtPrefix: "k8gb-us-"
+    txtOwnerId: "k8gb-us"
