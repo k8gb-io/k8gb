@@ -53,6 +53,23 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 		return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edge)
 	}
 
+	validateRFC1035 := func(zoneInfo *DelegationZoneInfo) error {
+		const dnsNameMax = 253
+		const dnsLabelMax = 63
+		for _, ns := range zoneInfo.GetNSServerList() {
+			if len(ns) > dnsNameMax {
+				return fmt.Errorf("%s exceeds %v characters limit", ns, dnsNameMax)
+			}
+			labels := strings.Split(ns, ".")
+			for _, l := range labels {
+				if len(l) > dnsLabelMax {
+					return fmt.Errorf("label %s in %s exceeds %v characters limit", l, ns, dnsLabelMax)
+				}
+			}
+		}
+		return nil
+	}
+
 	// parse example.com:cloud.example.com:30;example.io:cloud.example.io:50
 	getEnvAsArrayOfPairsOrFallback := func(zones string) ([]info, error) {
 		tuples := make([]info, 0)
@@ -93,6 +110,13 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 		}
 		dzi = append(dzi, zoneInfo)
 	}
+
+	for _, z := range dzi {
+		if err := validateRFC1035(z); err != nil {
+			return dzi, err
+		}
+	}
+
 	return dzi, nil
 }
 
