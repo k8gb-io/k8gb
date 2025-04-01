@@ -22,11 +22,12 @@ import (
 	"context"
 	"testing"
 
-	netv1 "k8s.io/api/networking/v1"
+	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -72,7 +73,8 @@ func TestBootstrap(t *testing.T) {
 			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
 			hasIngress:    false,
 			config: &depresolver.Config{
-				K8gbNamespace: "k8gb",
+				K8gbNamespace:      "k8gb",
+				CoreDNSServiceType: string(corev1.ServiceTypeLoadBalancer),
 			},
 			setupClient: func(expectedIPs []string) client.Client {
 				coreDNSService := &corev1.Service{
@@ -110,18 +112,16 @@ func TestBootstrap(t *testing.T) {
 			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
 			hasIngress:    true,
 			config: &depresolver.Config{
-				K8gbNamespace: "k8gb",
+				K8gbNamespace:      "k8gb",
+				CoreDNSServiceType: string(corev1.ServiceTypeClusterIP),
 			},
 			setupClient: func(expectedIPs []string) client.Client {
 				coreDNSService := &corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      objectMeta.Name,
 						Namespace: objectMeta.Namespace,
-						Annotations: map[string]string{
-							"k8gb.io/coredns-ingress-ref": "k8gb/coredns-ingress",
-						},
 						Labels: map[string]string{
-							"app.kubernetes.io/name": "coredns",
+							assistant.CoreDNSServiceLabelName: assistant.CoreDNSServiceLabelValue,
 						},
 					},
 					Spec: corev1.ServiceSpec{
@@ -144,6 +144,9 @@ func TestBootstrap(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "coredns-ingress",
 						Namespace: "k8gb",
+						Labels: map[string]string{
+							assistant.IngressLabelName: assistant.IngressLabelValue,
+						},
 					},
 					Status: netv1.IngressStatus{
 						LoadBalancer: netv1.IngressLoadBalancerStatus{
@@ -169,7 +172,8 @@ func TestBootstrap(t *testing.T) {
 			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
 			hasIngress:    true,
 			config: &depresolver.Config{
-				K8gbNamespace: "k8gb",
+				K8gbNamespace:      "k8gb",
+				CoreDNSServiceType: string(corev1.ServiceTypeClusterIP),
 			},
 			setupClient: func(expectedIPs []string) client.Client {
 				coreDNSService := &corev1.Service{
@@ -177,7 +181,7 @@ func TestBootstrap(t *testing.T) {
 						Name:      objectMeta.Name,
 						Namespace: objectMeta.Namespace,
 						Labels: map[string]string{
-							"app.kubernetes.io/name": "coredns",
+							assistant.CoreDNSServiceLabelName: assistant.CoreDNSServiceLabelValue,
 						},
 					},
 					Spec: corev1.ServiceSpec{

@@ -144,6 +144,8 @@ type Config struct {
 	Infoblox Infoblox
 	// CoreDNSExposed flag, deprecated
 	CoreDNSExposed bool `env:"COREDNS_EXPOSED, default=false"`
+	// CoreDNSServiceType can be LoadBalancer or anything
+	CoreDNSServiceType string `env:"COREDNS_SERVICE_TYPE, default=ClusterIP"`
 	// Log configuration
 	Log Log
 	// MetricsAddress in format address:port where address can be empty, IP address, or hostname, default: 0.0.0.0:8080
