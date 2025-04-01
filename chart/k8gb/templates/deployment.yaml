@@ -55,6 +55,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "k8gb"
+            - name: COREDNS_SERVICE_TYPE
+              value: {{ quote .Values.coredns.serviceType }}
             - name: CLUSTER_GEO_TAG
               value: {{ quote .Values.k8gb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS
