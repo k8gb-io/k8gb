@@ -1,4 +1,4 @@
-{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
+{{- if or .Values.ns1.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,9 +39,6 @@ spec:
         - --txt-owner-id={{ include "k8gb.extdnsOwnerID" . }}
         - --txt-prefix=k8gb-{{ .Values.k8gb.clusterGeoTag }}- # add custom prefix to TXT records, critical for Cloudflare NS record creation
         - --provider={{ include "k8gb.extdnsProvider" . }}
-        {{- if and .Values.route53.assumeRoleArn (not .Values.route53.secret) }}
-        - --aws-assume-role={{ .Values.route53.assumeRoleArn }}
-        {{- end }}
         {{ include "k8gb.extdnsProviderOpts" . }}
         resources:
           requests:
@@ -56,27 +53,6 @@ spec:
         env:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-      {{- if .Values.route53.secret }}
-        {{- if not .Values.externaldns.extraEnv }}
-        env:
-        {{- end }}
-          - name: AWS_SHARED_CREDENTIALS_FILE
-            value: /.aws/credentials
-        volumeMounts:
-          - name: aws-credentials
-            mountPath: /.aws
-            readOnly: true
-          {{- with .Values.externaldns.extraVolumeMounts }}
-          {{- toYaml . | nindent 10 }}
-          {{- end }}
-      volumes:
-        - name: aws-credentials
-          secret:
-            secretName: {{ .Values.route53.secret }}
-        {{- with .Values.externaldns.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      {{- end }}
       {{- if .Values.rfc2136.rfc2136auth.gssTsig.enabled }}
         volumeMounts:
           - mountPath: /etc/krb5.conf
