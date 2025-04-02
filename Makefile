@@ -260,7 +260,9 @@ deploy-k8gb-with-helm:
 	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
 		--set $(call get-helm-args,$(CLUSTER_ID)) \
 		--set k8gb.reconcileRequeueSeconds=10 \
-		--set k8gb.dnsZoneNegTTL=10 \
+		--set k8gb.dnsZones[0].dnsZoneNegTTL=10 \
+		--set k8gb.dnsZones[0].zone="example.com" \
+		--set k8gb.dnsZones[0].domain="cloud.example.com" \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
 		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL) \
