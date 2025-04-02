@@ -21,8 +21,9 @@ helm:
   releaseName: k8gb
   values:
     k8gb:
-      dnsZone: global.fleet.clusterLabels.k8gb-dnsZone
-      edgeDNSZone: "cloud.example.com"
+      dnsZones:
+        - zone: cloud.example.com
+          domain: global.fleet.clusterLabels.k8gb-dnsZone
       edgeDNSServers:
         - "1.2.3.4"
         - "5.6.7.8"
