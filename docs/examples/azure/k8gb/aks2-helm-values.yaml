@@ -1,15 +1,13 @@
 k8gb:
-  # -- dnsZone controlled by gslb
-  dnsZone: "demo.k8gb-kubeconeu2023.com"
-  # -- Negative TTL for SOA record
-  dnsZoneNegTTL: 300
-  # -- main zone which would contain gslb zone to delegate
-  edgeDNSZone: "k8gb-kubeconeu2023.com" # main zone which would contain gslb zone to delegate
+  dnsZones:
+    - domain: "demo.k8gb-kubeconeu2023.com" # -- dnsZone controlled by gslb
+      zone: "k8gb-kubeconeu2023.com" # -- main zone which would contain gslb zone to delegate
+      dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
   # -- host/ip[:port] format is supported here where port defaults to 53
   edgeDNSServers:
-      # -- use these DNS server as a main resolver to enable cross k8gb DNS based communication
-      - "1.1.1.1"
-      - "8.8.8.8"
+    # -- use these DNS server as a main resolver to enable cross k8gb DNS based communication
+    - "1.1.1.1"
+    - "8.8.8.8"
   # -- used for places where we need to distinguish between different Gslb instances
   clusterGeoTag: "francecentral"
   # -- comma-separated list of external gslb geo tags to pair with

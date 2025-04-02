@@ -1,6 +1,10 @@
 k8gb:
   reconcileRequeueSeconds: 10
   dnsZoneNegTTL: 10
+  dnsZones:
+    - dnsZoneNegTTL: 10
+      zone: example.com
+      domain: cloud.example.com
   log:
     format: simple
     level: debug
