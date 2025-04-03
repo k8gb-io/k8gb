@@ -49,12 +49,13 @@ import (
 // GslbReconciler reconciles a Gslb object
 type GslbReconciler struct {
 	client.Client
-	Scheme      *runtime.Scheme
-	Config      *depresolver.Config
-	DepResolver depresolver.GslbResolver
-	DNSProvider dns.Provider
-	Recorder    record.EventRecorder
-	Tracer      trace.Tracer
+	Scheme             *runtime.Scheme
+	Config             *depresolver.Config
+	DepResolver        depresolver.GslbResolver
+	DNSProvider        dns.Provider
+	Recorder           record.EventRecorder
+	Tracer             trace.Tracer
+	GslbIngressHandler Handler
 }
 
 const (
@@ -106,13 +107,13 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	// == Ingress ==========
 	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
-		ingress, err := r.gslbIngress(gslb)
+		ingress, err := r.createIngressFromGslb(gslb)
 		if err != nil {
 			m.IncrementError(gslb)
 			return result.RequeueError(err)
 		}
 
-		err = r.saveIngress(gslb, ingress)
+		err = r.saveDependentIngress(gslb, ingress)
 		if err != nil {
 			m.IncrementError(gslb)
 			return result.RequeueError(err)
