@@ -28,8 +28,10 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 )
 
+const DefaultTTLSeconds = 30
+
 var predefinedStrategy = k8gbv1beta1.Strategy{
-	DNSTtlSeconds: 30,
+	DNSTtlSeconds: DefaultTTLSeconds,
 }
 
 // ResolveGslbSpec fills Gslb by spec values. It executes always, when gslb is initialised.
