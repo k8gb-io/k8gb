@@ -59,7 +59,7 @@ func TestAnnotations(t *testing.T) {
 			host:            "test-ingress-annotation-failover.cloud.example.com",
 			path:            "../examples/ingress-annotation.yaml",
 			patch:           map[string]string{"k8gb.io/primary-geotag": "us"},
-			expectedIngress: map[string]string{"k8gb.io/primary-geotag": "eu", "k8gb.io/strategy": "failover"},
+			expectedIngress: map[string]string{"k8gb.io/primary-geotag": "us", "k8gb.io/strategy": "failover"},
 			expectedGslb:    map[string]string{},
 		},
 		{
