@@ -5,7 +5,7 @@ kind: Ingress
 metadata:
   labels:
     app: init-ingress
-    io/ip-source: "true"
+    k8gb.io/ip-source: "true"
   name: init-ingress
   namespace: k8gb
 spec:

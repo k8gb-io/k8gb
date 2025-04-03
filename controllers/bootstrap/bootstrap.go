@@ -79,5 +79,5 @@ func (b *Bootstrap) String() string {
 	if b.HasIngress() {
 		return fmt.Sprintf("Ingress %s/%s %s", b.ing.Namespace, b.ing.Name, b.IPs)
 	}
-	return fmt.Sprintf("Service %s/%s %s", b.ing.Namespace, b.ing.Name, b.IPs)
+	return fmt.Sprintf("Service type LoadBalancer %s/%s %s", b.svc.Namespace, b.svc.Name, b.IPs)
 }

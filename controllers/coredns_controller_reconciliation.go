@@ -40,8 +40,7 @@ type CoreDNSReconciler struct {
 	Tracer      trace.Tracer
 	Scheme      *runtime.Scheme
 	DNSProvider dns.Provider
-	// source      *ipSource
-	Bootstrap *bootstrap.Bootstrap
+	Bootstrap   *bootstrap.Bootstrap
 }
 
 func (r *CoreDNSReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
