@@ -23,13 +23,16 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -82,8 +85,12 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	ingressMapHandler := handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, a client.Object) []reconcile.Request {
+			// filtering out Ingress created from GSLB
+			if hasGslbOwnerReference(a) {
+				return nil
+			}
 			annotations := a.GetAnnotations()
-			if annotationValue, found := annotations[strategyAnnotation]; found && a.GetOwnerReferences() != nil {
+			if annotationValue, found := annotations[strategyAnnotation]; found {
 				c := mgr.GetClient()
 				r.createGSLBFromIngress(c, a, annotationValue)
 			}
@@ -122,6 +129,15 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+func hasGslbOwnerReference(a client.Object) bool {
+	for _, owner := range a.GetOwnerReferences() {
+		if owner.Kind == "Gslb" {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object, strategy string) {
 	log.Info().
 		Str("annotation", fmt.Sprintf("(%s:%s)", strategyAnnotation, strategy)).
@@ -139,35 +155,52 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 			Msg("Ingress does not exist anymore. Skipping Glsb creation...")
 		return
 	}
-	gslbExist := &k8gbv1beta1.Gslb{}
-	err = c.Get(context.Background(), client.ObjectKey{
-		Namespace: a.GetNamespace(),
-		Name:      a.GetName(),
-	}, gslbExist)
-	if err == nil {
-		log.Info().
-			Str("gslb", gslbExist.Name).
-			Msg("Gslb already exists. Skipping Gslb creation...")
-		return
-	}
-	gslb := &k8gbv1beta1.Gslb{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: a.GetNamespace(),
-			Name:      a.GetName(),
-		},
-		Spec: k8gbv1beta1.GslbSpec{
-			Ingress: k8gbv1beta1.FromV1IngressSpec(ingressToReuse.Spec),
-		},
-	}
-
-	gslb.Spec.Strategy, err = r.parseStrategy(a.GetAnnotations(), strategy)
+	strategyObj, err := r.parseStrategy(a.GetAnnotations(), strategy)
 	if err != nil {
 		log.Err(err).
-			Str("gslb", gslbExist.Name).
+			Str("gslb", a.GetName()).
 			Msg("can't parse Gslb strategy")
 		return
 	}
+	create := false
+	gslb := &k8gbv1beta1.Gslb{}
+	err = c.Get(context.Background(), client.ObjectKey{
+		Namespace: a.GetNamespace(),
+		Name:      a.GetName(),
+	}, gslb)
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			log.Err(err).
+				Str("gslb", a.GetName()).
+				Msg("reading Gslb object failed")
+			return
+		}
+		// is not found
+		create = true
+		log.Info().
+			Str("gslb", a.GetName()).
+			Msg("Gslb doesnt exist, creating...")
 
+	}
+	gslb.ObjectMeta.Name = a.GetName()
+	gslb.ObjectMeta.Namespace = a.GetNamespace()
+	if val, found := a.GetAnnotations()[ingress.ExternalIPsAnnotation]; found {
+		gslb.ObjectMeta.Annotations[ingress.ExternalIPsAnnotation] = val
+	}
+	// migration to resourceRef
+	gslb.Spec = k8gbv1beta1.GslbSpec{
+		ResourceRef: k8gbv1beta1.ResourceRef{
+			ObjectReference: corev1.ObjectReference{
+				Name:       a.GetName(),
+				Namespace:  a.GetNamespace(),
+				Kind:       "Ingress",
+				APIVersion: "networking.k8s.io/v1",
+			},
+		},
+		// detaching ingress spec
+		Ingress:  k8gbv1beta1.IngressSpec{},
+		Strategy: strategyObj,
+	}
 	err = controllerutil.SetControllerReference(ingressToReuse, gslb, r.Scheme)
 	if err != nil {
 		log.Err(err).
@@ -176,12 +209,23 @@ func (r *GslbReconciler) createGSLBFromIngress(c client.Client, a client.Object,
 			Msg("Cannot set the Ingress as the owner of the Gslb")
 	}
 
+	if create {
+		log.Info().
+			Str("gslb", gslb.Name).
+			Msg(fmt.Sprintf("Creating a new Gslb out of Ingress with '%s' annotation", strategyAnnotation))
+		err = c.Create(context.Background(), gslb)
+		if err != nil {
+			log.Err(err).Msg("Glsb creation failed")
+		}
+		return
+	}
+	// update
 	log.Info().
 		Str("gslb", gslb.Name).
-		Msg(fmt.Sprintf("Creating a new Gslb out of Ingress with '%s' annotation", strategyAnnotation))
-	err = c.Create(context.Background(), gslb)
+		Msg(fmt.Sprintf("Updating a Gslb out of Ingress %s", a.GetName()))
+	err = c.Update(context.Background(), gslb)
 	if err != nil {
-		log.Err(err).Msg("Glsb creation failed")
+		log.Err(err).Msg("Glsb update failed")
 	}
 }
 
