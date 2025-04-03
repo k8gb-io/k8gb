@@ -56,6 +56,7 @@ const (
 var predefinedConfig = Config{
 	ReconcileRequeueSeconds: 30,
 	NSRecordTTL:             30,
+	CoreDNSServiceType:      "ClusterIP",
 	ClusterGeoTag:           "us",
 	extClustersGeoTags:      []string{"za", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
@@ -1207,7 +1208,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, NSRecordTTLKey, ClusterGeoTagKey, ExtClustersGeoTagsKey,
 		EdgeDNSServersKey, ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
-		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey,
+		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey, CoreDNSServiceTypeKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, TracingEnabled,
 		TracingSamplingRatio, OtelExporterOtlpEndpoint, DNSZonesKey} {
 		if os.Unsetenv(s) != nil {
@@ -1242,6 +1243,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(TracingSamplingRatio, strconv.FormatFloat(config.TracingSamplingRatio, 'f', 2, 64))
 	_ = os.Setenv(OtelExporterOtlpEndpoint, config.OtelExporterOtlpEndpoint)
 	_ = os.Setenv(DNSZonesKey, config.dnsZones)
+	_ = os.Setenv(CoreDNSServiceTypeKey, config.CoreDNSServiceType)
 }
 
 func getTestContext(testData string) (client.Client, *k8gbv1beta1.Gslb) {
