@@ -1,5 +1,7 @@
 package utils
 
+import netv1 "k8s.io/api/networking/v1"
+
 /*
 Copyright 2022 The k8gb Contributors.
 
@@ -35,6 +37,13 @@ func MergeAnnotations(target map[string]string, source map[string]string, contro
 	}
 
 	return target
+}
+
+func SetCommonGslbLabels(ingress *netv1.Ingress) {
+	if ingress.Labels == nil {
+		ingress.Labels = make(map[string]string)
+	}
+	ingress.Labels["app.k8gb.io/managed-by"] = "gslb"
 }
 
 // EqualPredefinedAnnotations checks if there has been a change in controlledAnnotations, it ignores the rest
