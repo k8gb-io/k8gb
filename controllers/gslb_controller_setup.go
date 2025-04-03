@@ -83,7 +83,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	ingressMapHandler := handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, a client.Object) []reconcile.Request {
 			annotations := a.GetAnnotations()
-			if annotationValue, found := annotations[strategyAnnotation]; found {
+			if annotationValue, found := annotations[strategyAnnotation]; found && a.GetOwnerReferences() != nil {
 				c := mgr.GetClient()
 				r.createGSLBFromIngress(c, a, annotationValue)
 			}
