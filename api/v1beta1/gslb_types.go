@@ -44,7 +44,7 @@ type Strategy struct {
 // ResourceRef selects a resource defining the GSLB's load balancer and server
 // +k8s:openapi-gen=true
 type ResourceRef struct {
-	corev1.ObjectReference
+	corev1.ObjectReference `json:",inline"`
 	// LabelSelector of the referenced resource
 	metav1.LabelSelector `json:",inline"`
 }
