@@ -31,10 +31,12 @@ spec:
         metadata:
           name: ($test.metadata.name)
           namespace: ($namespace)
-        spec: 
+          ownerReferences:
+            (length(@)): 1
+        spec:
           endpoints:
           - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
             targets:
               (length(@)): 2
           - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
-      timeout: 15s
+      timeout: 30s

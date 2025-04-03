@@ -23,12 +23,13 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress/common"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -36,8 +37,8 @@ import (
 var log = logging.Logger()
 
 const (
-	// comma separated list of external IP addresses
-	externalIPsAnnotation = "k8gb.io/exposed-ip-addresses"
+	// ExternalIPsAnnotation comma separated list of external IP addresses
+	ExternalIPsAnnotation = "k8gb.io/exposed-ip-addresses"
 )
 
 type ReferenceResolver struct {
@@ -67,28 +68,41 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 
 // getGslbIngressRef resolves a Kubernetes Ingress resource referenced by the Gslb spec
 func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1.Ingress, error) {
-	ingressList := &netv1.IngressList{}
-
-	selector, err := metav1.LabelSelectorAsSelector(&gslb.Spec.ResourceRef.LabelSelector)
+	query, err := common.GetQueryOptions(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
 	}
-	opts := &client.ListOptions{
-		LabelSelector: selector,
-		Namespace:     gslb.Namespace,
-	}
 
-	err = k8sClient.List(context.TODO(), ingressList, opts)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info().
-				Str("gslb", gslb.Name).
-				Msg("Can't find referenced Ingress resource")
+	switch query.Mode {
+	case common.QueryModeGet:
+		var ing = netv1.Ingress{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, &ing)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced Ingress resource")
+			}
+			return nil, err
 		}
-		return nil, err
-	}
+		return []netv1.Ingress{ing}, nil
 
-	return ingressList.Items, err
+	case common.QueryModeList:
+		var ingList netv1.IngressList
+		err = k8sClient.List(context.TODO(), &ingList, query.ListOpts)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced Ingress resource")
+			}
+			return nil, err
+		}
+		return ingList.Items, nil
+	}
+	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }
 
 // NewEmbeddedResolver creates a reference resolver capable of understanding embedded ingresses.networking.k8s.io resources
@@ -164,7 +178,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, edgeDNSServers utils.DNSList) ([]string, error) {
 	// fetch the IP addresses of the reverse proxy from an annotation if it exists
-	if ingressIPsFromAnnotation, ok := gslbAnnotations[externalIPsAnnotation]; ok {
+	if ingressIPsFromAnnotation, ok := gslbAnnotations[ExternalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(ingressIPsFromAnnotation)
 	}
 

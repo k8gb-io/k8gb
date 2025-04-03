@@ -23,13 +23,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress/common"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -77,27 +78,41 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 
 // getGslbVirtualServiceRef resolves an istio virtual service resource referenced by the Gslb spec
 func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]*istio.VirtualService, error) {
-	virtualServiceList := &istio.VirtualServiceList{}
-
-	selector, err := metav1.LabelSelectorAsSelector(&gslb.Spec.ResourceRef.LabelSelector)
+	query, err := common.GetQueryOptions(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
 	}
-	opts := &client.ListOptions{
-		LabelSelector: selector,
-	}
 
-	err = k8sClient.List(context.TODO(), virtualServiceList, opts)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info().
-				Str("gslb", gslb.Name).
-				Msg("Can't find referenced VirtualService resource")
+	switch query.Mode {
+	case common.QueryModeGet:
+		var virtualService = &istio.VirtualService{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, virtualService)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced VirtualService resource")
+			}
+			return nil, err
 		}
-		return nil, err
-	}
+		return []*istio.VirtualService{virtualService}, nil
 
-	return virtualServiceList.Items, err
+	case common.QueryModeList:
+		virtualServiceList := &istio.VirtualServiceList{}
+		err = k8sClient.List(context.TODO(), virtualServiceList, query.ListOpts)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced VirtualService resource")
+			}
+			return nil, err
+		}
+		return virtualServiceList.Items, nil
+	}
+	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }
 
 // getGateway retrieves the istio gateway referenced by the istio virtual service
