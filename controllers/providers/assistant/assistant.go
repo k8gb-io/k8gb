@@ -22,9 +22,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type Assistant[T client.Object] interface {
+type LoadBalancerStatusAssistant[T client.Object] interface {
 	// GetResource returns the CoreDNS Service
 	GetResource() (*T, error)
 	// GetExposedIPs retrieves list of exposed IP by CoreDNS
-	GetExposedIPs() ([]string, error)
+	GetExposedIPs() ([]string, *T, error)
 }

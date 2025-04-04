@@ -22,18 +22,21 @@ import (
 	"context"
 	"fmt"
 
+	netv1 "k8s.io/api/networking/v1"
+
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Bootstrap struct {
-	CoreDNSService client.ObjectKey
-	Ingress        client.ObjectKey
-	IPs            []string
+	source corev1.ServiceType
+	svc    *corev1.Service
+	ing    *netv1.Ingress
+	IPs    []string
+	Name   string
 }
 
 func GetBootstrap(ctx context.Context, config *depresolver.Config, kubeconfig *rest.Config) (*Bootstrap, error) {
@@ -56,56 +59,25 @@ func GetBootstrapWithClient(ctx context.Context, config *depresolver.Config, cl 
 }
 
 func readIPs(ctx context.Context, cl client.Client, config *depresolver.Config) (*Bootstrap, error) {
-	const coreDNSIngressRefAnnotation = "k8gb.io/coredns-ingress-ref"
 	var err error
-	var coreDNSService *corev1.Service
-	var ingress *netv1.Ingress
-	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(cl, *config)
-	coreDNSService, err = coreDNSAssistant.GetResource()
-	if err != nil {
-		return nil, err
-	}
-	boot := &Bootstrap{CoreDNSService: client.ObjectKey{Name: coreDNSService.Name, Namespace: coreDNSService.Namespace}}
-	if coreDNSService.Spec.Type != corev1.ServiceTypeLoadBalancer {
-		ingressPath, found := coreDNSService.Annotations[coreDNSIngressRefAnnotation]
-		if !found {
-			return nil, fmt.Errorf("CoreDNS service does not have %s annotation", coreDNSIngressRefAnnotation)
-		}
-		ingressAssistant := assistant.NewIngressAssistant(ctx, cl, ingressPath)
-		ingress, err = ingressAssistant.GetResource()
-		if err != nil {
-			return nil, err
-		}
-		boot.Ingress = client.ObjectKey{Name: ingress.Name, Namespace: ingress.Namespace}
-		boot.IPs, err = ingressAssistant.GetExposedIPs()
+	boot := &Bootstrap{source: corev1.ServiceType(config.CoreDNSServiceType)}
+	if boot.HasIngress() {
+		ingresAssistant := assistant.NewIngressAssistant(ctx, cl)
+		boot.IPs, boot.ing, err = ingresAssistant.GetExposedIPs()
 		return boot, err
 	}
-	// coreDNSService is ServiceTypeLoadBalancer
-	boot.IPs, err = coreDNSAssistant.GetExposedIPs()
+	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(ctx, cl, *config)
+	boot.IPs, boot.svc, err = coreDNSAssistant.GetExposedIPs()
 	return boot, err
 }
 
 func (b *Bootstrap) HasIngress() bool {
-	return b.Ingress.Name != ""
-}
-
-func (b *Bootstrap) ContainsIngress(ing *netv1.Ingress) bool {
-	if ing == nil {
-		return false
-	}
-	return b.Ingress.Name == ing.Name && b.Ingress.Namespace == ing.Namespace
-}
-
-func (b *Bootstrap) ContainsService(svc *corev1.Service) bool {
-	if svc == nil {
-		return false
-	}
-	return b.CoreDNSService.Name == svc.Name && b.CoreDNSService.Namespace == svc.Namespace
+	return b.source != corev1.ServiceTypeLoadBalancer
 }
 
 func (b *Bootstrap) String() string {
 	if b.HasIngress() {
-		return fmt.Sprintf("Ingress %s/%s %s", b.Ingress.Namespace, b.Ingress.Name, b.IPs)
+		return fmt.Sprintf("Ingress %s/%s %s", b.ing.Namespace, b.ing.Name, b.IPs)
 	}
-	return fmt.Sprintf("Service %s/%s %s", b.CoreDNSService.Namespace, b.CoreDNSService.Name, b.IPs)
+	return fmt.Sprintf("Service type LoadBalancer %s/%s %s", b.svc.Namespace, b.svc.Name, b.IPs)
 }

@@ -40,6 +40,7 @@ const (
 	ReconcileRequeueSecondsKey = "RECONCILE_REQUEUE_SECONDS"
 	NSRecordTTLKey             = "NS_RECORD_TTL"
 	ClusterGeoTagKey           = "CLUSTER_GEO_TAG"
+	CoreDNSServiceTypeKey      = "COREDNS_SERVICE_TYPE"
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
 	ExtDNSEnabledKey           = "EXTDNS_ENABLED"
 	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"

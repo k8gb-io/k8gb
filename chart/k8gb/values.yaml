@@ -121,6 +121,10 @@ coredns:
     - name: prometheus
       parameters: 0.0.0.0:9153
 
+  # -- If the value is LoadBalancer, the IP addresses of the cluster will be loaded from the CoreDNS service;
+  # otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true".
+  serviceType: "ClusterIP"
+
 infoblox:
   # -- infoblox provider enabled
   enabled: false
