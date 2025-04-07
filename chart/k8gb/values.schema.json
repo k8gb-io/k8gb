@@ -272,10 +272,6 @@
                         "$ref": "#/definitions/k8gbDnsZone"
                     }
                 },
-                "dnsZoneNegTTL": {
-                    "type": "integer",
-                    "minimum": 0
-                },
                 "edgeDNSServers": {
                     "type": "array",
                     "items": {
@@ -425,7 +421,7 @@
                     "type": "string",
                     "format": "idn-hostname"
                 },
-                "domain": {
+                "parentZone": {
                     "type": "string",
                     "format": "idn-hostname"
                 },
@@ -437,7 +433,7 @@
             },
             "required": [
                 "zone",
-                "domain"
+                "parentZone"
             ]
         },
         "Ns1": {

@@ -51,8 +51,8 @@ var (
 		},
 		DelegationZones: depresolver.DelegationZones{
 			{
-				Domain:            "cloud.example.com",
-				Zone:              "example.com",
+				Zone:              "cloud.example.com",
+				ParentZone:        "example.com",
 				ClusterNSName:     "gslb-ns-us-west-1-cloud.example.com",
 				ExtClusterNSNames: map[string]string{"us": "gslb-ns-us-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"},
 			},
@@ -136,8 +136,8 @@ func TestCanSanitizeDelegatedZone(t *testing.T) {
 	provider := NewInfobloxDNS(customConfig, a, m)
 	// act
 	got := provider.sanitizeDelegateZone(local, upstream, &depresolver.DelegationZoneInfo{
-		Domain:        "cloud.example.com",
-		Zone:          "example.com",
+		Zone:          "cloud.example.com",
+		ParentZone:    "example.com",
 		ClusterNSName: "gslb-ns-eu-cloud.example.com",
 	})
 	// assert
@@ -183,12 +183,12 @@ func TestInfobloxCreateZoneDelegationForExternalDNS(t *testing.T) {
 	config := defaultConfig
 	config.DelegationZones = []depresolver.DelegationZoneInfo{
 		{
-			Domain: "cloud.example.com",
-			Zone:   "example.com",
+			Zone:       "cloud.example.com",
+			ParentZone: "example.com",
 		},
 		{
-			Domain: "cloud.example.org",
-			Zone:   "example.org",
+			Zone:       "cloud.example.org",
+			ParentZone: "example.org",
 		},
 	}
 	gslb1 := defaultGslb.DeepCopy()
@@ -227,12 +227,12 @@ func TestInfobloxFinalize(t *testing.T) {
 	config := defaultConfig
 	config.DelegationZones = []depresolver.DelegationZoneInfo{
 		{
-			Domain: "cloud.example.com",
-			Zone:   "example.com",
+			Zone:       "cloud.example.com",
+			ParentZone: "example.com",
 		},
 		{
-			Domain: "cloud.example.org",
-			Zone:   "example.org",
+			Zone:       "cloud.example.org",
+			ParentZone: "example.org",
 		},
 	}
 	provider := NewInfobloxDNS(config, a, cl)
