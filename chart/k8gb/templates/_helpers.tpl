@@ -93,7 +93,7 @@ k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_
 {{- $entries := list -}}
 {{- range .Values.k8gb.dnsZones }}
   {{- $dnsZoneNegTTL := toString (.dnsZoneNegTTL | default "300") }}
-  {{- $entry := printf "%s:%s:%s" .zone .domain $dnsZoneNegTTL }}
+  {{- $entry := printf "%s:%s:%s" .parentZone .zone $dnsZoneNegTTL }}
   {{- $entries = append $entries $entry }}
 {{- end }}
 {{- join ";" $entries }}

@@ -63,8 +63,8 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
+						Zone:          "cloud.example.com",
+						ParentZone:    "example.com",
 						ClusterNSName: "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
@@ -117,8 +117,8 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
+						Zone:          "cloud.example.com",
+						ParentZone:    "example.com",
 						ClusterNSName: "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
@@ -171,8 +171,8 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
+						Zone:          "cloud.example.com",
+						ParentZone:    "example.com",
 						ClusterNSName: "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
@@ -225,8 +225,8 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
+						Zone:          "cloud.example.com",
+						ParentZone:    "example.com",
 						ClusterNSName: "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
@@ -269,8 +269,8 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:            "cloud.example.com",
-						Zone:              "example.com",
+						Zone:              "cloud.example.com",
+						ParentZone:        "example.com",
 						ClusterNSName:     "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{},
 					},

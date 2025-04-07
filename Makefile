@@ -261,8 +261,8 @@ deploy-k8gb-with-helm:
 		--set $(call get-helm-args,$(CLUSTER_ID)) \
 		--set k8gb.reconcileRequeueSeconds=10 \
 		--set k8gb.dnsZones[0].dnsZoneNegTTL=10 \
-		--set k8gb.dnsZones[0].zone="example.com" \
-		--set k8gb.dnsZones[0].domain="cloud.example.com" \
+		--set k8gb.dnsZones[0].zone="cloud.example.com" \
+		--set k8gb.dnsZones[0].parentZone="example.com" \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
 		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL) \
