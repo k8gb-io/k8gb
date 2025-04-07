@@ -31,8 +31,8 @@ Remember to change the zone-related values to point configuration to your own DN
 ```yaml
 k8gb:
   dnsZones:
-  - zone: "k8gb.io"
-    domain: "cloudflare-test.k8gb.io"
+  - parentZone: "k8gb.io"
+    zone: "cloudflare-test.k8gb.io"
 ```
 
 ### Cloudflare-specific configuration

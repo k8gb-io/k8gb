@@ -97,8 +97,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 				NSRecordTTL:   60,
 				DelegationZones: []*depresolver.DelegationZoneInfo{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
+						Zone:          "cloud.example.com",
+						ParentZone:    "example.com",
 						NegativeTTL:   60,
 						IPs:           []string{"10.0.0.1", "10.0.0.2"},
 						ClusterNSName: "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
@@ -118,8 +118,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 				NSRecordTTL:   60,
 				DelegationZones: []*depresolver.DelegationZoneInfo{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
+						Zone:          "cloud.example.com",
+						ParentZone:    "example.com",
 						NegativeTTL:   60,
 						IPs:           []string{"10.0.0.1", "10.0.0.2"},
 						ClusterNSName: "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
@@ -139,8 +139,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 				NSRecordTTL:   60,
 				DelegationZones: []*depresolver.DelegationZoneInfo{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
+						Zone:          "cloud.example.com",
+						ParentZone:    "example.com",
 						NegativeTTL:   60,
 						IPs:           []string{"10.0.0.1", "10.0.0.2"},
 						ClusterNSName: "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
@@ -149,8 +149,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 						},
 					},
 					{
-						Domain:        "cloud.example.org",
-						Zone:          "example.org",
+						Zone:          "cloud.example.org",
+						ParentZone:    "example.org",
 						NegativeTTL:   60,
 						IPs:           []string{"10.0.0.1", "10.0.0.2"},
 						ClusterNSName: "gslb-ns-eu-k8gb-test-gslb.cloud.example.org",

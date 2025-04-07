@@ -22,8 +22,8 @@ helm:
   values:
     k8gb:
       dnsZones:
-        - zone: cloud.example.com
-          domain: global.fleet.clusterLabels.k8gb-dnsZone
+        - parentZone: cloud.example.com
+          zone: global.fleet.clusterLabels.k8gb-dnsZone
       edgeDNSServers:
         - "1.2.3.4"
         - "5.6.7.8"

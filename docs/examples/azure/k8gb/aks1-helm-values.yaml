@@ -1,8 +1,8 @@
 k8gb:
   # -- dnsZone controlled by gslb
   dnsZones:
-    - domain: "demo.k8gb-kubeconeu2023.com" # -- dnsZone controlled by gslb
-      zone: "k8gb-kubeconeu2023.com" # -- main zone which would contain gslb zone to delegate
+    - zone: "demo.k8gb-kubeconeu2023.com" # -- dnsZone controlled by gslb
+      parentZone: "k8gb-kubeconeu2023.com" # -- main zone which would contain gslb zone to delegate
       dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
   # -- host/ip[:port] format is supported here where port defaults to 53
   edgeDNSServers:

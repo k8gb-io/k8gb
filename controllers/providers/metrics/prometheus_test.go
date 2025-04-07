@@ -51,8 +51,8 @@ var (
 		K8gbNamespace: namespace,
 		DelegationZones: depresolver.DelegationZones{
 			{
-				Domain: "cloud.example.com",
-				Zone:   "example.com",
+				Zone:       "cloud.example.com",
+				ParentZone: "example.com",
 			},
 		},
 	}
