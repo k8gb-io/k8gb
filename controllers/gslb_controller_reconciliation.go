@@ -49,12 +49,13 @@ import (
 // GslbReconciler reconciles a Gslb object
 type GslbReconciler struct {
 	client.Client
-	Scheme      *runtime.Scheme
-	Config      *depresolver.Config
-	DepResolver depresolver.GslbResolver
-	DNSProvider dns.Provider
-	Recorder    record.EventRecorder
-	Tracer      trace.Tracer
+	Scheme             *runtime.Scheme
+	Config             *depresolver.Config
+	DepResolver        depresolver.GslbResolver
+	DNSProvider        dns.Provider
+	Recorder           record.EventRecorder
+	Tracer             trace.Tracer
+	GslbIngressHandler Handler
 }
 
 const (
