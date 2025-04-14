@@ -1,0 +1,6 @@
+dependencies:
+- name: k8gb
+  repository: file://../../../chart/k8gb
+  version: v0.14.0
+digest: sha256:7ba55b867b66ac5373108279063fb6c788175934b6595c52e101e527d65cfaab
+generated: "2024-11-04T10:50:56.482779+01:00"

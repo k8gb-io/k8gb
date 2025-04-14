@@ -1,8 +1,9 @@
-{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
+{{- if or .Values.ns1.enabled .Values.route53.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled .Values.clouddns.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
+  namespace: {{ .Release.Namespace }}
 spec:
   strategy:
     type: Recreate
@@ -105,4 +106,15 @@ spec:
           secret:
             secretName: {{ .Values.azuredns.authSecretName | default "external-dns-secret-azure" }}
       {{- end }}
+      {{- if .Values.clouddns.enabled }}
+        volumeMounts:
+          - name: google-service-account
+            mountPath: /etc/secrets/service-account/
+            readOnly: true
+      volumes:
+        - name: google-service-account
+          secret:
+            secretName: {{ .Values.clouddns.authSecretName }}
+      {{- end }}
+
 {{- end }}

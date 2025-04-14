@@ -32,3 +32,8 @@ changes
 cosign.key
 *.sig
 *.att
+
+# Terraform
+terraform.tfstate*
+.terraform.lock.hcl
+.terraform/

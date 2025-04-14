@@ -1,0 +1,15 @@
+k8gb:
+  k8gb:
+    dnsZone: "<helm set>"
+    edgeDNSZone: "<helm set>"
+    edgeDNSServers:
+    - "<helm set"
+
+  clouddns:
+    enabled: true
+    # add to external-dns: - --google-project=k8gb-440514
+
+  externaldns:
+    extraEnv:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/service-account/credentials.json
