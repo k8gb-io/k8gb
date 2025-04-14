@@ -130,11 +130,6 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | rfc2136.rfc2136auth.tsig.enabled | bool | `true` |  |
 | rfc2136.rfc2136auth.tsig.tsigCreds[0].tsig-secret-alg | string | `"hmac-sha256"` |  |
 | rfc2136.rfc2136auth.tsig.tsigCreds[1].tsig-keyname | string | `"externaldns-key"` |  |
-| route53.assumeRoleArn | string | `nil` | specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null` |
-| route53.enabled | bool | `false` | Enable Route53 provider |
-| route53.hostedZoneID | string | `"ZXXXSSS"` | Route53 ZoneID |
-| route53.irsaRole | string | `"arn:aws:iam::111111:role/external-dns"` | specify IRSA Role in AWS ARN format or disable it by setting to `null` |
-| route53.secret | string | `nil` | alternatively specify the secret name with static credentials for IAM user (make sure this user has limited privileges) this can be useful when IRSA is not present or when using say Azure cluster and Route53 docs: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#create-iam-user-and-attach-the-policy |
 | tracing.deployJaeger | bool | `false` | should the Jaeger be deployed together with the k8gb operator? In case of using another OpenTracing solution, make sure that configmap for OTEL agent has the correct exporters set up (`tracing.otelConfig`). |
 | tracing.enabled | bool | `false` | if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`) |
 | tracing.endpoint | string | `"localhost:4318"` | `host:port` where the spans from the applications (traces) should be sent, sets the `OTEL_EXPORTER_OTLP_ENDPOINT` env var This is not the final destination where all the traces are going. Otel collector has its configuration in the associated configmap (`tracing.otelConfig`). |
