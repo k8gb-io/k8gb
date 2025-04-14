@@ -39,25 +39,27 @@ type Handler interface {
 	Handle(context.Context, client.Object) []reconcile.Request
 }
 
-type GslbHandler struct {
+// IngressHandler
+type IngressHandler struct {
 	client client.Client
 	scheme *runtime.Scheme
 }
 
-func NewGslbHandler(client client.Client, scheme *runtime.Scheme) *GslbHandler {
-	return &GslbHandler{
+func NewIngressHandler(client client.Client, scheme *runtime.Scheme) *IngressHandler {
+	return &IngressHandler{
 		client: client,
 		scheme: scheme,
 	}
 }
 
-func (g *GslbHandler) Handle(_ context.Context, obj client.Object) []reconcile.Request {
+func (g *IngressHandler) Handle(_ context.Context, obj client.Object) []reconcile.Request {
 
 	// following lines filters only Ingresses with strategyAnnotation which are not owned by GSLB
 	// filtering out Ingress without k8gb strategy
-	if !g.isK8gbIngress(obj) {
+	if !g.isK8gbAnnotated(obj) {
 		return nil
 	}
+
 	// filtering out Ingress with Gslb owner reference
 	if g.hasGslbOwnerReference(obj) {
 		return nil
@@ -69,7 +71,7 @@ func (g *GslbHandler) Handle(_ context.Context, obj client.Object) []reconcile.R
 	return nil
 }
 
-func (g *GslbHandler) hasGslbOwnerReference(obj client.Object) bool {
+func (g *IngressHandler) hasGslbOwnerReference(obj client.Object) bool {
 	for _, owner := range obj.GetOwnerReferences() {
 		if owner.Kind == "Gslb" {
 			return true
@@ -78,13 +80,13 @@ func (g *GslbHandler) hasGslbOwnerReference(obj client.Object) bool {
 	return false
 }
 
-func (g *GslbHandler) isK8gbIngress(obj client.Object) bool {
+func (g *IngressHandler) isK8gbAnnotated(obj client.Object) bool {
 	annotations := obj.GetAnnotations()
 	_, found := annotations[strategyAnnotation]
 	return found
 }
 
-func (g *GslbHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) {
+func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) {
 	strategy := ing.GetAnnotations()[strategyAnnotation]
 	objectKey := client.ObjectKey{Namespace: ing.GetNamespace(), Name: ing.GetName()}
 	log.Info().
@@ -136,7 +138,7 @@ func (g *GslbHandler) createGslbFromIngress(ing client.Object, scheme *runtime.S
 	}
 }
 
-func (g *GslbHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, error) {
+func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, error) {
 	gslb := &k8gbv1beta1.Gslb{}
 	objectKey := client.ObjectKey{Namespace: obj.GetNamespace(), Name: obj.GetName()}
 	isNew := false
@@ -188,7 +190,7 @@ func (g *GslbHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, error
 	return gslb, isNew, nil
 }
 
-func (g *GslbHandler) parseStrategySpec(annotations map[string]string, strategy string) (result k8gbv1beta1.Strategy, err error) {
+func (g *IngressHandler) parseStrategySpec(annotations map[string]string, strategy string) (result k8gbv1beta1.Strategy, err error) {
 	toInt := func(k string, v string) (int, error) {
 		intValue, err := strconv.Atoi(v)
 		if err != nil {
