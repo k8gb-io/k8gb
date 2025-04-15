@@ -171,6 +171,9 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 	gslb.ObjectMeta.Name = obj.GetName()
 	gslb.ObjectMeta.Namespace = obj.GetNamespace()
 	if val, found := obj.GetAnnotations()[ingress.ExternalIPsAnnotation]; found {
+		if gslb.ObjectMeta.Annotations == nil {
+			gslb.ObjectMeta.Annotations = make(map[string]string)
+		}
 		gslb.ObjectMeta.Annotations[ingress.ExternalIPsAnnotation] = val
 	}
 	// migration to resourceRef
