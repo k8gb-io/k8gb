@@ -203,6 +203,33 @@ func TestIngressHandler(t *testing.T) {
 				return cl
 			},
 		},
+
+		{
+			name: "Create new Failover Strategy",
+			ing: &netv1.Ingress{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      dummy,
+					Namespace: dummy,
+					Annotations: map[string]string{
+						strategyAnnotation:      "failover",
+						primaryGeoTagAnnotation: "eu",
+					},
+				},
+				Spec: spec,
+			},
+			getClient: func(ctrl *gomock.Controller) *mocks.MockClient {
+				cl := mocks.NewMockClient(ctrl)
+				// ingress to reuse
+				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
+				// existing gslb - doesnt exists
+				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).
+					Return(k8serrors.NewNotFound(schema.GroupResource{Group: "k8gb.absa.oss/v1beta1", Resource: "Gslb"}, dummy)).
+					Times(1)
+				// create gslb
+				cl.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
+				return cl
+			},
+		},
 	}
 
 	for _, test := range tests {
