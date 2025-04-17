@@ -255,7 +255,7 @@ deploy-k8gb-with-helm:
 	@if [ -z "$(CLUSTER_ID)" ]; then echo invalid CLUSTER_ID value && exit 1; fi
 	# create rfc2136 secret
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
-	helm repo add --force-update k8gb https://www.k8gb.io
+	helm repo add --force-update k8gb https://k8gb.rocks
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
 		--set $(call get-helm-args,$(CLUSTER_ID)) \
