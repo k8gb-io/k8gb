@@ -142,7 +142,7 @@ func run() error {
 		Client:             mgr.GetClient(),
 		DepResolver:        resolver,
 		Scheme:             mgr.GetScheme(),
-		GslbIngressHandler: controllers.NewIngressHandler(mgr.GetClient(), mgr.GetScheme()),
+		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
 	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{

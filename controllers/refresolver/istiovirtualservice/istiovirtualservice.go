@@ -78,22 +78,41 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 
 // getGslbVirtualServiceRef resolves an istio virtual service resource referenced by the Gslb spec
 func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]*istio.VirtualService, error) {
-	virtualServiceList := &istio.VirtualServiceList{}
-	opts, err := common.GetListOptions(gslb.Spec.ResourceRef, gslb.Namespace)
+	query, err := common.GetQueryOptions(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
-		return nil, err
-	}
-	err = k8sClient.List(context.TODO(), virtualServiceList, opts)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info().
-				Str("gslb", gslb.Name).
-				Msg("Can't find referenced VirtualService resource")
-		}
 		return nil, err
 	}
 
-	return virtualServiceList.Items, err
+	switch query.Mode {
+	case common.QueryModeGet:
+		var virtualService = &istio.VirtualService{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, virtualService)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced VirtualService resource")
+			}
+			return nil, err
+		}
+		return []*istio.VirtualService{virtualService}, nil
+
+	case common.QueryModeList:
+		virtualServiceList := &istio.VirtualServiceList{}
+		err = k8sClient.List(context.TODO(), virtualServiceList, query.ListOpts)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced VirtualService resource")
+			}
+			return nil, err
+		}
+		return virtualServiceList.Items, nil
+	}
+	return nil, fmt.Errorf("unknown query mode %s", query.Mode)
 }
 
 // getGateway retrieves the istio gateway referenced by the istio virtual service

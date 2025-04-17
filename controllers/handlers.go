@@ -41,14 +41,16 @@ type Handler interface {
 
 // IngressHandler
 type IngressHandler struct {
-	client client.Client
-	scheme *runtime.Scheme
+	client  client.Client
+	scheme  *runtime.Scheme
+	context context.Context
 }
 
-func NewIngressHandler(client client.Client, scheme *runtime.Scheme) *IngressHandler {
+func NewIngressHandler(ctx context.Context, client client.Client, scheme *runtime.Scheme) *IngressHandler {
 	return &IngressHandler{
-		client: client,
-		scheme: scheme,
+		context: ctx,
+		client:  client,
+		scheme:  scheme,
 	}
 }
 
@@ -65,16 +67,23 @@ func (g *IngressHandler) Handle(_ context.Context, obj client.Object) []reconcil
 		return nil
 	}
 
-	// gslb created from ingress will run standalone reconciliation cycle
-	g.createGslbFromIngress(obj, g.scheme)
+	// gslb created from ingress will run standalone reconciliation cycle automatically
+	_ = g.createGslbFromIngress(obj, g.scheme)
 
 	return nil
 }
 
 func (g *IngressHandler) hasGslbOwnerReference(obj client.Object) bool {
-	for _, owner := range obj.GetOwnerReferences() {
-		if owner.Kind == "Gslb" {
-			return true
+	var gslbs k8gbv1beta1.GslbList
+	err := g.client.List(g.context, &gslbs, client.InNamespace(obj.GetNamespace()))
+	if err != nil {
+		return false
+	}
+	for _, gslb := range gslbs.Items {
+		for _, owner := range gslb.OwnerReferences {
+			if owner.Kind == "Ingress" && owner.Name == obj.GetName() && owner.UID == obj.GetUID() {
+				return true
+			}
 		}
 	}
 	return false
@@ -86,7 +95,7 @@ func (g *IngressHandler) isK8gbAnnotated(obj client.Object) bool {
 	return found
 }
 
-func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) {
+func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) *k8gbv1beta1.Gslb {
 	strategy := ing.GetAnnotations()[strategyAnnotation]
 	objectKey := client.ObjectKey{Namespace: ing.GetNamespace(), Name: ing.GetName()}
 	log.Info().
@@ -100,7 +109,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 		log.Info().
 			Str("ingress", objectKey.Name).
 			Msg("Ingress does not exist anymore. Skipping Glsb creation...")
-		return
+		return nil
 	}
 
 	gslb, isNew, err := g.getGslb(ing)
@@ -125,7 +134,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 		if err != nil {
 			log.Err(err).Msg("Glsb creation failed")
 		}
-		return
+		return gslb
 	}
 	// update
 	log.Info().
@@ -136,6 +145,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 	if err != nil {
 		log.Err(err).Msg("Glsb update failed")
 	}
+	return gslb
 }
 
 func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, error) {

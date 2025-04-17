@@ -68,22 +68,41 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 
 // getGslbIngressRef resolves a Kubernetes Ingress resource referenced by the Gslb spec
 func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1.Ingress, error) {
-	ingressList := &netv1.IngressList{}
-	opts, err := common.GetListOptions(gslb.Spec.ResourceRef, gslb.Namespace)
+	query, err := common.GetQueryOptions(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
-		return nil, err
-	}
-	err = k8sClient.List(context.TODO(), ingressList, opts)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info().
-				Str("gslb", gslb.Name).
-				Msg("Can't find referenced Ingress resource")
-		}
 		return nil, err
 	}
 
-	return ingressList.Items, err
+	switch query.Mode {
+	case common.QueryModeGet:
+		var ing = netv1.Ingress{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, &ing)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced Ingress resource")
+			}
+			return nil, err
+		}
+		return []netv1.Ingress{ing}, nil
+
+	case common.QueryModeList:
+		var ingList netv1.IngressList
+		err = k8sClient.List(context.TODO(), &ingList, query.ListOpts)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced Ingress resource")
+			}
+			return nil, err
+		}
+		return ingList.Items, nil
+	}
+	return nil, fmt.Errorf("unknown query mode %s", query.Mode)
 }
 
 // NewEmbeddedResolver creates a reference resolver capable of understanding embedded ingresses.networking.k8s.io resources
