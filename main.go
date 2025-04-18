@@ -82,7 +82,7 @@ func run() error {
 		Interface("config", config).
 		Msg("Resolved config")
 
-	ctrl.SetLogger(logging.NewLogrAdapter(log))
+	// ctrl.SetLogger(logging.NewLogrAdapter(log))
 
 	log.Info().Msg("Reading external IPs from cluster")
 	bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())

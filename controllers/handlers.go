@@ -177,6 +177,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 			Msg("can't parse Gslb strategy")
 		return nil, isNew, err
 	}
+	strategyObj.Weight = gslb.Spec.Strategy.Weight
 
 	gslb.ObjectMeta.Name = obj.GetName()
 	gslb.ObjectMeta.Namespace = obj.GetNamespace()
