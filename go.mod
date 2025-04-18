@@ -8,8 +8,8 @@ require (
 	github.com/go-logr/logr v1.4.2
 	github.com/infobloxopen/infoblox-go-client v1.1.1
 	github.com/infobloxopen/infoblox-go-client/v2 v2.9.0
-	github.com/miekg/dns v1.1.64
-	github.com/prometheus/client_golang v1.21.1
+	github.com/miekg/dns v1.1.65
+	github.com/prometheus/client_golang v1.22.0
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/otel v1.35.0
@@ -18,7 +18,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.35.0
 	go.opentelemetry.io/otel/trace v1.35.0
 	go.uber.org/mock v0.5.0
-	istio.io/client-go v1.25.1
+	istio.io/client-go v1.25.2
 	k8s.io/api v0.32.3
 	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v0.32.3
@@ -50,7 +50,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -87,7 +87,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	istio.io/api v1.25.1-0.20250321204246-eb3f2673759c // indirect
+	istio.io/api v1.25.2-0.20250410212420-84c271001f68 // indirect
 	k8s.io/apiextensions-apiserver v0.32.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241105132330-32ad38e42d3f // indirect
