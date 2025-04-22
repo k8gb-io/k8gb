@@ -14,12 +14,6 @@ spec:
         value: ($test.metadata.name)
       content: |
         
-        kubectl get pods -n k8gb
-        
-        kubectl -n k8gb describe pod -l name=k8gb
-        
-        kubectl -n k8gb logs -l name=k8gb --tail=20
-        
         GEO_TAG=$(kubectl get deployment k8gb -n k8gb -o json | jq -r '.spec.template.spec.containers[] | select(.name=="k8gb") | .env[] | select(.name=="CLUSTER_GEO_TAG") | .value')
         echo "DEBUG: GEO_TAG = $GEO_TAG"
         
