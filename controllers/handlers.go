@@ -173,8 +173,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 			Msg("Gslb doesnt exist, creating...")
 	}
 
-	strategy := obj.GetAnnotations()[strategyAnnotation]
-	strategyObj, err := g.parseStrategySpec(obj.GetAnnotations(), strategy)
+	strategyObj, err := g.parseStrategySpec(obj.GetAnnotations())
 	if err != nil {
 		log.Err(err).
 			Str("gslb", obj.GetName()).
@@ -208,7 +207,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 	return gslb, isNew, nil
 }
 
-func (g *IngressHandler) parseStrategySpec(annotations map[string]string, strategy string) (result k8gbv1beta1.Strategy, err error) {
+func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (result k8gbv1beta1.Strategy, err error) {
 	toInt := func(k string, v string) (int, error) {
 		intValue, err := strconv.Atoi(v)
 		if err != nil {
@@ -217,22 +216,23 @@ func (g *IngressHandler) parseStrategySpec(annotations map[string]string, strate
 		return intValue, nil
 	}
 
-	result = k8gbv1beta1.Strategy{
-		Type: strategy,
+	result = k8gbv1beta1.Strategy{}
+
+	if value, found := annotations[strategyAnnotation]; found {
+		result.Type = value
+	} else {
+		return result, fmt.Errorf("annotation %s not found", strategyAnnotation)
 	}
 
-	for annotationKey, annotationValue := range annotations {
-		switch annotationKey {
-		case dnsTTLSecondsAnnotation:
-			if result.DNSTtlSeconds, err = toInt(annotationKey, annotationValue); err != nil {
-				return result, err
-			}
-		case primaryGeoTagAnnotation:
-			result.PrimaryGeoTag = annotationValue
+	result.DNSTtlSeconds = depresolver.DefaultTTLSeconds
+	if value, found := annotations[dnsTTLSecondsAnnotation]; found {
+		if result.DNSTtlSeconds, err = toInt(dnsTTLSecondsAnnotation, value); err != nil {
+			return result, err
 		}
 	}
+	result.PrimaryGeoTag = annotations[primaryGeoTagAnnotation]
 
-	if strategy == depresolver.FailoverStrategy {
+	if result.Type == depresolver.FailoverStrategy {
 		if len(result.PrimaryGeoTag) == 0 {
 			return result, fmt.Errorf("%s strategy requires annotation %s", depresolver.FailoverStrategy, primaryGeoTagAnnotation)
 		}
