@@ -44,7 +44,7 @@ spec:
 
 k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.
 
-k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](strategy.md) to meet requirements such as region failover for high availability.
+k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](./strategy.md) to meet requirements such as region failover for high availability.
 
 Global load balancing for any Kubernetes Service can now be enabled and managed by any operations or development teams in the same Kubernetes native way as any other custom resource.
 
@@ -63,11 +63,11 @@ Simply run
 make deploy-full-local-setup
 ```
 
-It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](exposing_dns.md)), and install k8gb with test applications and two sample Gslb resources on top.
+It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](./exposing_dns.md)), and install k8gb with test applications and two sample Gslb resources on top.
 
 This setup is adapted for local scenarios and works without external DNS provider dependency.
 
-Consult with [local playground](/docs/local.md) documentation to learn all the details of experimenting with local setup.
+Consult with [local playground](./local.md) documentation to learn all the details of experimenting with local setup.
 
 Optionally, you can run `make deploy-prometheus` and check the metrics on the test clusters (http://localhost:9080, http://localhost:9081).
 
@@ -87,27 +87,27 @@ k8gb commoditizes GSLB for Kubernetes, putting teams in complete control of expo
 
 k8gb requires no specialized software or hardware, relying completely on other OSS/CNCF projects, has no single point of failure, and fits in with any existing Kubernetes deployment workflow (e.g. GitOps, Kustomize, Helm, etc.) or tools.
 
-Please see the extended architecture documentation [here](/docs/index.md)
+Please see the extended architecture documentation [here](./index.md)
 
-Internal k8gb architecture and its components are described [here](/docs/components.md)
+Internal k8gb architecture and its components are described [here](./components.md)
 
 ## Installation and Configuration Tutorials
 
-* [General deployment with Infoblox integration](/docs/deploy_infoblox.md)
-* [AWS based deployment with Route53 integration](/docs/deploy_route53.md)
-* [AWS based deployment with NS1 integration](/docs/deploy_ns1.md)
-* [Using Azure Public DNS provider](/docs/deploy_azuredns.md)
-* [Azure based deployment with Windows DNS integration](/docs/deploy_windowsdns.md)
-* [General deployment with Cloudflare integration](/docs/deploy_cloudflare.md)
-* [Seamless DDNS Integration with Bind9 and other RFC2136-Compatible DNS Environments](/docs/provider_rfc2136.md)
-* [Local playground for testing and development](/docs/local.md)
-* [Local playground with Kuar web app](/docs/local-kuar.md)
-* [Metrics](/docs/metrics.md)
-* [Traces](/docs/traces.md)
-* [Ingress annotations](/docs/ingress_annotations.md)
-* [Integration with Admiralty](/docs/admiralty.md)
-* [Integration with Liqo](/docs/liqo.md)
-* [Integration with Rancher Fleet](/docs/rancher.md)
+* [General deployment with Infoblox integration](./deploy_infoblox.md)
+* [AWS based deployment with Route53 integration](./deploy_route53.md)
+* [AWS based deployment with NS1 integration](./deploy_ns1.md)
+* [Using Azure Public DNS provider](./deploy_azuredns.md)
+* [Azure based deployment with Windows DNS integration](./deploy_windowsdns.md)
+* [General deployment with Cloudflare integration](./deploy_cloudflare.md)
+* [Seamless DDNS Integration with Bind9 and other RFC2136-Compatible DNS Environments](./provider_rfc2136.md)
+* [Local playground for testing and development](./local.md)
+* [Local playground with Kuar web app](./local-kuar.md)
+* [Metrics](./metrics.md)
+* [Traces](./traces.md)
+* [Ingress annotations](./ingress_annotations.md)
+* [Integration with Admiralty](./admiralty.md)
+* [Integration with Liqo](./liqo.md)
+* [Integration with Rancher Fleet](./rancher.md)
 
 ## Adopters
 
@@ -134,9 +134,8 @@ If your Kubernetes version or Ingress controller is not included in the table ab
 
 [//]: # (Table is generated with the help of https://www.tablesgenerator.com/markdown_tables#)
 
-|  | **KubeCon EU 2025** [![](https://img.youtube.com/vi/YMyrcqZ2sbU/0.jpg)](https://www.youtube.com/watch?v=YMyrcqZ2sbU "Project Lightning Talk: What's New in k8gb: CNCF's Multicluster Global Balancer - Bradley Andersen") |
-|---|---|
 | **ChatLoopBackOff - Episode 42 (K8gb)** [![](https://img.youtube.com/vi/tKUNI6E1_7c/0.jpg)](https://www.youtube.com/watch?v=tKUNI6E1_7c "ChatLoopBackOff - Episode 42 (K8gb)") | **KubeCon NA 2024** [![](https://img.youtube.com/vi/vCzl15AIoU0/0.jpg)](https://www.youtube.com/watch?v=vCzl15AIoU0 "k8gb: Global Load Balancing, the Kubernetes Way \| Project Lightning Talk") |
+|---|---|
 | **Open Source Summit EU 2024** [![](https://img.youtube.com/vi/5eLX4kMgo8Q/0.jpg)](https://www.youtube.com/watch?v=5eLX4kMgo8Q "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **KubeCon EU 2024** [![](https://img.youtube.com/vi/MsQ0E7SYNPo/0.jpg)](https://www.youtube.com/watch?v=MsQ0E7SYNPo "K8gb: Reliable Global Service Load Balancing without vendor lock-in \| Project Lightning Talk") |
 | **KubeCon NA 2023** [![](https://img.youtube.com/vi/4qJDkw5YGqM/0.jpg)](https://www.youtube.com/watch?v=4qJDkw5YGqM "KubeCon NA 2023: Take It to the Edge: Creating a Globally Distributed Ingress with Istio & K8gb - Jimmi Dyson, D2iQ") | **KubeCon EU 2023** [![](https://img.youtube.com/vi/U46hlF0Z3xs/0.jpg)](https://www.youtube.com/watch?v=U46hlF0Z3xs "KubeCon EU 2023: Recovering from Regional Failures at Cloud Native Speeds") |
 | **FOSDEM 2022** [![](https://img.youtube.com/vi/1UTWxf7PQis/0.jpg)](https://www.youtube.com/watch?v=1UTWxf7PQis "FOSDEM 2022: Cloud Native Global Load Balancer for Kubernetes") | **KCDBengaluru 2023** [![](https://img.youtube.com/vi/vrDCUIVyc4g/0.jpg)](https://www.youtube.com/watch?v=vrDCUIVyc4g "Kubernetes Community Days Bengaluru 2023: Cloud Native Multi Cluster/Multicloud Global Load Balancer for Kubernetes") |
