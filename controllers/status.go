@@ -70,27 +70,86 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 				return serviceHealth, err
 			}
 
-			endpoints := &corev1.Endpoints{}
-			nn := types.NamespacedName{
-				Name:      svc.Name,
-				Namespace: svc.Namespace,
+			// If service is ExternalName, check if it points to another Kubernetes service
+			if service.Spec.Type == corev1.ServiceTypeExternalName {
+				// ExternalName services reference DNS names, which can be:
+				// 1. Reference to internal K8s service: service.namespace.svc.cluster.local
+				// 2. External DNS record: example.com
+
+				// Check if it's a reference to a Kubernetes service
+				if strings.Contains(service.Spec.ExternalName, ".svc") {
+					// Try to extract service name and namespace from the ExternalName
+					// Format is typically service.namespace.svc.cluster.local
+					parts := strings.Split(service.Spec.ExternalName, ".")
+					if len(parts) < 2 {
+						// Malformed ExternalName - mark as NotFound
+						serviceHealth[server.Host] = k8gbv1beta1.NotFound
+						return serviceHealth, errors.NewBadRequest("Invalid ExternalName format")
+					}
+
+					serviceName := parts[0]
+					serviceNamespace := parts[1]
+
+					// Look up the referenced service
+					referencedService := &corev1.Service{}
+					referencedFinder := client.ObjectKey{
+						Namespace: serviceNamespace,
+						Name:      serviceName,
+					}
+					err := r.Get(context.TODO(), referencedFinder, referencedService)
+					if err != nil {
+						if errors.IsNotFound(err) {
+							serviceHealth[server.Host] = k8gbv1beta1.NotFound
+							return serviceHealth, err
+						}
+						serviceHealth[server.Host] = k8gbv1beta1.NotFound
+						return serviceHealth, err
+					}
+
+					// Found the referenced service, check its endpoints
+					health, err := r.checkServiceEndpoints(referencedService.Name, referencedService.Namespace)
+					if err != nil {
+						serviceHealth[server.Host] = k8gbv1beta1.NotFound
+						return serviceHealth, err
+					}
+					serviceHealth[server.Host] = health
+				} else {
+					// External DNS record - mark as healthy
+					serviceHealth[server.Host] = k8gbv1beta1.Healthy
+				}
+				continue
 			}
-			err = r.Get(context.TODO(), nn, endpoints)
+
+			// For non-ExternalName services, check their endpoints directly
+			health, err := r.checkServiceEndpoints(svc.Name, svc.Namespace)
 			if err != nil {
 				return serviceHealth, err
 			}
-
-			serviceHealth[server.Host] = k8gbv1beta1.Unhealthy
-			if len(endpoints.Subsets) > 0 {
-				for _, subset := range endpoints.Subsets {
-					if len(subset.Addresses) > 0 {
-						serviceHealth[server.Host] = k8gbv1beta1.Healthy
-					}
-				}
-			}
+			serviceHealth[server.Host] = health
 		}
 	}
 	return serviceHealth, nil
+}
+
+func (r *GslbReconciler) checkServiceEndpoints(serviceName, namespace string) (k8gbv1beta1.HealthStatus, error) {
+	endpoints := &corev1.Endpoints{}
+	nn := types.NamespacedName{
+		Name:      serviceName,
+		Namespace: namespace,
+	}
+	err := r.Get(context.TODO(), nn, endpoints)
+	if err != nil {
+		return k8gbv1beta1.NotFound, err
+	}
+
+	if len(endpoints.Subsets) > 0 {
+		for _, subset := range endpoints.Subsets {
+			if len(subset.Addresses) > 0 {
+				return k8gbv1beta1.Healthy, nil
+			}
+		}
+	}
+	return k8gbv1beta1.Unhealthy, nil
 }
 
 func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][]string, error) {
