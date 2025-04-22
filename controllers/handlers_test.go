@@ -22,6 +22,8 @@ import (
 	"context"
 	"testing"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
@@ -100,7 +102,30 @@ func TestIngressHandler(t *testing.T) {
 				},
 				Spec: spec,
 			},
-			getClient: mocks.NewMockClient,
+			getClient: func(ctrl *gomock.Controller) *mocks.MockClient {
+				cl := mocks.NewMockClient(ctrl)
+				// List for existing gslb reference
+				cl.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, list *k8gbv1beta1.GslbList, _ ...client.ListOption) error {
+						list.Items = []k8gbv1beta1.Gslb{
+							{
+								ObjectMeta: metav1.ObjectMeta{
+									Name: dummy,
+									OwnerReferences: []metav1.OwnerReference{
+										{
+											Kind: "Ingress",
+											Name: dummy,
+											UID:  "",
+										},
+									},
+								},
+								Spec: k8gbv1beta1.GslbSpec{},
+							},
+						}
+						return nil
+					}).Times(1)
+				return cl
+			},
 		},
 		{
 			name: "Create new RoundRobin Ingress with ExternalIPsAnnotation already exists (IPs from Ingress)",
@@ -116,6 +141,8 @@ func TestIngressHandler(t *testing.T) {
 			},
 			getClient: func(ctrl *gomock.Controller) *mocks.MockClient {
 				cl := mocks.NewMockClient(ctrl)
+				// List for existing gslb reference
+				cl.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// ingress to reuse
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// existing gslb - doesnt exists
@@ -141,6 +168,8 @@ func TestIngressHandler(t *testing.T) {
 			},
 			getClient: func(ctrl *gomock.Controller) *mocks.MockClient {
 				cl := mocks.NewMockClient(ctrl)
+				// List for existing gslb reference
+				cl.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// ingress to reuse
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// existing gslb - doesnt exists
@@ -167,6 +196,8 @@ func TestIngressHandler(t *testing.T) {
 			},
 			getClient: func(ctrl *gomock.Controller) *mocks.MockClient {
 				cl := mocks.NewMockClient(ctrl)
+				// List for existing gslb reference
+				cl.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// ingress to reuse
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// existing gslb - doesnt exists
@@ -192,6 +223,8 @@ func TestIngressHandler(t *testing.T) {
 			},
 			getClient: func(ctrl *gomock.Controller) *mocks.MockClient {
 				cl := mocks.NewMockClient(ctrl)
+				// List for existing gslb reference
+				cl.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// ingress to reuse
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// existing gslb - doesnt exists
@@ -216,10 +249,10 @@ func TestIngressHandler(t *testing.T) {
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 			utilruntime.Must(netv1.AddToScheme(scheme))
 			utilruntime.Must(k8gbv1beta1.AddToScheme(scheme))
-			handler := NewIngressHandler(client, scheme)
+			handler := NewIngressHandler(context.TODO(), client, scheme)
 
 			// act
-			result := handler.Handle(context.TODO(), test.ing)
+			result := handler.Handle(test.ing)
 
 			// assert
 			assert.Nil(t, result)

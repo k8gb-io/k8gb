@@ -102,7 +102,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 		}
 		return ingList.Items, nil
 	}
-	return nil, fmt.Errorf("unknown query mode %s", query.Mode)
+	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }
 
 // NewEmbeddedResolver creates a reference resolver capable of understanding embedded ingresses.networking.k8s.io resources

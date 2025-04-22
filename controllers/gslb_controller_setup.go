@@ -76,8 +76,8 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		})
 
 	ingressMapHandler := handler.EnqueueRequestsFromMapFunc(
-		func(ctx context.Context, a client.Object) []reconcile.Request {
-			return r.GslbIngressHandler.Handle(ctx, a)
+		func(_ context.Context, a client.Object) []reconcile.Request {
+			return r.GslbIngressHandler.Handle(a)
 		})
 
 	return ctrl.NewControllerManagedBy(mgr).

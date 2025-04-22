@@ -112,7 +112,7 @@ func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (
 		}
 		return virtualServiceList.Items, nil
 	}
-	return nil, fmt.Errorf("unknown query mode %s", query.Mode)
+	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }
 
 // getGateway retrieves the istio gateway referenced by the istio virtual service
