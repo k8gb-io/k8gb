@@ -217,7 +217,13 @@ func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (resul
 	}
 
 	result = k8gbv1beta1.Strategy{}
-	result.Type = annotations[strategyAnnotation]
+
+	if value, found := annotations[strategyAnnotation]; found {
+		result.Type = value
+	} else {
+		return result, fmt.Errorf("annotation %s not found", strategyAnnotation)
+	}
+
 	result.DNSTtlSeconds = depresolver.DefaultTTLSeconds
 	if value, found := annotations[dnsTTLSecondsAnnotation]; found {
 		if result.DNSTtlSeconds, err = toInt(dnsTTLSecondsAnnotation, value); err != nil {
