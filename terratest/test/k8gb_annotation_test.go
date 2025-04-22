@@ -63,12 +63,16 @@ func TestAnnotations(t *testing.T) {
 			expectedGslb:    map[string]string{},
 		},
 		{
-			name:            "Create From GSLB - patch non k8gb annotation",
-			host:            "test-gslb-annotation.cloud.example.com",
-			path:            "../examples/gslb-annotation.yaml",
-			patch:           map[string]string{"example.io/protocol": "tcp"},
-			expectedIngress: map[string]string{"k8gb.io/primary-geotag": "eu", "k8gb.io/strategy": "failover", "example.io/protocol": "tcp"},
-			expectedGslb:    map[string]string{"example.io/origin": "gslb"},
+			name:  "Create From GSLB - patch non k8gb annotation",
+			host:  "test-gslb-annotation.cloud.example.com",
+			path:  "../examples/gslb-annotation.yaml",
+			patch: map[string]string{"example.io/protocol": "tcp"},
+			expectedIngress: map[string]string{
+				"k8gb.io/primary-geotag":  "eu",
+				"k8gb.io/strategy":        "failover",
+				"k8gb.io/dns-ttl-seconds": "5",
+				"example.io/protocol":     "tcp"},
+			expectedGslb: map[string]string{"example.io/origin": "gslb"},
 		},
 	}
 
