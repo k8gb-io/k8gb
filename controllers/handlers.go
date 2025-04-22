@@ -115,8 +115,9 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 	gslb, isNew, err := g.getGslb(ing)
 	if err != nil {
 		log.Err(err).
-			Str("gslb", gslb.Name).
-			Msg("Cannot set build the Gslb object")
+			Str("gslb", ing.GetName()).
+			Msg("Cannot build the Gslb object from ingress")
+		return nil
 	}
 	err = controllerutil.SetControllerReference(ingressToReuse, gslb, scheme)
 	if err != nil {
@@ -124,6 +125,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 			Str("ingress", ingressToReuse.Name).
 			Str("gslb", gslb.Name).
 			Msg("Cannot set the Ingress as the owner of the Gslb")
+		return nil
 	}
 	// create
 	if isNew {
@@ -133,6 +135,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 		err = g.client.Create(context.Background(), gslb)
 		if err != nil {
 			log.Err(err).Msg("Glsb creation failed")
+			return nil
 		}
 		return gslb
 	}
@@ -144,6 +147,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 	err = g.client.Update(context.Background(), gslb)
 	if err != nil {
 		log.Err(err).Msg("Glsb update failed")
+		return nil
 	}
 	return gslb
 }
