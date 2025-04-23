@@ -29,7 +29,7 @@ spec:
           ports:
           - containerPort: {{ include "k8gb.metrics_port" . }}
             name: metrics
-          image: {{ .Values.k8gb.imageRepo }}:{{ .Values.k8gb.imageTag | default .Chart.AppVersion }}
+          image: {{ printf "%s:%s" .Values.k8gb.imageRepo (or .Values.k8gb.imageTag .Chart.AppVersion) | quote }}
           imagePullPolicy: IfNotPresent
           {{- if .Values.k8gb.securityContext }}
           securityContext:

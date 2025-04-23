@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8gb
+  namespace: bks-cloud-inspector
+  labels:
+    helm.sh/chart: k8gb-v0.14.0
+    app.kubernetes.io/name: k8gb
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.14.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: k8gb
+  template:
+    metadata:
+      labels:
+        name: k8gb
+      annotations:
+        kubectl.kubernetes.io/default-container: k8gb
+    spec:
+      serviceAccountName: k8gb
+      containers:
+        - name: k8gb
+          ports:
+          - containerPort: 8080
+            name: metrics
+          image: docker.io/absaoss/k8gb:v0.14.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OPERATOR_NAME
+              value: "k8gb"
+            - name: COREDNS_SERVICE_TYPE
+              value: "ClusterIP"
+            - name: CLUSTER_GEO_TAG
+              value: "eu"
+            - name: EXT_GSLB_CLUSTERS_GEO_TAGS
+              value: "us"
+            - name: EDGE_DNS_SERVERS
+              value: 1.1.1.1
+            - name: DNS_ZONES
+              value: example.com:cloud.example.com:30
+            - name: RECONCILE_REQUEUE_SECONDS
+              value: "30"
+            - name: NS_RECORD_TTL
+              value: "30"
+            - name: LOG_FORMAT
+              value: "simple"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: NO_COLOR
+              value: "true"
+            - name: METRICS_ADDRESS
+              value: 0.0.0.0:8080
