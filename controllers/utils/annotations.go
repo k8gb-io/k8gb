@@ -43,7 +43,7 @@ func SetCommonGslbLabels(ingress *netv1.Ingress) {
 	if ingress.Labels == nil {
 		ingress.Labels = make(map[string]string)
 	}
-	ingress.Labels["app.kubernetes.io/managed-by"] = "gslb"
+	ingress.Labels["app.k8gb.io/managed-by"] = "gslb"
 }
 
 // EqualPredefinedAnnotations checks if there has been a change in controlledAnnotations, it ignores the rest
