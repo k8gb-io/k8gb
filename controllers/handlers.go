@@ -54,36 +54,29 @@ func NewIngressHandler(ctx context.Context, client client.Client, scheme *runtim
 	}
 }
 
-func (g *IngressHandler) Handle(obj client.Object) []reconcile.Request {
+func (g *IngressHandler) Handle(ing client.Object) []reconcile.Request {
 
 	// following lines filters only Ingresses with strategyAnnotation which are not owned by GSLB
 	// filtering out Ingress without k8gb strategy
-	if !g.isK8gbAnnotated(obj) {
+	if !g.isK8gbAnnotated(ing) {
 		return nil
 	}
 
-	// filtering out Ingress with Gslb owner reference
-	if g.hasGslbOwnerReference(obj) {
+	// filtering out Ingress which is owned by GSLB
+	if g.isOwnedByGSLB(ing) {
 		return nil
 	}
 
 	// gslb created from ingress will run standalone reconciliation cycle automatically
-	_ = g.createGslbFromIngress(obj, g.scheme)
+	_ = g.createGslbFromIngress(ing, g.scheme)
 
 	return nil
 }
 
-func (g *IngressHandler) hasGslbOwnerReference(obj client.Object) bool {
-	var gslbs k8gbv1beta1.GslbList
-	err := g.client.List(g.context, &gslbs, client.InNamespace(obj.GetNamespace()))
-	if err != nil {
-		return false
-	}
-	for _, gslb := range gslbs.Items {
-		for _, owner := range gslb.OwnerReferences {
-			if owner.Kind == "Ingress" && owner.Name == obj.GetName() && owner.UID == obj.GetUID() {
-				return true
-			}
+func (g *IngressHandler) isOwnedByGSLB(obj client.Object) bool {
+	for _, r := range obj.GetOwnerReferences() {
+		if r.Kind == "Gslb" {
+			return true
 		}
 	}
 	return false
