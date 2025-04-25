@@ -32,21 +32,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, error) {
-	annotations := make(map[string]string)
-	annotations[strategyAnnotation] = gslb.Spec.Strategy.Type
-	if gslb.Spec.Strategy.PrimaryGeoTag != "" {
-		annotations[primaryGeoTagAnnotation] = gslb.Spec.Strategy.PrimaryGeoTag
-	}
+func (r *GslbReconciler) createIngressFromGslb(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, error) {
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        gslb.Name,
-			Namespace:   gslb.Namespace,
-			Annotations: annotations,
+			Name:      gslb.Name,
+			Namespace: gslb.Namespace,
 		},
 		Spec: k8gbv1beta1.ToV1IngressSpec(gslb.Spec.Ingress),
 	}
-
+	utils.SetCommonGslbLabels(ingress)
 	err := controllerutil.SetControllerReference(gslb, ingress, r.Scheme)
 	if err != nil {
 		return nil, err
@@ -54,7 +48,7 @@ func (r *GslbReconciler) gslbIngress(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, er
 	return ingress, err
 }
 
-func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingress) error {
+func (r *GslbReconciler) saveDependentIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingress) error {
 	found := &netv1.Ingress{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      instance.Name,
@@ -88,7 +82,7 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingres
 	// Update existing object with new spec and annotations
 	if !ingressEqual(found, i) {
 		found.Spec = i.Spec
-		found.Annotations = utils.MergeAnnotations(found.Annotations, i.Annotations, k8gbAnnotations...)
+		utils.SetCommonGslbLabels(found)
 		err = r.Update(context.TODO(), found)
 		if errors.IsConflict(err) {
 			log.Info().
@@ -111,8 +105,5 @@ func (r *GslbReconciler) saveIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingres
 }
 
 func ingressEqual(ing1 *netv1.Ingress, ing2 *netv1.Ingress) bool {
-	if !utils.EqualPredefinedAnnotations(ing1.Annotations, ing2.Annotations, k8gbAnnotations...) {
-		return false
-	}
 	return reflect.DeepEqual(ing1.Spec, ing2.Spec)
 }
