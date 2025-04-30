@@ -49,7 +49,7 @@ func NewExternalDNS(ctx context.Context, client client.Client, config depresolve
 
 func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *depresolver.DelegationZoneInfo) error {
 	log.Info().
-		Interface("provider", p).
+		Str("provider", p.String()).
 		Msg("Creating/Updating DNSEndpoint CR")
 	// design break for testability - should be passed via constructor
 	// consider move this into provider
