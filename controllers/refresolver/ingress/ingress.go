@@ -146,7 +146,6 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 			if path.Backend.Service == nil || path.Backend.Service.Name == "" {
 				log.Warn().
 					Str("ingress", rr.ingress.Name).
-					Interface("service", path.Backend.Service).
 					Msg("Malformed service definition")
 				continue
 			}

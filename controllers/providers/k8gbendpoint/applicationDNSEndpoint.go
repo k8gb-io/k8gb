@@ -196,14 +196,14 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		if err != nil {
 			d.logger.Warn().
 				Str("fqdn", cluster+".").
-				Interface("nameservers", d.config.EdgeDNSServers).
+				Str("nameservers", d.config.EdgeDNSServers.String()).
 				Err(err).
 				Msg("can't resolve FQDN using nameservers")
 			return targets
 		}
 		d.logger.Info().
 			Str("nameserver", cluster).
-			Interface("edgeDNSServers", d.config.EdgeDNSServers).
+			Str("edgeDNSServers", d.config.EdgeDNSServers.String()).
 			Interface("glueARecord", glueA.Answer).
 			Msg("Resolved glue A record for NS")
 		glueARecords := d.queryService.ExtractARecords(glueA)
@@ -219,7 +219,7 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		if err != nil {
 			d.logger.Warn().
 				Str("fqdn", lHost+".").
-				Interface("nameservers", nameServersToUse).
+				Str("nameservers", nameServersToUse.String()).
 				Err(err).
 				Msg("can't resolve FQDN using nameservers")
 			return targets

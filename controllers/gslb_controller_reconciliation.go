@@ -101,7 +101,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	log.Debug().
 		Str("gslb", gslb.Name).
 		Str("namespace", gslb.Namespace).
-		Interface("strategy", gslb.Spec.Strategy).
+		Str("strategy", gslb.Spec.Strategy.Type).
 		Msg("Resolved strategy")
 
 	// == Ingress ==========
