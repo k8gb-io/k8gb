@@ -66,7 +66,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, erro
 	const externalDNSTypeCommon = "extdns"
 	ttl := externaldns.TTL(d.config.NSRecordTTL)
 	log.Info().
-		Interface("provider", d.endpointType).
+		Str("provider", string(d.endpointType)).
 		Msg("Creating/Updating DNSEndpoint CR")
 
 	NSRecord := &externaldns.DNSEndpoint{
