@@ -31,6 +31,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -87,7 +88,11 @@ func run() error {
 	log.Info().Msg("Reading external IPs from cluster")
 	bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
 	if err != nil {
-		log.Err(err).Msg("Can't resolve external IPs")
+		if config.CoreDNSServiceType == string(corev1.ServiceTypeLoadBalancer) {
+			log.Err(err).Msg("Can't resolve external IPs")
+			return err
+		}
+		log.Err(err).Msg("Can't resolve ingress IPs")
 		return err
 	}
 	log.Info().Msgf("Found External IP's: %s", bootstrap)
