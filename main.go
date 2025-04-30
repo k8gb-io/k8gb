@@ -22,6 +22,9 @@ import (
 	"context"
 	"os"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+	"k8s.io/apimachinery/pkg/api/errors"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers"
 	boot "github.com/k8gb-io/k8gb/controllers/bootstrap"
@@ -84,8 +87,19 @@ func run() error {
 
 	ctrl.SetLogger(logging.NewLogrAdapter(log))
 
-	log.Info().Msg("Reading external IPs from cluster")
-	bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
+	var waitMinutes int32 = 2
+	log.Info().Msgf("Reading external IPs from cluster (timeout %v minutes)", waitMinutes)
+	var bootstrap *boot.Bootstrap
+	err = utils.Wait(waitMinutes, func() (bool, error) {
+		bootstrap, err = boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	})
 	if err != nil {
 		log.Err(err).Msg("Can't resolve external IPs")
 		return err

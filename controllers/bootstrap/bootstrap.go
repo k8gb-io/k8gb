@@ -23,6 +23,8 @@ import (
 	"fmt"
 
 	netv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
@@ -53,7 +55,10 @@ func GetBootstrapWithClient(ctx context.Context, config *depresolver.Config, cl 
 		return nil, err
 	}
 	if len(bootstrap.IPs) == 0 {
-		return nil, fmt.Errorf("no IP addresses found")
+		if bootstrap.HasIngress() {
+			return nil, errors.NewNotFound(schema.GroupResource{Group: "networking.k8s.io", Resource: "ingresses"}, "ingress")
+		}
+		return nil, errors.NewNotFound(schema.GroupResource{Group: "", Resource: "services"}, "service")
 	}
 	return bootstrap, nil
 }
