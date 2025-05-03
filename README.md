@@ -10,7 +10,6 @@
 [![CodeQL](https://github.com/k8gb-io/k8gb/workflows/CodeQL/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ACodeQL+branch%3Amaster)
 [![Go Report Card](https://goreportcard.com/badge/github.com/k8gb-io/k8gb)](https://goreportcard.com/report/github.com/k8gb-io/k8gb)
 [![Helm Publish](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml/badge.svg)](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml)
-[![KubeLinter](https://github.com/k8gb-io/k8gb/workflows/KubeLinter/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3AKubeLinter+branch%3Amaster)
 [![Docker Pulls](https://img.shields.io/docker/pulls/absaoss/k8gb)](https://hub.docker.com/r/absaoss/k8gb)
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8gb)](https://artifacthub.io/packages/search?repo=k8gb)
 [![doc.crds.dev](https://img.shields.io/badge/doc-crds-purple)](https://doc.crds.dev/github.com/k8gb-io/k8gb)
