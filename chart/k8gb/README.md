@@ -36,6 +36,7 @@ Kubernetes: `>= 1.19.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://coredns.github.io/helm | coredns | 1.39.2 |
+| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.15.2 |
 
 For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
@@ -73,11 +74,24 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | coredns.servers | list | `[{"plugins":[{"name":"prometheus","parameters":"0.0.0.0:9153"}],"port":5353,"servicePort":53}]` | Only meant to open the correct service and container ports, has no other impact on the coredns configuration |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
 | coredns.serviceType | string | `"ClusterIP"` | If the value is LoadBalancer, the IP addresses of the cluster will be loaded from the CoreDNS service; otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true". |
+| extdns.domainFilters[0] | string | `"example.com"` |  |
+| extdns.enabled | bool | `false` |  |
+| extdns.interval | string | `"20s"` |  |
+| extdns.labelFilter | string | `"k8gb.absa.oss/dnstype=extdns"` |  |
+| extdns.logLevel | string | `"debug"` |  |
+| extdns.managedRecordTypes[0] | string | `"A"` |  |
+| extdns.managedRecordTypes[1] | string | `"CNAME"` |  |
+| extdns.managedRecordTypes[2] | string | `"NS"` |  |
+| extdns.policy | string | `"sync"` |  |
+| extdns.rbac.create | bool | `true` |  |
+| extdns.sources[0] | string | `"crd"` |  |
+| extdns.txtOwnerId | string | `"k8gb-<GEOTAG>"` |  |
+| extdns.txtPrefix | string | `"k8gb-<GEOTAG>-"` |  |
 | externaldns.dnsPolicy | string | `"ClusterFirst"` | `.spec.template.spec.dnsPolicy` for ExternalDNS deployment |
 | externaldns.extraEnv | list | `[]` | extra environment variables |
 | externaldns.extraVolumeMounts | list | `[]` | extra volume mounts |
 | externaldns.extraVolumes | list | `[]` | extra volumes |
-| externaldns.image | string | `"ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns-multiarch"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
+| externaldns.image | string | `"registry.k8s.io/external-dns/external-dns:v0.15.1"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
 | externaldns.interval | string | `"20s"` | external-dns sync interval |
 | externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
 | externaldns.securityContext.runAsNonRoot | bool | `true` |  |
@@ -91,7 +105,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
 | istio.enabled | bool | `true` | install istio RBAC |
-| k8gb.clusterGeoTag | string | `"eu"` | used for places where we need to distinguish between different Gslb instances |
+| k8gb.clusterGeoTag | string | `"FIXME"` | used for places where we need to distinguish between different Gslb instances |
 | k8gb.coredns.extraServerBlocks | string | `""` | Extra CoreDNS server blocks |
 | k8gb.coredns.extra_plugins | list | `[]` | Extra CoreDNS plugins to be enabled |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
@@ -99,7 +113,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"domain":"cloud.example.com","zone":"example.com"}]` | array of dns zones controlled by gslb§ |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
-| k8gb.extGslbClustersGeoTags | string | `"us"` | comma-separated list of external gslb geo tags to pair with |
+| k8gb.extGslbClustersGeoTags | string | `"FIXME,FIXME"` | comma-separated list of external gslb geo tags to pair with |
 | k8gb.imageRepo | string | `"docker.io/absaoss/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
