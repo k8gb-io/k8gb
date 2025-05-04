@@ -32,9 +32,9 @@ k8gb:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
   # -- used for places where we need to distinguish between different Gslb instances
-  clusterGeoTag: "eu"
+  clusterGeoTag: "FIXME"
   # -- comma-separated list of external gslb geo tags to pair with
-  extGslbClustersGeoTags: "us"
+  extGslbClustersGeoTags: "FIXME,FIXME"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
   # -- TTL of the NS and respective glue record used by external DNS
@@ -84,7 +84,7 @@ externaldns:
   # functionality. See links below
   # https://github.com/k8gb-io/external-dns
   # https://github.com/k8gb-io/external-dns/pkgs/container/external-dns
-  image: ghcr.io/k8gb-io/external-dns:v0.13.4-azure-ns-multiarch
+  image: registry.k8s.io/external-dns/external-dns:v0.15.1
   # -- external-dns sync interval
   interval: "20s"
   securityContext:
@@ -141,19 +141,24 @@ infoblox:
   # -- Size of connections pool
   httpPoolConnections: 10
 
-route53:
-  # -- Enable Route53 provider
+extdns:
   enabled: false
-  # -- Route53 ZoneID
-  hostedZoneID: ZXXXSSS
-  # -- specify IRSA Role in AWS ARN format or disable it by setting to `null`
-  irsaRole: arn:aws:iam::111111:role/external-dns
-  # -- specify IRSA Role in AWS ARN format for assume role permissions or disable it by setting to `null`
-  assumeRoleArn: null
-  # -- alternatively specify the secret name with static credentials for IAM user (make sure this user has limited privileges)
-  # this can be useful when IRSA is not present or when using say Azure cluster and Route53
-  # docs: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#create-iam-user-and-attach-the-policy
-  secret: null
+  interval: 20s
+  labelFilter: "k8gb.absa.oss/dnstype=extdns"
+  logLevel: debug
+  managedRecordTypes:
+  - A
+  - CNAME
+  - NS
+  policy: sync
+  rbac:
+    create: true
+  sources:
+  - crd
+  domainFilters:
+  - "example.com"
+  txtPrefix: "k8gb-<GEOTAG>-"
+  txtOwnerId: "k8gb-<GEOTAG>"
 
 ns1:
   # -- Enable NS1 provider

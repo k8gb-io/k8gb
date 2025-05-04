@@ -15,6 +15,11 @@
                 "externaldns": {
                     "$ref": "#/definitions/Externaldns"
                 },
+                "extdns": {
+                    "type": "object",
+                    "description": "Values for the external-dns upstream chart. See https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns for all available options",
+                    "additionalProperties": true
+                },
                 "coredns": {
                     "$ref": "#/definitions/Coredns"
                 },

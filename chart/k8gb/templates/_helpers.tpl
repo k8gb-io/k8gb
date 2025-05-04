@@ -66,9 +66,6 @@ Create the name of the service account to use
 {{- if .Values.ns1.enabled -}}
 {{- print "ns1" -}}
 {{- end -}}
-{{- if .Values.route53.enabled }}
-{{- print "aws" -}}
-{{- end -}}
 {{- if .Values.rfc2136.enabled }}
 {{- print "rfc2136" -}}
 {{- end -}}
@@ -81,11 +78,7 @@ Create the name of the service account to use
 {{- end -}}
 
 {{- define "k8gb.extdnsOwnerID" -}}
-{{- if .Values.route53.enabled -}}
-k8gb-{{ .Values.route53.hostedZoneID }}-{{ .Values.k8gb.clusterGeoTag }}
-{{- else -}}
 k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_0")) "_1" }}-{{ .Values.k8gb.clusterGeoTag }}
-{{- end -}}
 {{- end -}}
 
 {{- define "k8gb.edgeDNSServers" -}}
