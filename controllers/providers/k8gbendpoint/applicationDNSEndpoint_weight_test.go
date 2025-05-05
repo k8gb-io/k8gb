@@ -41,7 +41,7 @@ func TestWeight(t *testing.T) {
 	// void metrics
 	metrics := func(*k8gbv1beta1.Gslb, bool, k8gbv1beta1.HealthStatus, []string) {}
 
-	edgeDNSServers := []utils.DNSServer{
+	parentZoneDNSServers := []utils.DNSServer{
 		{Host: "10.0.0.1", Port: 53},
 	}
 	type wrr struct {
@@ -72,7 +72,7 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -126,7 +126,7 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -180,7 +180,7 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -234,7 +234,7 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -275,7 +275,7 @@ func TestWeight(t *testing.T) {
 						ExtClusterNSNames: map[string]string{},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{

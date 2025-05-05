@@ -262,7 +262,6 @@ deploy-k8gb-with-helm:
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-
 	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) -f $(call get-helm-values-file,$(CHART)) \
 		$(call get-helm-args,$(CLUSTER_ID)) \
 		$(call get-next-args,$(CHART),$(CLUSTER_ID)) \

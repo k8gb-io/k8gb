@@ -24,7 +24,7 @@ helm:
       dnsZones:
         - parentZone: cloud.example.com
           zone: global.fleet.clusterLabels.k8gb-dnsZone
-      edgeDNSServers:
+      parentZoneDNSServers:
         - "1.2.3.4"
         - "5.6.7.8"
       clusterGeoTag: global.fleet.clusterLabels.k8gb-clusterGeoTag
