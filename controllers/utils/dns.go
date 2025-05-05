@@ -45,16 +45,16 @@ func (l DNSList) String() string {
 	return strings.Join(aux, ",")
 }
 
-// Dig returns a list of IP addresses for a given FQDN by using the dns servers from edgeDNSServers
-// dns servers are tried one by one from the edgeDNSServers and if there is a non-error response it is returned and the rest is not tried
-func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []string, err error) {
+// Dig returns a list of IP addresses for a given FQDN by using the dns servers from parentZoneDNSServers
+// dns servers are tried one by one from the parentZoneDNSServers and if there is a non-error response it is returned and the rest is not tried
+func Dig(fqdn string, maxRecursion int, parentZoneDNSServers ...DNSServer) (ips []string, err error) {
 	if maxRecursion < 0 {
 		return nil, fmt.Errorf("maximum recursion limit reached")
 	}
 	maxRecursion--
 
-	if len(edgeDNSServers) == 0 {
-		return nil, fmt.Errorf("empty edgeDNSServers, provide at least one")
+	if len(parentZoneDNSServers) == 0 {
+		return nil, fmt.Errorf("empty parentZoneDNSServers, provide at least one")
 	}
 	if len(fqdn) == 0 {
 		return ips, nil
@@ -65,7 +65,7 @@ func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []stri
 	}
 	msg := new(dns.Msg)
 	msg.SetQuestion(fqdn, dns.TypeA)
-	ack, err := Exchange(msg, edgeDNSServers)
+	ack, err := Exchange(msg, parentZoneDNSServers)
 	if err != nil {
 		return nil, fmt.Errorf("dig error: %s", err)
 	}
@@ -99,7 +99,7 @@ func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []stri
 	// Check for non-resolved CNAMEs
 	for _, cname := range cnameRecords {
 		if !aResolved(cname) && !cResolved(cname) {
-			cnameIPs, err := Dig(cname.Target, maxRecursion, edgeDNSServers...)
+			cnameIPs, err := Dig(cname.Target, maxRecursion, parentZoneDNSServers...)
 			if err != nil {
 				return nil, err
 			}
@@ -110,11 +110,11 @@ func Dig(fqdn string, maxRecursion int, edgeDNSServers ...DNSServer) (ips []stri
 	return ips, nil
 }
 
-func Exchange(m *dns.Msg, edgeDNSServers []DNSServer) (msg *dns.Msg, err error) {
-	if len(edgeDNSServers) == 0 {
-		return nil, fmt.Errorf("empty edgeDNSServers, provide at least one")
+func Exchange(m *dns.Msg, parentZoneDNSServers []DNSServer) (msg *dns.Msg, err error) {
+	if len(parentZoneDNSServers) == 0 {
+		return nil, fmt.Errorf("empty parentZoneDNSServers, provide at least one")
 	}
-	for _, ns := range edgeDNSServers {
+	for _, ns := range parentZoneDNSServers {
 		if ns.Host == "" {
 			return nil, fmt.Errorf("empty edgeDNSServer.Host in the list")
 		}

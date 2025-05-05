@@ -277,18 +277,6 @@
                         "$ref": "#/definitions/k8gbDnsZone"
                     }
                 },
-                "dnsZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
-                },
-                "dnsZoneNegTTL": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "edgeDNSZone": {
-                    "format": "idn-hostname",
-                    "minLength": 1
-                },
                 "edgeDNSServers": {
                     "type": "array",
                     "items": {
@@ -345,24 +333,11 @@
                     "type": "object"
                 }
             },
-            "oneOf": [
-                {
-                    "required": [
-                        "clusterGeoTag",
-                        "extGslbClustersGeoTags",
-                        "edgeDNSServers",
-                        "dnsZone",
-                        "edgeDNSZone"
-                    ]
-                },
-                {
-                    "required": [
-                        "clusterGeoTag",
-                        "extGslbClustersGeoTags",
-                        "edgeDNSServers",
-                        "dnsZones"
-                    ]
-                }
+            "required": [
+                "clusterGeoTag",
+                "extGslbClustersGeoTags",
+                "edgeDNSServers",
+                "dnsZones"
             ],
             "title": "k8gb"
         },
@@ -451,7 +426,7 @@
                     "type": "string",
                     "format": "idn-hostname"
                 },
-                "domain": {
+                "parentZone": {
                     "type": "string",
                     "format": "idn-hostname"
                 },
@@ -463,7 +438,7 @@
             },
             "required": [
                 "zone",
-                "domain"
+                "parentZone"
             ]
         },
         "Ns1": {

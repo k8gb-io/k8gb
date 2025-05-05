@@ -128,11 +128,11 @@ type Config struct {
 	extClustersGeoTags []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS, default=[]"`
 	// EdgeDNSType is READONLY and is set automatically by configuration
 	EdgeDNSType EdgeDNSType
-	// EdgeDNSServers
-	EdgeDNSServers utils.DNSList
-	// to avoid breaking changes is used as fallback server for EdgeDNSServers
+	// ParentZoneDNSServers
+	ParentZoneDNSServers utils.DNSList
+	// to avoid breaking changes is used as fallback server for ParentZoneDNSServers
 	fallbackEdgeDNSServerName string `env:"EDGE_DNS_SERVER"`
-	// to avoid breaking changes is used as fallback server port for EdgeDNSServers
+	// to avoid breaking changes is used as fallback server port for ParentZoneDNSServers
 	fallbackEdgeDNSServerPort int `env:"EDGE_DNS_SERVER_PORT, default=53"`
 	// DelegationZones
 	DelegationZones DelegationZones

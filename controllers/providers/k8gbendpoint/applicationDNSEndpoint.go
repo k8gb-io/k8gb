@@ -192,18 +192,18 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		d.logger.Info().
 			Str("cluster", cluster).
 			Msg("Adding external Gslb targets from cluster")
-		glueA, err := d.queryService.Query(cluster, d.config.EdgeDNSServers)
+		glueA, err := d.queryService.Query(cluster, d.config.ParentZoneDNSServers)
 		if err != nil {
 			d.logger.Warn().
 				Str("fqdn", cluster+".").
-				Interface("nameservers", d.config.EdgeDNSServers).
+				Interface("nameservers", d.config.ParentZoneDNSServers).
 				Err(err).
 				Msg("can't resolve FQDN using nameservers")
 			return targets
 		}
 		d.logger.Info().
 			Str("nameserver", cluster).
-			Interface("edgeDNSServers", d.config.EdgeDNSServers).
+			Interface("parentZoneDNSServers", d.config.ParentZoneDNSServers).
 			Interface("glueARecord", glueA.Answer).
 			Msg("Resolved glue A record for NS")
 		glueARecords := d.queryService.ExtractARecords(glueA)
@@ -213,7 +213,7 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		} else {
 			hostToUse = cluster
 		}
-		nameServersToUse := getNSCombinations(d.config.EdgeDNSServers, hostToUse)
+		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, hostToUse)
 		lHost := fmt.Sprintf("localtargets-%s", host)
 		a, err := d.queryService.Query(lHost, nameServersToUse)
 		if err != nil {
