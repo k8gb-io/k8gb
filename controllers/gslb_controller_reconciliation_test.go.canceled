@@ -94,7 +94,7 @@ var predefinedConfig = depresolver.Config{
 	ReconcileRequeueSeconds: 30,
 	NSRecordTTL:             30,
 	ClusterGeoTag:           "us",
-	EdgeDNSServers: []utils.DNSServer{
+	ParentZoneDNSServers: []utils.DNSServer{
 		{
 			Host: "127.0.0.1",
 			Port: 7753,
@@ -137,7 +137,7 @@ const (
 	defaultEdgeDNS1              = "1.1.1.1"
 )
 
-var defaultEdgeDNSServers = []utils.DNSServer{
+var defaultParentZoneDNSServers = []utils.DNSServer{
 	{
 		Host: defaultEdgeDNS1,
 		Port: 53,
@@ -699,7 +699,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategy(t *testing.T) {
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServers = []utils.DNSServer{
+	customConfig.ParentZoneDNSServers = []utils.DNSServer{
 		{
 			Host: "localhost",
 			Port: 7753,
@@ -765,7 +765,7 @@ func TestReturnsExternalRecordsUsingFailoverStrategyAndFallbackDNSserver(t *test
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServers = []utils.DNSServer{
+	customConfig.ParentZoneDNSServers = []utils.DNSServer{
 		{ // this one will be tried frist, but fails
 			Host: "localhost",
 			Port: 7752,
@@ -925,7 +925,7 @@ func TestCreatesDNSNSRecordsForExtDNS(t *testing.T) {
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServers = defaultEdgeDNSServers
+	customConfig.ParentZoneDNSServers = defaultParentZoneDNSServers
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -1010,7 +1010,7 @@ func TestCreatesDNSNSRecordsForLoadBalancer(t *testing.T) {
 	}
 	dnsEndpoint := &externaldns.DNSEndpoint{}
 	customConfig := predefinedConfig
-	customConfig.EdgeDNSServers = defaultEdgeDNSServers
+	customConfig.ParentZoneDNSServers = defaultParentZoneDNSServers
 	customConfig.CoreDNSExposed = true
 	coreDNSService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -1073,7 +1073,7 @@ func TestResolvesLoadBalancerHostnameFromIngressStatus(t *testing.T) {
 	// arrange
 	customConfig := predefinedConfig
 	serviceName := defaultPodinfoServiceName
-	customConfig.EdgeDNSServers = defaultEdgeDNSServers
+	customConfig.ParentZoneDNSServers = defaultParentZoneDNSServers
 	want := []*externaldns.Endpoint{
 		{
 			DNSName:    "localtargets-roundrobin.cloud.example.com",

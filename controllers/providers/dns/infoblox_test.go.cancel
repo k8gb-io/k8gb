@@ -43,7 +43,7 @@ var (
 	defaultConfig = depresolver.Config{
 		ReconcileRequeueSeconds: 30,
 		ClusterGeoTag:           "us",
-		EdgeDNSServers: []utils.DNSServer{
+		ParentZoneDNSServers: []utils.DNSServer{
 			{
 				Host: "8.8.8.8",
 				Port: 53,

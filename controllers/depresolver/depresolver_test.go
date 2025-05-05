@@ -60,7 +60,7 @@ var predefinedConfig = Config{
 	ClusterGeoTag:           "us",
 	extClustersGeoTags:      []string{"za", "eu"},
 	EdgeDNSType:             DNSTypeInfoblox,
-	EdgeDNSServers: []utils2.DNSServer{
+	ParentZoneDNSServers: []utils2.DNSServer{
 		{
 			Host: "dns.cloud.example.com",
 			Port: 53,
@@ -279,11 +279,11 @@ func TestResolveConfigWithDeprecatedEdgeDNSServerKey(t *testing.T) {
 	assert.Equal(t, expected, *config)
 }
 
-func TestResolveConfigWithMalformedEdgeDNSServersKey(t *testing.T) {
+func TestResolveConfigWithMalformedParentZoneDNSServersKey(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "dns1;dns2?")
+	_ = os.Setenv(ParentZoneDNSServersKey, "dns1;dns2?")
 	resolver := NewDependencyResolver()
 	// act
 	_, err := resolver.ResolveOperatorConfig()
@@ -342,7 +342,7 @@ func TestResolveConfigWithEmptyEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils2.DNSServer{}
+	expected.ParentZoneDNSServers = []utils2.DNSServer{}
 	// act,assert
 	arrangeVariablesAndAssert(t, expected, assert.Error)
 }
@@ -351,7 +351,7 @@ func TestResolveConfigWithTwoEdgeDnsServers(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils2.DNSServer{
+	expected.ParentZoneDNSServers = []utils2.DNSServer{
 		{
 			Host: "8.8.8.8",
 			Port: 53,
@@ -369,16 +369,16 @@ func TestResolveConfigWithNoEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils2.DNSServer{}
+	expected.ParentZoneDNSServers = []utils2.DNSServer{}
 	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, EdgeDNSServersKey)
+	arrangeVariablesAndAssert(t, expected, assert.Error, ParentZoneDNSServersKey)
 }
 
 func TestResolveConfigWithEmptyIpAddressInEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils2.DNSServer{
+	expected.ParentZoneDNSServers = []utils2.DNSServer{
 		{
 			Host: defaultEdgeDNSServerIP,
 			Port: 53,
@@ -392,7 +392,7 @@ func TestResolveConfigWithHostnameEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils2.DNSServer{
+	expected.ParentZoneDNSServers = []utils2.DNSServer{
 		{
 			Host: "server-nonprod.on.domain.l3.2l.com",
 			Port: 53,
@@ -407,7 +407,7 @@ func TestResolveConfigWithInvalidIpAddressEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	expected := predefinedConfig
-	expected.EdgeDNSServers = []utils2.DNSServer{
+	expected.ParentZoneDNSServers = []utils2.DNSServer{
 		{
 			Host: fmt.Sprintf("%s.", defaultEdgeDNSServerIP),
 			Port: 53,
@@ -421,7 +421,7 @@ func TestResolveConfigWithMultipleEdgeDnsServers1(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:53,  2.2.2.2:42")
+	_ = os.Setenv(ParentZoneDNSServersKey, "1.1.1.1:53,  2.2.2.2:42")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
@@ -429,15 +429,15 @@ func TestResolveConfigWithMultipleEdgeDnsServers1(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Empty(t, depr)
-	assert.Equal(t, 2, len(config.EdgeDNSServers))
-	assert.Equal(t, 42, config.EdgeDNSServers[1].Port)
+	assert.Equal(t, 2, len(config.ParentZoneDNSServers))
+	assert.Equal(t, 42, config.ParentZoneDNSServers[1].Port)
 }
 
 func TestResolveConfigWithMultipleEdgeDnsServers2(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:11, 2.2.2.2:22, 3.3.3.3, somedns:1337")
+	_ = os.Setenv(ParentZoneDNSServersKey, "1.1.1.1:11, 2.2.2.2:22, 3.3.3.3, somedns:1337")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
@@ -445,46 +445,46 @@ func TestResolveConfigWithMultipleEdgeDnsServers2(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Empty(t, depr)
-	assert.Equal(t, 4, len(config.EdgeDNSServers))
-	assert.Equal(t, "1.1.1.1", config.EdgeDNSServers[0].Host)
-	assert.Equal(t, 11, config.EdgeDNSServers[0].Port)
-	assert.Equal(t, 22, config.EdgeDNSServers[1].Port)
-	assert.Equal(t, 53, config.EdgeDNSServers[2].Port)
-	assert.Equal(t, 1337, config.EdgeDNSServers[3].Port)
-	assert.Equal(t, "somedns", config.EdgeDNSServers[3].Host)
+	assert.Equal(t, 4, len(config.ParentZoneDNSServers))
+	assert.Equal(t, "1.1.1.1", config.ParentZoneDNSServers[0].Host)
+	assert.Equal(t, 11, config.ParentZoneDNSServers[0].Port)
+	assert.Equal(t, 22, config.ParentZoneDNSServers[1].Port)
+	assert.Equal(t, 53, config.ParentZoneDNSServers[2].Port)
+	assert.Equal(t, 1337, config.ParentZoneDNSServers[3].Port)
+	assert.Equal(t, "somedns", config.ParentZoneDNSServers[3].Host)
 }
 
 func TestResolveConfigWithNoEdgeDnsServerPort(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1")
+	_ = os.Setenv(ParentZoneDNSServersKey, "1.1.1.1")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, 53, config.EdgeDNSServers[0].Port)
+	assert.Equal(t, 53, config.ParentZoneDNSServers[0].Port)
 }
 
 func TestResolveConfigWithEdgeDnsServerPort(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:42")
+	_ = os.Setenv(ParentZoneDNSServersKey, "1.1.1.1:42")
 	resolver := NewDependencyResolver()
 	// act
 	config, err := resolver.ResolveOperatorConfig()
 	// assert
 	assert.NoError(t, err)
-	assert.Equal(t, 42, config.EdgeDNSServers[0].Port)
+	assert.Equal(t, 42, config.ParentZoneDNSServers[0].Port)
 }
 
 func TestResolveConfigWithInvalidEdgeDnsServerPort1(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:invalid")
+	_ = os.Setenv(ParentZoneDNSServersKey, "1.1.1.1:invalid")
 	resolver := NewDependencyResolver()
 	// act
 	_, err := resolver.ResolveOperatorConfig()
@@ -499,7 +499,7 @@ func TestResolveConfigWithInvalidEdgeDnsServersValue(t *testing.T) {
 		// arrange
 		defer cleanup()
 		configureEnvVar(predefinedConfig)
-		_ = os.Setenv(EdgeDNSServersKey, invalid)
+		_ = os.Setenv(ParentZoneDNSServersKey, invalid)
 		resolver := NewDependencyResolver()
 		// act
 		_, err := resolver.ResolveOperatorConfig()
@@ -514,7 +514,7 @@ func TestResolveConfigWithMultipleEdgeDnsServersLocalhostNotFirst(t *testing.T) 
 		// arrange
 		defer cleanup()
 		configureEnvVar(predefinedConfig)
-		_ = os.Setenv(EdgeDNSServersKey, invalid)
+		_ = os.Setenv(ParentZoneDNSServersKey, invalid)
 		resolver := NewDependencyResolver()
 		// act
 		_, err := resolver.ResolveOperatorConfig()
@@ -528,7 +528,7 @@ func TestResolveConfigWithMultipleEdgeDnsServersMalformed1(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "somehost:,somehost3:123:aaa.com")
+	_ = os.Setenv(ParentZoneDNSServersKey, "somehost:,somehost3:123:aaa.com")
 	resolver := NewDependencyResolver()
 	// act
 	_, err := resolver.ResolveOperatorConfig()
@@ -541,7 +541,7 @@ func TestResolveConfigWithMultipleEdgeDnsServersMalformed2(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1,")
+	_ = os.Setenv(ParentZoneDNSServersKey, "1.1.1.1,")
 	resolver := NewDependencyResolver()
 	// act
 	_, err := resolver.ResolveOperatorConfig()
@@ -554,7 +554,7 @@ func TestResolveConfigWithInvalidHostnameEdgeDnsServer(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "https://server-nonprod.on.domain.l3.2l.com")
+	_ = os.Setenv(ParentZoneDNSServersKey, "https://server-nonprod.on.domain.l3.2l.com")
 	resolver := NewDependencyResolver()
 	// act
 	_, err := resolver.ResolveOperatorConfig()
@@ -567,7 +567,7 @@ func TestResolveConfigWithZeroOrNegativeEdgeDnsServerPort(t *testing.T) {
 	// arrange
 	defer cleanup()
 	configureEnvVar(predefinedConfig)
-	_ = os.Setenv(EdgeDNSServersKey, "1.1.1.1:-53")
+	_ = os.Setenv(ParentZoneDNSServersKey, "1.1.1.1:-53")
 	resolver := NewDependencyResolver()
 	// act
 	_, err := resolver.ResolveOperatorConfig()
@@ -1207,7 +1207,7 @@ func arrangeVariablesAndAssert(t *testing.T, expected Config,
 
 func cleanup() {
 	for _, s := range []string{ReconcileRequeueSecondsKey, NSRecordTTLKey, ClusterGeoTagKey, ExtClustersGeoTagsKey,
-		EdgeDNSServersKey, ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
+		ParentZoneDNSServersKey, ExtDNSEnabledKey, InfobloxGridHostKey, InfobloxVersionKey, InfobloxPortKey, InfobloxUsernameKey,
 		InfobloxPasswordKey, K8gbNamespaceKey, CoreDNSExposedKey, InfobloxHTTPRequestTimeoutKey, CoreDNSServiceTypeKey,
 		InfobloxHTTPPoolConnectionsKey, LogLevelKey, LogFormatKey, LogNoColorKey, MetricsAddressKey, TracingEnabled,
 		TracingSamplingRatio, OtelExporterOtlpEndpoint, DNSZonesKey} {
@@ -1224,7 +1224,7 @@ func configureEnvVar(config Config) {
 	_ = os.Setenv(NSRecordTTLKey, strconv.Itoa(config.NSRecordTTL))
 	_ = os.Setenv(ClusterGeoTagKey, config.ClusterGeoTag)
 	_ = os.Setenv(ExtClustersGeoTagsKey, strings.Join(config.extClustersGeoTags, ","))
-	_ = os.Setenv(EdgeDNSServersKey, config.EdgeDNSServers.String())
+	_ = os.Setenv(ParentZoneDNSServersKey, config.ParentZoneDNSServers.String())
 	_ = os.Setenv(K8gbNamespaceKey, config.K8gbNamespace)
 	_ = os.Setenv(ExtDNSEnabledKey, strconv.FormatBool(config.extDNSEnabled))
 	_ = os.Setenv(CoreDNSExposedKey, strconv.FormatBool(config.CoreDNSExposed))
@@ -1292,10 +1292,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "invalid negTTL",
 			config: &Config{
-				dnsZones:           "example.com:cloud.example.com:30x",
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             "example.com:cloud.example.com:30x",
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 0,
 			assert: func(_ []*DelegationZoneInfo, err error) {
@@ -1305,10 +1305,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "multiple zones",
 			config: &Config{
-				dnsZones:           "example.com:cloud.example.com:30;example.io:cloud.example.io:50",
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             "example.com:cloud.example.com:30;example.io:cloud.example.io:50",
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -1338,10 +1338,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "multiple domains",
 			config: &Config{
-				dnsZones:           "example.com:cloud.example.com:30;example.com:pair.example.com:50",
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             "example.com:cloud.example.com:30;example.com:pair.example.com:50",
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -1371,10 +1371,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "ends with semicolon",
 			config: &Config{
-				dnsZones:           "example.com:cloud.example.com:30;example.io:cloud.example.io:300;",
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             "example.com:cloud.example.com:30;example.io:cloud.example.io:300;",
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -1390,10 +1390,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "trimmed spaces and semicolons",
 			config: &Config{
-				dnsZones:           "example.com: cloud.example.com: 50; example.io:cloud.example.io: 30 ;",
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             "example.com: cloud.example.com: 50; example.io:cloud.example.io: 30 ;",
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -1409,10 +1409,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "check nsNames",
 			config: &Config{
-				dnsZones:           "cloud.example.com: k8gb-test.gslb.cloud.example.com :60;",
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             "cloud.example.com: k8gb-test.gslb.cloud.example.com :60;",
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -1426,10 +1426,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "nsName exceed exceed limit 253 characters",
 			config: &Config{
-				dnsZones:           fmt.Sprintf("cloud.example.com:k8gb-test.%s.gslb.cloud.example.com:60;", str220),
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             fmt.Sprintf("cloud.example.com:k8gb-test.%s.gslb.cloud.example.com:60;", str220),
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(_ []*DelegationZoneInfo, err error) {
@@ -1439,10 +1439,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "nsName label exceed limit 63 characters",
 			config: &Config{
-				dnsZones:           fmt.Sprintf("cloud.example.com: %s.gslb.cloud.example.com:60;", str64),
-				EdgeDNSServers:     []utils2.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:      "us",
-				extClustersGeoTags: []string{"za", "eu"},
+				dnsZones:             fmt.Sprintf("cloud.example.com: %s.gslb.cloud.example.com:60;", str64),
+				ParentZoneDNSServers: []utils2.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:        "us",
+				extClustersGeoTags:   []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(_ []*DelegationZoneInfo, err error) {
