@@ -32,3 +32,20 @@ changes
 cosign.key
 *.sig
 *.att
+
+# Terraform / OpenTofu
+*.tfstate
+*.tfstate.*
+crash.log
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+terraform.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+tofu.tfstate
+tofu.tfstate.*
+.tofu/
+.tofu.lock.hcl
