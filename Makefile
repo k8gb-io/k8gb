@@ -190,7 +190,10 @@ deploy-local-cluster:
 
 	@echo -e "\n$(YELLOW)Create coredns init-ingress $(NC)"
 	kubectl apply -f ./deploy/crds/init-ingress.yaml
-
+	while [[ -z $(kubectl get ingress <ingress-name> -n <namespace> -o jsonpath='{.status.loadBalancer.ingress[0].ip}') ]]; do
+		echo "Waiting for external IP..."
+		sleep 5
+	done
 
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
