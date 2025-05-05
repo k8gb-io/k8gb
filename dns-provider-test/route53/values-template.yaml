@@ -1,29 +1,27 @@
 k8gb:
-  clusterGeoTag: "us"
-  extGslbClustersGeoTags: "eu"
   dnsZones:
     - parentZone: "k8gb.io"
       loadBalancedZone: "cloud.k8gb.io"
       dnsZoneNegTTL: 30
+  edgeDNSServers:
+  - DNS_SERVER_TODO
 
 extdns:
   enabled: true
-  txtPrefix: "k8gb-us-"
-  txtOwnerId: "k8gb-us"
   provider:
     name: aws
+  domainFilters:
+  - k8gb.io
   env:
   - name: AWS_DEFAULT_REGION
-    value: "eu-central-1"
+    value: "us-east-1"
   - name: AWS_SHARED_CREDENTIALS_FILE
     value: .aws/credentials
   extraVolumes:
   - name: aws-credentials
     secret:
-      secretName: credentials
+      secretName: external-dns-secret-aws
   extraVolumeMounts:
   - name: aws-credentials
     mountPath: /.aws
     readOnly: true
-  domainFilters:
-  - k8gb.io

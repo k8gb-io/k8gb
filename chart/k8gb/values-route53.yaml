@@ -1,7 +1,0 @@
-k8gb:
-  clusterGeoTag: "us"
-  extGslbClustersGeoTags: "eu"
-
-route53:
-  enabled: true
-  secret: credentials

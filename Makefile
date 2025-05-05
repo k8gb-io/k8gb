@@ -39,7 +39,7 @@ FULL_LOCAL_SETUP_WITH_APPS ?= true
 GSLB_DOMAIN ?= cloud.example.com
 REPO := absaoss/k8gb
 SHELL := bash
-VALUES_YAML ?= ""
+VALUES_YAML ?= "chart/k8gb/values-local.yaml"
 PODINFO_IMAGE_REPO ?= ghcr.io/stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
@@ -132,11 +132,8 @@ K8GB_LOCAL_VERSION ?= stable
 # Use `K8GB_LOCAL_VERSION=test make deploy-full-local-setup`
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
-	@echo -e "\n$(YELLOW)Creating $$(( $(CLUSTERS_NUMBER) + 1 )) k8s clusters$(NC)"
-	$(MAKE) create-local-cluster CLUSTER_NAME=edge-dns
-	@for c in $(CLUSTER_IDS); do \
-		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
-	done
+	$(MAKE) create-local-clusters
+
 	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
 	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=$(FULL_LOCAL_SETUP_WITH_APPS)
 
@@ -169,6 +166,15 @@ list-running-pods:
 		kubectl get pods -A --context=k3d-$(CLUSTER_NAME)$$c ;\
 	done
 
+.PHONY: create-local-clusters
+create-local-clusters:
+	@echo -e "\n$(YELLOW)Creating $$(( $(CLUSTERS_NUMBER) + 1 )) k8s clusters$(NC)"
+	$(MAKE) create-local-cluster CLUSTER_NAME=edge-dns
+	@for c in $(CLUSTER_IDS); do \
+		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
+	done
+
+.PHONY: create-local-cluster
 create-local-cluster:
 	@echo -e "\n$(YELLOW)Create local cluster $(CYAN)$(CLUSTER_NAME) $(NC)"
 	k3d cluster create -c k3d/$(CLUSTER_NAME).yaml
