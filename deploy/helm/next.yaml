@@ -1,0 +1,8 @@
+k8gb:
+  reconcileRequeueSeconds: 10
+  dnsZoneNegTTL: 10
+  log:
+    format: simple
+    level: debug
+rfc2136:
+  enabled: true

@@ -257,15 +257,10 @@ deploy-k8gb-with-helm:
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) \
-		--set $(call get-helm-args,$(CLUSTER_ID)) \
-		--set k8gb.reconcileRequeueSeconds=10 \
-		--set k8gb.dnsZoneNegTTL=10 \
+	helm -n k8gb upgrade -i k8gb $(CHART) -f $(VALUES_YAML) -f $(call get-helm-values-file,$(CHART)) \
+		$(call get-helm-args,$(CLUSTER_ID)) \
+		$(call get-next-args,$(CHART),$(CLUSTER_ID)) \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
-		--set k8gb.log.format=$(LOG_FORMAT) \
-		--set k8gb.log.level=$(LOG_LEVEL) \
-		--set rfc2136.enabled=true \
-		--set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053 \
 		--wait --timeout=10m0s
 
 .PHONY: deploy-gslb-operator
@@ -547,10 +542,6 @@ $(shell echo $(foreach cl,$(filter-out $1,$(shell seq $(CLUSTERS_NUMBER))),$(cal
 	| sed 's/ /\\,/g')
 endef
 
-define get-helm-args
-k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' --set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$1)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$1)'
-endef
-
 define hit-testapp-host
 	kubectl run -it --rm busybox --restart=Never --image=busybox --command \
 	--overrides "{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"$(shell $(K8GB_COREDNS_IP))\"]},\"dnsPolicy\":\"None\"}}" \
@@ -639,4 +630,18 @@ define uninstall-prometheus
 	$(call stop-scraping,"name=k8gb",$1) ;\
 	$(call stop-scraping,"app=external-dns",$1) ;\
 	$(call stop-scraping,"app.kubernetes.io/name=coredns",$1)
+endef
+
+define get-helm-args
+--set k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' --set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053
+endef
+
+define get-helm-values-file
+$(if $(filter k8gb/k8gb,$(1)),./deploy/helm/stable.yaml,./deploy/helm/next.yaml)
+endef
+
+# values here are only available in the not released (next) version.
+# by releases the content would be moved into get-helm-args
+define get-next-args
+$(if $(filter ./chart/k8gb,$(1)),--set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$2)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$2)')
 endef
