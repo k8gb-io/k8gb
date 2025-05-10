@@ -1,0 +1,14 @@
+apiVersion: v2
+name: k8gb
+description: A Helm chart for Kubernetes Global Balancer
+icon: https://www.k8gb.io/assets/images/icon-192x192.png
+type: application
+version: v0.1.0
+dependencies:
+  - name: k8gb
+    repository: file://../../../chart/k8gb
+    version: v0.14.0
+
+home: https://www.k8gb.io/
+sources:
+  - https://github.com/k8gb-io/k8gb
