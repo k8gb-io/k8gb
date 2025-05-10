@@ -1,0 +1,22 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: ingress-playground-resourceref
+spec:
+  namespace: ingress-playground-resourceref
+  steps:
+    - name: namespace EU
+      description: create namespace on EU cluster
+      cluster: eu
+      use:
+        template: ../../step-templates/namespace.yaml
+    - name: init EU
+      description: setup podinfo application and GSLB on EU cluster
+      cluster: eu
+      use:
+        template: ../../step-templates/init.yaml
+    - name: GSLB resource ref check
+      description: verify, that GSLB has properly set resourceRef and ownerreference
+      cluster: eu
+      use:
+        template: ../../step-templates/assert-dependent-gslb.yaml

@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-playground-resourceref
+  namespace: ingress-playground-resourceref
+  annotations:
+    k8gb.io/strategy: failover
+    k8gb.io/primary-geotag: "eu"
+    k8gb.io/dns-ttl-seconds: "5"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ingress-playground-resourceref.cloud.example.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: frontend-podinfo
+              port:
+                name: http

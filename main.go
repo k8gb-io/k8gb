@@ -143,10 +143,11 @@ func run() error {
 	}
 
 	gslbReconciler := &controllers.GslbReconciler{
-		Config:      config,
-		Client:      mgr.GetClient(),
-		DepResolver: resolver,
-		Scheme:      mgr.GetScheme(),
+		Config:             config,
+		Client:             mgr.GetClient(),
+		DepResolver:        resolver,
+		Scheme:             mgr.GetScheme(),
+		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
 	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{

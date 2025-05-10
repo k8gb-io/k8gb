@@ -1,0 +1,32 @@
+---
+# asserts that both clusters resolve the domain to the correct cluster
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-dependent-gslb
+spec:
+  try:
+    - sleep:
+        duration: 40s # reconcile requeue seconds + coreDNS
+    - assert:
+        resource:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metadata:
+            name: ($test.metadata.name)
+            namespace: ($namespace)
+            ownerReferences:
+              - apiVersion: networking.k8s.io/v1
+                blockOwnerDeletion: true
+                controller: true
+                kind: Ingress
+                name: ($test.metadata.name)
+          spec:
+            resourceRef:
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              name: ($test.metadata.name)
+              namespace: ($namespace)
+        timeout: 15s
+
+
