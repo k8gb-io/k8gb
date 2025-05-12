@@ -188,7 +188,6 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 		ResourceRef: k8gbv1beta1.ResourceRef{
 			ObjectReference: corev1.ObjectReference{
 				Name:       obj.GetName(),
-				Namespace:  obj.GetNamespace(),
 				Kind:       "Ingress",
 				APIVersion: "networking.k8s.io/v1",
 			},
