@@ -9,7 +9,6 @@ spec:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
     name: failover-playground-resourceref
-    namespace: failover-playground-resourceref
   strategy:
     type: failover
     primaryGeoTag: "eu"

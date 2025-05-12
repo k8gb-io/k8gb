@@ -26,7 +26,6 @@ spec:
               apiVersion: networking.k8s.io/v1
               kind: Ingress
               name: ($test.metadata.name)
-              namespace: ($namespace)
         timeout: 15s
 
 
