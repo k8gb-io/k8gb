@@ -22,6 +22,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/geotags"
+
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
@@ -187,7 +189,15 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, err
 
 func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Targets) {
 	targets = NewTargets()
-	for tag, cluster := range d.config.DelegationZones.GetExternalClusterNSNamesByHostname(host) {
+	gt, err := geotags.GeoTag(d.config).GetExternalClusterNSNamesByHostname(host)
+	if err != nil {
+		d.logger.
+			Err(err).
+			Str("host", host).
+			Msg("Failed to get external cluster ns names")
+		return targets
+	}
+	for tag, cluster := range gt {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		d.logger.Info().
 			Str("cluster", cluster).

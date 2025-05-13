@@ -612,7 +612,7 @@ func TestResolveUnsetExtGeoTags(t *testing.T) {
 	expected := predefinedConfig
 	expected.extClustersGeoTags = []string{}
 	// act,assert
-	arrangeVariablesAndAssert(t, expected, assert.Error, ExtClustersGeoTagsKey)
+	arrangeVariablesAndAssert(t, expected, assert.NoError, ExtClustersGeoTagsKey)
 }
 
 func TestResolveInvalidExtGeoTags(t *testing.T) {
@@ -624,21 +624,6 @@ func TestResolveInvalidExtGeoTags(t *testing.T) {
 		// act,assert
 		arrangeVariablesAndAssert(t, expected, assert.Error)
 	}
-}
-
-func TestResolveOnlyGeoTagExistsWithinExtGeoTags(t *testing.T) {
-	// arrange
-	defer cleanup()
-	tag := "us-west1"
-	expected := predefinedConfig
-	expected.ClusterGeoTag = tag
-	expected.extClustersGeoTags = []string{}
-	configureEnvVar(expected)
-	os.Setenv(ExtClustersGeoTagsKey, tag)
-	resolver := NewDependencyResolver()
-	config, err := resolver.ResolveOperatorConfig()
-	assert.Error(t, err)
-	assert.Equal(t, expected, *config)
 }
 
 func TestResolveGeoTagExistsWithinExtGeoTags(t *testing.T) {

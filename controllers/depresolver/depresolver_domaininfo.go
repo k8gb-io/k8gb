@@ -37,6 +37,13 @@ type DelegationZoneInfo struct {
 	IPs               []string
 }
 
+func GetNsName(tag, zone, edge string) string {
+	const prefix = "gslb-ns"
+	d := strings.TrimSuffix(zone, "."+edge)
+	domainX := strings.ReplaceAll(d, ".", "-")
+	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edge)
+}
+
 func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	type info struct {
 		loadBalancedZone string
@@ -45,14 +52,6 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	}
 
 	zones := config.dnsZones
-
-	getNsName := func(tag, zone, parentZone string) string {
-		const prefix = "gslb-ns"
-		d := strings.TrimSuffix(zone, "."+parentZone)
-		domainX := strings.ReplaceAll(d, ".", "-")
-		return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, parentZone)
-	}
-
 	validateRFC1035 := func(zoneInfo *DelegationZoneInfo) error {
 		const dnsNameMax = 253
 		const dnsLabelMax = 63
@@ -104,11 +103,11 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 			LoadBalancedZone: inf.loadBalancedZone,
 			ParentZone:       inf.parentZone,
 			NegativeTTL:      negTTL,
-			ClusterNSName:    getNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
+			ClusterNSName:    GetNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
 			ExtClusterNSNames: func(zone, edge string) map[string]string {
 				m := map[string]string{}
 				for _, tag := range config.extClustersGeoTags {
-					m[tag] = getNsName(tag, zone, edge)
+					m[tag] = GetNsName(tag, zone, edge)
 				}
 				return m
 			}(inf.loadBalancedZone, inf.parentZone),
@@ -155,14 +154,6 @@ func (z *DelegationZoneInfo) GetSortedIPs() []string {
 	})
 
 	return z.IPs
-}
-
-func (d *DelegationZones) GetExternalClusterNSNamesByHostname(host string) map[string]string {
-	z := d.getZone(host)
-	if z != nil {
-		return z.ExtClusterNSNames
-	}
-	return map[string]string{}
 }
 
 func (d *DelegationZones) ContainsZone(host string) bool {

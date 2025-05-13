@@ -34,46 +34,47 @@ import (
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// MockAssistant is a mock of Assistant interface.
-type MockAssistant[T client.Object] struct {
+// MockLoadBalancerStatusAssistant is a mock of LoadBalancerStatusAssistant interface.
+type MockLoadBalancerStatusAssistant[T client.Object] struct {
 	ctrl     *gomock.Controller
-	recorder *MockAssistantMockRecorder[T]
+	recorder *MockLoadBalancerStatusAssistantMockRecorder[T]
 }
 
-// MockAssistantMockRecorder is the mock recorder for MockAssistant.
-type MockAssistantMockRecorder[T client.Object] struct {
-	mock *MockAssistant[T]
+// MockLoadBalancerStatusAssistantMockRecorder is the mock recorder for MockLoadBalancerStatusAssistant.
+type MockLoadBalancerStatusAssistantMockRecorder[T client.Object] struct {
+	mock *MockLoadBalancerStatusAssistant[T]
 }
 
-// NewMockAssistant creates a new mock instance.
-func NewMockAssistant[T client.Object](ctrl *gomock.Controller) *MockAssistant[T] {
-	mock := &MockAssistant[T]{ctrl: ctrl}
-	mock.recorder = &MockAssistantMockRecorder[T]{mock}
+// NewMockLoadBalancerStatusAssistant creates a new mock instance.
+func NewMockLoadBalancerStatusAssistant[T client.Object](ctrl *gomock.Controller) *MockLoadBalancerStatusAssistant[T] {
+	mock := &MockLoadBalancerStatusAssistant[T]{ctrl: ctrl}
+	mock.recorder = &MockLoadBalancerStatusAssistantMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAssistant[T]) EXPECT() *MockAssistantMockRecorder[T] {
+func (m *MockLoadBalancerStatusAssistant[T]) EXPECT() *MockLoadBalancerStatusAssistantMockRecorder[T] {
 	return m.recorder
 }
 
 // GetExposedIPs mocks base method.
-func (m *MockAssistant[T]) GetExposedIPs() ([]string, error) {
+func (m *MockLoadBalancerStatusAssistant[T]) GetExposedIPs() ([]string, *T, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExposedIPs")
 	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(*T)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetExposedIPs indicates an expected call of GetExposedIPs.
-func (mr *MockAssistantMockRecorder[T]) GetExposedIPs() *gomock.Call {
+func (mr *MockLoadBalancerStatusAssistantMockRecorder[T]) GetExposedIPs() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExposedIPs", reflect.TypeOf((*MockAssistant[T])(nil).GetExposedIPs))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExposedIPs", reflect.TypeOf((*MockLoadBalancerStatusAssistant[T])(nil).GetExposedIPs))
 }
 
 // GetResource mocks base method.
-func (m *MockAssistant[T]) GetResource() (*T, error) {
+func (m *MockLoadBalancerStatusAssistant[T]) GetResource() (*T, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetResource")
 	ret0, _ := ret[0].(*T)
@@ -82,7 +83,7 @@ func (m *MockAssistant[T]) GetResource() (*T, error) {
 }
 
 // GetResource indicates an expected call of GetResource.
-func (mr *MockAssistantMockRecorder[T]) GetResource() *gomock.Call {
+func (mr *MockLoadBalancerStatusAssistantMockRecorder[T]) GetResource() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResource", reflect.TypeOf((*MockAssistant[T])(nil).GetResource))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResource", reflect.TypeOf((*MockLoadBalancerStatusAssistant[T])(nil).GetResource))
 }
