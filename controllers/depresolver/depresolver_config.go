@@ -353,3 +353,10 @@ func parseLogOutputFormat(value string) LogFormat {
 	}
 	return NoFormat
 }
+
+func (c *Config) HasExtClusterGeoTags() bool {
+	if len(c.DelegationZones) == 0 {
+		return false
+	}
+	return len(c.DelegationZones[0].ExtClusterNSNames) > 0
+}
