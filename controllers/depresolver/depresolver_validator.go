@@ -159,16 +159,6 @@ func (v *validator) isHigherThan(num int) *validator {
 	return v
 }
 
-func (v *validator) hasItems() *validator {
-	if v.err != nil {
-		return v
-	}
-	if len(v.strArr) == 0 {
-		v.err = fmt.Errorf(`'%s' should contain at least one item`, v.name)
-	}
-	return v
-}
-
 func (v *validator) hasUniqueItems() *validator {
 	if v.err != nil {
 		return v

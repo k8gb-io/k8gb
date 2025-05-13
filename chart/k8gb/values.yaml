@@ -27,6 +27,7 @@ k8gb:
   # -- Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags
   clusterGeoTag: "eu"
   # -- Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances
+  # If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used.
   extGslbClustersGeoTags: "eu,us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
