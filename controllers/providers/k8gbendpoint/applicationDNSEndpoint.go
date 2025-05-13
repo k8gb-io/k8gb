@@ -198,8 +198,8 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 				Str("fqdn", cluster+".").
 				Str("nameservers", d.config.EdgeDNSServers.String()).
 				Err(err).
-				Msg("can't resolve FQDN using nameservers")
-			return targets
+				Msg("can't lookup GlueA record")
+			continue
 		}
 		d.logger.Info().
 			Str("nameserver", cluster).
@@ -222,7 +222,7 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 				Str("nameservers", nameServersToUse.String()).
 				Err(err).
 				Msg("can't resolve FQDN using nameservers")
-			return targets
+			continue
 		}
 		clusterTargets := d.queryService.ExtractARecords(a)
 		if len(clusterTargets) > 0 {
