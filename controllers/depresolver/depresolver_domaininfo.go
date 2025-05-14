@@ -29,7 +29,7 @@ import (
 type DelegationZones []*DelegationZoneInfo
 
 type DelegationZoneInfo struct {
-	Zone              string // cloud.example.com
+	LoadBalancedZone  string // cloud.example.com
 	ParentZone        string // example.com
 	NegativeTTL       int
 	ClusterNSName     string
@@ -39,9 +39,9 @@ type DelegationZoneInfo struct {
 
 func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	type info struct {
-		zone       string
-		parentZone string
-		negTTL     string
+		loadBalancedZone string
+		parentZone       string
+		negTTL           string
 	}
 
 	zones := config.dnsZones
@@ -79,7 +79,12 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 			if len(touple) != 3 {
 				return tuples, fmt.Errorf("invalid format of delegation zones: %s", z)
 			}
-			tuples = append(tuples, info{parentZone: strings.Trim(touple[0], " "), zone: strings.Trim(touple[1], " "), negTTL: strings.Trim(touple[2], " ")})
+			tuples = append(tuples,
+				info{
+					parentZone:       strings.Trim(touple[0], " "),
+					loadBalancedZone: strings.Trim(touple[1], " "),
+					negTTL:           strings.Trim(touple[2], " "),
+				})
 		}
 		return tuples, nil
 	}
@@ -96,17 +101,17 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 			return dzi, fmt.Errorf("invalid value of delegation zones: %s", zones)
 		}
 		zoneInfo := &DelegationZoneInfo{
-			Zone:          inf.zone,
-			ParentZone:    inf.parentZone,
-			NegativeTTL:   negTTL,
-			ClusterNSName: getNsName(config.ClusterGeoTag, inf.zone, inf.parentZone),
+			LoadBalancedZone: inf.loadBalancedZone,
+			ParentZone:       inf.parentZone,
+			NegativeTTL:      negTTL,
+			ClusterNSName:    getNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
 			ExtClusterNSNames: func(zone, edge string) map[string]string {
 				m := map[string]string{}
 				for _, tag := range config.extClustersGeoTags {
 					m[tag] = getNsName(tag, zone, edge)
 				}
 				return m
-			}(inf.zone, inf.parentZone),
+			}(inf.loadBalancedZone, inf.parentZone),
 		}
 		dzi = append(dzi, zoneInfo)
 	}
@@ -132,7 +137,7 @@ func (z *DelegationZoneInfo) GetNSServerList() []string {
 
 // GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
 func (z *DelegationZoneInfo) GetExternalDNSEndpointName() string {
-	var suffix = strings.Trim(strings.ReplaceAll(z.Zone, ".", "-"), " ")
+	var suffix = strings.Trim(strings.ReplaceAll(z.LoadBalancedZone, ".", "-"), " ")
 	return fmt.Sprintf("k8gb-ns-extdns-%s", suffix)
 }
 
@@ -167,14 +172,14 @@ func (d *DelegationZones) ContainsZone(host string) bool {
 func (d *DelegationZones) ListZones() []string {
 	var zones []string
 	for _, z := range *d {
-		zones = append(zones, z.Zone)
+		zones = append(zones, z.LoadBalancedZone)
 	}
 	return zones
 }
 
 func (d *DelegationZones) getZone(host string) *DelegationZoneInfo {
 	for _, z := range *d {
-		if strings.Contains(host, z.Zone) {
+		if strings.Contains(host, z.LoadBalancedZone) {
 			return z
 		}
 	}

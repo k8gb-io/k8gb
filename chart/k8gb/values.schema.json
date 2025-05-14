@@ -422,7 +422,7 @@
         "k8gbDnsZone": {
             "type": "object",
             "properties": {
-                "zone": {
+                "loadBalancedZone": {
                     "type": "string",
                     "format": "idn-hostname"
                 },
@@ -437,7 +437,7 @@
                 }
             },
             "required": [
-                "zone",
+                "loadBalancedZone",
                 "parentZone"
             ]
         },

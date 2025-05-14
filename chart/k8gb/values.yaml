@@ -18,8 +18,8 @@ k8gb:
   #
   # -- array of dns zones controlled by gslb
   dnsZones:
-    - parentZone: "example.com" # -- parent zone which would contain gslb zone to delegate (same meaning as to edgeDNSZone)
-      zone: "cloud.example.com" # -- zone controlled by gslb (same meaning as to dnsZone)
+    - parentZone: "example.com" # -- parent zone which would contain gslb zone to delegate (same meaning as the old edgeDNSZone)
+      loadBalancedZone: "cloud.example.com" # -- zone controlled by gslb (same meaning as the old dnsZone)
       dnsZoneNegTTL: 30  # -- Negative TTL for SOA record# -- host/ip[:port] format is supported here where port defaults to 53
   edgeDNSServers:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication

@@ -1314,10 +1314,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.Zone == "cloud.example.com"
+					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
 				}))
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.io" && info.Zone == "cloud.example.io"
+					return info.ParentZone == "example.io" && info.LoadBalancedZone == "cloud.example.io"
 				}))
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-cloud.example.com" &&
@@ -1347,10 +1347,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.Zone == "cloud.example.com"
+					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
 				}))
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.Zone == "pair.example.com"
+					return info.ParentZone == "example.com" && info.LoadBalancedZone == "pair.example.com"
 				}))
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
 					return info.ClusterNSName == "gslb-ns-us-cloud.example.com" &&
@@ -1380,10 +1380,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.Zone == "cloud.example.com"
+					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
 				}))
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.io" && info.Zone == "cloud.example.io"
+					return info.ParentZone == "example.io" && info.LoadBalancedZone == "cloud.example.io"
 				}))
 			},
 		},
@@ -1399,10 +1399,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
 				assert.NoError(t, err)
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.Zone == "cloud.example.com"
+					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
 				}))
 				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.io" && info.Zone == "cloud.example.io"
+					return info.ParentZone == "example.io" && info.LoadBalancedZone == "cloud.example.io"
 				}))
 			},
 		},

@@ -78,7 +78,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, erro
 		Spec: externaldns.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{
 				{
-					DNSName:    d.info.Zone,
+					DNSName:    d.info.LoadBalancedZone,
 					RecordTTL:  ttl,
 					RecordType: "NS",
 					Targets:    d.info.GetNSServerList(),

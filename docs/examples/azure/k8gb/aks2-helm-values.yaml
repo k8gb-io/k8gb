@@ -1,6 +1,6 @@
 k8gb:
   dnsZones:
-    - zone: "demo.k8gb-kubeconeu2023.com" # -- dnsZone controlled by gslb
+    - loadBalancedZone: "demo.k8gb-kubeconeu2023.com" # -- dnsZone controlled by gslb
       parentZone: "k8gb-kubeconeu2023.com" # -- main zone which would contain gslb zone to delegate
       dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
   # -- host/ip[:port] format is supported here where port defaults to 53

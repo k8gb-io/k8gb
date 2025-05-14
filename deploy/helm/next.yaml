@@ -3,8 +3,8 @@ k8gb:
   dnsZoneNegTTL: 10
   dnsZones:
     - dnsZoneNegTTL: 10
-      zone: example.com
-      domain: cloud.example.com
+      loadBalancedZone: example.com
+      parentZone: cloud.example.com
   log:
     format: simple
     level: debug

@@ -23,7 +23,7 @@ helm:
     k8gb:
       dnsZones:
         - parentZone: cloud.example.com
-          zone: global.fleet.clusterLabels.k8gb-dnsZone
+          loadBalancedZone: global.fleet.clusterLabels.k8gb-dnsZone
       parentZoneDNSServers:
         - "1.2.3.4"
         - "5.6.7.8"

@@ -1,6 +1,6 @@
 k8gb:
   dnsZones:
-    - zone: "test.k8gb.io" # -- dnsZone controlled by gslb
+    - loadBalancedZone: "test.k8gb.io" # -- dnsZone controlled by gslb
       parentZone: "k8gb.io" # -- main zone which would contain gslb zone to delegate
   edgeDNSServer: "169.254.169.253" # use this DNS server as a main resolver to enable cross k8gb DNS based communication
   clusterGeoTag: "us-east-1" # used for places where we need to distinguish between differnet Gslb instances

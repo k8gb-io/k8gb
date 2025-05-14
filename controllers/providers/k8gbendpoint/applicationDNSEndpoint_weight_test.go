@@ -63,9 +63,9 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Zone:          "cloud.example.com",
-						ParentZone:    "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
@@ -117,9 +117,9 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Zone:          "cloud.example.com",
-						ParentZone:    "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
@@ -171,9 +171,9 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Zone:          "cloud.example.com",
-						ParentZone:    "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
@@ -225,9 +225,9 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Zone:          "cloud.example.com",
-						ParentZone:    "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
@@ -269,7 +269,7 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Zone:              "cloud.example.com",
+						LoadBalancedZone:  "cloud.example.com",
 						ParentZone:        "example.com",
 						ClusterNSName:     "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{},

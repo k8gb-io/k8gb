@@ -32,7 +32,7 @@ Remember to change the zone-related values to point configuration to your own DN
 k8gb:
   dnsZones:
   - parentZone: "k8gb.io"
-    zone: "cloudflare-test.k8gb.io"
+    loadBalancedZone: "cloudflare-test.k8gb.io"
 ```
 
 ### Cloudflare-specific configuration

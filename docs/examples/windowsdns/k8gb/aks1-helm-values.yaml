@@ -4,7 +4,7 @@ k8gb:
   deployRbac: true
   # -- dns zone that will be managed by CoreDNS
   dnsZones:
-    - zone: "global.k8gb.local" # -- dnsZone controlled by gslb
+    - loadBalancedZone: "global.k8gb.local" # -- dnsZone controlled by gslb
       parentZone: "k8gb.local" # -- main zone which would contain gslb zone to delegate
       dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
   # -- host/ip[:port] format is supported here where port defaults to 53

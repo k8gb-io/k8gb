@@ -12,9 +12,9 @@ data:
 {{- $dnsZones := split ";" $dnsZonesRaw }}
 {{- range $dnsZones }}
     {{- $parts := split ":" . }}
-    {{- $zone := index $parts "_1" }}
+    {{- $loadBalancedZone := index $parts "_1" }}
     {{- $dnsZoneNegTTL := index $parts "_2" }}
-    {{ $zone }}:5353 {
+    {{ $loadBalancedZone }}:5353 {
         errors
         health
 {{- if $.Values.k8gb.coredns.extra_plugins }}
