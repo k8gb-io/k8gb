@@ -1,10 +1,9 @@
 k8gb:
   reconcileRequeueSeconds: 10
-  dnsZoneNegTTL: 10
   dnsZones:
     - dnsZoneNegTTL: 10
-      loadBalancedZone: example.com
-      parentZone: cloud.example.com
+      loadBalancedZone: cloud.example.com
+      parentZone: example.com
   log:
     format: simple
     level: debug

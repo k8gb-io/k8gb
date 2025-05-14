@@ -12,31 +12,28 @@
 {{- end -}}
 {{- end -}}
 
-# Validates that the zones in k8gb.edgeDNSZone/k8gb.dnsZones match the zones in extdns.domainFilters
+# Validates that the zones in k8gb.dnsZones match the zones in extdns.domainFilters
 {{- define "validateDnsZones" -}}
-{{- $k8gbZones := list -}}
+{{- $parentZones := list -}}
 {{- range .Values.k8gb.dnsZones -}}
-  {{- $k8gbZones = append $k8gbZones .zone -}}
+  {{- $parentZones = append $parentZones .parentZone -}}
 {{- end -}}
-{{- if and (or (not .Values.k8gb.dnsZones) (eq (len .Values.k8gb.dnsZones) 0)) .Values.k8gb.dnsZone .Values.k8gb.edgeDNSZone }}
-  {{- $k8gbZones = append $k8gbZones .Values.k8gb.edgeDNSZone -}}
-{{- end }}
 
 {{- $extdnsZones := .Values.extdns.domainFilters -}}
 
-{{- if ne (len $k8gbZones) (len $extdnsZones) -}}
-  {{- fail (printf "Validation failed: Number of zones in k8gb.edgeDNSZone/k8gb.dnsZones (%d) does not match number of domains in extdns.domainFilters (%d)" (len $k8gbZones) (len $extdnsZones)) -}}
+{{- if ne (len $parentZones) (len $extdnsZones) -}}
+  {{- fail (printf "Validation failed: Number of zones in k8gb.dnsZones (%d) does not match number of domains in extdns.domainFilters (%d)" (len $parentZones) (len $extdnsZones)) -}}
 {{- end -}}
 
-{{- range $k8gbZone := $k8gbZones -}}
-  {{- if not (has $k8gbZone $extdnsZones) -}}
-    {{- fail (printf "Validation failed: Zone '%s' from k8gb.edgeDNSZone/k8gb.dnsZones is not present in extdns.domainFilters" $k8gbZone) -}}
+{{- range $parentZone := $parentZones -}}
+  {{- if not (has $parentZone $extdnsZones) -}}
+    {{- fail (printf "Validation failed: Zone '%s' from k8gb.dnsZones is not present in extdns.domainFilters" $parentZone) -}}
   {{- end -}}
 {{- end -}}
 
 {{- range $extdnsZone := $extdnsZones -}}
-  {{- if not (has $extdnsZone $k8gbZones) -}}
-    {{- fail (printf "Validation failed: Domain '%s' from extdns.domainFilters is not present in k8gb.edgeDNSZone/k8gb.dnsZones" $extdnsZone) -}}
+  {{- if not (has $extdnsZone $parentZones) -}}
+    {{- fail (printf "Validation failed: Domain '%s' from extdns.domainFilters is not present in k8gb.dnsZones" $extdnsZone) -}}
   {{- end -}}
 {{- end -}}
 
