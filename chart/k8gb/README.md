@@ -110,7 +110,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.coredns.extra_plugins | list | `[]` | Extra CoreDNS plugins to be enabled |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
-| k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"domain":"cloud.example.com","zone":"example.com"}]` | array of dns zones controlled by gslb§ |
+| k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"loadBalancedZone":"cloud.example.com","parentZone":"example.com"}]` | array of dns zones controlled by gslb |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
 | k8gb.extGslbClustersGeoTags | string | `"FIXME,FIXME"` | comma-separated list of external gslb geo tags to pair with |
