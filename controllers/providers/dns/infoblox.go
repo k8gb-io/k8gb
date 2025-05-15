@@ -61,7 +61,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 	if err != nil {
 		return err
 	}
-	findZone, err := p.getZoneDelegated(objMgr, zoneInfo.Domain)
+	findZone, err := p.getZoneDelegated(objMgr, zoneInfo.LoadBalancedZone)
 	if err != nil {
 		return err
 	}
@@ -74,12 +74,12 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 
 	if findZone == nil {
 		log.Info().
-			Str("DNSZone", zoneInfo.Domain).
+			Str("DNSZone", zoneInfo.LoadBalancedZone).
 			Msg("Creating delegated zone")
 		log.Debug().
 			Interface("records", delegateTo).
 			Msg("Delegated records")
-		_, err = p.createZoneDelegated(objMgr, zoneInfo.Domain, delegateTo)
+		_, err = p.createZoneDelegated(objMgr, zoneInfo.LoadBalancedZone, delegateTo)
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 				Interface("records", findZone.DelegateTo).
 				Msg("Found delegated zone records")
 			log.Info().
-				Str("DNSZone", zoneInfo.Domain).
+				Str("DNSZone", zoneInfo.LoadBalancedZone).
 				Interface("serverList", currentList).
 				Msg("Updating delegated zone with the server list")
 			_, err = p.updateZoneDelegated(objMgr, findZone.Ref, currentList)
@@ -108,7 +108,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 }
 
 func (p *InfobloxProvider) Finalize(zoneInfo *depresolver.DelegationZoneInfo) error {
-	log.Info().Msgf("Domain %s must deleted by manually in Infoblox", zoneInfo.Domain)
+	log.Info().Msgf("Zone %s must deleted by manually in Infoblox", zoneInfo.LoadBalancedZone)
 	return nil
 }
 

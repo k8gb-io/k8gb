@@ -219,7 +219,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 }
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
-func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, edgeDNSServers utils.DNSList) ([]string, error) {
+func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
 	// fetch the IP addresses of the reverse proxy from an annotation if it exists
 	if ingressIPsFromAnnotation, ok := gslbAnnotations[externalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(ingressIPsFromAnnotation)
@@ -232,7 +232,7 @@ func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string
 			gslbIngressIPs = append(gslbIngressIPs, ip.IP)
 		}
 		if len(ip.Hostname) > 0 {
-			IPs, err := utils.Dig(ip.Hostname, 8, edgeDNSServers...)
+			IPs, err := utils.Dig(ip.Hostname, 8, parentZoneDNSServers...)
 			if err != nil {
 				log.Warn().Err(err).Msg("Dig error")
 				return nil, err

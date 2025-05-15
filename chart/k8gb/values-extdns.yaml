@@ -2,8 +2,8 @@ k8gb:
   clusterGeoTag: "us"
   extGslbClustersGeoTags: "eu"
   dnsZones:
-    - zone: "k8gb.io"
-      domain: "cloud.k8gb.io"
+    - parentZone: "k8gb.io"
+      loadBalancedZone: "cloud.k8gb.io"
       dnsZoneNegTTL: 30
 
 extdns:

@@ -46,11 +46,11 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				NSRecordTTL:   30,
 				DelegationZones: []*depresolver.DelegationZoneInfo{
 					{
-						Zone:          "example.com",
-						Domain:        "cloud.example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
-						IPs:           []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:   30,
+						ParentZone:       "example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+						IPs:              []string{"10.0.0.1", "10.0.0.2"},
+						NegativeTTL:      30,
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 						},
@@ -102,11 +102,11 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				NSRecordTTL:   30,
 				DelegationZones: []*depresolver.DelegationZoneInfo{
 					{
-						Zone:          "example.com",
-						Domain:        "cloud.example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
-						IPs:           []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:   30,
+						ParentZone:       "example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+						IPs:              []string{"10.0.0.1", "10.0.0.2"},
+						NegativeTTL:      30,
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
@@ -147,11 +147,11 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				NSRecordTTL:   30,
 				DelegationZones: []*depresolver.DelegationZoneInfo{
 					{
-						Zone:          "example.com",
-						Domain:        "cloud.example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
-						IPs:           []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:   30,
+						ParentZone:       "example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+						IPs:              []string{"10.0.0.1", "10.0.0.2"},
+						NegativeTTL:      30,
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
@@ -221,11 +221,11 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				NSRecordTTL:   30,
 				DelegationZones: []*depresolver.DelegationZoneInfo{
 					{
-						Zone:          "example.com",
-						Domain:        "cloud.example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
-						IPs:           []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:   30,
+						ParentZone:       "example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+						IPs:              []string{"10.0.0.1", "10.0.0.2"},
+						NegativeTTL:      30,
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",

@@ -41,7 +41,7 @@ func TestWeight(t *testing.T) {
 	// void metrics
 	metrics := func(*k8gbv1beta1.Gslb, bool, k8gbv1beta1.HealthStatus, []string) {}
 
-	edgeDNSServers := []utils.DNSServer{
+	parentZoneDNSServers := []utils.DNSServer{
 		{Host: "10.0.0.1", Port: 53},
 	}
 	type wrr struct {
@@ -63,16 +63,16 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -117,16 +117,16 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -171,16 +171,16 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -225,16 +225,16 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:        "cloud.example.com",
-						Zone:          "example.com",
-						ClusterNSName: "gslb-ns-eu-cloud.example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{
 							"us": "gslb-ns-us-cloud.example.com",
 							"za": "gslb-ns-za-cloud.example.com",
 						},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
@@ -269,13 +269,13 @@ func TestWeight(t *testing.T) {
 				ClusterGeoTag: "eu",
 				DelegationZones: depresolver.DelegationZones{
 					{
-						Domain:            "cloud.example.com",
-						Zone:              "example.com",
+						LoadBalancedZone:  "cloud.example.com",
+						ParentZone:        "example.com",
 						ClusterNSName:     "gslb-ns-eu-cloud.example.com",
 						ExtClusterNSNames: map[string]string{},
 					},
 				},
-				EdgeDNSServers: edgeDNSServers,
+				ParentZoneDNSServers: parentZoneDNSServers,
 			},
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{

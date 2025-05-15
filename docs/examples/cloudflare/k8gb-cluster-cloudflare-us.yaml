@@ -1,7 +1,7 @@
 k8gb:
-  dnsZone: "cloudflare-test.k8gb.io"
-  # -- main zone which would contain gslb zone to delegate
-  edgeDNSZone: "k8gb.io" # main zone which would contain gslb zone to delegate
+  dnsZones:
+    - loadBalancedZone: "cloudflare-test.k8gb.io" # -- dnsZone controlled by gslb
+      parentZone: "k8gb.io" # -- main zone which would contain gslb zone to delegate
   # -- used for places where we need to distinguish between different Gslb instances
   clusterGeoTag: "us"
   # -- comma-separated list of external gslb geo tags to pair with

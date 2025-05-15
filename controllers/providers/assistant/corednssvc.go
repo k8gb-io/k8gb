@@ -83,7 +83,7 @@ func (r *CoreDNSService) GetExposedIPs() ([]string, *corev1.Service, error) {
 	}
 	var ipList []string
 	for _, ingressStatusIP := range coreDNSService.Status.LoadBalancer.Ingress {
-		var confirmedIPs, err = extractIPFromLB(ingressStatusIP, r.config.EdgeDNSServers)
+		var confirmedIPs, err = extractIPFromLB(ingressStatusIP, r.config.ParentZoneDNSServers)
 		if err != nil {
 			return nil, nil, err
 		}

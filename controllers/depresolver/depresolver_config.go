@@ -43,7 +43,7 @@ const (
 	CoreDNSServiceTypeKey      = "COREDNS_SERVICE_TYPE"
 	ExtClustersGeoTagsKey      = "EXT_GSLB_CLUSTERS_GEO_TAGS"
 	ExtDNSEnabledKey           = "EXTDNS_ENABLED"
-	EdgeDNSServersKey          = "EDGE_DNS_SERVERS"
+	ParentZoneDNSServersKey    = "EDGE_DNS_SERVERS"
 	DNSZonesKey                = "DNS_ZONES"
 	InfobloxGridHostKey        = "INFOBLOX_GRID_HOST"
 	InfobloxVersionKey         = "INFOBLOX_WAPI_VERSION"
@@ -95,8 +95,8 @@ func (dr *DependencyResolver) ResolveOperatorConfig() (*Config, error) {
 
 		// calculation
 		fallbackDNS := fmt.Sprintf("%s:%v", dr.config.fallbackEdgeDNSServerName, dr.config.fallbackEdgeDNSServerPort)
-		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(EdgeDNSServersKey, []string{fallbackDNS})
-		dr.config.EdgeDNSServers = parseEdgeDNSServers(edgeDNSServerList)
+		edgeDNSServerList := env.GetEnvAsArrayOfStringsOrFallback(ParentZoneDNSServersKey, []string{fallbackDNS})
+		dr.config.ParentZoneDNSServers = parseParentZoneDNSServers(edgeDNSServerList)
 		dr.config.extClustersGeoTags = excludeGeoTag(dr.config.extClustersGeoTags, dr.config.ClusterGeoTag)
 		dr.config.Log.Level, _ = zerolog.ParseLevel(strings.ToLower(dr.config.Log.level))
 		dr.config.Log.Format = parseLogOutputFormat(strings.ToLower(dr.config.Log.format))
@@ -151,11 +151,11 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 			return err
 		}
 	}
-	err = field(EdgeDNSServersKey, os.Getenv(EdgeDNSServersKey)).isNotEmpty().matchRegexp(hostNamesWithPortsRegex1).err
+	err = field(ParentZoneDNSServersKey, os.Getenv(ParentZoneDNSServersKey)).isNotEmpty().matchRegexp(hostNamesWithPortsRegex1).err
 	if err != nil {
 		return err
 	}
-	err = field(EdgeDNSServersKey, os.Getenv(EdgeDNSServersKey)).isNotEmpty().matchRegexp(hostNamesWithPortsRegex2).err
+	err = field(ParentZoneDNSServersKey, os.Getenv(ParentZoneDNSServersKey)).isNotEmpty().matchRegexp(hostNamesWithPortsRegex2).err
 	if err != nil {
 		return err
 	}
@@ -163,11 +163,11 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(EdgeDNSServersKey, config.EdgeDNSServers).isNotEmpty().matchRegexp(hostNamesWithPortsRegex1).err
+	err = field(ParentZoneDNSServersKey, config.ParentZoneDNSServers).isNotEmpty().matchRegexp(hostNamesWithPortsRegex1).err
 	if err != nil {
 		return err
 	}
-	for _, s := range config.EdgeDNSServers {
+	for _, s := range config.ParentZoneDNSServers {
 		if s.Port < 1 || s.Port > 65535 {
 			return fmt.Errorf("error for port of edge dns server(%v): it must be a positive integer between 1 and 65535", s)
 		}
@@ -205,8 +205,8 @@ func validateLocalhostNotAmongDNSServers(config *Config) error {
 		}
 		return false
 	}
-	if len(config.EdgeDNSServers) > 1 && containsLocalhost(config.EdgeDNSServers) {
-		return fmt.Errorf("invalid %s: the list can't contain 'localhost' or '127.0.0.1' on other than the first position", EdgeDNSServersKey)
+	if len(config.ParentZoneDNSServers) > 1 && containsLocalhost(config.ParentZoneDNSServers) {
+		return fmt.Errorf("invalid %s: the list can't contain 'localhost' or '127.0.0.1' on other than the first position", ParentZoneDNSServersKey)
 	}
 	return nil
 }
@@ -252,11 +252,11 @@ func (dr *DependencyResolver) GetDeprecations() (deprecations []string) {
 
 	var deprecated = map[oldVar]newVar{
 		EdgeDNSServerKey: newVar{
-			Name: EdgeDNSServersKey,
+			Name: ParentZoneDNSServersKey,
 			Msg:  "Pass the hostname or IP address as comma-separated list",
 		},
 		EdgeDNSServerPortKey: newVar{
-			Name: EdgeDNSServersKey,
+			Name: ParentZoneDNSServersKey,
 			Msg: "Port is an optional item in the comma-separated list of dns edge servers, in following form: dns1:53,dns2 (if not provided after the " +
 				"hostname and colon, it defaults to '53')",
 		},
@@ -281,7 +281,7 @@ func parseMetricsAddr(metricsAddr string) (host string, port int, err error) {
 	return
 }
 
-func parseEdgeDNSServers(serverList []string) (r []utils.DNSServer) {
+func parseParentZoneDNSServers(serverList []string) (r []utils.DNSServer) {
 	r = []utils.DNSServer{}
 	var host, portStr string
 	var err error
