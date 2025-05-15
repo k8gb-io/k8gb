@@ -24,10 +24,10 @@ k8gb:
   edgeDNSServers:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
-  # -- used for places where we need to distinguish between different Gslb instances
-  clusterGeoTag: "CHANGEME"
-  # -- comma-separated list of external gslb geo tags to pair with
-  extGslbClustersGeoTags: "CHANGEME,CHANGEME"
+  # -- Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags
+  clusterGeoTag: "eu"
+  # -- Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances
+  extGslbClustersGeoTags: "eu,us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
   # -- TTL of the NS and respective glue record used by external DNS
