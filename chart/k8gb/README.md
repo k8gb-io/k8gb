@@ -113,7 +113,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"loadBalancedZone":"cloud.example.com","parentZone":"example.com"}]` | array of dns zones controlled by gslb |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
-| k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances. |
+| k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances |
 | k8gb.imageRepo | string | `"docker.io/absaoss/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
