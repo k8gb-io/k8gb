@@ -3,13 +3,12 @@ k8gb:
   deployCrds: true
   deployRbac: true
   # -- dns zone that will be managed by CoreDNS
-  dnsZone: "global.k8gb.local"
-  # -- Negative TTL for SOA record
-  dnsZoneNegTTL: 300
-  # -- main zone which would contain gslb zone to delegate
-  edgeDNSZone: "k8gb.local"
+  dnsZones:
+    - loadBalancedZone: "global.k8gb.local" # -- dnsZone controlled by gslb
+      parentZone: "k8gb.local" # -- main zone which would contain gslb zone to delegate
+      dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
   # -- host/ip[:port] format is supported here where port defaults to 53
-  edgeDNSServers:
+  parentZoneDNSServers:
       # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
       - "10.10.0.6"
   # -- used for places where we need to distinguish between different Gslb instances

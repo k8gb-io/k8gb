@@ -30,9 +30,9 @@ Remember to change the zone-related values to point configuration to your own DN
 
 ```yaml
 k8gb:
-  dnsZone: "cloudflare-test.k8gb.io"
-  # -- main zone which would contain gslb zone to delegate
-  edgeDNSZone: "k8gb.io" # main zone which would contain gslb zone to delegate
+  dnsZones:
+  - parentZone: "k8gb.io"
+    loadBalancedZone: "cloudflare-test.k8gb.io"
 ```
 
 ### Cloudflare-specific configuration

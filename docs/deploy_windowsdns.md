@@ -82,7 +82,7 @@ Before deploying K8GB and the demo workload, ensure required configurations on W
         * Ensure that the following properties are updated with your values:
             * dnsZone
             * edgeDNSZone
-            * edgeDNSServers
+            * parentZoneDNSServers
             * host - always use FQDN with GSS-TSIG, not IP address
             * kerberos-username
             * kerberos-password

@@ -21,9 +21,10 @@ helm:
   releaseName: k8gb
   values:
     k8gb:
-      dnsZone: global.fleet.clusterLabels.k8gb-dnsZone
-      edgeDNSZone: "cloud.example.com"
-      edgeDNSServers:
+      dnsZones:
+        - parentZone: cloud.example.com
+          loadBalancedZone: global.fleet.clusterLabels.k8gb-dnsZone
+      parentZoneDNSServers:
         - "1.2.3.4"
         - "5.6.7.8"
       clusterGeoTag: global.fleet.clusterLabels.k8gb-clusterGeoTag
