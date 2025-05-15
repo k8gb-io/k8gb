@@ -76,22 +76,37 @@ func (a *logrSinkAdapter) Error(err error, msg string, keysAndValues ...interfac
 }
 
 func (a *logrSinkAdapter) WithValues(keysAndValues ...interface{}) logr.LogSink {
+	newKV := make(map[string]string)
+	for k, v := range a.keysAndValues {
+		newKV[k] = v
+	}
 	for i := 0; i < len(keysAndValues)/2; i++ {
 		keyIndex := i * 2
 		valIndex := keyIndex + 1
-		key := fmt.Sprintf("%s", keysAndValues[keyIndex])
-		if i*2+1 > len(keysAndValues) {
+		if valIndex >= len(keysAndValues) {
 			continue
 		}
-		value := fmt.Sprintf("%s", keysAndValues[valIndex])
-		a.keysAndValues[key] = value
+		key := fmt.Sprintf("%v", keysAndValues[keyIndex])
+		value := fmt.Sprintf("%v", keysAndValues[valIndex])
+		newKV[key] = value
 	}
-	return a
+	return &logrSinkAdapter{
+		z:             a.z,
+		keysAndValues: newKV,
+		name:          a.name,
+	}
 }
 
 func (a *logrSinkAdapter) WithName(name string) logr.LogSink {
-	a.name = name
-	return a
+	newKV := make(map[string]string)
+	for k, v := range a.keysAndValues {
+		newKV[k] = v
+	}
+	return &logrSinkAdapter{
+		z:             a.z,
+		keysAndValues: newKV,
+		name:          a.name + "/" + name,
+	}
 }
 
 func (a *logrSinkAdapter) valuesAsJSON() (s string) {
