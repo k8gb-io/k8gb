@@ -105,7 +105,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
 | istio.enabled | bool | `true` | install istio RBAC |
-| k8gb.clusterGeoTag | string | `"eu"` | Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags |
+| k8gb.clusterGeoTag | string | `"CHANGEME"` | used for places where we need to distinguish between different Gslb instances |
 | k8gb.coredns.extraServerBlocks | string | `""` | Extra CoreDNS server blocks |
 | k8gb.coredns.extra_plugins | list | `[]` | Extra CoreDNS plugins to be enabled |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
@@ -113,7 +113,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"loadBalancedZone":"cloud.example.com","parentZone":"example.com"}]` | array of dns zones controlled by gslb |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
-| k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances. |
+| k8gb.extGslbClustersGeoTags | string | `"CHANGEME,CHANGEME"` | comma-separated list of external gslb geo tags to pair with |
 | k8gb.imageRepo | string | `"docker.io/absaoss/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
