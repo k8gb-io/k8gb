@@ -140,7 +140,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(ExtClustersGeoTagsKey, config.extClustersGeoTags).hasItems().hasUniqueItems().err
+	err = field(ExtClustersGeoTagsKey, config.extClustersGeoTags).hasUniqueItems().err
 	if err != nil {
 		return err
 	}
