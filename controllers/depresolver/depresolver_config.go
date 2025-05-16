@@ -140,7 +140,7 @@ func (dr *DependencyResolver) validateConfig(config *Config, recognizedDNSTypes 
 	if err != nil {
 		return err
 	}
-	err = field(ExtClustersGeoTagsKey, config.extClustersGeoTags).hasItems().hasUniqueItems().err
+	err = field(ExtClustersGeoTagsKey, config.extClustersGeoTags).hasUniqueItems().err
 	if err != nil {
 		return err
 	}
@@ -352,4 +352,11 @@ func parseLogOutputFormat(value string) LogFormat {
 		return SimpleFormat
 	}
 	return NoFormat
+}
+
+func (c *Config) HasExtClusterGeoTags() bool {
+	if len(c.DelegationZones) == 0 {
+		return false
+	}
+	return len(c.DelegationZones[0].ExtClusterNSNames) > 0
 }
