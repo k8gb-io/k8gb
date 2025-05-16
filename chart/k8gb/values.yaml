@@ -26,7 +26,8 @@ k8gb:
     - "1.1.1.1"
   # -- used for places where we need to distinguish between different Gslb instances
   clusterGeoTag: "CHANGEME"
-  # -- comma-separated list of external gslb geo tags to pair with
+  # -- comma-separated list of external gslb geo tags to pair with.
+  # If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used.
   extGslbClustersGeoTags: "CHANGEME,CHANGEME"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
