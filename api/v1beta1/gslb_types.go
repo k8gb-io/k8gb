@@ -30,13 +30,13 @@ import (
 // +k8s:openapi-gen=true
 type Strategy struct {
 	// Load balancing strategy type:(roundRobin|failover)
-	Type string `json:"type"`
+	Type string `json:"type" validate:"required,oneof=geoip roundRobin failover"`
 	// Weight is defined by map region:weight
 	Weight map[string]int `json:"weight,omitempty"`
 	// Primary Geo Tag. Valid for failover strategy only
 	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
 	// Defines DNS record TTL in seconds
-	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty"`
+	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty" validate:"gte=0"`
 	// Split brain TXT record expiration in seconds. The field is deprecated and not used.
 	SplitBrainThresholdSeconds int `json:"splitBrainThresholdSeconds,omitempty"`
 }

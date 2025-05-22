@@ -22,7 +22,7 @@ import (
 	"strconv"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 )
 
 type InfobloxClient interface {
@@ -31,10 +31,10 @@ type InfobloxClient interface {
 
 type Client struct {
 	objMgr ibclient.IBObjectManager
-	config depresolver.Config
+	config resolver.Config
 }
 
-func NewInfobloxClient(config depresolver.Config) *Client {
+func NewInfobloxClient(config resolver.Config) *Client {
 	return &Client{
 		config: config,
 	}

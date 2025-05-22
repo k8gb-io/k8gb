@@ -27,12 +27,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/k8gb-io/k8gb/controllers/resolver"
+
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/prometheus/client_golang/prometheus"
 	crm "sigs.k8s.io/controller-runtime/pkg/metrics"
 )
@@ -79,7 +80,7 @@ type collectors struct {
 
 type PrometheusMetrics struct {
 	once    sync.Once
-	config  depresolver.Config
+	config  resolver.Config
 	metrics collectors
 }
 
@@ -101,7 +102,7 @@ const (
 var regex = regexp.MustCompile("[A-Z]")
 
 // newPrometheusMetrics creates new prometheus metrics instance
-func newPrometheusMetrics(config depresolver.Config) (metrics *PrometheusMetrics) {
+func newPrometheusMetrics(config resolver.Config) (metrics *PrometheusMetrics) {
 	metrics = new(PrometheusMetrics)
 	metrics.config = config
 	metrics.init()

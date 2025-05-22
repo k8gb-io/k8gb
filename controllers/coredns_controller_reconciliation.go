@@ -22,8 +22,8 @@ import (
 	"context"
 
 	"github.com/k8gb-io/k8gb/controllers/bootstrap"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	"go.opentelemetry.io/otel/trace"
@@ -35,7 +35,7 @@ import (
 
 type CoreDNSReconciler struct {
 	client.Client
-	Config      *depresolver.Config
+	Config      *resolver.Config
 	Recorder    record.EventRecorder
 	Tracer      trace.Tracer
 	Scheme      *runtime.Scheme

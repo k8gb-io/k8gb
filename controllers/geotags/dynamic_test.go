@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,16 +38,16 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		config        *depresolver.Config
+		config        *resolver.Config
 		expectedError bool
 		host          string
 		result        map[string]string
 	}{
 		{
 			name: "hit cloud.example.com",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "us",
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",
@@ -66,9 +66,9 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com with three clusters",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "za",
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",
@@ -88,9 +88,9 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com on multiple DNS servers",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "us",
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",
@@ -115,9 +115,9 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "unsupported host",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "us",
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",

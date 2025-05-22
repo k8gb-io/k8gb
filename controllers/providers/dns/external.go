@@ -23,23 +23,23 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const externalDNSTypeCommon = "extdns"
 
 type ExternalDNSProvider struct {
-	config  depresolver.Config
+	config  resolver.Config
 	client  client.Client
 	context context.Context
 }
 
 var log = logging.Logger()
 
-func NewExternalDNS(ctx context.Context, client client.Client, config depresolver.Config) *ExternalDNSProvider {
+func NewExternalDNS(ctx context.Context, client client.Client, config resolver.Config) *ExternalDNSProvider {
 	return &ExternalDNSProvider{
 		context: ctx,
 		client:  client,
@@ -47,7 +47,7 @@ func NewExternalDNS(ctx context.Context, client client.Client, config depresolve
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *depresolver.DelegationZoneInfo) error {
+func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *resolver.DelegationZoneInfo) error {
 	log.Info().
 		Str("provider", p.String()).
 		Msg("Creating/Updating DNSEndpoint CR")
@@ -65,7 +65,7 @@ func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegat
 	return nil
 }
 
-func (p *ExternalDNSProvider) Finalize(zoneInfo *depresolver.DelegationZoneInfo) error {
+func (p *ExternalDNSProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo) error {
 	log.Info().Msgf("Domain %s will be deleted by removing delegation DNSEndpoint %s", zoneInfo.LoadBalancedZone, zoneInfo.GetExternalDNSEndpointName())
 	return nil
 }

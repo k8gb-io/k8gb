@@ -434,7 +434,7 @@ mocks:
 	mockgen -package=mocks -destination=controllers/mocks/infoblox-connection_mock.go github.com/infobloxopen/infoblox-go-client IBConnector
 	mockgen -package=mocks -destination=controllers/mocks/manager_mock.go sigs.k8s.io/controller-runtime/pkg/manager Manager
 	mockgen -package=mocks -destination=controllers/mocks/client_mock.go sigs.k8s.io/controller-runtime/pkg/client Client
-	mockgen -package=mocks -destination=controllers/mocks/resolver_mock.go -source=controllers/depresolver/resolver.go GslbResolver
+	mockgen -package=mocks -destination=controllers/mocks/resolver_mock.go -source=controllers/resolver/resolver.go GslbResolver
 	mockgen -package=mocks -destination=controllers/mocks/dns_query_service_mock.go -source=controllers/utils/dns_query_service.go DNSQueryService
 	mockgen -package=mocks -destination=controllers/mocks/refresolver_mock.go -source=controllers/refresolver/refresolver.go GslbRefResolver
 	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
@@ -475,7 +475,7 @@ test:
 	$(call generate)
 	$(call crd-manifest)
 	@echo -e "\n$(YELLOW)Running the unit tests$(NC)"
-	go test ./... -coverprofile cover.out
+	env -u LOG_FORMAT -u LOG_LEVEL -u EXT_GSLB_CLUSTERS_GEO_TAGS -u EDGE_DNS_SERVER go test ./... -coverprofile cover.out
 
 .PHONY: test-round-robin
 test-round-robin:
