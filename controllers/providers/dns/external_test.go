@@ -23,7 +23,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/stretchr/testify/assert"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,16 +86,16 @@ func TestCreateZoneDelegation(t *testing.T) {
 	ctx := context.TODO()
 	var tests = []struct {
 		name          string
-		config        depresolver.Config
+		config        resolver.Config
 		expectedError bool
 		client        client.Client
 	}{
 		{
 			name: "existing cloud.example.com",
-			config: depresolver.Config{
+			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   60,
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						LoadBalancedZone: "cloud.example.com",
 						ParentZone:       "example.com",
@@ -113,10 +113,10 @@ func TestCreateZoneDelegation(t *testing.T) {
 		},
 		{
 			name: "new cloud.example.com",
-			config: depresolver.Config{
+			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   60,
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						LoadBalancedZone: "cloud.example.com",
 						ParentZone:       "example.com",
@@ -134,10 +134,10 @@ func TestCreateZoneDelegation(t *testing.T) {
 		},
 		{
 			name: "new cloud.example.com, cloud.example.org",
-			config: depresolver.Config{
+			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   60,
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						LoadBalancedZone: "cloud.example.com",
 						ParentZone:       "example.com",

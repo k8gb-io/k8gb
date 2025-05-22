@@ -36,7 +36,6 @@ linters:
             - k8s.io/api
             - sigs.k8s.io/controller-runtime
             - sigs.k8s.io/external-dns
-            - github.com/AbsaOSS
             - github.com/ghodss/yaml
             - github.com/go-logr
             - github.com/golang/mock/
@@ -48,6 +47,8 @@ linters:
             - github.com/stretchr/testify
             - go.opentelemetry.io/otel
             - go.uber.org/mock/gomock
+            - github.com/alecthomas/kong
+            - github.com/go-playground/validator/v10
     lll:
       line-length: 152
   exclusions:

@@ -22,8 +22,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/k8gb-io/k8gb/controllers/resolver"
+
 	"github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +49,7 @@ func TestReconciliation(t *testing.T) {
 		reqNamespace = "default"
 	)
 	skipTest := errors.New("this indicates that test successfully passed but skipping reconciliation")
-	config := &depresolver.Config{
+	config := &resolver.Config{
 		ReconcileRequeueSeconds: 0,
 	}
 	var tests = []struct {
@@ -104,10 +105,10 @@ func TestReconciliation(t *testing.T) {
 					}).Times(1)
 
 				reconciler := &GslbReconciler{
-					Config:      config,
-					Tracer:      tracer,
-					Client:      cl,
-					DepResolver: resolver,
+					Config:   config,
+					Tracer:   tracer,
+					Client:   cl,
+					Resolver: resolver,
 				}
 				return reconciler
 			},

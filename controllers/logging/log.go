@@ -22,19 +22,19 @@ import (
 	"os"
 	"time"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 )
 
 // loggerFactory creates new logger
 type loggerFactory struct {
-	log depresolver.Log
+	log resolver.Log
 }
 
-func newLogger(config *depresolver.Config) *loggerFactory {
+func newLogger(config *resolver.Config) *loggerFactory {
 	if config == nil {
-		return &loggerFactory{log: depresolver.Log{}}
+		return &loggerFactory{log: resolver.Log{}}
 	}
 	return &loggerFactory{log: config.Log}
 }
@@ -43,8 +43,8 @@ func newLogger(config *depresolver.Config) *loggerFactory {
 // In such case returns default logger
 func (l *loggerFactory) get() zerolog.Logger {
 	var logger zerolog.Logger
-	if l.log.Format == depresolver.NoFormat {
-		l.log.Format = depresolver.SimpleFormat
+	if l.log.Format == resolver.NoFormat {
+		l.log.Format = resolver.SimpleFormat
 	}
 	if l.log.Level == zerolog.NoLevel {
 		l.log.Level = zerolog.InfoLevel
@@ -53,14 +53,14 @@ func (l *loggerFactory) get() zerolog.Logger {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.SetGlobalLevel(l.log.Level)
 	switch l.log.Format {
-	case depresolver.JSONFormat:
+	case resolver.JSONFormat:
 		logger = zerolog.New(os.Stdout).
 			With().
 			Caller().
 			Timestamp().
 			Logger().
 			Level(l.log.Level)
-	case depresolver.SimpleFormat:
+	case resolver.SimpleFormat:
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339, NoColor: l.log.NoColor}).
 			With().
 			Caller().

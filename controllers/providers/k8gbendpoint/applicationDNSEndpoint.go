@@ -23,11 +23,10 @@ import (
 	"fmt"
 
 	"github.com/k8gb-io/k8gb/controllers/geotags"
-
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,7 +38,7 @@ type ApplicationDNSEndpoint struct {
 	context             context.Context
 	endpointType        dnsEndpointType
 	client              client.Client
-	config              *depresolver.Config
+	config              *resolver.Config
 	gslb                *k8gbv1beta1.Gslb
 	logger              *zerolog.Logger
 	updateRuntimeStatus UpdateRuntimeStatus
@@ -49,7 +48,7 @@ type ApplicationDNSEndpoint struct {
 func NewApplicationDNSEndpoint(
 	ctx context.Context,
 	client client.Client,
-	config *depresolver.Config,
+	config *resolver.Config,
 	gslb *k8gbv1beta1.Gslb,
 	logger *zerolog.Logger,
 	queryService utils.DNSQueryService,
@@ -108,9 +107,9 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, err
 
 		if len(externalTargets) > 0 {
 			switch d.gslb.Spec.Strategy.Type {
-			case depresolver.RoundRobinStrategy, depresolver.GeoStrategy:
+			case resolver.RoundRobinStrategy, resolver.GeoStrategy:
 				finalTargets.AppendTargets(externalTargets)
-			case depresolver.FailoverStrategy:
+			case resolver.FailoverStrategy:
 				// If cluster is Primary
 				if isPrimary {
 					// If cluster is Primary and Healthy return only own targets

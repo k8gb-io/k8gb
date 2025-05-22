@@ -22,18 +22,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ProviderFactory struct {
-	config  depresolver.Config
+	config  resolver.Config
 	client  client.Client
 	context context.Context
 }
 
-func NewDNSProviderFactory(context context.Context, client client.Client, config depresolver.Config) (f *ProviderFactory, err error) {
+func NewDNSProviderFactory(context context.Context, client client.Client, config resolver.Config) (f *ProviderFactory, err error) {
 	if client == nil {
 		err = fmt.Errorf("nil client")
 	}
@@ -47,9 +47,9 @@ func NewDNSProviderFactory(context context.Context, client client.Client, config
 
 func (f *ProviderFactory) Provider() Provider {
 	switch f.config.EdgeDNSType {
-	case depresolver.DNSTypeExternal:
+	case resolver.DNSTypeExternal:
 		return NewExternalDNS(f.context, f.client, f.config)
-	case depresolver.DNSTypeInfoblox:
+	case resolver.DNSTypeInfoblox:
 		ibx := NewInfobloxClient(f.config)
 		return NewInfobloxDNS(f.config, ibx)
 	}

@@ -23,17 +23,17 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/miekg/dns"
 )
 
 // Dynamic reads geotags from parent DNS
 type Dynamic struct {
-	config *depresolver.Config
+	config *resolver.Config
 }
 
-func NewDynamic(config *depresolver.Config) *Dynamic {
+func NewDynamic(config *resolver.Config) *Dynamic {
 	return &Dynamic{
 		config: config,
 	}
@@ -70,7 +70,7 @@ func (p *Dynamic) getExternalClusterNSNamesByHostname() (map[string]string, erro
 		return nsNames, fmt.Errorf("ExternalGeoTags: reading geo tags: %w", err)
 	}
 	for _, tag := range tags {
-		nsNames[tag] = depresolver.GetNsName(tag, d.LoadBalancedZone, d.ParentZone)
+		nsNames[tag] = d.GetNSName(tag)
 	}
 	return nsNames, nil
 }
