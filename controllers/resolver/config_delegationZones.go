@@ -1,4 +1,4 @@
-package depresolver
+package resolver
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
@@ -37,7 +37,7 @@ type DelegationZoneInfo struct {
 	IPs               []string
 }
 
-func GetNsName(tag, zone, edge string) string {
+func getNsName(tag, zone, edge string) string {
 	const prefix = "gslb-ns"
 	d := strings.TrimSuffix(zone, "."+edge)
 	domainX := strings.ReplaceAll(d, ".", "-")
@@ -51,7 +51,16 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 		negTTL           string
 	}
 
-	zones := config.dnsZones
+	zones := config.DNSZones
+
+	extClusterNSNames := func(zone, edge string) map[string]string {
+		m := map[string]string{}
+		for _, tag := range config.ExtClustersGeoTagsRaw {
+			m[tag] = getNsName(tag, zone, edge)
+		}
+		return m
+	}
+
 	validateRFC1035 := func(zoneInfo *DelegationZoneInfo) error {
 		const dnsNameMax = 253
 		const dnsLabelMax = 63
@@ -100,17 +109,11 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 			return dzi, fmt.Errorf("invalid value of delegation zones: %s", zones)
 		}
 		zoneInfo := &DelegationZoneInfo{
-			LoadBalancedZone: inf.loadBalancedZone,
-			ParentZone:       inf.parentZone,
-			NegativeTTL:      negTTL,
-			ClusterNSName:    GetNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
-			ExtClusterNSNames: func(zone, edge string) map[string]string {
-				m := map[string]string{}
-				for _, tag := range config.extClustersGeoTags {
-					m[tag] = GetNsName(tag, zone, edge)
-				}
-				return m
-			}(inf.loadBalancedZone, inf.parentZone),
+			LoadBalancedZone:  inf.loadBalancedZone,
+			ParentZone:        inf.parentZone,
+			NegativeTTL:       negTTL,
+			ClusterNSName:     getNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
+			ExtClusterNSNames: extClusterNSNames(inf.loadBalancedZone, inf.parentZone),
 		}
 		dzi = append(dzi, zoneInfo)
 	}
@@ -154,6 +157,18 @@ func (z *DelegationZoneInfo) GetSortedIPs() []string {
 	})
 
 	return z.IPs
+}
+
+func (z *DelegationZoneInfo) GetNSName(tag string) string {
+	return getNsName(tag, z.LoadBalancedZone, z.ParentZone)
+}
+
+func (d *DelegationZones) GetExternalClusterNSNamesByHostname(host string) map[string]string {
+	z := d.getZone(host)
+	if z != nil {
+		return z.ExtClusterNSNames
+	}
+	return map[string]string{}
 }
 
 func (d *DelegationZones) ContainsZone(host string) bool {

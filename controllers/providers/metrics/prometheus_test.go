@@ -25,15 +25,13 @@ import (
 	"runtime"
 	"testing"
 
-	externaldns "sigs.k8s.io/external-dns/endpoint"
-
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/prometheus/client_golang/prometheus/testutil"
-
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/stretchr/testify/assert"
+	externaldns "sigs.k8s.io/external-dns/endpoint"
+
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 )
 
 const (
@@ -47,9 +45,9 @@ const (
 var (
 	defaultGslb     = new(k8gbv1beta1.Gslb)
 	defaultEndpoint = new(externaldns.DNSEndpoint)
-	defaultConfig   = depresolver.Config{
+	defaultConfig   = resolver.Config{
 		K8gbNamespace: namespace,
-		DelegationZones: depresolver.DelegationZones{
+		DelegationZones: resolver.DelegationZones{
 			{
 				LoadBalancedZone: "cloud.example.com",
 				ParentZone:       "example.com",
@@ -69,8 +67,8 @@ func TestMetricsSingletonIsNotNil(t *testing.T) {
 
 func TestMetricsSingletonInitTwice(t *testing.T) {
 	// arrange
-	c1 := &depresolver.Config{K8gbNamespace: "c1"}
-	c2 := &depresolver.Config{K8gbNamespace: "c2"}
+	c1 := &resolver.Config{K8gbNamespace: "c1"}
+	c2 := &resolver.Config{K8gbNamespace: "c2"}
 	// act
 	Init(c1)
 	Init(c2)

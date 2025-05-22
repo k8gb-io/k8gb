@@ -22,7 +22,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 
 	"github.com/k8gb-io/k8gb/controllers/logging"
 
@@ -39,13 +39,13 @@ var coreDNSServiceLabel = fmt.Sprintf("%s=%s", CoreDNSServiceLabelName, CoreDNSS
 // It uses apimachinery client to call kubernetes API
 type CoreDNSService struct {
 	client  client.Client
-	config  depresolver.Config
+	config  resolver.Config
 	context context.Context
 }
 
 var log = logging.Logger()
 
-func NewCoreDNSServiceAssistant(context context.Context, client client.Client, config depresolver.Config) *CoreDNSService {
+func NewCoreDNSServiceAssistant(context context.Context, client client.Client, config resolver.Config) *CoreDNSService {
 	return &CoreDNSService{
 		client:  client,
 		config:  config,

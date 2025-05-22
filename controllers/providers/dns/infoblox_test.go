@@ -24,8 +24,8 @@ import (
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -34,17 +34,17 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		config        depresolver.Config
+		config        resolver.Config
 		getClient     func(*gomock.Controller) InfobloxClient
 		expectedError bool
 	}{
 		{
 			name:          "create cloud.example.com",
 			expectedError: false,
-			config: depresolver.Config{
+			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",
@@ -97,10 +97,10 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		{
 			name:          "found cloud.example.com WITHOUT updating",
 			expectedError: false,
-			config: depresolver.Config{
+			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",
@@ -142,10 +142,10 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		{
 			name:          "found cloud.example.com WITH updating",
 			expectedError: false,
-			config: depresolver.Config{
+			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",
@@ -216,10 +216,10 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		{
 			name:          "error during Infoblox interraction",
 			expectedError: true,
-			config: depresolver.Config{
+			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*depresolver.DelegationZoneInfo{
+				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
 						LoadBalancedZone: "cloud.example.com",

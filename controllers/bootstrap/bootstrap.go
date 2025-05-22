@@ -22,9 +22,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/resolver"
+
 	netv1 "k8s.io/api/networking/v1"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
@@ -39,7 +40,7 @@ type Bootstrap struct {
 	Name   string
 }
 
-func GetBootstrap(ctx context.Context, config *depresolver.Config, kubeconfig *rest.Config) (*Bootstrap, error) {
+func GetBootstrap(ctx context.Context, config *resolver.Config, kubeconfig *rest.Config) (*Bootstrap, error) {
 	cl, err := client.New(kubeconfig, client.Options{})
 	if err != nil {
 		return nil, err
@@ -47,7 +48,7 @@ func GetBootstrap(ctx context.Context, config *depresolver.Config, kubeconfig *r
 	return GetBootstrapWithClient(ctx, config, cl)
 }
 
-func GetBootstrapWithClient(ctx context.Context, config *depresolver.Config, cl client.Client) (*Bootstrap, error) {
+func GetBootstrapWithClient(ctx context.Context, config *resolver.Config, cl client.Client) (*Bootstrap, error) {
 	bootstrap, err := readIPs(ctx, cl, config)
 	if err != nil {
 		return nil, err
@@ -58,9 +59,9 @@ func GetBootstrapWithClient(ctx context.Context, config *depresolver.Config, cl 
 	return bootstrap, nil
 }
 
-func readIPs(ctx context.Context, cl client.Client, config *depresolver.Config) (*Bootstrap, error) {
+func readIPs(ctx context.Context, cl client.Client, config *resolver.Config) (*Bootstrap, error) {
 	var err error
-	boot := &Bootstrap{source: corev1.ServiceType(config.CoreDNSServiceType)}
+	boot := &Bootstrap{source: config.CoreDNSServiceType}
 	if boot.HasIngress() {
 		ingresAssistant := assistant.NewIngressAssistant(ctx, cl)
 		boot.IPs, boot.ing, err = ingresAssistant.GetExposedIPs()

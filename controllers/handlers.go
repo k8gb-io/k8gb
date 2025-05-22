@@ -23,8 +23,9 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/k8gb-io/k8gb/controllers/resolver"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -216,7 +217,7 @@ func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (resul
 		return result, fmt.Errorf("annotation %s not found", strategyAnnotation)
 	}
 
-	result.DNSTtlSeconds = depresolver.DefaultTTLSeconds
+	result.DNSTtlSeconds = resolver.DefaultTTLSeconds
 	if value, found := annotations[dnsTTLSecondsAnnotation]; found {
 		if result.DNSTtlSeconds, err = toInt(dnsTTLSecondsAnnotation, value); err != nil {
 			return result, err
@@ -224,9 +225,9 @@ func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (resul
 	}
 	result.PrimaryGeoTag = annotations[primaryGeoTagAnnotation]
 
-	if result.Type == depresolver.FailoverStrategy {
+	if result.Type == resolver.FailoverStrategy {
 		if len(result.PrimaryGeoTag) == 0 {
-			return result, fmt.Errorf("%s strategy requires annotation %s", depresolver.FailoverStrategy, primaryGeoTagAnnotation)
+			return result, fmt.Errorf("%s strategy requires annotation %s", resolver.FailoverStrategy, primaryGeoTagAnnotation)
 		}
 	}
 

@@ -24,7 +24,7 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -43,7 +43,7 @@ func TestBootstrap(t *testing.T) {
 	ctx := context.TODO()
 	tests := []struct {
 		name          string
-		config        *depresolver.Config
+		config        *resolver.Config
 		expectedIPs   []string
 		setupClient   func(_ []string) client.Client
 		expectedError bool
@@ -53,7 +53,7 @@ func TestBootstrap(t *testing.T) {
 			name:          "CoreDNSService missing",
 			expectedError: true,
 			hasIngress:    false,
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				K8gbNamespace: "k8gb",
 			},
 			setupClient: func(_ []string) client.Client {
@@ -72,9 +72,9 @@ func TestBootstrap(t *testing.T) {
 			expectedError: false,
 			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
 			hasIngress:    false,
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				K8gbNamespace:      "k8gb",
-				CoreDNSServiceType: string(corev1.ServiceTypeLoadBalancer),
+				CoreDNSServiceType: corev1.ServiceTypeLoadBalancer,
 			},
 			setupClient: func(expectedIPs []string) client.Client {
 				coreDNSService := &corev1.Service{
@@ -111,9 +111,9 @@ func TestBootstrap(t *testing.T) {
 			expectedError: false,
 			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
 			hasIngress:    true,
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				K8gbNamespace:      "k8gb",
-				CoreDNSServiceType: string(corev1.ServiceTypeClusterIP),
+				CoreDNSServiceType: corev1.ServiceTypeClusterIP,
 			},
 			setupClient: func(expectedIPs []string) client.Client {
 				coreDNSService := &corev1.Service{
@@ -171,9 +171,9 @@ func TestBootstrap(t *testing.T) {
 			expectedError: true,
 			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
 			hasIngress:    true,
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				K8gbNamespace:      "k8gb",
-				CoreDNSServiceType: string(corev1.ServiceTypeClusterIP),
+				CoreDNSServiceType: corev1.ServiceTypeClusterIP,
 			},
 			setupClient: func(expectedIPs []string) client.Client {
 				coreDNSService := &corev1.Service{
