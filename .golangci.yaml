@@ -48,6 +48,7 @@ linters:
             - github.com/stretchr/testify
             - go.opentelemetry.io/otel
             - go.uber.org/mock/gomock
+            - github.com/alecthomas/kong
     lll:
       line-length: 152
   exclusions:
