@@ -468,7 +468,7 @@ test:
 	$(call generate)
 	$(call crd-manifest)
 	@echo -e "\n$(YELLOW)Running the unit tests$(NC)"
-	go test ./... -coverprofile cover.out
+	env -u LOG_FORMAT -u LOG_LEVEL -u EXT_GSLB_CLUSTERS_GEO_TAGS go test ./... -coverprofile cover.out
 
 .PHONY: test-round-robin
 test-round-robin:

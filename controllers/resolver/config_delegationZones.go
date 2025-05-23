@@ -44,7 +44,7 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 		negTTL           string
 	}
 
-	zones := config.DnsZones
+	zones := config.DNSZones
 
 	getNsName := func(tag, zone, parentZone string) string {
 		const prefix = "gslb-ns"
@@ -55,7 +55,7 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 
 	extClusterNSNames := func(zone, edge string) map[string]string {
 		m := map[string]string{}
-		for _, tag := range config.ExtClustersGeoTags {
+		for _, tag := range config.ExtClustersGeoTagsRaw {
 			m[tag] = getNsName(tag, zone, edge)
 		}
 		return m

@@ -24,22 +24,26 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+// https://github.com/go-playground/validator
+// https://github.com/go-playground/validator/blob/master/validator_test.go
+// https://github.com/alecthomas/kong
+
 type Config struct {
-	ClusterGeoTag string `env:"CLUSTER_GEO_TAG" required:"" help:"ClusterGeoTag to determine specific location"`
+	ClusterGeoTag string `env:"CLUSTER_GEO_TAG" required:"" validate:"geotag" help:"ClusterGeoTag to determine specific location"`
 
-	DnsZones string `env:"DNS_ZONES" required:"" help:"pairs of dnsZone ad edgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io"`
+	DNSZones string `env:"DNS_ZONES" required:"" help:"pairs of dnsZone ad edgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io"`
 
-	ParentZoneDNSServersRaw []string `env:"EDGE_DNS_SERVERS" optional:"" help:"list of parent DNS servers (ipv4 or domain). If port is missing default value 53 is used; e.g: '10.0.0.1,10.20.20.0.1:5053,edge.test:53'"`
+	ParentZoneDNSServersRaw []string `env:"EDGE_DNS_SERVERS" optional:"" validate:"unique,dive,iphostport" help:"list of parent DNS servers (ipv4 or domain). If port is missing default value 53 is used; e.g: '10.0.0.1,10.20.20.0.1:5053,edge.test:53'"`
 
 	FallbackEdgeDNSServerNameRaw string `env:"EDGE_DNS_SERVER" optional:"" help:"deprecated; to avoid breaking changes is used as fallback server port for ParentZoneDNSServers"`
 
 	FallbackEdgeDNSServerPortRaw int `env:"EDGE_DNS_SERVER_PORT" optional:"" default:"53" help:"deprecated; to avoid breaking changes is used as fallback server port for ParentZoneDNSServers"`
 
-	ExtClustersGeoTags []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS" optional:"" help:"identify clusters gek tags in other locations; separated by comma. i.e.: 'eu,uk,us'"`
+	ExtClustersGeoTagsRaw []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS" optional:"" validate:"unique,dive,geotag" help:"identify clusters gek tags in other locations; separated by comma. i.e.: 'eu,uk,us'"`
 
-	ReconcileRequeueSeconds int `env:"RECONCILE_REQUEUE_SECONDS" optional:""  default:"30" help:"delay between individual reconciliations. If set to 0, reconciliation is only triggered at startup or when the GSLB, Ingress, or DNSEndpoint changes."`
+	ReconcileRequeueSeconds int `env:"RECONCILE_REQUEUE_SECONDS" optional:""  default:"30" validate:"min=0" help:"delay between individual reconciliations. If set to 0, reconciliation is only triggered at startup or when the GSLB, Ingress, or DNSEndpoint changes."`
 
-	NSRecordTTL int `env:"NS_RECORD_TTL" optional:"" default:"30"  help:"TTL of the NS and respective glue record used by external DNS."`
+	NSRecordTTL int `env:"NS_RECORD_TTL" optional:"" default:"30" validate:"min=1" help:"TTL of the NS and respective glue record used by external DNS."`
 
 	K8gbNamespace string `env:"POD_NAMESPACE" optional:"" default:"k8gb" help:"namespace where k8gb pod is running"`
 
@@ -48,6 +52,8 @@ type Config struct {
 	CoreDNSServiceType corev1.ServiceType `env:"COREDNS_SERVICE_TYPE" required:"" enum:"ClusterIP,LoadBalancer,NodePort,ExternalName" default:"ClusterIP" help:"k8gb requires the cluster IP addresses to operate. If the service type is LoadBalancer, the IP addresses are read from the CoreDNS service otherwise, they are read from the ingress labeled with 'k8gb.io/ip-source=true'."`
 
 	ExtDNSEnabledRaw bool `env:"EXTDNS_ENABLED" optional:"" default:"false" help:"if true K8gb uses ExternalDNS"`
+
+	MetricsAddress string `env:"METRICS_ADDRESS" optional:"" default:"0.0.0.0:8080" validate:"iphostport" help:"format address:port where address can be empty, IP address, or hostname, e.g: 10.10.0.0:8080"`
 
 	TracingEnabled bool `env:"TRACING_ENABLED" optional:"" default:"false" help:"decides whether to use a real otlp tracer or a noop one"`
 

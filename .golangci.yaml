@@ -49,6 +49,7 @@ linters:
             - go.opentelemetry.io/otel
             - go.uber.org/mock/gomock
             - github.com/alecthomas/kong
+            - github.com/go-playground/validator/v10
     lll:
       line-length: 152
   exclusions:

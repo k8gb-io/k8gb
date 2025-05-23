@@ -27,12 +27,12 @@ import (
 
 const DefaultTTLSeconds = 30
 
-var predefinedStrategy = k8gbv1beta1.Strategy{
-	DNSTtlSeconds: DefaultTTLSeconds,
-}
+// var predefinedStrategy = k8gbv1beta1.Strategy{
+//	DNSTtlSeconds: DefaultTTLSeconds,
+// }
 
 // ResolveGslbSpec fills Gslb by spec values. It executes always, when gslb is initialised.
 // If spec value is not defined, it will use the default value. Function returns error if input is invalid.
-func (dr *Resolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1beta1.Gslb, client client.Client) error {
+func (dr *Resolver) ResolveGslbSpec(_ context.Context, _ *k8gbv1beta1.Gslb, _ client.Client) error {
 	return nil
 }

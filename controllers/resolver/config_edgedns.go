@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -60,6 +61,9 @@ func (c *Config) parseParentZoneDNSServers() (r []utils.DNSServer) {
 	r = []utils.DNSServer{}
 	var host, portStr string
 	var err error
+	if len(c.ParentZoneDNSServersRaw) == 0 {
+		c.ParentZoneDNSServersRaw = []string{fmt.Sprintf("%s:%v", c.FallbackEdgeDNSServerNameRaw, c.FallbackEdgeDNSServerPortRaw)}
+	}
 	for _, chunk := range c.ParentZoneDNSServersRaw {
 		chunk = strings.TrimSpace(chunk)
 		switch strings.Count(chunk, ":") {

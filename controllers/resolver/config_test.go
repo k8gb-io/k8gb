@@ -29,7 +29,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
-	// "github.com/absaoss/cluster-pool-operator/internal/controller/common/validator"
 )
 
 func TestConfigurations(t *testing.T) {
@@ -43,7 +42,8 @@ func TestConfigurations(t *testing.T) {
 			name: "minimal valid configuration",
 			envvars: `CLUSTER_GEO_TAG=us;
 				 DNS_ZONES=example.com:cloud.example.com:300;
-				 EDGE_DNS_SERVERS=local.test`,
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true`,
 			assert: func(t *testing.T, cfg *Config) {
 				assert.Equal(t, "us", cfg.ClusterGeoTag)
 				assert.Equal(t, 53, cfg.FallbackEdgeDNSServerPortRaw)
@@ -54,17 +54,18 @@ func TestConfigurations(t *testing.T) {
 				assert.Equal(t, zerolog.InfoLevel, cfg.Log.Level)
 				assert.Equal(t, 0, len(cfg.DelegationZones[0].ExtClusterNSNames))
 				assert.Equal(t, DNSTypeExternal, cfg.EdgeDNSType)
+				assert.Equal(t, "0.0.0.0:8080", cfg.MetricsAddress)
 			},
 		},
 		{
 			name: "minimal valid configuration with external geotags",
-			envvars: `CLUSTER_GEO_TAG=us;
+			envvars: `CLUSTER_GEO_TAG=us-1;
 				 DNS_ZONES=example.com:cloud.example.com:300;
 				 EDGE_DNS_SERVERS=local.test;
 				 EXT_GSLB_CLUSTERS_GEO_TAGS=za,eu`,
 			assert: func(t *testing.T, cfg *Config) {
 				m := map[string]string{"eu": "gslb-ns-eu-cloud.example.com", "za": "gslb-ns-za-cloud.example.com"}
-				assert.Equal(t, "us", cfg.ClusterGeoTag)
+				assert.Equal(t, "us-1", cfg.ClusterGeoTag)
 				assert.Equal(t, 53, cfg.FallbackEdgeDNSServerPortRaw)
 				assert.Equal(t, "k8gb", cfg.K8gbNamespace)
 				assert.Equal(t, corev1.ServiceTypeClusterIP, cfg.CoreDNSServiceType)
@@ -73,6 +74,130 @@ func TestConfigurations(t *testing.T) {
 				assert.Equal(t, zerolog.InfoLevel, cfg.Log.Level)
 				assert.True(t, utils.EqualAnnotations(m, cfg.DelegationZones[0].ExtClusterNSNames))
 			},
+		},
+		{
+			name:          "invalid configuration with invalid external cluster geotag",
+			expectedError: true,
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXT_GSLB_CLUSTERS_GEO_TAGS=za*,eu`,
+		},
+		{
+			name:          "invalid configuration with non-unique external cluster geotag",
+			expectedError: true,
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXT_GSLB_CLUSTERS_GEO_TAGS=za,eu,za`,
+		},
+		{
+			name: "valid configuration with multiple parent DNS servers",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test,10.10.0.2:5353,10.10.0.2`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "local.test", cfg.ParentZoneDNSServers[0].Host)
+				assert.Equal(t, 53, cfg.ParentZoneDNSServers[0].Port)
+				assert.Equal(t, "10.10.0.2", cfg.ParentZoneDNSServers[1].Host)
+				assert.Equal(t, 5353, cfg.ParentZoneDNSServers[1].Port)
+				assert.Equal(t, "10.10.0.2", cfg.ParentZoneDNSServers[2].Host)
+				assert.Equal(t, 53, cfg.ParentZoneDNSServers[2].Port)
+			},
+		},
+		{
+			name: "invalid configuration with multiple parent DNS servers 1",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test,10.10.0.2:500353,10.10.0.2`,
+			expectedError: true,
+		},
+		{
+			name: "invalid configuration with multiple parent DNS servers 2",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test,10.10.0.2:badport,10.10.0.2`,
+			expectedError: true,
+		},
+		{
+			name: "invalid configuration with multiple parent DNS servers 3",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=:5053,10.10.0.2`,
+			expectedError: true,
+		},
+		{
+			name: "support fallback parent DNS",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVER=10.10.0.2;
+				 EDGE_DNS_SERVER_PORT=5053`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "10.10.0.2", cfg.ParentZoneDNSServers[0].Host)
+				assert.Equal(t, 5053, cfg.ParentZoneDNSServers[0].Port)
+			},
+		},
+		{
+			name: "support fallback parent DNS 2",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVER=10.10.0.2;`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "10.10.0.2", cfg.ParentZoneDNSServers[0].Host)
+				assert.Equal(t, 53, cfg.ParentZoneDNSServers[0].Port)
+			},
+		},
+		{
+			name: "invalid fallback parent DNS",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVER=10.10.0.2;
+				 EDGE_DNS_SERVER_PORT=0`,
+			expectedError: true,
+		},
+		{
+			name: "ignored fallback parent DNS",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVER=10.10.0.2;
+				 EDGE_DNS_SERVER_PORT=3535;
+				 EDGE_DNS_SERVERS=local.test,10.10.0.2:5353,10.10.0.2`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "local.test", cfg.ParentZoneDNSServers[0].Host)
+				assert.Equal(t, 53, cfg.ParentZoneDNSServers[0].Port)
+				assert.Equal(t, "10.10.0.2", cfg.ParentZoneDNSServers[1].Host)
+				assert.Equal(t, 5353, cfg.ParentZoneDNSServers[1].Port)
+				assert.Equal(t, "10.10.0.2", cfg.ParentZoneDNSServers[2].Host)
+				assert.Equal(t, 53, cfg.ParentZoneDNSServers[2].Port)
+				assert.Equal(t, 3, len(cfg.ParentZoneDNSServers))
+			},
+		},
+		{
+			name: "multiple DNS providers",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EXTDNS_ENABLED=true;
+				 EDGE_DNS_SERVERS=dns.test;
+				 INFOBLOX_GRID_HOST="infoblox.test"`,
+			expectedError: true,
+		},
+		{
+			name: "valid metrics address",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=dns.test;
+				 METRICS_ADDRESS=10.0.0.2:8080`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "10.0.0.2:8080", cfg.MetricsAddress)
+			},
+		},
+		{
+			name: "invalid metrics address",
+			envvars: `CLUSTER_GEO_TAG=us-1;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=dns.test;
+				 METRICS_ADDRESS=10.0.0.:8080`,
+			expectedError: true,
 		},
 	}
 
@@ -93,12 +218,6 @@ func TestConfigurations(t *testing.T) {
 
 			// assert
 			test.assert(t, cfg)
-			//if err := validator.NewConfigValidator(cfg).Validate(); err != nil {
-			//	logging.GetDefaultLogger().Err(err).Msg("Invalid operator configuration.")
-			//	os.Exit(1)
-			//}
-
-			// assert
 		})
 	}
 }
@@ -127,10 +246,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "invalid negTTL",
 			config: &Config{
-				DnsZones:             "example.com:cloud.example.com:30x",
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              "example.com:cloud.example.com:30x",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 0,
 			assert: func(_ []*DelegationZoneInfo, err error) {
@@ -140,10 +259,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "multiple zones",
 			config: &Config{
-				DnsZones:             "example.com:cloud.example.com:30;example.io:cloud.example.io:50",
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              "example.com:cloud.example.com:30;example.io:cloud.example.io:50",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -173,10 +292,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "multiple domains",
 			config: &Config{
-				DnsZones:             "example.com:cloud.example.com:30;example.com:pair.example.com:50",
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              "example.com:cloud.example.com:30;example.com:pair.example.com:50",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -206,10 +325,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "ends with semicolon",
 			config: &Config{
-				DnsZones:             "example.com:cloud.example.com:30;example.io:cloud.example.io:300;",
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              "example.com:cloud.example.com:30;example.io:cloud.example.io:300;",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -225,10 +344,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "trimmed spaces and semicolons",
 			config: &Config{
-				DnsZones:             "example.com: cloud.example.com: 50; example.io:cloud.example.io: 30 ;",
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              "example.com: cloud.example.com: 50; example.io:cloud.example.io: 30 ;",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -244,10 +363,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "check nsNames",
 			config: &Config{
-				DnsZones:             "cloud.example.com: k8gb-test.gslb.cloud.example.com :60;",
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              "cloud.example.com: k8gb-test.gslb.cloud.example.com :60;",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
@@ -261,10 +380,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "nsName exceed exceed limit 253 characters",
 			config: &Config{
-				DnsZones:             fmt.Sprintf("cloud.example.com:k8gb-test.%s.gslb.cloud.example.com:60;", str220),
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              fmt.Sprintf("cloud.example.com:k8gb-test.%s.gslb.cloud.example.com:60;", str220),
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(_ []*DelegationZoneInfo, err error) {
@@ -274,10 +393,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		{
 			name: "nsName label exceed limit 63 characters",
 			config: &Config{
-				DnsZones:             fmt.Sprintf("cloud.example.com: %s.gslb.cloud.example.com:60;", str64),
-				ParentZoneDNSServers: []utils.DNSServer{{Host: "edge.com", Port: 53}},
-				ClusterGeoTag:        "us",
-				ExtClustersGeoTags:   []string{"za", "eu"},
+				DNSZones:              fmt.Sprintf("cloud.example.com: %s.gslb.cloud.example.com:60;", str64),
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 1,
 			assert: func(_ []*DelegationZoneInfo, err error) {
