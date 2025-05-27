@@ -35,6 +35,7 @@ EDGE_DNS_SERVER=$(aws route53 list-resource-record-sets --hosted-zone-id "$ZONE_
 cp dns-provider-test/route53/values-template.yaml dns-provider-test/route53/values.yaml
 sed -i '' "s/DNS_SERVER_TODO/$EDGE_DNS_SERVER/g" dns-provider-test/route53/values.yaml
 make create-local-clusters
+make release-images
 
 echo "---- Deploying AWS credentials ----"
 SECRET_ACCESS_KEY=$(aws iam create-access-key --user-name "externaldns")

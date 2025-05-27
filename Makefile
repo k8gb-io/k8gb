@@ -39,7 +39,7 @@ FULL_LOCAL_SETUP_WITH_APPS ?= true
 GSLB_DOMAIN ?= cloud.example.com
 REPO := absaoss/k8gb
 SHELL := bash
-VALUES_YAML ?= "chart/k8gb/values-local.yaml"
+VALUES_YAML ?= ""
 PODINFO_IMAGE_REPO ?= ghcr.io/stefanprodan/podinfo
 HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
@@ -268,7 +268,7 @@ deploy-k8gb-with-helm:
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} -f $(VALUES_YAML) -f $(call get-helm-values-file,$(CHART)) \
+	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} -f $(call get-helm-values-file,$(CHART)) -f $(VALUES_YAML) \
 		$(call get-helm-args,$(CLUSTER_ID)) \
 		$(call get-next-args,$(CHART),$(CLUSTER_ID)) \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
