@@ -1,5 +1,22 @@
 # Changelog
 
+## [v0.15.0-rc2](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc2) (2025-05-28)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc1...v0.15.0-rc2)
+
+**Merged pull requests:**
+
+- RELEASE: v0.15.0-rc2 [\#1930](https://github.com/k8gb-io/k8gb/pull/1930) ([kuritka](https://github.com/kuritka))
+- FIX: HELM Disable validation - parentZones equal to extDNSZones [\#1929](https://github.com/k8gb-io/k8gb/pull/1929) ([kuritka](https://github.com/kuritka))
+- 2021-present - change fixed year in license header [\#1924](https://github.com/k8gb-io/k8gb/pull/1924) ([kuritka](https://github.com/kuritka))
+- Update Offline Changelog [\#1923](https://github.com/k8gb-io/k8gb/pull/1923) ([github-actions[bot]](https://github.com/apps/github-actions))
+- FIX: Stable version fur upgrade testing. Sticking RELEASE [\#1922](https://github.com/k8gb-io/k8gb/pull/1922) ([kuritka](https://github.com/kuritka))
+- Update Helm Docs [\#1920](https://github.com/k8gb-io/k8gb/pull/1920) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Dynamic GeoTags [\#1914](https://github.com/k8gb-io/k8gb/pull/1914) ([kuritka](https://github.com/kuritka))
+- Create automated test setup for AWS route53 [\#1897](https://github.com/k8gb-io/k8gb/pull/1897) ([abaguas](https://github.com/abaguas))
+
+
+
 ## [v0.15.0-rc1](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc1) (2025-05-18)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.14.0...v0.15.0-rc1)
