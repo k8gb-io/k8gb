@@ -14,6 +14,9 @@
 
 # Validates that the zones in k8gb.dnsZones match the zones in extdns.domainFilters
 {{- define "validateDnsZones" -}}
+
+{{- if .Values.extdns.enabled }}
+
 {{- $parentZones := list -}}
 {{- range .Values.k8gb.dnsZones -}}
   {{- $parentZones = append $parentZones .parentZone -}}
@@ -37,4 +40,5 @@
   {{- end -}}
 {{- end -}}
 
+ {{- end }}
 {{- end -}}
