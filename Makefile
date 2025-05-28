@@ -132,11 +132,8 @@ K8GB_LOCAL_VERSION ?= stable
 # Use `K8GB_LOCAL_VERSION=test make deploy-full-local-setup`
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
-	@echo -e "\n$(YELLOW)Creating $$(( $(CLUSTERS_NUMBER) + 1 )) k8s clusters$(NC)"
-	$(MAKE) create-local-cluster CLUSTER_NAME=edge-dns
-	@for c in $(CLUSTER_IDS); do \
-		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
-	done
+	$(MAKE) create-local-clusters
+
 	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
 	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=$(FULL_LOCAL_SETUP_WITH_APPS)
 
@@ -169,6 +166,15 @@ list-running-pods:
 		kubectl get pods -A --context=k3d-$(CLUSTER_NAME)$$c ;\
 	done
 
+.PHONY: create-local-clusters
+create-local-clusters:
+	@echo -e "\n$(YELLOW)Creating $$(( $(CLUSTERS_NUMBER) + 1 )) k8s clusters$(NC)"
+	$(MAKE) create-local-cluster CLUSTER_NAME=edge-dns
+	@for c in $(CLUSTER_IDS); do \
+		$(MAKE) create-local-cluster CLUSTER_NAME=$(CLUSTER_NAME)$$c ;\
+	done
+
+.PHONY: create-local-cluster
 create-local-cluster:
 	@echo -e "\n$(YELLOW)Create local cluster $(CYAN)$(CLUSTER_NAME) $(NC)"
 	k3d cluster create -c k3d/$(CLUSTER_NAME).yaml
@@ -262,7 +268,7 @@ deploy-k8gb-with-helm:
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} -f $(VALUES_YAML) -f $(call get-helm-values-file,$(CHART)) \
+	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} -f $(call get-helm-values-file,$(CHART)) -f $(VALUES_YAML) \
 		$(call get-helm-args,$(CLUSTER_ID)) \
 		$(call get-next-args,$(CHART),$(CLUSTER_ID)) \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
