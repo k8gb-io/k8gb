@@ -1,5 +1,9 @@
 apiVersion: example.crossplane.io/v1
-kind: XR
+kind: GlobalApp
 metadata:
-  name: example
-spec: {}
+  name: example-gslb-yury
+spec:
+  region: "West Europe"
+  namespace: "demo"
+  hostname: "podinfo.failover.cloud.example.com"
+  gslbNamespace: "test-gslb"

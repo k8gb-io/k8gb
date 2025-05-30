@@ -1,21 +1,192 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-gsbl-check
+  name: global-app
 spec:
   compositeTypeRef:
     apiVersion: example.crossplane.io/v1
-    kind: XR
+    kind: GlobalApp
   mode: Pipeline
   pipeline:
-  - step: normal
+  # Step 1: Infrastructure (Redis Cache)
+  - step: infrastructure
     functionRef:
-      name: kcl-function
+      name: crossplane-contrib-function-kcl
     input:
       apiVersion: krm.kcl.dev/v1alpha1
       kind: KCLInput
       metadata:
-        name: basic
+        name: infrastructure
+      spec:
+        source: |
+
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          _dxr = {
+              **option("params").dxr
+              status.infrastructure = {}
+          }
+
+          # Azure Resource Group
+          resourceGroup = {
+            apiVersion = "azure.upbound.io/v1beta1"
+            kind = "ResourceGroup"
+            metadata = {
+              name = "gslb-demo-rg-{}".format(oxr.metadata.name)
+              annotations = {
+                "krm.kcl.dev/composition-resource-name" = "resource-group"
+                "crossplane.io/external-name" = "gslb-demo-rg-{}".format(oxr.metadata.name)
+              }
+              labels = {
+                "demo" = "gslb"
+              }
+            }
+            spec = {
+              forProvider = {
+                location = oxr.spec?.region or "West US"
+              }
+            }
+          }
+
+          # Azure Redis Cache
+          redisCache = {
+            apiVersion = "cache.azure.upbound.io/v1beta2"
+            kind = "RedisCache"
+            metadata = {
+              name = "redis-cache-{}".format(oxr.metadata.name)
+              annotations = {
+                "krm.kcl.dev/composition-resource-name" = "redis-cache"
+                "crossplane.io/external-name" = "redis-cache-{}".format(oxr.metadata.name)
+              }
+            }
+            spec = {
+              forProvider = {
+                location = oxr.spec?.region or "West US"
+                resourceGroupNameSelector = {
+                  matchControllerRef = True
+                }
+                capacity = 2
+                family = "C"
+                skuName = "Standard"
+                redisVersion = "6"
+                enableNonSslPort = False
+                minimumTlsVersion = "1.2"
+                redisConfiguration = {}
+              }
+            }
+          }
+
+          # Update status based on infrastructure readiness
+          if "resource-group" in ocds:
+            if ocds["resource-group"].Resource?.status?.atProvider?.id:
+              _dxr.status.infrastructure.resourceGroup = "Resource group ready"
+            else:
+              _dxr.status.infrastructure.resourceGroup = "Resource group provisioning"
+          else:
+            _dxr.status.infrastructure.resourceGroup = "Resource group not found"
+
+          if "redis-cache" in ocds:
+            if ocds["redis-cache"].Resource?.status?.atProvider?.provisioningState == "Succeeded":
+              _dxr.status.infrastructure.redis = "Redis cache ready"
+            else:
+              _dxr.status.infrastructure.redis = "Redis cache provisioning"
+          else:
+            _dxr.status.infrastructure.redis = "Redis cache not found"
+
+          items = [ resourceGroup, redisCache, _dxr ]
+
+  # Step 2: Application (Podinfo)
+  - step: application
+    functionRef:
+      name: crossplane-contrib-function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: application
+      spec:
+        source: |
+
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          _dxr = {
+              **option("params").dxr
+              status.application = {}
+          }
+
+          # Get Redis connection string if available
+          _redisHost = ""
+          _redisReady = False
+          if "redis-cache" in ocds:
+            _redisHost = ocds["redis-cache"].Resource?.status?.atProvider?.hostname or ""
+            _redisReady = _redisHost != ""
+
+          _items = []
+
+          # Only create Podinfo when Redis hostname is available
+          if _redisReady:
+            podinfo = {
+              apiVersion = "helm.crossplane.io/v1beta1"
+              kind = "Release"
+              metadata = {
+                name = "podinfo-app"
+                annotations = {
+                  "krm.kcl.dev/composition-resource-name" = "podinfo"
+                }
+              }
+              spec = {
+                forProvider = {
+                  chart = {
+                    name = "podinfo"
+                    repository = "https://stefanprodan.github.io/podinfo"
+                    version = "6.5.4"
+                  }
+                  namespace = oxr.spec?.namespace or "demo"
+                  values = {
+                    ingress = {
+                      enabled = True
+                      hosts = [
+                        {
+                          host = oxr.spec?.hostname or "podinfo.example.com"
+                          paths = [
+                            {
+                              path = "/"
+                              pathType = "Prefix"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                    cache = "tcp://{}:6380".format(_redisHost)
+                  }
+                }
+              }
+            }
+            _items += [podinfo]
+
+          # Update status based on Redis and Podinfo state
+          if not _redisReady:
+            _dxr.status.application.podinfo = "Waiting for Redis hostname"
+          elif "podinfo" in ocds:
+            if ocds["podinfo"].Resource?.status?.atProvider?.state == "deployed":
+              _dxr.status.application.podinfo = "Podinfo deployed with Redis: {}".format(_redisHost)
+            else:
+              _dxr.status.application.podinfo = "Podinfo deploying with Redis: {}".format(_redisHost)
+          else:
+            _dxr.status.application.podinfo = "Creating Podinfo with Redis: {}".format(_redisHost)
+
+          _items += [_dxr]
+          items = _items
+
+  # Step 3: GSLB Monitoring
+  - step: gslb-monitoring
+    functionRef:
+      name: crossplane-contrib-function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: gslb-monitoring
       spec:
         source: |
 
@@ -45,7 +216,7 @@ spec:
                   kind = "Gslb"
                   metadata = {
                     name = "failover-ingress"
-                    namespace = "test-gslb"
+                    namespace = oxr.spec?.gslbNamespace or "test-gslb"
                   }
                 }
               }
@@ -66,3 +237,6 @@ spec:
             _dxr.status.gslb.healthy = "GSLB resource not found"
 
           items = [ gslb, _dxr ]
+  - functionRef:
+      name: crossplane-contrib-function-auto-ready
+    step: crossplane-contrib-function-auto-ready

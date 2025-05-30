@@ -1,9 +1,13 @@
 apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
-  name: kcl-function
-  annotations:
-    # This tells crossplane render to connect to the function locally.
-    #3render.crossplane.io/runtime: Development
+  name: crossplane-contrib-function-kcl
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/function-kcl:latest
+  package: xpkg.upbound.io/crossplane-contrib/function-kcl:v0.11.4
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: crossplane-contrib-function-auto-ready
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:v0.5.0
