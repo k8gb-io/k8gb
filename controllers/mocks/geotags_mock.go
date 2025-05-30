@@ -57,11 +57,12 @@ func (m *MockGeoTags) EXPECT() *MockGeoTagsMockRecorder {
 }
 
 // GetExternalClusterNSNamesByHostname mocks base method.
-func (m *MockGeoTags) GetExternalClusterNSNamesByHostname(host string) map[string]string {
+func (m *MockGeoTags) GetExternalClusterNSNamesByHostname(host string) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExternalClusterNSNamesByHostname", host)
 	ret0, _ := ret[0].(map[string]string)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetExternalClusterNSNamesByHostname indicates an expected call of GetExternalClusterNSNamesByHostname.
