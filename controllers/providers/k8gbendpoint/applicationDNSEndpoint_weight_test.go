@@ -26,8 +26,8 @@ import (
 	"testing"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/miekg/dns"
 	"github.com/rs/zerolog"
@@ -53,15 +53,15 @@ func TestWeight(t *testing.T) {
 	var tests = []struct {
 		name           string
 		mockData       []wrr
-		config         *depresolver.Config
+		config         *resolver.Config
 		gslb           *k8gbv1beta1.Gslb
 		expectedLabels map[string]string
 	}{
 		{
 			name: "app eu35-us50-za15 - all clusters",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "eu",
-				DelegationZones: depresolver.DelegationZones{
+				DelegationZones: resolver.DelegationZones{
 					{
 						LoadBalancedZone: "cloud.example.com",
 						ParentZone:       "example.com",
@@ -77,7 +77,7 @@ func TestWeight(t *testing.T) {
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
 					Strategy: k8gbv1beta1.Strategy{
-						Type: depresolver.RoundRobinStrategy,
+						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 35,
 							"us": 50,
@@ -100,7 +100,7 @@ func TestWeight(t *testing.T) {
 				{region: "za", weight: 15, targets: []string{"10.22.0.1", "10.22.0.2", "10.22.1.1"}},
 			},
 			expectedLabels: map[string]string{
-				"strategy":       depresolver.RoundRobinStrategy,
+				"strategy":       resolver.RoundRobinStrategy,
 				"weight-us-0-50": "10.0.0.1",
 				"weight-us-1-50": "10.0.0.2",
 				"weight-eu-0-35": "10.10.0.1",
@@ -113,9 +113,9 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "app eu1-us0-za0 - only current cluster",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "eu",
-				DelegationZones: depresolver.DelegationZones{
+				DelegationZones: resolver.DelegationZones{
 					{
 						LoadBalancedZone: "cloud.example.com",
 						ParentZone:       "example.com",
@@ -131,7 +131,7 @@ func TestWeight(t *testing.T) {
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
 					Strategy: k8gbv1beta1.Strategy{
-						Type: depresolver.RoundRobinStrategy,
+						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 1,
 							"us": 0,
@@ -154,7 +154,7 @@ func TestWeight(t *testing.T) {
 				{region: "za", weight: 15, targets: []string{"10.22.0.1", "10.22.0.2", "10.22.1.1"}},
 			},
 			expectedLabels: map[string]string{
-				"strategy":      depresolver.RoundRobinStrategy,
+				"strategy":      resolver.RoundRobinStrategy,
 				"weight-us-0-0": "10.0.0.1",
 				"weight-us-1-0": "10.0.0.2",
 				"weight-eu-0-1": "10.10.0.1",
@@ -167,9 +167,9 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "app eu0-us1-za0 only external cluster",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "eu",
-				DelegationZones: depresolver.DelegationZones{
+				DelegationZones: resolver.DelegationZones{
 					{
 						LoadBalancedZone: "cloud.example.com",
 						ParentZone:       "example.com",
@@ -185,7 +185,7 @@ func TestWeight(t *testing.T) {
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
 					Strategy: k8gbv1beta1.Strategy{
-						Type: depresolver.RoundRobinStrategy,
+						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 0,
 							"us": 1,
@@ -208,7 +208,7 @@ func TestWeight(t *testing.T) {
 				{region: "za", weight: 15, targets: []string{"10.22.0.1", "10.22.0.2", "10.22.1.1"}},
 			},
 			expectedLabels: map[string]string{
-				"strategy":      depresolver.RoundRobinStrategy,
+				"strategy":      resolver.RoundRobinStrategy,
 				"weight-us-0-1": "10.0.0.1",
 				"weight-us-1-1": "10.0.0.2",
 				"weight-eu-0-0": "10.10.0.1",
@@ -221,9 +221,9 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "empty weights with external targets",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "eu",
-				DelegationZones: depresolver.DelegationZones{
+				DelegationZones: resolver.DelegationZones{
 					{
 						LoadBalancedZone: "cloud.example.com",
 						ParentZone:       "example.com",
@@ -239,7 +239,7 @@ func TestWeight(t *testing.T) {
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
 					Strategy: k8gbv1beta1.Strategy{
-						Type:   depresolver.RoundRobinStrategy,
+						Type:   resolver.RoundRobinStrategy,
 						Weight: map[string]int{},
 					},
 				},
@@ -259,15 +259,15 @@ func TestWeight(t *testing.T) {
 			},
 
 			expectedLabels: map[string]string{
-				"strategy": depresolver.RoundRobinStrategy,
+				"strategy": resolver.RoundRobinStrategy,
 			},
 		},
 
 		{
 			name: "empty weights without",
-			config: &depresolver.Config{
+			config: &resolver.Config{
 				ClusterGeoTag: "eu",
-				DelegationZones: depresolver.DelegationZones{
+				DelegationZones: resolver.DelegationZones{
 					{
 						LoadBalancedZone:  "cloud.example.com",
 						ParentZone:        "example.com",
@@ -280,7 +280,7 @@ func TestWeight(t *testing.T) {
 			gslb: &k8gbv1beta1.Gslb{
 				Spec: k8gbv1beta1.GslbSpec{
 					Strategy: k8gbv1beta1.Strategy{
-						Type:   depresolver.RoundRobinStrategy,
+						Type:   resolver.RoundRobinStrategy,
 						Weight: map[string]int{},
 					},
 				},
@@ -298,7 +298,7 @@ func TestWeight(t *testing.T) {
 			},
 
 			expectedLabels: map[string]string{
-				"strategy": depresolver.RoundRobinStrategy,
+				"strategy": resolver.RoundRobinStrategy,
 			},
 		},
 	}

@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/k8gb-io/k8gb/controllers/resolver"
+
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -34,7 +36,6 @@ import (
 	"errors"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"go.opentelemetry.io/otel/trace"
@@ -50,8 +51,8 @@ import (
 type GslbReconciler struct {
 	client.Client
 	Scheme             *runtime.Scheme
-	Config             *depresolver.Config
-	DepResolver        depresolver.GslbResolver
+	Config             *resolver.Config
+	Resolver           resolver.GslbResolver
 	DNSProvider        dns.Provider
 	Recorder           record.EventRecorder
 	Tracer             trace.Tracer
@@ -94,7 +95,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return result.RequeueError(fmt.Errorf("error reading the object (%s)", err))
 	}
 
-	err = r.DepResolver.ResolveGslbSpec(ctx, gslb, r.Client)
+	err = r.Resolver.ResolveGslbSpec(ctx, gslb, r.Client)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("resolving spec (%s)", err))

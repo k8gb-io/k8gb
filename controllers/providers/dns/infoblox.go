@@ -25,18 +25,18 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	ibcl "github.com/infobloxopen/infoblox-go-client/v2"
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 )
 
 type InfobloxProvider struct {
-	config depresolver.Config
+	config resolver.Config
 	client InfobloxClient
 }
 
 var m = metrics.Metrics()
 
-func NewInfobloxDNS(config depresolver.Config, client InfobloxClient) *InfobloxProvider {
+func NewInfobloxDNS(config resolver.Config, client InfobloxClient) *InfobloxProvider {
 	return &InfobloxProvider{
 		client: client,
 		config: config,
@@ -44,7 +44,7 @@ func NewInfobloxDNS(config depresolver.Config, client InfobloxClient) *InfobloxP
 }
 
 // current IP list is up to date, so we remove it from delegatedTo.
-func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServer, zoneInfo *depresolver.DelegationZoneInfo) []ibcl.NameServer {
+func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServer, zoneInfo *resolver.DelegationZoneInfo) []ibcl.NameServer {
 	// Drop own records for straight away update
 	// And ensure local entries are up to date
 	// And final list is sorted
@@ -56,7 +56,7 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServe
 	return final
 }
 
-func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.DelegationZoneInfo) error {
+func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *resolver.DelegationZoneInfo) error {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *depresolver.Delegation
 	return nil
 }
 
-func (p *InfobloxProvider) Finalize(zoneInfo *depresolver.DelegationZoneInfo) error {
+func (p *InfobloxProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo) error {
 	log.Info().Msgf("Zone %s must deleted by manually in Infoblox", zoneInfo.LoadBalancedZone)
 	return nil
 }

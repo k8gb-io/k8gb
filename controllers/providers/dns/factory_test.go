@@ -22,7 +22,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/k8gb-io/k8gb/controllers/depresolver"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,39 +33,39 @@ func TestFactory(t *testing.T) {
 	cl := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 	var tests = []struct {
 		name          string
-		config        depresolver.Config
+		config        resolver.Config
 		expectedType  string
 		expectedError bool
 		client        client.Client
 	}{
 		{
 			name: "ExternalDNS",
-			config: depresolver.Config{
-				EdgeDNSType: depresolver.DNSTypeExternal,
+			config: resolver.Config{
+				EdgeDNSType: resolver.DNSTypeExternal,
 			},
 			expectedType: "EXTDNS",
 			client:       cl,
 		},
 		{
 			name: "Infoblox",
-			config: depresolver.Config{
-				EdgeDNSType: depresolver.DNSTypeInfoblox,
+			config: resolver.Config{
+				EdgeDNSType: resolver.DNSTypeInfoblox,
 			},
 			expectedType: "Infoblox",
 			client:       cl,
 		},
 		{
 			name: "No EdgeDNS",
-			config: depresolver.Config{
-				EdgeDNSType: depresolver.DNSTypeNoEdgeDNS,
+			config: resolver.Config{
+				EdgeDNSType: resolver.DNSTypeNoEdgeDNS,
 			},
 			expectedType: "EMPTY",
 			client:       cl,
 		},
 		{
 			name: "Invalid",
-			config: depresolver.Config{
-				EdgeDNSType: depresolver.DNSTypeNoEdgeDNS,
+			config: resolver.Config{
+				EdgeDNSType: resolver.DNSTypeNoEdgeDNS,
 			},
 			expectedType:  "EMPTY",
 			expectedError: true,
