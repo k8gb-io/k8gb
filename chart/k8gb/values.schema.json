@@ -290,7 +290,7 @@
                 },
                 "extGslbClustersGeoTags": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 0
                 },
                 "reconcileRequeueSeconds": {
                     "type": "integer",
@@ -335,7 +335,6 @@
             },
             "required": [
                 "clusterGeoTag",
-                "extGslbClustersGeoTags",
                 "edgeDNSServers",
                 "dnsZones"
             ],
