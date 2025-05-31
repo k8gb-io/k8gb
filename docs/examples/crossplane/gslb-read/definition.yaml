@@ -73,6 +73,21 @@ spec:
                   healthy:
                     type: string
                     description: GSLB health status across all domains
+                  isActiveCluster:
+                    type: boolean
+                    description: Whether this cluster is currently receiving traffic from GSLB
+                  recommendedPolicy:
+                    type: string
+                    description: Recommended management policy based on GSLB state
+                  policyReason:
+                    type: string
+                    description: Reason for the recommended policy change
+                  debugHealthyRecords:
+                    type: string
+                    description: Debug info showing healthy records from GSLB
+                  debugExposedIps:
+                    type: string
+                    description: Debug info showing exposed IPs from GSLB
         required:
         - spec
         type: object

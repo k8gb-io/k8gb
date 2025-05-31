@@ -249,19 +249,53 @@ spec:
               status.gslb = {}
           }
 
+          # Initialize default values
+          _recommendedPolicy = oxr.spec?.managementPolicies[0] or "*"
+          _policyReason = "Initializing"
+          _isActiveCluster = False
+
           # Monitor health of GSLB created by application step
           if "gslb-resource" in ocds:
-            serviceHealth = ocds["gslb-resource"].Resource?.status?.atProvider?.manifest?.status?.serviceHealth
+            _gslbStatus = ocds["gslb-resource"].Resource?.status?.atProvider?.manifest?.status
+            serviceHealth = _gslbStatus?.serviceHealth
+
+            # Check GSLB health
             if serviceHealth:
               _unhealthyDomains = [k for k, v in serviceHealth if v != "Healthy"]
-              if len(_unhealthyDomains) == 0:
+              _gslbHealthy = len(_unhealthyDomains) == 0
+              if _gslbHealthy:
                 _dxr.status.gslb.healthy = "All {} GSLB domains are healthy".format(len(serviceHealth))
               else:
                 _dxr.status.gslb.healthy = "GSLB UNHEALTHY: {} ({}/{} unhealthy)".format(_unhealthyDomains, len(_unhealthyDomains), len(serviceHealth))
             else:
+              _gslbHealthy = False
               _dxr.status.gslb.healthy = "No GSLB serviceHealth data available"
+
+            # Check if we are the active cluster from GSLB perspective
+            _hostname = oxr.spec?.hostname or "globalapp.cloud.example.com"
+            _healthyRecords = _gslbStatus?.healthyRecords?[_hostname] or []
+            _exposedIps = _gslbStatus?.loadBalancer?.exposedIps or []
+            _isActiveCluster = len(_healthyRecords) > 0 and len(_exposedIps) > 0 and _healthyRecords == _exposedIps
+
+            # Simple GSLB-based policy decision
+            if _gslbHealthy and _isActiveCluster:
+              _recommendedPolicy = "*"
+              _policyReason = "GSLB healthy and cluster is active"
+            else:
+              _recommendedPolicy = "Observe"
+              _policyReason = "GSLB unhealthy or traffic routed elsewhere"
+
+            # Debug info
+            _dxr.status.gslb.debugHealthyRecords = str(_healthyRecords)
+            _dxr.status.gslb.debugExposedIps = str(_exposedIps)
           else:
             _dxr.status.gslb.healthy = "GSLB resource not found"
+            _policyReason = "GSLB not available"
+
+          # Always set these fields
+          _dxr.status.gslb.isActiveCluster = _isActiveCluster
+          _dxr.status.gslb.recommendedPolicy = _recommendedPolicy
+          _dxr.status.gslb.policyReason = _policyReason
 
           items = [ _dxr ]
   - functionRef:
