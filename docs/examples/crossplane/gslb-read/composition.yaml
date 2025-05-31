@@ -42,6 +42,7 @@ spec:
               }
             }
             spec = {
+              managementPolicies = oxr.spec?.managementPolicies or ["*"]
               forProvider = {
                 location = oxr.spec?.region or "West US"
               }
@@ -60,6 +61,7 @@ spec:
               }
             }
             spec = {
+              managementPolicies = oxr.spec?.managementPolicies or ["*"]
               forProvider = {
                 location = oxr.spec?.region or "West US"
                 resourceGroupNameSelector = {
@@ -145,9 +147,10 @@ spec:
                   values = {
                     ingress = {
                       enabled = True
+                      className = "nginx"
                       hosts = [
                         {
-                          host = oxr.spec?.hostname or "podinfo.example.com"
+                          host = oxr.spec?.hostname or "globalapp.cloud.example.com"
                           paths = [
                             {
                               path = "/"
@@ -156,29 +159,76 @@ spec:
                           ]
                         }
                       ]
+                      additionalLabels = {
+                        "gslb" = "failover-ingress"
+                      }
                     }
                     cache = "tcp://{}:6380".format(_redisHost)
                   }
                 }
               }
             }
-            _items += [podinfo]
+            # GSLB for traffic management
+            gslb = {
+              apiVersion = "kubernetes.crossplane.io/v1alpha2"
+              kind = "Object"
+              metadata = {
+                name = "failover-ingress"
+                annotations = {
+                  "krm.kcl.dev/composition-resource-name" = "gslb-resource"
+                }
+              }
+              spec = {
+                watch = True
+                forProvider = {
+                  manifest = {
+                    apiVersion = "k8gb.absa.oss/v1beta1"
+                    kind = "Gslb"
+                    metadata = {
+                      name = "failover-ingress"
+                      namespace = oxr.spec?.namespace or "demo"
+                    }
+                    spec = {
+                      strategy = {
+                        type = "failover"
+                        primaryGeoTag = oxr.spec?.primaryGeoTag or "eu"
+                      }
+                      resourceRef = {
+                        apiVersion = "networking.k8s.io/v1"
+                        kind = "Ingress"
+                        matchLabels = {
+                          "gslb" = "failover-ingress"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
 
-          # Update status based on Redis and Podinfo state
+            _items += [podinfo, gslb]
+
+          # Update status based on Redis, Podinfo and GSLB state
           if not _redisReady:
             _dxr.status.application.podinfo = "Waiting for Redis hostname"
-          elif "podinfo" in ocds:
+            _dxr.status.application.gslb = "Waiting for application deployment"
+          elif "podinfo" in ocds and "gslb-resource" in ocds:
             if ocds["podinfo"].Resource?.status?.atProvider?.state == "deployed":
               _dxr.status.application.podinfo = "Podinfo deployed with Redis: {}".format(_redisHost)
             else:
               _dxr.status.application.podinfo = "Podinfo deploying with Redis: {}".format(_redisHost)
+            _dxr.status.application.gslb = "GSLB resource created"
+          elif "podinfo" in ocds:
+            _dxr.status.application.podinfo = "Podinfo ready, creating GSLB"
+            _dxr.status.application.gslb = "Creating GSLB resource"
           else:
             _dxr.status.application.podinfo = "Creating Podinfo with Redis: {}".format(_redisHost)
+            _dxr.status.application.gslb = "Waiting for Podinfo"
 
           _items += [_dxr]
           items = _items
 
-  # Step 3: GSLB Monitoring
+  # Step 3: GSLB Health Monitoring  
   - step: gslb-monitoring
     functionRef:
       name: crossplane-contrib-function-kcl
@@ -197,34 +247,9 @@ spec:
               status.gslb = {}
           }
 
-          gslb = {
-            apiVersion = "kubernetes.crossplane.io/v1alpha2"
-            kind = "Object"
-            metadata = {
-                name = "failover-ingress"
-                annotations = {
-                  "krm.kcl.dev/composition-resource-name" = "gslb"
-                  "krm.kcl.dev/ready": "True"
-                }
-            }
-            spec = {
-              managementPolicies = ["Observe"]
-              watch = True
-              forProvider = {
-                manifest = {
-                  apiVersion = "k8gb.absa.oss/v1beta1"
-                  kind = "Gslb"
-                  metadata = {
-                    name = "failover-ingress"
-                    namespace = oxr.spec?.gslbNamespace or "test-gslb"
-                  }
-                }
-              }
-            }
-          }
-
-          if "gslb" in ocds:
-            serviceHealth = ocds["gslb"].Resource?.status?.atProvider?.manifest?.status?.serviceHealth
+          # Monitor health of GSLB created by application step
+          if "gslb-resource" in ocds:
+            serviceHealth = ocds["gslb-resource"].Resource?.status?.atProvider?.manifest?.status?.serviceHealth
             if serviceHealth:
               _unhealthyDomains = [k for k, v in serviceHealth if v != "Healthy"]
               if len(_unhealthyDomains) == 0:
@@ -236,7 +261,7 @@ spec:
           else:
             _dxr.status.gslb.healthy = "GSLB resource not found"
 
-          items = [ gslb, _dxr ]
+          items = [ _dxr ]
   - functionRef:
       name: crossplane-contrib-function-auto-ready
     step: crossplane-contrib-function-auto-ready

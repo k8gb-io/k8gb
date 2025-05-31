@@ -24,6 +24,10 @@ spec:
                 type: string
                 description: Azure region for resource deployment
                 default: "West US"
+              primaryGeoTag:
+                type: string
+                description: Primary geo tag for GSLB failover strategy
+                default: "eu"
               namespace:
                 type: string
                 description: Kubernetes namespace for application deployment
@@ -31,11 +35,13 @@ spec:
               hostname:
                 type: string
                 description: Hostname for the application ingress
-                default: "podinfo.example.com"
-              gslbNamespace:
-                type: string
-                description: Kubernetes namespace where GSLB resource is deployed
-                default: "test-gslb"
+                default: "globalapp.cloud.example.com"
+              managementPolicies:
+                type: array
+                description: Management policies for infrastructure resources (Active vs Passive control plane)
+                items:
+                  type: string
+                default: ["*"]
           status:
             description: GlobalAppStatus defines the observed state of GlobalApp.
             type: object
@@ -57,6 +63,9 @@ spec:
                   podinfo:
                     type: string
                     description: Podinfo deployment status
+                  gslb:
+                    type: string
+                    description: GSLB resource creation status
               gslb:
                 type: object
                 description: GSLB monitoring status

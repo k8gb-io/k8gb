@@ -4,6 +4,7 @@ metadata:
   name: example-gslb-yury
 spec:
   region: "West Europe"
+  primaryGeoTag: "eu"
   namespace: "demo"
-  hostname: "podinfo.failover.cloud.example.com"
-  gslbNamespace: "test-gslb"
+  hostname: "globalapp.cloud.example.com"
+  managementPolicies: ["*"]  # Active control plane
