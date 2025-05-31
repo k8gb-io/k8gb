@@ -80,7 +80,8 @@ spec:
 
           # Update status based on infrastructure readiness
           if "resource-group" in ocds:
-            if ocds["resource-group"].Resource?.status?.atProvider?.id:
+            _rgReadyCondition = [c for c in ocds["resource-group"].Resource?.status?.conditions or [] if c.type == "Ready" and c.status == "True"]
+            if len(_rgReadyCondition) > 0:
               _dxr.status.infrastructure.resourceGroup = "Resource group ready"
             else:
               _dxr.status.infrastructure.resourceGroup = "Resource group provisioning"
@@ -88,7 +89,8 @@ spec:
             _dxr.status.infrastructure.resourceGroup = "Resource group not found"
 
           if "redis-cache" in ocds:
-            if ocds["redis-cache"].Resource?.status?.atProvider?.provisioningState == "Succeeded":
+            _redisReadyCondition = [c for c in ocds["redis-cache"].Resource?.status?.conditions or [] if c.type == "Ready" and c.status == "True"]
+            if len(_redisReadyCondition) > 0:
               _dxr.status.infrastructure.redis = "Redis cache ready"
             else:
               _dxr.status.infrastructure.redis = "Redis cache provisioning"
