@@ -7,4 +7,5 @@ spec:
   primaryGeoTag: "eu"
   namespace: "demo"
   hostname: "globalapp.cloud.example.com"
-  managementPolicies: ["*"]  # Active control plane
+  managementPolicies: ["*"]  # Initial policy
+  autoApplyRecommendedPolicy: false  # Manual mode

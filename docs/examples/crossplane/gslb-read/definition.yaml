@@ -42,6 +42,10 @@ spec:
                 items:
                   type: string
                 default: ["*"]
+              autoApplyRecommendedPolicy:
+                type: boolean
+                description: Whether to automatically apply the recommended management policy based on GSLB status
+                default: false
           status:
             description: GlobalAppStatus defines the observed state of GlobalApp.
             type: object
@@ -88,6 +92,15 @@ spec:
                   debugExposedIps:
                     type: string
                     description: Debug info showing exposed IPs from GSLB
+                  autoApplyEnabled:
+                    type: boolean
+                    description: Whether auto-apply is enabled
+                  appliedPolicy:
+                    type: string
+                    description: The policy actually applied to infrastructure resources
+                  autoApplyStatus:
+                    type: string
+                    description: Status message about auto-apply behavior
         required:
         - spec
         type: object

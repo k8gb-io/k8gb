@@ -27,6 +27,12 @@ spec:
               status.infrastructure = {}
           }
 
+          # Determine which management policy to use
+          _autoApply = oxr.spec?.autoApplyRecommendedPolicy or False
+          _manualPolicy = oxr.spec?.managementPolicies or ["*"]
+          _recommendedFromStatus = oxr.status?.gslb?.recommendedPolicy or "*"
+          _finalPolicy = [_recommendedFromStatus] if _autoApply else _manualPolicy
+
           # Azure Resource Group
           resourceGroup = {
             apiVersion = "azure.upbound.io/v1beta1"
@@ -42,7 +48,7 @@ spec:
               }
             }
             spec = {
-              managementPolicies = oxr.spec?.managementPolicies or ["*"]
+              managementPolicies = _finalPolicy
               forProvider = {
                 location = oxr.spec?.region or "West US"
               }
@@ -61,7 +67,7 @@ spec:
               }
             }
             spec = {
-              managementPolicies = oxr.spec?.managementPolicies or ["*"]
+              managementPolicies = _finalPolicy
               forProvider = {
                 location = oxr.spec?.region or "West US"
                 resourceGroupNameSelector = {
@@ -296,6 +302,17 @@ spec:
           _dxr.status.gslb.isActiveCluster = _isActiveCluster
           _dxr.status.gslb.recommendedPolicy = _recommendedPolicy
           _dxr.status.gslb.policyReason = _policyReason
+          
+          # Add auto-apply status
+          _autoApplyEnabled = oxr.spec?.autoApplyRecommendedPolicy or False
+          _currentManualPolicy = oxr.spec?.managementPolicies[0] if oxr.spec?.managementPolicies else "*"
+          _dxr.status.gslb.autoApplyEnabled = _autoApplyEnabled
+          if _autoApplyEnabled:
+            _dxr.status.gslb.appliedPolicy = _recommendedPolicy
+            _dxr.status.gslb.autoApplyStatus = "Policy automatically applied: {}".format(_recommendedPolicy)
+          else:
+            _dxr.status.gslb.appliedPolicy = _currentManualPolicy
+            _dxr.status.gslb.autoApplyStatus = "Manual policy used: {}".format(_currentManualPolicy)
 
           items = [ _dxr ]
   - functionRef:

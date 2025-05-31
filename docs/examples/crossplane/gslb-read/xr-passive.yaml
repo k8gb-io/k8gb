@@ -7,4 +7,6 @@ spec:
   primaryGeoTag: "eu"    # Same primary geo tag for consistent failover
   namespace: "demo"
   hostname: "globalapp.cloud.example.com"
-  managementPolicies: ["Observe"]  # Passive control plane
+  managementPolicies: ["Observe"]  # Initial policy
+  #autoApplyRecommendedPolicy: false  # Manual mode
+  autoApplyRecommendedPolicy: true  # Automatic GSLB-driven failover
