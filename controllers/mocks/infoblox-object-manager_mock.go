@@ -58,18 +58,18 @@ func (m *MockIBObjectManager) EXPECT() *MockIBObjectManagerMockRecorder {
 }
 
 // AllocateIP mocks base method.
-func (m *MockIBObjectManager) AllocateIP(arg0, arg1, arg2 string, arg3 bool, arg4, arg5, arg6 string, arg7 ibclient.EA) (*ibclient.FixedAddress, error) {
+func (m *MockIBObjectManager) AllocateIP(arg0, arg1, arg2 string, arg3 bool, arg4, arg5, arg6 string, arg7 ibclient.EA, arg8, arg9, arg10 string, arg11 *bool, arg12 string, arg13 bool, arg14 []*ibclient.Dhcpoption, arg15 bool) (*ibclient.FixedAddress, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AllocateIP", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+	ret := m.ctrl.Call(m, "AllocateIP", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
 	ret0, _ := ret[0].(*ibclient.FixedAddress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // AllocateIP indicates an expected call of AllocateIP.
-func (mr *MockIBObjectManagerMockRecorder) AllocateIP(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 any) *gomock.Call {
+func (mr *MockIBObjectManagerMockRecorder) AllocateIP(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateIP", reflect.TypeOf((*MockIBObjectManager)(nil).AllocateIP), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateIP", reflect.TypeOf((*MockIBObjectManager)(nil).AllocateIP), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
 }
 
 // AllocateNetwork mocks base method.
@@ -175,6 +175,21 @@ func (m *MockIBObjectManager) CreateARecord(arg0, arg1, arg2, arg3, arg4 string,
 func (mr *MockIBObjectManagerMockRecorder) CreateARecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateARecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateARecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+}
+
+// CreateAliasRecord mocks base method.
+func (m *MockIBObjectManager) CreateAliasRecord(arg0, arg1, arg2, arg3, arg4 string, arg5 bool, arg6 ibclient.EA, arg7 uint32, arg8 bool) (*ibclient.RecordAlias, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAliasRecord", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+	ret0, _ := ret[0].(*ibclient.RecordAlias)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAliasRecord indicates an expected call of CreateAliasRecord.
+func (mr *MockIBObjectManagerMockRecorder) CreateAliasRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAliasRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateAliasRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 }
 
 // CreateCNAMERecord mocks base method.
@@ -283,6 +298,21 @@ func (mr *MockIBObjectManagerMockRecorder) CreateHostRecord(arg0, arg1, arg2, ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateHostRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateHostRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
 }
 
+// CreateIpv4SharedNetwork mocks base method.
+func (m *MockIBObjectManager) CreateIpv4SharedNetwork(arg0 string, arg1 []string, arg2 string, arg3 ibclient.EA, arg4 string, arg5, arg6 bool, arg7 []*ibclient.Dhcpoption) (*ibclient.SharedNetwork, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateIpv4SharedNetwork", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+	ret0, _ := ret[0].(*ibclient.SharedNetwork)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateIpv4SharedNetwork indicates an expected call of CreateIpv4SharedNetwork.
+func (mr *MockIBObjectManagerMockRecorder) CreateIpv4SharedNetwork(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIpv4SharedNetwork", reflect.TypeOf((*MockIBObjectManager)(nil).CreateIpv4SharedNetwork), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+}
+
 // CreateMXRecord mocks base method.
 func (m *MockIBObjectManager) CreateMXRecord(arg0, arg1, arg2 string, arg3, arg4 uint32, arg5 bool, arg6 string, arg7 ibclient.EA) (*ibclient.RecordMX, error) {
 	m.ctrl.T.Helper()
@@ -296,6 +326,21 @@ func (m *MockIBObjectManager) CreateMXRecord(arg0, arg1, arg2 string, arg3, arg4
 func (mr *MockIBObjectManagerMockRecorder) CreateMXRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMXRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateMXRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+}
+
+// CreateNSRecord mocks base method.
+func (m *MockIBObjectManager) CreateNSRecord(arg0, arg1, arg2 string, arg3 []*ibclient.ZoneNameServer, arg4 string) (*ibclient.RecordNS, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateNSRecord", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(*ibclient.RecordNS)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateNSRecord indicates an expected call of CreateNSRecord.
+func (mr *MockIBObjectManagerMockRecorder) CreateNSRecord(arg0, arg1, arg2, arg3, arg4 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNSRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateNSRecord), arg0, arg1, arg2, arg3, arg4)
 }
 
 // CreateNetwork mocks base method.
@@ -328,6 +373,21 @@ func (mr *MockIBObjectManagerMockRecorder) CreateNetworkContainer(arg0, arg1, ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNetworkContainer", reflect.TypeOf((*MockIBObjectManager)(nil).CreateNetworkContainer), arg0, arg1, arg2, arg3, arg4)
 }
 
+// CreateNetworkRange mocks base method.
+func (m *MockIBObjectManager) CreateNetworkRange(arg0, arg1, arg2, arg3, arg4, arg5 string, arg6 bool, arg7 ibclient.EA, arg8 *ibclient.Dhcpmember, arg9 string, arg10 []*ibclient.Dhcpoption, arg11 bool, arg12, arg13, arg14 string) (*ibclient.Range, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateNetworkRange", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
+	ret0, _ := ret[0].(*ibclient.Range)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateNetworkRange indicates an expected call of CreateNetworkRange.
+func (mr *MockIBObjectManagerMockRecorder) CreateNetworkRange(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNetworkRange", reflect.TypeOf((*MockIBObjectManager)(nil).CreateNetworkRange), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
+}
+
 // CreateNetworkView mocks base method.
 func (m *MockIBObjectManager) CreateNetworkView(arg0, arg1 string, arg2 ibclient.EA) (*ibclient.NetworkView, error) {
 	m.ctrl.T.Helper()
@@ -356,6 +416,21 @@ func (m *MockIBObjectManager) CreatePTRRecord(arg0, arg1, arg2, arg3, arg4, arg5
 func (mr *MockIBObjectManagerMockRecorder) CreatePTRRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePTRRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreatePTRRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+}
+
+// CreateRangeTemplate mocks base method.
+func (m *MockIBObjectManager) CreateRangeTemplate(arg0 string, arg1, arg2 uint32, arg3 string, arg4 ibclient.EA, arg5 []*ibclient.Dhcpoption, arg6 bool, arg7, arg8 string, arg9 *ibclient.Dhcpmember, arg10 bool, arg11 string) (*ibclient.Rangetemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRangeTemplate", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
+	ret0, _ := ret[0].(*ibclient.Rangetemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateRangeTemplate indicates an expected call of CreateRangeTemplate.
+func (mr *MockIBObjectManagerMockRecorder) CreateRangeTemplate(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRangeTemplate", reflect.TypeOf((*MockIBObjectManager)(nil).CreateRangeTemplate), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
 }
 
 // CreateSRVRecord mocks base method.
@@ -463,6 +538,21 @@ func (mr *MockIBObjectManagerMockRecorder) DeleteARecord(arg0 any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteARecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteARecord), arg0)
 }
 
+// DeleteAliasRecord mocks base method.
+func (m *MockIBObjectManager) DeleteAliasRecord(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAliasRecord", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAliasRecord indicates an expected call of DeleteAliasRecord.
+func (mr *MockIBObjectManagerMockRecorder) DeleteAliasRecord(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAliasRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteAliasRecord), arg0)
+}
+
 // DeleteCNAMERecord mocks base method.
 func (m *MockIBObjectManager) DeleteCNAMERecord(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
@@ -553,6 +643,21 @@ func (mr *MockIBObjectManagerMockRecorder) DeleteHostRecord(arg0 any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHostRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteHostRecord), arg0)
 }
 
+// DeleteIpv4SharedNetwork mocks base method.
+func (m *MockIBObjectManager) DeleteIpv4SharedNetwork(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteIpv4SharedNetwork", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteIpv4SharedNetwork indicates an expected call of DeleteIpv4SharedNetwork.
+func (mr *MockIBObjectManagerMockRecorder) DeleteIpv4SharedNetwork(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteIpv4SharedNetwork", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteIpv4SharedNetwork), arg0)
+}
+
 // DeleteMXRecord mocks base method.
 func (m *MockIBObjectManager) DeleteMXRecord(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
@@ -566,6 +671,21 @@ func (m *MockIBObjectManager) DeleteMXRecord(arg0 string) (string, error) {
 func (mr *MockIBObjectManagerMockRecorder) DeleteMXRecord(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMXRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteMXRecord), arg0)
+}
+
+// DeleteNSRecord mocks base method.
+func (m *MockIBObjectManager) DeleteNSRecord(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteNSRecord", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteNSRecord indicates an expected call of DeleteNSRecord.
+func (mr *MockIBObjectManagerMockRecorder) DeleteNSRecord(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNSRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteNSRecord), arg0)
 }
 
 // DeleteNetwork mocks base method.
@@ -598,6 +718,21 @@ func (mr *MockIBObjectManagerMockRecorder) DeleteNetworkContainer(arg0 any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNetworkContainer", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteNetworkContainer), arg0)
 }
 
+// DeleteNetworkRange mocks base method.
+func (m *MockIBObjectManager) DeleteNetworkRange(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteNetworkRange", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteNetworkRange indicates an expected call of DeleteNetworkRange.
+func (mr *MockIBObjectManagerMockRecorder) DeleteNetworkRange(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNetworkRange", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteNetworkRange), arg0)
+}
+
 // DeleteNetworkView mocks base method.
 func (m *MockIBObjectManager) DeleteNetworkView(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
@@ -626,6 +761,21 @@ func (m *MockIBObjectManager) DeletePTRRecord(arg0 string) (string, error) {
 func (mr *MockIBObjectManagerMockRecorder) DeletePTRRecord(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePTRRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeletePTRRecord), arg0)
+}
+
+// DeleteRangeTemplate mocks base method.
+func (m *MockIBObjectManager) DeleteRangeTemplate(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteRangeTemplate", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteRangeTemplate indicates an expected call of DeleteRangeTemplate.
+func (mr *MockIBObjectManagerMockRecorder) DeleteRangeTemplate(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRangeTemplate", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteRangeTemplate), arg0)
 }
 
 // DeleteSRVRecord mocks base method.
@@ -763,6 +913,36 @@ func (mr *MockIBObjectManagerMockRecorder) GetARecordByRef(arg0 any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetARecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetARecordByRef), arg0)
 }
 
+// GetAliasRecordByRef mocks base method.
+func (m *MockIBObjectManager) GetAliasRecordByRef(arg0 string) (*ibclient.RecordAlias, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAliasRecordByRef", arg0)
+	ret0, _ := ret[0].(*ibclient.RecordAlias)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAliasRecordByRef indicates an expected call of GetAliasRecordByRef.
+func (mr *MockIBObjectManagerMockRecorder) GetAliasRecordByRef(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAliasRecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetAliasRecordByRef), arg0)
+}
+
+// GetAllAliasRecord mocks base method.
+func (m *MockIBObjectManager) GetAllAliasRecord(arg0 *ibclient.QueryParams) ([]ibclient.RecordAlias, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllAliasRecord", arg0)
+	ret0, _ := ret[0].([]ibclient.RecordAlias)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllAliasRecord indicates an expected call of GetAllAliasRecord.
+func (mr *MockIBObjectManagerMockRecorder) GetAllAliasRecord(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllAliasRecord", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllAliasRecord), arg0)
+}
+
 // GetAllDtcLbdn mocks base method.
 func (m *MockIBObjectManager) GetAllDtcLbdn(arg0 *ibclient.QueryParams) ([]ibclient.DtcLbdn, error) {
 	m.ctrl.T.Helper()
@@ -808,6 +988,36 @@ func (mr *MockIBObjectManagerMockRecorder) GetAllDtcServer(arg0 any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllDtcServer", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllDtcServer), arg0)
 }
 
+// GetAllFixedAddress mocks base method.
+func (m *MockIBObjectManager) GetAllFixedAddress(arg0 *ibclient.QueryParams, arg1 bool) ([]ibclient.FixedAddress, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllFixedAddress", arg0, arg1)
+	ret0, _ := ret[0].([]ibclient.FixedAddress)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllFixedAddress indicates an expected call of GetAllFixedAddress.
+func (mr *MockIBObjectManagerMockRecorder) GetAllFixedAddress(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFixedAddress", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllFixedAddress), arg0, arg1)
+}
+
+// GetAllIpv4SharedNetwork mocks base method.
+func (m *MockIBObjectManager) GetAllIpv4SharedNetwork(arg0 *ibclient.QueryParams) ([]ibclient.SharedNetwork, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllIpv4SharedNetwork", arg0)
+	ret0, _ := ret[0].([]ibclient.SharedNetwork)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllIpv4SharedNetwork indicates an expected call of GetAllIpv4SharedNetwork.
+func (mr *MockIBObjectManagerMockRecorder) GetAllIpv4SharedNetwork(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllIpv4SharedNetwork", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllIpv4SharedNetwork), arg0)
+}
+
 // GetAllMembers mocks base method.
 func (m *MockIBObjectManager) GetAllMembers() ([]ibclient.Member, error) {
 	m.ctrl.T.Helper()
@@ -821,6 +1031,36 @@ func (m *MockIBObjectManager) GetAllMembers() ([]ibclient.Member, error) {
 func (mr *MockIBObjectManagerMockRecorder) GetAllMembers() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllMembers", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllMembers))
+}
+
+// GetAllRangeTemplate mocks base method.
+func (m *MockIBObjectManager) GetAllRangeTemplate(arg0 *ibclient.QueryParams) ([]ibclient.Rangetemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllRangeTemplate", arg0)
+	ret0, _ := ret[0].([]ibclient.Rangetemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllRangeTemplate indicates an expected call of GetAllRangeTemplate.
+func (mr *MockIBObjectManagerMockRecorder) GetAllRangeTemplate(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRangeTemplate", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllRangeTemplate), arg0)
+}
+
+// GetAllRecordNS mocks base method.
+func (m *MockIBObjectManager) GetAllRecordNS(arg0 *ibclient.QueryParams) ([]ibclient.RecordNS, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllRecordNS", arg0)
+	ret0, _ := ret[0].([]ibclient.RecordNS)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllRecordNS indicates an expected call of GetAllRecordNS.
+func (mr *MockIBObjectManagerMockRecorder) GetAllRecordNS(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRecordNS", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllRecordNS), arg0)
 }
 
 // GetCNAMERecord mocks base method.
@@ -1123,6 +1363,21 @@ func (mr *MockIBObjectManagerMockRecorder) GetIpAddressFromHostRecord(arg0 any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIpAddressFromHostRecord", reflect.TypeOf((*MockIBObjectManager)(nil).GetIpAddressFromHostRecord), arg0)
 }
 
+// GetIpv4SharedNetworkByRef mocks base method.
+func (m *MockIBObjectManager) GetIpv4SharedNetworkByRef(arg0 string) (*ibclient.SharedNetwork, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetIpv4SharedNetworkByRef", arg0)
+	ret0, _ := ret[0].(*ibclient.SharedNetwork)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetIpv4SharedNetworkByRef indicates an expected call of GetIpv4SharedNetworkByRef.
+func (mr *MockIBObjectManagerMockRecorder) GetIpv4SharedNetworkByRef(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIpv4SharedNetworkByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetIpv4SharedNetworkByRef), arg0)
+}
+
 // GetMXRecord mocks base method.
 func (m *MockIBObjectManager) GetMXRecord(arg0, arg1, arg2 string, arg3 uint32) (*ibclient.RecordMX, error) {
 	m.ctrl.T.Helper()
@@ -1151,6 +1406,21 @@ func (m *MockIBObjectManager) GetMXRecordByRef(arg0 string) (*ibclient.RecordMX,
 func (mr *MockIBObjectManagerMockRecorder) GetMXRecordByRef(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMXRecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetMXRecordByRef), arg0)
+}
+
+// GetNSRecordByRef mocks base method.
+func (m *MockIBObjectManager) GetNSRecordByRef(arg0 string) (*ibclient.RecordNS, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNSRecordByRef", arg0)
+	ret0, _ := ret[0].(*ibclient.RecordNS)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNSRecordByRef indicates an expected call of GetNSRecordByRef.
+func (mr *MockIBObjectManagerMockRecorder) GetNSRecordByRef(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNSRecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetNSRecordByRef), arg0)
 }
 
 // GetNetwork mocks base method.
@@ -1213,6 +1483,36 @@ func (mr *MockIBObjectManagerMockRecorder) GetNetworkContainerByRef(arg0 any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworkContainerByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetNetworkContainerByRef), arg0)
 }
 
+// GetNetworkRange mocks base method.
+func (m *MockIBObjectManager) GetNetworkRange(arg0 *ibclient.QueryParams) ([]ibclient.Range, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNetworkRange", arg0)
+	ret0, _ := ret[0].([]ibclient.Range)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNetworkRange indicates an expected call of GetNetworkRange.
+func (mr *MockIBObjectManagerMockRecorder) GetNetworkRange(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworkRange", reflect.TypeOf((*MockIBObjectManager)(nil).GetNetworkRange), arg0)
+}
+
+// GetNetworkRangeByRef mocks base method.
+func (m *MockIBObjectManager) GetNetworkRangeByRef(arg0 string) (*ibclient.Range, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNetworkRangeByRef", arg0)
+	ret0, _ := ret[0].(*ibclient.Range)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNetworkRangeByRef indicates an expected call of GetNetworkRangeByRef.
+func (mr *MockIBObjectManagerMockRecorder) GetNetworkRangeByRef(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworkRangeByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetNetworkRangeByRef), arg0)
+}
+
 // GetNetworkView mocks base method.
 func (m *MockIBObjectManager) GetNetworkView(arg0 string) (*ibclient.NetworkView, error) {
 	m.ctrl.T.Helper()
@@ -1271,6 +1571,21 @@ func (m *MockIBObjectManager) GetPTRRecordByRef(arg0 string) (*ibclient.RecordPT
 func (mr *MockIBObjectManagerMockRecorder) GetPTRRecordByRef(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPTRRecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetPTRRecordByRef), arg0)
+}
+
+// GetRangeTemplateByRef mocks base method.
+func (m *MockIBObjectManager) GetRangeTemplateByRef(arg0 string) (*ibclient.Rangetemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRangeTemplateByRef", arg0)
+	ret0, _ := ret[0].(*ibclient.Rangetemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRangeTemplateByRef indicates an expected call of GetRangeTemplateByRef.
+func (mr *MockIBObjectManagerMockRecorder) GetRangeTemplateByRef(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRangeTemplateByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetRangeTemplateByRef), arg0)
 }
 
 // GetSRVRecord mocks base method.
@@ -1513,6 +1828,21 @@ func (mr *MockIBObjectManagerMockRecorder) UpdateARecord(arg0, arg1, arg2, arg3,
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateARecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateARecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 }
 
+// UpdateAliasRecord mocks base method.
+func (m *MockIBObjectManager) UpdateAliasRecord(arg0, arg1, arg2, arg3, arg4, arg5 string, arg6 bool, arg7 ibclient.EA, arg8 uint32, arg9 bool) (*ibclient.RecordAlias, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAliasRecord", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+	ret0, _ := ret[0].(*ibclient.RecordAlias)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAliasRecord indicates an expected call of UpdateAliasRecord.
+func (mr *MockIBObjectManagerMockRecorder) UpdateAliasRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAliasRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateAliasRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+}
+
 // UpdateCNAMERecord mocks base method.
 func (m *MockIBObjectManager) UpdateCNAMERecord(arg0, arg1, arg2 string, arg3 bool, arg4 uint32, arg5 string, arg6 ibclient.EA) (*ibclient.RecordCNAME, error) {
 	m.ctrl.T.Helper()
@@ -1604,18 +1934,18 @@ func (mr *MockIBObjectManagerMockRecorder) UpdateDtcServer(arg0, arg1, arg2, arg
 }
 
 // UpdateFixedAddress mocks base method.
-func (m *MockIBObjectManager) UpdateFixedAddress(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 string, arg8 ibclient.EA) (*ibclient.FixedAddress, error) {
+func (m *MockIBObjectManager) UpdateFixedAddress(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 string, arg8 ibclient.EA, arg9, arg10 string, arg11 *bool, arg12 string, arg13 bool, arg14 []*ibclient.Dhcpoption, arg15 bool) (*ibclient.FixedAddress, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateFixedAddress", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+	ret := m.ctrl.Call(m, "UpdateFixedAddress", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
 	ret0, _ := ret[0].(*ibclient.FixedAddress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateFixedAddress indicates an expected call of UpdateFixedAddress.
-func (mr *MockIBObjectManagerMockRecorder) UpdateFixedAddress(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 any) *gomock.Call {
+func (mr *MockIBObjectManagerMockRecorder) UpdateFixedAddress(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFixedAddress", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateFixedAddress), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFixedAddress", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateFixedAddress), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
 }
 
 // UpdateHostRecord mocks base method.
@@ -1633,6 +1963,21 @@ func (mr *MockIBObjectManagerMockRecorder) UpdateHostRecord(arg0, arg1, arg2, ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateHostRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateHostRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17)
 }
 
+// UpdateIpv4SharedNetwork mocks base method.
+func (m *MockIBObjectManager) UpdateIpv4SharedNetwork(arg0, arg1 string, arg2 []string, arg3, arg4 string, arg5 ibclient.EA, arg6, arg7 bool, arg8 []*ibclient.Dhcpoption) (*ibclient.SharedNetwork, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateIpv4SharedNetwork", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+	ret0, _ := ret[0].(*ibclient.SharedNetwork)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateIpv4SharedNetwork indicates an expected call of UpdateIpv4SharedNetwork.
+func (mr *MockIBObjectManagerMockRecorder) UpdateIpv4SharedNetwork(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateIpv4SharedNetwork", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateIpv4SharedNetwork), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+}
+
 // UpdateMXRecord mocks base method.
 func (m *MockIBObjectManager) UpdateMXRecord(arg0, arg1, arg2, arg3 string, arg4, arg5 uint32, arg6 bool, arg7 string, arg8 ibclient.EA) (*ibclient.RecordMX, error) {
 	m.ctrl.T.Helper()
@@ -1646,6 +1991,21 @@ func (m *MockIBObjectManager) UpdateMXRecord(arg0, arg1, arg2, arg3 string, arg4
 func (mr *MockIBObjectManagerMockRecorder) UpdateMXRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMXRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateMXRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+}
+
+// UpdateNSRecord mocks base method.
+func (m *MockIBObjectManager) UpdateNSRecord(arg0, arg1, arg2, arg3 string, arg4 []*ibclient.ZoneNameServer, arg5 string) (*ibclient.RecordNS, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNSRecord", arg0, arg1, arg2, arg3, arg4, arg5)
+	ret0, _ := ret[0].(*ibclient.RecordNS)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateNSRecord indicates an expected call of UpdateNSRecord.
+func (mr *MockIBObjectManagerMockRecorder) UpdateNSRecord(arg0, arg1, arg2, arg3, arg4, arg5 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNSRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateNSRecord), arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
 // UpdateNetwork mocks base method.
@@ -1678,6 +2038,21 @@ func (mr *MockIBObjectManagerMockRecorder) UpdateNetworkContainer(arg0, arg1, ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNetworkContainer", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateNetworkContainer), arg0, arg1, arg2)
 }
 
+// UpdateNetworkRange mocks base method.
+func (m *MockIBObjectManager) UpdateNetworkRange(arg0, arg1, arg2, arg3, arg4, arg5 string, arg6 bool, arg7 ibclient.EA, arg8 *ibclient.Dhcpmember, arg9 string, arg10 []*ibclient.Dhcpoption, arg11 bool, arg12, arg13, arg14 string) (*ibclient.Range, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNetworkRange", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
+	ret0, _ := ret[0].(*ibclient.Range)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateNetworkRange indicates an expected call of UpdateNetworkRange.
+func (mr *MockIBObjectManagerMockRecorder) UpdateNetworkRange(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNetworkRange", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateNetworkRange), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
+}
+
 // UpdateNetworkView mocks base method.
 func (m *MockIBObjectManager) UpdateNetworkView(arg0, arg1, arg2 string, arg3 ibclient.EA) (*ibclient.NetworkView, error) {
 	m.ctrl.T.Helper()
@@ -1706,6 +2081,21 @@ func (m *MockIBObjectManager) UpdatePTRRecord(arg0, arg1, arg2, arg3, arg4, arg5
 func (mr *MockIBObjectManagerMockRecorder) UpdatePTRRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePTRRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdatePTRRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+}
+
+// UpdateRangeTemplate mocks base method.
+func (m *MockIBObjectManager) UpdateRangeTemplate(arg0, arg1 string, arg2, arg3 uint32, arg4 string, arg5 ibclient.EA, arg6 []*ibclient.Dhcpoption, arg7 bool, arg8, arg9 string, arg10 *ibclient.Dhcpmember, arg11 bool, arg12 string) (*ibclient.Rangetemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRangeTemplate", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
+	ret0, _ := ret[0].(*ibclient.Rangetemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateRangeTemplate indicates an expected call of UpdateRangeTemplate.
+func (mr *MockIBObjectManagerMockRecorder) UpdateRangeTemplate(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRangeTemplate", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateRangeTemplate), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
 }
 
 // UpdateSRVRecord mocks base method.
