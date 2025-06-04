@@ -236,7 +236,7 @@ spec:
           _items += [_dxr]
           items = _items
 
-  # Step 3: GSLB Health Monitoring  
+  # Step 3: GSLB Health Monitoring
   - step: gslb-monitoring
     functionRef:
       name: crossplane-contrib-function-kcl
@@ -302,7 +302,7 @@ spec:
           _dxr.status.gslb.isActiveCluster = _isActiveCluster
           _dxr.status.gslb.recommendedPolicy = _recommendedPolicy
           _dxr.status.gslb.policyReason = _policyReason
-          
+
           # Add auto-apply status
           _autoApplyEnabled = oxr.spec?.autoApplyRecommendedPolicy or False
           _currentManualPolicy = oxr.spec?.managementPolicies[0] if oxr.spec?.managementPolicies else "*"
