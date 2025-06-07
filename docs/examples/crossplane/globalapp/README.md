@@ -1,113 +1,75 @@
-# Example Manifests
+# Resilient Multiregion Global Control Planes With Crossplane and K8gb
 
-You can run your function locally and test it using `crossplane render`
-with these example manifests.
+This example demonstrates how to build resilient, scalable multicluster environments using Crossplane's declarative infrastructure provisioning integrated with k8gb for DNS-based failover.
+
+## Overview
+
+This reference architecture showcases a Crossplane-based Global Control Plane with Active/Passive setup:
+
+- **Active/Passive Control Planes**: Multiple regions with one active control plane and passive standby
+- **DNS-based Failover**: k8gb provides automatic DNS failover when active region fails
+- **GSLB Health Monitoring**: Crossplane observes GSLB resources to track control plane health
+- **Automated Failover**: Passive control plane transitions to Active during failures
+
+## Key Components
+
+- **Composition Pipeline**: Uses KCL function to observe GSLB resources and report health status
+- **GSLB Observation**: Monitors k8gb.absa.oss/v1beta1 Gslb resources in observe-only mode
+- **Health Status Integration**: Extracts serviceHealth from GSLB and updates XR status for failover decisions
+- **Multiregion Coordination**: Enables Crossplane to make intelligent decisions based on regional health
+
+## Files
+
+- `composition.yaml`: Crossplane Composition with KCL function for GSLB health monitoring
+- `definition.yaml`: CompositeResourceDefinition with GSLB status schema for failover logic
+- `xr.yaml`: Example XR instance representing a control plane endpoint
+- `xr-auto.yaml`: Auto-mode XR example with intelligent GSLB-based failover
+- `xr-passive.yaml`: Passive-mode XR example for standby regions
+- `functions.yaml`: KCL function package for health monitoring logic
+- `provider-*.yaml`: Provider configurations for multicluster access
+
+## Usage
+
+### Local Testing
 
 ```shell
-# Run the function locally
-$ go run . --insecure --debug
+# Render the composition locally
+make run
+
+# Or using crossplane render directly
+crossplane render xr.yaml composition.yaml functions.yaml -r
+
+# Test with Docker environment
+make run-in-docker
 ```
 
+### Deploy Examples
+
 ```shell
-# Then, in another terminal, call it with these example manifests
-$ crossplane render xr.yaml composition.yaml functions.yaml -r
----
-apiVersion: example.crossplane.io/v1beta1
-kind: XR
-metadata:
-  name: example
-status:
-  dummy: cool-status
----
-apiVersion: iam.aws.upbound.io/v1beta1
-kind: AccessKey
-metadata:
-  annotations:
-    crossplane.io/composition-resource-name: sample-access-key-1
-  generateName: example-
-  labels:
-    crossplane.io/composite: example
-  name: sample-access-key-1
-  ownerReferences:
-  - apiVersion: example.crossplane.io/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: XR
-    name: example
-    uid: ""
-spec:
-  forProvider:
-    userSelector:
-      matchLabels:
-        testing.upbound.io/example-name: test-user-1
-  writeConnectionSecretToRef:
-    name: sample-access-key-secret-1
-    namespace: crossplane-system
----
-apiVersion: iam.aws.upbound.io/v1beta1
-kind: User
-metadata:
-  annotations:
-    crossplane.io/composition-resource-name: test-user-0
-  generateName: example-
-  labels:
-    crossplane.io/composite: example
-    dummy: foo
-    testing.upbound.io/example-name: test-user-0
-  name: test-user-0
-  ownerReferences:
-  - apiVersion: example.crossplane.io/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: XR
-    name: example
-    uid: ""
-spec:
-  forProvider: {}
----
-apiVersion: iam.aws.upbound.io/v1beta1
-kind: AccessKey
-metadata:
-  annotations:
-    crossplane.io/composition-resource-name: sample-access-key-0
-  generateName: example-
-  labels:
-    crossplane.io/composite: example
-  name: sample-access-key-0
-  ownerReferences:
-  - apiVersion: example.crossplane.io/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: XR
-    name: example
-    uid: ""
-spec:
-  forProvider:
-    userSelector:
-      matchLabels:
-        testing.upbound.io/example-name: test-user-0
-  writeConnectionSecretToRef:
-    name: sample-access-key-secret-0
-    namespace: crossplane-system
----
-apiVersion: iam.aws.upbound.io/v1beta1
-kind: User
-metadata:
-  annotations:
-    crossplane.io/composition-resource-name: test-user-1
-  generateName: example-
-  labels:
-    crossplane.io/composite: example
-    dummy: foo
-    testing.upbound.io/example-name: test-user-1
-  name: test-user-1
-  ownerReferences:
-  - apiVersion: example.crossplane.io/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: XR
-    name: example
-    uid: ""
-spec:
-  forProvider: {}
+# Deploy the basic XR
+kubectl apply -f xr.yaml
+
+# Deploy auto-mode XR with intelligent failover
+kubectl apply -f xr-auto.yaml
+
+# Deploy passive-mode XR for standby regions
+kubectl apply -f xr-passive.yaml
 ```
+
+## Architecture Details
+
+The KCL function implements the core failover monitoring logic:
+
+1. **Observe GSLB**: Creates Kubernetes Object to monitor GSLB resource health
+2. **Health Assessment**: Extracts serviceHealth status from k8gb  
+3. **Status Propagation**: Updates XR status to reflect regional control plane health (Healthy/UNHEALTHY)
+4. **Failover Enablement**: Provides health data for automated Active/Passive transitions
+
+The composition uses `managementPolicies: ["Observe"]` for read-only health monitoring without modifying the underlying GSLB resources, enabling safe observation across multiple regions.
+
+## Important Notes
+
+- The domain is fully parameterized via `spec.hostname` for production flexibility
+- Health monitoring is performed in observe-only mode to avoid conflicts across regions
+- GSLB status updates drive automated failover decisions between Active/Passive control planes
+- Auto-apply policy mode enables intelligent management policy switching based on GSLB health
