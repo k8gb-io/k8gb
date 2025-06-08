@@ -172,6 +172,7 @@ spec:
                       }
                     }
                     cache = "tcp://{}:6380".format(_redisHost)
+                    ui.message = "Region: {}".format(oxr.status?.gslb?.geoTag or "unknown")
                   }
                 }
               }
@@ -264,6 +265,10 @@ spec:
           if "gslb-resource" in ocds:
             _gslbStatus = ocds["gslb-resource"].Resource?.status?.atProvider?.manifest?.status
             serviceHealth = _gslbStatus?.serviceHealth
+            geoTag = _gslbStatus?.geoTag or "unknown"
+
+            # Store geoTag in status for use by application step
+            _dxr.status.gslb.geoTag = geoTag
 
             # Check GSLB health
             if serviceHealth:

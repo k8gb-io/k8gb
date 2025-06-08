@@ -77,6 +77,9 @@ spec:
                   healthy:
                     type: string
                     description: GSLB health status across all domains
+                  geoTag:
+                    type: string
+                    description: Geographic tag from observed GSLB status
                   isActiveCluster:
                     type: boolean
                     description: Whether this cluster is currently receiving traffic from GSLB

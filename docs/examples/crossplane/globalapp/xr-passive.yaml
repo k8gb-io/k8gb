@@ -8,5 +8,5 @@ spec:
   namespace: "demo"
   hostname: "globalapp.cloud.example.com"
   managementPolicies: ["Observe"]  # Initial policy
-  #autoApplyRecommendedPolicy: false  # Manual mode
-  autoApplyRecommendedPolicy: true  # Automatic GSLB-driven failover
+  autoApplyRecommendedPolicy: false  # Manual mode
+  #autoApplyRecommendedPolicy: true  # Automatic GSLB-driven failover
