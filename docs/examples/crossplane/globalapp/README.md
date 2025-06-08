@@ -38,9 +38,74 @@ make run
 
 # Or using crossplane render directly
 crossplane render xr.yaml composition.yaml functions.yaml -r
+```
 
-# Test with Docker environment
-make run-in-docker
+### Local Installation
+
+```
+# In the main k8gb repo
+make deploy-full-local-setup
+```
+
+```
+# Check current context. We expect second k8gb cluster to be active after the
+# installation
+k config current-context
+k3d-test-gslb2
+```
+
+```
+# Install Crossplane
+helm install crossplane \
+--namespace crossplane-system \
+--create-namespace crossplane-stable/crossplane
+```
+
+```
+# Install Crossplane Providers
+k apply -f crossplane-providers
+```
+
+```
+# Wait for providers readiness
+k get providers
+NAME                            INSTALLED   HEALTHY   PACKAGE                                                 AGE
+provider-azure-cache            True        True      xpkg.upbound.io/upbound/provider-azure-cache:v1         35s
+provider-helm                   True        True      xpkg.upbound.io/upbound/provider-helm:v0                35s
+provider-kubernetes             True        True      xpkg.upbound.io/upbound/provider-kubernetes:v0          35s
+upbound-provider-family-azure   True        True      xpkg.upbound.io/upbound/provider-family-azure:v1.13.0   30s
+```
+
+```
+# Install ProviderConfigs
+k apply -f crossplane-providers/providerconfigs
+providerconfig.azure.upbound.io/default created
+providerconfig.helm.crossplane.io/default created
+providerconfig.kubernetes.crossplane.io/default created
+```
+
+```
+# Setup Azure Credentials Secret
+kubectl create secret generic azure-account-creds -n crossplane-system --from-literal=credentials="$(cat credentials.json)" --dry-run=client -o yaml | kubectl apply -f -
+# If you don't have Azure credentials json file, check Quickstart documentation
+at https://marketplace.upbound.io/providers/upbound/provider-family-azure/latest
+```
+
+```
+# Apply demo GlobalApp material
+k apply -f definition.yaml,composition.yaml,functions.yaml
+compositeresourcedefinition.apiextensions.crossplane.io/globalapps.example.crossplane.io created
+Warning: CustomResourceDefinition.apiextensions.k8s.io "GlobalApp.example.crossplane.io" not found
+composition.apiextensions.crossplane.io/global-app created
+function.pkg.crossplane.io/crossplane-contrib-function-kcl created
+function.pkg.crossplane.io/crossplane-contrib-function-auto-ready created
+```
+
+```
+# Switch context to first k8gb cluster
+k config use-context k3d-test-gslb1
+Switched to context "k3d-test-gslb1".
+# Repeat all installation steps in identical manner on the first cluster!
 ```
 
 ### Deploy Examples
