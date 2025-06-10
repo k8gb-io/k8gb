@@ -126,7 +126,7 @@ kubectl apply -f xr-passive.yaml
 The KCL function implements the core failover monitoring logic:
 
 1. **Observe GSLB**: Creates Kubernetes Object to monitor GSLB resource health
-2. **Health Assessment**: Extracts serviceHealth status from k8gb  
+2. **Health Assessment**: Extracts serviceHealth status from k8gb
 3. **Status Propagation**: Updates XR status to reflect regional control plane health (Healthy/UNHEALTHY)
 4. **Failover Enablement**: Provides health data for automated Active/Passive transitions
 
