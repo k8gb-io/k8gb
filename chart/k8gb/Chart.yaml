@@ -10,7 +10,7 @@ kubeVersion: ">= 1.19.0-0"
 dependencies:
   - name: coredns
     repository: https://coredns.github.io/helm
-    version: 1.42.3
+    version: 1.42.4
   - name: external-dns
     alias: extdns
     condition: extdns.enabled
