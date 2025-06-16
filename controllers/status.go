@@ -25,6 +25,7 @@ import (
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	discov1 "k8s.io/api/discovery/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -70,21 +71,19 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 				return serviceHealth, err
 			}
 
-			endpoints := &corev1.Endpoints{}
-			nn := types.NamespacedName{
-				Name:      svc.Name,
-				Namespace: svc.Namespace,
-			}
-			err = r.Get(context.TODO(), nn, endpoints)
+			endpoints := &discov1.EndpointSliceList{}
+			err = r.List(context.TODO(), endpoints, client.InNamespace(svc.Namespace), client.MatchingLabels{discov1.LabelServiceName: svc.Name})
 			if err != nil {
 				return serviceHealth, err
 			}
 
 			serviceHealth[server.Host] = k8gbv1beta1.Unhealthy
-			if len(endpoints.Subsets) > 0 {
-				for _, subset := range endpoints.Subsets {
-					if len(subset.Addresses) > 0 {
-						serviceHealth[server.Host] = k8gbv1beta1.Healthy
+			if len(endpoints.Items) > 0 {
+				if len(endpoints.Items[0].Endpoints) > 0 {
+					for _, e := range endpoints.Items[0].Endpoints {
+						if len(e.Addresses) > 0 && (e.Conditions.Ready == nil || *e.Conditions.Ready) {
+							serviceHealth[server.Host] = k8gbv1beta1.Healthy
+						}
 					}
 				}
 			}
