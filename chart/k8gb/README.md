@@ -35,7 +35,7 @@ Kubernetes: `>= 1.19.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://coredns.github.io/helm | coredns | 1.42.3 |
+| https://coredns.github.io/helm | coredns | 1.42.4 |
 | https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.16.1 |
 
 For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
