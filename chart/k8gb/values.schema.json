@@ -364,22 +364,6 @@
             },
             "title": "Log"
         },
-        "k8gbCoreDNS": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "extra_plugins": {
-                    "type": [
-                        "array",
-                        "null"
-                    ]
-                },
-                "extraServerBlocks": {
-                    "type": "string"
-                }
-            },
-            "title": "k8gbCoredns"
-        },
         "k8gbSecurityContext": {
             "type": "object",
             "additionalProperties": false,
@@ -433,6 +417,19 @@
                     "type": "integer",
                     "minimum": 0,
                     "default": 300
+                },
+                "extraPlugins": {
+                    "type": [
+                        "array",
+                        "null"
+                    ],
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "extraServerBlocks": {
+                    "type": "string"
                 }
             },
             "required": [

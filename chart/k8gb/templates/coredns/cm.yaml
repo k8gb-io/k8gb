@@ -8,17 +8,12 @@ metadata:
 {{ include "chart.labels" . | indent 4  }}
 data:
   Corefile: |-
-{{- $dnsZonesRaw := include "k8gb.dnsZonesString" . }}
-{{- $dnsZones := split ";" $dnsZonesRaw }}
-{{- range $dnsZones }}
-    {{- $parts := split ":" . }}
-    {{- $loadBalancedZone := index $parts "_1" }}
-    {{- $dnsZoneNegTTL := index $parts "_2" }}
-    {{ $loadBalancedZone }}:5353 {
+{{- range .Values.k8gb.dnsZones }}
+    {{ .loadBalancedZone }}:5353 {
         errors
         health
-{{- if $.Values.k8gb.coredns.extra_plugins }}
-{{- range $.Values.k8gb.coredns.extra_plugins }}
+{{- if .extraPlugins }}
+{{- range .extraPlugins }}
         {{ . }}
 {{- end }}
 {{- end }}
@@ -27,12 +22,12 @@ data:
         forward . /etc/resolv.conf
         k8s_crd {
             filter k8gb.absa.oss/dnstype=local
-            negttl {{ $dnsZoneNegTTL | default 30 }}
+            negttl {{ .dnsZoneNegTTL | default 30 }}
             loadbalance weight
         }
     }
 {{- end }}
-    {{- with .Values.k8gb.coredns.extraServerBlocks -}}
+    {{- with .extraServerBlocks -}}
     {{- tpl . $ | nindent 4 }}
     {{- end }}
 {{- end }}
