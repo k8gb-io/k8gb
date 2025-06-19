@@ -24,12 +24,11 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	corev1 "k8s.io/api/core/v1"
+	discov1 "k8s.io/api/discovery/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -60,7 +59,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			for _, gslb := range gslbList.Items {
 				for _, server := range gslb.Status.Servers {
 					for _, service := range server.Services {
-						if service.Name == a.GetName() {
+						if service.Name == a.GetLabels()[discov1.LabelServiceName] {
 							reconcileRequests = append(reconcileRequests, reconcile.Request{
 								NamespacedName: types.NamespacedName{
 									Name:      gslb.Name,
@@ -84,20 +83,11 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&externaldns.DNSEndpoint{}).
-		Watches(&corev1.Endpoints{}, endpointMapHandler).
+		Watches(&discov1.EndpointSlice{}, endpointMapHandler).
 		Watches(&netv1.Ingress{}, ingressMapHandler).
 		WithEventFilter(predicate.Funcs{
 			UpdateFunc: func(e event.TypedUpdateEvent[client.Object]) bool {
 				if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {
-					return true
-				}
-
-				// endpoints don't have state, therefore they don't have a generation
-				// but when their subsets change they must be be reconciled
-				gvk, err := apiutil.GVKForObject(e.ObjectOld, r.Scheme)
-				if err != nil {
-					log.Warn().Msg("could not fetch GroupVersionKind for object")
-				} else if gvk.Kind == "Endpoints" {
 					return true
 				}
 
