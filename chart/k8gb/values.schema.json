@@ -364,6 +364,22 @@
             },
             "title": "Log"
         },
+        "k8gbCoreDNS": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "serviceType": {
+                    "type": "string",
+                    "enum": [
+                        "ClusterIP",
+                        "NodePort",
+                        "LoadBalancer",
+                        "ExternalName"
+                    ]
+                }
+            },
+            "title": "k8gbCoreDNS"
+        },
         "k8gbSecurityContext": {
             "type": "object",
             "additionalProperties": false,
