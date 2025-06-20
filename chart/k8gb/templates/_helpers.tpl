@@ -99,15 +99,6 @@ k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_
 {{- join ";" $entries }}
 {{- end }}
 
-
-{{- define "k8gb.coredns.extraPlugins" -}}
-{{- if .Values.k8gb.coredns.extra_plugins }}
-{{- range .Values.k8gb.coredns.extra_plugins }}
-        {{ . }}
-{{- end }}
-{{- end }}
-{{- end }}
-
 {{- define "k8gb.extdnsProviderOpts" -}}
 {{- if .Values.ns1.enabled -}}
 {{- if .Values.ns1.endpoint -}}

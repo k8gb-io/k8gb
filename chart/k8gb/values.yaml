@@ -21,6 +21,8 @@ k8gb:
     - parentZone: "example.com" # -- parent zone which would contain gslb zone to delegate (same meaning as the old edgeDNSZone)
       loadBalancedZone: "cloud.example.com" # -- zone controlled by gslb (same meaning as the old dnsZone)
       dnsZoneNegTTL: 30  # -- Negative TTL for SOA record# -- host/ip[:port] format is supported here where port defaults to 53
+      extraPlugins: [] # -- Extra CoreDNS plugins to be enabled for this zone
+      extraServerBlocks: "" # -- Extra CoreDNS server blocks for this zone
   edgeDNSServers:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
@@ -33,11 +35,7 @@ k8gb:
   reconcileRequeueSeconds: 30
   # -- TTL of the NS and respective glue record used by external DNS
   nsRecordTTL: 30
-  coredns:
-    # -- Extra CoreDNS server blocks
-    extraServerBlocks: ""
-    # -- Extra CoreDNS plugins to be enabled
-    extra_plugins: []
+
   log:
     # -- log format (simple,json)
     format: simple # log format (simple,json)
