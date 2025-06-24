@@ -20,9 +20,7 @@ k8gb:
   dnsZones:
     - parentZone: "example.com" # -- parent zone which would contain gslb zone to delegate (same meaning as the old edgeDNSZone)
       loadBalancedZone: "cloud.example.com" # -- zone controlled by gslb (same meaning as the old dnsZone)
-      dnsZoneNegTTL: 30  # -- Negative TTL for SOA record# -- host/ip[:port] format is supported here where port defaults to 53
-      extraPlugins: [] # -- Extra CoreDNS plugins to be enabled for this zone
-      extraServerBlocks: "" # -- Extra CoreDNS server blocks for this zone
+      dnsZoneNegTTL: 30 # -- Negative TTL for SOA record# -- host/ip[:port] format is supported here where port defaults to 53
   edgeDNSServers:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
@@ -107,11 +105,11 @@ coredns:
       add: []
   # -- Only meant to open the correct service and container ports, has no other impact on the coredns configuration
   servers:
-  - port: 5353
-    servicePort: 53
-    plugins:
-    - name: prometheus
-      parameters: 0.0.0.0:9153
+    - port: 5353
+      servicePort: 53
+      plugins:
+        - name: prometheus
+          parameters: 0.0.0.0:9153
 
   # -- If the value is LoadBalancer, the IP addresses of the cluster will be loaded from the CoreDNS service;
   # otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true".
@@ -132,6 +130,8 @@ infoblox:
   httpRequestTimeout: 20
   # -- Size of connections pool
   httpPoolConnections: 10
+  # -- DNS view to use for zone operations
+  dnsView: "default"
 
 extdns:
   enabled: false
@@ -139,16 +139,16 @@ extdns:
   labelFilter: "k8gb.absa.oss/dnstype=extdns"
   logLevel: debug
   managedRecordTypes:
-  - A
-  - CNAME
-  - NS
+    - A
+    - CNAME
+    - NS
   policy: sync
   rbac:
     create: true
   sources:
-  - crd
+    - crd
   domainFilters:
-  - "example.com"
+    - "example.com"
   txtPrefix: "k8gb-<GEOTAG>-"
   txtOwnerId: "k8gb-<GEOTAG>"
 

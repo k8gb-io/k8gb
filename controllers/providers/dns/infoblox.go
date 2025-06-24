@@ -131,7 +131,7 @@ func (p *InfobloxProvider) createZoneDelegated(o ibcl.IBObjectManager, fqdn stri
 	start := time.Now()
 	ns := ibcl.NullableNameServers{NameServers: d, IsNull: false}
 	//nolint: gosec
-	res, err = o.CreateZoneDelegated(fqdn, ns, "created by k8gb", false, false, "", uint32(p.config.NSRecordTTL), true, ibcl.EA{}, "default", "FORWARD")
+	res, err = o.CreateZoneDelegated(fqdn, ns, "created by k8gb", false, false, "", uint32(p.config.NSRecordTTL), true, ibcl.EA{}, p.config.Infoblox.DNSView, "FORWARD")
 	m.InfobloxObserveRequestDuration(start, metrics.CreateZoneDelegated, err == nil)
 	return
 }
