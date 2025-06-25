@@ -78,7 +78,7 @@ Create the name of the service account to use
 {{- end -}}
 
 {{- define "k8gb.extdnsOwnerID" -}}
-k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_0")) "_1" }}-{{ .Values.k8gb.clusterGeoTag }}
+k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_0")) "_1" }}{{- if .Values.k8gb.extGslbClustersGeoTags }}-{{ .Values.k8gb.clusterGeoTag }}{{- end }}
 {{- end -}}
 
 {{- define "k8gb.edgeDNSServers" -}}

@@ -283,6 +283,18 @@ func TestConfigurations(t *testing.T) {
 			},
 		},
 		{
+			name: "ExtClusterGeoTags is empty",
+			envvars: `CLUSTER_GEO_TAG=us;
+				 EXT_GSLB_CLUSTERS_GEO_TAGS=;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "us", cfg.ClusterGeoTag)
+				assert.False(t, cfg.HasExtClusterGeoTags())
+			},
+		},
+		{
 			name: "minimal valid configuration with external geotags",
 			envvars: `CLUSTER_GEO_TAG=us-1;
 				 DNS_ZONES=example.com:cloud.example.com:300;

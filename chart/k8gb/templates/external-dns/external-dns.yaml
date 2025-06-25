@@ -29,7 +29,11 @@ spec:
         {{- $parentZone := index $parts "_0" }}
         - --domain-filter={{ $parentZone }} # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
 {{- end }}
+      {{- if .Values.k8gb.extGslbClustersGeoTags }}
         - --policy=sync # enable full synchronization including record removal
+      {{- else }}
+        - --policy=upsert-only # only add/update, do not remove records
+      {{- end }}
         - --log-level=debug # debug only
         - --managed-record-types=A
         - --managed-record-types=CNAME

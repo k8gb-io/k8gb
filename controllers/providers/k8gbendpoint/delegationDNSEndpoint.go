@@ -78,10 +78,11 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, erro
 		Spec: externaldns.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{
 				{
-					DNSName:    d.info.LoadBalancedZone,
-					RecordTTL:  ttl,
-					RecordType: "NS",
-					Targets:    d.info.GetNSServerList(),
+					DNSName:       d.info.LoadBalancedZone,
+					SetIdentifier: d.config.ClusterGeoTag,
+					RecordTTL:     ttl,
+					RecordType:    "NS",
+					Targets:       d.info.GetNSServerList(),
 				},
 				{
 					DNSName:    d.info.ClusterNSName,
