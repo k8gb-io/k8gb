@@ -107,6 +107,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 * [Integration with Admiralty](/docs/admiralty.md)
 * [Integration with Liqo](/docs/liqo.md)
 * [Integration with Rancher Fleet](/docs/rancher.md)
+* [Integration with Crossplane - Global Application](/docs/examples/crossplane/globalapp/README.md)
 
 ## Adopters
 
@@ -133,7 +134,7 @@ If your Kubernetes version or Ingress controller is not included in the table ab
 
 [//]: # (Table is generated with the help of https://www.tablesgenerator.com/markdown_tables#)
 
-|  | **KubeCon EU 2025** [![](https://img.youtube.com/vi/YMyrcqZ2sbU/0.jpg)](https://www.youtube.com/watch?v=YMyrcqZ2sbU "Project Lightning Talk: What's New in k8gb: CNCF's Multicluster Global Balancer - Bradley Andersen") |
+| **KubeCon China 2025**   [![](https://img.youtube.com/vi/L9mRWljLnzw/0.jpg)](https://www.youtube.com/watch?v=L9mRWljLnzw "Resilient Multiregion Global Control Planes With Crossplane and K8gb ") | **KubeCon EU 2025** [![](https://img.youtube.com/vi/YMyrcqZ2sbU/0.jpg)](https://www.youtube.com/watch?v=YMyrcqZ2sbU "Project Lightning Talk: What's New in k8gb: CNCF's Multicluster Global Balancer - Bradley Andersen") |
 |---|---|
 | **ChatLoopBackOff - Episode 42 (K8gb)** [![](https://img.youtube.com/vi/tKUNI6E1_7c/0.jpg)](https://www.youtube.com/watch?v=tKUNI6E1_7c "ChatLoopBackOff - Episode 42 (K8gb)") | **KubeCon NA 2024** [![](https://img.youtube.com/vi/vCzl15AIoU0/0.jpg)](https://www.youtube.com/watch?v=vCzl15AIoU0 "k8gb: Global Load Balancing, the Kubernetes Way \| Project Lightning Talk") |
 | **Open Source Summit EU 2024** [![](https://img.youtube.com/vi/5eLX4kMgo8Q/0.jpg)](https://www.youtube.com/watch?v=5eLX4kMgo8Q "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **KubeCon EU 2024** [![](https://img.youtube.com/vi/MsQ0E7SYNPo/0.jpg)](https://www.youtube.com/watch?v=MsQ0E7SYNPo "K8gb: Reliable Global Service Load Balancing without vendor lock-in \| Project Lightning Talk") |
