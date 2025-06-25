@@ -107,6 +107,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 * [Integration with Admiralty](/docs/admiralty.md)
 * [Integration with Liqo](/docs/liqo.md)
 * [Integration with Rancher Fleet](/docs/rancher.md)
+* [Integration with Crossplane - Global Application](/docs/examples/crossplane/globalapp/README.md)
 
 ## Adopters
 
