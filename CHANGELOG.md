@@ -1,5 +1,100 @@
 # Changelog
 
+**Breaking changes:**
+
+v0.15.0 contains two breaking changes in the Helm chart. One relates to DNS zone configuration, which affects all users. The second one only affects users using the AWS Route53 integration.
+
+---
+
+DNS Zones
+
+To support multiple dnsZones we created a new helm value called `k8gb.dnsZones` (list of objects), and deprecated the values `k8gb.dnsZoneNegTTL`, `k8gb.edgeDnsZone`, `k8gb.dnsZone`. We took this opportunity to clarify the naming since it was not always clear what an edge zone is.
+In your chart you will need to change from:
+```
+k8gb:
+  dnsZone: demo.example.com
+  dnsZoneNegTTL: 300
+  edgeDNSZone: example.com
+
+```
+to:
+```
+k8gb:
+  dnsZones:
+    - loadBalancedZone: demo.example.com
+      parentZone: example.com
+      dnsZoneNegTTL: 300 
+```
+
+---
+
+AWS Route53 integration
+
+The AWS Route53 integration was migrated to native [external dns configuration](https://github.com/kubernetes-sigs/external-dns/blob/8d8f81369f02beeba479944e26f55dfbcb53195d/docs/tutorials/aws.md). This allows for more flexibility when configuring this integration, since you are no longer dependent on our wrappers of external-dns configuration.
+
+If your authentication to AWS used a role ARN, then your configuration needs to be adapted as described in the [external-dns docs](https://github.com/kubernetes-sigs/external-dns/blob/8d8f81369f02beeba479944e26f55dfbcb53195d/docs/tutorials/aws.md#when-using-clusters-with-rbac-enabled) from:
+```
+route53:
+  enabled: true
+  irsaRole: arn:aws:iam::111111:role/external-dns
+```
+or
+```
+route53:
+  enabled: true
+  assumeRoleArn: arn:aws:iam::111111:role/external-dns
+```
+to:
+```
+extdns:
+  enabled: true
+  provider:
+    name: aws
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::111111:role/external-dns
+```
+
+If your authentication to AWS used secret (called `credentials` in this example), then your configuration needs to be adapted as described in the [external-dns docs](https://github.com/kubernetes-sigs/external-dns/blob/8d8f81369f02beeba479944e26f55dfbcb53195d/docs/tutorials/aws.md#when-using-clusters-with-rbac-enabled) from:
+```
+route53:
+  enabled: true
+  secret: credentials
+```
+to
+```
+extdns:
+  enabled: true
+  provider:
+    name: aws
+  extraVolumes:
+  - name: aws-credentials
+    secret:
+      secretName: credentials
+  extraVolumeMounts:
+  - name: aws-credentials
+    mountPath: /.aws
+    readOnly: true
+```
+
+In addition, the new version of `external-dns` requires the `AWS_DEFAULT_REGION` environment variable to be explicitly defined:
+```
+extdns:
+  env:
+  - name: AWS_DEFAULT_REGION
+    value: "us-east-1"
+```
+
+Finally, a couple of variables must be specified (there are helm validation function that make sure they are correct). Replace <GEOTAG> with the same value as k8gb.clusterGeoTag, and domainFilters with the same values as k8gb.dnsZones.parentZone:
+```
+extdns:
+  txtPrefix: "k8gb-<GEOTAG>"
+  txtOwnerId: "k8gb-<GEOTAG>"
+  domainFilters:
+  - "<domain>"
+```
+If you used to set hostedZoneID, then the txtOwnerId takes the value k8gb-<hostZoneID>-<GEOTAG>.
+
 ## [v0.15.0-rc2](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc2) (2025-05-28)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc1...v0.15.0-rc2)
