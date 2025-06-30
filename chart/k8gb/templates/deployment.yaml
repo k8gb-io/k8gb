@@ -17,6 +17,7 @@ spec:
     metadata:
       labels:
         name: k8gb
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         {{- with .Values.k8gb.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
