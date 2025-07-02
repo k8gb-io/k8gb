@@ -52,6 +52,44 @@
                 }
             }
         },
+        "Resources": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "requests": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "memory": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "cpu": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    }
+                },
+                "limits": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "memory": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "cpu": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    }
+                }
+            },
+            "required": [
+                "requests"
+            ],
+            "title": "Resources"
+        },
         "Coredns": {
             "type": "object",
             "additionalProperties": true,
@@ -67,6 +105,9 @@
                 },
                 "serviceAccount": {
                     "$ref": "#/definitions/CorednsServiceAccount"
+                },
+                "resources": {
+                    "$ref": "#/definitions/Resources"
                 }
             },
             "title": "Coredns"
@@ -143,6 +184,9 @@
                 },
                 "securityContext": {
                     "$ref": "#/definitions/ExternaldnsSecurityContext"
+                },
+                "resources": {
+                    "$ref": "#/definitions/Resources"
                 }
             },
             "title": "Externaldns"
@@ -328,6 +372,9 @@
                 },
                 "podLabels": {
                     "type": "object"
+                },
+                "resources": {
+                    "$ref": "#/definitions/Resources"
                 }
             },
             "required": [
