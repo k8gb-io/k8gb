@@ -42,11 +42,11 @@ spec:
         {{ include "k8gb.extdnsProviderOpts" . }}
         resources:
           requests:
-            memory: "32Mi"
-            cpu: "100m"
+            memory: {{ .Values.externaldns.resources.requests.memory | default "32Mi" }}
+            cpu: {{ .Values.externaldns.resources.requests.cpu | default "100m" }}
           limits:
-            memory: "128Mi"
-            cpu: "500m"
+            memory: {{ .Values.externaldns.resources.limits.memory | default "128Mi" }}
+            cpu: {{ .Values.externaldns.resources.limits.cpu | default "500m" }}
         securityContext:
           readOnlyRootFilesystem: true
         {{- with .Values.externaldns.extraEnv }}

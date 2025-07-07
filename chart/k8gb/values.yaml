@@ -60,6 +60,15 @@ k8gb:
   # -- pod labels
   podLabels: {}
 
+  resources:
+    # -- requests and limits for the k8gb operator container
+    requests:
+      memory: "32Mi"
+      cpu: "100m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
+
 externaldns:
   # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment
   dnsPolicy: "ClusterFirst"
@@ -83,6 +92,15 @@ externaldns:
     # -- For ExternalDNS to be able to read Kubernetes and AWS token files
     fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
     runAsNonRoot: true
+
+  resources:
+    # -- requests and limits for the external-dns container
+    requests:
+      memory: "32Mi"
+      cpu: "100m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
 
 coredns:
   # -- service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps
@@ -114,6 +132,15 @@ coredns:
   # -- If the value is LoadBalancer, the IP addresses of the cluster will be loaded from the CoreDNS service;
   # otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true".
   serviceType: "ClusterIP"
+
+  resources:
+    # -- requests and limits for the coredns container
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 infoblox:
   # -- infoblox provider enabled

@@ -17,6 +17,7 @@ spec:
     metadata:
       labels:
         name: k8gb
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         {{- with .Values.k8gb.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -40,11 +41,11 @@ spec:
           {{- end }}
           resources:
             requests:
-              memory: "32Mi"
-              cpu: "100m"
+              memory: {{ .Values.k8gb.resources.requests.memory | default "32Mi" }}
+              cpu: {{ .Values.k8gb.resources.requests.cpu | default "100m" }}
             limits:
-              memory: "128Mi"
-              cpu: "500m"
+              memory: {{ .Values.k8gb.resources.limits.memory | default "128Mi" }}
+              cpu: {{ .Values.k8gb.resources.limits.cpu | default "500m" }}
           env:
             - name: WATCH_NAMESPACE
               value: ""
