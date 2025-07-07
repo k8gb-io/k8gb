@@ -5,6 +5,9 @@ Returns both cluster endpoints in round-robin manner.
 ## weight roundRobin
 While roundRobin is fair for all regions, with WeightRoundRobin we can set explicitly how the regions should be loaded with traffic. For example, we can set one region to handle 80% of the traffic, another 20% and a third 0%, so that the last region is practically disabled.
 
+Note:
+Please read the [WRR caveats](../docs/wrr_caveats.md)for important limitations and recommendations.
+
 ## failover
 Pinned to a specified primary cluster until workload on that cluster has no available Pods, upon which the next available cluster's Ingress node IPs will be resolved. When Pods are again available on the primary cluster, the primary cluster will once again be the only eligible cluster for which cluster Ingress node IPs will be resolved
 
