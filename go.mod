@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/kong v1.12.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.3
-	github.com/go-playground/validator/v10 v10.26.0
+	github.com/go-playground/validator/v10 v10.27.0
 	github.com/infobloxopen/infoblox-go-client v1.1.1
 	github.com/infobloxopen/infoblox-go-client/v2 v2.10.0
 	github.com/miekg/dns v1.1.66
