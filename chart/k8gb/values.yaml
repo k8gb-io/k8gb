@@ -85,7 +85,7 @@ externaldns:
   # functionality. See links below
   # https://github.com/k8gb-io/external-dns
   # https://github.com/k8gb-io/external-dns/pkgs/container/external-dns
-  image: registry.k8s.io/external-dns/external-dns:v0.17.0
+  image: registry.k8s.io/external-dns/external-dns:v0.18.0
   # -- external-dns sync interval
   interval: "20s"
   securityContext:
