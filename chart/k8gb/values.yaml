@@ -144,6 +144,10 @@ coredns:
       cpu: 100m
       memory: 128Mi
 
+  # -- CoreDNS configmap
+  corefile:
+    enabled: true
+
 infoblox:
   # -- infoblox provider enabled
   enabled: false

@@ -108,6 +108,11 @@
                 },
                 "resources": {
                     "$ref": "#/definitions/Resources"
+                },
+                "corefile": {
+                    "enabled": {
+                        "type": "boolean"
+                    }
                 }
             },
             "title": "Coredns"
