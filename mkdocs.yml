@@ -1,6 +1,6 @@
 site_name: K8GB - Kubernetes Global Balancer
 site_description: Cloud native global load balancing solution for Kubernetes
-site_url: https://itsfarhan.github.io/k8gb/
+site_url: https://k8gb.io
 repo_url: https://github.com/k8gb-io/k8gb
 repo_name: k8gb-io/k8gb
 edit_uri: edit/master/docs/
