@@ -51,3 +51,4 @@ tofu.tfstate.*
 .tofu.lock.hcl
 
 mkdocs-env/
+site/
