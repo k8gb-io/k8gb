@@ -6,7 +6,7 @@ Here we provide an example of k8gb deployment in AWS context with NS1 as edgeDNS
 
 Two EKS clusters in `eu-west-1` and `us-east-1`.
 
-The EKS setup is identical to [Route53 tutorial](../docs/deploy_route53.md)
+The EKS setup is identical to [Route53 tutorial](deploy_route53.md)
 
 Terraform code for cluster reference setup can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53)
 

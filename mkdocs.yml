@@ -1,0 +1,90 @@
+site_name: K8GB - Kubernetes Global Balancer
+site_description: Cloud native global load balancing solution for Kubernetes
+site_url: https://k8gb.io
+repo_url: https://github.com/k8gb-io/k8gb
+repo_name: k8gb-io/k8gb
+edit_uri: edit/master/docs/
+
+nav:
+  - Home: index.md
+  - Installation & Configuration: tutorials.md
+  - Architecture & Components: components.md
+  - Load Balancing Strategy: strategy.md
+  - DNS Providers:
+    - Infoblox: deploy_infoblox.md
+    - Route53: deploy_route53.md
+    - NS1: deploy_ns1.md
+    - Azure DNS: deploy_azuredns.md
+    - Windows DNS: deploy_windowsdns.md
+    - Cloudflare: deploy_cloudflare.md
+    - RFC2136/Bind9: provider_rfc2136.md
+  - Development & Testing:
+    - Local Setup: local.md
+    - Local with Kuar: local-kuar.md
+  - Monitoring and Observability:
+    - Metrics: metrics.md
+    - Traces: traces.md
+  - Configuration:
+    - Ingress Annotations: ingress_annotations.md
+    - Resource References: resource_ref.md
+    - Address Discovery: address_discovery.md
+    - Dynamic Geotags: dynamic_geotags.md
+    - Multi-zone Setup: multizone.md
+    - Exposing DNS: exposing_dns.md
+  - Platform Integrations:
+    - Admiralty: admiralty.md
+    - Liqo: liqo.md
+    - Rancher: rancher.md
+  - Advanced:
+    - Service Upgrade: service_upgrade.md
+    - WRR Caveats: wrr_caveats.md
+    - External DNS Proxy: proxy_externaldns.md
+
+theme:
+  name: material
+  logo: images/k8gb-icon-color.svg
+  favicon: images/k8gb-icon-color.svg
+  palette:
+    - scheme: default
+      primary: red
+      accent: deep orange
+      toggle:
+        icon: material/brightness-1
+        name: Switch to dark mode
+    - scheme: slate
+      primary: red
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.copy
+    - content.action.edit
+    - toc.integrate
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true

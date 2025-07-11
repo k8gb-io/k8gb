@@ -92,22 +92,7 @@ Internal k8gb architecture and its components are described [here](/docs/compone
 
 ## Installation and Configuration Tutorials
 
-* [General deployment with Infoblox integration](/docs/deploy_infoblox.md)
-* [AWS based deployment with Route53 integration](/docs/deploy_route53.md)
-* [AWS based deployment with NS1 integration](/docs/deploy_ns1.md)
-* [Using Azure Public DNS provider](/docs/deploy_azuredns.md)
-* [Azure based deployment with Windows DNS integration](/docs/deploy_windowsdns.md)
-* [General deployment with Cloudflare integration](/docs/deploy_cloudflare.md)
-* [Seamless DDNS Integration with Bind9 and other RFC2136-Compatible DNS Environments](/docs/provider_rfc2136.md)
-* [Local playground for testing and development](/docs/local.md)
-* [Local playground with Kuar web app](/docs/local-kuar.md)
-* [Metrics](/docs/metrics.md)
-* [Traces](/docs/traces.md)
-* [Ingress annotations](/docs/ingress_annotations.md)
-* [Integration with Admiralty](/docs/admiralty.md)
-* [Integration with Liqo](/docs/liqo.md)
-* [Integration with Rancher Fleet](/docs/rancher.md)
-* [Integration with Crossplane - Global Application](/docs/examples/crossplane/globalapp/README.md)
+For comprehensive installation and configuration guides, see the [Installation and Configuration Tutorials](/docs/tutorials.md) documentation.
 
 ## Adopters
 
@@ -127,8 +112,9 @@ k8gb is tested with the following environment options.
 | Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                            |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                                 |
 
-<a name="clarify"></a>* We only mention solutions where we have tested and verified a k8gb installation.
-If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
+<a name="clarify"></a> 
+* We only mention solutions where we have tested and verified a k8gb installation.
+* If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
 
 ## Presentations Featuring k8gb
 
