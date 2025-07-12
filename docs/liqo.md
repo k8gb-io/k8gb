@@ -13,7 +13,7 @@ The figure below outlines the high-level scenario, with a client consuming an ap
 
 ## Setup Environment
 
-Checkout the [liqo docs](https://docs.liqo.io/en/v0.5.4/examples/global-ingress.html) to get the environment setup script and to get more details.
+Checkout the [liqo docs](https://docs.liqo.io/en/stable/examples/global-ingress.html) to get the environment setup script and to get more details.
 It creates the k3d clusters required for the K8GB playground as described in [Local playground for testing and development](local.md) and installs Liqo over them.
 
 ## Peer the clusters
@@ -67,8 +67,12 @@ affinity:
       topologyKey: "kubernetes.io/hostname"
 ```
 
-Additionally, it creates an *Ingress* resource configured with the ingress_annotations.mdThis annotation will [instruct the K8GB Global Ingress Controller](ingress_annotations.md) to distribute the traffic across the different clusters.
-ingress_annotations.mdis an HTTP service, you can contact it using the *curl* command.
+Additionally, it creates an *Ingress* resource configured with the `k8gb.io/strategy: roundRobin` annotation.
+This annotation will [instruct the K8GB Global Ingress Controller](https://www.k8gb.io/docs/ingress_annotations.html) to distribute the traffic across the different clusters.
+
+## Check service reachability
+
+Since *podinfo* is an HTTP service, you can contact it using the *curl* command.
 Use the `-v` option to understand which of the nodes is being targeted.
 
 You need to use the DNS server in order to resolve the hostname to the IP address of the service.

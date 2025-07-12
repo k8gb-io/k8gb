@@ -1,6 +1,6 @@
 <h1 align="center" style="margin-top: 0;">Using Azure Public DNS provider</h1>
 
-This document outlines how to configure k8gb to use the Azure Public DNS provider. Azure Private DNS is not supported as it does not support NS records at this time. For private DNS scenarios in Azure, please refer to the [Windows DNS](deploy_windowsdns.md) documentation and consider implementing it using VM-based DNS services such as Windows DNS or BIND.
+This document outlines how to configure k8gb to use the Azure Public DNS provider. Azure Private DNS is not supported as it does not support NS records at this time. For private DNS scenarios in Azure, please refer to the [Windows DNS](deploy_azuredns.md) documentation and consider implementing it using VM-based DNS services such as Windows DNS or BIND.
 
 ### external-dns credentials for Azure DNS
 

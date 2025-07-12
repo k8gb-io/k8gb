@@ -30,12 +30,12 @@ Together with Kuar, we also prepared the failover gslb resource for k8gb. Where 
 
 Before we do that, we can visit Kuar on [cluster 2](http://localhost:81) and verify that hostname `kuar.cloud.example.com` is correctly resolved IPs corresponding to nodes in the primary cluster - which is the cluster 1. This DNS resolution will work the same way on both clusters, but we will be simulating the failure on cluster 1 soon so the web API will not respond on cluster 1.
 
-![Kuar dns resolution](images/kuar1.png)
+![Kuar dns resolution](/docs/images/kuar1.png)
 
 Now we can open a new tab with Kuar on cluster one and simulate the readiness probe failure for the next 10 checks - http://localhost/-/readiness.
 
-![Kuar probes](images/kuar2.png)
+![Kuar probes](/docs/images/kuar2.png)
 
 Once we do that, the web API on cluster 1 will become unavailable. So we can switch to cluster 2 and run the web-based dig again. This time it should respond with IPs from cluster two. However, once the readiness probe will start succeeding again, it will switch back to cluster 1.
 
-![Kuar dns resolution again](images/kuar3.png)
+![Kuar dns resolution again](/docs/images/kuar3.png)
