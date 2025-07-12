@@ -5,8 +5,8 @@
 <p align="center"><a href="https://landscape.cncf.io/?item=orchestration-management--coordination-service-discovery--k8gb">CNCF Sandbox Project</a> | <a href="https://github.com/orgs/k8gb-io/projects/2/views/2">Roadmap</a> | <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a></p>
 
 [![License: Apache_2](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://github.com/k8gb-io/k8gb/workflows/Golang%20lint,%20golic%20and%20test/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3A%22Golang%20lint,%20golic%20and%20test%22+branch%3Amaster)
-[![Terratest Status](https://github.com/k8gb-io/k8gb/workflows/Terratest/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ATerratest+branch%3Amaster)
+[![Golang lint, golic and test](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml)
+[![Terratest](https://github.com/k8gb-io/k8gb/actions/workflows/terratest.yaml/badge.svg)](https://github.com/k8gb-io/k8gb/actions/workflows/terratest.yaml)
 [![CodeQL](https://github.com/k8gb-io/k8gb/workflows/CodeQL/badge.svg)](https://github.com/k8gb-io/k8gb/actions?query=workflow%3ACodeQL+branch%3Amaster)
 [![Go Report Card](https://goreportcard.com/badge/github.com/k8gb-io/k8gb)](https://goreportcard.com/report/github.com/k8gb-io/k8gb)
 [![Helm Publish](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml/badge.svg)](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml)
