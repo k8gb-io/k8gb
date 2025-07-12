@@ -8,8 +8,8 @@ Cloudflare for automated zone delegation configuration.
 As a prerequisite, we will need two Kubernetes clusters where you want to deploy
 k8gb and enable global load balancing between them.
 
-You can reuse local clusters from the [Infoblox tutorial](deploy_infoblox.md),
-the EKS-based setup from [Route53 tutorial](deploy_route53.md)
+You can reuse local clusters from the [Infoblox tutorial](../docs/deploy_infoblox.html),
+the EKS-based setup from [Route53 tutorial](../docs/deploy_route53.md)
 or any Kubernetes deployment method that is convenient to you.
 
 The specific Kubernetes deployment method is not essential for the focus of this documentation guide.
@@ -143,7 +143,7 @@ spec:
 On the Cloudflare dashboard side, you should observe that NS and glue A records are
 automatically created:
 
-![Cloudflare dashboard with Zone Delegation records](images/k8gb-cloudflare.png)
+![Cloudflare dashboard with Zone Delegation records](/docs/images/k8gb-cloudflare.png)
 
 ## Troubleshooting
 

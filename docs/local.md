@@ -30,7 +30,7 @@ For more user-centric targets in that makefile consult `make help`.
   > Ensure you are able to push/pull from your docker registry
 
   > To run multiple clusters, reserve 8GB of memory*
-    ![](images/docker_settings.png)
+    ![](/docs/images/docker_settings.png)
       <div>
         <sup><i>* above screenshot is provided for <strong>Docker for Mac</strong>, options for other Docker distributions may vary
         </i></sup>
