@@ -149,38 +149,14 @@ jobs:
   provenance:
     name: provenance
     needs: [release]
-    runs-on: ubuntu-24.04
     permissions:
       actions: read
       id-token: write
       contents: write
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
-        with:
-          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
-
-      - name: Download checksums.txt
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG_NAME="${{ github.event.inputs.tag }}"
-          fi
-          gh release download "${TAG_NAME}" --pattern "checksums.txt" --repo ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate base64 subjects from checksums
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v2.1.0
-        id: hashes
-        with:
-          path: checksums.txt
-
-      - name: Generate SLSA provenance
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-provenance@v2.1.0
-        with:
-          base64-subjects: "${{ steps.hashes.outputs.base64-subjects }}"
-          upload-assets: true
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.release.outputs.hashes }}"
+      upload-assets: true
 
   container-provenance:
     name: container-provenance
