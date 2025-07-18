@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to test with'
+        required: true
+        default: 'v0.15.0-test'
 
 permissions:
   contents: read
@@ -156,7 +162,11 @@ jobs:
 
       - name: Download checksums.txt
         run: |
-          gh release download ${{ github.ref_name }} --pattern "checksums.txt" --repo ${{ github.repository }}
+          TAG_NAME="${{ github.ref_name }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_NAME="${{ github.event.inputs.tag }}"
+          fi
+          gh release download "${TAG_NAME}" --pattern "checksums.txt" --repo ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
