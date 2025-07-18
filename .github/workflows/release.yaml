@@ -173,8 +173,8 @@ jobs:
     with:
       image: docker.io/absaoss/k8gb
       digest: ${{ matrix.container.digest }}
-      registry-username: ${{ secrets.DOCKER_USER }}
     secrets:
+      registry-username: ${{ secrets.DOCKER_USER }}
       registry-password: ${{ secrets.DOCKER_PASSWORD }}
 
   slsa-summary:
