@@ -171,13 +171,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate base64 subjects from checksums
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v1.4.0
+        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v2.1.0
         id: hashes
         with:
           path: checksums.txt
 
       - name: Generate SLSA provenance
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-provenance@v1.4.0
+        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-provenance@v2.1.0
         with:
           base64-subjects: "${{ steps.hashes.outputs.base64-subjects }}"
           upload-assets: true
