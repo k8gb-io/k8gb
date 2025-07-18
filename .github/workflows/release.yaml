@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to test with'
+        description: 'Tag to build release with'
         required: true
-        default: 'v0.15.0-test'
+        default: 'v0.15.0-rcX'
 
 permissions:
   contents: read
