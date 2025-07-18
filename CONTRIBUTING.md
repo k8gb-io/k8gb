@@ -353,9 +353,8 @@ Congratulations, the release is complete!
 
 ### Signed releases
 
-During the release process we generate also the provenance file that is compliant with
-https://in-toto.io/Statement/v0.1 schema. It contains the information about the github action run that was
-responsible for the release, but also other metadata about artifacts there were created and their signatures.
+During the release process we generate SLSA (Supply-chain Levels for Software Artifacts) Level 3 provenance
+attestations using the official [slsa-framework/slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator).
 
 This provenance file is signed itself and attached with the signature to the release artifacts. For signing
 the artifacts we use [`cosign`](https://github.com/sigstore/cosign) tool and private key stored as the
@@ -364,11 +363,80 @@ This way anybody can verify the origin of arbitrary artifact. In order to regene
 one can run `cosign generate-key-pair`, use some passphrase and update the `COSIGN_{PRIVATE,PUBLIC}_KEY` &
 `COSIGN_PASSWORD` repo secret and also the content of [`cosign.pub`](https://github.com/k8gb-io/k8gb/blob/master/cosign.pub) file.
 
-All the container images that are produced during the build are also signed with `cosign` and the signatures
-are also pushed to the container registries (dockerhub). So that users of k8gb can introduce OPA policy that
-imposes such verification on our images. These signatures are stored in OCI format under predictable name
-that can be found using `cosign triangulate $IMAGE` command. However, `cosign verify ..` with our public key
-should be sufficient.
+#### SLSA Provenance
+
+The release artifacts include a `multiple.intoto.jsonl` file that contains SLSA provenance attestations
+compliant with the [in-toto Attestation Framework](https://in-toto.io/Statement/v0.1). This file provides:
+
+- **Build metadata**: Information about the GitHub Actions workflow that built the artifacts
+- **Material provenance**: Source code repository, commit SHA, and build environment details
+- **Artifact attestations**: Cryptographic signatures for all release binaries and archives
+- **Supply chain security**: Verifiable proof that artifacts weren't tampered with during build
+
+#### Artifact Signing
+
+For signing the artifacts we use [`cosign`](https://github.com/sigstore/cosign) tool with:
+- **Private key**: Stored as repository secret (`COSIGN_PRIVATE_KEY`)
+- **Public key**: Available in [`cosign.pub`](./cosign.pub) file
+- **Passphrase**: Stored as repository secret (`COSIGN_PASSWORD`)
+
+To regenerate signing keys:
+```bash
+cosign generate-key-pair
+# Update COSIGN_{PRIVATE,PUBLIC}_KEY & COSIGN_PASSWORD secrets
+# Update ./cosign.pub file content
+```
+
+#### Container Image Signatures
+
+All container images are signed with `cosign` and signatures are pushed to registries:
+- **Signature location**: OCI format under predictable names
+- **Discovery**: `cosign triangulate $IMAGE`
+- **Verification**: `cosign verify --key cosign.pub $IMAGE`
+
+#### Verification Instructions
+
+To verify release artifacts using the new SLSA provenance:
+
+**1. Install slsa-verifier:**
+```bash
+# Download from https://github.com/slsa-framework/slsa-verifier/releases
+wget https://github.com/slsa-framework/slsa-verifier/releases/latest/download/slsa-verifier-linux-amd64
+chmod +x slsa-verifier-linux-amd64
+```
+
+**2. Download artifacts:**
+```bash
+# Download the binary and provenance from GitHub release
+wget https://github.com/k8gb-io/k8gb/releases/download/v0.15.0/k8gb_0.15.0_linux_amd64.tar.gz
+wget https://github.com/k8gb-io/k8gb/releases/download/v0.15.0/multiple.intoto.jsonl
+```
+
+**3. Verify SLSA provenance:**
+```bash
+./slsa-verifier-linux-amd64 verify-artifact \
+  --provenance-path multiple.intoto.jsonl \
+  --source-uri github.com/k8gb-io/k8gb \
+  k8gb_0.15.0_linux_amd64.tar.gz
+```
+
+**4. Verify container images:**
+```bash
+cosign verify --key cosign.pub docker.io/absaoss/k8gb:v0.15.0
+```
+
+**5. Verify container provenance:**
+```bash
+cosign verify-attestation \
+  --key cosign.pub \
+  --type slsaprovenance \
+  docker.io/absaoss/k8gb@sha256:digest
+```
+
+The verification confirms that artifacts were:
+- Built by the official GitHub Actions workflow
+- From the expected source repository (github.com/k8gb-io/k8gb)
+- Without tampering during the build process
 
 ### Software bill of materials
 
