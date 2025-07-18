@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to test with'
+        required: true
+        default: 'v0.15.0-test'
 
 permissions:
   contents: read
@@ -17,6 +23,7 @@ jobs:
     outputs:
       container_tags: ${{ steps.container_info.outputs.container_tags }}
       container_info: ${{ steps.container_info.outputs.container_info }}
+      hashes: ${{ steps.hash.outputs.hashes }}
     env:
       DOCKER_CLI_EXPERIMENTAL: "enabled"
       COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
@@ -91,6 +98,11 @@ jobs:
       - name: Cleanup signing keys
         if: ${{ always() }}
         run: rm -f cosign.key
+      - name: Generate hashes for provenance
+        id: hash
+        run: |
+          cd dist
+          echo "hashes=$(sha256sum * | base64 -w0)" >> "$GITHUB_OUTPUT"
 
   sbom:
     name: sbom
@@ -139,6 +151,8 @@ jobs:
     needs: [release]
     runs-on: ubuntu-24.04
     permissions:
+      actions: read
+      id-token: write
       contents: write
     steps:
       - name: Harden Runner
@@ -146,43 +160,27 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@37037a07a9316d7d379b3c7574f50e1f43d088b8
-        id: provenance-step
-        with:
-          command: generate
-          subcommand: github-release
-          arguments: --artifact-path release-assets --output-path provenance.att --tag-name ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Check if uploading provenance failed
-        if: ${{ always() }}
+      - name: Download checksums.txt
         run: |
-          [ "x${{steps.provenance-step.outcome}}" == "xfailure" ] && echo ":x: Uploading provenance for release failed, make sure to delete all the previous releases in GitHub web api before releasing." > "$GITHUB_STEP_SUMMARY" || true
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
-        with:
-          cosign-release: 'v1.12.1'
-
-      - name: Sign provenance
+          TAG_NAME="${{ github.ref_name }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_NAME="${{ github.event.inputs.tag }}"
+          fi
+          gh release download "${TAG_NAME}" --pattern "checksums.txt" --repo ${{ github.repository }}
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-          SIGNATURE: provenance.att.sig
-        run: |
-          echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
-          cosign sign-blob --key cosign.key --output-signature "${SIGNATURE}" provenance.att
-          cat "${SIGNATURE}"
-          curl_args=(-s -H "Authorization: token ${GITHUB_TOKEN}")
-          curl_args+=(-H "Accept: application/vnd.github.v3+json")
-          release_id="$(curl "${curl_args[@]}" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases?per_page=10" | jq "map(select(.name == \"${GITHUB_REF_NAME}\"))" | jq -r '.[0].id')"
-          echo "Upload ${SIGNATURE} to release with id ${release_id}…"
-          curl_args+=(-H "Content-Type: $(file -b --mime-type "${SIGNATURE}")")
-          curl "${curl_args[@]}" \
-            --data-binary @"${SIGNATURE}" \
-            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${SIGNATURE}"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate base64 subjects from checksums
+        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v1.4.0
+        id: hashes
+        with:
+          path: checksums.txt
+
+      - name: Generate SLSA provenance
+        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-provenance@v1.4.0
+        with:
+          base64-subjects: "${{ steps.hashes.outputs.base64-subjects }}"
+          upload-assets: true
 
   container-provenance:
     name: container-provenance
