@@ -166,6 +166,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
+      packages: write
     strategy:
       matrix:
         container: ${{ fromJSON(needs.release.outputs.container_info) }}
