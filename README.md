@@ -43,7 +43,7 @@ spec:
 
 k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.
 
-k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](./docs/strategy.md) to meet requirements such as region failover for high availability.
+k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](strategy.md) to meet requirements such as region failover for high availability.
 
 Global load balancing for any Kubernetes Service can now be enabled and managed by any operations or development teams in the same Kubernetes native way as any other custom resource.
 
@@ -62,11 +62,11 @@ Simply run
 make deploy-full-local-setup
 ```
 
-It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](./docs/exposing_dns.md)), and install k8gb with test applications and two sample Gslb resources on top.
+It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](exposing_dns.md), and install k8gb with test applications and two sample Gslb resources on top.
 
 This setup is adapted for local scenarios and works without external DNS provider dependency.
 
-Consult with [local playground](/docs/local.md) documentation to learn all the details of experimenting with local setup.
+Consult with [local playground](local.md) documentation to learn all the details of experimenting with local setup.
 
 Optionally, you can run `make deploy-prometheus` and check the metrics on the test clusters (http://localhost:9080, http://localhost:9081).
 
@@ -86,32 +86,17 @@ k8gb commoditizes GSLB for Kubernetes, putting teams in complete control of expo
 
 k8gb requires no specialized software or hardware, relying completely on other OSS/CNCF projects, has no single point of failure, and fits in with any existing Kubernetes deployment workflow (e.g. GitOps, Kustomize, Helm, etc.) or tools.
 
-Please see the extended architecture documentation [here](/docs/index.md)
+Please see the extended architecture documentation [here](intro.md)
 
-Internal k8gb architecture and its components are described [here](/docs/components.md)
+Internal k8gb architecture and its components are described [here](components.md)
 
 ## Installation and Configuration Tutorials
 
-* [General deployment with Infoblox integration](/docs/deploy_infoblox.md)
-* [AWS based deployment with Route53 integration](/docs/deploy_route53.md)
-* [AWS based deployment with NS1 integration](/docs/deploy_ns1.md)
-* [Using Azure Public DNS provider](/docs/deploy_azuredns.md)
-* [Azure based deployment with Windows DNS integration](/docs/deploy_windowsdns.md)
-* [General deployment with Cloudflare integration](/docs/deploy_cloudflare.md)
-* [Seamless DDNS Integration with Bind9 and other RFC2136-Compatible DNS Environments](/docs/provider_rfc2136.md)
-* [Local playground for testing and development](/docs/local.md)
-* [Local playground with Kuar web app](/docs/local-kuar.md)
-* [Metrics](/docs/metrics.md)
-* [Traces](/docs/traces.md)
-* [Ingress annotations](/docs/ingress_annotations.md)
-* [Integration with Admiralty](/docs/admiralty.md)
-* [Integration with Liqo](/docs/liqo.md)
-* [Integration with Rancher Fleet](/docs/rancher.md)
-* [Integration with Crossplane - Global Application](/docs/examples/crossplane/globalapp/README.md)
+For comprehensive installation and configuration guides, see the [Installation and Configuration Tutorials](tutorials.md) documentation.
 
 ## Adopters
 
-A list of publicly known users of the K8GB project can be found in [ADOPTERS.md](/ADOPTERS.md).
+A list of publicly known users of the K8GB project can be found in [ADOPTERS.md](ADOPTERS.md).
 We encourage all users of K8GB to add themselves to this list!
 
 ## Production Readiness
@@ -127,8 +112,9 @@ k8gb is tested with the following environment options.
 | Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                            |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                                 |
 
-<a name="clarify"></a>* We only mention solutions where we have tested and verified a k8gb installation.
-If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
+<a name="clarify"></a> 
+* We only mention solutions where we have tested and verified a k8gb installation.
+* If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
 
 ## Presentations Featuring k8gb
 
@@ -159,4 +145,4 @@ You can also find recordings from our community meetings at [k8gb youtube channe
 
 ## Contributing
 
-See [CONTRIBUTING](/CONTRIBUTING.md)
+See [CONTRIBUTING](CONTRIBUTING.md)

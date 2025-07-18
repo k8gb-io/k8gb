@@ -1,7 +1,6 @@
 [build]
-  command = "make website"
-  publish = "_site/"
-  ignore = "git diff --quiet HEAD^ HEAD -- {README,CONTRIBUTING,CHANGELOG}.md docs/"
+  command = "pip install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin && mkdocs build"
+  publish = "site/"
 
-[context.deploy-preview]
-  ignore = "git diff --quiet HEAD^ HEAD -- {README,CONTRIBUTING,CHANGELOG}.md docs/"
+[build.environment]
+  PYTHON_VERSION = "3.8"

@@ -36,7 +36,7 @@ make infoblox-secret
 ```
 
 * Expose associated k8gb CoreDNS service for DNS traffic on worker nodes.
-  > Check [this document](./exposing_dns.md) for detailed information.
+  > Check [this document](exposing_dns.md) for detailed information.
 
 * Let's deploy k8gb to the first cluster. Most of the helper commands are abstracted by GNU `make`. If you want to look under the hood please check the `Makefile`. In general, standard Kubernetes/Helm commands are used. Point deployment mechanism to your custom `values.yaml`
 ```sh
