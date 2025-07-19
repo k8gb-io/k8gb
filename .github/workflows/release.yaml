@@ -159,6 +159,7 @@ jobs:
       base64-subjects: "${{ needs.release.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: ${{ github.ref_name }}
+      draft-release: true
 
   container-provenance:
     name: container-provenance
