@@ -30,13 +30,13 @@
   - [Signed releases](#signed-releases)
   - [Software bill of materials](#software-bill-of-materials)
 
-k8gb is licensed under [Apache 2 License](./LICENSE) and accepts contributions via GitHub pull requests.
+k8gb is licensed under [Apache 2 License](https://github.com/k8gb-io/k8gb/blob/master/LICENSE) and accepts contributions via GitHub pull requests.
 This document outlines the resources and guidelines necessary to follow by contributors to the k8gb project.
 
 ## Getting started
 
 - Fork the repository on GitHub
-- See the [local playground guide](/docs/local.md) for local dev environment setup
+- See the [local playground guide](local.md) for local dev environment setup
 
 ## Getting help
 
@@ -141,7 +141,7 @@ There is a dedicated make target available for Goland:
 3. Attach debugger of your IDE to port `2345`.
 
 ## Metrics
-More info about k8gb metrics can be found in the [metrics.md](/docs/metrics.md) document.
+More info about k8gb metrics can be found in the [metrics.md](metrics.md) document.
 If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the `make deploy-prometheus` command.
 
 The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:
@@ -240,7 +240,7 @@ When a commit is created in GitHub UI as a result of [accepted suggested change]
 
 ### Changelog
 
-The [CHANGELOG](CHANGELOG.md) is automatically generated from Github PRs and Issues during release.
+The [CHANGELOG](https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md) is automatically generated from Github PRs and Issues during release.
 Use dedicated [keywords](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword) in PR message or [manual PR and Issue linking](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue) for clean changelog generation.
 Issues and PRs should be also properly tagged with valid project tags ("bug", "enhancement", "wontfix", etc )
 
@@ -324,7 +324,7 @@ The happy path will look like:
 [Thu May 27 15:35:36 UTC 2021] ...
 ```
 
-The sources for demo helper images can be found [here](deploy/test-apps/curldemo/)
+The sources for demo helper images can be found [here](https://github.com/k8gb-io/k8gb/tree/master/deploy/test-apps/curldemo/)
 
 To enable verbose debug output declare `DEMO_DEBUG=1` like
 ```sh
@@ -359,10 +359,10 @@ responsible for the release, but also other metadata about artifacts there were 
 
 This provenance file is signed itself and attached with the signature to the release artifacts. For signing
 the artifacts we use [`cosign`](https://github.com/sigstore/cosign) tool and private key stored as the
-repository secret. Public key is available in the repository itself in file [`cosign.pub`](./cosign.pub).
+repository secret. Public key is available in the repository itself in file [`cosign.pub`](https://github.com/k8gb-io/k8gb/blob/master/cosign.pub).
 This way anybody can verify the origin of arbitrary artifact. In order to regenerate the keys for cosign,
 one can run `cosign generate-key-pair`, use some passphrase and update the `COSIGN_{PRIVATE,PUBLIC}_KEY` &
-`COSIGN_PASSWORD` repo secret and also the content of `./cosign.pub` file.
+`COSIGN_PASSWORD` repo secret and also the content of [`cosign.pub`](https://github.com/k8gb-io/k8gb/blob/master/cosign.pub) file.
 
 All the container images that are produced during the build are also signed with `cosign` and the signatures
 are also pushed to the container registries (dockerhub). So that users of k8gb can introduce OPA policy that

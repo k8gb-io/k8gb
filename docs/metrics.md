@@ -93,4 +93,4 @@ The k8gb exposes several metrics to help you monitor the health and behavior.
 
 ## OpenTracing
 
-Optionally k8gb operator can expose traces in OpenTelemetry format to any available OTEL compliant tracing solution. Consult the [following page](../traces/) for more details.
+Optionally k8gb operator can expose traces in OpenTelemetry format to any available OTEL compliant tracing solution. Consult the [following page](traces.md) for more details.
