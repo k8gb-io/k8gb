@@ -25,16 +25,16 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          
+
       - name: Setup Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: '3.x'
-          
+
       - name: Install MkDocs
         run: |
           pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
-          
+
       - name: Setup git config
         run: |
           git config --local user.email "action@github.com"
@@ -59,19 +59,19 @@ jobs:
       - name: Deploy to gh-pages
         run: |
           git checkout gh-pages
-          
-          # Clean MkDocs artifacts only
-          rm -rf docs/ *.html *.js *.css search/ sitemap.xml
-          
+
+          # Clean everything except git files and preserved files
+          find . -maxdepth 1 -not -name '.git*' -not -name '.' -not -name '..' -exec rm -rf {} +
+
           # Deploy new site
           cp -r site/* .
-          
+
           # Restore preserved files
           test -d /tmp/preserved/charts && cp -r /tmp/preserved/charts .
           test -f /tmp/preserved/artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .
           test -f /tmp/preserved/index.yaml && cp /tmp/preserved/index.yaml .
           test -f /tmp/preserved/CNAME && cp /tmp/preserved/CNAME .
-          
+
           # Commit and push if there are changes
           git add .
           if ! git diff --cached --quiet; then
