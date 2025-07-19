@@ -35,30 +35,48 @@ jobs:
         run: |
           pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
           
-      - name: Build and Deploy
+      - name: Setup git config
         run: |
-          # Backup chart repo files
-          git checkout gh-pages
-          mkdir -p /tmp/chart-backup
-          cp -r . /tmp/chart-backup/ 2>/dev/null || true
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Backup preserved files
+        run: |
+          mkdir -p /tmp/preserved
+          git fetch origin gh-pages:gh-pages
+          if git checkout gh-pages; then
+            echo "Backing up existing files..."
+            test -d charts && cp -r charts /tmp/preserved/
+            test -f artifacthub-repo.yml && cp artifacthub-repo.yml /tmp/preserved/
+            test -f index.yaml && cp index.yaml /tmp/preserved/
+            test -f CNAME && cp CNAME /tmp/preserved/
+          fi
           git checkout master
-          
-          # Build MkDocs site
-          mkdocs build
-          
-          # Deploy with chart files preserved
+
+      - name: Build documentation
+        run: mkdocs build --clean
+
+      - name: Deploy to gh-pages
+        run: |
           git checkout gh-pages
-          rm -rf docs/ *.html *.js *.css search/ sitemap.xml* 2>/dev/null || true
+          
+          # Clean MkDocs artifacts only
+          rm -rf docs/ *.html *.js *.css search/ sitemap.xml
+          
+          # Deploy new site
           cp -r site/* .
           
-          # Restore only chart repo and essential files (Jekyll replaced by MkDocs)
-          cp -r /tmp/chart-backup/charts/ . 2>/dev/null || true
-          cp -r /tmp/chart-backup/artifacthub-repo.yml . 2>/dev/null || true
-          cp -r /tmp/chart-backup/index.yaml . 2>/dev/null || true
-          cp -r /tmp/chart-backup/CNAME . 2>/dev/null || true
+          # Restore preserved files
+          test -d /tmp/preserved/charts && cp -r /tmp/preserved/charts .
+          test -f /tmp/preserved/artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .
+          test -f /tmp/preserved/index.yaml && cp /tmp/preserved/index.yaml .
+          test -f /tmp/preserved/CNAME && cp /tmp/preserved/CNAME .
           
+          # Commit and push if there are changes
           git add .
-          git commit -m "Documentation sync from master" || exit 0
-          git push origin gh-pages
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy documentation from ${{ github.sha }}"
+            git push origin gh-pages
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
