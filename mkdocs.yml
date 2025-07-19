@@ -36,10 +36,14 @@ nav:
     - Admiralty: admiralty.md
     - Liqo: liqo.md
     - Rancher: rancher.md
+    - Crossplane Global Control Plane: examples/crossplane/globalapp/README.md
   - Advanced:
     - Service Upgrade: service_upgrade.md
     - WRR Caveats: wrr_caveats.md
     - External DNS Proxy: proxy_externaldns.md
+  - Community:
+    - Contributing: CONTRIBUTING.md
+    - Adopters: ADOPTERS.md
 
 theme:
   name: material
