@@ -7,6 +7,7 @@ on:
     paths:
       - '**.md'
       - 'docs/**'
+      - 'mkdocs.yml'
 permissions:
   contents: read
 
@@ -24,20 +25,40 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-      - name: Copy new docs to gh-pages
-        run: |
-          git checkout gh-pages
-          git checkout ${GITHUB_REF##*/} ADOPTERS.md
-          git checkout ${GITHUB_REF##*/} README.md
-          git checkout ${GITHUB_REF##*/} CONTRIBUTING.md
-          git checkout ${GITHUB_REF##*/} CHANGELOG.md
-          git checkout ${GITHUB_REF##*/} docs
-      - name: Push to gh-pages
-        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
+          
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          author_name: ${{ github.actor }}
-          author_email: ${{ github.actor }}@users.noreply.github.com
-          message: "Documentation sync from master"
-          branch: gh-pages
+          python-version: '3.x'
+          
+      - name: Install MkDocs
+        run: |
+          pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
+          
+      - name: Build and Deploy
+        run: |
+          # Backup chart repo files
+          git checkout gh-pages
+          mkdir -p /tmp/chart-backup
+          cp -r . /tmp/chart-backup/ 2>/dev/null || true
+          git checkout master
+          
+          # Build MkDocs site
+          mkdocs build
+          
+          # Deploy with chart files preserved
+          git checkout gh-pages
+          rm -rf docs/ *.html *.js *.css search/ sitemap.xml* 2>/dev/null || true
+          cp -r site/* .
+          
+          # Restore only chart repo and essential files (Jekyll replaced by MkDocs)
+          cp -r /tmp/chart-backup/charts/ . 2>/dev/null || true
+          cp -r /tmp/chart-backup/artifacthub-repo.yml . 2>/dev/null || true
+          cp -r /tmp/chart-backup/index.yaml . 2>/dev/null || true
+          cp -r /tmp/chart-backup/CNAME . 2>/dev/null || true
+          
+          git add .
+          git commit -m "Documentation sync from master" || exit 0
+          git push origin gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
