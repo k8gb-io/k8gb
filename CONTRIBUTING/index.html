@@ -1611,6 +1611,48 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Signed releases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slsa-provenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      SLSA Provenance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artifact-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Artifact Signing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-image-signatures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Image Signatures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification Instructions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1979,20 +2021,69 @@ a pull request with an offline changelog. Do a review and if everything is ok, m
 </ul>
 <p>Congratulations, the release is complete!</p>
 <h3 id="signed-releases">Signed releases<a class="headerlink" href="#signed-releases" title="Permanent link">&para;</a></h3>
-<p>During the release process we generate also the provenance file that is compliant with
-https://in-toto.io/Statement/v0.1 schema. It contains the information about the github action run that was
-responsible for the release, but also other metadata about artifacts there were created and their signatures.</p>
+<p>During the release process we generate SLSA (Supply-chain Levels for Software Artifacts) Level 3 provenance
+attestations using the official <a href="https://github.com/slsa-framework/slsa-github-generator">slsa-framework/slsa-github-generator</a>.</p>
 <p>This provenance file is signed itself and attached with the signature to the release artifacts. For signing
 the artifacts we use <a href="https://github.com/sigstore/cosign"><code>cosign</code></a> tool and private key stored as the
 repository secret. Public key is available in the repository itself in file <a href="https://github.com/k8gb-io/k8gb/blob/master/cosign.pub"><code>cosign.pub</code></a>.
 This way anybody can verify the origin of arbitrary artifact. In order to regenerate the keys for cosign,
 one can run <code>cosign generate-key-pair</code>, use some passphrase and update the <code>COSIGN_{PRIVATE,PUBLIC}_KEY</code> &amp;
 <code>COSIGN_PASSWORD</code> repo secret and also the content of <a href="https://github.com/k8gb-io/k8gb/blob/master/cosign.pub"><code>cosign.pub</code></a> file.</p>
-<p>All the container images that are produced during the build are also signed with <code>cosign</code> and the signatures
-are also pushed to the container registries (dockerhub). So that users of k8gb can introduce OPA policy that
-imposes such verification on our images. These signatures are stored in OCI format under predictable name
-that can be found using <code>cosign triangulate $IMAGE</code> command. However, <code>cosign verify ..</code> with our public key
-should be sufficient.</p>
+<h4 id="slsa-provenance">SLSA Provenance<a class="headerlink" href="#slsa-provenance" title="Permanent link">&para;</a></h4>
+<p>The release artifacts include a <code>multiple.intoto.jsonl</code> file that contains SLSA provenance attestations
+compliant with the <a href="https://in-toto.io/Statement/v0.1">in-toto Attestation Framework</a>. This file provides:</p>
+<ul>
+<li><strong>Build metadata</strong>: Information about the GitHub Actions workflow that built the artifacts</li>
+<li><strong>Material provenance</strong>: Source code repository, commit SHA, and build environment details</li>
+<li><strong>Artifact attestations</strong>: Cryptographic signatures for all release binaries and archives</li>
+<li><strong>Supply chain security</strong>: Verifiable proof that artifacts weren't tampered with during build</li>
+</ul>
+<h4 id="artifact-signing">Artifact Signing<a class="headerlink" href="#artifact-signing" title="Permanent link">&para;</a></h4>
+<p>For signing the artifacts we use <a href="https://github.com/sigstore/cosign"><code>cosign</code></a> tool with:
+- <strong>Private key</strong>: Stored as repository secret (<code>COSIGN_PRIVATE_KEY</code>)
+- <strong>Public key</strong>: Available in <a href="./cosign.pub"><code>cosign.pub</code></a> file
+- <strong>Passphrase</strong>: Stored as repository secret (<code>COSIGN_PASSWORD</code>)</p>
+<p>To regenerate signing keys:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>cosign<span class="w"> </span>generate-key-pair
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="c1"># Update COSIGN_{PRIVATE,PUBLIC}_KEY &amp; COSIGN_PASSWORD secrets</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="c1"># Update ./cosign.pub file content</span>
+</code></pre></div></p>
+<h4 id="container-image-signatures">Container Image Signatures<a class="headerlink" href="#container-image-signatures" title="Permanent link">&para;</a></h4>
+<p>All container images are signed with <code>cosign</code> and signatures are pushed to registries:
+- <strong>Signature location</strong>: OCI format under predictable names
+- <strong>Discovery</strong>: <code>cosign triangulate $IMAGE</code>
+- <strong>Verification</strong>: <code>cosign verify --key cosign.pub $IMAGE</code></p>
+<h4 id="verification-instructions">Verification Instructions<a class="headerlink" href="#verification-instructions" title="Permanent link">&para;</a></h4>
+<p>To verify release artifacts using the new SLSA provenance:</p>
+<p><strong>1. Install slsa-verifier:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Download from https://github.com/slsa-framework/slsa-verifier/releases</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>wget<span class="w"> </span>https://github.com/slsa-framework/slsa-verifier/releases/latest/download/slsa-verifier-linux-amd64
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>chmod<span class="w"> </span>+x<span class="w"> </span>slsa-verifier-linux-amd64
+</code></pre></div></p>
+<p><strong>2. Download artifacts:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># Download the binary and provenance from GitHub release</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>wget<span class="w"> </span>https://github.com/k8gb-io/k8gb/releases/download/v0.15.0/k8gb_0.15.0_linux_amd64.tar.gz
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>wget<span class="w"> </span>https://github.com/k8gb-io/k8gb/releases/download/v0.15.0/multiple.intoto.jsonl
+</code></pre></div></p>
+<p><strong>3. Verify SLSA provenance:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>./slsa-verifier-linux-amd64<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">  </span>--provenance-path<span class="w"> </span>multiple.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">  </span>--source-uri<span class="w"> </span>github.com/k8gb-io/k8gb<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">  </span>k8gb_0.15.0_linux_amd64.tar.gz
+</code></pre></div></p>
+<p><strong>4. Verify container images:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>cosign<span class="w"> </span>verify<span class="w"> </span>--key<span class="w"> </span>cosign.pub<span class="w"> </span>docker.io/absaoss/k8gb:v0.15.0
+</code></pre></div></p>
+<p><strong>5. Verify container provenance:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>cosign<span class="w"> </span>verify-attestation<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span>--key<span class="w"> </span>cosign.pub<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span>--type<span class="w"> </span>slsaprovenance<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">  </span>docker.io/absaoss/k8gb@sha256:digest
+</code></pre></div></p>
+<p>The verification confirms that artifacts were:
+- Built by the official GitHub Actions workflow
+- From the expected source repository (github.com/k8gb-io/k8gb)
+- Without tampering during the build process</p>
 <h3 id="software-bill-of-materials">Software bill of materials<a class="headerlink" href="#software-bill-of-materials" title="Permanent link">&para;</a></h3>
 <p>For each container image we also create Software bill of materials (SBOM) file + its signature that ends up
 as part of the release. These files follows this naming pattern:
@@ -2021,7 +2112,7 @@ as part of the release. These files follows this naming pattern:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 19, 2025 22:53:25 UTC">July 19, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 20, 2025 18:16:27 UTC">July 20, 2025</span>
   </span>
 
     
