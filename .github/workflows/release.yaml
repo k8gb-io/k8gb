@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to test with'
+        description: 'Tag to build release with'
         required: true
-        default: 'v0.15.0-test'
+        default: 'v0.15.0-rcX'
 
 permissions:
   contents: read
@@ -41,6 +41,7 @@ jobs:
           previous_tag=$(git tag --sort=v:refname | tail -2 | head -1)
           echo "previous_tag=${previous_tag}" >> $GITHUB_ENV
       - uses: heinrichreimer/github-changelog-generator-action@e60b5a2bd9fcd88dadf6345ff8327863fb8b490f # v2.4
+        if: ${{ !contains(github.ref_name, 'rc') && github.event_name != 'workflow_dispatch' }}
         with:
           token: ${{ secrets.CHANGELOG_GH_TOKEN }}
           project: k8gb
@@ -76,7 +77,7 @@ jobs:
         uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200 # v6.0.0
         with:
           version: v1.7.0
-          args: release --rm-dist --release-notes=changes
+          args: release --rm-dist ${{ (!contains(github.ref_name, 'rc') && github.event_name != 'workflow_dispatch') && '--release-notes=changes' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get container info
@@ -149,93 +150,35 @@ jobs:
   provenance:
     name: provenance
     needs: [release]
-    runs-on: ubuntu-24.04
     permissions:
       actions: read
       id-token: write
       contents: write
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
-        with:
-          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
-
-      - name: Download checksums.txt
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG_NAME="${{ github.event.inputs.tag }}"
-          fi
-          gh release download "${TAG_NAME}" --pattern "checksums.txt" --repo ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate base64 subjects from checksums
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v1.4.0
-        id: hashes
-        with:
-          path: checksums.txt
-
-      - name: Generate SLSA provenance
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-provenance@v1.4.0
-        with:
-          base64-subjects: "${{ steps.hashes.outputs.base64-subjects }}"
-          upload-assets: true
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.release.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: ${{ github.ref_name }}
+      draft-release: true
 
   container-provenance:
     name: container-provenance
     needs: [release]
-    runs-on: ubuntu-24.04
     permissions:
+      actions: read
+      id-token: write
       contents: write
-
+      packages: write
     strategy:
       matrix:
         container: ${{ fromJSON(needs.release.outputs.container_info) }}
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
-        with:
-          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
-        with:
-          cosign-release: 'v1.12.1'
-
-      - name: Generate provenance for container image
-        uses: philips-labs/slsa-provenance-action@37037a07a9316d7d379b3c7574f50e1f43d088b8
-        with:
-          command: generate
-          subcommand: container
-          arguments: --repository docker.io/absaoss/k8gb --output-path provenance.att --digest ${{ matrix.container.digest }} --tags ${{ join(matrix.container.tags, ',') }} }}
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Get slsa-provenance predicate
-        run: |
-          cat provenance.att | jq .predicate > provenance-predicate.att
-      - name: Login to Dockerhub
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Attach provenance to image
-        run: |
-          echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
-          cosign attest --predicate provenance-predicate.att --type slsaprovenance --key cosign.key docker.io/absaoss/k8gb@${{ matrix.container.digest }}
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-
-      - name: Verify attestation
-        run: |
-          echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
-          cosign verify-attestation --key cosign.pub --type slsaprovenance docker.io/absaoss/k8gb@${{ matrix.container.digest }}
-      - name: Cleanup
-        if: ${{ always() }}
-        run: |
-          rm -f cosign.key
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
+    with:
+      image: docker.io/absaoss/k8gb
+      digest: ${{ matrix.container.digest }}
+    secrets:
+      registry-username: ${{ secrets.DOCKER_USER }}
+      registry-password: ${{ secrets.DOCKER_PASSWORD }}
 
   slsa-summary:
     name: Release Summary
