@@ -1,0 +1,2095 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Cloud native global load balancing solution for Kubernetes">
+      
+      
+      
+        <link rel="canonical" href="https://k8gb.io/CONTRIBUTING/">
+      
+      
+        <link rel="prev" href="../proxy_externaldns/">
+      
+      
+        <link rel="next" href="../ADOPTERS/">
+      
+      
+      <link rel="icon" href="../images/k8gb-icon-color.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>Contributing - K8GB - Kubernetes Global Balancer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#contributing-to-k8gb" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="K8GB - Kubernetes Global Balancer" class="md-header__button md-logo" aria-label="K8GB - Kubernetes Global Balancer" data-md-component="logo">
+      
+  <img src="../images/k8gb-icon-color.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            K8GB - Kubernetes Global Balancer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Contributing
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10A10 10 0 0 1 2 12 10 10 0 0 1 12 2"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="red" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k8gb-io/k8gb" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    k8gb-io/k8gb
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="K8GB - Kubernetes Global Balancer" class="md-nav__button md-logo" aria-label="K8GB - Kubernetes Global Balancer" data-md-component="logo">
+      
+  <img src="../images/k8gb-icon-color.svg" alt="logo">
+
+    </a>
+    K8GB - Kubernetes Global Balancer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k8gb-io/k8gb" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    k8gb-io/k8gb
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation & Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Components
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Load Balancing Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    DNS Providers
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            DNS Providers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_infoblox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Infoblox
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_route53/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Route53
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_ns1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    NS1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_azuredns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Azure DNS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_windowsdns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Windows DNS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_cloudflare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Cloudflare
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../provider_rfc2136/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    RFC2136/Bind9
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development & Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Development & Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Local Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local-kuar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Local with Kuar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Monitoring and Observability
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Monitoring and Observability
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Traces
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingress_annotations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ingress Annotations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../resource_ref/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Resource References
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../address_discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Address Discovery
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dynamic_geotags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dynamic Geotags
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multizone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Multi-zone Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exposing_dns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Exposing DNS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Platform Integrations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Platform Integrations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admiralty/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Admiralty
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../liqo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Liqo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rancher/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rancher
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/crossplane/globalapp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Crossplane Global Control Plane
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../service_upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Service Upgrade
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wrr_caveats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WRR Caveats
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxy_externaldns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    External DNS Proxy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Community
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            Community
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting started
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting help
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reporting-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reporting issues
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contribution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contribution flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deploy-k8gb-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deploy k8gb locally
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upgrade-k8gb-to-local-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrade k8gb to local candidate
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overriding-dev-environment-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overriding dev environment settings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-against-real-k8s-clusters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing against real k8s clusters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code style
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Code style">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error handling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commit-and-pull-request-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commit and Pull Request message
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commit and Pull Request message">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      Signature
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changelog
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k8gbio-website" class="md-nav__link">
+    <span class="md-ellipsis">
+      k8gb.io website
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="k8gb.io website">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-website-authoring-and-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local website authoring and testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local website authoring and testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-custom-ssl-ca-certificate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using custom SSL CA certificate
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#env-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      .env support
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-demo-helper" class="md-nav__link">
+    <span class="md-ellipsis">
+      End-to-end demo helper
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release process
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Release process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signed-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Signed releases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software-bill-of-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Software bill of materials
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ADOPTERS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Adopters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/CONTRIBUTING.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<!-- omit in toc -->
+<h1 id="contributing-to-k8gb">Contributing to k8gb<a class="headerlink" href="#contributing-to-k8gb" title="Permanent link">&para;</a></h1>
+<ul>
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#getting-help">Getting help</a></li>
+<li><a href="#reporting-issues">Reporting issues</a></li>
+<li><a href="#contribution-flow">Contribution flow</a></li>
+<li><a href="#local-setup">Local setup</a></li>
+<li><a href="#deploy-k8gb-locally">Deploy k8gb locally</a></li>
+<li><a href="#upgrade-k8gb-to-local-candidate">Upgrade k8gb to local candidate</a></li>
+<li><a href="#overriding-dev-environment-settings">Overriding dev environment settings</a></li>
+<li><a href="#testing">Testing</a></li>
+<li><a href="#unit-testing">Unit testing</a></li>
+<li><a href="#testing-against-real-k8s-clusters">Testing against real k8s clusters</a></li>
+<li><a href="#debugging">Debugging</a></li>
+<li><a href="#metrics">Metrics</a></li>
+<li><a href="#code-style">Code style</a></li>
+<li><a href="#logging">Logging</a></li>
+<li><a href="#error-handling">Error handling</a></li>
+<li><a href="#commit-and-pull-request-message">Commit and Pull Request message</a></li>
+<li><a href="#signature">Signature</a></li>
+<li><a href="#changelog">Changelog</a></li>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#k8gbio-website">k8gb.io website</a></li>
+<li><a href="#local-website-authoring-and-testing">Local website authoring and testing</a><ul>
+<li><a href="#using-custom-ssl-ca-certificate">Using custom SSL CA certificate</a></li>
+<li><a href="#env-support">.env support</a></li>
+</ul>
+</li>
+<li><a href="#end-to-end-demo-helper">End-to-end demo helper</a></li>
+<li><a href="#release-process">Release process</a></li>
+<li><a href="#signed-releases">Signed releases</a></li>
+<li><a href="#software-bill-of-materials">Software bill of materials</a></li>
+</ul>
+<p>k8gb is licensed under <a href="https://github.com/k8gb-io/k8gb/blob/master/LICENSE">Apache 2 License</a> and accepts contributions via GitHub pull requests.
+This document outlines the resources and guidelines necessary to follow by contributors to the k8gb project.</p>
+<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fork the repository on GitHub</li>
+<li>See the <a href="../local/">local playground guide</a> for local dev environment setup</li>
+</ul>
+<h2 id="getting-help">Getting help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<p>Feel free to ask for help and join the discussions at <a href="https://github.com/k8gb-io/k8gb/discussions">k8gb community discussions forum</a>.
+We have <a href="https://cloud-native.slack.com/archives/C021P656HGB">dedicated <code>#k8gb</code> channel on Cloud Native Computing Foundation (CNCF) Slack</a>,
+and we can also actively monitoring <a href="https://kubernetes.slack.com/archives/C09R1PJR3"><code>#sig-multicluster</code> channel on Kubernetes Slack</a>.</p>
+<h2 id="reporting-issues">Reporting issues<a class="headerlink" href="#reporting-issues" title="Permanent link">&para;</a></h2>
+<p>Reporting bugs is one of the best ways to contribute.
+Feel free to open an issue describing your problem or question.</p>
+<h2 id="contribution-flow">Contribution flow<a class="headerlink" href="#contribution-flow" title="Permanent link">&para;</a></h2>
+<p>Following is a rough outline for the contributor's workflow:</p>
+<ul>
+<li>Create a topic branch from where to base the contribution.</li>
+<li>Make commits of logical units.</li>
+<li>Make sure your code is clean and follows the <a href="#code-style">code style and logging guidelines</a>.</li>
+<li>Make sure the commit messages are in the <a href="#commit-and-pull-request-message">proper format</a>.</li>
+<li>Make sure the changes are covered by <a href="#testing">reasonable amount of testing</a>.</li>
+<li>Push changes in a topic branch to a personal fork of the repository.</li>
+<li>Submit a pull request to k8gb-io/k8gb GitHub repository.</li>
+<li>Resolve review comments.</li>
+<li>PR must receive an "LGTM" approval from at least one maintainer listed in the <code>CODEOWNERS</code> file.</li>
+</ul>
+<h2 id="local-setup">Local setup<a class="headerlink" href="#local-setup" title="Permanent link">&para;</a></h2>
+<h3 id="deploy-k8gb-locally">Deploy k8gb locally<a class="headerlink" href="#deploy-k8gb-locally" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>make<span class="w"> </span>deploy-full-local-setup
+</code></pre></div>
+deploys k8gb from scratch, including:</p>
+<ul>
+<li>2 local clusters</li>
+<li>Stable k8gb helm chart</li>
+<li>Gslb Custom Resources examples</li>
+<li>Test applications</li>
+</ul>
+<h3 id="upgrade-k8gb-to-local-candidate">Upgrade k8gb to local candidate<a class="headerlink" href="#upgrade-k8gb-to-local-candidate" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>upgrade-candidate
+</code></pre></div>
+performs upgrade of k8gb helm chart and controller to the testing version built from your current development tree.</p>
+<h2 id="overriding-dev-environment-settings">Overriding dev environment settings<a class="headerlink" href="#overriding-dev-environment-settings" title="Permanent link">&para;</a></h2>
+<p>Sometimes there is a need to override environment variables used by <code>make</code> targets for local k8gb development.
+This can be easily achieved by providing the list of environment variables with respective values in the <code>.env</code> file at the local repository root:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>cat<span class="w"> </span>.env
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># .env:</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nv">LOG_LEVEL</span><span class="o">=</span>info
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nv">LOG_FORMAT</span><span class="o">=</span>json
+</code></pre></div>
+Overrides done this way can persist between terminal sessions and can be used as a single point of configuration for development in terminal and IDE of choice.</p>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Any functional GSLB controller code change should be secured by the corresponding <a href="https://github.com/k8gb-io/k8gb/tree/master/controllers/gslb_controller_reconciliation_test.go">unit tests</a>.</li>
+<li>Integration terratest suite is located <a href="https://github.com/k8gb-io/k8gb/tree/master/terratest">here</a>.
+  These tests are updated only if the change is substantial enough to affect the main end-to-end flow.</li>
+<li>See the <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/local.md">local playground guide</a> for local testing environment setup and integration test execution.</li>
+</ul>
+<h3 id="unit-testing">Unit testing<a class="headerlink" href="#unit-testing" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Include unit tests when you contribute new features, as they help to a) prove that your code works correctly, and b) guard against future breaking changes to lower the maintenance cost.</li>
+<li>Bug fixes also generally require unit tests, because the presence of bugs usually indicates insufficient test coverage.</li>
+</ul>
+<p>Use <code>make test</code> to check your implementation changes.</p>
+<h3 id="testing-against-real-k8s-clusters">Testing against real k8s clusters<a class="headerlink" href="#testing-against-real-k8s-clusters" title="Permanent link">&para;</a></h3>
+<p>There is a possibility to execute the integration terratest suite over the real clusters.
+For this, you need to override the set of test settings as in the example below.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">PRIMARY_GEO_TAG</span><span class="o">=</span>af-south-1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">SECONDARY_GEO_TAG</span><span class="o">=</span>eu-west-1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nv">DNS_SERVER1</span><span class="o">=</span>a377095726f1845fb85b95c2afef8ac0-9a1a10f24e634e28.elb.af-south-1.amazonaws.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nv">DNS_SERVER1_PORT</span><span class="o">=</span><span class="m">53</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nv">DNS_SERVER2</span><span class="o">=</span>a873f5c83be624a0a84c05a743d598a8-443f7e0285e4a28f.elb.eu-west-1.amazonaws.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nv">DNS_SERVER2_PORT</span><span class="o">=</span><span class="m">53</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nv">GSLB_DOMAIN</span><span class="o">=</span>test.k8gb.io<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nv">K8GB_CLUSTER1</span><span class="o">=</span>arn:aws:eks:af-south-1:&lt;aws-account-id&gt;:cluster/k8gb-cluster-af-south-1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nv">K8GB_CLUSTER2</span><span class="o">=</span>arn:aws:eks:eu-west-1:&lt;aws-account-id&gt;:cluster/k8gb-cluster-eu-west-1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>make<span class="w"> </span>terratest
+</code></pre></div></p>
+<h2 id="debugging">Debugging<a class="headerlink" href="#debugging" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Install Delve debugger first. Follow the <a href="https://github.com/go-delve/delve/tree/master/Documentation/installation">installation instructions</a> for specific platforms from Delve's website.</p>
+</li>
+<li>
+<p>Run delve with options specific to IDE of choice.
+There is a dedicated make target available for Goland:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>make<span class="w"> </span>debug-idea
+</code></pre></div>
+<a href="https://dev4devs.com/2019/05/04/operator-framework-how-to-debug-golang-operator-projects/">This article</a> describes possible option examples for Goland and VS Code.</p>
+</li>
+<li>
+<p>Attach debugger of your IDE to port <code>2345</code>.</p>
+</li>
+</ol>
+<h2 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h2>
+<p>More info about k8gb metrics can be found in the <a href="../metrics/">metrics.md</a> document.
+If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the <code>make deploy-prometheus</code> command.</p>
+<p>The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:</p>
+<ul>
+<li>http://127.0.0.1:9080</li>
+<li>http://127.0.0.1:9081</li>
+</ul>
+<p>All the metric data is ephemeral and will be lost with pod restarts.
+To uninstall Prometheus, run <code>make uninstall-prometheus</code></p>
+<p>Optionally, you can also install Grafana that will have the datasources configured and example dashboard ready using <code>make deploy-grafana</code></p>
+<h2 id="code-style">Code style<a class="headerlink" href="#code-style" title="Permanent link">&para;</a></h2>
+<p>k8gb project is using the coding style suggested by the Golang community. See the <a href="https://github.com/golang/go/wiki/CodeReviewComments">golang-style-doc</a> for details.</p>
+<p>Please follow this style to make k8gb easy to review, maintain and develop.
+Run <code>make check</code> to automatically check if your code is compliant.</p>
+<h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h3>
+<p>k8gb project is using the <a href="https://github.com/rs/zerolog">zerolog</a> library for logging.</p>
+<ul>
+<li>Please make sure to follow the zerolog library concepts and conventions in the code.</li>
+<li>Try to use <a href="https://github.com/rs/zerolog#contextual-logging">contextual logging</a> whenever possible.</li>
+<li>Pay attention to <a href="https://github.com/rs/zerolog#error-logging">error logging</a> recommendations.</li>
+</ul>
+<h3 id="error-handling">Error handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
+<p>See <a href="https://golang.org/doc/effective_go.html#errors">effective go errors</a> first. Do not discard errors using <code>_</code> variables except
+tests, or, in truly exceptional situations. If a function returns an error, check it to make sure the function succeeded.
+If the function fails, consider logging the error and recording errors in metrics (see: <a href="#logging">logging recommendations</a>).</p>
+<p>The following example demonstrates error handling inside the reconciliation loop:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">log</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">logging</span><span class="p">.</span><span class="nx">Logger</span><span class="p">()</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">metrics</span><span class="p">.</span><span class="nx">Metrics</span><span class="p">()</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="o">...</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">DNSProvider</span><span class="p">.</span><span class="nx">CreateZoneDelegationForExternalDNS</span><span class="p">(</span><span class="nx">gslb</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">        </span><span class="nx">log</span><span class="p">.</span><span class="nx">Err</span><span class="p">(</span><span class="nx">err</span><span class="p">).</span><span class="nx">Msg</span><span class="p">(</span><span class="s">&quot;Unable to create zone delegation&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">        </span><span class="nx">m</span><span class="p">.</span><span class="nx">ErrorIncrement</span><span class="p">(</span><span class="nx">gslb</span><span class="p">)</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">Requeue</span><span class="p">()</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="p">}</span>
+</code></pre></div></p>
+<h2 id="commit-and-pull-request-message">Commit and Pull Request message<a class="headerlink" href="#commit-and-pull-request-message" title="Permanent link">&para;</a></h2>
+<p>We follow a rough convention for PR and commit messages, which is designed to answer two questions: what changed and why.
+The subject line should feature the what, and the body of the message should describe the why.
+The format can be described more formally as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>&lt;what was changed&gt;
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>&lt;why this change was made&gt;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>&lt;footer&gt;
+</code></pre></div>
+<p>The first line is the subject and should be no longer than 70 characters.
+The second line is always blank.
+Consequent lines should be wrapped at 80 characters.
+This way, the message is easier to read on GitHub as well as in various git tools.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>scripts: add the test-cluster command
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>This command uses &quot;k3d&quot; to set up a test cluster for debugging.
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>Fixes #38
+</code></pre></div>
+<p>Commit message can be made lightweight unless it is the only commit forming the PR.
+In that case, the message can follow the simplified convention:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>&lt;what was changed and why&gt;
+</code></pre></div>
+This convention is useful when several minimalistic commit messages are going to form PR descriptions as bullet points of what was done during the final squash and merge for PR.</p>
+<h3 id="signature">Signature<a class="headerlink" href="#signature" title="Permanent link">&para;</a></h3>
+<p>As a CNCF project, k8gb must comply with <a href="https://developercertificate.org/">Developer Certificate of Origin (DCO)</a> requirement.
+<a href="https://github.com/apps/dco">DCO GitHub Check</a> automatically enforces DCO for all commits.
+Contributors are required to ensure that every commit message contains the following signature:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Signed-off-by: NAME SURNAME &lt;email@address.example.org&gt;
+</code></pre></div>
+The best way to achieve this automatically for local development is to create the following alias in the <code>~/.gitconfig</code> file:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>[alias]
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>ci = commit -s
+</code></pre></div>
+When a commit is created in GitHub UI as a result of <a href="https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request#applying-suggested-changes">accepted suggested change</a>, the signature should be manually added to the "optional extended description" field.</p>
+<h3 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h3>
+<p>The <a href="https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md">CHANGELOG</a> is automatically generated from Github PRs and Issues during release.
+Use dedicated <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">keywords</a> in PR message or <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue">manual PR and Issue linking</a> for clean changelog generation.
+Issues and PRs should be also properly tagged with valid project tags ("bug", "enhancement", "wontfix", etc )</p>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<p>If contribution changes the existing APIs or user interface, it must include sufficient documentation explaining the use of the new or updated feature.</p>
+<h2 id="k8gbio-website">k8gb.io website<a class="headerlink" href="#k8gbio-website" title="Permanent link">&para;</a></h2>
+<p>k8gb.io website is a Jekyll-based static website generated from project markdown documentation and hosted by GitHub Pages.
+<code>gh-pages</code> branch contains the website source, including configuration, website layout, and styling.
+Markdown documents are automatically populated to <code>gh-pages</code> from the main branch and should be authored there.
+Changes to the k8gb.io website layout and styling should be checked out from the <code>gh-pages</code> branch and  PRs should be created against <code>gh-pages</code>.</p>
+<h3 id="local-website-authoring-and-testing">Local website authoring and testing<a class="headerlink" href="#local-website-authoring-and-testing" title="Permanent link">&para;</a></h3>
+<p>These instructions will help you to set up and use local website authoring and testing environment:</p>
+<ul>
+<li>Check-out the <a href="https://github.com/k8gb-io/k8gb/tree/gh-pages"><code>gh-pages</code></a> branch</li>
+<li>Create dedicated <a href="https://github.com/settings/tokens/new">GitHub Personal Access Token</a> with <code>public_repo</code> permission and assign it to the <code>JEKYLL_GITHUB_TOKEN</code> environment variable:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">JEKYLL_GITHUB_TOKEN</span><span class="o">=</span>&lt;your-github-token&gt;
+</code></pre></div>
+<ul>
+<li>Run <code>make</code> and serve the local copy of the k8gb.io website.</li>
+</ul>
+<p><em>The target utilizes the <code>jekyll/jekyll</code> docker container to avoid local environment pollution from Jekyll gem dependencies.</em></p>
+<ul>
+<li>Open the <code>http://localhost:4000/</code> page in your browser.</li>
+<li>Website will get automatically rebuilt and refreshed in the browser to accommodate the related code changes.</li>
+</ul>
+<h4 id="using-custom-ssl-ca-certificate">Using custom SSL CA certificate<a class="headerlink" href="#using-custom-ssl-ca-certificate" title="Permanent link">&para;</a></h4>
+<p>When the dev environment is behind a proxy, it might be required to use a custom SSL CA certificate,
+otherwise, Jekyll is not able to update its plugins and dependencies.
+Local website authoring target automatically detects and wires the SSL certificate to its docker container from the path provided by the <code>CUSTOM_CERT_PATH</code> environment variable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CUSTOM_CERT_PATH</span><span class="o">=</span>/path/to/custom/certificate.pem
+</code></pre></div>
+<blockquote>
+<p>NOTE: Certificate should be in a PEM format</p>
+</blockquote>
+<h4 id="env-support">.env support<a class="headerlink" href="#env-support" title="Permanent link">&para;</a></h4>
+<p>Environment variables can be stored in a local <code>.env</code> file in the project's root to retain their persistency between the authoring sessions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>JEKYLL_GITHUB_TOKEN=&lt;your-github-token&gt;
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>CUSTOM_CERT_PATH=&lt;your-custom-ssl-certificate&gt;
+</code></pre></div>
+<h2 id="end-to-end-demo-helper">End-to-end demo helper<a class="headerlink" href="#end-to-end-demo-helper" title="Permanent link">&para;</a></h2>
+<p>The demo helper is designed to work with <code>podinfo</code> that was deployed by</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>make<span class="w"> </span>deploy-test-apps
+</code></pre></div>
+<p>It will configure <code>podinfo</code> to expose geotag as part of an HTTP response.</p>
+<p>To test and/or demonstrate continuous query to GSLB enabled endpoint execute</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>make<span class="w"> </span>demo<span class="w"> </span><span class="nv">DEMO_URL</span><span class="o">=</span>https://failover.test.exampledns.tk
+</code></pre></div>
+<p>The happy path will look like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="o">[</span>Thu<span class="w"> </span>May<span class="w"> </span><span class="m">27</span><span class="w"> </span><span class="m">15</span>:35:26<span class="w"> </span>UTC<span class="w"> </span><span class="m">2021</span><span class="o">]</span><span class="w"> </span>...
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="m">200</span><span class="w">  </span><span class="s2">&quot;message&quot;</span>:<span class="w"> </span><span class="s2">&quot;eu-west-1&quot;</span>,
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="o">[</span>Thu<span class="w"> </span>May<span class="w"> </span><span class="m">27</span><span class="w"> </span><span class="m">15</span>:35:31<span class="w"> </span>UTC<span class="w"> </span><span class="m">2021</span><span class="o">]</span><span class="w"> </span>...
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="m">200</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">  </span><span class="s2">&quot;message&quot;</span>:<span class="w"> </span><span class="s2">&quot;eu-west-1&quot;</span>,
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="o">[</span>Thu<span class="w"> </span>May<span class="w"> </span><span class="m">27</span><span class="w"> </span><span class="m">15</span>:35:36<span class="w"> </span>UTC<span class="w"> </span><span class="m">2021</span><span class="o">]</span><span class="w"> </span>...
+</code></pre></div>
+<p>The sources for demo helper images can be found <a href="https://github.com/k8gb-io/k8gb/tree/master/deploy/test-apps/curldemo/">here</a></p>
+<p>To enable verbose debug output declare <code>DEMO_DEBUG=1</code> like
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>make<span class="w"> </span>demo<span class="w"> </span><span class="nv">DEMO_URL</span><span class="o">=</span>https://failover.test.exampledns.tk<span class="w"> </span><span class="nv">DEMO_DEBUG</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div></p>
+<h2 id="release-process">Release process<a class="headerlink" href="#release-process" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Bump the version in <code>Chart.yaml</code>, see <a href="https://github.com/k8gb-io/k8gb/pull/749">example PR</a>. Make sure the
+commit message starts with <code>RELEASE:</code>.</li>
+<li>In addition, bump the version in <code>chart/k8gb/README.md</code> to reflect correct version tags in artifacthub after
+release, e.g.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>chart/k8gb/README.md:![Version: v0.13.0](https://img.shields.io/badge/Version-v0.13.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.13.0](https://img.shields.io/badge/AppVersion-v0.13.0-informational?style=flat-square)
+</code></pre></div></li>
+<li>Ensure <code>stable</code> become <code>next</code>. Update <code>deploy/helm/stable.yaml</code> with <code>deploy/helm/next.yaml</code>.</li>
+<li>Merge the Pull Request after the review approval (make sure the squash or rebase is used, merge commit will not trigger the release pipeline)</li>
+<li>
+<p>At this point a DRAFT release will be created on GitHub. After the <a href="https://github.com/k8gb-io/k8gb/actions/workflows/cut_release.yaml">automatic tag</a> &amp; <a href="https://github.com/k8gb-io/k8gb/actions/workflows/release.yaml">release pipeline</a>
+have been successfully completed, you check the <a href="https://github.com/k8gb-io/k8gb/releases">release DRAFT</a> and if it is OK, you click on the <strong>"Publish release"</strong> button.</p>
+</li>
+<li>
+<p>Check the <a href="https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml">helm publish pipeline</a> status</p>
+</li>
+<li>Check the <a href="https://github.com/k8gb-io/k8gb/actions/workflows/changelog_pr.yaml">offline changelog</a> status. This pipeline creates
+a pull request with an offline changelog. Do a review and if everything is ok, merge it.</li>
+</ul>
+<p>Congratulations, the release is complete!</p>
+<h3 id="signed-releases">Signed releases<a class="headerlink" href="#signed-releases" title="Permanent link">&para;</a></h3>
+<p>During the release process we generate also the provenance file that is compliant with
+https://in-toto.io/Statement/v0.1 schema. It contains the information about the github action run that was
+responsible for the release, but also other metadata about artifacts there were created and their signatures.</p>
+<p>This provenance file is signed itself and attached with the signature to the release artifacts. For signing
+the artifacts we use <a href="https://github.com/sigstore/cosign"><code>cosign</code></a> tool and private key stored as the
+repository secret. Public key is available in the repository itself in file <a href="https://github.com/k8gb-io/k8gb/blob/master/cosign.pub"><code>cosign.pub</code></a>.
+This way anybody can verify the origin of arbitrary artifact. In order to regenerate the keys for cosign,
+one can run <code>cosign generate-key-pair</code>, use some passphrase and update the <code>COSIGN_{PRIVATE,PUBLIC}_KEY</code> &amp;
+<code>COSIGN_PASSWORD</code> repo secret and also the content of <a href="https://github.com/k8gb-io/k8gb/blob/master/cosign.pub"><code>cosign.pub</code></a> file.</p>
+<p>All the container images that are produced during the build are also signed with <code>cosign</code> and the signatures
+are also pushed to the container registries (dockerhub). So that users of k8gb can introduce OPA policy that
+imposes such verification on our images. These signatures are stored in OCI format under predictable name
+that can be found using <code>cosign triangulate $IMAGE</code> command. However, <code>cosign verify ..</code> with our public key
+should be sufficient.</p>
+<h3 id="software-bill-of-materials">Software bill of materials<a class="headerlink" href="#software-bill-of-materials" title="Permanent link">&para;</a></h3>
+<p>For each container image we also create Software bill of materials (SBOM) file + its signature that ends up
+as part of the release. These files follows this naming pattern:
+<code>k8gb_{version}_{os}_{arch}.tar.gz.sbom.json</code> and are generated using <a href="https://github.com/anchore/syft">Syft</a>tool.</p>
+<hr />
+<p>Thanks for contributing!</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 19, 2025 22:53:25 UTC">July 19, 2025</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 26, 2020 13:22:16 UTC">October 26, 2020</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.code.copy", "content.action.edit", "toc.integrate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+    
+  </body>
+</html>
