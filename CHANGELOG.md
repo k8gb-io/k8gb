@@ -1,5 +1,54 @@
 # Changelog
 
+## [v0.15.0](https://github.com/k8gb-io/k8gb/tree/v0.15.0) (2025-07-20)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc6...v0.15.0)
+
+**Merged pull requests:**
+
+- RELEASE: v0.15.0 \(\#1981\) [\#1988](https://github.com/k8gb-io/k8gb/pull/1988) ([ytsarev](https://github.com/ytsarev))
+- Fix mkdocs preservation logic issue, add workflow\_dispatch [\#1987](https://github.com/k8gb-io/k8gb/pull/1987) ([ytsarev](https://github.com/ytsarev))
+- Fix mkdocs warnings and missing links [\#1986](https://github.com/k8gb-io/k8gb/pull/1986) ([ytsarev](https://github.com/ytsarev))
+- Fix mkdocs GitHub Pages deployment with reliable chart preservation [\#1985](https://github.com/k8gb-io/k8gb/pull/1985) ([ytsarev](https://github.com/ytsarev))
+- Revert "RELEASE: v0.15.0 \(\#1981\)" [\#1984](https://github.com/k8gb-io/k8gb/pull/1984) ([ytsarev](https://github.com/ytsarev))
+- Upgrade to official SLSA provenance generation [\#1983](https://github.com/k8gb-io/k8gb/pull/1983) ([ytsarev](https://github.com/ytsarev))
+- Fix SLSA provenance generation with official generator [\#1982](https://github.com/k8gb-io/k8gb/pull/1982) ([ytsarev](https://github.com/ytsarev))
+- RELEASE: v0.15.0 [\#1981](https://github.com/k8gb-io/k8gb/pull/1981) ([ytsarev](https://github.com/ytsarev))
+- Revamped K8GB site with Mkdocs [\#1979](https://github.com/k8gb-io/k8gb/pull/1979) ([itsfarhan](https://github.com/itsfarhan))
+- Update badges, mitigate false negatives [\#1975](https://github.com/k8gb-io/k8gb/pull/1975) ([ytsarev](https://github.com/ytsarev))
+- Update Helm Docs [\#1974](https://github.com/k8gb-io/k8gb/pull/1974) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Revert "created docs site with mkdocs" [\#1972](https://github.com/k8gb-io/k8gb/pull/1972) ([ytsarev](https://github.com/ytsarev))
+- created docs site with mkdocs [\#1971](https://github.com/k8gb-io/k8gb/pull/1971) ([itsfarhan](https://github.com/itsfarhan))
+- Update all non-major dependencies [\#1970](https://github.com/k8gb-io/k8gb/pull/1970) ([renovate[bot]](https://github.com/apps/renovate))
+- add option to disable coredns configmap provided by k8gb [\#1968](https://github.com/k8gb-io/k8gb/pull/1968) ([barmettlerl](https://github.com/barmettlerl))
+- Allow multiline extraplugin [\#1966](https://github.com/k8gb-io/k8gb/pull/1966) ([barmettlerl](https://github.com/barmettlerl))
+- \[Documentation\] WRR caveats  [\#1965](https://github.com/k8gb-io/k8gb/pull/1965) ([kuritka](https://github.com/kuritka))
+- add vertical pod scaling for k8gb, coredns and externaldns [\#1963](https://github.com/k8gb-io/k8gb/pull/1963) ([barmettlerl](https://github.com/barmettlerl))
+- Update otel/opentelemetry-collector Docker tag to v0.129.1 - autoclosed [\#1962](https://github.com/k8gb-io/k8gb/pull/1962) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Offline Changelog [\#1961](https://github.com/k8gb-io/k8gb/pull/1961) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#1960](https://github.com/k8gb-io/k8gb/pull/1960) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update all non-major dependencies [\#1956](https://github.com/k8gb-io/k8gb/pull/1956) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [v0.15.0-rc6](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc6) (2025-07-19)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc5...v0.15.0-rc6)
+
+## [v0.15.0-rc5](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc5) (2025-07-18)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc4...v0.15.0-rc5)
+
+## [v0.15.0-rc4](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc4) (2025-07-18)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc3...v0.15.0-rc4)
+
+**Closed issues:**
+
+- Weighted Round Robin strategy failing tests [\#1964](https://github.com/k8gb-io/k8gb/issues/1964)
+- Using the rfc2136 provider, Weight Round Robin does not work [\#1950](https://github.com/k8gb-io/k8gb/issues/1950)
+- Fossa is failing [\#1797](https://github.com/k8gb-io/k8gb/issues/1797)
+
+
+
 ## [v0.15.0-rc3](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc3) (2025-06-30)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc2...v0.15.0-rc3)
