@@ -5,7 +5,7 @@ header:
   last-reviewed: '2022-10-26'
   commit-hash: d01f1a8e2c9918c15b8e640f9be86a4c0be46c9d
   project-url: https://github.com/k8gb-io/k8gb
-  project-release: '0.14.0'
+  project-release: '0.15.0'
   changelog: https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md
   license: https://github.com/k8gb-io/k8gb/blob/master/LICENSE.md
 
@@ -74,6 +74,6 @@ dependencies:
   env-dependencies-policy:
     policy-url: https://github.com/k8gb-io/k8gb/blob/main/DEPENDENCY.md
   sbom:
-  - sbom-file: https://github.com/k8gb-io/k8gb/releases/download/v0.14.0/k8gb_0.14.0_linux_amd64.tar.gz.sbom.json
+  - sbom-file: https://github.com/k8gb-io/k8gb/releases/download/v0.15.0/k8gb_0.15.0_linux_amd64.tar.gz.sbom.json
     sbom-format: SPDX
     sbom-url: https://github.com/k8gb-io/k8gb/releases/
