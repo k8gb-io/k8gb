@@ -1,4 +1,12 @@
 # Dynamic GeoTags
+
+_**Note:**
+Dynamic GeoTags currently work only with parent DNS servers running Infoblox (WAPI-based integration).
+Other parent DNS solutions, such as those managed by ExternalDNS, are not supported for dynamic GeoTag discovery.
+If your parent zone is managed by a different DNS provider (e.g., Route53, CoreDNS, or ExternalDNS), you must use the 
+static configuration method and set the `extGslbClustersGeoTags` value explicitly in your `values.yaml`._
+
+
 From v0.15.0, k8gb makes it easier to configure and manage cluster GeoTags.
 
 ### What is a GeoTag?
