@@ -6,10 +6,18 @@ k8gb:
   clusterGeoTag: "eu-west-1" # used for places where we need to distinguish between differnet Gslb instances
   extGslbClustersGeoTags: "us-east-1" # comma-separated list of external gslb geo tags to pair with
 
-route53:
+extdns:
   enabled: true
-  hostedZoneID: Z<zone-id>
-  irsaRole: arn:aws:iam::<account-id>:role/external-dns-k8gb-cluster-eu-west-1 # ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+  provider:
+    name: aws
+  serviceAccount:
+    name: k8gb-external-dns
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/external-dns-k8gb-cluster-eu-west-1 # ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+  txtPrefix: k8gb-eu-west-1
+  txtOwnerId: k8gb-<zone-id>-eu-west-1
+  domainFilters:
+    - k8gb.io
 
 coredns:
   serviceType: LoadBalancer
