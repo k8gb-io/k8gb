@@ -6,6 +6,7 @@ data:
   INFOBLOX_WAPI_PORT: {{ quote .Values.infoblox.wapiPort }}
   INFOBLOX_HTTP_REQUEST_TIMEOUT: {{ quote .Values.infoblox.httpRequestTimeout }}
   INFOBLOX_HTTP_POOL_CONNECTIONS: {{ quote .Values.infoblox.httpPoolConnections }}
+  INFOBLOX_DNS_VIEW: {{ quote .Values.infoblox.dnsView }}
 kind: ConfigMap
 metadata:
   name: infoblox

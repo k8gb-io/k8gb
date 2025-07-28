@@ -91,4 +91,6 @@ type Infoblox struct {
 	HTTPRequestTimeout int `env:"INFOBLOX_HTTP_REQUEST_TIMEOUT" optional:"" default:"20" help:"request timeout seconds"`
 	// HTTPPoolConnections seconds
 	HTTPPoolConnections int `env:"INFOBLOX_HTTP_POOL_CONNECTIONS" optional:"" default:"10" help:"pool connection seconds"`
+	// DNSView specifies the DNS view to use for zone operations
+	DNSView string `env:"INFOBLOX_DNS_VIEW" optional:"" default:"default" help:"DNS view to use for zone operations"`
 }

@@ -99,6 +99,11 @@ spec:
                 configMapKeyRef:
                   name: infoblox
                   key: INFOBLOX_HTTP_POOL_CONNECTIONS
+            - name: INFOBLOX_DNS_VIEW
+              valueFrom:
+                configMapKeyRef:
+                  name: infoblox
+                  key: INFOBLOX_DNS_VIEW                  
             - name: INFOBLOX_WAPI_USERNAME
               valueFrom:
                 secretKeyRef:
