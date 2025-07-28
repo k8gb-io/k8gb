@@ -10,7 +10,7 @@ Here we provide an example of k8gb deployment in Azure environment with Windows 
 
 The reference setup includes two private AKS clusters that can be deployed on two different regions for load balancing or to provide a failover solution.
 
-![GLSB with K8gb on Windows DNS](/docs/examples/windowsdns/images/k8gb_solution.png?raw=true "GLSB with K8gb on Windows DNS")
+![GLSB with K8gb on Windows DNS](examples/windowsdns/images/k8gb_solution.png "GLSB with K8gb on Windows DNS")
 
 The solution design can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/).
 
@@ -58,15 +58,15 @@ Before deploying K8GB and the demo workload, ensure required configurations on W
 
 * Ensure that the Network Security is configured only for AES256
 
-![Network Policy - Kerberos auth](/docs/examples/windowsdns/images/LocalSecuryPolicyNetworkKerberos.png?raw=true "Network Policy - Kerberos auth")
+![Network Policy - Kerberos auth](examples/windowsdns/images/LocalSecuryPolicyNetworkKerberos.png "Network Policy - Kerberos auth")
 
 * Ensure that the DNS Zone has only Secure updates option enabled
 
-![DNS Secure Updates](/docs/examples/windowsdns/images/DNSSecureUpdates.png "DNS Secure Updates")
+![DNS Secure Updates](examples/windowsdns/images/DNSSecureUpdates.png "DNS Secure Updates")
 
 * Ensure that the DNS Zone has the option "Allow zone transfers" check with the option "To any server" under the tab Zone Transfers on the zone properties
 
-![DNS Zone Transfers](/docs/examples/windowsdns/images/DNSZoneTransfers.png "DNS Zone Transfers")
+![DNS Zone Transfers](examples/windowsdns/images/DNSZoneTransfers.png "DNS Zone Transfers")
 
 * Create a new Active Directory user
     * The user should be created with "Encryptions options" for Kerberos AES256 encryption

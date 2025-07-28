@@ -1,5 +1,102 @@
 # Changelog
 
+## [v0.15.0](https://github.com/k8gb-io/k8gb/tree/v0.15.0) (2025-07-20)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc6...v0.15.0)
+
+**Merged pull requests:**
+
+- RELEASE: v0.15.0 \(\#1981\) [\#1988](https://github.com/k8gb-io/k8gb/pull/1988) ([ytsarev](https://github.com/ytsarev))
+- Fix mkdocs preservation logic issue, add workflow\_dispatch [\#1987](https://github.com/k8gb-io/k8gb/pull/1987) ([ytsarev](https://github.com/ytsarev))
+- Fix mkdocs warnings and missing links [\#1986](https://github.com/k8gb-io/k8gb/pull/1986) ([ytsarev](https://github.com/ytsarev))
+- Fix mkdocs GitHub Pages deployment with reliable chart preservation [\#1985](https://github.com/k8gb-io/k8gb/pull/1985) ([ytsarev](https://github.com/ytsarev))
+- Revert "RELEASE: v0.15.0 \(\#1981\)" [\#1984](https://github.com/k8gb-io/k8gb/pull/1984) ([ytsarev](https://github.com/ytsarev))
+- Upgrade to official SLSA provenance generation [\#1983](https://github.com/k8gb-io/k8gb/pull/1983) ([ytsarev](https://github.com/ytsarev))
+- Fix SLSA provenance generation with official generator [\#1982](https://github.com/k8gb-io/k8gb/pull/1982) ([ytsarev](https://github.com/ytsarev))
+- RELEASE: v0.15.0 [\#1981](https://github.com/k8gb-io/k8gb/pull/1981) ([ytsarev](https://github.com/ytsarev))
+- Revamped K8GB site with Mkdocs [\#1979](https://github.com/k8gb-io/k8gb/pull/1979) ([itsfarhan](https://github.com/itsfarhan))
+- Update badges, mitigate false negatives [\#1975](https://github.com/k8gb-io/k8gb/pull/1975) ([ytsarev](https://github.com/ytsarev))
+- Update Helm Docs [\#1974](https://github.com/k8gb-io/k8gb/pull/1974) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Revert "created docs site with mkdocs" [\#1972](https://github.com/k8gb-io/k8gb/pull/1972) ([ytsarev](https://github.com/ytsarev))
+- created docs site with mkdocs [\#1971](https://github.com/k8gb-io/k8gb/pull/1971) ([itsfarhan](https://github.com/itsfarhan))
+- Update all non-major dependencies [\#1970](https://github.com/k8gb-io/k8gb/pull/1970) ([renovate[bot]](https://github.com/apps/renovate))
+- add option to disable coredns configmap provided by k8gb [\#1968](https://github.com/k8gb-io/k8gb/pull/1968) ([barmettlerl](https://github.com/barmettlerl))
+- Allow multiline extraplugin [\#1966](https://github.com/k8gb-io/k8gb/pull/1966) ([barmettlerl](https://github.com/barmettlerl))
+- \[Documentation\] WRR caveats  [\#1965](https://github.com/k8gb-io/k8gb/pull/1965) ([kuritka](https://github.com/kuritka))
+- add vertical pod scaling for k8gb, coredns and externaldns [\#1963](https://github.com/k8gb-io/k8gb/pull/1963) ([barmettlerl](https://github.com/barmettlerl))
+- Update otel/opentelemetry-collector Docker tag to v0.129.1 - autoclosed [\#1962](https://github.com/k8gb-io/k8gb/pull/1962) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Offline Changelog [\#1961](https://github.com/k8gb-io/k8gb/pull/1961) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#1960](https://github.com/k8gb-io/k8gb/pull/1960) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update all non-major dependencies [\#1956](https://github.com/k8gb-io/k8gb/pull/1956) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [v0.15.0-rc6](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc6) (2025-07-19)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc5...v0.15.0-rc6)
+
+## [v0.15.0-rc5](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc5) (2025-07-18)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc4...v0.15.0-rc5)
+
+## [v0.15.0-rc4](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc4) (2025-07-18)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc3...v0.15.0-rc4)
+
+**Closed issues:**
+
+- Weighted Round Robin strategy failing tests [\#1964](https://github.com/k8gb-io/k8gb/issues/1964)
+- Using the rfc2136 provider, Weight Round Robin does not work [\#1950](https://github.com/k8gb-io/k8gb/issues/1950)
+- Fossa is failing [\#1797](https://github.com/k8gb-io/k8gb/issues/1797)
+
+
+
+## [v0.15.0-rc3](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc3) (2025-06-30)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc2...v0.15.0-rc3)
+
+**Implemented enhancements:**
+
+- Refactor depresolver [\#1870](https://github.com/k8gb-io/k8gb/issues/1870)
+- Review split brain mechanism for Route53 and future external-dns based EdgeDNS providers [\#175](https://github.com/k8gb-io/k8gb/issues/175)
+
+**Closed issues:**
+
+- rfc2136 provider does not support Weight Round Robin ？ [\#1943](https://github.com/k8gb-io/k8gb/issues/1943)
+- Switch to EndpointSlice API [\#1921](https://github.com/k8gb-io/k8gb/issues/1921)
+- Migrate from dependabot to renovatebot [\#1014](https://github.com/k8gb-io/k8gb/issues/1014)
+
+**Merged pull requests:**
+
+- RELEASE: v0.15.0-rc3 [\#1958](https://github.com/k8gb-io/k8gb/pull/1958) ([k0da](https://github.com/k0da))
+- Use add selector labels to pod [\#1957](https://github.com/k8gb-io/k8gb/pull/1957) ([k0da](https://github.com/k0da))
+- Update github/codeql-action action to v3.29.1 [\#1955](https://github.com/k8gb-io/k8gb/pull/1955) ([renovate[bot]](https://github.com/apps/renovate))
+- Add artifacts from KubeCon China 2025 to frontpage readme [\#1951](https://github.com/k8gb-io/k8gb/pull/1951) ([ytsarev](https://github.com/ytsarev))
+- Update all non-major dependencies [\#1949](https://github.com/k8gb-io/k8gb/pull/1949) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#1948](https://github.com/k8gb-io/k8gb/pull/1948) ([github-actions[bot]](https://github.com/apps/github-actions))
+- add coredns plugin and server bocks per zone [\#1947](https://github.com/k8gb-io/k8gb/pull/1947) ([barmettlerl](https://github.com/barmettlerl))
+- Update Terraform terraform-aws-modules/eks/aws to v20.37.1 [\#1946](https://github.com/k8gb-io/k8gb/pull/1946) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Terraform aws to v6 [\#1945](https://github.com/k8gb-io/k8gb/pull/1945) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#1944](https://github.com/k8gb-io/k8gb/pull/1944) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update all non-major dependencies [\#1942](https://github.com/k8gb-io/k8gb/pull/1942) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#1941](https://github.com/k8gb-io/k8gb/pull/1941) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Switch from Endpoints to EndpointSlice API \(deprecation\) [\#1940](https://github.com/k8gb-io/k8gb/pull/1940) ([jkremser](https://github.com/jkremser))
+- Update all non-major dependencies [\#1939](https://github.com/k8gb-io/k8gb/pull/1939) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#1938](https://github.com/k8gb-io/k8gb/pull/1938) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#1937](https://github.com/k8gb-io/k8gb/pull/1937) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Crossplane + k8gb reference example [\#1936](https://github.com/k8gb-io/k8gb/pull/1936) ([ytsarev](https://github.com/ytsarev))
+- FIX: inline license for zz\_generated.deepcopy.go [\#1935](https://github.com/k8gb-io/k8gb/pull/1935) ([kuritka](https://github.com/kuritka))
+- BUMP GO references May 2025 [\#1934](https://github.com/k8gb-io/k8gb/pull/1934) ([kuritka](https://github.com/kuritka))
+- fix values.schema.json for Dynamic GeoTags [\#1933](https://github.com/k8gb-io/k8gb/pull/1933) ([mel3c](https://github.com/mel3c))
+- Documentation for v0.15.0 features [\#1932](https://github.com/k8gb-io/k8gb/pull/1932) ([kuritka](https://github.com/kuritka))
+- Update Offline Changelog [\#1931](https://github.com/k8gb-io/k8gb/pull/1931) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Refactor depresolver to resolver [\#1928](https://github.com/k8gb-io/k8gb/pull/1928) ([kuritka](https://github.com/kuritka))
+- Update otel/opentelemetry-collector Docker tag to v0.128.0 [\#1927](https://github.com/k8gb-io/k8gb/pull/1927) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#1925](https://github.com/k8gb-io/k8gb/pull/1925) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update module github.com/gruntwork-io/terratest to v0.50.0 [\#1901](https://github.com/k8gb-io/k8gb/pull/1901) ([renovate[bot]](https://github.com/apps/renovate))
+- Update registry.k8s.io/external-dns/external-dns Docker tag to v0.17.0 [\#1895](https://github.com/k8gb-io/k8gb/pull/1895) ([renovate[bot]](https://github.com/apps/renovate))
+- Update all non-major dependencies [\#1885](https://github.com/k8gb-io/k8gb/pull/1885) ([renovate[bot]](https://github.com/apps/renovate))
+
+
+
 ## [v0.15.0-rc2](https://github.com/k8gb-io/k8gb/tree/v0.15.0-rc2) (2025-05-28)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0-rc1...v0.15.0-rc2)

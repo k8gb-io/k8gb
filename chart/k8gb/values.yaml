@@ -142,6 +142,10 @@ coredns:
       cpu: 100m
       memory: 128Mi
 
+  # -- CoreDNS configmap
+  corefile:
+    enabled: true
+
 infoblox:
   # -- infoblox provider enabled
   enabled: false
@@ -271,13 +275,13 @@ tracing:
     # -- OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data
     # to somewhere else using exporters (Jaeger for instance)
     repository: otel/opentelemetry-collector
-    tag: 0.128.0
+    tag: 0.129.1
     pullPolicy: Always
 
   jaegerImage:
     # -- if `tracing.deployJaeger==true` this image will be used in the deployment for Jaeger
     repository: jaegertracing/all-in-one
-    tag: 1.70.0
+    tag: 1.71.0
     pullPolicy: Always
 
 istio:

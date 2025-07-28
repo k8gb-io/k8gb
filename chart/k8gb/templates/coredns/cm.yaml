@@ -1,4 +1,4 @@
-{{- if .Values.coredns.deployment.enabled }}
+{{- if and .Values.coredns.deployment.enabled .Values.coredns.corefile.enabled}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,7 +14,7 @@ data:
         health
 {{- if .extraPlugins }}
 {{- range .extraPlugins }}
-        {{ . }}
+{{ . | nindent 8 }}
 {{- end }}
 {{- end }}
         ready
