@@ -24,19 +24,15 @@
 
 {{- $extdnsZones := .Values.extdns.domainFilters -}}
 
-{{- if ne (len $parentZones) (len $extdnsZones) -}}
-  {{- fail (printf "Validation failed: Number of zones in k8gb.dnsZones (%d) does not match number of domains in extdns.domainFilters (%d)" (len $parentZones) (len $extdnsZones)) -}}
-{{- end -}}
-
 {{- range $parentZone := $parentZones -}}
   {{- if not (has $parentZone $extdnsZones) -}}
-    {{- fail (printf "Validation failed: Zone '%s' from k8gb.dnsZones is not present in extdns.domainFilters" $parentZone) -}}
+    {{- fail (printf "Validation failed: Parent zone '%s' from k8gb.dnsZones is not present in extdns.domainFilters" $parentZone) -}}
   {{- end -}}
 {{- end -}}
 
 {{- range $extdnsZone := $extdnsZones -}}
   {{- if not (has $extdnsZone $parentZones) -}}
-    {{- fail (printf "Validation failed: Domain '%s' from extdns.domainFilters is not present in k8gb.dnsZones" $extdnsZone) -}}
+    {{- fail (printf "Validation failed: Domain '%s' from extdns.domainFilters is not present in k8gb.dnsZones.parentZone" $extdnsZone) -}}
   {{- end -}}
 {{- end -}}
 
