@@ -253,6 +253,64 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				return client
 			},
 		},
+		{
+			name:          "create cloud.example.com with custom DNS view",
+			expectedError: false,
+			config: resolver.Config{
+				K8gbNamespace: "k8gb",
+				NSRecordTTL:   30,
+				Infoblox: resolver.Infoblox{
+					DNSView: "custom-view",
+				},
+				DelegationZones: []*resolver.DelegationZoneInfo{
+					{
+						ParentZone:       "example.com",
+						LoadBalancedZone: "cloud.example.com",
+						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+						IPs:              []string{"10.0.0.1", "10.0.0.2"},
+						NegativeTTL:      30,
+						ExtClusterNSNames: map[string]string{
+							"us": "gslb-ns-us-cloud.example.com",
+						},
+					},
+				},
+			},
+			getClient: func(ctrl *gomock.Controller) InfobloxClient {
+				findZone := &ibclient.ZoneDelegated{
+					DelegateTo: ibclient.NullableNameServers{
+						NameServers: []ibclient.NameServer{
+							{
+								Name:    "gslb-ns-eu-cloud.example.com",
+								Address: "10.0.0.1",
+							},
+							{
+								Name:    "gslb-ns-us-cloud.example.com",
+								Address: "10.0.0.2",
+							},
+						},
+						IsNull: false,
+					},
+				}
+
+				mgr := mocks.NewMockIBObjectManager(ctrl)
+				client := mocks.NewMockInfobloxClient(ctrl)
+				mgr.EXPECT().GetZoneDelegated("cloud.example.com").Return(nil, nil).Times(1)
+				mgr.EXPECT().CreateZoneDelegated(gomock.Any(),
+					gomock.Any(),
+					gomock.Any(),
+					gomock.Any(),
+					gomock.Any(),
+					gomock.Any(),
+					gomock.Any(),
+					gomock.Any(),
+					gomock.Any(),
+					"custom-view",
+					gomock.Any()).
+					Return(findZone, nil).Times(1)
+				client.EXPECT().GetObjectManager().Return(mgr, nil).AnyTimes()
+				return client
+			},
+		},
 	}
 
 	for _, test := range tests {

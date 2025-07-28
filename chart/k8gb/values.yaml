@@ -163,6 +163,8 @@ infoblox:
   httpRequestTimeout: 20
   # -- Size of connections pool
   httpPoolConnections: 10
+  # -- DNS view to use for zone operations
+  dnsView: "default"  
 
 extdns:
   enabled: false
