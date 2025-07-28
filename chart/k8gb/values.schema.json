@@ -107,9 +107,7 @@
                     "$ref": "#/definitions/Resources"
                 },
                 "corefile": {
-                    "enabled": {
-                        "type": "boolean"
-                    }
+                    "$ref": "#/definitions/CorednsCorefile"
                 }
             },
             "title": "Coredns"
@@ -159,6 +157,38 @@
                 "name"
             ],
             "title": "ServiceAccount"
+        },
+        "CorednsCorefile": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "reload": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "jitter": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "required": [
+                        "enabled",
+                        "interval",
+                        "jitter"
+                    ]
+                }
+            },
+            "title": "Corefile"
         },
         "Externaldns": {
             "type": "object",

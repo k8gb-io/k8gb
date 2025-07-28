@@ -147,6 +147,12 @@ coredns:
   # -- CoreDNS configmap
   corefile:
     enabled: true
+    # -- Reload CoreDNS configmap when it changes
+    # https://coredns.io/plugins/reload/
+    reload:
+      enabled: true
+      interval: 30s
+      jitter: 15s
 
 infoblox:
   # -- infoblox provider enabled
