@@ -26,9 +26,6 @@
                 "infoblox": {
                     "$ref": "#/definitions/Infoblox"
                 },
-                "route53": {
-                    "$ref": "#/definitions/Route53"
-                },
                 "ns1": {
                     "$ref": "#/definitions/Ns1"
                 },
@@ -654,59 +651,6 @@
                 }
             },
             "title": "Rfc2136authGssTsigCreds"
-        },
-        "Route53": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "hostedZoneID": {
-                    "type": "string",
-                    "minLength": 2
-                },
-                "irsaRole": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^arn:aws:iam:.+$",
-                            "minLength": 20
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ]
-                },
-                "secret": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ]
-                },
-                "assumeRoleArn": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^arn:aws:iam:.+$",
-                            "minLength": 20
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "hostedZoneID",
-                "irsaRole"
-            ],
-            "title": "Route53"
         },
         "AzureDNS": {
             "type": "object",
