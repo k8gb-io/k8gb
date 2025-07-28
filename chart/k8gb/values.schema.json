@@ -292,6 +292,10 @@
                 "httpPoolConnections": {
                     "type": "integer",
                     "minimum": 0
+                },
+                "dnsView": {
+                  "type": "string",
+                  "description": "DNS view to use for zone operations"
                 }
             },
             "required": [
