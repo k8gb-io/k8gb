@@ -66,7 +66,8 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | cloudflare.dnsRecordsPerPage | int | `5000` | Configure how many DNS records to fetch per request see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling |
 | cloudflare.enabled | bool | `false` | Enable Cloudflare provider |
 | cloudflare.zoneID | string | `"replaceme"` | Cloudflare Zone ID follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/ to find your zoneID value |
-| coredns.corefile | object | `{"enabled":true}` | CoreDNS configmap |
+| coredns.corefile | object | `{"enabled":true,"reload":{"enabled":true,"interval":"30s","jitter":"15s"}}` | CoreDNS configmap |
+| coredns.corefile.reload | object | `{"enabled":true,"interval":"30s","jitter":"15s"}` | Reload CoreDNS configmap when it changes https://coredns.io/plugins/reload/ |
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
 | coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
 | coredns.image.tag | string | `"v0.1.2"` | image tag |
