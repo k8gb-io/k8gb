@@ -12,6 +12,9 @@ data:
     {{ .loadBalancedZone }}:5353 {
         errors
         health
+        {{- if $.Values.coredns.corefile.reload.enabled }}
+        reload {{ $.Values.coredns.corefile.reload.interval }} {{ $.Values.coredns.corefile.reload.jitter }}
+        {{- end }}
 {{- if .extraPlugins }}
 {{- range .extraPlugins }}
 {{ . | nindent 8 }}
