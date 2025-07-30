@@ -76,7 +76,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | coredns.resources.requests.cpu | string | `"100m"` |  |
 | coredns.resources.requests.memory | string | `"128Mi"` |  |
 | coredns.securityContext | object | `{"capabilities":{"add":[]}}` | Disables all permissions since we don't open privileged ports |
-| coredns.servers | list | `[{"plugins":[{"name":"prometheus","parameters":"0.0.0.0:9153"}],"port":5353,"servicePort":53}]` | Only meant to open the correct service and container ports, has no other impact on the coredns configuration |
+| coredns.servers | list | `[{"plugins":[{"name":"prometheus","parameters":"0.0.0.0:9153"}],"port":5353,"servicePort":53,"zones":[{"use_tcp":true,"zone":"."}]}]` | Only meant to open the correct service and container ports, has no other impact on the coredns configuration |
 | coredns.serviceAccount | object | `{"create":true,"name":"coredns"}` | Creates serviceAccount for coredns |
 | coredns.serviceType | string | `"ClusterIP"` | If the value is LoadBalancer, the IP addresses of the cluster will be loaded from the CoreDNS service; otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true". |
 | extdns.domainFilters[0] | string | `"example.com"` |  |
