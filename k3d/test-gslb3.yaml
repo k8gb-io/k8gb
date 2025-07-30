@@ -13,22 +13,20 @@ ports:
       - agent:0:direct
   - port: 8082:8080
     nodeFilters:
-      - agent:0:direct
+      - loadbalancer
   - port: 445:443
     nodeFilters:
       - agent:0:direct
   - port: 9082:30090
     nodeFilters:
       - agent:0:direct
-  - port: 5055:30053/tcp
+  - port: 5055:53/tcp
     nodeFilters:
-      - agent:0:direct
+      - loadbalancer
   - port: 5055:53/udp
     nodeFilters:
-      - agent:0:direct
+      - loadbalancer
 options:
-  k3d:
-    disableLoadbalancer: true
   k3s:
     extraArgs:
       - arg: --disable=traefik,metrics-server,local-storage

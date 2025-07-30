@@ -125,7 +125,10 @@ coredns:
       add: []
   # -- Only meant to open the correct service and container ports, has no other impact on the coredns configuration
   servers:
-  - port: 5353
+  - zones:
+    - zone: .
+      use_tcp: true
+    port: 5353
     servicePort: 53
     plugins:
     - name: prometheus
