@@ -1518,7 +1518,7 @@
 </code></pre></div>
 <p><a href="https://cloud.redhat.com/blog/global-load-balancer-approaches">Global load balancing</a>, commonly referred to as GSLB (Global Server Load Balancing) solutions, has been typically the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.</p>
 <p>k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.</p>
-<p>k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing <a href="strategy/">strategies</a> to meet requirements such as region failover for high availability.</p>
+<p>k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing <a href="docs/strategy.md">strategies</a> to meet requirements such as region failover for high availability.</p>
 <p>Global load balancing for any Kubernetes Service can now be enabled and managed by any operations or development teams in the same Kubernetes native way as any other custom resource.</p>
 <h2 id="key-differentiators">Key Differentiators<a class="headerlink" href="#key-differentiators" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1531,9 +1531,9 @@
 <p>Simply run</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>deploy-full-local-setup
 </code></pre></div>
-<p>It will deploy two local <a href="https://k3s.io/">k3s</a> clusters via <a href="https://k3d.io/">k3d</a>, <a href="exposing_dns/">expose associated CoreDNS service for UDP DNS traffic</a>, and install k8gb with test applications and two sample Gslb resources on top.</p>
+<p>It will deploy two local <a href="https://k3s.io/">k3s</a> clusters via <a href="https://k3d.io/">k3d</a>, <a href="docs/exposing_dns.md">expose associated CoreDNS service for UDP DNS traffic</a>, and install k8gb with test applications and two sample Gslb resources on top.</p>
 <p>This setup is adapted for local scenarios and works without external DNS provider dependency.</p>
-<p>Consult with <a href="local/">local playground</a> documentation to learn all the details of experimenting with local setup.</p>
+<p>Consult with <a href="docs/local.md">local playground</a> documentation to learn all the details of experimenting with local setup.</p>
 <p>Optionally, you can run <code>make deploy-prometheus</code> and check the metrics on the test clusters (http://localhost:9080, http://localhost:9081).</p>
 <h2 id="motivation-and-architecture">Motivation and Architecture<a class="headerlink" href="#motivation-and-architecture" title="Permanent link">&para;</a></h2>
 <p>k8gb was born out of the need for an open source, cloud native GSLB solution at Absa Group in South Africa.</p>
@@ -1543,10 +1543,10 @@
 <p>Born as a completely open source project and following the popular Kubernetes operator pattern, k8gb can be installed in a Kubernetes cluster and via a Gslb custom resource, can provide independent GSLB capability to any Ingress or Service in the cluster, without the need for handoffs and coordination between dedicated network teams.</p>
 <p>k8gb commoditizes GSLB for Kubernetes, putting teams in complete control of exposing Services across geographically dispersed Kubernetes clusters across public and private clouds.</p>
 <p>k8gb requires no specialized software or hardware, relying completely on other OSS/CNCF projects, has no single point of failure, and fits in with any existing Kubernetes deployment workflow (e.g. GitOps, Kustomize, Helm, etc.) or tools.</p>
-<p>Please see the extended architecture documentation <a href="intro/">here</a></p>
-<p>Internal k8gb architecture and its components are described <a href="components/">here</a></p>
+<p>Please see the extended architecture documentation <a href="docs/intro.md">here</a></p>
+<p>Internal k8gb architecture and its components are described <a href="docs/components.md">here</a></p>
 <h2 id="installation-and-configuration-tutorials">Installation and Configuration Tutorials<a class="headerlink" href="#installation-and-configuration-tutorials" title="Permanent link">&para;</a></h2>
-<p>For comprehensive installation and configuration guides, see the <a href="tutorials/">Installation and Configuration Tutorials</a> documentation.</p>
+<p>For comprehensive installation and configuration guides, see the <a href="docs/tutorials.md">Installation and Configuration Tutorials</a> documentation.</p>
 <h2 id="adopters">Adopters<a class="headerlink" href="#adopters" title="Permanent link">&para;</a></h2>
 <p>A list of publicly known users of the K8GB project can be found in <a href="ADOPTERS/">ADOPTERS.md</a>.
 We encourage all users of K8GB to add themselves to this list!</p>
@@ -1667,7 +1667,7 @@ We encourage all users of K8GB to add themselves to this list!</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 19, 2025 20:53:26 UTC">July 19, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 30, 2025 10:21:02 UTC">July 30, 2025</span>
   </span>
 
     
