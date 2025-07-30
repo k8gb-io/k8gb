@@ -43,7 +43,7 @@ spec:
 
 k8gb is a completely open source, cloud native, global load balancing solution for Kubernetes.
 
-k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](strategy.md) to meet requirements such as region failover for high availability.
+k8gb focuses on load balancing traffic across geographically dispersed Kubernetes clusters using multiple load balancing [strategies](docs/strategy.md) to meet requirements such as region failover for high availability.
 
 Global load balancing for any Kubernetes Service can now be enabled and managed by any operations or development teams in the same Kubernetes native way as any other custom resource.
 
@@ -62,11 +62,11 @@ Simply run
 make deploy-full-local-setup
 ```
 
-It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](exposing_dns.md), and install k8gb with test applications and two sample Gslb resources on top.
+It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.io/), [expose associated CoreDNS service for UDP DNS traffic](docs/exposing_dns.md), and install k8gb with test applications and two sample Gslb resources on top.
 
 This setup is adapted for local scenarios and works without external DNS provider dependency.
 
-Consult with [local playground](local.md) documentation to learn all the details of experimenting with local setup.
+Consult with [local playground](docs/local.md) documentation to learn all the details of experimenting with local setup.
 
 Optionally, you can run `make deploy-prometheus` and check the metrics on the test clusters (http://localhost:9080, http://localhost:9081).
 
@@ -86,13 +86,13 @@ k8gb commoditizes GSLB for Kubernetes, putting teams in complete control of expo
 
 k8gb requires no specialized software or hardware, relying completely on other OSS/CNCF projects, has no single point of failure, and fits in with any existing Kubernetes deployment workflow (e.g. GitOps, Kustomize, Helm, etc.) or tools.
 
-Please see the extended architecture documentation [here](intro.md)
+Please see the extended architecture documentation [here](docs/intro.md)
 
-Internal k8gb architecture and its components are described [here](components.md)
+Internal k8gb architecture and its components are described [here](docs/components.md)
 
 ## Installation and Configuration Tutorials
 
-For comprehensive installation and configuration guides, see the [Installation and Configuration Tutorials](tutorials.md) documentation.
+For comprehensive installation and configuration guides, see the [Installation and Configuration Tutorials](docs/tutorials.md) documentation.
 
 ## Adopters
 
