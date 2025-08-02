@@ -26,19 +26,30 @@
       "matchCurrentVersion": "!/^v?0/",
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
-    }, {
+    },
+    {
         "matchPackageNames": [
         "k8gb-io/k8gb",
       ],
       "groupName": "update SECURITY-INSIGHTS.yml",
       "groupSlug": "update-security-insights"
-    }, {
+    },
+    {
         "matchPackageNames": [
         "rancher/k3s",
       ],
       "groupName": "update k8s version",
       "groupSlug": "update-k8s-version"
-    }, {
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "matchDepTypes": ["golang"],
+      "groupName": "update golang version",
+      "groupSlug": "update-golang-version",
+      "rangeStrategy": "bump"
+    },
+    {
       "matchDepTypes": [
         "action",
       ],

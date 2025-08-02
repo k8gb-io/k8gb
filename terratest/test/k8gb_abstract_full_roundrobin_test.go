@@ -31,7 +31,8 @@ func abstractTestFullRoundRobin(t *testing.T, testPrefix string, workflows []*ut
 		t.Logf("Number of cluster must be in the interval [2,8]")
 		t.FailNow()
 	}
-	t.Logf(fmt.Sprintf("Running TestFullRoundRobin for %d clusters", len(workflows)))
+	clusterCount := len(workflows)
+	t.Logf("Running TestFullRoundRobin for %d clusters", clusterCount)
 	tags := []string{"eu", "us", "cz", "af", "ru", "ap", "uk", "ca"}
 	var instances []*utils.Instance
 
