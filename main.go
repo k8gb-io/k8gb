@@ -41,7 +41,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
-	externaldns "sigs.k8s.io/external-dns/endpoint"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -121,7 +121,7 @@ func run() error {
 	// Add external-dns DNSEndpoints resource
 	// https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md#adding-3rd-party-resources-to-your-operator
 	schemeBuilder := &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}}
-	schemeBuilder.Register(&externaldns.DNSEndpoint{}, &externaldns.DNSEndpointList{})
+	schemeBuilder.Register(&externaldnsApi.DNSEndpoint{}, &externaldnsApi.DNSEndpointList{})
 	if err := schemeBuilder.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Err(err).Msg("Unable to register ExternalDNS resource schemas")
 		return err

@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	externaldns "sigs.k8s.io/external-dns/endpoint"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
 // SetupWithManager configures controller manager
@@ -82,7 +82,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&netv1.Ingress{}).
-		Owns(&externaldns.DNSEndpoint{}).
+		Owns(&externaldnsApi.DNSEndpoint{}).
 		Watches(&discov1.EndpointSlice{}, endpointMapHandler).
 		Watches(&netv1.Ingress{}, ingressMapHandler).
 		WithEventFilter(predicate.Funcs{

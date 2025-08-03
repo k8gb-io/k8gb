@@ -31,17 +31,18 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
 func TestCreateZoneDelegation(t *testing.T) {
 	// arrange
-	getExistingEndpoint := func(name, namespace string) *externaldns.DNSEndpoint {
-		return &externaldns.DNSEndpoint{
+	getExistingEndpoint := func(name, namespace string) *externaldnsApi.DNSEndpoint {
+		return &externaldnsApi.DNSEndpoint{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: namespace},
-			Spec: externaldns.DNSEndpointSpec{Endpoints: []*externaldns.Endpoint{
+			Spec: externaldnsApi.DNSEndpointSpec{Endpoints: []*externaldns.Endpoint{
 				{
 					DNSName:    "cloud.example.com",
 					RecordTTL:  60,
@@ -61,9 +62,9 @@ func TestCreateZoneDelegation(t *testing.T) {
 	getFakeClient := func(ctx context.Context, namespace string, names ...string) client.Client {
 		cl := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 		for _, v := range names {
-			_ = cl.Get(ctx, client.ObjectKey{Name: v, Namespace: namespace}, &externaldns.DNSEndpoint{})
-			_ = cl.Get(ctx, client.ObjectKey{Name: v, Namespace: namespace}, &externaldns.DNSEndpoint{})
-			_ = cl.Update(ctx, &externaldns.DNSEndpoint{
+			_ = cl.Get(ctx, client.ObjectKey{Name: v, Namespace: namespace}, &externaldnsApi.DNSEndpoint{})
+			_ = cl.Get(ctx, client.ObjectKey{Name: v, Namespace: namespace}, &externaldnsApi.DNSEndpoint{})
+			_ = cl.Update(ctx, &externaldnsApi.DNSEndpoint{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      v,
 					Namespace: namespace},
@@ -72,10 +73,10 @@ func TestCreateZoneDelegation(t *testing.T) {
 		return cl
 	}
 
-	getFakeClientForExistingEndpoint := func(ctx context.Context, expectedEP *externaldns.DNSEndpoint) client.Client {
+	getFakeClientForExistingEndpoint := func(ctx context.Context, expectedEP *externaldnsApi.DNSEndpoint) client.Client {
 		cl := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(expectedEP).Build()
 		_ = cl.Get(ctx, client.ObjectKey{Name: expectedEP.Name, Namespace: expectedEP.Namespace}, expectedEP)
-		_ = cl.Update(ctx, &externaldns.DNSEndpoint{
+		_ = cl.Update(ctx, &externaldnsApi.DNSEndpoint{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      expectedEP.Name,
 				Namespace: expectedEP.Namespace},
@@ -179,6 +180,6 @@ func TestCreateZoneDelegation(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	scheme.Scheme.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldns.DNSEndpoint{})
+	scheme.Scheme.AddKnownTypes(schema.GroupVersion{Group: "externaldns.k8s.io", Version: "v1alpha1"}, &externaldnsApi.DNSEndpoint{})
 	os.Exit(m.Run())
 }

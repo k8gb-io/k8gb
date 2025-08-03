@@ -30,6 +30,7 @@ import (
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -65,7 +66,7 @@ func NewApplicationDNSEndpoint(
 	}
 }
 
-func (d *ApplicationDNSEndpoint) SaveDNSEndpoint(e *externaldns.DNSEndpoint) error {
+func (d *ApplicationDNSEndpoint) SaveDNSEndpoint(e *externaldnsApi.DNSEndpoint) error {
 	return saveDNSEndpoint(d.context, d.client, d.gslb.Namespace, e, d.logger)
 }
 
@@ -73,7 +74,7 @@ func (d *ApplicationDNSEndpoint) RemoveEndpoint() error {
 	return removeEndpoint(d.context, d.client, client.ObjectKey{Namespace: d.gslb.Namespace, Name: d.gslb.Name}, d.logger)
 }
 
-func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, error) {
+func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, error) {
 	var gslbHosts []*externaldns.Endpoint
 	var ttl = externaldns.TTL(d.gslb.Spec.Strategy.DNSTtlSeconds)
 
@@ -169,11 +170,11 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, err
 			gslbHosts = append(gslbHosts, dnsRecord)
 		}
 	}
-	dnsEndpointSpec := externaldns.DNSEndpointSpec{
+	dnsEndpointSpec := externaldnsApi.DNSEndpointSpec{
 		Endpoints: gslbHosts,
 	}
 
-	dnsEndpoint := &externaldns.DNSEndpoint{
+	dnsEndpoint := &externaldnsApi.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        d.gslb.Name,
 			Namespace:   d.gslb.Namespace,
