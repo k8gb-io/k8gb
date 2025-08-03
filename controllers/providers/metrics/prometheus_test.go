@@ -29,6 +29,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -44,7 +45,7 @@ const (
 
 var (
 	defaultGslb     = new(k8gbv1beta1.Gslb)
-	defaultEndpoint = new(externaldns.DNSEndpoint)
+	defaultEndpoint = new(externaldnsApi.DNSEndpoint)
 	defaultConfig   = resolver.Config{
 		K8gbNamespace: namespace,
 		DelegationZones: resolver.DelegationZones{

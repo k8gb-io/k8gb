@@ -26,6 +26,7 @@ import (
 	"github.com/rs/zerolog/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
@@ -54,7 +55,7 @@ func NewDelegationDNSEndpoint(
 	}
 }
 
-func (d *DelegationDNSEndpoint) SaveDNSEndpoint(e *externaldns.DNSEndpoint) error {
+func (d *DelegationDNSEndpoint) SaveDNSEndpoint(e *externaldnsApi.DNSEndpoint) error {
 	return saveDNSEndpoint(d.context, d.client, d.config.K8gbNamespace, e, d.logger)
 }
 
@@ -62,20 +63,20 @@ func (d *DelegationDNSEndpoint) RemoveEndpoint() error {
 	return removeEndpoint(d.context, d.client, client.ObjectKey{Namespace: d.config.K8gbNamespace, Name: d.info.GetExternalDNSEndpointName()}, d.logger)
 }
 
-func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldns.DNSEndpoint, error) {
+func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, error) {
 	const externalDNSTypeCommon = "extdns"
 	ttl := externaldns.TTL(d.config.NSRecordTTL)
 	log.Info().
 		Str("provider", string(d.endpointType)).
 		Msg("Creating/Updating DNSEndpoint CR")
 
-	NSRecord := &externaldns.DNSEndpoint{
+	NSRecord := &externaldnsApi.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      d.info.GetExternalDNSEndpointName(),
 			Namespace: d.config.K8gbNamespace,
 			Labels:    map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
 		},
-		Spec: externaldns.DNSEndpointSpec{
+		Spec: externaldnsApi.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{
 				{
 					DNSName:    d.info.LoadBalancedZone,

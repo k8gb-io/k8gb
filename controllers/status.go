@@ -29,10 +29,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	externaldns "sigs.k8s.io/external-dns/endpoint"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
-func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb, ep *externaldns.DNSEndpoint) error {
+func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb, ep *externaldnsApi.DNSEndpoint) error {
 
 	m.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
 
@@ -94,7 +94,7 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 
 func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][]string, error) {
 
-	dnsEndpoint := &externaldns.DNSEndpoint{}
+	dnsEndpoint := &externaldnsApi.DNSEndpoint{}
 
 	nn := types.NamespacedName{
 		Name:      gslb.Name,

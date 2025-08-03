@@ -31,11 +31,10 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	externaldns "sigs.k8s.io/external-dns/endpoint"
-
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/prometheus/client_golang/prometheus"
 	crm "sigs.k8s.io/controller-runtime/pkg/metrics"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
 const (
@@ -137,7 +136,7 @@ func (m *PrometheusMetrics) UpdateHealthyRecordsMetric(gslb *k8gbv1beta1.Gslb, h
 	m.metrics.K8gbGslbHealthyRecords.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsCount))
 }
 
-func (m *PrometheusMetrics) UpdateEndpointStatus(ep *externaldns.DNSEndpoint) {
+func (m *PrometheusMetrics) UpdateEndpointStatus(ep *externaldnsApi.DNSEndpoint) {
 	for _, e := range ep.Spec.Endpoints {
 		m.metrics.K8gbEndpointStatusNum.With(prometheus.Labels{"namespace": ep.Namespace, "name": ep.Name, "dns_name": e.DNSName}).
 			Set(float64(e.Targets.Len()))

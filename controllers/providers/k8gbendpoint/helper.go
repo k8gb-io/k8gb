@@ -27,11 +27,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	externaldns "sigs.k8s.io/external-dns/endpoint"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
-func saveDNSEndpoint(ctx context.Context, client client.Client, namespace string, i *externaldns.DNSEndpoint, logger *zerolog.Logger) error {
-	found := &externaldns.DNSEndpoint{}
+func saveDNSEndpoint(ctx context.Context, client client.Client, namespace string, i *externaldnsApi.DNSEndpoint, logger *zerolog.Logger) error {
+	found := &externaldnsApi.DNSEndpoint{}
 	err := client.Get(ctx, types.NamespacedName{
 		Name:      i.Name,
 		Namespace: namespace,
@@ -82,7 +82,7 @@ func removeEndpoint(ctx context.Context, client client.Client, endpointKey clien
 		Str("namespace", endpointKey.Namespace).
 		Str("name", endpointKey.Name).
 		Msg("Removing endpoint")
-	dnsEndpoint := &externaldns.DNSEndpoint{}
+	dnsEndpoint := &externaldnsApi.DNSEndpoint{}
 	err := client.Get(ctx, endpointKey, dnsEndpoint)
 	if err != nil {
 		if errors.IsNotFound(err) {
