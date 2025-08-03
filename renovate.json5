@@ -85,5 +85,71 @@
       ],
       "extractVersionTemplate": "^(?<version>.+)(-k3s1)?(-k3s2)?$",
     },
+    // update Istio version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "istio/istio",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "matchStrings": [
+        "ISTIO_VERSION \\?= v(?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "ISTIO_VERSION ?= v{{{newValue}}}"
+    },
+    // update controller-gen version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "kubernetes-sigs/controller-tools",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "matchStrings": [
+        "CONTROLLER_GEN_VERSION \\?= v(?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "CONTROLLER_GEN_VERSION ?= v{{{newValue}}}"
+    },
+    // update NGINX ingress version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "kubernetes/ingress-nginx",
+      "extractVersionTemplate": "^helm-chart-(?<version>.*)$",
+      "matchStrings": [
+        "NGINX_INGRESS_VERSION \\?= (?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "NGINX_INGRESS_VERSION ?= {{{newValue}}}"
+    },
+    // update Grafana version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "grafana/helm-charts",
+      "extractVersionTemplate": "^grafana-(?<version>.*)$",
+      "matchStrings": [
+        "GRAFANA_VERSION \\?= (?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "GRAFANA_VERSION ?= {{{newValue}}}"
+    },
+    // update Podinfo version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "stefanprodan/podinfo",
+      "extractVersionTemplate": "^(?<version>.*)$",
+      "matchStrings": [
+        "PODINFO_VERSION \\?= (?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "PODINFO_VERSION ?= {{{newValue}}}"
+    },
+    // update Prometheus version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "prometheus-community/helm-charts",
+      "extractVersionTemplate": "^prometheus-(?<version>.*)$",
+      "matchStrings": [
+        "PROMETHEUS_VERSION \\?= (?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "PROMETHEUS_VERSION ?= {{{newValue}}}"
+    },
   ],
 }
