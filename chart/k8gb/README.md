@@ -96,7 +96,7 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | externaldns.extraEnv | list | `[]` | extra environment variables |
 | externaldns.extraVolumeMounts | list | `[]` | extra volume mounts |
 | externaldns.extraVolumes | list | `[]` | extra volumes |
-| externaldns.image | string | `"registry.k8s.io/external-dns/external-dns:v0.17.0"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
+| externaldns.image | string | `"registry.k8s.io/external-dns/external-dns:v0.18.0"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
 | externaldns.interval | string | `"20s"` | external-dns sync interval |
 | externaldns.resources.limits.cpu | string | `"500m"` |  |
 | externaldns.resources.limits.memory | string | `"128Mi"` |  |
