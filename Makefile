@@ -45,10 +45,14 @@ HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
-CONTROLLER_GEN_VERSION  ?= v0.16.5
-GOLIC_VERSION  ?= v0.7.2
+CONTROLLER_GEN_VERSION ?= v0.16.5
+GOLIC_VERSION ?= v0.7.2
 GOLANGCI_VERSION ?= v2.0.2
+GRAFANA_VERSION ?= 6.38.6
 ISTIO_VERSION ?= v1.23.3
+NGINX_INGRESS_VERSION ?= 4.0.15
+PODINFO_VERSION ?= 5.1.1
+PROMETHEUS_VERSION ?= 15.14.0
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -191,7 +195,7 @@ deploy-local-cluster:
 	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
 	helm repo update
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
-		--version 4.0.15 -f $(NGINX_INGRESS_VALUES_PATH)
+		--version "$(NGINX_INGRESS_VERSION)" -f $(NGINX_INGRESS_VALUES_PATH)
 
 	@echo -e "\n$(YELLOW)Create coredns init-ingress $(NC)"
 	kubectl apply -f ./deploy/crds/init-ingress.yaml
@@ -246,12 +250,12 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 		--set ui.message="`$(call get-cluster-geo-tag)`" \
 		--set image.repository="$(PODINFO_IMAGE_REPO)" \
 		podinfo/podinfo \
-		--version 5.1.1
+		--version $(PODINFO_VERSION)
 	helm upgrade --install frontend --namespace test-gslb-istio -f deploy/test-apps/podinfo/podinfo-values.yaml \
 		--set ui.message="`$(call get-cluster-geo-tag)`" \
 		--set image.repository="$(PODINFO_IMAGE_REPO)" \
 		podinfo/podinfo \
-		--version 5.1.1
+		--version $(PODINFO_VERSION)
 
 .PHONY: deploy-kuar-app
 deploy-kuar-app:
@@ -316,7 +320,7 @@ deploy-grafana:
 	helm repo update
 	helm -n k8gb upgrade -i grafana grafana/grafana -f deploy/grafana/values.yaml \
 		--wait --timeout=4m \
-		--version=6.38.6 \
+		--version=$(GRAFANA_VERSION) \
 		--kube-context=k3d-$(CLUSTER_NAME)1
 	kubectl --context k3d-$(CLUSTER_NAME)1 apply -f deploy/grafana/dashboard-cm.yaml -n k8gb
 	mkdir grafana/dashboards/ || true
@@ -636,7 +640,7 @@ define deploy-prometheus
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ;\
 	helm repo update ;\
 	helm -n k8gb upgrade -i prometheus prometheus-community/prometheus -f deploy/prometheus/values.yaml \
-		--version 15.14.0 \
+		--version $(PROMETHEUS_VERSION) \
 		--wait --timeout=2m0s \
 		--kube-context=k3d-$1
 endef
