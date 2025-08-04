@@ -28,6 +28,9 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: k8gb
+      {{- if .Values.k8gb.tolerations }}
+      tolerations: {{ toYaml .Values.k8gb.tolerations | nindent 8 }}
+      {{- end }}
       containers:
         - name: k8gb
           ports:

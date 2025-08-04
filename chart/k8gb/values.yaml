@@ -71,6 +71,15 @@ k8gb:
       memory: "128Mi"
       cpu: "500m"
 
+  # -- Tolerations to apply to the k8gb operator deployment
+  # for example:
+  #   tolerations:
+  #   - key: foo.bar.com/role
+  #     operator: Equal
+  #     value: master
+  #     effect: NoSchedule
+  tolerations: []
+
 externaldns:
   # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment
   dnsPolicy: "ClusterFirst"
@@ -173,7 +182,7 @@ infoblox:
   # -- Size of connections pool
   httpPoolConnections: 10
   # -- DNS view to use for zone operations
-  dnsView: "default"  
+  dnsView: "default"
 
 extdns:
   enabled: false
