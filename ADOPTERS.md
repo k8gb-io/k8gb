@@ -19,4 +19,4 @@ This list is sorted in the order that organizations were added to it.
 [Open Systems](https://www.open-systems.com/) | @abaguas | Multi-cluster load balancing in private WAN
 [PagBank](https://pagbank.com/) | @altieresfreitas | Multicloud global load balancing across multiple regions
 [Darede](https://darede.com.br/) | @diego7marques | As a cloud consulting company, we support customers using k8gb
-[envio.dev](https://envio.dev/) | @Piroddi | Provides cross region availablity of Envio's high-performance blockchain data engine  
+[envio.dev](https://envio.dev/) | @Piroddi | Provides cross region availability of Envio's high-performance blockchain data engine  
