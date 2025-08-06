@@ -27,6 +27,12 @@ data:
             filter k8gb.absa.oss/dnstype=local
             negttl {{ .dnsZoneNegTTL | default 30 }}
             loadbalance weight
+            {{- if and .geoDataFilePath (ne .geoDataFilePath "") }}
+            geoDataFilePath {{ .geoDataFilePath }}
+            {{- end }}
+            {{- if and .geoDataField (ne .geoDataField "") }}
+            geoDataField {{ .geoDataField }}
+            {{- end }}
         }
     }
 {{- end }}
