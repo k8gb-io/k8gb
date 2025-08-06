@@ -411,6 +411,53 @@
                 },
                 "resources": {
                     "$ref": "#/definitions/Resources"
+                },
+                "tolerations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "key": {
+                                "type": "string"
+                            },
+                            "operator": {
+                                "type": "string",
+                                "enum": ["Exists", "Equal"]
+                            },
+                            "value": {
+                                "type": "string"
+                            },
+                            "effect": {
+                                "type": "string",
+                                "enum": ["NoSchedule", "PreferNoSchedule", "NoExecute"]
+                            },
+                            "tolerationSeconds": {
+                                "type": "integer"
+                            }
+                        },
+                        "anyOf": [
+                            {
+                            "properties": {
+                                "operator": {"const": "Exists"}
+                                },
+                            "not": {
+                                "required": ["value"]
+                                }
+                            },
+                            {
+                            "properties": {
+                                "operator": {"const": "Equal"}
+                                },
+                            "required": ["value"]
+                            },
+                            {
+                            "not": {
+                                "required": ["operator"]
+                                }
+                            }
+                        ],
+                        "additionalProperties": false
+                    }
                 }
             },
             "required": [
