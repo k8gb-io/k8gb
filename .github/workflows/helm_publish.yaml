@@ -19,17 +19,22 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
-      - uses: dave-mcconnell/helm-gh-pages-microservices@8478af5f0fd712cc0fb59f2c99e0688f3f591287
-        with:
-          access-token: ${{ secrets.CR_TOKEN }}
-          source-charts-folder: 'chart'
-          destination-repo: k8gb-io/k8gb
-          destination-branch: gh-pages
+      # TODO: Remove after OCI migration is complete
+      # - uses: dave-mcconnell/helm-gh-pages-microservices@8478af5f0fd712cc0fb59f2c99e0688f3f591287
+      #   with:
+      #     access-token: ${{ secrets.CR_TOKEN }}
+      #     source-charts-folder: 'chart'
+      #     destination-repo: k8gb-io/k8gb
+      #     destination-branch: gh-pages
       - name: Create k3s cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
+      - name: Push to OCI Registry
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          helm push k8gb-*.tgz oci://ghcr.io/k8gb-io/charts
       - name: Smoke test helm installation
         run: |
           helm repo add k8gb https://k8gb.io/
