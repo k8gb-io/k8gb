@@ -35,7 +35,7 @@ jobs:
 
       - name: Install MkDocs
         run: |
-          pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
+          pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks
 
       - name: Setup git config
         run: |

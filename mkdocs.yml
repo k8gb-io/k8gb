@@ -93,3 +93,6 @@ plugins:
   - search
   - git-revision-date-localized:
       enable_creation_date: true
+  - mkdocs-simple-hooks:
+      hooks:
+        on_page_markdown: "docs.link_fixer:fix_links"
