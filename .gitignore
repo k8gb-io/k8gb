@@ -52,3 +52,4 @@ tofu.tfstate.*
 
 mkdocs-env/
 site/
+docs/__pycache__/
