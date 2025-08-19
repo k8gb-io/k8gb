@@ -3,15 +3,27 @@
 apiVersion: chainsaw.kyverno.io/v1alpha1
 kind: StepTemplate
 metadata:
-  name: init-istio
+  name: init-lbservice
 spec:
   try:
     - apply:
-        file: ../../testdata/namespace-istio.yaml
+        file: ../../testdata/namespace.yaml
     - apply:
         file: ../../testdata/podinfo.yaml
     - apply:
         file: testdata/gslb.yaml
+    - assert:
+        resource:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ($test.metadata.name)
+            namespace: ($namespace)
+          status:
+            loadBalancer:
+              ingress:
+                (length(@)): 2
+        timeout: 60s
     - assert:
         resource:
           apiVersion: externaldns.k8s.io/v1alpha1

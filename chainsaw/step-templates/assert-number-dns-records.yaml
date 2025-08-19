@@ -1,0 +1,24 @@
+---
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-number-dns-records
+spec:
+  try:
+    - sleep:
+        duration: 40s # reconcile requeue seconds + coreDNS
+    - script:
+        env:
+          - name: NAME
+            value: ($test.metadata.name)
+          - name: DNS_PORT_EU
+            value: ($values.dns_port_eu)
+          - name: DNS_PORT_US
+            value: ($values.dns_port_us)
+        content: |
+          EXPECTED_COUNT=2
+          ACTUAL_COUNT_EU=$(dig @localhost -p $DNS_PORT_EU "$NAME.cloud.example.com" +short | wc -l)
+          ACTUAL_COUNT_US=$(dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com" +short | wc -l)
+
+          [ "$EXPECTED_COUNT" = "$ACTUAL_COUNT_EU" ] || { echo "EU expected $EXPECTED_COUNT records but found $ACTUAL_COUNT_EU"; exit 1; }
+          [ "$EXPECTED_COUNT" = "$ACTUAL_COUNT_US" ] || { echo "US expected $EXPECTED_COUNT records but found $ACTUAL_COUNT_US"; exit 1; }

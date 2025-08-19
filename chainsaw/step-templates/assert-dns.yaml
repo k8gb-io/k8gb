@@ -1,29 +1,28 @@
 ---
-# asserts that both clusters resolve the domain to the correct cluster
 apiVersion: chainsaw.kyverno.io/v1alpha1
 kind: StepTemplate
 metadata:
   name: assert-dns
 spec:
   try:
-  - sleep: 
-      duration: 40s # reconcile requeue seconds + coreDNS
-  - script:
-      env:
-      - name: NAME
-        value: ($test.metadata.name)
-      - name: DNS_PORT_EU
-        value: ($values.dns_port_eu)
-      - name: DNS_PORT_US
-        value: ($values.dns_port_us)
-      content: |
-        EXPECTED=$(kubectl get dnsendpoint $NAME -n $NAMESPACE -o json | jq -r '.spec.endpoints[] | select(.dnsName | contains("localtargets")).targets | join(",")')
-        ACTUAL_EU=$(dig @localhost -p $DNS_PORT_EU "$NAME.cloud.example.com" +short | paste -sd, -)
+    - sleep:
+        duration: 40s # reconcile requeue seconds + coreDNS
+    - script:
+        env:
+          - name: NAME
+            value: ($test.metadata.name)
+          - name: DNS_PORT_EU
+            value: ($values.dns_port_eu)
+          - name: DNS_PORT_US
+            value: ($values.dns_port_us)
+        content: |
+          EXPECTED=$(kubectl get dnsendpoint $NAME -n $NAMESPACE -o json | jq -r '.spec.endpoints[] | select(.dnsName | contains("localtargets")).targets | join(",")')
+          ACTUAL_EU=$(dig @localhost -p $DNS_PORT_EU "$NAME.cloud.example.com" +short | paste -sd, -)
 
-        EXPECTED_SORTED=$(echo "$EXPECTED" | tr ',' '\n' | sort | tr '\n' ',')
-        ACTUAL_EU_SORTED=$(echo "$ACTUAL_EU" | tr ',' '\n' | sort | tr '\n' ',')
-        [ "$EXPECTED_SORTED" = "$ACTUAL_EU_SORTED" ] || { echo "EU expected targets '$EXPECTED_SORTED' but found '$ACTUAL_EU_SORTED'"; exit 1; }
+          EXPECTED_SORTED=$(echo "$EXPECTED" | tr ',' '\n' | sort | tr '\n' ',')
+          ACTUAL_EU_SORTED=$(echo "$ACTUAL_EU" | tr ',' '\n' | sort | tr '\n' ',')
+          [ "$EXPECTED_SORTED" = "$ACTUAL_EU_SORTED" ] || { echo "EU expected targets '$EXPECTED_SORTED' but found '$ACTUAL_EU_SORTED'"; exit 1; }
 
-        ACTUAL_US=$(dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com" +short | paste -sd, -)
-        ACTUAL_US_SORTED=$(echo "$ACTUAL_US" | tr ',' '\n' | sort | tr '\n' ',')
-        [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ] || { echo "US expected targets '$EXPECTED_SORTED' but found '$ACTUAL_US_SORTED'"; exit 1; }
+          ACTUAL_US=$(dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com" +short | paste -sd, -)
+          ACTUAL_US_SORTED=$(echo "$ACTUAL_US" | tr ',' '\n' | sort | tr '\n' ',')
+          [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ] || { echo "US expected targets '$EXPECTED_SORTED' but found '$ACTUAL_US_SORTED'"; exit 1; }

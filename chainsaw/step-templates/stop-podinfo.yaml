@@ -5,14 +5,14 @@ metadata:
   name: stop-podinfo
 spec:
   try:
-  - delete:
-      ref:
+    - delete:
+        ref:
+          apiVersion: v1
+          kind: Pod
+          name: frontend-podinfo
+    - wait:
         apiVersion: v1
         kind: Pod
         name: frontend-podinfo
-  - wait:
-      apiVersion: v1
-      kind: Pod
-      name: frontend-podinfo
-      for:
-        deletion: {}
+        for:
+          deletion: {}
