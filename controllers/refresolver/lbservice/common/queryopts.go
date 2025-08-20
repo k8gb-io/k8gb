@@ -43,12 +43,16 @@ type QueryOptions struct {
 // GetQueryOptions creates query options from GSLB ResourceRef
 func GetQueryOptions(resourceRef k8gbv1beta1.ResourceRef, namespace string) (*QueryOptions, error) {
 	if resourceRef.Name != "" {
-		// Direct reference by name
+		// Direct reference by name - use fallback namespace if ResourceRef namespace is empty
+		serviceNamespace := resourceRef.Namespace
+		if serviceNamespace == "" {
+			serviceNamespace = namespace
+		}
 		return &QueryOptions{
 			Mode: QueryModeGet,
 			GetKey: &types.NamespacedName{
 				Name:      resourceRef.Name,
-				Namespace: resourceRef.Namespace,
+				Namespace: serviceNamespace,
 			},
 		}, nil
 	}
