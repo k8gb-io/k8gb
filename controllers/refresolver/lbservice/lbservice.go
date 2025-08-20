@@ -2,14 +2,18 @@ package lbservice
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/lbservice/common"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 )
 
 // LoadBalancerServiceReconciler reconciles a LoadBalancerService object
@@ -47,4 +51,161 @@ func (r *LoadBalancerServiceReconciler) SetupWithManager(mgr ctrl.Manager) error
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&corev1.Service{}).
 		Complete(r)
+}
+
+// ReferenceResolver resolves LoadBalancer service references
+type ReferenceResolver struct {
+	service *corev1.Service
+	gslb    *k8gbv1beta1.Gslb
+	config  interface{}
+}
+
+// NewReferenceResolver creates a new reference resolver for LoadBalancer services
+func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+	serviceList, err := getGslbServiceRef(gslb, k8sClient)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(serviceList) != 1 {
+		return nil, fmt.Errorf("exactly 1 Service resource expected but %d were found", len(serviceList))
+	}
+
+	service := serviceList[0]
+	
+	// Verify it's a LoadBalancer service
+	if service.Spec.Type != corev1.ServiceTypeLoadBalancer {
+		return nil, fmt.Errorf("service %s is not of type LoadBalancer", service.Name)
+	}
+
+	return &ReferenceResolver{
+		service: &service,
+		gslb:    gslb,
+		config:  nil,
+	}, nil
+}
+
+// NewReferenceResolverWithConfig creates a new reference resolver for LoadBalancer services
+// Note: Configuration is no longer used for hostname generation since hostname is required via annotation
+func NewReferenceResolverWithConfig(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, config interface{}) (*ReferenceResolver, error) {
+	serviceList, err := getGslbServiceRef(gslb, k8sClient)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(serviceList) != 1 {
+		return nil, fmt.Errorf("exactly 1 Service resource expected but %d were found", len(serviceList))
+	}
+
+	service := serviceList[0]
+	
+	// Verify it's a LoadBalancer service
+	if service.Spec.Type != corev1.ServiceTypeLoadBalancer {
+		return nil, fmt.Errorf("service %s is not of type LoadBalancer", service.Name)
+	}
+
+	return &ReferenceResolver{
+		service: &service,
+		gslb:    gslb,
+		config:  nil, // No longer needed since hostname comes from annotation
+	}, nil
+}
+
+// getGslbServiceRef resolves a Kubernetes Service resource referenced by the Gslb spec
+func getGslbServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]corev1.Service, error) {
+	query, err := common.GetQueryOptions(gslb.Spec.ResourceRef, gslb.Namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	switch query.Mode {
+	case common.QueryModeGet:
+		var service = corev1.Service{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, &service)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.FromContext(context.TODO()).Info("Can't find referenced Service resource", "gslb", gslb.Name, "namespace", gslb.Namespace)
+			}
+			return nil, err
+		}
+		return []corev1.Service{service}, nil
+
+	case common.QueryModeList:
+		var serviceList corev1.ServiceList
+		err = k8sClient.List(context.TODO(), &serviceList, query.ListOpts...)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.FromContext(context.TODO()).Info("Can't find referenced Service resource", "gslb", gslb.Name, "namespace", gslb.Namespace)
+			}
+			return nil, err
+		}
+		return serviceList.Items, nil
+	}
+	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
+}
+
+// GetServers retrieves the GSLB server configuration from the LoadBalancer service
+func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
+	// For LoadBalancer services, the hostname must be explicitly specified via annotation
+	// since the service itself doesn't contain hostname information
+	
+	// Check for required hostname annotation
+	hostname, ok := rr.gslb.Annotations["k8gb.io/hostname"]
+	if !ok {
+		log.FromContext(context.TODO()).Error(fmt.Errorf("missing required hostname annotation"), 
+			"LoadBalancer service GSLB requires k8gb.io/hostname annotation", 
+			"gslb", rr.gslb.Name)
+		return nil, fmt.Errorf("LoadBalancer service GSLB %s requires k8gb.io/hostname annotation", rr.gslb.Name)
+	}
+	
+	if hostname == "" {
+		log.FromContext(context.TODO()).Error(fmt.Errorf("empty hostname annotation"), 
+			"k8gb.io/hostname annotation cannot be empty", 
+			"gslb", rr.gslb.Name)
+		return nil, fmt.Errorf("LoadBalancer service GSLB %s has empty k8gb.io/hostname annotation", rr.gslb.Name)
+	}
+	
+	// Create server with the specified hostname
+	server := &k8gbv1beta1.Server{
+		Host: hostname,
+		Services: []*k8gbv1beta1.NamespacedName{
+			{
+				Name:      rr.service.Name,
+				Namespace: rr.service.Namespace,
+			},
+		},
+	}
+	
+	log.FromContext(context.TODO()).Info("Using hostname from annotation", 
+		"gslb", rr.gslb.Name, 
+		"hostname", hostname)
+	
+	return []*k8gbv1beta1.Server{server}, nil
+}
+
+// GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
+func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
+	// Check for explicit IP addresses in annotations first
+	if serviceIPsFromAnnotation, ok := gslbAnnotations["k8gb.io/exposed-ip-addresses"]; ok {
+		return utils.ParseIPAddresses(serviceIPsFromAnnotation)
+	}
+
+	// Get IP addresses from the LoadBalancer service status
+	gslbServiceIPs := []string{}
+	for _, ip := range rr.service.Status.LoadBalancer.Ingress {
+		if len(ip.IP) > 0 {
+			gslbServiceIPs = append(gslbServiceIPs, ip.IP)
+		}
+		if len(ip.Hostname) > 0 {
+			// Resolve hostname to IPs using DNS
+			IPs, err := utils.Dig(ip.Hostname, 8, parentZoneDNSServers...)
+			if err != nil {
+				log.FromContext(context.TODO()).Error(err, "Dig error")
+				return nil, err
+			}
+			gslbServiceIPs = append(gslbServiceIPs, IPs...)
+		}
+	}
+
+	return gslbServiceIPs, nil
 }

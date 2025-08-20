@@ -107,6 +107,8 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Msg("Resolved strategy")
 
 	// == Ingress ==========
+	// Only create embedded Ingress if ResourceRef is empty (embedded mode)
+	// Skip Ingress creation for LoadBalancer services as they don't need an Ingress
 	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
 		ingress, err := r.createIngressFromGslb(gslb)
 		if err != nil {
@@ -122,7 +124,13 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	// == Reference resolution ==
-	refResolver, err := refresolver.New(gslb, r.Client)
+	var refResolver refresolver.GslbReferenceResolver
+	if gslb.Spec.ResourceRef.Kind == "Service" && gslb.Spec.ResourceRef.APIVersion == "v1" {
+		// For LoadBalancer services, we need to pass the configuration to generate proper hostnames
+		refResolver, err = refresolver.NewWithConfig(gslb, r.Client, r.Config)
+	} else {
+		refResolver, err = refresolver.New(gslb, r.Client)
+	}
 	if err != nil {
 		m.IncrementError(gslb)
 		errorMsg := fmt.Sprintf("error resolving references (%s)", err)
