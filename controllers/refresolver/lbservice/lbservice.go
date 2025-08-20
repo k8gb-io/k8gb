@@ -33,6 +33,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+const (
+	hostnameAnnotation = "k8gb.io/hostname"
+)
+
 // LoadBalancerServiceReconciler reconciles a LoadBalancerService object
 type LoadBalancerServiceReconciler struct {
 	client.Client
@@ -167,19 +171,19 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 	// since the service itself doesn't contain hostname information
 
 	// Check for required hostname annotation
-	hostname, ok := rr.gslb.Annotations["k8gb.io/hostname"]
+	hostname, ok := rr.gslb.Annotations[hostnameAnnotation]
 	if !ok {
 		log.FromContext(context.TODO()).Error(fmt.Errorf("missing required hostname annotation"),
-			"LoadBalancer service GSLB requires k8gb.io/hostname annotation",
+			fmt.Sprintf("LoadBalancer service GSLB requires %s annotation", hostnameAnnotation),
 			"gslb", rr.gslb.Name)
-		return nil, fmt.Errorf("LoadBalancer service GSLB %s requires k8gb.io/hostname annotation", rr.gslb.Name)
+		return nil, fmt.Errorf("LoadBalancer service GSLB %s requires %s annotation", rr.gslb.Name, hostnameAnnotation)
 	}
 
 	if hostname == "" {
 		log.FromContext(context.TODO()).Error(fmt.Errorf("empty hostname annotation"),
-			"k8gb.io/hostname annotation cannot be empty",
+			fmt.Sprintf("%s annotation cannot be empty", hostnameAnnotation),
 			"gslb", rr.gslb.Name)
-		return nil, fmt.Errorf("LoadBalancer service GSLB %s has empty k8gb.io/hostname annotation", rr.gslb.Name)
+		return nil, fmt.Errorf("LoadBalancer service GSLB %s has empty %s annotation", rr.gslb.Name, hostnameAnnotation)
 	}
 
 	// Create server with the specified hostname

@@ -23,14 +23,14 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/k8gb-io/k8gb/controllers/resolver"
-
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -89,9 +89,10 @@ func (g *IngressHandler) isK8gbAnnotated(obj client.Object) bool {
 	return found
 }
 
+//nolint:dupl // Similar structure but handles different object types (Service vs Ingress)
 func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) *k8gbv1beta1.Gslb {
 	strategy := ing.GetAnnotations()[strategyAnnotation]
-	objectKey := client.ObjectKey{Namespace: ing.GetNamespace(), Name: ing.GetName()}
+	objectKey := types.NamespacedName{Namespace: ing.GetNamespace(), Name: ing.GetName()}
 	log.Info().
 		Str("annotation", fmt.Sprintf("(%s:%s)", strategyAnnotation, strategy)).
 		Str("ingress", ing.GetName()).
@@ -148,7 +149,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 
 func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, error) {
 	gslb := &k8gbv1beta1.Gslb{}
-	objectKey := client.ObjectKey{Namespace: obj.GetNamespace(), Name: obj.GetName()}
+	objectKey := types.NamespacedName{Namespace: obj.GetNamespace(), Name: obj.GetName()}
 	isNew := false
 	err := g.client.Get(context.Background(), objectKey, gslb)
 	if err != nil {
@@ -167,7 +168,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 			Msg("Gslb doesnt exist, creating...")
 	}
 
-	strategyObj, err := g.parseStrategySpec(obj.GetAnnotations())
+	strategyObj, err := parseStrategySpec(obj.GetAnnotations())
 	if err != nil {
 		log.Err(err).
 			Str("gslb", obj.GetName()).
@@ -200,7 +201,203 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 	return gslb, isNew, nil
 }
 
-func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (result k8gbv1beta1.Strategy, err error) {
+// ServiceHandler
+type ServiceHandler struct {
+	client  client.Client
+	scheme  *runtime.Scheme
+	context context.Context
+}
+
+func NewServiceHandler(ctx context.Context, client client.Client, scheme *runtime.Scheme) *ServiceHandler {
+	return &ServiceHandler{
+		context: ctx,
+		client:  client,
+		scheme:  scheme,
+	}
+}
+
+func (g *ServiceHandler) Handle(svc client.Object) []reconcile.Request {
+
+	// following lines filters only Services with strategyAnnotation which are not owned by GSLB
+	// filtering out Service without k8gb strategy
+	if !g.isK8gbAnnotated(svc) {
+		return nil
+	}
+
+	// filtering out Service which is owned by GSLB
+	if g.isOwnedByGSLB(svc) {
+		return nil
+	}
+
+	// filtering out Services that are not LoadBalancer type
+	if !g.isLoadBalancerService(svc) {
+		return nil
+	}
+
+	// filtering out Services without required hostname annotation
+	if !g.hasRequiredHostnameAnnotation(svc) {
+		return nil
+	}
+
+	// gslb created from service will run standalone reconciliation cycle automatically
+	_ = g.createGslbFromService(svc, g.scheme)
+
+	return nil
+}
+
+func (g *ServiceHandler) isOwnedByGSLB(obj client.Object) bool {
+	for _, r := range obj.GetOwnerReferences() {
+		if r.Kind == "Gslb" {
+			return true
+		}
+	}
+	return false
+}
+
+func (g *ServiceHandler) isK8gbAnnotated(obj client.Object) bool {
+	annotations := obj.GetAnnotations()
+	_, found := annotations[strategyAnnotation]
+	return found
+}
+
+func (g *ServiceHandler) isLoadBalancerService(obj client.Object) bool {
+	// Check if the object is a Service and has LoadBalancer type
+	if service, ok := obj.(*corev1.Service); ok {
+		return service.Spec.Type == corev1.ServiceTypeLoadBalancer
+	}
+	return false
+}
+
+func (g *ServiceHandler) hasRequiredHostnameAnnotation(obj client.Object) bool {
+	annotations := obj.GetAnnotations()
+	hostname, found := annotations[hostnameAnnotation]
+	return found && hostname != ""
+}
+
+//nolint:dupl // Similar structure but handles different object types (Service vs Ingress)
+func (g *ServiceHandler) createGslbFromService(svc client.Object, scheme *runtime.Scheme) *k8gbv1beta1.Gslb {
+	strategy := svc.GetAnnotations()[strategyAnnotation]
+	objectKey := types.NamespacedName{Namespace: svc.GetNamespace(), Name: svc.GetName()}
+	log.Info().
+		Str("annotation", fmt.Sprintf("(%s:%s)", strategyAnnotation, strategy)).
+		Str("service", svc.GetName()).
+		Msg("Detected strategy annotation on LoadBalancer service")
+
+	serviceToReuse := &corev1.Service{}
+	err := g.client.Get(context.Background(), objectKey, serviceToReuse)
+	if err != nil {
+		log.Info().
+			Str("service", objectKey.Name).
+			Msg("Service does not exist anymore. Skipping Gslb creation...")
+		return nil
+	}
+
+	gslb, isNew, err := g.getGslb(svc)
+	if err != nil {
+		log.Err(err).
+			Str("gslb", svc.GetName()).
+			Msg("Cannot build the Gslb object from service")
+		return nil
+	}
+	err = controllerutil.SetControllerReference(serviceToReuse, gslb, scheme)
+	if err != nil {
+		log.Err(err).
+			Str("service", serviceToReuse.Name).
+			Str("gslb", gslb.Name).
+			Msg("Cannot set the Service as the owner of the Gslb")
+		return nil
+	}
+	// create
+	if isNew {
+		log.Info().
+			Str("gslb", gslb.Name).
+			Msg(fmt.Sprintf("Creating a new Gslb out of LoadBalancer Service with '%s' annotation", strategyAnnotation))
+		err = g.client.Create(context.Background(), gslb)
+		if err != nil {
+			log.Err(err).Msg("Glsb creation failed")
+			return nil
+		}
+		return gslb
+	}
+	// update
+	log.Info().
+		Str("gslb", gslb.Name).
+		Str("namespace", objectKey.Namespace).
+		Msg(fmt.Sprintf("Updating a Gslb out of LoadBalancer Service %s", objectKey.Name))
+	err = g.client.Update(context.Background(), gslb)
+	if err != nil {
+		log.Err(err).Msg("Glsb update failed")
+		return nil
+	}
+	return gslb
+}
+
+func (g *ServiceHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, error) {
+	gslb := &k8gbv1beta1.Gslb{}
+	objectKey := types.NamespacedName{Namespace: obj.GetNamespace(), Name: obj.GetName()}
+	isNew := false
+	err := g.client.Get(context.Background(), objectKey, gslb)
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			log.Err(err).
+				Str("gslb", objectKey.Name).
+				Str("namespace", objectKey.Namespace).
+				Msg("reading Gslb object failed")
+			return nil, false, err
+		}
+		// is not found
+		isNew = true
+		log.Info().
+			Str("gslb", objectKey.Name).
+			Str("namespace", objectKey.Namespace).
+			Msg("Gslb doesnt exist, creating...")
+	}
+
+	strategyObj, err := parseStrategySpec(obj.GetAnnotations())
+	if err != nil {
+		log.Err(err).
+			Str("gslb", obj.GetName()).
+			Msg("can't parse Gslb strategy")
+		return nil, isNew, err
+	}
+	strategyObj.Weight = gslb.Spec.Strategy.Weight
+
+	gslb.ObjectMeta.Name = obj.GetName()
+	gslb.ObjectMeta.Namespace = obj.GetNamespace()
+
+	// Copy annotations from service to GSLB
+	if gslb.ObjectMeta.Annotations == nil {
+		gslb.ObjectMeta.Annotations = make(map[string]string)
+	}
+
+	// Copy k8gb.io/hostname annotation
+	if hostname, found := obj.GetAnnotations()[hostnameAnnotation]; found {
+		gslb.ObjectMeta.Annotations[hostnameAnnotation] = hostname
+	}
+
+	// Copy k8gb.io/exposed-ip-addresses annotation if present
+	if exposedIPs, found := obj.GetAnnotations()["k8gb.io/exposed-ip-addresses"]; found {
+		gslb.ObjectMeta.Annotations["k8gb.io/exposed-ip-addresses"] = exposedIPs
+	}
+
+	// migration to resourceRef
+	gslb.Spec = k8gbv1beta1.GslbSpec{
+		ResourceRef: k8gbv1beta1.ResourceRef{
+			ObjectReference: corev1.ObjectReference{
+				Name:       obj.GetName(),
+				Kind:       "Service",
+				APIVersion: "v1",
+			},
+		},
+		// detaching ingress spec
+		Ingress:  k8gbv1beta1.IngressSpec{},
+		Strategy: strategyObj,
+	}
+	return gslb, isNew, nil
+}
+
+// parseStrategySpec is a shared function for parsing strategy specifications from annotations
+func parseStrategySpec(annotations map[string]string) (result k8gbv1beta1.Strategy, err error) {
 	toInt := func(k string, v string) (int, error) {
 		intValue, err := strconv.Atoi(v)
 		if err != nil {
