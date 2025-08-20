@@ -6,5 +6,5 @@ metadata:
   name: namespace
 spec:
   try:
-    - apply:
-        file: ../../testdata/namespace.yaml
+  - apply:
+      file: ../../testdata/namespace.yaml

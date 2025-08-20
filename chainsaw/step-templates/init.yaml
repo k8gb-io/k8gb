@@ -6,37 +6,37 @@ metadata:
   name: init-ingress
 spec:
   try:
-    - apply:
-        file: ../../testdata/namespace.yaml
-    - apply:
-        file: ../../testdata/podinfo.yaml
-    - apply:
-        file: ./testdata/gslb.yaml
-    - assert:
-        resource:
-          apiVersion: networking.k8s.io/v1
-          kind: Ingress
-          metadata:
-            name: ($test.metadata.name)
-            namespace: ($namespace)
-          status:
-            loadBalancer:
-              ingress:
-                (length(@)): 2
-        timeout: 60s
-    - assert:
-        resource:
-          apiVersion: externaldns.k8s.io/v1alpha1
-          kind: DNSEndpoint
-          metadata:
-            name: ($test.metadata.name)
-            namespace: ($namespace)
-            ownerReferences:
-              (length(@)): 1
-          spec:
-            endpoints:
-              - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
-                targets:
-                  (length(@)): 2
-              - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
-        timeout: 30s
+  - apply:
+      file: ../../testdata/namespace.yaml
+  - apply:
+      file: ../../testdata/podinfo.yaml
+  - apply:
+      file: ./testdata/gslb.yaml
+  - assert:
+      resource:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: ($test.metadata.name)
+          namespace: ($namespace)
+        status: 
+          loadBalancer:
+            ingress:
+              (length(@)): 2
+      timeout: 60s
+  - assert:
+      resource:
+        apiVersion: externaldns.k8s.io/v1alpha1
+        kind: DNSEndpoint
+        metadata:
+          name: ($test.metadata.name)
+          namespace: ($namespace)
+          ownerReferences:
+            (length(@)): 1
+        spec:
+          endpoints:
+          - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
+            targets:
+              (length(@)): 2
+          - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
+      timeout: 30s
