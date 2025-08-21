@@ -126,13 +126,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	// == Reference resolution ==
-	var refResolver refresolver.GslbReferenceResolver
-	if gslb.Spec.ResourceRef.Kind == "Service" && gslb.Spec.ResourceRef.APIVersion == "v1" {
-		// For LoadBalancer services, we need to pass the configuration to generate proper hostnames
-		refResolver, err = refresolver.NewWithConfig(gslb, r.Client, r.Config)
-	} else {
-		refResolver, err = refresolver.New(gslb, r.Client)
-	}
+	refResolver, err := refresolver.New(gslb, r.Client)
 	if err != nil {
 		m.IncrementError(gslb)
 		errorMsg := fmt.Sprintf("error resolving references (%s)", err)

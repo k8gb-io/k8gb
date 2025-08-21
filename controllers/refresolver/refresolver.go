@@ -57,23 +57,3 @@ func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver
 	}
 	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)
 }
-
-// NewWithConfig creates a new GSLBReferenceResolver with configuration
-func NewWithConfig(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, config interface{}) (GslbReferenceResolver, error) {
-	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
-		return ingress.NewEmbeddedResolver(gslb, k8sClient)
-	}
-	if gslb.Spec.ResourceRef.Kind == "Ingress" && gslb.Spec.ResourceRef.APIVersion == "networking.k8s.io/v1" {
-		return ingress.NewReferenceResolver(gslb, k8sClient)
-	}
-	if gslb.Spec.ResourceRef.Kind == "VirtualService" {
-		if gslb.Spec.ResourceRef.APIVersion == "networking.istio.io/v1beta1" ||
-			gslb.Spec.ResourceRef.APIVersion == "networking.istio.io/v1" {
-			return istiovirtualservice.NewReferenceResolver(gslb, k8sClient)
-		}
-	}
-	if gslb.Spec.ResourceRef.Kind == "Service" && gslb.Spec.ResourceRef.APIVersion == "v1" {
-		return lbservice.NewReferenceResolverWithConfig(gslb, k8sClient, config)
-	}
-	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)
-}

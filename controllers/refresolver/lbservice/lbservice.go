@@ -78,7 +78,6 @@ func (r *LoadBalancerServiceReconciler) SetupWithManager(mgr ctrl.Manager) error
 type ReferenceResolver struct {
 	service *corev1.Service
 	gslb    *k8gbv1beta1.Gslb
-	config  interface{}
 }
 
 // NewReferenceResolver creates a new reference resolver for LoadBalancer services
@@ -102,33 +101,6 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	return &ReferenceResolver{
 		service: &service,
 		gslb:    gslb,
-		config:  nil,
-	}, nil
-}
-
-// NewReferenceResolverWithConfig creates a new reference resolver for LoadBalancer services
-// Note: Configuration is no longer used for hostname generation since hostname is required via annotation
-func NewReferenceResolverWithConfig(gslb *k8gbv1beta1.Gslb, k8sClient client.Client, config interface{}) (*ReferenceResolver, error) {
-	serviceList, err := getGslbServiceRef(gslb, k8sClient)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(serviceList) != 1 {
-		return nil, fmt.Errorf("exactly 1 Service resource expected but %d were found", len(serviceList))
-	}
-
-	service := serviceList[0]
-
-	// Verify it's a LoadBalancer service
-	if service.Spec.Type != corev1.ServiceTypeLoadBalancer {
-		return nil, fmt.Errorf("service %s is not of type LoadBalancer", service.Name)
-	}
-
-	return &ReferenceResolver{
-		service: &service,
-		gslb:    gslb,
-		config:  nil, // No longer needed since hostname comes from annotation
 	}, nil
 }
 
