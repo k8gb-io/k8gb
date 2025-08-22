@@ -56,6 +56,10 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	extClusterNSNames := func(zone, edge string) map[string]string {
 		m := map[string]string{}
 		for _, tag := range config.ExtClustersGeoTagsRaw {
+			if tag == config.ClusterGeoTag {
+				// skip the cluster GeoTag, see: https://github.com/k8gb-io/k8gb/issues/720
+				continue
+			}
 			m[tag] = getNsName(tag, zone, edge)
 		}
 		return m

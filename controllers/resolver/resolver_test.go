@@ -507,6 +507,52 @@ func TestConfigurations(t *testing.T) {
 				 INFOBLOX_WAPI_PASSWORD="testpassword"`,
 			expectedError: true,
 		},
+		{
+			name: "valid configuration without clusterGeotag in EXT_GSLB_CLUSTERS_GEO_TAGS",
+			envvars: `CLUSTER_GEO_TAG=us;
+				 EXT_GSLB_CLUSTERS_GEO_TAGS=eu;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.DelegationZones[0].ClusterNSName)
+				assert.Equal(t, "gslb-ns-eu-cloud.example.com", cfg.DelegationZones[0].ExtClusterNSNames["eu"])
+			},
+		},
+		{
+			name: "valid configuration with clusterGeotag in EXT_GSLB_CLUSTERS_GEO_TAGS",
+			envvars: `CLUSTER_GEO_TAG=us;
+				 EXT_GSLB_CLUSTERS_GEO_TAGS=us,eu;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.DelegationZones[0].ClusterNSName)
+				assert.Equal(t, "gslb-ns-eu-cloud.example.com", cfg.DelegationZones[0].ExtClusterNSNames["eu"])
+				assert.Equal(t, "", cfg.DelegationZones[0].ExtClusterNSNames["us"])
+			},
+		},
+		{
+			name: "invalid configuration with multiple clusterGeotag in EXT_GSLB_CLUSTERS_GEO_TAGS",
+			envvars: `CLUSTER_GEO_TAG=us;
+				 EXT_GSLB_CLUSTERS_GEO_TAGS=us,us,eu;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true`,
+			expectedError: true,
+		},
+		{
+			name: "invalid configuration with equal clusterGeotag in EXT_GSLB_CLUSTERS_GEO_TAGS",
+			envvars: `CLUSTER_GEO_TAG=us;
+				 EXT_GSLB_CLUSTERS_GEO_TAGS=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true`,
+			assert: func(t *testing.T, cfg *Config) {
+				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.DelegationZones[0].ClusterNSName)
+				assert.Equal(t, 0, len(cfg.DelegationZones[0].ExtClusterNSNames))
+			},
+		},
 	}
 
 	for _, test := range tests {
