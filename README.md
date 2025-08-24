@@ -112,7 +112,7 @@ k8gb is tested with the following environment options.
 | Ingress Controller               | NGINX, AWS Load Balancer Controller [*](#clarify)                            |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                                 |
 
-<a name="clarify"></a> 
+<a name="clarify"></a>
 * We only mention solutions where we have tested and verified a k8gb installation.
 * If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
 
@@ -120,8 +120,9 @@ k8gb is tested with the following environment options.
 
 [//]: # (Table is generated with the help of https://www.tablesgenerator.com/markdown_tables#)
 
-| **KubeCon China 2025**   [![](https://img.youtube.com/vi/L9mRWljLnzw/0.jpg)](https://www.youtube.com/watch?v=L9mRWljLnzw "Resilient Multiregion Global Control Planes With Crossplane and K8gb ") | **KubeCon EU 2025** [![](https://img.youtube.com/vi/YMyrcqZ2sbU/0.jpg)](https://www.youtube.com/watch?v=YMyrcqZ2sbU "Project Lightning Talk: What's New in k8gb: CNCF's Multicluster Global Balancer - Bradley Andersen") |
+| **KCD Czech&Slovak 2025**   [![](https://img.youtube.com/vi/kpxS7cJtxcs/0.jpg)](https://www.youtube.com/watch?v=kpxS7cJtxcs "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **Cloud Native Rejekts 2025**   [![](https://img.youtube.com/vi/RBMRU8rtxfI/0.jpg)](https://www.youtube.com/watch?v=RBMRU8rtxfI "Evaluating Global Load Balancing Options for Kubernetes in Practice") |
 |---|---|
+| **KubeCon China 2025**   [![](https://img.youtube.com/vi/L9mRWljLnzw/0.jpg)](https://www.youtube.com/watch?v=L9mRWljLnzw "Resilient Multiregion Global Control Planes With Crossplane and K8gb ") | **KubeCon EU 2025** [![](https://img.youtube.com/vi/YMyrcqZ2sbU/0.jpg)](https://www.youtube.com/watch?v=YMyrcqZ2sbU "Project Lightning Talk: What's New in k8gb: CNCF's Multicluster Global Balancer - Bradley Andersen") |
 | **ChatLoopBackOff - Episode 42 (K8gb)** [![](https://img.youtube.com/vi/tKUNI6E1_7c/0.jpg)](https://www.youtube.com/watch?v=tKUNI6E1_7c "ChatLoopBackOff - Episode 42 (K8gb)") | **KubeCon NA 2024** [![](https://img.youtube.com/vi/vCzl15AIoU0/0.jpg)](https://www.youtube.com/watch?v=vCzl15AIoU0 "k8gb: Global Load Balancing, the Kubernetes Way \| Project Lightning Talk") |
 | **Open Source Summit EU 2024** [![](https://img.youtube.com/vi/5eLX4kMgo8Q/0.jpg)](https://www.youtube.com/watch?v=5eLX4kMgo8Q "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **KubeCon EU 2024** [![](https://img.youtube.com/vi/MsQ0E7SYNPo/0.jpg)](https://www.youtube.com/watch?v=MsQ0E7SYNPo "K8gb: Reliable Global Service Load Balancing without vendor lock-in \| Project Lightning Talk") |
 | **KubeCon NA 2023** [![](https://img.youtube.com/vi/4qJDkw5YGqM/0.jpg)](https://www.youtube.com/watch?v=4qJDkw5YGqM "KubeCon NA 2023: Take It to the Edge: Creating a Globally Distributed Ingress with Istio & K8gb - Jimmi Dyson, D2iQ") | **KubeCon EU 2023** [![](https://img.youtube.com/vi/U46hlF0Z3xs/0.jpg)](https://www.youtube.com/watch?v=U46hlF0Z3xs "KubeCon EU 2023: Recovering from Regional Failures at Cloud Native Speeds") |
