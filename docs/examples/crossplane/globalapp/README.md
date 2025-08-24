@@ -18,6 +18,27 @@ This reference architecture showcases a Crossplane-based Global Control Plane wi
 - **Health Status Integration**: Extracts serviceHealth from GSLB and updates XR status for failover decisions
 - **Multiregion Coordination**: Enables Crossplane to make intelligent decisions based on regional health
 
+## Architecture Diagrams
+
+### Crossplane Function Health Monitoring Flow
+
+![Crossplane Function Health Monitoring](./assets/crossplane-function-health-monitoring.png)
+
+This diagram illustrates how the Crossplane function dynamically monitors GSLB health status and adjusts management policies. The function observes the GSLB resource status and conditionally sets management policies - when active and healthy, it enables full management (`managementPolicies: ["*"]`), otherwise it switches to observe-only mode (`managementPolicies: ["Observe"]`).
+
+### Active/Passive Cluster Management Policies  
+
+![Active Passive Cluster Policies](./assets/active-passive-cluster-policies.png)
+
+This diagram shows the management policy differences between Active and Passive clusters. The Active cluster (with green checkmark) has full management policies including Create, Delete, Observe, and Update capabilities. The Passive cluster (with red X) is restricted to Observe-only mode, ensuring it monitors health without making changes until it needs to become active during failover.
+
+## Conference Presentation
+
+This reference PoC architecture was presented at **KubeCon China in Hong Kong 2025**:
+
+- **Presentation Deck**: [Resilient Multiregion Global Control Planes With Crossplane and K8gb](https://docs.google.com/presentation/d/1lCO5k4tTWFTbRdPcx9WzjCS_4aapt116/edit?usp=sharing&ouid=103406682887003571641&rtpof=true&sd=true)
+- **Recording**: [Watch on YouTube](https://www.youtube.com/watch?v=L9mRWljLnzw)
+
 ## Files
 
 - `composition.yaml`: Crossplane Composition with KCL function for GSLB health monitoring
