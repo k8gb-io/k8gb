@@ -1,0 +1,12 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: embedded-ingress-creation-broken-no-http
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: embedded-ingress-creation-broken-no-http.cloud.example.com
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
