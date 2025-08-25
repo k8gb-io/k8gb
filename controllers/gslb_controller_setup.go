@@ -24,6 +24,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	discov1 "k8s.io/api/discovery/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -79,12 +80,18 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			return r.GslbIngressHandler.Handle(a)
 		})
 
+	serviceMapHandler := handler.EnqueueRequestsFromMapFunc(
+		func(_ context.Context, a client.Object) []reconcile.Request {
+			return r.GslbServiceHandler.Handle(a)
+		})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8gbv1beta1.Gslb{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&externaldnsApi.DNSEndpoint{}).
 		Watches(&discov1.EndpointSlice{}, endpointMapHandler).
 		Watches(&netv1.Ingress{}, ingressMapHandler).
+		Watches(&corev1.Service{}, serviceMapHandler).
 		WithEventFilter(predicate.Funcs{
 			UpdateFunc: func(e event.TypedUpdateEvent[client.Object]) bool {
 				if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {

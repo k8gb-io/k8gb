@@ -57,15 +57,17 @@ type GslbReconciler struct {
 	Recorder           record.EventRecorder
 	Tracer             trace.Tracer
 	GslbIngressHandler Handler
+	GslbServiceHandler Handler
 }
 
 const (
 	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
 	strategyAnnotation      = "k8gb.io/strategy"
 	dnsTTLSecondsAnnotation = "k8gb.io/dns-ttl-seconds"
+	hostnameAnnotation      = "k8gb.io/hostname"
 )
 
-var k8gbAnnotations = []string{strategyAnnotation, primaryGeoTagAnnotation, dnsTTLSecondsAnnotation}
+var k8gbAnnotations = []string{strategyAnnotation, primaryGeoTagAnnotation, dnsTTLSecondsAnnotation, hostnameAnnotation}
 
 var log = logging.Logger()
 
@@ -107,6 +109,8 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Msg("Resolved strategy")
 
 	// == Ingress ==========
+	// Only create embedded Ingress if ResourceRef is empty (embedded mode)
+	// Skip Ingress creation for LoadBalancer services as they don't need an Ingress
 	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
 		ingress, err := r.createIngressFromGslb(gslb)
 		if err != nil {
