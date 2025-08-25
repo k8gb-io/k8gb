@@ -2,7 +2,7 @@
 apiVersion: chainsaw.kyverno.io/v1alpha1
 kind: StepTemplate
 metadata:
-  name: stop-podinfo
+  name: destroy-podinfo
 spec:
   try:
   - delete:

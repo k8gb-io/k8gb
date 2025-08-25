@@ -1,0 +1,48 @@
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: roundrobin-istio
+spec:
+  resourceRef:
+    apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    matchLabels:
+      app: roundrobin-istio
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: roundrobin-istio
+  labels:
+    app: roundrobin-istio
+spec:
+  gateways:
+    - istio-ingress/roundrobin-istio
+  hosts:
+    - roundrobin-istio.cloud.example.com
+  http:
+    - route:
+        - destination:
+            host: frontend-podinfo
+            port:
+              number: 9898
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: roundrobin-istio
+  namespace: istio-ingress
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+    - hosts:
+        - roundrobin-istio.cloud.example.com
+      port:
+        name: http
+        number: 8080
+        protocol: http
