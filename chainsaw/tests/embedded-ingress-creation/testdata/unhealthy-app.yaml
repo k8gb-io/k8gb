@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: unhealthy-app
+  name: unhealthy-app
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      run: unhealthy-app
+  template:
+    metadata:
+      labels:
+        run: unhealthy-app
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: unhealthy-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: unhealthy-app
+  name: unhealthy-app
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: unhealthy-app
+  sessionAffinity: None
+  type: ClusterIP
