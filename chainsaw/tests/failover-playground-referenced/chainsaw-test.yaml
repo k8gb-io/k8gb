@@ -4,17 +4,10 @@ metadata:
   name: failover-playground-referenced
 spec:
   namespace: failover-playground-referenced
+  bindings:
+    - name: istio_inject
+      value: disabled
   steps:
-  - name: namespace EU
-    description: create namespace on EU cluster
-    cluster: eu
-    use:
-      template: ../../step-templates/namespace.yaml
-  - name: namespace US
-    description: create namespace on US cluster
-    cluster: us
-    use:
-      template: ../../step-templates/namespace.yaml
   - name: init EU
     description: setup podinfo application and GSLB on EU cluster
     cluster: eu
