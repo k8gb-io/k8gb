@@ -324,27 +324,4 @@ func TestServiceHandler(t *testing.T) {
 	assert.Equal(t, "roundRobin", gslb.Spec.Strategy.Type)
 	assert.Equal(t, "test.example.com", gslb.Annotations["k8gb.io/hostname"])
 
-	// Test 5: Service owned by GSLB should not trigger new GSLB creation
-	ownedService := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "owned-service",
-			Namespace: "default",
-			Annotations: map[string]string{
-				"k8gb.io/strategy": "roundRobin",
-				"k8gb.io/hostname": "owned.example.com",
-			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					Kind: "Gslb",
-					Name: "existing-gslb",
-				},
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeLoadBalancer,
-		},
-	}
-
-	requests = handler.Handle(ownedService)
-	assert.Empty(t, requests, "Service owned by GSLB should not trigger new GSLB creation")
 }

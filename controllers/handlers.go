@@ -218,14 +218,9 @@ func NewServiceHandler(ctx context.Context, client client.Client, scheme *runtim
 
 func (g *ServiceHandler) Handle(svc client.Object) []reconcile.Request {
 
-	// following lines filters only Services with strategyAnnotation which are not owned by GSLB
+	// following lines filters only Services with strategyAnnotation
 	// filtering out Service without k8gb strategy
 	if !g.isK8gbAnnotated(svc) {
-		return nil
-	}
-
-	// filtering out Service which is owned by GSLB
-	if g.isOwnedByGSLB(svc) {
 		return nil
 	}
 
@@ -243,15 +238,6 @@ func (g *ServiceHandler) Handle(svc client.Object) []reconcile.Request {
 	_ = g.createGslbFromService(svc, g.scheme)
 
 	return nil
-}
-
-func (g *ServiceHandler) isOwnedByGSLB(obj client.Object) bool {
-	for _, r := range obj.GetOwnerReferences() {
-		if r.Kind == "Gslb" {
-			return true
-		}
-	}
-	return false
 }
 
 func (g *ServiceHandler) isK8gbAnnotated(obj client.Object) bool {
