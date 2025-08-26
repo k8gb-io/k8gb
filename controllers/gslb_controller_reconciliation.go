@@ -110,7 +110,6 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	// == Ingress ==========
 	// Only create embedded Ingress if ResourceRef is empty (embedded mode)
-	// Skip Ingress creation for LoadBalancer services as they don't need an Ingress
 	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
 		ingress, err := r.createIngressFromGslb(gslb)
 		if err != nil {
