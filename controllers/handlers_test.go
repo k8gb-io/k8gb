@@ -28,16 +28,13 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
-	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 func TestIngressHandler(t *testing.T) {
@@ -228,100 +225,4 @@ func TestIngressHandler(t *testing.T) {
 			assert.Nil(t, result)
 		})
 	}
-}
-
-func TestServiceHandler(t *testing.T) {
-	// Create a test scheme
-	scheme := runtime.NewScheme()
-	_ = corev1.AddToScheme(scheme)
-	_ = k8gbv1beta1.AddToScheme(scheme)
-
-	// Create a test client
-	client := fake.NewClientBuilder().WithScheme(scheme).Build()
-
-	// Create a ServiceHandler
-	handler := NewServiceHandler(context.TODO(), client, scheme)
-
-	// Test 1: Service without k8gb annotations should not trigger GSLB creation
-	serviceWithoutAnnotations := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-service",
-			Namespace: "default",
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeLoadBalancer,
-		},
-	}
-
-	requests := handler.Handle(serviceWithoutAnnotations)
-	assert.Empty(t, requests, "Service without k8gb annotations should not trigger reconciliation")
-
-	// Test 2: Service with strategy annotation but not LoadBalancer type should not trigger GSLB creation
-	serviceNotLoadBalancer := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-service",
-			Namespace: "default",
-			Annotations: map[string]string{
-				"k8gb.io/strategy": "roundRobin",
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeClusterIP,
-		},
-	}
-
-	requests = handler.Handle(serviceNotLoadBalancer)
-	assert.Empty(t, requests, "Service that is not LoadBalancer type should not trigger reconciliation")
-
-	// Test 3: Service with strategy annotation but without hostname should not trigger GSLB creation
-	serviceWithoutHostname := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-service",
-			Namespace: "default",
-			Annotations: map[string]string{
-				"k8gb.io/strategy": "roundRobin",
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeLoadBalancer,
-		},
-	}
-
-	requests = handler.Handle(serviceWithoutHostname)
-	assert.Empty(t, requests, "Service without hostname annotation should not trigger reconciliation")
-
-	// Test 4: Valid LoadBalancer service with all required annotations should trigger GSLB creation
-	validService := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-service",
-			Namespace: "default",
-			Annotations: map[string]string{
-				"k8gb.io/strategy": "roundRobin",
-				"k8gb.io/hostname": "test.example.com",
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeLoadBalancer,
-		},
-	}
-
-	// Add the service to the client
-	err := client.Create(context.TODO(), validService)
-	assert.NoError(t, err)
-
-	requests = handler.Handle(validService)
-	assert.Empty(t, requests, "Valid service should trigger GSLB creation but return empty requests")
-
-	// Verify that GSLB was created
-	gslb := &k8gbv1beta1.Gslb{}
-	err = client.Get(context.TODO(), types.NamespacedName{Name: "test-service", Namespace: "default"}, gslb)
-	assert.NoError(t, err, "GSLB should be created")
-	assert.Equal(t, "test-service", gslb.Name)
-	assert.Equal(t, "default", gslb.Namespace)
-	assert.Equal(t, "Service", gslb.Spec.ResourceRef.Kind)
-	assert.Equal(t, "v1", gslb.Spec.ResourceRef.APIVersion)
-	assert.Equal(t, "test-service", gslb.Spec.ResourceRef.Name)
-	assert.Equal(t, "roundRobin", gslb.Spec.Strategy.Type)
-	assert.Equal(t, "test.example.com", gslb.Annotations["k8gb.io/hostname"])
-
 }

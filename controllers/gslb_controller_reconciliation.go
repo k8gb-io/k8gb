@@ -57,17 +57,15 @@ type GslbReconciler struct {
 	Recorder           record.EventRecorder
 	Tracer             trace.Tracer
 	GslbIngressHandler Handler
-	GslbServiceHandler Handler
 }
 
 const (
 	primaryGeoTagAnnotation = "k8gb.io/primary-geotag"
 	strategyAnnotation      = "k8gb.io/strategy"
 	dnsTTLSecondsAnnotation = "k8gb.io/dns-ttl-seconds"
-	hostnameAnnotation      = "k8gb.io/hostname"
 )
 
-var k8gbAnnotations = []string{strategyAnnotation, primaryGeoTagAnnotation, dnsTTLSecondsAnnotation, hostnameAnnotation}
+var k8gbAnnotations = []string{strategyAnnotation, primaryGeoTagAnnotation, dnsTTLSecondsAnnotation}
 
 var log = logging.Logger()
 
