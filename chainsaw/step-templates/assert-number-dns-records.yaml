@@ -6,7 +6,7 @@ metadata:
   name: assert-number-dns-records
 spec:
   try:
-  - sleep: 
+  - sleep:
       duration: 30s # reconcile requeue seconds + coreDNS
   - script:
       env:
