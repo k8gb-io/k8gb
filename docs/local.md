@@ -93,8 +93,8 @@ k3d-test-gslb2-agent-0    172.20.0.5
 
 Or you can ask specific CoreDNS instance for its local targets:
 ```sh
-dig -p 5053 +tcp @localhost localtargets-roundrobin.cloud.example.com && \
-dig -p 5054 +tcp @localhost localtargets-roundrobin.cloud.example.com
+dig -p 5053 @localhost localtargets-roundrobin.cloud.example.com && \
+dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
 As expected result you should see **two A records** divided between both clusters.
 ```sh
