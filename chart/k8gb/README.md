@@ -140,8 +140,6 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.serviceMonitor | object | `{"enabled":false}` | enable ServiceMonitor |
 | k8gb.tolerations | list | `[]` | Tolerations to apply to the k8gb operator deployment for example:   tolerations:   - key: foo.bar.com/role     operator: Equal     value: master     effect: NoSchedule |
 | k8gb.validatingAdmissionPolicy | object | `{"enabled":false}` | enable validating admission policies |
-| ns1.enabled | bool | `false` | Enable NS1 provider |
-| ns1.ignoreSSL | bool | `false` | optional custom NS1 API endpoint for on-prem setups endpoint: https://api.nsone.net/v1/ |
 | openshift.enabled | bool | `false` | Install OpenShift specific RBAC |
 | rfc2136.enabled | bool | `false` |  |
 | rfc2136.rfc2136Opts[0].host | string | `"host.k3d.internal"` |  |

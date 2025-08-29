@@ -1,4 +1,4 @@
-{{- if or .Values.ns1.enabled .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
+{{- if or .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
