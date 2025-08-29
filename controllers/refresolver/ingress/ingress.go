@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/k8gb-io/k8gb/controllers/refresolver/common"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
@@ -68,13 +68,13 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 
 // getGslbIngressRef resolves a Kubernetes Ingress resource referenced by the Gslb spec
 func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1.Ingress, error) {
-	query, err := common.GetQueryOptions(gslb.Spec.ResourceRef, gslb.Namespace)
+	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
 	}
 
 	switch query.Mode {
-	case common.QueryModeGet:
+	case queryopts.QueryModeGet:
 		var ing = netv1.Ingress{}
 		err = k8sClient.Get(context.TODO(), *query.GetKey, &ing)
 		if err != nil {
@@ -88,7 +88,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 		}
 		return []netv1.Ingress{ing}, nil
 
-	case common.QueryModeList:
+	case queryopts.QueryModeList:
 		var ingList netv1.IngressList
 		err = k8sClient.List(context.TODO(), &ingList, query.ListOpts...)
 		if err != nil {

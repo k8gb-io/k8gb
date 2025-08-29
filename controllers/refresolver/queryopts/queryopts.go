@@ -1,4 +1,4 @@
-package common
+package queryopts
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
@@ -40,8 +40,8 @@ type QueryOptions struct {
 	ListOpts []client.ListOption
 }
 
-// GetQueryOptions creates query options from GSLB ResourceRef
-func GetQueryOptions(resourceRef k8gbv1beta1.ResourceRef, namespace string) (*QueryOptions, error) {
+// Get creates query options from GSLB ResourceRef
+func Get(resourceRef k8gbv1beta1.ResourceRef, namespace string) (*QueryOptions, error) {
 	if resourceRef.Name != "" {
 		// Direct reference by name - use fallback namespace if ResourceRef namespace is empty
 		serviceNamespace := resourceRef.Namespace
