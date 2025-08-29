@@ -151,5 +151,27 @@
       ],
       "autoReplaceStringTemplate": "PROMETHEUS_VERSION ?= {{{newValue}}}"
     },
+    // update golangci-lint version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "golangci/golangci-lint",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "matchStrings": [
+        "GOLANGCI_VERSION \\?= v(?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "GOLANGCI_VERSION ?= v{{{newValue}}}"
+    },
+    // update golangci-lint version in GitHub Actions workflow
+    {
+      "fileMatch": ["^\\.github/workflows/build\\.yml$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "golangci/golangci-lint",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "matchStrings": [
+        "version: v(?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "version: v{{{newValue}}}"
+    },
   ],
 }

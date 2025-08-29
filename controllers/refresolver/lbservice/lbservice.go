@@ -23,7 +23,7 @@ import (
 	"fmt"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/refresolver/common"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -67,13 +67,13 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 
 // getGslbServiceRef resolves a Kubernetes Service resource referenced by the Gslb spec
 func getGslbServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]corev1.Service, error) {
-	query, err := common.GetQueryOptions(gslb.Spec.ResourceRef, gslb.Namespace)
+	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
 	}
 
 	switch query.Mode {
-	case common.QueryModeGet:
+	case queryopts.QueryModeGet:
 		var service = corev1.Service{}
 		err = k8sClient.Get(context.TODO(), *query.GetKey, &service)
 		if err != nil {
@@ -84,7 +84,7 @@ func getGslbServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]corev
 		}
 		return []corev1.Service{service}, nil
 
-	case common.QueryModeList:
+	case queryopts.QueryModeList:
 		var serviceList corev1.ServiceList
 		err = k8sClient.List(context.TODO(), &serviceList, query.ListOpts...)
 		if err != nil {
