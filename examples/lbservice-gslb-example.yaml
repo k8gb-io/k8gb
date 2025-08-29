@@ -1,0 +1,39 @@
+# LoadBalancer Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world-service
+  namespace: default
+  labels:
+    app: hello-world
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: hello-world
+
+---
+# GSLB Resource for LoadBalancer Service
+# Note: Hostname must be explicitly specified via annotation
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: hello-world-gslb
+  namespace: default
+  annotations:
+    k8gb.io/hostname: "hello.lb.mycompany.com" # Required: Specify your desired hostname
+spec:
+  resourceRef:
+    apiVersion: v1
+    kind: Service
+    matchLabels:
+      app: hello-world # Must match the service labels
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
+    dnsTtlSeconds: 30
+  splitBrainThresholdSeconds: 300
