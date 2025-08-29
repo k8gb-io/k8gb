@@ -51,6 +51,7 @@ linters:
             - github.com/go-playground/validator/v10
     lll:
       line-length: 152
+
   exclusions:
     generated: lax
     presets:
@@ -68,6 +69,11 @@ linters:
       - linters:
           - gochecknoinits
         path: gslb_types.go
+      - linters:
+          - revive
+        path: controllers/utils/
+        rules:
+          - var-naming
     paths:
       - third_party$
       - builtin$

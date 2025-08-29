@@ -1,6 +1,4 @@
 // Package utils contains helper functions and framework for k8gb terratest
-//
-//nolint:revive
 package utils
 
 /*
