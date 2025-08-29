@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress/common"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/common"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
@@ -100,7 +100,7 @@ func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (
 
 	case common.QueryModeList:
 		virtualServiceList := &istio.VirtualServiceList{}
-		err = k8sClient.List(context.TODO(), virtualServiceList, query.ListOpts)
+		err = k8sClient.List(context.TODO(), virtualServiceList, query.ListOpts...)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().

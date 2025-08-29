@@ -107,6 +107,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Msg("Resolved strategy")
 
 	// == Ingress ==========
+	// Only create embedded Ingress if ResourceRef is empty (embedded mode)
 	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
 		ingress, err := r.createIngressFromGslb(gslb)
 		if err != nil {

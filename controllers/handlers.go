@@ -23,10 +23,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/k8gb-io/k8gb/controllers/resolver"
-
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -200,6 +199,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 	return gslb, isNew, nil
 }
 
+// parseStrategySpec parses strategy specifications from annotations for Ingress resources
 func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (result k8gbv1beta1.Strategy, err error) {
 	toInt := func(k string, v string) (int, error) {
 		intValue, err := strconv.Atoi(v)

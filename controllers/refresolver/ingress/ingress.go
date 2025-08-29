@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress/common"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/common"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
@@ -90,7 +90,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 
 	case common.QueryModeList:
 		var ingList netv1.IngressList
-		err = k8sClient.List(context.TODO(), &ingList, query.ListOpts)
+		err = k8sClient.List(context.TODO(), &ingList, query.ListOpts...)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-service
+  namespace: test-namespace
+  labels:
+    app: test-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: test-app
+status:
+  loadBalancer:
+    ingress:
+      - ip: 192.168.1.1
