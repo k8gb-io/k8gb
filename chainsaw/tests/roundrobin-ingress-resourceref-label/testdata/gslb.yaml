@@ -1,0 +1,35 @@
+
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: roundrobin-ingress-resourceref-label
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: roundrobin-ingress-resourceref-label
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: roundrobin-ingress-resourceref-label
+  labels:
+    app: roundrobin-ingress-resourceref-label
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: roundrobin-ingress-resourceref-label.cloud.example.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: frontend-podinfo
+              port:
+                name: http

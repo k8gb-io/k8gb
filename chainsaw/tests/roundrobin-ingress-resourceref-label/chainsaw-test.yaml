@@ -1,0 +1,74 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: roundrobin-ingress-resourceref-label
+spec:
+  namespace: roundrobin-ingress-resourceref-label
+  bindings:
+    - name: istio_inject
+      value: disabled
+  steps:
+  - name: init EU
+    description: setup podinfo application and GSLB on EU cluster
+    cluster: eu
+    use:
+      template: ../../step-templates/init.yaml
+  - name: init US
+    description: setup podinfo application and GSLB on US cluster
+    cluster: us
+    use:
+      template: ../../step-templates/init.yaml
+  - name: DNS resolves to all IP addresses
+    description: verify that coredns on both clusters returns the expected number of records
+    use:
+      with:
+        bindings:
+        - name: expected_records
+          value: "4"
+      template: ../../step-templates/assert-number-dns-records.yaml
+  - name: stop app on EU
+    description: stop app on EU cluster
+    cluster: eu
+    use:
+      template: ../../step-templates/destroy-podinfo.yaml
+  - name: DNS resolves to US IP addresses
+    description: verify that coredns on both clusters returns the expected number of records
+    cluster: us
+    use:
+      template: ../../step-templates/assert-dns.yaml
+  - name: stop app on US
+    description: stop app on US cluster
+    cluster: us
+    use:
+      template: ../../step-templates/destroy-podinfo.yaml
+  - name: DNS resolves to no IP addresses
+    description: verify that coredns on both clusters returns the expected number of records
+    use:
+      with:
+        bindings:
+        - name: expected_records
+          value: "0"
+      template: ../../step-templates/assert-number-dns-records.yaml
+  - name: start again app on EU
+    description: restore application on EU cluster
+    cluster: eu
+    use:
+      template: ../../step-templates/apply-podinfo.yaml
+  - name: DNS resolves to EU IP addresses
+    description: assert that coredns on both clusters resolves to EU
+    cluster: eu
+    use:
+      template: ../../step-templates/assert-dns.yaml
+  - name: start again app on US
+    description: restore application on US cluster
+    cluster: us
+    use:
+      template: ../../step-templates/apply-podinfo.yaml
+  - name: DNS resolves to all IP addresses
+    description: verify that coredns on both clusters returns the expected number of records
+    use:
+      with:
+        bindings:
+        - name: expected_records
+          value: "4"
+      template: ../../step-templates/assert-number-dns-records.yaml

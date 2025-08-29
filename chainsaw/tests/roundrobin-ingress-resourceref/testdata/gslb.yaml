@@ -2,28 +2,24 @@
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: failover-playground-referenced
+  name: roundrobin-ingress-resourceref
 spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
-    matchLabels:
-      app: failover-playground-referenced
+    name: roundrobin-ingress-resourceref
   strategy:
-    type: failover
+    type: roundRobin
     dnsTtlSeconds: 5
-    primaryGeoTag: "eu"
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: failover-playground-referenced
-  labels:
-    app: failover-playground-referenced
+  name: roundrobin-ingress-resourceref
 spec:
   ingressClassName: nginx
   rules:
-    - host: failover-playground-referenced.cloud.example.com
+    - host: roundrobin-ingress-resourceref.cloud.example.com
       http:
         paths:
         - path: /

@@ -1,13 +1,12 @@
----
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: failover-playground-embedded
+  name: roundrobin-ingress-embedded
 spec:
   ingress:
     ingressClassName: nginx
     rules:
-      - host: failover-playground-embedded.cloud.example.com
+      - host: roundrobin-ingress-embedded.cloud.example.com
         http:
           paths:
           - path: /
@@ -18,6 +17,5 @@ spec:
                 port:
                   name: http
   strategy:
-    type: failover
+    type: roundRobin
     dnsTtlSeconds: 5
-    primaryGeoTag: "eu"

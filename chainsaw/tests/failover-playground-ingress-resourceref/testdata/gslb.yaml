@@ -1,0 +1,34 @@
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-playground-ingress-resourceref
+  namespace: failover-playground-ingress-resourceref
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: failover-playground-ingress-resourceref
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
+    dnsTtlSeconds: 5
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: failover-playground-ingress-resourceref
+  namespace: failover-playground-ingress-resourceref
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: failover-playground-ingress-resourceref.cloud.example.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: frontend-podinfo
+              port:
+                name: http

@@ -4,12 +4,10 @@ metadata:
   name: ingress-playground-resourceref
 spec:
   namespace: ingress-playground-resourceref
+  bindings:
+    - name: istio_inject
+      value: disabled
   steps:
-    - name: namespace EU
-      description: create namespace on EU cluster
-      cluster: eu
-      use:
-        template: ../../step-templates/namespace.yaml
     - name: init EU
       description: setup podinfo application and GSLB on EU cluster
       cluster: eu
