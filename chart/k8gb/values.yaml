@@ -205,13 +205,6 @@ extdns:
   txtPrefix: "k8gb-<GEOTAG>-"
   txtOwnerId: "k8gb-<GEOTAG>"
 
-ns1:
-  # -- Enable NS1 provider
-  enabled: false
-  # -- optional custom NS1 API endpoint for on-prem setups
-  # endpoint: https://api.nsone.net/v1/
-  ignoreSSL: false
-
 rfc2136:
   enabled: false
   rfc2136Opts:

@@ -63,9 +63,6 @@ Create the name of the service account to use
 {{- end -}}
 
 {{- define "k8gb.extdnsProvider" -}}
-{{- if .Values.ns1.enabled -}}
-{{- print "ns1" -}}
-{{- end -}}
 {{- if .Values.rfc2136.enabled }}
 {{- print "rfc2136" -}}
 {{- end -}}
@@ -100,20 +97,6 @@ k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_
 {{- end }}
 
 {{- define "k8gb.extdnsProviderOpts" -}}
-{{- if .Values.ns1.enabled -}}
-{{- if .Values.ns1.endpoint -}}
-        - --ns1-endpoint={{ .Values.ns1.endpoint }}
-{{- end -}}
-{{- if .Values.ns1.ignoreSSL -}}
-        - --ns1-ignoressl
-{{- end -}}
-        env:
-        - name: NS1_APIKEY
-          valueFrom:
-            secretKeyRef:
-              name: ns1
-              key: apiKey
-{{- end }}
 {{- if .Values.azuredns.enabled -}}
         - --azure-resource-group={{ .Values.azuredns.resourceGroup }}
 {{- end }}

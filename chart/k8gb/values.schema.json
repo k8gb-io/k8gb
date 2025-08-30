@@ -26,9 +26,6 @@
                 "infoblox": {
                     "$ref": "#/definitions/Infoblox"
                 },
-                "ns1": {
-                    "$ref": "#/definitions/Ns1"
-                },
                 "rfc2136": {
                     "$ref": "#/definitions/Rfc2136"
                 },
@@ -437,22 +434,22 @@
                         },
                         "anyOf": [
                             {
-                            "properties": {
-                                "operator": {"const": "Exists"}
+                                "properties": {
+                                    "operator": {"const": "Exists"}
                                 },
-                            "not": {
-                                "required": ["value"]
+                                "not": {
+                                    "required": ["value"]
                                 }
                             },
                             {
-                            "properties": {
-                                "operator": {"const": "Equal"}
+                                "properties": {
+                                    "operator": {"const": "Equal"}
                                 },
-                            "required": ["value"]
+                                "required": ["value"]
                             },
                             {
-                            "not": {
-                                "required": ["operator"]
+                                "not": {
+                                    "required": ["operator"]
                                 }
                             }
                         ],
@@ -563,19 +560,6 @@
                 "loadBalancedZone",
                 "parentZone"
             ]
-        },
-        "Ns1": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "ignoreSSL": {
-                    "type": "boolean"
-                }
-            },
-            "title": "Ns1"
         },
         "Openshift": {
             "type": "object",

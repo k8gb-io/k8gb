@@ -2,13 +2,27 @@ k8gb:
   dnsZones:
     - loadBalancedZone: "test.k8gb.io" # -- dnsZone controlled by gslb
       parentZone: "k8gb.io" # -- main zone which would contain gslb zone to delegate
-  edgeDNSServer: "169.254.169.253" # external DNS server to be used for resolution
+  edgeDNSServers:
+    - "169.254.169.253" # external DNS server to be used for resolution
   clusterGeoTag: "us-east-1" # used for places where we need to distinguish between differnet Gslb instances
   extGslbClustersGeoTags: "eu-west-1" # comma-separated list of external gslb geo tags to pair with
 
-ns1:
+extdns:
   enabled: true
-  ignoreSSL: false
+  fullnameOverride: "k8gb-external-dns"
+  provider:
+    name: ns1
+  txtPrefix: "k8gb-us-east-1-"
+  txtOwnerId: "k8gb-test.k8gb.io-us-east-1"
+  domainFilters:
+    - k8gb.io
+  env:
+    - name: NS1_APIKEY
+      valueFrom:
+        secretKeyRef:
+          name: ns1
+          key: apiKey
+
 coredns:
   serviceType: LoadBalancer
   service:
