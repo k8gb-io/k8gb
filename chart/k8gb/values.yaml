@@ -252,17 +252,6 @@ azuredns:
     # -- Use AKS workload identity extension
     useWorkloadIdentityExtension: false
 
-cloudflare:
-  # -- Enable Cloudflare provider
-  enabled: false
-  # -- Cloudflare Zone ID
-  # follow https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/
-  # to find your zoneID value
-  zoneID: replaceme
-  # -- Configure how many DNS records to fetch per request
-  # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
-  dnsRecordsPerPage: 5000
-
 openshift:
   # -- Install OpenShift specific RBAC
   enabled: false

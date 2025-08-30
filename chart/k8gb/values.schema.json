@@ -32,9 +32,6 @@
                 "azuredns": {
                     "$ref": "#/definitions/AzureDNS"
                 },
-                "cloudflare": {
-                    "$ref": "#/definitions/Cloudflare"
-                },
                 "openshift": {
                     "$ref": "#/definitions/Openshift"
                 },
@@ -771,26 +768,6 @@
                 "enabled"
             ],
             "title": "azuredns"
-        },
-        "Cloudflare": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "dnsRecordsPerPage": {
-                    "type": "integer"
-                },
-                "zoneID": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "enabled",
-                "zoneID"
-            ],
-            "title": "Cloudflare"
         },
         "Tracing": {
             "type": "object",

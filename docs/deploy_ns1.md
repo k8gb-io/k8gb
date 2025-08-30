@@ -10,7 +10,7 @@ The EKS setup is identical to [Route53 tutorial](deploy_route53.md)
 
 Terraform code for cluster reference setup can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53)
 
-For additional configuration options please check [External DNS's documentation](https://kubernetes-sigs.github.io/external-dns/v0.14.0/tutorials/ns1/)
+For additional configuration options please check [External DNS's documentation](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/ns1/)
 
 ## Deploy k8gb
 

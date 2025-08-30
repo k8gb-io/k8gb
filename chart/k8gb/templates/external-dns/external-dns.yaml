@@ -1,4 +1,4 @@
-{{- if or .Values.rfc2136.enabled .Values.azuredns.enabled .Values.cloudflare.enabled }}
+{{- if or .Values.rfc2136.enabled .Values.azuredns.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

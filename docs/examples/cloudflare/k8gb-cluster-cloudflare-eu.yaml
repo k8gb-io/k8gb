@@ -7,11 +7,24 @@ k8gb:
   # -- comma-separated list of external gslb geo tags to pair with
   extGslbClustersGeoTags: "us"
 
-cloudflare:
-  # -- Enable Cloudflare provider
+extdns:
   enabled: true
-  # -- Cloudflare Zone ID
-  zoneID: cdebf92e613133e4bb176a14a9c5b730
-  # -- Configure how many DNS records to fetch per request
-  # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
-  dnsRecordsPerPage: 5000
+  fullnameOverride: "k8gb-external-dns"
+  provider:
+    name: cloudflare
+  txtPrefix: k8gb-eu-
+  txtOwnerId: k8gb-cloudflare-test.k8gb.io-eu
+  domainFilters:
+    - k8gb.io
+  env:
+    - name: CF_API_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare
+          key: token
+  extraArgs:
+    # -- Configure how many DNS records to fetch per request
+    # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
+    cloudflare-dns-records-per-page: "5000"
+    # -- Cloudflare Zone ID
+    zone-id-filter: "cdebf92e613133e4bb176a14a9c5b730"
