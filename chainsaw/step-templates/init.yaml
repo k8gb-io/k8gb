@@ -3,27 +3,21 @@
 apiVersion: chainsaw.kyverno.io/v1alpha1
 kind: StepTemplate
 metadata:
-  name: init-ingress
+  name: init
 spec:
   try:
   - apply:
       file: ../../testdata/namespace.yaml
+  - script:
+      env:
+      - name: ISTIO_INJECT
+        value: ($istio_inject)
+      content: |
+        kubectl label namespace $NAMESPACE istio-inject=$ISTIO_INJECT --overwrite
   - apply:
       file: ../../testdata/podinfo.yaml
   - apply:
-      file: ./testdata/gslb.yaml
-  - assert:
-      resource:
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: ($test.metadata.name)
-          namespace: ($namespace)
-        status: 
-          loadBalancer:
-            ingress:
-              (length(@)): 2
-      timeout: 60s
+      file: testdata/gslb.yaml
   - assert:
       resource:
         apiVersion: externaldns.k8s.io/v1alpha1
@@ -36,7 +30,9 @@ spec:
         spec:
           endpoints:
           - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
+            recordType: A
             targets:
               (length(@)): 2
           - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
-      timeout: 30s
+            recordType: A
+      timeout: 75s

@@ -52,7 +52,7 @@ jobs:
       - name: Setup Chainsaw
         uses: kyverno/action-install-chainsaw@6354895e0f99ab23d3e38d85cf5c71b5dc21d727 # v0.2.13
         with:
-          release: v0.2.11
+          release: v0.2.12
 
       - name: Check install
         run: chainsaw version
