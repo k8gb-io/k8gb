@@ -1,0 +1,25 @@
+---
+# asserts that both clusters resolve the domain to the expected number of DNS records
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-number-dns-records
+spec:
+  try:
+  - sleep:
+      duration: 30s # reconcile requeue seconds + coreDNS
+  - script:
+      env:
+      - name: NAME
+        value: ($test.metadata.name)
+      - name: DNS_PORT_EU
+        value: ($values.dns_port_eu)
+      - name: DNS_PORT_US
+        value: ($values.dns_port_us)
+      - name: EXPECTED
+        value: ($expected_records)
+      content: |
+        ACTUAL_EU=$(dig @localhost -p $DNS_PORT_EU "$NAME.cloud.example.com" +short | wc -l)
+        [ "$EXPECTED" -eq "$ACTUAL_EU" ] || { echo "EU expected $EXPECTED targets but found $ACTUAL_EU"; exit 1; }
+        ACTUAL_US=$(dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com" +short | wc -l)
+        [ "$EXPECTED" -eq "$ACTUAL_US" ] || { echo "US expected $EXPECTED targets but found $ACTUAL_US"; exit 1; }

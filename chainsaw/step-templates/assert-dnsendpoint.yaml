@@ -6,7 +6,7 @@ metadata:
   name: assert-dnsendpoint
 spec:
   try:
-  - sleep: 
+  - sleep:
       duration: 30s # reconcile requeue seconds + coreDNS
   - script:
       env:

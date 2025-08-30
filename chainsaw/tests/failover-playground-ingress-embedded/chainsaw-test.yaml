@@ -1,20 +1,13 @@
 apiVersion: chainsaw.kyverno.io/v1alpha1
 kind: Test
 metadata:
-  name: failover-playground-resourceref
+  name: failover-playground-ingress-embedded
 spec:
-  namespace: failover-playground-resourceref
+  namespace: failover-playground-ingress-embedded
+  bindings:
+    - name: istio_inject
+      value: disabled
   steps:
-  - name: namespace EU
-    description: create namespace on EU cluster
-    cluster: eu
-    use:
-      template: ../../step-templates/namespace.yaml
-  - name: namespace US
-    description: create namespace on US cluster
-    cluster: us
-    use:
-      template: ../../step-templates/namespace.yaml
   - name: init EU
     description: setup podinfo application and GSLB on EU cluster
     cluster: eu
@@ -34,7 +27,7 @@ spec:
     description: stop app on EU cluster
     cluster: eu
     use:
-      template: ../../step-templates/stop-podinfo.yaml
+      template: ../../step-templates/destroy-podinfo.yaml
   - name: DNS resolves to US post failover
     description: assert that coredns on both clusters resolves to US
     cluster: us
