@@ -118,7 +118,7 @@ spec:
                   name: infoblox
                   key: INFOBLOX_WAPI_PASSWORD
             {{- end }}
-            {{- if or .Values.extdns.enabled .Values.rfc2136.enabled }}
+            {{- if .Values.extdns.enabled }}
             - name: EXTDNS_ENABLED
               value: "true"
             {{- end }}

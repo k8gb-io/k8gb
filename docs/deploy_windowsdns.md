@@ -89,28 +89,6 @@ Before deploying K8GB and the demo workload, ensure required configurations on W
             * kerberos-realm
     * At this moment ExternalDNS doesn't provide a way to use secrets as the source for the kerberos-password setting, so you must ensure this is stored in a secure way
 
-```yaml
-rfc2136:
-  enabled: true
-  rfc2136Opts:
-    - host: AD-DC.k8gb.local #when using gssTsig, use the FQDN of the host, not an IP
-    - port: 53
-  rfc2136auth:
-    insecure: 
-      enabled: false
-    tsig:
-      enabled: false
-      tsigCreds:
-        - tsig-secret-alg: hmac-sha256
-        - tsig-keyname: externaldns-key
-    gssTsig:
-      enabled: true
-      gssTsigCreds:
-        - kerberos-username: ad-user-account
-        - kerberos-password: ad-user-account-password
-        - kerberos-realm: cloud.lab
-```
-
 ### Install K8gb
 
 This action will install K8gb in both clusters using the provided [sample](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/k8gb/) values.yaml for each cluster. Please ensure that the are correctly updated before execution

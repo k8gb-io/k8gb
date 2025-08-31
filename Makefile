@@ -655,7 +655,7 @@ define uninstall-prometheus
 endef
 
 define get-helm-args
---set k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' --set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053
+--set k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$1)' --set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$1)-' --set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053
 endef
 
 define get-helm-values-file

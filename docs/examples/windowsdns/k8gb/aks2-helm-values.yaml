@@ -8,7 +8,7 @@ k8gb:
       parentZone: "k8gb.local" # -- main zone which would contain gslb zone to delegate
       dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
   # -- host/ip[:port] format is supported here where port defaults to 53
-  parentZoneDNSServers:
+  edgeDNSServers:
       # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
       - "10.10.0.6"
   # -- used for places where we need to distinguish between different Gslb instances
@@ -31,50 +31,46 @@ k8gb:
     allowPrivilegeEscalation: false
     runAsUser: 1000
 
-externaldns:
-  # -- external-dns image repo:tag
-  image: k8s.gcr.io/external-dns/external-dns:v0.11.0
-  # -- external-dns sync interval
-  interval: "20s"
-  securityContext:
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
-    runAsUser: 1000
-    # -- For ExternalDNS to be able to read Kubernetes and AWS token files
-    fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
-    runAsNonRoot: true
+extdns:
+  enabled: true
+  fullnameOverride: "k8gb-external-dns"
+  provider:
+    name: rfc2136
+  txtPrefix: "k8gb-francecentral-"
+  txtOwnerId: "k8gb-global.k8gb.local-francecentral"
+  domainFilters:
+    - k8gb.local
+  dnsPolicy: ClusterFirst
+  env:
+  - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: rfc2136
+        key: secret
+  extraArgs:
+    rfc2136-tsig-axfr:
+    rfc2136-tsig-secret-alg: hmac-sha256
+    rfc2136-tsig-keyname: externaldns-key
+    rfc2136-gss-tsig:
+    rfc2136-kerberos-username: k8gb
+    rfc2136-kerberos-password: asdfkuj#f8guh1
+    rfc2136-kerberos-realm: k8gb.local
+    rfc2136-host: dc.k8gb.local
+    rfc2136-port: "53"
+    rfc2136-zone: k8gb.local
+  extraVolumes:
+    - name: kerberos-config-volume
+      configMap:
+        name: kerberos-config-volume
+        defaultMode: 420
+  extraVolumeMounts:
+    - name: kerberos-config-volume
+      mountPath: /etc/krb5.conf
+      subPath: krb5.conf
 
 coredns:
   # -- service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps
-  isClusterService: false
   serviceType: LoadBalancer
   service:
     annotations:
       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-  deployment:
-    # -- Skip CoreDNS creation and uses the one shipped by k8gb instead
-    skipConfig: true
-  # -- Creates serviceAccount for coredns
-  rbac:
-    create: true
-    name: coredns
-
-rfc2136:
-  enabled: true
-  rfc2136Opts:
-    - host: dc.k8gb.local #when using gssTsig, use the FQDN of the host, not an IP
-    - port: 53
-  rfc2136auth:
-    insecure: 
-      enabled: false
-    tsig:
-      enabled: true
-      tsigCreds:
-        - tsig-secret-alg: hmac-sha256
-        - tsig-keyname: externaldns-key
-    gssTsig:
-      enabled: true
-      kerberosConfigmap: kerberos-config-volume
-      gssTsigCreds:
-        - kerberos-username: k8gb
-        - kerberos-password: asdfkuj#f8guh1
-        - kerberos-realm: K8GB.LOCAL

@@ -62,16 +62,6 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{- define "k8gb.extdnsProvider" -}}
-{{- if .Values.rfc2136.enabled }}
-{{- print "rfc2136" -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "k8gb.extdnsOwnerID" -}}
-k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_0")) "_1" }}-{{ .Values.k8gb.clusterGeoTag }}
-{{- end -}}
-
 {{- define "k8gb.edgeDNSServers" -}}
 {{- if .Values.k8gb.edgeDNSServer -}}
 {{ .Values.k8gb.edgeDNSServer }}
@@ -90,47 +80,6 @@ k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_
 {{- join ";" $entries }}
 {{- end }}
 
-{{- define "k8gb.extdnsProviderOpts" -}}
-{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.insecure.enabled true) -}}
-        - --rfc2136-insecure
-{{- end -}}
-{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.tsig.enabled true) -}}
-        - --rfc2136-tsig-axfr
-{{- range $k, $v := .Values.rfc2136.rfc2136auth.tsig.tsigCreds -}}
-{{- range $kk, $vv := $v }}
-        - --rfc2136-{{ $kk }}={{ $vv }}
-{{- end }}
-{{- end }}
-{{- end -}}
-{{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.gssTsig.enabled true) -}}
-        - --rfc2136-gss-tsig
-{{- range $k, $v := .Values.rfc2136.rfc2136auth.gssTsig.gssTsigCreds -}}
-{{- range $kk, $vv := $v }}
-        - --rfc2136-{{ $kk }}={{ $vv }}
-{{- end }}
-{{- end }}
-{{- end -}}
-{{ if .Values.rfc2136.enabled -}}
-{{- range $k, $v := .Values.rfc2136.rfc2136Opts -}}
-{{- range $kk, $vv := $v }}
-        - --rfc2136-{{ $kk }}={{ $vv }}
-{{- end }}
-{{- end }}
-{{- $dnsZonesRaw := include "k8gb.dnsZonesString" . }}
-{{- $dnsZones := split ";" $dnsZonesRaw }}
-{{- range $dnsZones }}
-    {{- $parts := split ":" . }}
-    {{- $zone := index $parts "_0" }}
-        - --rfc2136-zone={{ $zone }}
-{{- end }}
-        env:
-        - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: rfc2136
-              key: secret
-{{- end -}}
-{{- end -}}
 {{- define "k8gb.metrics_port" -}}
 {{ print (split ":" .Values.k8gb.metricsAddress)._1 }}
 {{- end -}}

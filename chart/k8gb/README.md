@@ -127,18 +127,6 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | k8gb.tolerations | list | `[]` | Tolerations to apply to the k8gb operator deployment for example:   tolerations:   - key: foo.bar.com/role     operator: Equal     value: master     effect: NoSchedule |
 | k8gb.validatingAdmissionPolicy | object | `{"enabled":false}` | enable validating admission policies |
 | openshift.enabled | bool | `false` | Install OpenShift specific RBAC |
-| rfc2136.enabled | bool | `false` |  |
-| rfc2136.rfc2136Opts[0].host | string | `"host.k3d.internal"` |  |
-| rfc2136.rfc2136Opts[1].port | int | `1053` |  |
-| rfc2136.rfc2136auth.gssTsig.enabled | bool | `false` |  |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[0].kerberos-username | string | `"ad-user"` |  |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[1].kerberos-password | string | `"ad-user-pass"` |  |
-| rfc2136.rfc2136auth.gssTsig.gssTsigCreds[2].kerberos-realm | string | `"ad-domain-realm"` |  |
-| rfc2136.rfc2136auth.gssTsig.kerberosConfigMap | string | `"kerberos-config"` |  |
-| rfc2136.rfc2136auth.insecure.enabled | bool | `false` |  |
-| rfc2136.rfc2136auth.tsig.enabled | bool | `true` |  |
-| rfc2136.rfc2136auth.tsig.tsigCreds[0].tsig-secret-alg | string | `"hmac-sha256"` |  |
-| rfc2136.rfc2136auth.tsig.tsigCreds[1].tsig-keyname | string | `"externaldns-key"` |  |
 | tracing.deployJaeger | bool | `false` | should the Jaeger be deployed together with the k8gb operator? In case of using another OpenTracing solution, make sure that configmap for OTEL agent has the correct exporters set up (`tracing.otelConfig`). |
 | tracing.enabled | bool | `false` | if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`) |
 | tracing.endpoint | string | `"localhost:4318"` | `host:port` where the spans from the applications (traces) should be sent, sets the `OTEL_EXPORTER_OTLP_ENDPOINT` env var This is not the final destination where all the traces are going. Otel collector has its configuration in the associated configmap (`tracing.otelConfig`). |

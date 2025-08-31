@@ -22,23 +22,27 @@ In order to enable the provider RFC2136 on ExternalDNS, the following `rfc2136.*
 # Sample for GSS-TSIG authentication
 
 ```yaml
-rfc2136:
+extdns:
   enabled: true
-  rfc2136Opts:
-    - host: yourAcDc.k8gb.local
-    - port: 53
-  rfc2136auth:
-    insecure:
-      enabled: false
-    tsig:
-      enabled: false
-      tsigCreds:
-        - tsig-secret-alg: hmac-sha256
-        - tsig-keyname: externaldns-key
-    gssTsig:
-      enabled: true
-      gssTsigCreds:
-        - kerberos-username: someServiceAccount
-        - kerberos-password: insecurePlainTextPassword
-        - kerberos-realm: yourKerberosRealm.domain
+  fullnameOverride: "k8gb-external-dns"
+  provider:
+    name: rfc2136
+  txtPrefix: "k8gb-<geotag>-"
+  txtOwnerId: "k8gb-<loadBalancedZone>-<geotag>"
+  domainFilters:
+    - "<parentZone>"
+  dnsPolicy: ClusterFirst
+  env:
+  - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: rfc2136
+        key: secret
+  extraArgs:
+    rfc2136-host: yourAcDc.k8gb.local
+    rfc2136-port: 53
+    rfc2136-gss-tsig:
+    rfc2136-kerberos-username: someServiceAccount
+    rfc2136-kerberos-password: insecurePlainTextPassword
+    rfc2136-kerberos-realm: yourKerberosRealm.domain
 ```
