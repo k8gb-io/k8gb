@@ -1,4 +1,4 @@
-{{- if or .Values.rfc2136.enabled .Values.azuredns.enabled }}
+{{- if .Values.rfc2136.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -70,15 +70,5 @@ spec:
         {{- with .Values.externaldns.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- end }}
-      {{- if .Values.azuredns.enabled }}
-        volumeMounts:
-          - name: azure-config-file
-            mountPath: /etc/kubernetes/
-            readOnly: true
-      volumes:
-        - name: azure-config-file
-          secret:
-            secretName: {{ .Values.azuredns.authSecretName | default "external-dns-secret-azure" }}
       {{- end }}
 {{- end }}

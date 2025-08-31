@@ -226,32 +226,6 @@ rfc2136:
         - kerberos-password: ad-user-pass
         - kerberos-realm: ad-domain-realm
 
-azuredns:
-  enabled: false
-  # -- External-dns secret name which contains Azure credentials.
-  # See https://github.com/k8gb-io/external-dns/blob/master/docs/tutorials/azure.md#configuration-file for expected format
-  authSecretName: external-dns-secret-azure
-  createAuthSecret:
-    # -- Create an authentication secret for Azure DNS based on the values below
-    # alternatively, you can create the secret manually and pass its name in the `azuredns.authSecretName` value
-    enabled: true
-    # -- Azure tenant ID which holds the managed identity
-    tenantId: myTenantId
-    # -- subscription id which holds the Azure DNS zone
-    subscriptionId: mySubscriptionId
-    # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'k8gb.edgeDNSZone')
-    resourceGroup: myDnsResourceGroup
-    # -- Azure client ID that is associated with the Service Principal.
-    aadClientId: myAadClientId
-    # -- Azure client secret that is associated with the Service Principal.
-    aadClientSecret: myAadClientSecret
-    # -- Use either AKS Kubelet Identity or AAD Pod Identities
-    useManagedIdentityExtension: false
-    # -- Client id from the Managed identitty when using the AAD Pod Identities
-    userAssignedIdentityID: myUserAssignedIdentityID
-    # -- Use AKS workload identity extension
-    useWorkloadIdentityExtension: false
-
 openshift:
   # -- Install OpenShift specific RBAC
   enabled: false

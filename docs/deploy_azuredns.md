@@ -2,10 +2,6 @@
 
 This document outlines how to configure k8gb to use the Azure Public DNS provider. Azure Private DNS is not supported as it does not support NS records at this time. For private DNS scenarios in Azure, please refer to the [Windows DNS](deploy_windowsdns.md) documentation and consider implementing it using VM-based DNS services such as Windows DNS or BIND.
 
-### external-dns credentials for Azure DNS
-
-In this example, we will use a registered app in Microsoft Entra ID and it's corresponding Client ID / Client Secret to authenticate with the Azure DNS zone. All of the [supported authentication fields supported by external-dns](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/azure.md#configuration-file) are supported by k8gb and can be used in the `azuredns` section of the `k8gb` Helm chart values.yaml file.
-
 ## Sample solution
 
 In this sample solution we will deploy two private AKS clusters in different regions. A workload will be deployed to both clusters and exposed to the internet with the help of k8gb and Azure Public DNS.
@@ -52,6 +48,10 @@ This action will install K8gb in both clusters using the provided [sample](https
 ```sh
 make deploy-k8gb
 ```
+
+### Deploy the credentials for Azure DNS
+
+In this example, we can use a registered app in Microsoft Entra ID and it's corresponding Client ID / Client Secret to authenticate with the Azure DNS zone. Deploy on both clusters a secret called `external-dns-secret-azure` following [External DNS's documentation](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/azure.md#configuration-file).
 
 ### Install demo app
 
