@@ -37,22 +37,21 @@ k8gb:
 
 ### Cloudflare-specific configuration
 
-Let's look closer at the Cloudflare section of the configuration examples.
-
+The example linked above shows how to configure a `zone-id-filter` and the number of `cloudflare-dns-records-per-page`.
 ```yaml
-cloudflare:
-  # -- Enable Cloudflare provider
-  enabled: true
-  # -- Cloudflare Zone ID
-  zoneID: cdebf92e613133e4bb176a14a9c5b730
-  # -- Configure how many DNS records to fetch per request
-  # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
-  dnsRecordsPerPage: 5000
+extdns:
+  ...
+  extraArgs
+    # -- Cloudflare Zone ID
+    zone-id-filter: "cdebf92e613133e4bb176a14a9c5b730"
+    # -- Configure how many DNS records to fetch per request
+    # see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling
+    cloudflare-dns-records-per-page: "5000"
 ```
 
-Follow
-https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/
-to find your `zoneID`
+For additional configuration options please refer to [External DNS's documentation](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/)
+
+To find your `zoneID` follow: https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/
 
 ### Install the k8gb helm chart in each cluster
 
@@ -88,8 +87,7 @@ spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
-    matchLabels:
-      app: test-gslb-failover
+    name: test-gslb-failover
   strategy:
     dnsTtlSeconds: 60 # Minimum for non-Enterprise Cloudflare https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/
     primaryGeoTag: eu

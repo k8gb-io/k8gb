@@ -4,8 +4,6 @@ kind: Ingress
 metadata:
   name: test-gslb-failover
   namespace: test-gslb
-  labels:
-    app: test-gslb-failover
 spec:
   ingressClassName: nginx
   rules:
