@@ -66,9 +66,6 @@ Create the name of the service account to use
 {{- if .Values.rfc2136.enabled }}
 {{- print "rfc2136" -}}
 {{- end -}}
-{{- if .Values.azuredns.enabled }}
-{{- print "azure-dns" -}}
-{{- end -}}
 {{- end -}}
 
 {{- define "k8gb.extdnsOwnerID" -}}
@@ -94,9 +91,6 @@ k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_
 {{- end }}
 
 {{- define "k8gb.extdnsProviderOpts" -}}
-{{- if .Values.azuredns.enabled -}}
-        - --azure-resource-group={{ .Values.azuredns.resourceGroup }}
-{{- end }}
 {{- if and (eq .Values.rfc2136.enabled true) (eq .Values.rfc2136.rfc2136auth.insecure.enabled true) -}}
         - --rfc2136-insecure
 {{- end -}}
@@ -139,25 +133,4 @@ k8gb-{{ index (split ":" (index (split ";" (include "k8gb.dnsZonesString" .)) "_
 {{- end -}}
 {{- define "k8gb.metrics_port" -}}
 {{ print (split ":" .Values.k8gb.metricsAddress)._1 }}
-{{- end -}}
-
-{{- define "external-dns.azure-credentials" -}}
-{{- if and (eq .Values.azuredns.enabled true) (eq .Values.azuredns.createAuthSecret.enabled true) -}}
-{
-  "tenantId": "{{ .Values.azuredns.createAuthSecret.tenantId }}",
-  "subscriptionId": "{{ .Values.azuredns.createAuthSecret.subscriptionId }}",
-  "resourceGroup": "{{ .Values.azuredns.createAuthSecret.resourceGroup }}",
-  {{- if .Values.azuredns.createAuthSecret.aadClientId }}
-  "aadClientId": "{{ .Values.azuredns.createAuthSecret.aadClientId }}",
-  {{- end }}
-  {{- if .Values.azuredns.createAuthSecret.aadClientSecret }}
-  "aadClientSecret": "{{ .Values.azuredns.createAuthSecret.aadClientSecret }}",
-  {{- end }}
-  "useManagedIdentityExtension": {{ .Values.azuredns.createAuthSecret.useManagedIdentityExtension | default false }},
-  {{- if .Values.azuredns.createAuthSecret.userAssignedIdentityID }}
-  "userAssignedIdentityID": "{{ .Values.azuredns.createAuthSecret.userAssignedIdentityID }}",
-  {{- end }}
-  "useWorkloadIdentityExtension": {{ .Values.azuredns.createAuthSecret.useWorkloadIdentityExtension | default false }}
-}
-{{- end -}}
 {{- end -}}

@@ -52,17 +52,6 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| azuredns.authSecretName | string | `"external-dns-secret-azure"` | External-dns secret name which contains Azure credentials. See https://github.com/k8gb-io/external-dns/blob/master/docs/tutorials/azure.md#configuration-file for expected format |
-| azuredns.createAuthSecret.aadClientId | string | `"myAadClientId"` | Azure client ID that is associated with the Service Principal. |
-| azuredns.createAuthSecret.aadClientSecret | string | `"myAadClientSecret"` | Azure client secret that is associated with the Service Principal. |
-| azuredns.createAuthSecret.enabled | bool | `true` | Create an authentication secret for Azure DNS based on the values below alternatively, you can create the secret manually and pass its name in the `azuredns.authSecretName` value |
-| azuredns.createAuthSecret.resourceGroup | string | `"myDnsResourceGroup"` | Azure Resource Group which holds the Azure DNS Zone (which is defined as 'k8gb.edgeDNSZone') |
-| azuredns.createAuthSecret.subscriptionId | string | `"mySubscriptionId"` | subscription id which holds the Azure DNS zone |
-| azuredns.createAuthSecret.tenantId | string | `"myTenantId"` | Azure tenant ID which holds the managed identity |
-| azuredns.createAuthSecret.useManagedIdentityExtension | bool | `false` | Use either AKS Kubelet Identity or AAD Pod Identities |
-| azuredns.createAuthSecret.useWorkloadIdentityExtension | bool | `false` | Use AKS workload identity extension |
-| azuredns.createAuthSecret.userAssignedIdentityID | string | `"myUserAssignedIdentityID"` | Client id from the Managed identitty when using the AAD Pod Identities |
-| azuredns.enabled | bool | `false` |  |
 | coredns.corefile | object | `{"enabled":true,"reload":{"enabled":true,"interval":"30s","jitter":"15s"}}` | CoreDNS configmap |
 | coredns.corefile.reload | object | `{"enabled":true,"interval":"30s","jitter":"15s"}` | Reload CoreDNS configmap when it changes https://coredns.io/plugins/reload/ |
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |

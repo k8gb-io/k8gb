@@ -29,9 +29,6 @@
                 "rfc2136": {
                     "$ref": "#/definitions/Rfc2136"
                 },
-                "azuredns": {
-                    "$ref": "#/definitions/AzureDNS"
-                },
                 "openshift": {
                     "$ref": "#/definitions/Openshift"
                 },
@@ -713,61 +710,6 @@
                 }
             },
             "title": "Rfc2136authGssTsigCreds"
-        },
-        "AzureDNS": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "authSecretName": {
-                    "type": "string",
-                    "default": "external-dns-secret-azure"
-                },
-                "createAuthSecret": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "tenantId": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "subscriptionId": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "resourceGroup": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "aadClientId": {
-                            "type": "string"
-                        },
-                        "aadClientSecret": {
-                            "type": "string"
-                        },
-                        "useManagedIdentityExtension": {
-                            "type": "boolean",
-                            "default": false
-                        },
-                        "userAssignedIdentityID": {
-                            "type": "string"
-                        },
-                        "useWorkloadIdentityExtension": {
-                            "type": "boolean",
-                            "default": false
-                        }
-                    }
-                }
-            },
-            "required": [
-                "enabled"
-            ],
-            "title": "azuredns"
         },
         "Tracing": {
             "type": "object",
