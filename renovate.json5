@@ -90,7 +90,7 @@
       "fileMatch": ["^Makefile$"],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "istio/istio",
-      "extractVersionTemplate": "^v(?<version>.*)$",
+      "extractVersionTemplate": "^(?<version>.*)$",
       "matchStrings": [
         "ISTIO_VERSION \\?= v(?<currentValue>.*)",
       ],
