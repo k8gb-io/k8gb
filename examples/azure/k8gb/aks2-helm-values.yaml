@@ -4,7 +4,7 @@ k8gb:
       parentZone: "k8gb-kubeconeu2023.com" # -- main zone which would contain gslb zone to delegate
       dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
   # -- host/ip[:port] format is supported here where port defaults to 53
-  parentZoneDNSServers:
+  edgeDNSServers:
     # -- use these DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
     - "8.8.8.8"
@@ -15,18 +15,23 @@ k8gb:
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 10
 
-externaldns:
-  interval: "10s"
-
-azuredns:
-  # -- Enable Azure DNS provider
+extdns:
   enabled: true
-  createAuthSecret:
-    enabled: true
-    tenantId: myTenantID
-    # -- subscription id which holds the Azure DNS zone
-    subscriptionId: mySubscriptionID
-    # -- Azure Resource Group which holds the Azure DNS Zone (which is defined as 'edgeDNSZone')
-    resourceGroup: k8gb-kubeconeu2023
-    aadClientId: myAADClientID
-    aadClientSecret: myAADClientSecret
+  fullnameOverride: "k8gb-external-dns"
+  provider:
+    name: azure-dns
+  txtPrefix: "k8gb-francecentral-"
+  txtOwnerId: "k8gb-demo.k8gb-kubeconeu2023.com-francecentral"
+  domainFilters:
+    - k8gb-kubeconeu2023.com
+  extraVolumes:
+    - name: azure-config-file
+      secret:
+        secretName: external-dns-secret-azure
+  extraVolumeMounts:
+    - name: azure-config-file
+      mountPath: /etc/kubernetes/
+      readOnly: true
+  extraArgs:
+    azure-resource-group: k8gb-kubeconeu2023
+  interval: "10s"
