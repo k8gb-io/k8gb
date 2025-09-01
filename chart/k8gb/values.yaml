@@ -82,39 +82,6 @@ k8gb:
   #     effect: NoSchedule
   tolerations: []
 
-externaldns:
-  # -- `.spec.template.spec.dnsPolicy` for ExternalDNS deployment
-  dnsPolicy: "ClusterFirst"
-  # -- extra environment variables
-  extraEnv: []
-  # -- extra volumes
-  extraVolumes: []
-  # -- extra volume mounts
-  extraVolumeMounts: []
-  # -- external-dns image repo:tag
-  # It is important to use the image from k8gb external-dns fork to get the full
-  # functionality. See links below
-  # https://github.com/k8gb-io/external-dns
-  # https://github.com/k8gb-io/external-dns/pkgs/container/external-dns
-  image: registry.k8s.io/external-dns/external-dns:v0.18.0
-  # -- external-dns sync interval
-  interval: "20s"
-  securityContext:
-    # -- For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core
-    runAsUser: 1000
-    # -- For ExternalDNS to be able to read Kubernetes and AWS token files
-    fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
-    runAsNonRoot: true
-
-  resources:
-    # -- requests and limits for the external-dns container
-    requests:
-      memory: "32Mi"
-      cpu: "100m"
-    limits:
-      memory: "128Mi"
-      cpu: "500m"
-
 coredns:
   # -- service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps
   isClusterService: false
@@ -204,27 +171,6 @@ extdns:
   - "example.com"
   txtPrefix: "k8gb-<GEOTAG>-"
   txtOwnerId: "k8gb-<GEOTAG>"
-
-rfc2136:
-  enabled: false
-  rfc2136Opts:
-    - host: host.k3d.internal
-    - port: 1053
-  rfc2136auth:
-    insecure:
-      enabled: false
-    tsig:
-      enabled: true
-      tsigCreds:
-        - tsig-secret-alg: hmac-sha256
-        - tsig-keyname: externaldns-key
-    gssTsig:
-      enabled: false
-      kerberosConfigMap: kerberos-config
-      gssTsigCreds:
-        - kerberos-username: ad-user
-        - kerberos-password: ad-user-pass
-        - kerberos-realm: ad-domain-realm
 
 openshift:
   # -- Install OpenShift specific RBAC

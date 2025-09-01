@@ -25,6 +25,3 @@ extdns:
   - name: aws-credentials
     mountPath: /.aws
     readOnly: true
-
-rfc2136:
-  enabled: false
