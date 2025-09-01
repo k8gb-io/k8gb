@@ -78,18 +78,6 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | extdns.sources[0] | string | `"crd"` |  |
 | extdns.txtOwnerId | string | `"k8gb-<GEOTAG>"` |  |
 | extdns.txtPrefix | string | `"k8gb-<GEOTAG>-"` |  |
-| externaldns.dnsPolicy | string | `"ClusterFirst"` | `.spec.template.spec.dnsPolicy` for ExternalDNS deployment |
-| externaldns.extraEnv | list | `[]` | extra environment variables |
-| externaldns.extraVolumeMounts | list | `[]` | extra volume mounts |
-| externaldns.extraVolumes | list | `[]` | extra volumes |
-| externaldns.image | string | `"registry.k8s.io/external-dns/external-dns:v0.18.0"` | external-dns image repo:tag It is important to use the image from k8gb external-dns fork to get the full functionality. See links below https://github.com/k8gb-io/external-dns https://github.com/k8gb-io/external-dns/pkgs/container/external-dns |
-| externaldns.interval | string | `"20s"` | external-dns sync interval |
-| externaldns.resources.limits.cpu | string | `"500m"` |  |
-| externaldns.resources.limits.memory | string | `"128Mi"` |  |
-| externaldns.resources.requests | object | `{"cpu":"100m","memory":"32Mi"}` | requests and limits for the external-dns container |
-| externaldns.securityContext.fsGroup | int | `65534` | For ExternalDNS to be able to read Kubernetes and AWS token files |
-| externaldns.securityContext.runAsNonRoot | bool | `true` |  |
-| externaldns.securityContext.runAsUser | int | `1000` | For more options consult https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#securitycontext-v1-core |
 | global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | infoblox.dnsView | string | `"default"` | DNS view to use for zone operations |
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
