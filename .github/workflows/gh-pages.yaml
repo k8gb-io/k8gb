@@ -48,7 +48,9 @@ jobs:
           git fetch origin gh-pages:gh-pages
           if git checkout gh-pages; then
             echo "Backing up existing files..."
-            # Only preserve CNAME for domain configuration
+            test -d charts && cp -r charts /tmp/preserved/
+            test -f artifacthub-repo.yml && cp artifacthub-repo.yml /tmp/preserved/
+            test -f index.yaml && cp index.yaml /tmp/preserved/
             test -f CNAME && cp CNAME /tmp/preserved/
           fi
           git checkout master
@@ -70,6 +72,9 @@ jobs:
           cp -r /tmp/mkdocs-site/* .
 
           # Restore preserved files
+          test -d /tmp/preserved/charts && cp -r /tmp/preserved/charts .
+          test -f /tmp/preserved/artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .
+          test -f /tmp/preserved/index.yaml && cp /tmp/preserved/index.yaml .
           test -f /tmp/preserved/CNAME && cp /tmp/preserved/CNAME .
 
           # Commit and push if there are changes
