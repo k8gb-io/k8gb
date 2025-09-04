@@ -61,6 +61,7 @@ type Config struct {
 
 	OtelExporterOtlpEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" optional:"" default:"localhost:4318" help:"where the traces should be sent to (in case of otel collector deployed on the same pod as sidecar -> localhost:4318). Otel collector itself can be configured via a configmap to send it somewhere else"`
 
+	WatchedNamespaces []string `env:"WATCHED_NAMESPACES" optional:"" default:"" help:"list of namespaces separated by ',' to watch for GSLB resources. If empty, all namespaces are watched."`
 	// Infoblox configuration
 	Infoblox Infoblox `embed:""`
 

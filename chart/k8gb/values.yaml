@@ -82,6 +82,9 @@ k8gb:
   #     effect: NoSchedule
   tolerations: []
 
+  # -- namespaces to be watched by the k8gb operator, if empty, operator watches all namespaces
+  watchedNamespaces: []
+
 coredns:
   # -- service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps
   isClusterService: false

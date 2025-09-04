@@ -767,6 +767,94 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 	}
 }
 
+func TestNamespaceWatch(t *testing.T) {
+	var tests = []struct {
+		name           string
+		namespace      string
+		envvars        string
+		expectedResult bool
+	}{
+		{
+			name:           "all namespaces",
+			namespace:      "random",
+			expectedResult: true,
+			envvars: `CLUSTER_GEO_TAG=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true;
+				 WATCHED_NAMESPACES=`,
+		},
+		{
+			name:           "is in izolated namespace",
+			namespace:      "izolated",
+			expectedResult: true,
+			envvars: `CLUSTER_GEO_TAG=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true;
+				 WATCHED_NAMESPACES=izolated`,
+		},
+		{
+			name:           "is in izolated namespaces",
+			namespace:      "izolated",
+			expectedResult: true,
+			envvars: `CLUSTER_GEO_TAG=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true;
+				 WATCHED_NAMESPACES=test,izolated`,
+		},
+		{
+			name:           "is NOT in izolated namespaces with spaces",
+			namespace:      "dev",
+			expectedResult: false,
+			envvars: `CLUSTER_GEO_TAG=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true;
+				 WATCHED_NAMESPACES= test, izolated `,
+		},
+		{
+			name:           "is NOT in izolated namespaces WITHOUT spaces",
+			namespace:      "dev",
+			expectedResult: false,
+			envvars: `CLUSTER_GEO_TAG=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true;
+				 WATCHED_NAMESPACES=test,izolated`,
+		},
+		{
+			name:           "empty namespace",
+			namespace:      "",
+			expectedResult: false,
+			envvars: `CLUSTER_GEO_TAG=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EXTDNS_ENABLED=true;
+				 WATCHED_NAMESPACES=test,izolated`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// arrange
+			cleanup := setEnvVarsFromString(test.envvars)
+			defer cleanup()
+			// removing args given by test, otherwise kong start to parse them
+			os.Args = []string{os.Args[0]}
+
+			// act
+			cfg, err := NewResolver().ResolveOperatorConfig()
+			assert.NoError(t, err)
+
+			// assert
+			assert.Equal(t, test.expectedResult, cfg.IsWatchedNamespace(test.namespace))
+		})
+	}
+
+}
+
 func setEnvVarsFromString(envStr string) (cleanup func()) {
 	lines := strings.Split(envStr, ";")
 	// Map for storing old values

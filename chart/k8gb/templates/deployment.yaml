@@ -62,6 +62,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "k8gb"
+            - name: WATCHED_NAMESPACES
+              value: {{ quote .Values.k8gb.watchedNamespaces }}
             - name: COREDNS_SERVICE_TYPE
               value: {{ quote .Values.coredns.serviceType }}
             - name: CLUSTER_GEO_TAG

@@ -79,8 +79,13 @@ var m = metrics.Metrics()
 func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	ctx, span := r.Tracer.Start(ctx, "Reconcile")
 	defer span.End()
-
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+
+	if !r.Config.IsWatchedNamespace(req.Namespace) {
+		log.Debug().Str("namespace", req.Namespace).Msg("Skipping reconciliation")
+		return result.Requeue()
+	}
+
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
 	err := r.Get(ctx, req.NamespacedName, gslb)
