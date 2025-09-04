@@ -1,6 +1,6 @@
 module github.com/k8gb-io/k8gb
 
-go 1.25.0
+go 1.25.1
 
 require (
 	github.com/alecthomas/kong v1.12.1
