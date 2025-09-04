@@ -4,17 +4,21 @@ metadata:
   name: failover-playground-istio
 spec:
   namespace: failover-playground-istio
+  bindings:
+    - name: istio_inject
+      value: enabled
   steps:
   - name: init EU
     description: setup podinfo application and GSLB on EU cluster
     cluster: eu
     use:
-      template: ../../step-templates/init-istio.yaml
+      template: ../../step-templates/init.yaml
   - name: init US
     description: setup podinfo application and GSLB on US cluster
     cluster: us
     use:
-      template: ../../step-templates/init-istio.yaml
+      template: ../../step-templates/init.yaml
+  # TODO: move all of this to a single step template
   - name: DNS resolves to EU pre failover
     description: verify that coredns on both clusters resolves to EU
     cluster: eu
