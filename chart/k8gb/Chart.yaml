@@ -15,7 +15,7 @@ dependencies:
     alias: extdns
     condition: extdns.enabled
     repository: https://kubernetes-sigs.github.io/external-dns
-    version: 1.18.0
+    version: 1.19.0
 
 home: https://www.k8gb.io/
 sources:
