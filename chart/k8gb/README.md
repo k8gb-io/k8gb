@@ -36,7 +36,7 @@ Kubernetes: `>= 1.21.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://coredns.github.io/helm | coredns | 1.43.3 |
-| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.18.0 |
+| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.19.0 |
 
 For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
@@ -125,4 +125,4 @@ For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 | tracing.samplingRatio | string | `nil` | float representing the ratio of how often the span should be kept/dropped (env var `TRACING_SAMPLING_RATIO`) if not specified, the AlwaysSample will be used which is the same as 1.0. `0.1` would mean that 10% of samples will be kept |
 | tracing.sidecarImage.pullPolicy | string | `"Always"` |  |
 | tracing.sidecarImage.repository | string | `"otel/opentelemetry-collector"` | OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data to somewhere else using exporters (Jaeger for instance) |
-| tracing.sidecarImage.tag | string | `"0.133.0"` |  |
+| tracing.sidecarImage.tag | string | `"0.135.0"` |  |
