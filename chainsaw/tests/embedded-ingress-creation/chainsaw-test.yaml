@@ -1,0 +1,83 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: embedded-ingress-creation
+spec:
+  namespace: embedded-ingress-creation
+  steps:
+  - name: namespace
+    description: create namespace
+    cluster: eu
+    use:
+      template: ../../step-templates/namespace.yaml
+  - name: create GSLB
+    description: create GSLB resource that leads to Ingress creation
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/gslb.yaml
+    - assert:
+        resource:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: ($test.metadata.name)
+            namespace: ($namespace)
+          status: 
+            loadBalancer:
+              ingress:
+                (length(@)): 2
+        timeout: 60s
+  - name: create unhealthy app
+    description: create unhealthy app for app embedded-ingress-creation-unhealthy
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/unhealthy-app.yaml
+  - name: create healthy app
+    description: create healthy app for app embedded-ingress-creation-healthy
+    cluster: eu
+    try:
+    - apply:
+        file: ../../testdata/podinfo.yaml
+  - name: assert GSLB status
+    description: the status of the GSLB domains is healthy, unhealthy and notfound
+    cluster: eu
+    try:
+    - assert:
+        resource:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metadata:
+            name: ($test.metadata.name)
+            namespace: ($namespace)
+          status: 
+            serviceHealth:
+              embedded-ingress-creation-healthy.cloud.example.com: Healthy
+              embedded-ingress-creation-unhealthy.cloud.example.com: Unhealthy
+              embedded-ingress-creation-notfound.cloud.example.com: NotFound
+        timeout: 45s
+  - name: assert DNSEndpoint label
+    description: assert that the DNSEndpoint has the correct label
+    cluster: eu
+    try:
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: ($test.metadata.name)
+            namespace: ($namespace)
+            ownerReferences:
+              (length(@)): 1
+            labels:
+              k8gb.absa.oss/dnstype: local
+        timeout: 10s
+  - name: apply broken resources
+    description: broken resources should be rejected by the API server
+    cluster: eu
+    try:
+    - error:
+        file: ./testdata/broken-gslb.yaml
+    - error:
+        file: ./testdata/broken-gslb-no-http.yaml
