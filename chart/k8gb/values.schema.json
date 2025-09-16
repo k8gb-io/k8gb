@@ -397,6 +397,13 @@
                 "podLabels": {
                     "type": "object"
                 },
+                "watchedNamespaces": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 0
+                    }
+                },
                 "resources": {
                     "$ref": "#/definitions/Resources"
                 },
