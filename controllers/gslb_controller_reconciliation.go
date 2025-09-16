@@ -81,10 +81,10 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	defer span.End()
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
 
-	// if !r.Config.IsWatchedNamespace(req.NamespacedName.Namespace) {
-	//	log.Debug().Str("namespace", req.NamespacedName.Namespace).Msg("Skipping reconciliation")
-	//	return result.Requeue()
-	// }
+	if !r.Config.IsWatchedNamespace(req.NamespacedName.Namespace) {
+		log.Debug().Str("namespace", req.NamespacedName.Namespace).Msg("Skipping reconciliation")
+		return result.Requeue()
+	}
 
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
