@@ -1,9 +1,10 @@
 {{- if .Values.k8gb.deployCrds }}
 
 {{- $files := .Files }}
-{{- range tuple "crd/k8gb.absa.oss_gslbs.yaml" "crd/dns-endpoint-crd-manifest.yaml" }}
-{{ $files.Get . }}
+{{ $files.Get "crd/k8gb.absa.oss_gslbs.yaml" }}
 
+{{- if not .Values.extdns.enabled }}
+{{ $files.Get "crd/dns-endpoint-crd-manifest.yaml" }}
 {{- end }}
 
 {{- end }}
