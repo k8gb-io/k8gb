@@ -15,6 +15,9 @@ tags
 # Helm charts
 chart/k8gb/charts/*.tgz
 
+# Generated test configuration files
+deploy/helm/gcp-generated.yaml
+
 # OLM
 /olm/bundle
 /olm/olm-bundle

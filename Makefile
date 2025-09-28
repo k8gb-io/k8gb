@@ -64,6 +64,12 @@ DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
 GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
 
+# GCP Cloud DNS testing variables
+GCP_PROJECT ?=
+GCP_DOMAIN ?=
+GCP_CREDENTIALS_FILE ?=
+USE_GCP_PROVIDER ?= false
+
 ifndef NO_COLOR
 YELLOW=\033[0;33m
 CYAN=\033[1;36m
@@ -140,6 +146,18 @@ deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster s
 
 	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
 	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=$(FULL_LOCAL_SETUP_WITH_APPS)
+
+.PHONY: deploy-gcp-local-setup
+deploy-gcp-local-setup: ## Deploy local setup with GCP Cloud DNS (requires GCP_PROJECT, GCP_DOMAIN, GCP_CREDENTIALS_FILE)
+	@if [ -z "$(GCP_PROJECT)" ] || [ -z "$(GCP_DOMAIN)" ] || [ -z "$(GCP_CREDENTIALS_FILE)" ]; then \
+		echo -e "$(RED)Usage: make deploy-gcp-local-setup GCP_PROJECT=my-project GCP_DOMAIN=example.com GCP_CREDENTIALS_FILE=/path/to/creds.json$(NC)" ;\
+		echo -e "$(RED)Make sure you have:$(NC)" ;\
+		echo -e "$(RED)  1. A Cloud DNS managed zone for $(GCP_DOMAIN)$(NC)" ;\
+		echo -e "$(RED)  2. Service account with dns.admin permissions$(NC)" ;\
+		echo -e "$(RED)  3. yq installed (brew install yq)$(NC)" ;\
+		exit 1 ;\
+	fi
+	K8GB_LOCAL_VERSION=test USE_GCP_PROVIDER=true $(MAKE) deploy-full-local-setup
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
@@ -267,8 +285,7 @@ upgrade-candidate: release-images deploy-test-version
 .PHONY: deploy-k8gb-with-helm
 deploy-k8gb-with-helm:
 	@if [ -z "$(CLUSTER_ID)" ]; then echo invalid CLUSTER_ID value && exit 1; fi
-	# create rfc2136 secret
-	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
+	$(call setup-dns-provider-secrets,$(CLUSTER_ID))
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
 	# Deletion of the coredns service is needed because of the bug below
@@ -299,6 +316,7 @@ destroy-full-local-setup: ## Destroy full local multicluster setup
 	@for c in $(CLUSTER_IDS); do \
 		k3d cluster delete $(CLUSTER_NAME)$$c ;\
 	done
+	@rm -f deploy/helm/gcp-generated.yaml
 
 .PHONY: deploy-prometheus
 deploy-prometheus:
@@ -659,11 +677,42 @@ define get-helm-args
 endef
 
 define get-helm-values-file
-$(if $(filter k8gb/k8gb,$(1)),./deploy/helm/stable.yaml,./deploy/helm/next.yaml)
+$(if $(filter k8gb/k8gb,$(1)),$(if $(filter true,$(USE_GCP_PROVIDER)),./deploy/helm/gcp-generated.yaml,./deploy/helm/stable.yaml),$(if $(filter true,$(USE_GCP_PROVIDER)),./deploy/helm/gcp-generated.yaml,./deploy/helm/next.yaml))
 endef
 
 # values here are only available in the not released (next) version.
 # by releases the content would be moved into get-helm-args
 define get-next-args
 $(if $(filter ./chart/k8gb,$(1)),--set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$2)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$2)')
+endef
+
+define setup-dns-provider-secrets
+	if [ "$(USE_GCP_PROVIDER)" = "true" ]; then \
+		echo -e "\n$(YELLOW)Setting up GCP Cloud DNS provider$(NC)" ; \
+		if [ -z "$(GCP_PROJECT)" ] || [ -z "$(GCP_DOMAIN)" ] || [ -z "$(GCP_CREDENTIALS_FILE)" ]; then \
+			echo -e "$(RED)Error: For GCP provider, you must set:$(NC)" ; \
+			echo -e "$(RED)  GCP_PROJECT=your-project$(NC)" ; \
+			echo -e "$(RED)  GCP_DOMAIN=your-domain.com$(NC)" ; \
+			echo -e "$(RED)  GCP_CREDENTIALS_FILE=/path/to/credentials.json$(NC)" ; \
+			exit 1 ; \
+		fi ; \
+		if [ ! -f "$(GCP_CREDENTIALS_FILE)" ]; then \
+			echo -e "$(RED)Error: GCP credentials file not found: $(GCP_CREDENTIALS_FILE)$(NC)" ; \
+			exit 1 ; \
+		fi ; \
+		kubectl -n k8gb create secret generic external-dns-gcp-sa --from-file=credentials.json=$(GCP_CREDENTIALS_FILE) || true ; \
+		echo -e "\n$(YELLOW)Creating GCP values from template$(NC)" ; \
+		yq eval '.k8gb.dnsZones[0].parentZone = "$(GCP_DOMAIN)"' dns-provider-test/gcp/values-template.yaml | \
+		 yq eval '.k8gb.dnsZones[0].loadBalancedZone = "k3d-test.$(GCP_DOMAIN)"' | \
+		 yq eval '.k8gb.edgeDNSServers[0] = "8.8.8.8"' | \
+		 yq eval '.extdns.extraArgs.google-project = "$(GCP_PROJECT)"' | \
+		 yq eval '.extdns.serviceAccount.annotations."iam.gke.io/gcp-service-account" = "SERVICE_ACCOUNT_EMAIL_TODO"' | \
+		 yq eval '.extdns.domainFilters[0] = "$(GCP_DOMAIN)"' | \
+		 yq eval 'del(.extdns.serviceAccount.annotations) | .extdns.env = [{"name": "GOOGLE_APPLICATION_CREDENTIALS", "value": "/etc/secrets/service-account/credentials.json"}] | .extdns.extraVolumes = [{"name": "google-service-account", "secret": {"secretName": "external-dns-gcp-sa"}}] | .extdns.extraVolumeMounts = [{"name": "google-service-account", "mountPath": "/etc/secrets/service-account/", "readOnly": true}]' \
+		 > deploy/helm/gcp-generated.yaml ; \
+		echo -e "$(CYAN)Generated deploy/helm/gcp-generated.yaml$(NC)" ; \
+	else \
+		echo -e "\n$(YELLOW)Setting up RFC2136 provider$(NC)" ; \
+		kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true ; \
+	fi
 endef

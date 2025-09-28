@@ -44,6 +44,34 @@ app.example.com (CoreDNS hosted zone - not in Cloud DNS)
 3. **Service Account**: A Google Service Account with DNS admin permissions
 4. **GKE Clusters** (recommended): GKE clusters with Workload Identity enabled
 
+#### Initial GCP Setup Commands
+
+```bash
+# Set your project and domain variables
+export PROJECT_ID="my-dns-project"
+export DOMAIN="example.com"
+export ZONE_NAME=$(echo $DOMAIN | sed 's/\./-/g')  # example-com
+
+# Set the default project
+gcloud config set project $PROJECT_ID
+
+# Enable required APIs
+gcloud services enable dns.googleapis.com
+gcloud services enable container.googleapis.com  # If using GKE
+
+# Create the parent DNS managed zone
+gcloud dns managed-zones create $ZONE_NAME \
+  --dns-name="$DOMAIN." \
+  --description="Parent zone for K8GB delegation" \
+  --visibility=public
+
+# View the assigned nameservers
+gcloud dns managed-zones describe $ZONE_NAME \
+  --format="value(nameServers)" | tr ';' '\n'
+```
+
+**Note**: For testing purposes, you don't need to own the domain or configure nameservers at your registrar. The Cloud DNS zone just needs to exist for K8GB to create delegation records. For production use, you would need to configure your domain registrar to use the Google Cloud DNS nameservers listed above.
+
 ### Required Permissions
 
 The service account used by external-dns needs:
