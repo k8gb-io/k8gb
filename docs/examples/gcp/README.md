@@ -129,10 +129,17 @@ For environments where Workload Identity is not available, you can use static se
      --values=k8gb-cluster-gcp-us-central1.yaml
    ```
 
-3. **Deploy test applications and GSLB resources:**
+3. **Deploy test application and GSLB resources:**
    ```bash
-   # Deploy test application (do this on both clusters)
-   kubectl apply -f ../../../deploy/test-apps/
+   # Create test namespace (do this on both clusters)
+   kubectl apply -f ../../../deploy/crds/test-namespace-ingress.yaml
+
+   # Deploy podinfo via Helm (do this on both clusters)
+   helm repo add podinfo https://stefanprodan.github.io/podinfo
+   helm upgrade --install frontend --namespace test-gslb \
+     -f ../../../deploy/test-apps/podinfo/podinfo-values.yaml \
+     --set ui.message="$(kubectl config current-context)" \
+     podinfo/podinfo --version 6.9.2
 
    # Apply GSLB configurations (do this on both clusters)
    kubectl apply -f test-gslb-failover.yaml
