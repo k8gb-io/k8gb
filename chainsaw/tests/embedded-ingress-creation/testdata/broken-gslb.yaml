@@ -1,0 +1,21 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: embedded-ingress-creation-broken
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: embedded-ingress-creation-broken.cloud.example.com
+        https:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo # Gslb should reflect Healthy status and create associated DNS records
+                port:
+                  name: http
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
