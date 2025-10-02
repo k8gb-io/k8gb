@@ -106,7 +106,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 	if err != nil {
 		log.Info().
 			Str("ingress", objectKey.Name).
-			Msg("Ingress does not exist anymore. Skipping Glsb creation...")
+			Msg("Ingress doesn't exist anymore. Skipping Gslb creation...")
 		return nil
 	}
 
@@ -132,7 +132,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 			Msg(fmt.Sprintf("Creating a new Gslb out of Ingress with '%s' annotation", strategyAnnotation))
 		err = g.client.Create(context.Background(), gslb)
 		if err != nil {
-			log.Err(err).Msg("Glsb creation failed")
+			log.Err(err).Msg("Gslb creation failed")
 			return nil
 		}
 		return gslb
@@ -144,7 +144,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 		Msg(fmt.Sprintf("Updating a Gslb out of Ingress %s", objectKey.Name))
 	err = g.client.Update(context.Background(), gslb)
 	if err != nil {
-		log.Err(err).Msg("Glsb update failed")
+		log.Err(err).Msg("Gslb update failed")
 		return nil
 	}
 	return gslb
@@ -168,7 +168,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 		log.Info().
 			Str("gslb", objectKey.Name).
 			Str("namespace", objectKey.Namespace).
-			Msg("Gslb doesnt exist, creating...")
+			Msg("Gslb doesn't exist, creating...")
 	}
 
 	strategyObj, err := g.parseStrategySpec(obj.GetAnnotations())

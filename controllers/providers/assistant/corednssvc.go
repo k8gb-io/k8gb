@@ -60,7 +60,7 @@ func (r *CoreDNSService) GetResource() (*corev1.Service, error) {
 		return nil, err
 	}
 	if len(serviceList.Items) == 0 {
-		return nil, fmt.Errorf("more no coreDNS service was found. Check if CoreDNS exposed correctly")
+		return nil, fmt.Errorf("no coreDNS service was found. Check if CoreDNS is exposed correctly")
 	}
 	coreDNSService := &serviceList.Items[0]
 	return coreDNSService, nil
