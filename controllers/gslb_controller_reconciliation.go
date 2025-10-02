@@ -115,7 +115,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 			return result.RequeueError(err)
 		}
 
-		err = r.saveDependentIngress(gslb, ingress)
+		err = r.saveDependentIngress(ctx, gslb, ingress)
 		if err != nil {
 			m.IncrementError(gslb)
 			return result.RequeueError(err)
@@ -149,7 +149,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Msg("Resolved LoadBalancer and Server configuration referenced by Ingress")
 
 	// == health status of applications ==
-	serviceHealth, err := r.getServiceHealthStatus(gslb)
+	serviceHealth, err := r.getServiceHealthStatus(ctx, gslb)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
@@ -187,7 +187,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	s.End()
 
 	// == Status =
-	err = r.updateGslbStatus(gslb, dnsEndpoint)
+	err = r.updateGslbStatus(ctx, gslb, dnsEndpoint)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)

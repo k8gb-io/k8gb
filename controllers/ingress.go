@@ -48,9 +48,9 @@ func (r *GslbReconciler) createIngressFromGslb(gslb *k8gbv1beta1.Gslb) (*netv1.I
 	return ingress, err
 }
 
-func (r *GslbReconciler) saveDependentIngress(instance *k8gbv1beta1.Gslb, i *netv1.Ingress) error {
+func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8gbv1beta1.Gslb, i *netv1.Ingress) error {
 	found := &netv1.Ingress{}
-	err := r.Get(context.TODO(), types.NamespacedName{
+	err := r.Get(ctx, types.NamespacedName{
 		Name:      instance.Name,
 		Namespace: instance.Namespace,
 	}, found)
@@ -61,7 +61,7 @@ func (r *GslbReconciler) saveDependentIngress(instance *k8gbv1beta1.Gslb, i *net
 			Str("namespace", i.Namespace).
 			Str("ingress", i.Name).
 			Msg("Creating a new Ingress")
-		err = r.Create(context.TODO(), i)
+		err = r.Create(ctx, i)
 
 		if err != nil {
 			// Creation failed
@@ -83,7 +83,7 @@ func (r *GslbReconciler) saveDependentIngress(instance *k8gbv1beta1.Gslb, i *net
 	if !ingressEqual(found, i) {
 		found.Spec = i.Spec
 		utils.SetCommonGslbLabels(found)
-		err = r.Update(context.TODO(), found)
+		err = r.Update(ctx, found)
 		if errors.IsConflict(err) {
 			log.Info().
 				Str("namespace", found.Namespace).
