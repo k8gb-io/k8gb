@@ -1,0 +1,35 @@
+k8gb:
+  dnsZones:
+    - parentZone: "k8gb.io"
+      loadBalancedZone: "cloud.k8gb.io"
+      dnsZoneNegTTL: 30
+  edgeDNSServers:
+  - DNS_SERVER_TODO
+
+extdns:
+  enabled: true
+  provider:
+    name: google
+  domainFilters:
+  - k8gb.io
+  extraArgs:
+    # -- Specify the GCP project containing the Cloud DNS zones
+    google-project: "GCP_PROJECT_TODO"
+    # -- Filter to only zones with this visibility. Set to either 'public' or 'private'
+    google-zone-visibility: "public"
+  # -- For Workload Identity authentication (recommended for GKE)
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: "SERVICE_ACCOUNT_EMAIL_TODO"
+  # -- For static service account credentials (alternative to Workload Identity)
+  # env:
+  #   - name: GOOGLE_APPLICATION_CREDENTIALS
+  #     value: /etc/secrets/service-account/credentials.json
+  # extraVolumes:
+  #   - name: google-service-account
+  #     secret:
+  #       secretName: external-dns-gcp-sa
+  # extraVolumeMounts:
+  #   - name: google-service-account
+  #     mountPath: /etc/secrets/service-account/
+  #     readOnly: true
