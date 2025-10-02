@@ -32,12 +32,12 @@ import (
 	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
-func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb, ep *externaldnsApi.DNSEndpoint) error {
+func (r *GslbReconciler) updateGslbStatus(ctx context.Context, gslb *k8gbv1beta1.Gslb, ep *externaldnsApi.DNSEndpoint) error {
 
 	m.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
 
 	var err error
-	gslb.Status.HealthyRecords, err = r.getHealthyRecords(gslb)
+	gslb.Status.HealthyRecords, err = r.getHealthyRecords(ctx, gslb)
 	if err != nil {
 		return err
 	}
@@ -49,11 +49,11 @@ func (r *GslbReconciler) updateGslbStatus(gslb *k8gbv1beta1.Gslb, ep *externaldn
 
 	m.UpdateEndpointStatus(ep)
 
-	err = r.Status().Update(context.TODO(), gslb)
+	err = r.Status().Update(ctx, gslb)
 	return err
 }
 
-func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[string]k8gbv1beta1.HealthStatus, error) {
+func (r *GslbReconciler) getServiceHealthStatus(ctx context.Context, gslb *k8gbv1beta1.Gslb) (map[string]k8gbv1beta1.HealthStatus, error) {
 	serviceHealth := make(map[string]k8gbv1beta1.HealthStatus)
 	for _, server := range gslb.Status.Servers {
 		serviceHealth[server.Host] = k8gbv1beta1.NotFound
@@ -63,7 +63,7 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 				Namespace: svc.Namespace,
 				Name:      svc.Name,
 			}
-			err := r.Get(context.TODO(), finder, service)
+			err := r.Get(ctx, finder, service)
 			if err != nil {
 				if errors.IsNotFound(err) {
 					continue
@@ -72,7 +72,7 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 			}
 
 			endpoints := &discov1.EndpointSliceList{}
-			err = r.List(context.TODO(), endpoints, client.InNamespace(svc.Namespace), client.MatchingLabels{discov1.LabelServiceName: svc.Name})
+			err = r.List(ctx, endpoints, client.InNamespace(svc.Namespace), client.MatchingLabels{discov1.LabelServiceName: svc.Name})
 			if err != nil {
 				return serviceHealth, err
 			}
@@ -92,7 +92,7 @@ func (r *GslbReconciler) getServiceHealthStatus(gslb *k8gbv1beta1.Gslb) (map[str
 	return serviceHealth, nil
 }
 
-func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][]string, error) {
+func (r *GslbReconciler) getHealthyRecords(ctx context.Context, gslb *k8gbv1beta1.Gslb) (map[string][]string, error) {
 
 	dnsEndpoint := &externaldnsApi.DNSEndpoint{}
 
@@ -101,7 +101,7 @@ func (r *GslbReconciler) getHealthyRecords(gslb *k8gbv1beta1.Gslb) (map[string][
 		Namespace: gslb.Namespace,
 	}
 
-	err := r.Get(context.TODO(), nn, dnsEndpoint)
+	err := r.Get(ctx, nn, dnsEndpoint)
 	if err != nil {
 		return nil, err
 	}
