@@ -2,28 +2,14 @@
 <a href="#"><img src="https://raw.githubusercontent.com/cncf/artwork/master/projects/k8gb/icon/color/k8gb-icon-color.svg" width="200"/></a>
 </p>
 <h1 align="center" class="disable-logo" style="margin-top: 0;">K8GB - Kubernetes Global Balancer<a href="https://www.k8gb.io"></h1>
+
 <p align="center">
   <a href="https://landscape.cncf.io/?item=orchestration-management--coordination-service-discovery--k8gb">CNCF Sandbox Project</a> | 
   <a href="https://github.com/orgs/k8gb-io/projects/2/views/2">Roadmap</a> | 
   <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a> | 
-  <a href="https://github.com/k8gb-io/k8gb" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #24292e; color: white; border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 14px; vertical-align: middle;">
-    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-      <path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/>
-    </svg>
-    <span>Star</span>
-    <span id="star-count" style="background: rgba(255, 255, 255, 0.2); padding: 2px 6px; border-radius: 10px; font-size: 12px;">1k+</span>
-  </a>
+  <a href="https://github.com/k8gb-io/k8gb"><img src="https://img.shields.io/github/stars/k8gb-io/k8gb?style=social" alt="GitHub stars"></a>
 </p>
 
-<script>
-(function() {
-  fetch('https://api.github.com/repos/k8gb-io/k8gb')
-    .then(r => r.json())
-    .then(data => {
-      document.getElementById('star-count').textContent = data.stargazers_count >= 1000 ? (data.stargazers_count/1000).toFixed(1) + 'k' : data.stargazers_count;
-    }).catch(() => {});
-})();
-</script>
 [![License: Apache_2](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Golang lint, golic and test](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml)
 [![Terratest](https://github.com/k8gb-io/k8gb/actions/workflows/terratest.yaml/badge.svg)](https://github.com/k8gb-io/k8gb/actions/workflows/terratest.yaml)
