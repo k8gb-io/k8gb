@@ -377,7 +377,7 @@ compliant with the [in-toto Attestation Framework](https://in-toto.io/Statement/
 
 For signing the artifacts we use [`cosign`](https://github.com/sigstore/cosign) tool with:
 - **Private key**: Stored as repository secret (`COSIGN_PRIVATE_KEY`)
-- **Public key**: Available in [`cosign.pub`](./cosign.pub) file
+- **Public key**: Available in [`cosign.pub`](https://github.com/k8gb-io/k8gb/blob/master/cosign.pub) file
 - **Passphrase**: Stored as repository secret (`COSIGN_PASSWORD`)
 
 To regenerate signing keys:
