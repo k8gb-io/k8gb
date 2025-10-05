@@ -343,6 +343,92 @@ dig +trace failover.app.example.com
 kubectl get dnsendpoint -n k8gb
 ```
 
+## Local Testing with k3d
+
+You can test the GCP Cloud DNS integration locally using k3d clusters without provisioning actual GKE clusters.
+
+### Prerequisites
+
+1. **Local tools:**
+   - k3d >= 5.1.0
+   - kubectl
+   - helm
+   - gcloud CLI
+   - yq (install via `brew install yq`)
+
+2. **GCP setup:**
+   - A GCP project with Cloud DNS API enabled
+   - A Cloud DNS managed zone created
+   - Service account with `roles/dns.admin` and downloaded key file (credentials.json)
+
+### Quick Start
+
+```bash
+# Deploy local k3d clusters with GCP Cloud DNS provider
+make deploy-gcp-local-setup \
+  GCP_PROJECT=my-project-id \
+  GCP_DOMAIN=k8gb-test.io \
+  GCP_CREDENTIALS_FILE=credentials.json
+```
+
+This command will:
+- Create two k3d clusters (test-gslb1, test-gslb2) with geo tags
+- Generate values configuration from the template
+- Deploy K8GB with GCP Cloud DNS provider
+- Create Kubernetes secrets with GCP credentials
+- Configure external-dns to manage records in your Cloud DNS zone
+
+### Verification
+
+```bash
+# Check that NS delegation records were created in Cloud DNS
+gcloud dns record-sets list --zone="k8gb-test-io" --filter="type=NS"
+
+# Expected output should show NS records for k3d-test.k8gb-test.io
+
+# Check glue A records for CoreDNS nameservers
+gcloud dns record-sets list --zone="k8gb-test-io" --filter="type=A"
+
+# Expected output should show A records like:
+# gslb-ns-eu-cloud.k8gb-test.io.  -> <coredns-ip>
+# gslb-ns-us-cloud.k8gb-test.io.  -> <coredns-ip>
+
+# Test DNS resolution through Google's public DNS
+dig @8.8.8.8 k3d-test.k8gb-test.io NS
+```
+
+### Cleanup
+
+```bash
+# Destroy local k3d clusters
+make destroy-full-local-setup
+```
+
+**Note:** DNS records may remain in Cloud DNS after cleanup. Remove them manually if needed:
+
+```bash
+# List all records in your zone
+gcloud dns record-sets list --zone="k8gb-test-io"
+
+# Delete specific test records
+gcloud dns record-sets delete k3d-test.k8gb-test.io. \
+  --zone="k8gb-test-io" --type=NS
+```
+
+### Alternative: Using VALUES_YAML Override
+
+If you prefer to customize the configuration beyond the command-line parameters, you can edit the reference values file directly:
+
+```bash
+# Edit dns-provider-test/gcp/values.yaml with your GCP project and domain
+vim dns-provider-test/gcp/values.yaml
+
+# Deploy using the values file directly
+VALUES_YAML=dns-provider-test/gcp/values.yaml \
+K8GB_LOCAL_VERSION=test \
+make deploy-full-local-setup
+```
+
 ## Best Practices
 
 ### DNS Configuration
@@ -373,18 +459,18 @@ kubectl get dnsendpoint -n k8gb
 
 ## Examples
 
-Complete working examples are available in the [docs/examples/gcp](../examples/gcp/) directory:
+Complete working examples are available in the [docs/examples/gcp](examples/gcp/README.md) directory:
 
-- [k8gb-cluster-gcp-europe-west1.yaml](../examples/gcp/k8gb-cluster-gcp-europe-west1.yaml)
-- [k8gb-cluster-gcp-us-central1.yaml](../examples/gcp/k8gb-cluster-gcp-us-central1.yaml)
-- [test-gslb-failover.yaml](../examples/gcp/test-gslb-failover.yaml)
-- [test-gslb-roundrobin.yaml](../examples/gcp/test-gslb-roundrobin.yaml)
+- [k8gb-cluster-gcp-europe-west1.yaml](examples/gcp/k8gb-cluster-gcp-europe-west1.yaml)
+- [k8gb-cluster-gcp-us-central1.yaml](examples/gcp/k8gb-cluster-gcp-us-central1.yaml)
+- [test-gslb-failover.yaml](examples/gcp/test-gslb-failover.yaml)
+- [test-gslb-roundrobin.yaml](examples/gcp/test-gslb-roundrobin.yaml)
 
-See the [README](../examples/gcp/README.md) in the examples directory for a complete setup walkthrough.
+See the [README](examples/gcp/README.md) in the examples directory for a complete setup walkthrough.
 
 ## References
 
 - [Google Cloud DNS Documentation](https://cloud.google.com/dns/docs)
 - [External-DNS Google Provider](https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/gke/)
 - [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
-- [K8GB Architecture Documentation](../intro.md)
+- [K8GB Architecture Documentation](intro.md)

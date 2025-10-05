@@ -16,7 +16,7 @@ tags
 chart/k8gb/charts/*.tgz
 
 # Generated test configuration files
-deploy/helm/gcp-generated.yaml
+dns-provider-test/gcp/values-generated.yaml
 
 # OLM
 /olm/bundle
