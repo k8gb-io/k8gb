@@ -3,12 +3,13 @@
 </p>
 <h1 align="center" class="disable-logo" style="margin-top: 0;">K8GB - Kubernetes Global Balancer<a href="https://www.k8gb.io"></h1>
 
+
 <p align="center">
   <a href="https://landscape.cncf.io/?item=orchestration-management--coordination-service-discovery--k8gb">CNCF Sandbox Project</a> | 
   <a href="https://github.com/orgs/k8gb-io/projects/2/views/2">Roadmap</a> | 
-  <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a> | 
-  <a href="https://github.com/k8gb-io/k8gb"><img src="https://img.shields.io/github/stars/k8gb-io/k8gb?style=social" alt="GitHub stars"></a>
+  <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a> 
 </p>
+
 
 [![License: Apache_2](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Golang lint, golic and test](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml)
@@ -23,6 +24,7 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4866/badge)](https://bestpractices.coreinfrastructure.org/projects/4866)
 [![CLOMonitor](https://img.shields.io/endpoint?url=https://clomonitor.io/api/projects/cncf/k8gb/badge)](https://clomonitor.io/projects/cncf/k8gb)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/k8gb-io/k8gb/badge)](https://securityscorecards.dev/viewer/?uri=github.com/k8gb-io/k8gb)
+
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
