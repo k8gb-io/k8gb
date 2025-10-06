@@ -44,9 +44,9 @@ nav:
   - Community:
     - Contributing: CONTRIBUTING.md
     - Adopters: ADOPTERS.md
-
 theme:
   name: material
+  custom_dir: overrides  
   logo: images/k8gb-icon-color.svg
   favicon: images/k8gb-icon-color.svg
   palette:
@@ -96,3 +96,5 @@ plugins:
   - mkdocs-simple-hooks:
       hooks:
         on_page_markdown: "docs.link_fixer:fix_links"
+extra_css:
+  - stylesheets/extra.css
