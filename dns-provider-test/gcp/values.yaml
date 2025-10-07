@@ -1,0 +1,38 @@
+k8gb:
+  dnsZones:
+    - parentZone: "k8gb-test.io"  # Replace with your Cloud DNS zone name
+      loadBalancedZone: "k3d-test.k8gb-test.io"  # Subdomain for load-balanced zone
+      dnsZoneNegTTL: 30
+  edgeDNSServers:
+  - "8.8.8.8"  # Replace with your Cloud DNS nameserver if needed
+
+extdns:
+  enabled: true
+  provider:
+    name: google
+  domainFilters:
+  - k8gb-test.io  # Replace with your Cloud DNS zone name
+
+  # For GKE with Workload Identity (recommended):
+  # Uncomment and configure these lines:
+  # serviceAccount:
+  #   annotations:
+  #     iam.gke.io/gcp-service-account: "k8gb-external-dns@YOUR_PROJECT.iam.gserviceaccount.com"
+
+  # For static credentials (k3d/local clusters):
+  # Use these settings (default):
+  env:
+  - name: GOOGLE_APPLICATION_CREDENTIALS
+    value: /etc/secrets/service-account/credentials.json
+  extraVolumes:
+  - name: google-service-account
+    secret:
+      secretName: external-dns-gcp-sa
+  extraVolumeMounts:
+  - name: google-service-account
+    mountPath: /etc/secrets/service-account/
+    readOnly: true
+
+  extraArgs:
+    google-project: "gcp_project_replace_me"  # Replace with your GCP project ID
+    google-zone-visibility: "public"

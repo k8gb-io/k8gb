@@ -15,6 +15,9 @@ tags
 # Helm charts
 chart/k8gb/charts/*.tgz
 
+# Generated test configuration files
+dns-provider-test/gcp/values-generated.yaml
+
 # OLM
 /olm/bundle
 /olm/olm-bundle

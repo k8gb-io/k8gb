@@ -12,10 +12,11 @@ nav:
   - Components: components.md
   - Load Balancing Strategy: strategy.md
   - DNS Providers:
-    - Infoblox: deploy_infoblox.md
-    - Route53: deploy_route53.md
-    - NS1: deploy_ns1.md
+    - AWS Route53: deploy_route53.md
     - Azure DNS: deploy_azuredns.md
+    - Google Cloud DNS: provider_gcp.md
+    - Infoblox: deploy_infoblox.md
+    - NS1: deploy_ns1.md
     - Windows DNS: deploy_windowsdns.md
     - Cloudflare: deploy_cloudflare.md
     - RFC2136/Bind9: provider_rfc2136.md

@@ -64,6 +64,11 @@ DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
 GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
 
+# GCP Cloud DNS testing variables
+GCP_PROJECT ?=
+GCP_DOMAIN ?=
+GCP_CREDENTIALS_FILE ?=
+
 ifndef NO_COLOR
 YELLOW=\033[0;33m
 CYAN=\033[1;36m
@@ -140,6 +145,25 @@ deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster s
 
 	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
 	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=$(FULL_LOCAL_SETUP_WITH_APPS)
+
+.PHONY: deploy-gcp-local-setup
+deploy-gcp-local-setup: ## Deploy local setup with GCP Cloud DNS (requires GCP_PROJECT, GCP_DOMAIN, GCP_CREDENTIALS_FILE)
+	@if [ -z "$(GCP_PROJECT)" ] || [ -z "$(GCP_DOMAIN)" ] || [ -z "$(GCP_CREDENTIALS_FILE)" ]; then \
+		echo -e "$(RED)Usage: make deploy-gcp-local-setup GCP_PROJECT=my-project GCP_DOMAIN=example.com GCP_CREDENTIALS_FILE=/path/to/creds.json$(NC)" ;\
+		echo -e "$(RED)Make sure you have:$(NC)" ;\
+		echo -e "$(RED)  1. A Cloud DNS managed zone for $(GCP_DOMAIN)$(NC)" ;\
+		echo -e "$(RED)  2. Service account with dns.admin permissions$(NC)" ;\
+		echo -e "$(RED)  3. yq installed (brew install yq)$(NC)" ;\
+		exit 1 ;\
+	fi
+	@echo -e "\n$(YELLOW)Updating values.yaml with GCP configuration$(NC)"
+	@yq eval '.k8gb.dnsZones[0].parentZone = "$(GCP_DOMAIN)"' dns-provider-test/gcp/values.yaml | \
+	 yq eval '.k8gb.dnsZones[0].loadBalancedZone = "k3d-test.$(GCP_DOMAIN)"' | \
+	 yq eval '.extdns.domainFilters[0] = "$(GCP_DOMAIN)"' | \
+	 yq eval '.extdns.extraArgs.google-project = "$(GCP_PROJECT)"' \
+	 > dns-provider-test/gcp/values-generated.yaml
+	@echo -e "$(CYAN)Generated dns-provider-test/gcp/values-generated.yaml$(NC)"
+	GCP_CREDENTIALS_FILE=$(GCP_CREDENTIALS_FILE) VALUES_YAML=dns-provider-test/gcp/values-generated.yaml K8GB_LOCAL_VERSION=test DEPLOY_APPS=false $(MAKE) deploy-full-local-setup
 
 .PHONY: deploy-stable-version
 deploy-stable-version:
@@ -267,8 +291,7 @@ upgrade-candidate: release-images deploy-test-version
 .PHONY: deploy-k8gb-with-helm
 deploy-k8gb-with-helm:
 	@if [ -z "$(CLUSTER_ID)" ]; then echo invalid CLUSTER_ID value && exit 1; fi
-	# create rfc2136 secret
-	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
+	$(call setup-dns-provider-secrets,$(CLUSTER_ID))
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
 	# Deletion of the coredns service is needed because of the bug below
@@ -299,6 +322,7 @@ destroy-full-local-setup: ## Destroy full local multicluster setup
 	@for c in $(CLUSTER_IDS); do \
 		k3d cluster delete $(CLUSTER_NAME)$$c ;\
 	done
+	@rm -f dns-provider-test/gcp/values-generated.yaml
 
 .PHONY: deploy-prometheus
 deploy-prometheus:
@@ -666,4 +690,10 @@ endef
 # by releases the content would be moved into get-helm-args
 define get-next-args
 $(if $(filter ./chart/k8gb,$(1)),--set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$2)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$2)')
+endef
+
+define setup-dns-provider-secrets
+	echo -e "\n$(YELLOW)Setting up DNS provider secrets$(NC)"
+	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
+	[ -n "$(GCP_CREDENTIALS_FILE)" ] && kubectl -n k8gb create secret generic external-dns-gcp-sa --from-file=credentials.json=$(GCP_CREDENTIALS_FILE) || true
 endef
