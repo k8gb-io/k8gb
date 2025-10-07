@@ -89,6 +89,10 @@
          <lastmod>2025-10-07</lastmod>
     </url>
     <url>
+         <loc>https://k8gb.io/provider_gcp/</loc>
+         <lastmod>2025-10-07</lastmod>
+    </url>
+    <url>
          <loc>https://k8gb.io/provider_rfc2136/</loc>
          <lastmod>2025-10-07</lastmod>
     </url>
@@ -126,6 +130,10 @@
     </url>
     <url>
          <loc>https://k8gb.io/examples/crossplane/globalapp/</loc>
+         <lastmod>2025-10-07</lastmod>
+    </url>
+    <url>
+         <loc>https://k8gb.io/examples/gcp/</loc>
          <lastmod>2025-10-07</lastmod>
     </url>
 </urlset>

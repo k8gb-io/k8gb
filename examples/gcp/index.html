@@ -10,28 +10,24 @@
       
       
       
-        <link rel="canonical" href="https://k8gb.io/resource_ref/">
+        <link rel="canonical" href="https://k8gb.io/examples/gcp/">
       
       
-        <link rel="prev" href="../ingress_annotations/">
       
       
-        <link rel="next" href="../address_discovery/">
-      
-      
-      <link rel="icon" href="../images/k8gb-icon-color.svg">
+      <link rel="icon" href="../../images/k8gb-icon-color.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
     
     
       
-        <title>Resource References - K8GB - Kubernetes Global Balancer</title>
+        <title>K8GB with Google Cloud DNS - Example - K8GB - Kubernetes Global Balancer</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.2a3383ac.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -50,9 +46,9 @@
       
     
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gslb-resourceref-support" class="md-skip">
+        <a href="#k8gb-with-google-cloud-dns-example" class="md-skip">
           Skip to content
         </a>
       
@@ -94,9 +90,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="K8GB - Kubernetes Global Balancer" class="md-header__button md-logo" aria-label="K8GB - Kubernetes Global Balancer" data-md-component="logo">
+    <a href="../.." title="K8GB - Kubernetes Global Balancer" class="md-header__button md-logo" aria-label="K8GB - Kubernetes Global Balancer" data-md-component="logo">
       
-  <img src="../images/k8gb-icon-color.svg" alt="logo">
+  <img src="../../images/k8gb-icon-color.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -113,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Resource References
+              K8GB with Google Cloud DNS - Example
             
           </span>
         </div>
@@ -251,9 +247,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="K8GB - Kubernetes Global Balancer" class="md-nav__button md-logo" aria-label="K8GB - Kubernetes Global Balancer" data-md-component="logo">
+    <a href="../.." title="K8GB - Kubernetes Global Balancer" class="md-nav__button md-logo" aria-label="K8GB - Kubernetes Global Balancer" data-md-component="logo">
       
-  <img src="../images/k8gb-icon-color.svg" alt="logo">
+  <img src="../../images/k8gb-icon-color.svg" alt="logo">
 
     </a>
     K8GB - Kubernetes Global Balancer
@@ -293,7 +289,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -315,7 +311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../intro/" class="md-nav__link">
+      <a href="../../intro/" class="md-nav__link">
         
   
   
@@ -337,7 +333,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/" class="md-nav__link">
+      <a href="../../tutorials/" class="md-nav__link">
         
   
   
@@ -359,7 +355,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../components/" class="md-nav__link">
+      <a href="../../components/" class="md-nav__link">
         
   
   
@@ -381,7 +377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../strategy/" class="md-nav__link">
+      <a href="../../strategy/" class="md-nav__link">
         
   
   
@@ -448,7 +444,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy_route53/" class="md-nav__link">
+      <a href="../../deploy_route53/" class="md-nav__link">
         
   
   
@@ -471,7 +467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy_azuredns/" class="md-nav__link">
+      <a href="../../deploy_azuredns/" class="md-nav__link">
         
   
   
@@ -494,7 +490,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../provider_gcp/" class="md-nav__link">
+      <a href="../../provider_gcp/" class="md-nav__link">
         
   
   
@@ -517,7 +513,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy_infoblox/" class="md-nav__link">
+      <a href="../../deploy_infoblox/" class="md-nav__link">
         
   
   
@@ -540,7 +536,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy_ns1/" class="md-nav__link">
+      <a href="../../deploy_ns1/" class="md-nav__link">
         
   
   
@@ -563,7 +559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy_windowsdns/" class="md-nav__link">
+      <a href="../../deploy_windowsdns/" class="md-nav__link">
         
   
   
@@ -586,7 +582,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy_cloudflare/" class="md-nav__link">
+      <a href="../../deploy_cloudflare/" class="md-nav__link">
         
   
   
@@ -609,7 +605,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../provider_rfc2136/" class="md-nav__link">
+      <a href="../../provider_rfc2136/" class="md-nav__link">
         
   
   
@@ -684,7 +680,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../local/" class="md-nav__link">
+      <a href="../../local/" class="md-nav__link">
         
   
   
@@ -707,7 +703,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../local-kuar/" class="md-nav__link">
+      <a href="../../local-kuar/" class="md-nav__link">
         
   
   
@@ -782,7 +778,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../metrics/" class="md-nav__link">
+      <a href="../../metrics/" class="md-nav__link">
         
   
   
@@ -805,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../traces/" class="md-nav__link">
+      <a href="../../traces/" class="md-nav__link">
         
   
   
@@ -832,8 +828,6 @@
       
   
   
-    
-  
   
   
     
@@ -846,11 +840,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
@@ -866,7 +862,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             Configuration
@@ -880,7 +876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ingress_annotations/" class="md-nav__link">
+      <a href="../../ingress_annotations/" class="md-nav__link">
         
   
   
@@ -900,32 +896,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Resource References
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../resource_ref/" class="md-nav__link">
         
   
   
@@ -936,53 +910,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#1-declaration-by-name" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Declaration by Name
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-declaration-by-label" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Declaration by Label
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-embedded-declaration-legacy" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Embedded Declaration (Legacy)
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -995,7 +922,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../address_discovery/" class="md-nav__link">
+      <a href="../../address_discovery/" class="md-nav__link">
         
   
   
@@ -1018,7 +945,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dynamic_geotags/" class="md-nav__link">
+      <a href="../../dynamic_geotags/" class="md-nav__link">
         
   
   
@@ -1041,7 +968,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../multizone/" class="md-nav__link">
+      <a href="../../multizone/" class="md-nav__link">
         
   
   
@@ -1064,7 +991,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../exposing_dns/" class="md-nav__link">
+      <a href="../../exposing_dns/" class="md-nav__link">
         
   
   
@@ -1139,7 +1066,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../admiralty/" class="md-nav__link">
+      <a href="../../admiralty/" class="md-nav__link">
         
   
   
@@ -1162,7 +1089,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../liqo/" class="md-nav__link">
+      <a href="../../liqo/" class="md-nav__link">
         
   
   
@@ -1185,7 +1112,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rancher/" class="md-nav__link">
+      <a href="../../rancher/" class="md-nav__link">
         
   
   
@@ -1208,7 +1135,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/crossplane/globalapp/" class="md-nav__link">
+      <a href="../crossplane/globalapp/" class="md-nav__link">
         
   
   
@@ -1283,7 +1210,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../service_upgrade/" class="md-nav__link">
+      <a href="../../service_upgrade/" class="md-nav__link">
         
   
   
@@ -1306,7 +1233,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../wrr_caveats/" class="md-nav__link">
+      <a href="../../wrr_caveats/" class="md-nav__link">
         
   
   
@@ -1329,7 +1256,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../proxy_externaldns/" class="md-nav__link">
+      <a href="../../proxy_externaldns/" class="md-nav__link">
         
   
   
@@ -1404,7 +1331,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../CONTRIBUTING/" class="md-nav__link">
+      <a href="../../CONTRIBUTING/" class="md-nav__link">
         
   
   
@@ -1427,7 +1354,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ADOPTERS/" class="md-nav__link">
+      <a href="../../ADOPTERS/" class="md-nav__link">
         
   
   
@@ -1466,7 +1393,7 @@
 
 
   
-    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/resource_ref.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/examples/gcp/README.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1474,66 +1401,110 @@
   
 
 
-<h1 id="gslb-resourceref-support">GSLB ResourceRef Support<a class="headerlink" href="#gslb-resourceref-support" title="Permanent link">&para;</a></h1>
-<p>Starting from v0.15.0, k8gb introduces a much simpler way to link a GSLB resource to an Ingress object in Kubernetes. You no longer need to duplicate the Ingress configuration in your GSLB definition—instead, you can simply reference an existing Ingress. 
-This makes your Ingress the single source of truth for application routing.</p>
-<h2 id="1-declaration-by-name">1. Declaration by Name<a class="headerlink" href="#1-declaration-by-name" title="Permanent link">&para;</a></h2>
-<p>The simplest way is to directly specify the name of the Ingress you want to reference in your GSLB. The namespace will be automatically taken from the GSLB’s namespace.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb.absa.oss/v1beta1</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gslb</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playground-failover</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">resourceRef</span><span class="p">:</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playground-failover-ingress</span>
-</code></pre></div>
-<h2 id="2-declaration-by-label">2. Declaration by Label<a class="headerlink" href="#2-declaration-by-label" title="Permanent link">&para;</a></h2>
-<p>Alternatively, you can reference the Ingress by label. This approach is useful when you need more flexibility—for example, 
-in CI/CD pipelines. It is required that only one Ingress in the namespace matches the label; otherwise, k8gb will return 
-an error.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb.absa.oss/v1beta1</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gslb</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playground-failover</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">resourceRef</span><span class="p">:</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playground-failover</span>
-</code></pre></div>
-<h2 id="3-embedded-declaration-legacy">3. Embedded Declaration (Legacy)<a class="headerlink" href="#3-embedded-declaration-legacy" title="Permanent link">&para;</a></h2>
-<p>For backward compatibility, you can still use the original way where the Ingress configuration is embedded directly inside the GSLB resource. This method will continue to work, but we recommend switching to reference-based configuration for simpler management and to avoid configuration drift.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb.absa.oss/v1beta1</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gslb</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failover-playground-embedded</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">rules</span><span class="p">:</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failover-playground-embedded.cloud.example.com</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="nt">http</span><span class="p">:</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">          </span><span class="nt">paths</span><span class="p">:</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">              </span><span class="nt">service</span><span class="p">:</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frontend-podinfo</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">                </span><span class="nt">port</span><span class="p">:</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failover</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">    </span><span class="nt">dnsTtlSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">    </span><span class="nt">primaryGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eu&quot;</span>
-</code></pre></div>
+<h1 id="k8gb-with-google-cloud-dns-example">K8GB with Google Cloud DNS - Example<a class="headerlink" href="#k8gb-with-google-cloud-dns-example" title="Permanent link">&para;</a></h1>
+<p>This example demonstrates how to configure K8GB with Google Cloud DNS across two GKE clusters in different regions.</p>
 <blockquote>
-<p><strong>Note:</strong>
-If the Ingress is created automatically by a GSLB resource, in addition to an ownerReference, it will also be marked with the label:
-<code>app.k8gb.io/managed-by: gslb</code>. This makes it easy to identify Ingresses managed by k8gb.</p>
+<p><strong>📖 For detailed setup instructions, architecture explanation, and troubleshooting, see <a href="../../provider_gcp/">Google Cloud DNS Provider Documentation</a></strong></p>
 </blockquote>
+<h2 id="quick-overview">Quick Overview<a class="headerlink" href="#quick-overview" title="Permanent link">&para;</a></h2>
+<p>This example deploys K8GB across two GKE clusters:
+- <strong>Primary cluster</strong>: <code>europe-west1</code> (failover primary)
+- <strong>Secondary cluster</strong>: <code>us-central1</code> (failover secondary)
+- <strong>DNS Zone</strong>: <code>gcp-test.k8gb.io</code> (load-balanced zone hosted by CoreDNS)
+- <strong>Parent Zone</strong>: <code>k8gb.io</code> (Cloud DNS managed zone for delegation)</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Two GKE clusters in different regions with Workload Identity enabled</li>
+<li>A Cloud DNS managed zone (see <a href="../../provider_gcp/#prerequisites">provider_gcp.md - Prerequisites</a>)</li>
+<li>Service account with <code>roles/dns.admin</code> (see <a href="../../provider_gcp/#authentication-methods">provider_gcp.md - Authentication</a>)</li>
+</ol>
+<h2 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Deploy K8GB on the first cluster:</strong>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Configure kubectl for europe-west1 cluster</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>get-credentials<span class="w"> </span>my-cluster-eu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>--region<span class="o">=</span>europe-west1<span class="w"> </span>--project<span class="o">=</span>my-gke-project
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Install K8GB</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span>--namespace<span class="o">=</span>k8gb<span class="w"> </span>--create-namespace<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>--values<span class="o">=</span>k8gb-cluster-gcp-europe-west1.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Deploy K8GB on the second cluster:</strong>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Configure kubectl for us-central1 cluster</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>get-credentials<span class="w"> </span>my-cluster-us<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--region<span class="o">=</span>us-central1<span class="w"> </span>--project<span class="o">=</span>my-gke-project
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Install K8GB</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span>--namespace<span class="o">=</span>k8gb<span class="w"> </span>--create-namespace<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span>--values<span class="o">=</span>k8gb-cluster-gcp-us-central1.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Deploy test application and GSLB resources:</strong>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Create test namespace (do this on both clusters)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>../../../deploy/crds/test-namespace-ingress.yaml
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Deploy podinfo via Helm (do this on both clusters)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>podinfo<span class="w"> </span>https://stefanprodan.github.io/podinfo
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>frontend<span class="w"> </span>--namespace<span class="w"> </span>test-gslb<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span>-f<span class="w"> </span>../../../deploy/test-apps/podinfo/podinfo-values.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span>--set<span class="w"> </span>ui.message<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>kubectl<span class="w"> </span>config<span class="w"> </span>current-context<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span>podinfo/podinfo<span class="w"> </span>--version<span class="w"> </span><span class="m">6</span>.9.2
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1"># Apply GSLB configurations (do this on both clusters)</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>test-gslb-failover.yaml
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>test-gslb-roundrobin.yaml
+</code></pre></div></p>
+</li>
+</ol>
+<h2 id="configuration-files">Configuration Files<a class="headerlink" href="#configuration-files" title="Permanent link">&para;</a></h2>
+<p>This example includes:
+- <code>k8gb-cluster-gcp-europe-west1.yaml</code> - Configuration for EU cluster
+- <code>k8gb-cluster-gcp-us-central1.yaml</code> - Configuration for US cluster
+- <code>test-gslb-failover.yaml</code> - Failover strategy example
+- <code>test-gslb-roundrobin.yaml</code> - Round-robin strategy example</p>
+<h3 id="key-configuration-notes">Key Configuration Notes<a class="headerlink" href="#key-configuration-notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Workload Identity</strong>: Configured by default in the example YAML files</li>
+<li><strong>Static Credentials</strong>: Commented out alternative (uncomment env/volumes sections if needed)</li>
+<li><strong>Cross-Project Setup</strong>: Use <code>extraArgs.google-project</code> if DNS zone is in a different project</li>
+<li><strong>Geo Tags</strong>: Must be unique per cluster (<code>europe-west1</code>, <code>us-central1</code>)</li>
+<li><strong>TXT Ownership</strong>: Each cluster needs unique <code>txtPrefix</code> and <code>txtOwnerId</code></li>
+</ul>
+<p>See <a href="../../provider_gcp/">provider_gcp.md</a> for detailed configuration parameters.</p>
+<h2 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Check K8GB status</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span>-n<span class="w"> </span>test-gslb
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>kubectl<span class="w"> </span>describe<span class="w"> </span>gslb<span class="w"> </span>test-gslb-failover<span class="w"> </span>-n<span class="w"> </span>test-gslb
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># Verify NS delegation records in Cloud DNS</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>gcloud<span class="w"> </span>dns<span class="w"> </span>record-sets<span class="w"> </span>list<span class="w"> </span>--zone<span class="o">=</span><span class="s2">&quot;k8gb-io&quot;</span><span class="w"> </span>--filter<span class="o">=</span><span class="s2">&quot;name~&#39;gcp-test.k8gb.io&#39;&quot;</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="c1"># Test DNS resolution</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>nslookup<span class="w"> </span>failover.gcp-test.k8gb.io<span class="w"> </span><span class="m">8</span>.8.8.8
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>nslookup<span class="w"> </span>roundrobin.gcp-test.k8gb.io<span class="w"> </span><span class="m">8</span>.8.8.8
+</code></pre></div>
+<p><strong>For detailed verification steps and troubleshooting, see:</strong>
+- <a href="../../provider_gcp/#verification">Verification</a>
+- <a href="../../provider_gcp/#monitoring-and-troubleshooting">Troubleshooting</a></p>
+<h2 id="testing-failover">Testing Failover<a class="headerlink" href="#testing-failover" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Scale down the primary cluster application</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>kubectl<span class="w"> </span>scale<span class="w"> </span>deployment<span class="w"> </span>frontend-podinfo<span class="w"> </span>--replicas<span class="o">=</span><span class="m">0</span><span class="w"> </span>-n<span class="w"> </span>test-gslb
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Wait for health check to detect failure (~30-60 seconds)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># Verify DNS now points to secondary cluster</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>nslookup<span class="w"> </span>failover.gcp-test.k8gb.io<span class="w"> </span><span class="m">8</span>.8.8.8
+</code></pre></div>
+<h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../provider_gcp/">Google Cloud DNS Provider Documentation</a> - Complete reference</li>
+<li><a href="../../intro/">K8GB Introduction</a> - How K8GB works</li>
+</ul>
 
 
 
@@ -1556,7 +1527,7 @@ If the Ingress is created automatically by a GSLB resource, in addition to an ow
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 29, 2025 13:21:18 UTC">May 29, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2025 08:36:23 UTC">October 7, 2025</span>
   </span>
 
     
@@ -1566,7 +1537,7 @@ If the Ingress is created automatically by a GSLB resource, in addition to an ow
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 29, 2025 13:21:18 UTC">May 29, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2025 08:36:23 UTC">October 7, 2025</span>
   </span>
 
     
@@ -1620,10 +1591,10 @@ If the Ingress is created automatically by a GSLB resource, in addition to an ow
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.code.copy", "content.action.edit", "toc.integrate"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.code.copy", "content.action.edit", "toc.integrate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
       
     
   </body>
