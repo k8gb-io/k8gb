@@ -99,3 +99,7 @@ plugins:
         on_page_markdown: "docs.link_fixer:fix_links"
 extra_css:
   - stylesheets/extra.css
+extra:
+  palette:
+    scheme: default
+copyright: © 2025 The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/legal/trademark-usage">Trademark Usage</a> page.
