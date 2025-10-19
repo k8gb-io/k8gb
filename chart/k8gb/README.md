@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.15.0](https://img.shields.io/badge/Version-v0.15.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.15.0](https://img.shields.io/badge/AppVersion-v0.15.0-informational?style=flat-square)
+![Version: v0.16.0](https://img.shields.io/badge/Version-v0.16.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.16.0](https://img.shields.io/badge/AppVersion-v0.16.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -38,15 +38,16 @@ Kubernetes: `>= 1.21.0-0`
 | https://coredns.github.io/helm | coredns | 1.44.3 |
 | https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.19.0 |
 
-For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
+#### Tested Environment Configurations:
 
-#### Compatibility matrix:
+| Type                             | Implementation                                                |
+|----------------------------------|---------------------------------------------------------------|
+| Kubernetes Version               | >= 1.21                                                       |
+| Environment                      | Any conformant Kubernetes cluster on-prem or in cloud         |
+| Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller                    |
+| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                  |
 
-| k8gb                           |      <= 0.8.x      | >= 0.9.0           |
-| ------------------------------ | :----------------: | :----------------: |
-| Kubernetes <= 1.18             | :white_check_mark: |        :x:         |
-| Kubernetes >= 1.19 and <= 1.21 | :white_check_mark: | :white_check_mark: |
-| Kubernetes >= 1.22             |        :x:         | :white_check_mark: |
+Note: k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller. The table above lists solutions where we have tested and verified k8gb installation.
 
 ## Values
 
