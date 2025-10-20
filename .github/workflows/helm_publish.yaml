@@ -4,6 +4,12 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish (e.g., v0.16.0)'
+        required: true
+        type: string
 permissions:
   contents: read
 
@@ -19,12 +25,17 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
       - uses: dave-mcconnell/helm-gh-pages-microservices@8478af5f0fd712cc0fb59f2c99e0688f3f591287
         with:
           access-token: ${{ secrets.CR_TOKEN }}
           source-charts-folder: 'chart'
           destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
+
+      - name: Package Helm Chart
+        run: |
+          helm package chart/k8gb --version $(make version)
 
       - name: Push to OCI Registry
         run: |
