@@ -40,7 +40,7 @@ jobs:
           ls -la charts/
           for chart in charts/k8gb-*.tgz; do
             if [ -f "$chart" ]; then
-              helm push "$chart" oci://ghcr.io/k8gb-io/charts
+              helm push "$chart" "oci://ghcr.io/k8gb-io/charts"
             fi
           done
 
