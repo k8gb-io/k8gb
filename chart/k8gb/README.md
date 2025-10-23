@@ -35,19 +35,18 @@ Kubernetes: `>= 1.21.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://coredns.github.io/helm | coredns | 1.44.3 |
+| https://coredns.github.io/helm | coredns | 1.45.0 |
 | https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.19.0 |
 
-#### Tested Environment Configurations:
+For Kubernetes `< 1.19` use this chart and k8gb in version `0.8.8` or lower.
 
-| Type                             | Implementation                                                |
-|----------------------------------|---------------------------------------------------------------|
-| Kubernetes Version               | >= 1.21                                                       |
-| Environment                      | Any conformant Kubernetes cluster on-prem or in cloud         |
-| Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller                    |
-| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                  |
+#### Compatibility matrix:
 
-Note: k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller. The table above lists solutions where we have tested and verified k8gb installation.
+| k8gb                           |      <= 0.8.x      | >= 0.9.0           |
+| ------------------------------ | :----------------: | :----------------: |
+| Kubernetes <= 1.18             | :white_check_mark: |        :x:         |
+| Kubernetes >= 1.19 and <= 1.21 | :white_check_mark: | :white_check_mark: |
+| Kubernetes >= 1.22             |        :x:         | :white_check_mark: |
 
 ## Values
 
