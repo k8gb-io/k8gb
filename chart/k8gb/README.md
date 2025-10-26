@@ -35,7 +35,7 @@ Kubernetes: `>= 1.21.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://coredns.github.io/helm | coredns | 1.44.3 |
+| https://coredns.github.io/helm | coredns | 1.45.0 |
 | https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.19.0 |
 
 #### Tested Environment Configurations:
@@ -45,7 +45,7 @@ Kubernetes: `>= 1.21.0-0`
 | Kubernetes Version               | >= 1.21                                                       |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud         |
 | Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller                    |
-| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                  |
+| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS   |
 
 Note: k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller. The table above lists solutions where we have tested and verified k8gb installation.
 
