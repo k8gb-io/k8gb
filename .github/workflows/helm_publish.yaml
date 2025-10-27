@@ -17,7 +17,7 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     env:
-      OCI_REPO: oci://ghcr.io/itsfarhan/charts
+      OCI_REPO: oci://ghcr.io/k8gb-io/charts
 
     steps:
       - name: Harden Runner
@@ -33,7 +33,7 @@ jobs:
         with:
           access-token: ${{ secrets.CR_TOKEN }}
           source-charts-folder: "chart"
-          destination-repo: itsfarhan/k8gb
+          destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
 
       - name: Push to OCI Registry
@@ -42,7 +42,7 @@ jobs:
           git fetch origin gh-pages
           git checkout origin/gh-pages -- charts/
           ls -la charts/
-          OCI_REPO="${OCI_REPO:-oci://ghcr.io/itsfarhan/charts}"
+          OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
           for chart in charts/k8gb-*.tgz; do
             if [ -f "$chart" ]; then
               helm push "$chart" "$OCI_REPO"
