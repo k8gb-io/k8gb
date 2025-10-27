@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to publish (e.g., v0.16.0)"
+        description: 'Release tag to publish (e.g., v0.16.0)'
         required: true
         type: string
 permissions:
@@ -16,8 +16,6 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    env:
-      OCI_REPO: oci://ghcr.io/k8gb-io/charts
 
     steps:
       - name: Harden Runner
@@ -32,7 +30,7 @@ jobs:
       - uses: dave-mcconnell/helm-gh-pages-microservices@8478af5f0fd712cc0fb59f2c99e0688f3f591287
         with:
           access-token: ${{ secrets.CR_TOKEN }}
-          source-charts-folder: "chart"
+          source-charts-folder: 'chart'
           destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
 
