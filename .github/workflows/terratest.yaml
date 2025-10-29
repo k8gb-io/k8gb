@@ -43,6 +43,12 @@ jobs:
     runs-on: ubuntu-24.04
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    strategy:
+      matrix:
+        k8s-version:
+          - "v1.32.0-k3s1"  # K8s 1.32
+          - "v1.33.0-k3s1"  # K8s 1.33  
+          - "v1.34.0-k3s1"  # K8s 1.34
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -71,19 +77,19 @@ jobs:
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "edgedns"
-          args: -c k3d/edge-dns.yaml
+          args: --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/edge-dns.yaml
 
       - name: Create 1st k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
-          args: -c k3d/test-gslb1.yaml
+          args: --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb1.yaml
 
       - name: Create 2nd k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb2"
-          args: -c k3d/test-gslb2.yaml
+          args: --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb2.yaml
 
       - name: K8GB deployment
         run: |
@@ -108,5 +114,5 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: terratest-logs
+          name: terratest-logs-${{ matrix.k8s-version }}
           path: ${{ github.workspace }}/tmp/terratest
