@@ -128,8 +128,9 @@ k8gb is tested with the following environment options.
 
 [//]: # (Table is generated with the help of https://www.tablesgenerator.com/markdown_tables#)
 
-| **KCD Czech&Slovak 2025**   [![](https://img.youtube.com/vi/kpxS7cJtxcs/0.jpg)](https://www.youtube.com/watch?v=kpxS7cJtxcs "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **Cloud Native Rejekts 2025**   [![](https://img.youtube.com/vi/RBMRU8rtxfI/0.jpg)](https://www.youtube.com/watch?v=RBMRU8rtxfI "Evaluating Global Load Balancing Options for Kubernetes in Practice") |
+| **Container Days Conference 2025**  [![](https://img.youtube.com/vi/FoKE2dST8HI/0.jpg)](https://www.youtube.com/watch?v=FoKE2dST8HI "Evaluating Global Load Balancing Options for Kubernetes in Practice") | **Container Days Conference 2025**  [![](https://img.youtube.com/vi/e-_zhuwNCAM/0.jpg)](https://www.youtube.com/watch?v=e-_zhuwNCAM "Ensuring high availability with global load balancing in Kubernetes") |
 |---|---|
+| **KCD Czech&Slovak 2025**   [![](https://img.youtube.com/vi/kpxS7cJtxcs/0.jpg)](https://www.youtube.com/watch?v=kpxS7cJtxcs "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **Cloud Native Rejekts 2025**   [![](https://img.youtube.com/vi/RBMRU8rtxfI/0.jpg)](https://www.youtube.com/watch?v=RBMRU8rtxfI "Evaluating Global Load Balancing Options for Kubernetes in Practice") |
 | **KubeCon China 2025**   [![](https://img.youtube.com/vi/L9mRWljLnzw/0.jpg)](https://www.youtube.com/watch?v=L9mRWljLnzw "Resilient Multiregion Global Control Planes With Crossplane and K8gb ") | **KubeCon EU 2025** [![](https://img.youtube.com/vi/YMyrcqZ2sbU/0.jpg)](https://www.youtube.com/watch?v=YMyrcqZ2sbU "Project Lightning Talk: What's New in k8gb: CNCF's Multicluster Global Balancer - Bradley Andersen") |
 | **ChatLoopBackOff - Episode 42 (K8gb)** [![](https://img.youtube.com/vi/tKUNI6E1_7c/0.jpg)](https://www.youtube.com/watch?v=tKUNI6E1_7c "ChatLoopBackOff - Episode 42 (K8gb)") | **KubeCon NA 2024** [![](https://img.youtube.com/vi/vCzl15AIoU0/0.jpg)](https://www.youtube.com/watch?v=vCzl15AIoU0 "k8gb: Global Load Balancing, the Kubernetes Way \| Project Lightning Talk") |
 | **Open Source Summit EU 2024** [![](https://img.youtube.com/vi/5eLX4kMgo8Q/0.jpg)](https://www.youtube.com/watch?v=5eLX4kMgo8Q "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **KubeCon EU 2024** [![](https://img.youtube.com/vi/MsQ0E7SYNPo/0.jpg)](https://www.youtube.com/watch?v=MsQ0E7SYNPo "K8gb: Reliable Global Service Load Balancing without vendor lock-in \| Project Lightning Talk") |
@@ -144,7 +145,9 @@ You can also find recordings from our community meetings at [k8gb youtube channe
 ## Online Publications Featuring k8gb
 
 * https://oilbeater.com/en/2024/04/18/k8gb-best-cloudnative-gslb/
+* https://medium.com/@kaanara/designing-a-high-availability-kubernetes-cluster-infrastructure-for-a-major-digital-travel-agency-7663465871fd
 * https://www.redhat.com/en/blog/global-load-balancing-red-hat-openshift-k8gb
+* https://blog.neilfren.ch/global-service-loadbalancers-for-your-homelab/
 * https://andrewbaker.ninja/2021/01/22/external-k8gb-presentation-to-kubernetes-sig-multicluster/
 
 ## And Even Books Featuring k8gb :)
