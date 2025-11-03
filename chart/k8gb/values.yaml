@@ -154,7 +154,7 @@ infoblox:
   dnsView: "default"
 
 extdns:
-  enabled: false
+  enabled: true
   interval: 20s
   labelFilter: "k8gb.absa.oss/dnstype=extdns"
   logLevel: debug
@@ -169,8 +169,8 @@ extdns:
   - crd
   domainFilters:
   - "example.com"
-  txtPrefix: "k8gb-<GEOTAG>-"
-  txtOwnerId: "k8gb-<GEOTAG>"
+  txtPrefix: "k8gb-eu-"
+  txtOwnerId: "k8gb-eu"
 
 openshift:
   # -- Install OpenShift specific RBAC
