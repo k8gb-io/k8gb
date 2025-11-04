@@ -57,9 +57,11 @@ type Config struct {
 
 	TracingEnabled bool `env:"TRACING_ENABLED" optional:"" default:"false" help:"decides whether to use a real otlp tracer or a noop one"`
 
-	TracingSamplingRatio float64 `env:"TRACING_SAMPLING_RATIO" optionl:"" default:"1.0" help:"how many traces should be kept and sent (1.0 - all, 0.0 - none)"`
+	TracingSamplingRatio float64 `env:"TRACING_SAMPLING_RATIO" optional:"" default:"1.0" help:"how many traces should be kept and sent (1.0 - all, 0.0 - none)"`
 
 	OtelExporterOtlpEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" optional:"" default:"localhost:4318" help:"where the traces should be sent to (in case of otel collector deployed on the same pod as sidecar -> localhost:4318). Otel collector itself can be configured via a configmap to send it somewhere else"`
+
+	DynamicZones bool `env:"FEATURE_DYNAMIC_ZONES" optional:"" default:"false" help:"whether to use dynamic zones"`
 
 	// Infoblox configuration
 	Infoblox Infoblox `embed:""`

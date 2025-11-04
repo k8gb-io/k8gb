@@ -576,7 +576,7 @@ func TestConfigurations(t *testing.T) {
 	}
 }
 
-//nolint:goconst
+//nolint:goconst,gocyclo
 func TestParseDNSZones(t *testing.T) {
 	str220 := `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1.
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb2.
@@ -596,6 +596,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		expectedLen int
 		config      *Config
 		assert      func(zoneInfo []*DelegationZoneInfo, err error)
+		assertParse func(zoneSpec []v1beta1.ZoneDelegationSpec, err error) bool
 	}{
 		{
 			name: "invalid negTTL",
@@ -606,8 +607,11 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 0,
-			assert: func(_ []*DelegationZoneInfo, err error) {
+			assert: func(_ []*DelegationZoneInfo, _ error) {
+			},
+			assertParse: func(_ []v1beta1.ZoneDelegationSpec, err error) bool {
 				assert.Error(t, err)
+				return false
 			},
 		},
 		{
@@ -760,7 +764,13 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			zoneInfo, err := parseDelegationZones(test.config)
+			zoneSpec, err := getZoneConfigFromString(test.config.DNSZones)
+			if test.assertParse != nil {
+				if !test.assertParse(zoneSpec, err) {
+					return
+				}
+			}
+			zoneInfo, err := ParseDelegationZones(test.config, zoneSpec)
 			test.assert(zoneInfo, err)
 			assert.Equal(t, test.expectedLen, len(zoneInfo))
 		})

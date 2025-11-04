@@ -12,6 +12,11 @@ k8gb:
   # -- whether it should also deploy the gslb and dnsendpoints CRDs
   deployCrds: true
   # -- whether it should also deploy the service account, cluster role and cluster role binding
+  feature:
+    # -- whether to use Dynamic ZoneDelegation feature.
+    # If enabled, an extra volume and VolumeMounts must be specified
+    # in .coredns.extraVolumes and .coredns.extraVolumeMounts
+    dynamicZones: false
   deployRbac: true
   # DNSZones - For backward compatibility, the dnsZone and edgeDNSZone fields are allowed; otherwise,
   # the dnsZones array is used. For valid values, use either dnsZone and edgeDNSZone or dnsZones.
@@ -116,6 +121,15 @@ coredns:
   # otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true".
   serviceType: "ClusterIP"
 
+  # -- optional dynamic zones configmap
+  extraVolumeMounts:
+    - name: dynamic-zones
+      mountPath: /etc/dynamic
+  extraVolumes:
+    - name: dynamic-zones
+      configMap:
+        name: coredns-dynamic
+        optional: true
   resources:
     # -- requests and limits for the coredns container
     limits:
