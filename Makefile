@@ -477,6 +477,7 @@ mocks:
 	mockgen -package=mocks -destination=controllers/mocks/refresolver_mock.go -source=controllers/refresolver/refresolver.go GslbRefResolver
 	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
 	mockgen -package=mocks -destination=controllers/mocks/geotags_mock.go -source=controllers/geotags/geotags.go GeoTags
+	mockgen -package=mocks -destination=controllers/mocks/zone_service_mock.go -source=controllers/zones/zone_service.go ZoneService
 	$(call golic)
 
 # remove clusters and redeploy

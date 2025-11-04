@@ -22,11 +22,13 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 )
 
+var finalize = false
+
 type Provider interface {
 	// CreateZoneDelegation handles delegated zone in Edge DNS
 	CreateZoneDelegation(*resolver.DelegationZoneInfo) error
 	// Finalize finalize gslb in k8gbNamespace
-	Finalize(*resolver.DelegationZoneInfo) error
+	Finalize(*resolver.DelegationZoneInfo, bool) error
 	// String see: Stringer interface
 	String() string
 }

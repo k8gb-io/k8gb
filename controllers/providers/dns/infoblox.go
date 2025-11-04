@@ -107,8 +107,10 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *resolver.DelegationZon
 	return nil
 }
 
-func (p *InfobloxProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo) error {
-	log.Info().Msgf("Zone %s must deleted by manually in Infoblox", zoneInfo.LoadBalancedZone)
+func (p *InfobloxProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo, finalize bool) error {
+	if !finalize {
+		log.Info().Msgf("Zone %s must deleted by manually in Infoblox", zoneInfo.LoadBalancedZone)
+	}
 	return nil
 }
 
