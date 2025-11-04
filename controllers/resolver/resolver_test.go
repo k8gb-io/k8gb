@@ -25,6 +25,7 @@ import (
 	"strings"
 	"testing"
 
+	k8gbio "github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -576,7 +577,7 @@ func TestConfigurations(t *testing.T) {
 	}
 }
 
-//nolint:goconst
+//nolint:goconst,gocyclo
 func TestParseDNSZones(t *testing.T) {
 	str220 := `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1.
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb2.
@@ -596,6 +597,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		expectedLen int
 		config      *Config
 		assert      func(zoneInfo []*DelegationZoneInfo, err error)
+		assertParse func(zoneSpec []k8gbio.ZoneDelegationSpec, err error) bool
 	}{
 		{
 			name: "invalid negTTL",
@@ -606,8 +608,11 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 0,
-			assert: func(_ []*DelegationZoneInfo, err error) {
+			assert: func(_ []*DelegationZoneInfo, _ error) {
+			},
+			assertParse: func(_ []k8gbio.ZoneDelegationSpec, err error) bool {
 				assert.Error(t, err)
+				return false
 			},
 		},
 		{
@@ -760,7 +765,13 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			zoneInfo, err := parseDelegationZones(test.config)
+			zoneSpec, err := getZoneConfigFromString(test.config.DNSZones)
+			if test.assertParse != nil {
+				if !test.assertParse(zoneSpec, err) {
+					return
+				}
+			}
+			zoneInfo, err := ParseDelegationZones(test.config, zoneSpec)
 			test.assert(zoneInfo, err)
 			assert.Equal(t, test.expectedLen, len(zoneInfo))
 		})

@@ -65,8 +65,10 @@ func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *resolver.Delegation
 	return nil
 }
 
-func (p *ExternalDNSProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo) error {
-	log.Info().Msgf("Domain %s will be deleted by removing delegation DNSEndpoint %s", zoneInfo.LoadBalancedZone, zoneInfo.GetExternalDNSEndpointName())
+func (p *ExternalDNSProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo, finalize bool) error {
+	if !finalize {
+		log.Info().Msgf("Domain %s will be deleted by removing delegation DNSEndpoint %s", zoneInfo.LoadBalancedZone, zoneInfo.GetExternalDNSEndpointName())
+	}
 	return nil
 }
 

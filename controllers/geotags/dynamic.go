@@ -61,6 +61,8 @@ func (p *Dynamic) getExternalClusterNSNamesByHostname() (map[string]string, erro
 		return nsNames, nil
 	}
 	d := p.config.DelegationZones[0]
+	// TODO we need to dynamically lookup for ParentZone
+	// Potentially read from DNSZones.ParentZone
 	parentDNSServer, err := p.extractParentDNSServer(parentNameServer, d.ParentZone)
 	if err != nil {
 		return nsNames, fmt.Errorf("ExternalGeoTags: error extracting parent DNS servers: %w", err)

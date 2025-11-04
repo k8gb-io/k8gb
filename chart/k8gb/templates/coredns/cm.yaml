@@ -8,18 +8,12 @@ metadata:
 {{ include "chart.labels" . | indent 4  }}
 data:
   Corefile: |-
-{{- range .Values.k8gb.dnsZones }}
-    {{ .loadBalancedZone }}:5353 {
+    (k8gbplugins) {
         errors
         health
         {{- if $.Values.coredns.corefile.reload.enabled }}
         reload {{ $.Values.coredns.corefile.reload.interval }} {{ $.Values.coredns.corefile.reload.jitter }}
         {{- end }}
-{{- if .extraPlugins }}
-{{- range .extraPlugins }}
-{{ . | nindent 8 }}
-{{- end }}
-{{- end }}
         ready
         prometheus 0.0.0.0:9153
         forward . /etc/resolv.conf
@@ -35,8 +29,29 @@ data:
             {{- end }}
         }
     }
+{{- range .Values.k8gb.dnsZones }}
+    {{ .loadBalancedZone }}:5353 {
+        import k8gbplugins
+{{- if .extraPlugins }}
+{{- range .extraPlugins }}
+{{ . | nindent 8 }}
 {{- end }}
-    {{- with .extraServerBlocks -}}
-    {{- tpl . $ | nindent 4 }}
-    {{- end }}
+{{- end }}
+    }
+{{- end }}
+{{- with .extraServerBlocks -}}
+{{- tpl . $ | nindent 4 }}
+{{- end }}
+{{- if .Values.k8gb.feature.dynamicZones }}
+    import ../dynamic/*.conf
+{{- end }}
+{{- end }}
+---
+{{- if .Values.k8gb.feature.dynamicZones }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-dynamic
+  namespace: {{ .Release.Namespace }}
+data: {}
 {{- end }}

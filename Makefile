@@ -64,6 +64,7 @@ DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
 GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
+K8GBIO_CRD_YAML ?= chart/k8gb/crd/k8gb.k8gb.io_dynamiczones.yaml
 
 # GCP Cloud DNS testing variables
 GCP_PROJECT ?=
@@ -503,6 +504,7 @@ mocks:
 	mockgen -package=mocks -destination=controllers/mocks/refresolver_mock.go -source=controllers/refresolver/refresolver.go GslbRefResolver
 	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
 	mockgen -package=mocks -destination=controllers/mocks/geotags_mock.go -source=controllers/geotags/geotags.go GeoTags
+	mockgen -package=mocks -destination=controllers/mocks/zone_service_mock.go -source=controllers/zones/zone_service.go ZoneService
 	$(call golic)
 
 # remove clusters and redeploy
@@ -655,8 +657,10 @@ endef
 
 define crd-manifest
 	$(call install-controller-gen)
-	@echo -e "\n$(YELLOW)Generating the CRD manifests$(NC)"
-	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./..." output:crd:stdout > $(GSLB_CRD_YAML)
+	@echo -e "\n$(YELLOW)Generating the absaoss CRD manifests$(NC)"
+	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./api/v1beta1" output:crd:stdout > $(GSLB_CRD_YAML)
+	@echo -e "\n$(YELLOW)Generating the k8gb.io CRD manifests$(NC)"
+	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./api/k8gb.io/v1beta1" output:crd:stdout > $(K8GBIO_CRD_YAML)
 endef
 
 define install-controller-gen
