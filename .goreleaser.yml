@@ -1,3 +1,4 @@
+version: 2
 before:
   hooks:
     - go mod download
@@ -18,12 +19,13 @@ builds:
       - -s -w -X main.version={{ .Tag }} -X main.commit={{ .Commit }}
 archives:
   - id: binary
-    format: binary
-    name_template: "{{ .ProjectName }}_{{ .Os }}-{{ .Arch }}"
+    formats: ["binary"]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- if eq .Os "darwin" }}macOS
+      {{- else }}{{ .Os }}{{ end }}-{{ .Arch }}
   - id: archive
-    format: tar.gz
-    replacements:
-      darwin: macOS
+    formats: ["tar.gz"]
     files:
       - LICENSE*
       - README*
@@ -31,36 +33,22 @@ archives:
       - dist/*.sig
     format_overrides:
       - goos: windows
-        format: zip
-dockers:
-- image_templates:
-  - "absaoss/k8gb:v{{ .Version }}-amd64"
-  use: buildx
-  build_flag_templates:
-  - "--platform=linux/amd64"
-  - &LABEL1
-    "--label=org.opencontainers.image.title=k8gb"
-  - &LABEL2
-    "--label=org.opencontainers.image.description=A cloud native Kubernetes Global Balancer"
-  - &LABEL3
-    "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-  - &LABEL4
-    "--label=org.opencontainers.image.version={{ .Version }}"
-- image_templates:
-  - "absaoss/k8gb:v{{ .Version }}-arm64"
-  use: buildx
-  goarch: arm64
-  build_flag_templates:
-  - "--platform=linux/arm64"
-  - *LABEL1
-  - *LABEL2
-  - *LABEL3
-  - *LABEL4
-docker_manifests:
-- name_template: absaoss/k8gb:{{ .Tag }}
-  image_templates:
-  - absaoss/k8gb:v{{ .Version }}-amd64
-  - absaoss/k8gb:v{{ .Version }}-arm64
+        formats: ["zip"]
+dockers_v2:
+  - images:
+      - absaoss/k8gb
+    tags:
+      - "v{{.Version}}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    ids:
+      - k8gb
+    labels:
+      "org.opencontainers.image.title": "k8gb"
+      "org.opencontainers.image.description": "A cloud native Kubernetes Global Balancer"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+      "org.opencontainers.image.version": "{{ .Version }}"
 sboms:
   - id: archive-sbom
     cmd: syft
@@ -130,7 +118,7 @@ docker_signs:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Version }}-{{ .ShortCommit }}"
+  version_template: "{{ .Version }}-{{ .ShortCommit }}"
 release:
   draft: true
   extra_files:
