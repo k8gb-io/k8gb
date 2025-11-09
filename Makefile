@@ -141,6 +141,7 @@ K8GB_LOCAL_VERSION ?= stable
 # Use `K8GB_LOCAL_VERSION=test make deploy-full-local-setup`
 .PHONY: deploy-full-local-setup
 deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster setup (k3d >= 5.1.0)
+	$(MAKE) preflight
 	$(MAKE) create-local-clusters
 
 	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
@@ -676,7 +677,33 @@ define uninstall-prometheus
 	$(call stop-scraping,"name=k8gb",$1) ;\
 	$(call stop-scraping,"app=external-dns",$1) ;\
 	$(call stop-scraping,"app.kubernetes.io/name=coredns",$1)
-endef
+
+.PHONY: preflight
+preflight:
+	@echo -e "\n$(YELLOW)Preflight checks$(NC)"
+	@which k3d >/dev/null 2>&1 || { echo "k3d is required"; exit 1; }
+	@K3D_VER=$$(k3d version | awk '/k3d version/ {print $$3}'); \
+	 if [ -z "$$K3D_VER" ]; then echo "Unable to detect k3d version"; exit 1; fi; \
+	 REQ_VER="v5.3.0"; \
+	 if [ "$$(printf '%s\n' "$$REQ_VER" "$$K3D_VER" | sort -V | head -n1)" != "$$REQ_VER" ]; then \
+	   echo "k3d $$K3D_VER detected (ok)"; \
+	 else \
+	   echo "k3d $$K3D_VER is too old; please install k3d >= $$REQ_VER"; exit 1; \
+	 fi
+
+.PHONY: verify-dns-lb
+verify-dns-lb:
+	@echo -e "\n$(YELLOW)Verifying CoreDNS Services$(NC)"
+	@for c in $(CLUSTER_IDS); do \
+	  CTX=k3d-$(CLUSTER_NAME)$$c; \
+	  echo -e "\n$(CYAN)$$CTX$(NC)"; \
+	  kubectl get svc -n k8gb k8gb-coredns --context $$CTX -o wide || true; \
+	  echo "Type/Ingress:"; \
+	  kubectl get svc -n k8gb k8gb-coredns --context $$CTX -o jsonpath='{.spec.type}{" "}{.status.loadBalancer.ingress[*].ip}{" "}{.status.loadBalancer.ingress[*].hostname}{"\n"}' || true; \
+	done
+	@echo -e "\n$(YELLOW)Testing localhost TCP ports$(NC)"
+	@dig @localhost -p 5053 SOA . +tcp >/dev/null 2>&1 && echo "5053 TCP OK" || echo "5053 TCP FAIL"
+	@[ $(CLUSTERS_NUMBER) -lt 2 ] || (dig @localhost -p 5054 SOA . +tcp >/dev/null 2>&1 && echo "5054 TCP OK" || echo "5054 TCP FAIL")
 
 define get-helm-args
 --set k8gb.clusterGeoTag='$(call nth-geo-tag,$1)' --set k8gb.extGslbClustersGeoTags='$(call get-ext-tags,$1)' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$1)' --set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$1)-' --set k8gb.edgeDNSServers[0]=$(shell $(CLUSTER_GSLB_GATEWAY)):1053
