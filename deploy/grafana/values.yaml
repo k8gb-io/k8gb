@@ -1,10 +1,9 @@
 adminUser: admin
 adminPassword: admin # don't use in production (1st login to web ui will ask for the password change)
 service:
-  nodePort: 30030 # allowed port range between 30000 and 32768
   targetPort: 3000
   port: 3000
-  type: NodePort
+  type: LoadBalancer
 sidecar:
   dashboards:
     enabled: true
@@ -14,18 +13,20 @@ datasources:
     datasources:
     - name: Prometheus
       type: prometheus
-      url: http://k3d-test-gslb1-agent-0:30090
+      url: http://prometheus-server:9090
       access: proxy
       isDefault: true
     - name: Prometheus-cluster1
       type: prometheus
-      url: http://localhost:9080
-      access: direct
+      # For Docker/K8s-in-Docker (k3d/kind), use host.docker.internal to reach the host's exposed port
+      url: http://172.17.0.1:9090
+      access: proxy
       isDefault: false
     - name: Prometheus-cluster2
       type: prometheus
-      url: http://localhost:9081
-      access: direct
+      # For Docker/K8s-in-Docker (k3d/kind), use host.docker.internal to reach the host's exposed port
+      url: http://172.17.0.1:9091
+      access: proxy
       isDefault: false
 dashboardProviders:
   dashboardproviders.yaml:

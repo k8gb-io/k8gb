@@ -146,8 +146,8 @@ If you need to check and query the k8gb metrics locally, you can install a Prome
 
 The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:
 
-- http://127.0.0.1:9080
-- http://127.0.0.1:9081
+- http://127.0.0.1:9090
+- http://127.0.0.1:9091
 
 All the metric data is ephemeral and will be lost with pod restarts.
 To uninstall Prometheus, run `make uninstall-prometheus`

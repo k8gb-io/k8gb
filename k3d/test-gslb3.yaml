@@ -17,9 +17,9 @@ ports:
   - port: 445:443
     nodeFilters:
       - agent:0:direct
-  - port: 9082:30090
+  - port: 9092:9090
     nodeFilters:
-      - agent:0:direct
+      - loadbalancer
   - port: 5055:53/tcp
     nodeFilters:
       - loadbalancer
