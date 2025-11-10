@@ -397,11 +397,11 @@ ensure-cluster-size:
 
 .PHONY: goreleaser
 goreleaser:
-	command -v goreleaser &> /dev/null || go install github.com/goreleaser/goreleaser@v1.7.0
+	command -v goreleaser &> /dev/null || go install github.com/goreleaser/goreleaser@v2.12.7
 
 .PHONY: release-images
 release-images: goreleaser
-	goreleaser release --snapshot --skip-validate --skip-publish --rm-dist --skip-sbom --skip-sign
+	goreleaser release --snapshot --clean --skip=validate,publish,sbom,sign
 
 # build the docker image
 .PHONY: docker-build
