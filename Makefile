@@ -397,7 +397,7 @@ ensure-cluster-size:
 
 .PHONY: goreleaser
 goreleaser:
-	command -v goreleaser &> /dev/null || go install github.com/goreleaser/goreleaser@v2.12.7
+	go install github.com/goreleaser/goreleaser/v2@v2.12.7
 
 .PHONY: release-images
 release-images: goreleaser
