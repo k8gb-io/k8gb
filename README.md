@@ -76,7 +76,7 @@ This setup is adapted for local scenarios and works without external DNS provide
 
 Consult with [local playground](docs/local.md) documentation to learn all the details of experimenting with local setup.
 
-Optionally, you can run `make deploy-prometheus` and check the metrics on the test clusters (http://localhost:9080, http://localhost:9081).
+Optionally, you can run `make deploy-prometheus` and check the metrics on the test clusters (http://localhost:9090, http://localhost:9091).
 
 ## Motivation and Architecture
 
