@@ -144,11 +144,37 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	gslb.Status.LoadBalancer.ExposedIPs = loadBalancerExposedIPs
 
+	// Get load balancer service reference from configuration
+	var lbService *k8gbv1beta1.NamespacedName
+	if r.Config.IngressControllerServiceName != "" && r.Config.IngressControllerServiceNamespace != "" {
+		lbService = &k8gbv1beta1.NamespacedName{
+			Name:      r.Config.IngressControllerServiceName,
+			Namespace: r.Config.IngressControllerServiceNamespace,
+		}
+		log.Debug().
+			Str("serviceName", lbService.Name).
+			Str("serviceNamespace", lbService.Namespace).
+			Msg("Using configured ingress controller service")
+	}
+	gslb.Status.LoadBalancer.Service = lbService
+
 	log.Debug().
 		Str("gslb", gslb.Name).
 		Msg("Resolved LoadBalancer and Server configuration referenced by Ingress")
 
+	// Check load balancer health BEFORE checking application health
+	// This ensures the LB status is available when evaluating overall health
+	if r.Config.IngressControllerHealthCheckEnabled {
+		lbHealth, err := r.getLoadBalancerHealthStatus(ctx, gslb)
+		if err != nil {
+			m.IncrementError(gslb)
+			return result.RequeueError(err)
+		}
+		gslb.Status.LoadBalancer.Status = lbHealth
+	}
+
 	// == health status of applications ==
+	// This checks application health and combines it with LB health (if enabled)
 	serviceHealth, err := r.getServiceHealthStatus(ctx, gslb)
 	if err != nil {
 		m.IncrementError(gslb)

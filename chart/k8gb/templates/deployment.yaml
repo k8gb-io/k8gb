@@ -68,6 +68,16 @@ spec:
               value: {{ quote .Values.k8gb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS
               value: {{ quote .Values.k8gb.extGslbClustersGeoTags }}
+            - name: INGRESS_CONTROLLER_HEALTH_CHECK_ENABLED
+              value: {{ quote .Values.k8gb.ingressController.healthCheck.enabled }}
+            {{- if .Values.k8gb.ingressController.healthCheck.serviceName }}
+            - name: INGRESS_CONTROLLER_SERVICE_NAME
+              value: {{ quote .Values.k8gb.ingressController.healthCheck.serviceName }}
+            {{- end }}
+            {{- if .Values.k8gb.ingressController.healthCheck.serviceNamespace }}
+            - name: INGRESS_CONTROLLER_SERVICE_NAMESPACE
+              value: {{ quote .Values.k8gb.ingressController.healthCheck.serviceNamespace }}
+            {{- end }}
             - name: EDGE_DNS_SERVERS
               value: {{ include "k8gb.edgeDNSServers" . }}
             - name: DNS_ZONES

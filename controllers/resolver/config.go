@@ -55,6 +55,12 @@ type Config struct {
 
 	MetricsAddress string `env:"METRICS_ADDRESS" optional:"" default:"0.0.0.0:8080" validate:"iphostport" help:"format address:port where address can be empty, IP address, or hostname, e.g: 10.10.0.0:8080"`
 
+	IngressControllerHealthCheckEnabled bool `env:"INGRESS_CONTROLLER_HEALTH_CHECK_ENABLED" optional:"" default:"false" help:"if true, k8gb considers the health of the ingress controller/load balancer in failover decisions"`
+
+	IngressControllerServiceName string `env:"INGRESS_CONTROLLER_SERVICE_NAME" optional:"" help:"name of the service that exposes the ingress controller."`
+
+	IngressControllerServiceNamespace string `env:"INGRESS_CONTROLLER_SERVICE_NAMESPACE" optional:"" help:"namespace of the ingress controller service"`
+
 	TracingEnabled bool `env:"TRACING_ENABLED" optional:"" default:"false" help:"decides whether to use a real otlp tracer or a noop one"`
 
 	TracingSamplingRatio float64 `env:"TRACING_SAMPLING_RATIO" optionl:"" default:"1.0" help:"how many traces should be kept and sent (1.0 - all, 0.0 - none)"`
