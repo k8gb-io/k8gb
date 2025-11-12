@@ -84,7 +84,7 @@ NO_VALUE ?= no_value
 ###############################
 PWD ?=  $(shell pwd)
 ifndef VERSION
-VERSION := $(shell git fetch --force --tags &> /dev/null ; git describe --tags --abbrev=0)
+VERSION := $(shell git fetch --force --tags &> /dev/null; git describe --tags --abbrev=0 2>/dev/null || echo 'v0.0.0')
 endif
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD)
 SEMVER ?= $(VERSION)-$(COMMIT_HASH)
