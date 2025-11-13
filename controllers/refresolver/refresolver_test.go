@@ -72,6 +72,12 @@ func TestNew(t *testing.T) {
 			expectedReferenceResolverType: "*gatewayapihttproute.ReferenceResolver",
 			expectedError:                 nil,
 		},
+		{
+			name:                          "referenced gateway API GRPCRoute",
+			gslbYaml:                      "./testdata/gslb_gatewayapi_grpcroute.yaml",
+			expectedReferenceResolverType: "*gatewayapigrpcroute.ReferenceResolver",
+			expectedError:                 nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -100,6 +106,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 		utils.FileToIstioVirtualService("./testdata/istio_virtualservice.yaml"),
 		utils.FileToIstioGateway("./testdata/istio_gateway.yaml"),
 		utils.FileToGatewayAPIHTTPRoute("./testdata/gatewayapi_httproute.yaml"),
+		utils.FileToGatewayAPIGRPCRoute("./testdata/gatewayapi_grpcroute.yaml"),
 		utils.FileToGatewayAPIGateway("./testdata/gatewayapi_gateway.yaml"),
 		utils.FileToService("./testdata/istio_service.yaml"),
 	}
@@ -109,6 +116,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 	s.AddKnownTypes(istio.SchemeGroupVersion, &istio.VirtualService{}, &istio.VirtualServiceList{})
 	s.AddKnownTypes(istio.SchemeGroupVersion, &istio.Gateway{}, &istio.GatewayList{})
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.HTTPRoute{}, &gatewayapiv1.HTTPRouteList{})
+	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.GRPCRoute{}, &gatewayapiv1.GRPCRouteList{})
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.Gateway{}, &gatewayapiv1.GatewayList{})
 	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
 

@@ -5,11 +5,11 @@ metadata:
   namespace: test-gslb
 spec:
   parentRefs:
-    - name: gatewayapi-gateway
+  - name: gatewayapi-gateway
   hostnames:
-    - gatewayapi-httproute1.cloud.example.com
-    - gatewayapi-httproute2.cloud.example.com
+  - gatewayapi-httproute1.cloud.example.com
+  - gatewayapi-httproute2.cloud.example.com
   rules:
-    - backendRefs:
-        - name: gatewayapi-service
-          port: 8080
+  - backendRefs:
+    - name: gatewayapi-httproute-service
+      port: 8080

@@ -1,4 +1,4 @@
-package gatewayapihttproute
+package gatewayapigrpcroute
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
@@ -29,18 +29,18 @@ import (
 func TestGetServers(t *testing.T) {
 	var tests = []struct {
 		name            string
-		httpRouteFile   string
+		grpcRouteFile   string
 		expectedServers []*k8gbv1beta1.Server
 	}{
 		{
 			name:          "single hostname and backend; backend without namespace specified",
-			httpRouteFile: "../testdata/gatewayapi_httproute.yaml",
+			grpcRouteFile: "../testdata/gatewayapi_grpcroute.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Host: "gatewayapi-httproute.cloud.example.com",
+					Host: "gatewayapi-grpcroute.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "gatewayapi-service",
+							Name:      "gatewayapi-grpcroute-service",
 							Namespace: "test-gslb",
 						},
 					},
@@ -49,13 +49,13 @@ func TestGetServers(t *testing.T) {
 		},
 		{
 			name:          "single hostname and backend; backend with namespace specified",
-			httpRouteFile: "./testdata/gatewayapi_httproute_backend_with_namespace.yaml",
+			grpcRouteFile: "./testdata/gatewayapi_grpcroute_backend_with_namespace.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Host: "gatewayapi-httproute.cloud.example.com",
+					Host: "gatewayapi-grpcroute.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "gatewayapi-httproute-service",
+							Name:      "gatewayapi-grpcroute-service",
 							Namespace: "test-backend",
 						},
 					},
@@ -64,22 +64,22 @@ func TestGetServers(t *testing.T) {
 		},
 		{
 			name:          "multiple hostnames",
-			httpRouteFile: "./testdata/gatewayapi_httproute_multiple_hostnames.yaml",
+			grpcRouteFile: "./testdata/gatewayapi_grpcroute_multiple_hostnames.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Host: "gatewayapi-httproute1.cloud.example.com",
+					Host: "gatewayapi-grpcroute1.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "gatewayapi-httproute-service",
+							Name:      "gatewayapi-grpcroute-service",
 							Namespace: "test-gslb",
 						},
 					},
 				},
 				{
-					Host: "gatewayapi-httproute2.cloud.example.com",
+					Host: "gatewayapi-grpcroute2.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "gatewayapi-httproute-service",
+							Name:      "gatewayapi-grpcroute-service",
 							Namespace: "test-gslb",
 						},
 					},
@@ -88,17 +88,17 @@ func TestGetServers(t *testing.T) {
 		},
 		{
 			name:          "multiple backendRefs",
-			httpRouteFile: "./testdata/gatewayapi_httproute_multiple_backendrefs.yaml",
+			grpcRouteFile: "./testdata/gatewayapi_grpcroute_multiple_backendrefs.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Host: "gatewayapi-httproute.cloud.example.com",
+					Host: "gatewayapi-grpcroute.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "gatewayapi-httproute-service1",
+							Name:      "gatewayapi-grpcroute-service1",
 							Namespace: "test-gslb",
 						},
 						{
-							Name:      "gatewayapi-httproute-service2",
+							Name:      "gatewayapi-grpcroute-service2",
 							Namespace: "test-gslb",
 						},
 					},
@@ -109,9 +109,9 @@ func TestGetServers(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
-			httpRoute := utils.FileToGatewayAPIHTTPRoute(test.httpRouteFile)
+			grpcRoute := utils.FileToGatewayAPIGRPCRoute(test.grpcRouteFile)
 			resolver := ReferenceResolver{
-				httpRoute: httpRoute,
+				grpcRoute: grpcRoute,
 			}
 
 			// act

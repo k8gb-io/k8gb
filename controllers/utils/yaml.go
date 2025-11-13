@@ -100,6 +100,19 @@ func FileToGatewayAPIHTTPRoute(file string) *gatewayapiv1.HTTPRoute {
 	return httproute
 }
 
+// FileToGatewayAPIGRPCRoute takes a file and returns a GatewayAPI GRPCRoute object
+func FileToGatewayAPIGRPCRoute(file string) *gatewayapiv1.GRPCRoute {
+	yaml, err := os.ReadFile(file)
+	if err != nil {
+		panic(fmt.Errorf("can't open example CR file: %s", file))
+	}
+	grpcroute, err := YamlToGatewayAPIGRPCRoute(yaml)
+	if err != nil {
+		panic(err)
+	}
+	return grpcroute
+}
+
 // FileToGatewayAPIGateway takes a file and returns a GatewayAPI Gateway object
 func FileToGatewayAPIGateway(file string) *gatewayapiv1.Gateway {
 	yaml, err := os.ReadFile(file)
@@ -238,4 +251,20 @@ func YamlToGatewayAPIGateway(yaml []byte) (*gatewayapiv1.Gateway, error) {
 		return &gatewayapiv1.Gateway{}, err
 	}
 	return gateway, nil
+}
+
+// YamlToGatewayAPIGRPCRoute takes yaml and returns a GatewayAPI GRPCRoute object
+func YamlToGatewayAPIGRPCRoute(yaml []byte) (*gatewayapiv1.GRPCRoute, error) {
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &gatewayapiv1.GRPCRoute{}, err
+	}
+	// unmarshal the json into the kube struct
+	grpcroute := &gatewayapiv1.GRPCRoute{}
+	err = json.Unmarshal(jsonBytes, &grpcroute)
+	if err != nil {
+		return &gatewayapiv1.GRPCRoute{}, err
+	}
+	return grpcroute, nil
 }

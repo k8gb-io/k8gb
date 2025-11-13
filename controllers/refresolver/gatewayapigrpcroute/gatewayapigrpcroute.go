@@ -1,4 +1,4 @@
-package gatewayapihttproute
+package gatewayapigrpcroute
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
@@ -36,36 +36,36 @@ import (
 var log = logging.Logger()
 
 type ReferenceResolver struct {
-	httpRoute *gatewayapiv1.HTTPRoute
+	grpcRoute *gatewayapiv1.GRPCRoute
 	gateway   *gatewayapiv1.Gateway
 }
 
 // NewReferenceResolver creates a new reference resolver capable of understanding `networking.gateway.api/v1` resources
 func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
-	httpRouteList, err := getGslbHTTPRouteRef(gslb, k8sClient)
+	grpcRouteList, err := getGslbGRPCRouteRef(gslb, k8sClient)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(httpRouteList) != 1 {
-		return nil, fmt.Errorf("exactly 1 HTTPRoute resource expected but %d were found", len(httpRouteList))
+	if len(grpcRouteList) != 1 {
+		return nil, fmt.Errorf("exactly 1 GRPCRoute resource expected but %d were found", len(grpcRouteList))
 	}
-	httpRoute := httpRouteList[0]
+	grpcRoute := grpcRouteList[0]
 
-	route := gatewayapi.NewHTTPRouteAdapter(&httpRoute)
+	route := gatewayapi.NewGRPCRouteAdapter(&grpcRoute)
 	gateway, err := gatewayapi.GetGateway(route, k8sClient)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ReferenceResolver{
-		httpRoute: &httpRoute,
+		grpcRoute: &grpcRoute,
 		gateway:   gateway,
 	}, nil
 }
 
-// getGslbHTTPRouteRef resolves a Gateway API HTTPRoute resource referenced by the Gslb spec
-func getGslbHTTPRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1.HTTPRoute, error) {
+// getGslbGRPCRouteRef resolves a Gateway API GRPCRoute resource referenced by the Gslb spec
+func getGslbGRPCRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1.GRPCRoute, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -73,39 +73,39 @@ func getGslbHTTPRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gat
 
 	switch query.Mode {
 	case queryopts.QueryModeGet:
-		var httproute = gatewayapiv1.HTTPRoute{}
-		err = k8sClient.Get(context.TODO(), *query.GetKey, &httproute)
+		var grpcRoute = gatewayapiv1.GRPCRoute{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, &grpcRoute)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().
 					Str("gslb", gslb.Name).
 					Str("namespace", gslb.Namespace).
-					Msg("Can't find referenced HTTPRoute resource")
+					Msg("Can't find referenced GRPCRoute resource")
 			}
 			return nil, err
 		}
-		return []gatewayapiv1.HTTPRoute{httproute}, nil
+		return []gatewayapiv1.GRPCRoute{grpcRoute}, nil
 
 	case queryopts.QueryModeList:
-		httprouteList := &gatewayapiv1.HTTPRouteList{}
-		err = k8sClient.List(context.TODO(), httprouteList, query.ListOpts...)
+		grpcRouteList := &gatewayapiv1.GRPCRouteList{}
+		err = k8sClient.List(context.TODO(), grpcRouteList, query.ListOpts...)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().
 					Str("gslb", gslb.Name).
 					Str("namespace", gslb.Namespace).
-					Msg("Can't find referenced HTTPRoute resource")
+					Msg("Can't find referenced GRPCRoute resource")
 			}
 			return nil, err
 		}
-		return httprouteList.Items, nil
+		return grpcRouteList.Items, nil
 	}
 	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }
 
-// GetServers retrieves the GSLB server configuration from the HTTPRoute resource
+// GetServers retrieves the GSLB server configuration from the GRPCRoute resource
 func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
-	route := gatewayapi.NewHTTPRouteAdapter(rr.httpRoute)
+	route := gatewayapi.NewGRPCRouteAdapter(rr.grpcRoute)
 	return gatewayapi.GetServersFromRoute(route)
 }
 

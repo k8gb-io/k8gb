@@ -36,6 +36,7 @@ linters:
             - k8s.io/api
             - sigs.k8s.io/controller-runtime
             - sigs.k8s.io/external-dns
+            - sigs.k8s.io/gateway-api
             - github.com/ghodss/yaml
             - github.com/go-logr
             - github.com/golang/mock/

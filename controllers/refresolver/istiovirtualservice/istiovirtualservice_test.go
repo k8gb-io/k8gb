@@ -37,7 +37,7 @@ func TestGetServers(t *testing.T) {
 			virtualServiceFile: "../testdata/istio_virtualservice.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Hostname: "istio.cloud.example.com",
+					Host: "istio.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
 							Name:      "istio",
@@ -52,7 +52,7 @@ func TestGetServers(t *testing.T) {
 			virtualServiceFile: "./testdata/istio_virtualservice_multiple_hosts.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Hostname: "istio1.cloud.example.com",
+					Host: "istio1.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
 							Name:      "istio",
@@ -61,7 +61,7 @@ func TestGetServers(t *testing.T) {
 					},
 				},
 				{
-					Hostname: "istio2.cloud.example.com",
+					Host: "istio2.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
 							Name:      "istio",
@@ -76,7 +76,7 @@ func TestGetServers(t *testing.T) {
 			virtualServiceFile: "./testdata/istio_virtualservice_multiple_routes.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Hostname: "istio.cloud.example.com",
+					Host: "istio.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
 							Name:      "istio1",
