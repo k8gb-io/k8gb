@@ -24,8 +24,8 @@ import (
 	"strconv"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
-	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -182,11 +182,11 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 
 	gslb.ObjectMeta.Name = obj.GetName()
 	gslb.ObjectMeta.Namespace = obj.GetNamespace()
-	if val, found := obj.GetAnnotations()[ingress.ExternalIPsAnnotation]; found {
+	if val, found := obj.GetAnnotations()[utils.ExternalIPsAnnotation]; found {
 		if gslb.ObjectMeta.Annotations == nil {
 			gslb.ObjectMeta.Annotations = make(map[string]string)
 		}
-		gslb.ObjectMeta.Annotations[ingress.ExternalIPsAnnotation] = val
+		gslb.ObjectMeta.Annotations[utils.ExternalIPsAnnotation] = val
 	}
 	// migration to resourceRef
 	gslb.Spec = k8gbv1beta1.GslbSpec{

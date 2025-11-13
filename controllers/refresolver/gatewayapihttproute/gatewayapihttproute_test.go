@@ -1,4 +1,4 @@
-package istiovirtualservice
+package gatewayapihttproute
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
@@ -28,19 +28,19 @@ import (
 
 func TestGetServers(t *testing.T) {
 	var tests = []struct {
-		name               string
-		virtualServiceFile string
-		expectedServers    []*k8gbv1beta1.Server
+		name            string
+		httpRouteFile   string
+		expectedServers []*k8gbv1beta1.Server
 	}{
 		{
-			name:               "single host and route",
-			virtualServiceFile: "../testdata/istio_virtualservice.yaml",
+			name:          "single hostname and backend, without backend namespace",
+			httpRouteFile: "../testdata/gatewayapi_httproute.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Hostname: "istio.cloud.example.com",
+					Hostname: "gatewayapi-httproute.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "istio",
+							Name:      "gatewayapi-service",
 							Namespace: "test-gslb",
 						},
 					},
@@ -48,23 +48,38 @@ func TestGetServers(t *testing.T) {
 			},
 		},
 		{
-			name:               "multiple hosts",
-			virtualServiceFile: "./testdata/istio_virtualservice_multiple_hosts.yaml",
+			name:          "single hostname and backend, backend with namespace specified",
+			httpRouteFile: "./testdata/gatewayapi_httproute_backend_with_namespace.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Hostname: "istio1.cloud.example.com",
+					Hostname: "gatewayapi-httproute.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "istio",
+							Name:      "gatewayapi-service",
+							Namespace: "test-backend",
+						},
+					},
+				},
+			},
+		},
+		{
+			name:          "multiple hostnames",
+			httpRouteFile: "./testdata/gatewayapi_httproute_multiple_hostnames.yaml",
+			expectedServers: []*k8gbv1beta1.Server{
+				{
+					Hostname: "gatewayapi-httproute1.cloud.example.com",
+					Services: []*k8gbv1beta1.NamespacedName{
+						{
+							Name:      "gatewayapi-service",
 							Namespace: "test-gslb",
 						},
 					},
 				},
 				{
-					Hostname: "istio2.cloud.example.com",
+					Hostname: "gatewayapi-httproute2.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "istio",
+							Name:      "gatewayapi-service",
 							Namespace: "test-gslb",
 						},
 					},
@@ -72,18 +87,18 @@ func TestGetServers(t *testing.T) {
 			},
 		},
 		{
-			name:               "multiple routes",
-			virtualServiceFile: "./testdata/istio_virtualservice_multiple_routes.yaml",
+			name:          "multiple backendRefs",
+			httpRouteFile: "./testdata/gatewayapi_httproute_multiple_backendrefs.yaml",
 			expectedServers: []*k8gbv1beta1.Server{
 				{
-					Hostname: "istio.cloud.example.com",
+					Hostname: "gatewayapi-httproute.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "istio1",
+							Name:      "gatewayapi-service1",
 							Namespace: "test-gslb",
 						},
 						{
-							Name:      "istio2",
+							Name:      "gatewayapi-service2",
 							Namespace: "test-gslb",
 						},
 					},
@@ -94,9 +109,9 @@ func TestGetServers(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
-			vs := utils.FileToIstioVirtualService(test.virtualServiceFile)
+			httpRoute := utils.FileToGatewayAPIHTTPRoute(test.httpRouteFile)
 			resolver := ReferenceResolver{
-				virtualService: vs,
+				httpRoute: httpRoute,
 			}
 
 			// act
@@ -113,13 +128,13 @@ func TestGetGslbExposedIPs(t *testing.T) {
 	var tests = []struct {
 		name          string
 		annotations   map[string]string
-		serviceYaml   string
+		gatewayYaml   string
 		expectedIPs   []string
 		expectedError bool
 	}{
 		{
 			name:          "no exposed IPs",
-			serviceYaml:   "./testdata/istio_service_no_ips.yaml",
+			gatewayYaml:   "./testdata/gatewayapi_gateway_no_ips.yaml",
 			annotations:   map[string]string{},
 			expectedIPs:   []string{},
 			expectedError: false,
@@ -127,35 +142,35 @@ func TestGetGslbExposedIPs(t *testing.T) {
 		{
 			name:          "single exposed IP",
 			annotations:   map[string]string{},
-			serviceYaml:   "../testdata/istio_service.yaml",
+			gatewayYaml:   "../testdata/gatewayapi_gateway.yaml",
 			expectedIPs:   []string{"10.0.0.1"},
 			expectedError: false,
 		},
 		{
 			name:          "multiple exposed IPs",
 			annotations:   map[string]string{},
-			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			gatewayYaml:   "./testdata/gatewayapi_gateway_multiple_ips.yaml",
 			expectedIPs:   []string{"10.0.0.1", "10.0.0.2"},
 			expectedError: false,
 		},
 		{
 			name:          "annotation with no exposed IPs",
 			annotations:   map[string]string{"k8gb.io/exposed-ip-addresses": ""},
-			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			gatewayYaml:   "./testdata/gatewayapi_gateway_multiple_ips.yaml",
 			expectedIPs:   []string{},
 			expectedError: true,
 		},
 		{
 			name:          "annotation with single exposed IP",
 			annotations:   map[string]string{"k8gb.io/exposed-ip-addresses": "185.199.110.153"},
-			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			gatewayYaml:   "./testdata/gatewayapi_gateway_multiple_ips.yaml",
 			expectedIPs:   []string{"185.199.110.153"},
 			expectedError: false,
 		},
 		{
 			name:          "annotation with invalid IP",
 			annotations:   map[string]string{"k8gb.io/exposed-ip-addresses": "192.169.0.test"},
-			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			gatewayYaml:   "./testdata/gatewayapi_gateway_multiple_ips.yaml",
 			expectedIPs:   []string{},
 			expectedError: true,
 		},
@@ -163,9 +178,9 @@ func TestGetGslbExposedIPs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// arrange
-			svc := utils.FileToService(tt.serviceYaml)
+			gateway := utils.FileToGatewayAPIGateway(tt.gatewayYaml)
 			resolver := ReferenceResolver{
-				lbService: svc,
+				gateway: gateway,
 			}
 
 			// act

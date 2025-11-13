@@ -173,5 +173,16 @@
       ],
       "autoReplaceStringTemplate": "version: v{{{newValue}}}"
     },
+    // update gateway API version in Makefile
+    {
+      "fileMatch": ["^Makefile$"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "kubernetes-sigs/gateway-api",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "matchStrings": [
+        "GATEWAY_API_VERSION \\?= v(?<currentValue>.*)",
+      ],
+      "autoReplaceStringTemplate": "GATEWAY_API_VERSION ?= v{{{newValue}}}"
+    }
   ],
 }
