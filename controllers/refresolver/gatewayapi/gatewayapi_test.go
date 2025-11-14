@@ -79,7 +79,7 @@ func TestGetGslbExposedIPs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// arrange
-			gateway := utils.FileToGatewayAPIGateway(tt.gatewayYaml)
+			gateway := utils.FileToGatewayApiGateway(tt.gatewayYaml)
 
 			// act
 			IPs, err := GetGslbExposedIPs(gateway, tt.annotations, []utils.DNSServer{})

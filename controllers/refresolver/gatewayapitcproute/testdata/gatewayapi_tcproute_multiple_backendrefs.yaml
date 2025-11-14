@@ -1,14 +1,15 @@
 apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
+kind: tcpRoute
 metadata:
-  name: gatewayapi-httproute
+  name: gatewayapi-tcproute
   namespace: test-gslb
 spec:
   parentRefs:
   - name: gatewayapi-gateway
-  hostnames:
-  - gatewayapi-httproute.cloud.example.com
   rules:
   - backendRefs:
-    - name: gatewayapi-httproute-service
+    - name: gatewayapi-tcproute-service1
+      port: 8080
+  - backendRefs:
+    - name: gatewayapi-tcproute-service2
       port: 8080
