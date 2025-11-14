@@ -24,7 +24,6 @@ import (
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
-	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -109,8 +108,8 @@ func TestIngressHandler(t *testing.T) {
 					Name:      dummy,
 					Namespace: dummy,
 					Annotations: map[string]string{
-						ingress.ExternalIPsAnnotation: "10.0.0.1",
-						strategyAnnotation:            "roundRobin"},
+						utils.ExternalIPsAnnotation: "10.0.0.1",
+						strategyAnnotation:          "roundRobin"},
 				},
 				Spec: spec,
 			},
@@ -160,8 +159,8 @@ func TestIngressHandler(t *testing.T) {
 					Name:      dummy,
 					Namespace: dummy,
 					Annotations: map[string]string{
-						ingress.ExternalIPsAnnotation: "10.0.0.1",
-						strategyAnnotation:            "roundRobin"},
+						utils.ExternalIPsAnnotation: "10.0.0.1",
+						strategyAnnotation:          "roundRobin"},
 				},
 				Spec: spec,
 			},

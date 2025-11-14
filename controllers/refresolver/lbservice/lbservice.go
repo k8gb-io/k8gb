@@ -140,7 +140,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
 	// Check for explicit IP addresses in annotations first
-	if serviceIPsFromAnnotation, ok := gslbAnnotations["k8gb.io/exposed-ip-addresses"]; ok {
+	if serviceIPsFromAnnotation, ok := gslbAnnotations[utils.ExternalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(serviceIPsFromAnnotation)
 	}
 

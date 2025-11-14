@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gatewayapi-gateway
+  namespace: test-gslb
+spec:
+  gatewayClassName: gatewayapi-gateway
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+status:
+  addresses:
+  - type: IPAddress
+    value: 10.0.0.1
+  - value: 10.0.0.2

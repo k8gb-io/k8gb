@@ -49,6 +49,7 @@ CONTROLLER_GEN_VERSION ?= v0.19.0
 GOLIC_VERSION ?= v0.7.2
 GOLANGCI_VERSION ?= v2.5.0
 GRAFANA_VERSION ?= 10.1.2
+GATEWAY_API_VERSION ?= v1.4.0
 ISTIO_VERSION ?= v1.27.2
 NGINX_INGRESS_VERSION ?= 4.13.3
 PODINFO_VERSION ?= 6.9.2
@@ -232,6 +233,9 @@ deploy-local-cluster:
 
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
+
+	@echo -e "\n$(YELLOW)Install Gateway API CRDs $(NC)"
+	kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/standard-install.yaml
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -

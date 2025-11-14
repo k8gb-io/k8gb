@@ -1,0 +1,13 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: gatewayapi-grpcroute
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: GRPCRoute
+    name: gatewayapi-grpcroute
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30

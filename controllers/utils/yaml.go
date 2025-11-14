@@ -29,6 +29,7 @@ import (
 	istio "istio.io/client-go/pkg/apis/networking/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
+	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 	// TODO: does this code run also for v1beta1 CRDs? No it does not
 	// What if we add those to the schema? Look for "istio.io/client-go/pkg/apis/networking/v1" in the code
 )
@@ -84,6 +85,45 @@ func FileToIstioGateway(file string) *istio.Gateway {
 		panic(err)
 	}
 	return gw
+}
+
+// FileToGatewayAPIHTTPRoute takes a file and returns a GatewayAPI HTTPRoute object
+func FileToGatewayAPIHTTPRoute(file string) *gatewayapiv1.HTTPRoute {
+	yaml, err := os.ReadFile(file)
+	if err != nil {
+		panic(fmt.Errorf("can't open example CR file: %s", file))
+	}
+	httproute, err := YamlToGatewayAPIHTTPRoute(yaml)
+	if err != nil {
+		panic(err)
+	}
+	return httproute
+}
+
+// FileToGatewayAPIGRPCRoute takes a file and returns a GatewayAPI GRPCRoute object
+func FileToGatewayAPIGRPCRoute(file string) *gatewayapiv1.GRPCRoute {
+	yaml, err := os.ReadFile(file)
+	if err != nil {
+		panic(fmt.Errorf("can't open example CR file: %s", file))
+	}
+	grpcroute, err := YamlToGatewayAPIGRPCRoute(yaml)
+	if err != nil {
+		panic(err)
+	}
+	return grpcroute
+}
+
+// FileToGatewayAPIGateway takes a file and returns a GatewayAPI Gateway object
+func FileToGatewayAPIGateway(file string) *gatewayapiv1.Gateway {
+	yaml, err := os.ReadFile(file)
+	if err != nil {
+		panic(fmt.Errorf("can't open example CR file: %s", file))
+	}
+	gateway, err := YamlToGatewayAPIGateway(yaml)
+	if err != nil {
+		panic(err)
+	}
+	return gateway
 }
 
 // FileToService takes a file and returns a Service object
@@ -167,7 +207,6 @@ func YamlToIstioVirtualService(yaml []byte) (*istio.VirtualService, error) {
 
 // YamlToIstioGateway takes yaml and returns an Istio Gateway object
 func YamlToIstioGateway(yaml []byte) (*istio.Gateway, error) {
-	// yamlBytes contains a []byte of my yaml job spec
 	// convert the yaml to json
 	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
 	if err != nil {
@@ -180,4 +219,52 @@ func YamlToIstioGateway(yaml []byte) (*istio.Gateway, error) {
 		return &istio.Gateway{}, err
 	}
 	return gw, nil
+}
+
+// YamlToGatewayAPIHTTPRoute takes yaml and returns a GatewayAPI HTTPRoute object
+func YamlToGatewayAPIHTTPRoute(yaml []byte) (*gatewayapiv1.HTTPRoute, error) {
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &gatewayapiv1.HTTPRoute{}, err
+	}
+	// unmarshal the json into the kube struct
+	httproute := &gatewayapiv1.HTTPRoute{}
+	err = json.Unmarshal(jsonBytes, &httproute)
+	if err != nil {
+		return &gatewayapiv1.HTTPRoute{}, err
+	}
+	return httproute, nil
+}
+
+// YamlToGatewayAPIGateway takes yaml and returns a GatewayAPI Gateway object
+func YamlToGatewayAPIGateway(yaml []byte) (*gatewayapiv1.Gateway, error) {
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &gatewayapiv1.Gateway{}, err
+	}
+	// unmarshal the json into the kube struct
+	gateway := &gatewayapiv1.Gateway{}
+	err = json.Unmarshal(jsonBytes, &gateway)
+	if err != nil {
+		return &gatewayapiv1.Gateway{}, err
+	}
+	return gateway, nil
+}
+
+// YamlToGatewayAPIGRPCRoute takes yaml and returns a GatewayAPI GRPCRoute object
+func YamlToGatewayAPIGRPCRoute(yaml []byte) (*gatewayapiv1.GRPCRoute, error) {
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &gatewayapiv1.GRPCRoute{}, err
+	}
+	// unmarshal the json into the kube struct
+	grpcroute := &gatewayapiv1.GRPCRoute{}
+	err = json.Unmarshal(jsonBytes, &grpcroute)
+	if err != nil {
+		return &gatewayapiv1.GRPCRoute{}, err
+	}
+	return grpcroute, nil
 }

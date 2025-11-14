@@ -36,11 +36,6 @@ import (
 
 var log = logging.Logger()
 
-const (
-	// ExternalIPsAnnotation comma separated list of external IP addresses
-	ExternalIPsAnnotation = "k8gb.io/exposed-ip-addresses"
-)
-
 type ReferenceResolver struct {
 	ingress *netv1.Ingress
 }
@@ -178,7 +173,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
 	// fetch the IP addresses of the reverse proxy from an annotation if it exists
-	if ingressIPsFromAnnotation, ok := gslbAnnotations[ExternalIPsAnnotation]; ok {
+	if ingressIPsFromAnnotation, ok := gslbAnnotations[utils.ExternalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(ingressIPsFromAnnotation)
 	}
 

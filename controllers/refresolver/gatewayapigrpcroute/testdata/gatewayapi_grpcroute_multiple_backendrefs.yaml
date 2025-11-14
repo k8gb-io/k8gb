@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: GRPCRoute
+metadata:
+  name: gatewayapi-grpcroute
+  namespace: test-gslb
+spec:
+  parentRefs:
+  - name: gatewayapi-gateway
+  hostnames:
+  - gatewayapi-grpcroute.cloud.example.com
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        prefix: /debug
+    backendRefs:
+    - name: gatewayapi-grpcroute-service1
+      port: 8080
+  - backendRefs:
+    - name: gatewayapi-grpcroute-service2
+      port: 8080
