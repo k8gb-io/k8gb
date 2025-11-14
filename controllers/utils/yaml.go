@@ -31,6 +31,7 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 	gatewayapiv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
+	gatewayapiv1alpha3 "sigs.k8s.io/gateway-api/apis/v1alpha3"
 	// TODO: does this code run also for v1beta1 CRDs? No it does not
 	// What if we add those to the schema? Look for "istio.io/client-go/pkg/apis/networking/v1" in the code
 )
@@ -125,6 +126,19 @@ func FileToGatewayApiGrpcRoute(file string) *gatewayapiv1.GRPCRoute {
 		panic(err)
 	}
 	return grpcroute
+}
+
+// FileToGatewayApiTlsRoute takes a file and returns a GatewayAPI TLSRoute object
+func FileToGatewayApiTlsRoute(file string) *gatewayapiv1alpha3.TLSRoute {
+	yaml, err := os.ReadFile(file)
+	if err != nil {
+		panic(fmt.Errorf("can't open example CR file: %s", file))
+	}
+	tlsRoute, err := YamlToGatewayApiTlsRoute(yaml)
+	if err != nil {
+		panic(err)
+	}
+	return tlsRoute
 }
 
 // FileToGatewayApiTcpRoute takes a file and returns a GatewayAPI TCPRoute object
@@ -294,6 +308,22 @@ func YamlToGatewayApiGrpcRoute(yaml []byte) (*gatewayapiv1.GRPCRoute, error) {
 		return &gatewayapiv1.GRPCRoute{}, err
 	}
 	return grpcroute, nil
+}
+
+// YamlToGatewayApiTlsRoute takes yaml and returns a GatewayAPI TLSRoute object
+func YamlToGatewayApiTlsRoute(yaml []byte) (*gatewayapiv1alpha3.TLSRoute, error) {
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &gatewayapiv1alpha3.TLSRoute{}, err
+	}
+	// unmarshal the json into the kube struct
+	tlsRoute := &gatewayapiv1alpha3.TLSRoute{}
+	err = json.Unmarshal(jsonBytes, &tlsRoute)
+	if err != nil {
+		return &gatewayapiv1alpha3.TLSRoute{}, err
+	}
+	return tlsRoute, nil
 }
 
 // YamlToGatewayApiTcpRoute takes yaml and returns a GatewayAPI TCPRoute object

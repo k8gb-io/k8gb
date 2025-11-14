@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 	gatewayapiv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
+	gatewayapiv1alpha3 "sigs.k8s.io/gateway-api/apis/v1alpha3"
 )
 
 // TestNew tests if the RefResolver is instantiated with the correct type
@@ -91,6 +92,12 @@ func TestNew(t *testing.T) {
 			expectedReferenceResolverType: "*gatewayapiudproute.ReferenceResolver",
 			expectedError:                 nil,
 		},
+		{
+			name:                          "referenced gateway API TLSRoute",
+			gslbYaml:                      "./testdata/gslb_gatewayapi_tlsroute.yaml",
+			expectedReferenceResolverType: "*gatewayapitlsroute.ReferenceResolver",
+			expectedError:                 nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -118,9 +125,10 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 		utils.FileToIngress("./testdata/ingress_embedded.yaml"),
 		utils.FileToIstioVirtualService("./testdata/istio_virtualservice.yaml"),
 		utils.FileToIstioGateway("./testdata/istio_gateway.yaml"),
+		utils.FileToGatewayApiGateway("./testdata/gatewayapi_gateway.yaml"),
 		utils.FileToGatewayApiHttpRoute("./testdata/gatewayapi_httproute.yaml"),
 		utils.FileToGatewayApiGrpcRoute("./testdata/gatewayapi_grpcroute.yaml"),
-		utils.FileToGatewayApiGateway("./testdata/gatewayapi_gateway.yaml"),
+		utils.FileToGatewayApiTlsRoute("./testdata/gatewayapi_tlsroute.yaml"),
 		utils.FileToGatewayApiTcpRoute("./testdata/gatewayapi_tcproute.yaml"),
 		utils.FileToGatewayApiUdpRoute("./testdata/gatewayapi_udproute.yaml"),
 		utils.FileToService("./testdata/istio_service.yaml"),
@@ -135,6 +143,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.Gateway{}, &gatewayapiv1.GatewayList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.TCPRoute{}, &gatewayapiv1alpha2.TCPRouteList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.UDPRoute{}, &gatewayapiv1alpha2.UDPRouteList{})
+	s.AddKnownTypes(gatewayapiv1alpha3.SchemeGroupVersion, &gatewayapiv1alpha3.TLSRoute{}, &gatewayapiv1alpha3.TLSRouteList{})
 	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
 
 	return cl, gslb
