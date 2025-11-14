@@ -211,3 +211,7 @@ tracing:
 istio:
   # -- install istio RBAC
   enabled: true
+
+gatewayapi:
+  # -- install gatewayapi RBAC
+  enabled: true

@@ -2,9 +2,15 @@
 Starting from v0.15.0, k8gb introduces a much simpler way to link a GSLB resource to an Ingress object in Kubernetes. You no longer need to duplicate the Ingress configuration in your GSLB definition—instead, you can simply reference an existing Ingress. 
 This makes your Ingress the single source of truth for application routing.
 
-## 1. Declaration by Name
-The simplest way is to directly specify the name of the Ingress you want to reference in your GSLB. The namespace will be automatically taken from the GSLB’s namespace.
+K8GB supports the following ingress resources: 
+- [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+- [Istio Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
+- Gateway API's [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) and [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/) - to be released in v0.17.0
 
+## 1. Declaration by Name
+The simplest way is to directly specify the name of the resource you want to reference in your GSLB. The namespace will be automatically taken from the GSLB’s namespace.
+
+Ingress:
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -17,10 +23,52 @@ spec:
     name: playground-failover-ingress
 ```
 
+Istio Virtual Service:
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: playground-failover
+spec:
+  resourceRef:
+    apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    name: playground-failover-virtualservice
+```
+
+GatewayAPI HTTPRoute:
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: playground-failover
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    name: playground-failover-httproute
+```
+
+GatewayAPI GRPCRoute:
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: playground-failover
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: GRPCRoute
+    name: playground-failover-grpcroute
+```
+
+
 ## 2. Declaration by Label
-Alternatively, you can reference the Ingress by label. This approach is useful when you need more flexibility—for example, 
-in CI/CD pipelines. It is required that only one Ingress in the namespace matches the label; otherwise, k8gb will return 
+Alternatively, you can reference the ingress resource by label. This approach is useful when you need more flexibility—for example, 
+in CI/CD pipelines. It is required that only one resource in the namespace matches the label; otherwise, k8gb will return 
 an error.
+
+Here we show only an example for Ingress resources, but the same applies for Istio and GatewayAPI integrations.
 
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1

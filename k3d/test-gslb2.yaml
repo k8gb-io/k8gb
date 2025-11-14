@@ -8,21 +8,31 @@ image: docker.io/rancher/k3s:v1.30.2-k3s1
 agents: 1
 network: k3d-action-bridge-network
 ports:
+  # Nginx Ingress Controller - HTTP
   - port: 81:80
     nodeFilters:
       - agent:0:direct
+  # Istio Ingress Gateway for Gateway API - HTTP
+  - port: 8001:8000
+    nodeFilters:
+      - loadbalancer
+  # Istio Ingress Gateway for Istio - HTTP
   - port: 8081:8080
     nodeFilters:
       - loadbalancer
+  # Nginx Ingress Controller - HTTPS
   - port: 444:443
     nodeFilters:
       - agent:0:direct
+  # Prometheus
   - port: 9091:9090
     nodeFilters:
       - loadbalancer
+  # CoreDNS - TCP
   - port: 5054:53/tcp
     nodeFilters:
       - loadbalancer
+  # CoreDNS - UDP
   - port: 5054:53/udp
     nodeFilters:
       - loadbalancer

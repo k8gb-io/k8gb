@@ -4,8 +4,6 @@ kind: Ingress
 metadata:
   name: test-gslb-failover
   namespace: test-gslb
-  labels:
-    app: failover
 spec:
   ingressClassName: nginx
   rules:
@@ -28,8 +26,7 @@ spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
-    matchLabels:
-      app: failover
+    name: test-gslb-failover
   strategy:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag

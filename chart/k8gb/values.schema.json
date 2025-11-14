@@ -34,6 +34,9 @@
                 },
                 "istio": {
                     "$ref": "#/definitions/Istio"
+                },
+                "gatewayapi": {
+                    "$ref": "#/definitions/GatewayAPI"
                 }
             }
         },
@@ -614,6 +617,19 @@
                 "enabled"
             ],
             "title": "Istio"
+        },
+        "GatewayAPI": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "enabled"
+            ],
+            "title": "GatewayAPI"
         }
     }
 }

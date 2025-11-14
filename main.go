@@ -42,6 +42,9 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
+	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
+	gatewayapiv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
+	gatewayapiv1alpha3 "sigs.k8s.io/gateway-api/apis/v1alpha3"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -55,6 +58,9 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(runtimescheme))
 	utilruntime.Must(k8gbv1beta1.AddToScheme(runtimescheme))
 	utilruntime.Must(istio.AddToScheme(runtimescheme))
+	utilruntime.Must(gatewayapiv1.Install(runtimescheme))
+	utilruntime.Must(gatewayapiv1alpha2.Install(runtimescheme))
+	utilruntime.Must(gatewayapiv1alpha3.Install(runtimescheme))
 	// +kubebuilder:scaffold:scheme
 }
 

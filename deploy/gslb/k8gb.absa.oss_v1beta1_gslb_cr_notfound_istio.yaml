@@ -2,33 +2,33 @@
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: unhealthy-istio
+  name: notfound-istio
   namespace: test-gslb-istio
   labels:
-    app: unhealthy-istio
+    app: notfound-istio
 spec:
   gateways:
-    - istio-ingress/unhealthy-istio
+    - istio-ingress/notfound-istio
   hosts:
-    - unhealthy-istio.cloud.example.com
+    - notfound-istio.cloud.example.com
   http:
     - route:
         - destination:
-            host: unhealthy-istio-app
+            host: non-existing-app
             port:
-              number: 80
+              number: 9898
 ---
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
-  name: unhealthy-istio
+  name: notfound-istio
   namespace: istio-ingress
 spec:
   selector:
     app: istio-ingressgateway
   servers:
     - hosts:
-        - unhealthy-istio.cloud.example.com
+        - notfound-istio.cloud.example.com
       port:
         number: 8080
         name: http
@@ -37,14 +37,13 @@ spec:
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: unhealthy-istio
+  name: notfound-istio
   namespace: test-gslb-istio
 spec:
   resourceRef:
     apiVersion: networking.istio.io/v1
     kind: VirtualService
-    matchLabels:
-      app: unhealthy-istio
+    name: notfound-istio
   strategy:
     type: roundRobin
     dnsTtlSeconds: 30

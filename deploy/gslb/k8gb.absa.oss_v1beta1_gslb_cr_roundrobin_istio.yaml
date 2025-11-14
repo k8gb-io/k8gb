@@ -43,8 +43,7 @@ spec:
   resourceRef:
     apiVersion: networking.istio.io/v1
     kind: VirtualService
-    matchLabels:
-      app: roundrobin-istio
+    name: roundrobin-istio
   strategy:
     type: roundRobin
     dnsTtlSeconds: 30

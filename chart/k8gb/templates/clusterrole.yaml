@@ -55,6 +55,21 @@ rules:
   - namespaces
   verbs:
   - 'list'
+{{- if .Values.gatewayapi.enabled }}
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - gateways
+  - httproutes
+  - grpcroutes
+  - tcproutes
+  - tlsroutes
+  - udproutes
+  verbs:
+  - 'get'
+  - 'list'
+  - 'watch'
+{{- end }}
 {{- if .Values.openshift.enabled }}
 - apiGroups:
   - route.openshift.io

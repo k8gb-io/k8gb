@@ -47,7 +47,7 @@ This example deploys K8GB across two GKE clusters:
 3. **Deploy test application and GSLB resources:**
    ```bash
    # Create test namespace (do this on both clusters)
-   kubectl apply -f ../../../deploy/crds/test-namespace-ingress.yaml
+   kubectl apply -f ../../../deploy/gslb/test-namespace-ingress.yaml
 
    # Deploy podinfo via Helm (do this on both clusters)
    helm repo add podinfo https://stefanprodan.github.io/podinfo

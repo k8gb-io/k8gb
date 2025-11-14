@@ -40,8 +40,7 @@ spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
-    matchLabels: # ingresses.networking.k8s.io resource selector
-      app: test-gslb-failover
+    name: test-gslb-failover
   strategy:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag
