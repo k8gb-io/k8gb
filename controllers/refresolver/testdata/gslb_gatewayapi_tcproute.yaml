@@ -1,0 +1,15 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: gatewayapi-tcproute
+  namespace: test-gslb
+  labels:
+    k8gb.io/hostname: gatewayapi-tcproute.cloud.example.com
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha2
+    kind: TCPRoute
+    name: gatewayapi-tcproute
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30

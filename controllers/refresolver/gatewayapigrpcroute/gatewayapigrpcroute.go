@@ -36,7 +36,7 @@ import (
 var log = logging.Logger()
 
 type ReferenceResolver struct {
-	grpcRoute *gatewayapiv1.GRPCRoute
+	grpcRoute *GRPCRouteAdapter
 	gateway   *gatewayapiv1.Gateway
 }
 
@@ -52,14 +52,14 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}
 	grpcRoute := grpcRouteList[0]
 
-	route := gatewayapi.NewGRPCRouteAdapter(&grpcRoute)
-	gateway, err := gatewayapi.GetGateway(route, k8sClient)
+	grpcRouteAdapter := NewGRPCRouteAdapter(&grpcRoute)
+	gateway, err := gatewayapi.GetGateway(grpcRouteAdapter, k8sClient)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ReferenceResolver{
-		grpcRoute: &grpcRoute,
+		grpcRoute: grpcRouteAdapter,
 		gateway:   gateway,
 	}, nil
 }
@@ -105,8 +105,7 @@ func getGslbGRPCRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gat
 
 // GetServers retrieves the GSLB server configuration from the GRPCRoute resource
 func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
-	route := gatewayapi.NewGRPCRouteAdapter(rr.grpcRoute)
-	return gatewayapi.GetServersFromRoute(route)
+	return gatewayapi.GetServersFromRoute(rr.grpcRoute)
 }
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB

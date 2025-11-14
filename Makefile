@@ -235,7 +235,7 @@ deploy-local-cluster:
 	$(MAKE) deploy-k8gb-with-helm
 
 	@echo -e "\n$(YELLOW)Install Gateway API CRDs $(NC)"
-	kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/standard-install.yaml
+	kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/experimental-install.yaml
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
