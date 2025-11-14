@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: TLSRoute
+metadata:
+  name: gatewayapi-tlsroute
+  namespace: test-gslb
+spec:
+  parentRefs:
+  - name: gatewayapi-gateway
+  hostnames:
+  - gatewayapi-tlsroute.cloud.example.com
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        prefix: /debug
+    backendRefs:
+    - name: gatewayapi-tlsroute-service1
+      port: 8080
+  - backendRefs:
+    - name: gatewayapi-tlsroute-service2
+      port: 8080
