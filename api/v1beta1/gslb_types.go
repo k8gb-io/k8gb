@@ -138,5 +138,5 @@ func (h HealthStatus) String() string {
 }
 
 func init() {
-	SchemeBuilder.Register(&Gslb{}, &GslbList{})
+	SchemeBuilder.Register(&Gslb{}, &GslbList{}, &ZoneDelegation{}, &ZoneDelegationList{})
 }
