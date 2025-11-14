@@ -1,0 +1,13 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: gatewayapi-udproute
+  namespace: test-gslb
+spec:
+  parentRefs:
+  - name: gatewayapi-gateway
+  rules:
+  - backendRefs:
+    - name: gatewayapi-udproute-service
+      namespace: test-backend
+      port: 8080
