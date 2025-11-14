@@ -1,0 +1,12 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: gatewayapi-tcproute
+  namespace: test-gslb
+spec:
+  parentRefs:
+  - name: gatewayapi-gateway
+  rules:
+  - backendRefs:
+    - name: gatewayapi-tcproute-service
+      port: 8080
