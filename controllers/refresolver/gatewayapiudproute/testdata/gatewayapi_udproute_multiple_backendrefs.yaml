@@ -1,15 +1,15 @@
 apiVersion: gateway.networking.k8s.io/v1
-kind: TCPRoute
+kind: UDPRoute
 metadata:
-  name: gatewayapi-tcproute
+  name: gatewayapi-udproute
   namespace: test-gslb
 spec:
   parentRefs:
   - name: gatewayapi-gateway
   rules:
   - backendRefs:
-    - name: gatewayapi-tcproute-service1
+    - name: gatewayapi-udproute-service1
       port: 8080
   - backendRefs:
-    - name: gatewayapi-tcproute-service2
+    - name: gatewayapi-udproute-service2
       port: 8080

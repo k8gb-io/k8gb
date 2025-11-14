@@ -85,6 +85,12 @@ func TestNew(t *testing.T) {
 			expectedReferenceResolverType: "*gatewayapitcproute.ReferenceResolver",
 			expectedError:                 nil,
 		},
+		{
+			name:                          "referenced gateway API UDPRoute",
+			gslbYaml:                      "./testdata/gslb_gatewayapi_udproute.yaml",
+			expectedReferenceResolverType: "*gatewayapiudproute.ReferenceResolver",
+			expectedError:                 nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -116,6 +122,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 		utils.FileToGatewayApiGrpcRoute("./testdata/gatewayapi_grpcroute.yaml"),
 		utils.FileToGatewayApiGateway("./testdata/gatewayapi_gateway.yaml"),
 		utils.FileToGatewayApiTcpRoute("./testdata/gatewayapi_tcproute.yaml"),
+		utils.FileToGatewayApiUdpRoute("./testdata/gatewayapi_udproute.yaml"),
 		utils.FileToService("./testdata/istio_service.yaml"),
 	}
 	// Register operator types with the runtime scheme.
@@ -127,6 +134,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.GRPCRoute{}, &gatewayapiv1.GRPCRouteList{})
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.Gateway{}, &gatewayapiv1.GatewayList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.TCPRoute{}, &gatewayapiv1alpha2.TCPRouteList{})
+	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.UDPRoute{}, &gatewayapiv1alpha2.UDPRouteList{})
 	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
 
 	return cl, gslb
