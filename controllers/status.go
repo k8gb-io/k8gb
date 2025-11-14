@@ -88,6 +88,18 @@ func (r *GslbReconciler) getServiceHealthStatus(ctx context.Context, gslb *k8gbv
 				}
 			}
 		}
+
+		// If ingress controller health checking is enabled, consider both app and ingress controller health
+		if r.Config.IngressControllerHealthCheckEnabled {
+			// If the app is healthy, also check the ingress controller health
+			if serviceHealth[server.Host] == k8gbv1beta1.Healthy {
+				lbHealth := gslb.Status.LoadBalancer.Status
+				// If the load balancer is not healthy, mark the overall service as unhealthy
+				if lbHealth != k8gbv1beta1.Healthy {
+					serviceHealth[server.Host] = k8gbv1beta1.Unhealthy
+				}
+			}
+		}
 	}
 	return serviceHealth, nil
 }
@@ -127,4 +139,53 @@ func (r *GslbReconciler) hostsToCSV(gslb *k8gbv1beta1.Gslb) string {
 		hosts = append(hosts, server.Host)
 	}
 	return strings.Join(hosts, ", ")
+}
+
+// getLoadBalancerHealthStatus checks the health of the load balancer service
+func (r *GslbReconciler) getLoadBalancerHealthStatus(ctx context.Context, gslb *k8gbv1beta1.Gslb) (k8gbv1beta1.HealthStatus, error) {
+	// If no load balancer service is configured, return Healthy (skip the check)
+	if gslb.Status.LoadBalancer.Service == nil {
+		return k8gbv1beta1.Healthy, nil
+	}
+
+	lbService := &corev1.Service{}
+	finder := client.ObjectKey{
+		Namespace: gslb.Status.LoadBalancer.Service.Namespace,
+		Name:      gslb.Status.LoadBalancer.Service.Name,
+	}
+
+	err := r.Get(ctx, finder, lbService)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return k8gbv1beta1.NotFound, nil
+		}
+		return k8gbv1beta1.Unhealthy, err
+	}
+
+	// Check if the service has endpoints
+	endpoints := &discov1.EndpointSliceList{}
+	err = r.List(ctx, endpoints, client.InNamespace(gslb.Status.LoadBalancer.Service.Namespace),
+		client.MatchingLabels{discov1.LabelServiceName: gslb.Status.LoadBalancer.Service.Name})
+	if err != nil {
+		return k8gbv1beta1.Unhealthy, err
+	}
+
+	// If there are no endpoint slices, the service is unhealthy
+	if len(endpoints.Items) == 0 {
+		return k8gbv1beta1.Unhealthy, nil
+	}
+
+	// Check if there are any ready endpoints
+	for _, endpointSlice := range endpoints.Items {
+		if len(endpointSlice.Endpoints) > 0 {
+			for _, endpoint := range endpointSlice.Endpoints {
+				if len(endpoint.Addresses) > 0 && (endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready) {
+					return k8gbv1beta1.Healthy, nil
+				}
+			}
+		}
+	}
+
+	// No ready endpoints found
+	return k8gbv1beta1.Unhealthy, nil
 }

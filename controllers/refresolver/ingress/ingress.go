@@ -37,7 +37,8 @@ import (
 var log = logging.Logger()
 
 type ReferenceResolver struct {
-	ingress *netv1.Ingress
+	ingress   *netv1.Ingress
+	k8sClient client.Client
 }
 
 // NewReferenceResolver creates a reference resolver capable of understanding referenced ingresses.networking.k8s.io resources
@@ -57,7 +58,8 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}
 
 	return &ReferenceResolver{
-		ingress: &ingressList[0],
+		ingress:   &ingressList[0],
+		k8sClient: k8sClient,
 	}, nil
 }
 
@@ -111,7 +113,8 @@ func NewEmbeddedResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Refe
 	}
 
 	return &ReferenceResolver{
-		ingress: ingressEmbedded,
+		ingress:   ingressEmbedded,
+		k8sClient: k8sClient,
 	}, nil
 }
 

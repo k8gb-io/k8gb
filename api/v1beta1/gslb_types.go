@@ -65,6 +65,10 @@ type GslbSpec struct {
 type LoadBalancer struct {
 	// ExposedIPs on the local Load Balancer
 	ExposedIPs []string `json:"exposedIps,omitempty"`
+	// Service that exposes the ingress controller
+	Service *NamespacedName `json:"service,omitempty"`
+	// Status of the load balancer service
+	Status HealthStatus `json:"status,omitempty"`
 }
 
 // Servers holds the GSLB's servers' configuration

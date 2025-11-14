@@ -360,6 +360,9 @@
                     "type": "string",
                     "minLength": 0
                 },
+                "ingressController": {
+                    "$ref": "#/definitions/k8gbIngressController"
+                },
                 "reconcileRequeueSeconds": {
                     "type": "integer",
                     "minimum": 0
@@ -454,6 +457,38 @@
                 "dnsZones"
             ],
             "title": "k8gb"
+        },
+        "k8gbIngressController": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "healthCheck": {
+                    "$ref": "#/definitions/k8gbIngressControllerHealthCheck"
+                }
+            },
+            "title": "IngressController"
+        },
+        "k8gbIngressControllerHealthCheck": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "serviceName": {
+                    "type": "string",
+                    "description": "Name of the service that exposes the ingress controller"
+                },
+                "serviceNamespace": {
+                    "type": "string",
+                    "description": "Namespace of the ingress controller service"
+                }
+            },
+            "required": [
+                "enabled"
+            ],
+            "title": "HealthCheck"
         },
         "k8gbLog": {
             "type": "object",
