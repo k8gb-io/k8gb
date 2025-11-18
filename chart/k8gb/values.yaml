@@ -36,12 +36,8 @@ k8gb:
   # -- Ingress controller health check configuration
   ingressController:
     healthCheck:
-      # -- Enable health checking for the ingress controller/load balancer. When enabled, k8gb considers both application health and ingress controller health in failover decisions
+      # -- Enable health checking for the ingress controller/load balancer. When enabled, k8gb considers both application health and ingress controller health in failover decisions. The ingress controller service is automatically discovered based on the ingress type.
       enabled: false
-      # -- Name of the service that exposes the ingress controller.'
-      serviceName: ""
-      # -- Namespace of the ingress controller service. Required if serviceName is specified
-      serviceNamespace: ""
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
   # -- TTL of the NS and respective glue record used by external DNS

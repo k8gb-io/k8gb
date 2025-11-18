@@ -474,15 +474,8 @@
             "properties": {
                 "enabled": {
                     "type": "boolean",
-                    "default": false
-                },
-                "serviceName": {
-                    "type": "string",
-                    "description": "Name of the service that exposes the ingress controller"
-                },
-                "serviceNamespace": {
-                    "type": "string",
-                    "description": "Namespace of the ingress controller service"
+                    "default": false,
+                    "description": "Enable health checking for the ingress controller/load balancer"
                 }
             },
             "required": [

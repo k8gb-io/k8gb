@@ -144,19 +144,26 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	gslb.Status.LoadBalancer.ExposedIPs = loadBalancerExposedIPs
 
-	// Get load balancer service reference from configuration
-	var lbService *k8gbv1beta1.NamespacedName
-	if r.Config.IngressControllerServiceName != "" && r.Config.IngressControllerServiceNamespace != "" {
-		lbService = &k8gbv1beta1.NamespacedName{
-			Name:      r.Config.IngressControllerServiceName,
-			Namespace: r.Config.IngressControllerServiceNamespace,
-		}
-		log.Debug().
-			Str("serviceName", lbService.Name).
-			Str("serviceNamespace", lbService.Namespace).
-			Msg("Using configured ingress controller service")
+	// Discover load balancer service reference from resolver
+	lbService, err := refResolver.GetLbService(ctx)
+	if err != nil {
+		m.IncrementError(gslb)
+		r.Recorder.Eventf(gslb, corev1.EventTypeWarning, "LoadBalancerServiceDiscoveryFailed",
+			"Failed to discover load balancer service: %s", err.Error())
+		return result.RequeueError(fmt.Errorf("discovering load balancer service (%s)", err))
 	}
 	gslb.Status.LoadBalancer.Service = lbService
+
+	// Emit event for service discovery result
+	if r.Config.IngressControllerHealthCheckEnabled {
+		if lbService != nil {
+			r.Recorder.Eventf(gslb, corev1.EventTypeNormal, "LoadBalancerServiceDiscovered",
+				"Discovered ingress controller service: %s/%s", lbService.Namespace, lbService.Name)
+		} else {
+			r.Recorder.Event(gslb, corev1.EventTypeNormal, "LoadBalancerServiceNotFound",
+				"No ingress controller service found - health check will be disabled")
+		}
+	}
 
 	log.Debug().
 		Str("gslb", gslb.Name).

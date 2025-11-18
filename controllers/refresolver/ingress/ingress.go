@@ -28,8 +28,10 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
+	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -75,7 +77,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 		var ing = netv1.Ingress{}
 		err = k8sClient.Get(context.TODO(), *query.GetKey, &ing)
 		if err != nil {
-			if errors.IsNotFound(err) {
+			if k8serrors.IsNotFound(err) {
 				log.Info().
 					Str("gslb", gslb.Name).
 					Str("namespace", gslb.Namespace).
@@ -89,7 +91,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 		var ingList netv1.IngressList
 		err = k8sClient.List(context.TODO(), &ingList, query.ListOpts...)
 		if err != nil {
-			if errors.IsNotFound(err) {
+			if k8serrors.IsNotFound(err) {
 				log.Info().
 					Str("gslb", gslb.Name).
 					Str("namespace", gslb.Namespace).
@@ -134,7 +136,7 @@ func getGslbIngressEmbedded(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*n
 	ingress := &netv1.Ingress{}
 	err := k8sClient.Get(context.TODO(), nn, ingress)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			log.Warn().
 				Str("gslb", gslb.Name).
 				Msg("Can't find gslb Ingress")
@@ -197,4 +199,219 @@ func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string
 	}
 
 	return gslbIngressIPs, nil
+}
+
+// GetLbService retrieves the service that exposes the ingress controller
+// It uses a hybrid discovery approach:
+// 1. Get exposed IP addresses/hostnames from the Ingress status
+// 2. Find services with label "k8gb.io/ingress-controller-service=true" that match those IPs/hostnames
+// This ensures we discover the correct ingress controller even when multiple controllers exist
+// Supports both IP-based (GCP/Azure) and hostname-based (AWS ELB) load balancers
+func (rr *ReferenceResolver) GetLbService(ctx context.Context) (*k8gbv1beta1.NamespacedName, error) {
+	// Step 1: Get exposed IPs and hostnames from Ingress status
+	ingressIPs, ingressHostnames := rr.getIngressAddresses()
+	if len(ingressIPs) == 0 && len(ingressHostnames) == 0 {
+		log.Debug().
+			Str("ingress", rr.ingress.Name).
+			Msg("No IPs or hostnames in Ingress status - ingress controller service discovery skipped")
+		return nil, nil
+	}
+
+	log.Debug().
+		Str("ingress", rr.ingress.Name).
+		Strs("ingressIPs", ingressIPs).
+		Strs("ingressHostnames", ingressHostnames).
+		Msg("Found addresses in Ingress status")
+
+	// Step 2: Get all services with the k8gb label
+	serviceList := &corev1.ServiceList{}
+	opts := &client.ListOptions{
+		LabelSelector: labels.SelectorFromSet(map[string]string{
+			"k8gb.io/ingress-controller-service": "true",
+		}),
+	}
+
+	err := rr.k8sClient.List(ctx, serviceList, opts)
+	if err != nil {
+		// Differentiate error types for better debugging
+		if k8serrors.IsForbidden(err) {
+			log.Error().
+				Err(err).
+				Msg("Insufficient RBAC permissions to list services - check ClusterRole configuration")
+			return nil, fmt.Errorf("insufficient RBAC permissions to list services: %w", err)
+		}
+		if k8serrors.IsTimeout(err) {
+			log.Warn().
+				Err(err).
+				Msg("Timeout listing services - API server may be slow or overloaded")
+			return nil, fmt.Errorf("timeout listing services: %w", err)
+		}
+		log.Warn().
+			Err(err).
+			Msg("Failed to list services with k8gb.io/ingress-controller-service label")
+		return nil, fmt.Errorf("failed to list services: %w", err)
+	}
+
+	if len(serviceList.Items) == 0 {
+		log.Debug().Msg("No services found with label k8gb.io/ingress-controller-service=true")
+		return nil, nil
+	}
+
+	log.Debug().
+		Int("count", len(serviceList.Items)).
+		Msg("Found services with k8gb.io/ingress-controller-service label")
+
+	// Step 3: Filter services by matching IPs/hostnames
+	var matchedServices []matchedService
+	for i := range serviceList.Items {
+		svc := &serviceList.Items[i]
+
+		// Only consider LoadBalancer services
+		if svc.Spec.Type != corev1.ServiceTypeLoadBalancer {
+			log.Debug().
+				Str("serviceName", svc.Name).
+				Str("serviceNamespace", svc.Namespace).
+				Str("serviceType", string(svc.Spec.Type)).
+				Msg("Skipping non-LoadBalancer service")
+			continue
+		}
+
+		// Get service IPs and hostnames
+		serviceIPs, serviceHostnames := getServiceAddresses(svc)
+		if len(serviceIPs) == 0 && len(serviceHostnames) == 0 {
+			log.Debug().
+				Str("serviceName", svc.Name).
+				Str("serviceNamespace", svc.Namespace).
+				Msg("Service has no IPs or hostnames in status")
+			continue
+		}
+
+		// Check if any ingress address matches any service address
+		matchedIPs, matchedHostnames := findMatches(ingressIPs, ingressHostnames, serviceIPs, serviceHostnames)
+		if len(matchedIPs) > 0 || len(matchedHostnames) > 0 {
+			matchedServices = append(matchedServices, matchedService{
+				namespace:        svc.Namespace,
+				name:             svc.Name,
+				matchedIPs:       matchedIPs,
+				matchedHostnames: matchedHostnames,
+			})
+			log.Debug().
+				Str("serviceName", svc.Name).
+				Str("serviceNamespace", svc.Namespace).
+				Strs("matchedIPs", matchedIPs).
+				Strs("matchedHostnames", matchedHostnames).
+				Msg("Found service with matching addresses")
+		} else {
+			log.Debug().
+				Str("serviceName", svc.Name).
+				Str("serviceNamespace", svc.Namespace).
+				Strs("serviceIPs", serviceIPs).
+				Strs("serviceHostnames", serviceHostnames).
+				Strs("ingressIPs", ingressIPs).
+				Strs("ingressHostnames", ingressHostnames).
+				Msg("Service addresses don't match Ingress addresses")
+		}
+	}
+
+	// Step 4: Validate results
+	if len(matchedServices) == 0 {
+		log.Debug().
+			Strs("ingressIPs", ingressIPs).
+			Strs("ingressHostnames", ingressHostnames).
+			Int("labeledServices", len(serviceList.Items)).
+			Msg("No labeled service found with matching addresses")
+		return nil, nil
+	}
+
+	if len(matchedServices) > 1 {
+		// Multiple services matched even after IP/DNS filtering - this is ambiguous
+		log.Error().
+			Int("matchedCount", len(matchedServices)).
+			Interface("matchedServices", matchedServices).
+			Msg("Multiple services matched after IP/DNS filtering - label k8gb.io/ingress-controller-service=true must be unique per ingress controller")
+		return nil, fmt.Errorf(
+			"multiple services matched (%d services) after IP/DNS filtering - label k8gb.io/ingress-controller-service=true must be unique",
+			len(matchedServices))
+	}
+
+	// Exactly one match - success!
+	matched := matchedServices[0]
+	log.Info().
+		Str("serviceName", matched.name).
+		Str("serviceNamespace", matched.namespace).
+		Strs("matchedIPs", matched.matchedIPs).
+		Strs("matchedHostnames", matched.matchedHostnames).
+		Msg("Discovered ingress controller service via label + address matching")
+
+	return &k8gbv1beta1.NamespacedName{
+		Namespace: matched.namespace,
+		Name:      matched.name,
+	}, nil
+}
+
+// matchedService represents a service that matched the ingress addresses
+type matchedService struct {
+	namespace        string
+	name             string
+	matchedIPs       []string
+	matchedHostnames []string
+}
+
+// getIngressAddresses extracts both IPs and hostnames from the Ingress status
+// This supports both IP-based load balancers (GCP/Azure) and hostname-based (AWS ELB)
+func (rr *ReferenceResolver) getIngressAddresses() (ips []string, hostnames []string) {
+	for _, ing := range rr.ingress.Status.LoadBalancer.Ingress {
+		if ing.IP != "" {
+			ips = append(ips, ing.IP)
+		}
+		if ing.Hostname != "" {
+			hostnames = append(hostnames, ing.Hostname)
+		}
+	}
+	return ips, hostnames
+}
+
+// getServiceAddresses extracts both IPs and hostnames from a LoadBalancer service status
+// This supports both IP-based load balancers (GCP/Azure) and hostname-based (AWS ELB)
+func getServiceAddresses(svc *corev1.Service) (ips []string, hostnames []string) {
+	for _, ing := range svc.Status.LoadBalancer.Ingress {
+		if ing.IP != "" {
+			ips = append(ips, ing.IP)
+		}
+		if ing.Hostname != "" {
+			hostnames = append(hostnames, ing.Hostname)
+		}
+	}
+	return ips, hostnames
+}
+
+// findMatches checks if any address from ingress matches any address from service
+// Returns the matched IPs and hostnames separately for logging purposes
+func findMatches(ingressIPs, ingressHostnames, serviceIPs, serviceHostnames []string) (matchedIPs, matchedHostnames []string) {
+	// Build sets for O(1) lookup
+	serviceIPSet := make(map[string]bool)
+	for _, ip := range serviceIPs {
+		serviceIPSet[ip] = true
+	}
+
+	serviceHostnameSet := make(map[string]bool)
+	for _, hostname := range serviceHostnames {
+		serviceHostnameSet[hostname] = true
+	}
+
+	// Find matching IPs
+	for _, ip := range ingressIPs {
+		if serviceIPSet[ip] {
+			matchedIPs = append(matchedIPs, ip)
+		}
+	}
+
+	// Find matching hostnames
+	for _, hostname := range ingressHostnames {
+		if serviceHostnameSet[hostname] {
+			matchedHostnames = append(matchedHostnames, hostname)
+		}
+	}
+
+	return matchedIPs, matchedHostnames
 }
