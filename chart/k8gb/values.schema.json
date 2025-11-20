@@ -34,6 +34,10 @@
                 },
                 "istio": {
                     "$ref": "#/definitions/Istio"
+                },
+                "extraServerBlocks": {
+                    "type": "string",
+                    "description": "Extra CoreDNS server blocks to be added after all k8gb zones"
                 }
             }
         },
@@ -542,9 +546,6 @@
                         "type": "string",
                         "minLength": 1
                     }
-                },
-                "extraServerBlocks": {
-                    "type": "string"
                 }
             },
             "required": [
