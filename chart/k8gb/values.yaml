@@ -22,7 +22,6 @@ k8gb:
       loadBalancedZone: "cloud.example.com" # -- zone controlled by gslb (same meaning as the old dnsZone)
       dnsZoneNegTTL: 30  # -- Negative TTL for SOA record# -- host/ip[:port] format is supported here where port defaults to 53
       extraPlugins: [] # -- Extra CoreDNS plugins to be enabled for this zone
-      extraServerBlocks: "" # -- Extra CoreDNS server blocks for this zone
       geoDataFilePath: "" # -- GeoData file path
       geoDataField: "" # -- GeoData field
   edgeDNSServers:
@@ -211,3 +210,16 @@ tracing:
 istio:
   # -- install istio RBAC
   enabled: true
+
+# -- Extra CoreDNS server blocks to be added after all k8gb zones.
+# Useful for adding glue records or additional DNS zones for cluster discovery.
+# Example:
+#   extraServerBlocks: |
+#     example.com:5353 {
+#       errors
+#       forward . /etc/resolv.conf
+#       k8s_crd {
+#         filter k8gb.absa.oss/dnstype=glue
+#       }
+#     }
+extraServerBlocks: ""

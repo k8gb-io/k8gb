@@ -36,7 +36,7 @@ data:
         }
     }
 {{- end }}
-    {{- with .extraServerBlocks -}}
+    {{- with .Values.extraServerBlocks -}}
     {{- tpl . $ | nindent 4 }}
     {{- end }}
 {{- end }}
