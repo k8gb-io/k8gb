@@ -135,6 +135,8 @@ func run() error {
 		log.Err(err).Msg("Unable to register metrics")
 		return err
 	}
+	// Initialize all metrics with zero values so they appear in Prometheus dashboards
+	metrics.Metrics().InitializeZeroValues()
 
 	log.Info().Msg("Resolving DNS provider")
 	f, err = dns.NewDNSProviderFactory(context.TODO(), mgr.GetClient(), *config)
