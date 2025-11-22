@@ -20,19 +20,18 @@ nav:
     - Windows DNS: deploy_windowsdns.md
     - Cloudflare: deploy_cloudflare.md
     - RFC2136/Bind9: provider_rfc2136.md
+  - Configuration:
+    - Resource References: resource_ref.md
+    - Address Discovery: address_discovery.md
+    - Dynamic Geotags: dynamic_geotags.md
+    - Multi-zone Setup: multizone.md
+    - Exposing DNS: exposing_dns.md
   - Development & Testing:
     - Local Setup: local.md
     - Local with Kuar: local-kuar.md
   - Monitoring and Observability:
     - Metrics: metrics.md
     - Traces: traces.md
-  - Configuration:
-    - Ingress Annotations: ingress_annotations.md
-    - Resource References: resource_ref.md
-    - Address Discovery: address_discovery.md
-    - Dynamic Geotags: dynamic_geotags.md
-    - Multi-zone Setup: multizone.md
-    - Exposing DNS: exposing_dns.md
   - Platform Integrations:
     - Admiralty: admiralty.md
     - Liqo: liqo.md

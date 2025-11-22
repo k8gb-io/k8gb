@@ -24,7 +24,6 @@ This section provides comprehensive tutorials for deploying and configuring K8GB
 
 ## Configuration
 
-* [Ingress annotations](ingress_annotations.md)
 * [Resource References](resource_ref.md)
 * [Address Discovery](address_discovery.md)
 * [Dynamic Geotags](dynamic_geotags.md)
