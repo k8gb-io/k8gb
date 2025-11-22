@@ -2,33 +2,31 @@
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: notfound-istio
+  name: failover-istio
   namespace: test-gslb-istio
-  labels:
-    app: notfound-istio
 spec:
   gateways:
-    - istio-ingress/notfound-istio
+    - istio-ingress/failover-istio
   hosts:
-    - notfound-istio.cloud.example.com
+    - failover-istio.cloud.example.com
   http:
     - route:
         - destination:
-            host: non-existing-app
+            host: frontend-podinfo
             port:
               number: 9898
 ---
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
-  name: notfound-istio
+  name: failover-istio
   namespace: istio-ingress
 spec:
   selector:
     app: istio-ingressgateway
   servers:
     - hosts:
-        - notfound-istio.cloud.example.com
+        - failover-istio.cloud.example.com
       port:
         number: 8080
         name: http
@@ -37,14 +35,13 @@ spec:
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: notfound-istio
+  name: failover-istio
   namespace: test-gslb-istio
 spec:
   resourceRef:
     apiVersion: networking.istio.io/v1
     kind: VirtualService
-    matchLabels:
-      app: notfound-istio
+    name: failover-istio
   strategy:
-    type: roundRobin
-    dnsTtlSeconds: 30
+    type: failover
+    primaryGeoTag: eu

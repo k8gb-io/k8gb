@@ -2,33 +2,33 @@
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: failover-istio
+  name: unhealthy-istio
   namespace: test-gslb-istio
   labels:
-    app: failover-istio
+    app: unhealthy-istio
 spec:
   gateways:
-    - istio-ingress/failover-istio
+    - istio-ingress/unhealthy-istio
   hosts:
-    - failover-istio.cloud.example.com
+    - unhealthy-istio.cloud.example.com
   http:
     - route:
         - destination:
-            host: frontend-podinfo
+            host: unhealthy-app
             port:
-              number: 9898
+              number: 80
 ---
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
-  name: failover-istio
+  name: unhealthy-istio
   namespace: istio-ingress
 spec:
   selector:
     app: istio-ingressgateway
   servers:
     - hosts:
-        - failover-istio.cloud.example.com
+        - unhealthy-istio.cloud.example.com
       port:
         number: 8080
         name: http
@@ -37,14 +37,13 @@ spec:
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: failover-istio
+  name: unhealthy-istio
   namespace: test-gslb-istio
 spec:
   resourceRef:
     apiVersion: networking.istio.io/v1
     kind: VirtualService
-    matchLabels:
-      app: failover-istio
+    name: unhealthy-istio
   strategy:
-    type: failover
-    primaryGeoTag: eu
+    type: roundRobin
+    dnsTtlSeconds: 30

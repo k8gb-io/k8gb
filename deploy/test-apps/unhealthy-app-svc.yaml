@@ -32,3 +32,20 @@ spec:
     run: unhealthy-app
   sessionAffinity: None
   type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: unhealthy-app
+  name: unhealthy-app
+  namespace: test-gslb-gatewayapi
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: unhealthy-app
+  sessionAffinity: None
+  type: ClusterIP
