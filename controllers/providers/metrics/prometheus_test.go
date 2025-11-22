@@ -376,6 +376,49 @@ func TestRuntimeStatus(t *testing.T) {
 	}
 }
 
+func TestInitializeZeroValues(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	initLabels := prometheus.Labels{"namespace": namespace, "name": "init"}
+
+	// act
+	m.InitializeZeroValues()
+
+	// assert - verify counter metrics are initialized with 0
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbErrorsTotal).AsCounterVec().With(initLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbReconciliationLoopsTotal).AsCounterVec().With(initLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbInfobloxZoneUpdatesTotal).AsCounterVec().With(initLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbInfobloxZoneUpdateErrorsTotal).AsCounterVec().With(initLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbInfobloxHeartbeatsTotal).AsCounterVec().With(initLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbInfobloxHeartbeatErrorsTotal).AsCounterVec().With(initLabels)))
+
+	// assert - verify gauge metrics are initialized with 0
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbHealthyRecords).AsGaugeVec().With(initLabels)))
+
+	// assert - verify gauge metrics with status labels are initialized with 0
+	statusLabels := prometheus.Labels{"namespace": namespace, "name": "init", "status": "Healthy"}
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForGeoIP).AsGaugeVec().With(statusLabels)))
+
+	statusLabels["status"] = "Unhealthy"
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForGeoIP).AsGaugeVec().With(statusLabels)))
+
+	statusLabels["status"] = "NotFound"
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().With(statusLabels)))
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbStatusCountForGeoIP).AsGaugeVec().With(statusLabels)))
+
+	// assert - verify endpoint status metric is initialized with 0
+	endpointLabels := prometheus.Labels{"namespace": namespace, "name": "init", "dns_name": "init.example.com"}
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbEndpointStatusNum).AsGaugeVec().With(endpointLabels)))
+}
+
 func TestMain(m *testing.M) {
 	defaultGslb.Name = gslbName
 	defaultGslb.Namespace = namespace

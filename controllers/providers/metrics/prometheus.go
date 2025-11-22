@@ -224,6 +224,65 @@ func (m *PrometheusMetrics) Unregister() {
 	}
 }
 
+// InitializeZeroValues initializes all counter and gauge metrics with zero values.
+// This ensures that all metrics are visible in Prometheus dashboards even before
+// they are first updated by the application code. Uses a special "init" label value
+// to create initial time series that make the metrics discoverable.
+func (m *PrometheusMetrics) InitializeZeroValues() {
+	// Use special labels to initialize metrics so they appear in Prometheus
+	// These serve as placeholder time series to make metrics discoverable
+	// Real GSLB resources will create their own time series with actual labels
+	initLabels := prometheus.Labels{
+		"namespace": m.config.K8gbNamespace,
+		"name":      "init",
+	}
+
+	// Initialize counter metrics
+	m.metrics.K8gbGslbErrorsTotal.With(initLabels).Add(0)
+	m.metrics.K8gbGslbReconciliationLoopsTotal.With(initLabels).Add(0)
+	m.metrics.K8gbInfobloxZoneUpdatesTotal.With(initLabels).Add(0)
+	m.metrics.K8gbInfobloxZoneUpdateErrorsTotal.With(initLabels).Add(0)
+	m.metrics.K8gbInfobloxHeartbeatsTotal.With(initLabels).Add(0)
+	m.metrics.K8gbInfobloxHeartbeatErrorsTotal.With(initLabels).Add(0)
+
+	// Initialize gauge metrics
+	m.metrics.K8gbGslbHealthyRecords.With(initLabels).Set(0)
+
+	// Initialize gauge metrics with status labels
+	statusLabels := prometheus.Labels{
+		"namespace": m.config.K8gbNamespace,
+		"name":      "init",
+		"status":    "Healthy",
+	}
+	m.metrics.K8gbGslbServiceStatusNum.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForFailover.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForRoundrobin.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForGeoip.With(statusLabels).Set(0)
+
+	statusLabels["status"] = "Unhealthy"
+	m.metrics.K8gbGslbServiceStatusNum.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForFailover.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForRoundrobin.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForGeoip.With(statusLabels).Set(0)
+
+	statusLabels["status"] = "NotFound"
+	m.metrics.K8gbGslbServiceStatusNum.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForFailover.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForRoundrobin.With(statusLabels).Set(0)
+	m.metrics.K8gbGslbStatusCountForGeoip.With(statusLabels).Set(0)
+
+	// Initialize endpoint status metric
+	endpointLabels := prometheus.Labels{
+		"namespace": m.config.K8gbNamespace,
+		"name":      "init",
+		"dns_name":  "init.example.com",
+	}
+	m.metrics.K8gbEndpointStatusNum.With(endpointLabels).Set(0)
+
+	// Note: K8gbInfobloxRequestDuration is a histogram and doesn't need initialization
+	// Note: K8gbRuntimeInfo is set separately via SetRuntimeInfo()
+}
+
 // init instantiates particular metrics
 func (m *PrometheusMetrics) init() {
 
