@@ -79,6 +79,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | extdns.sources[0] | string | `"crd"` |  |
 | extdns.txtOwnerId | string | `"k8gb-<GEOTAG>"` |  |
 | extdns.txtPrefix | string | `"k8gb-<GEOTAG>-"` |  |
+| gatewayapi.enabled | bool | `true` | install gatewayapi RBAC |
 | global.imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | infoblox.dnsView | string | `"default"` | DNS view to use for zone operations |
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
