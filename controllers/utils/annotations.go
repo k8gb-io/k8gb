@@ -23,6 +23,9 @@ import netv1 "k8s.io/api/networking/v1"
 // ExternalIPsAnnotation is the annotation key for comma separated list of external IP addresses
 const ExternalIPsAnnotation = "k8gb.io/exposed-ip-addresses"
 
+// HostnameAnnotation is the annotation key for the hostname of the application
+const HostnameAnnotation = "k8gb.io/hostname"
+
 // MergeAnnotations adds or updates annotations from source to target and returns merge
 func MergeAnnotations(target map[string]string, source map[string]string, controlledAnnotations ...string) map[string]string {
 	if target == nil {
