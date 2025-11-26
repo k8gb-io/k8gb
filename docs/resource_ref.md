@@ -3,9 +3,11 @@ Starting from v0.15.0, k8gb introduces a much simpler way to link a GSLB resourc
 This makes your Ingress the single source of truth for application routing.
 
 K8GB supports the following ingress resources: 
-- [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
-- [Istio Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
-- Gateway API's [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) and [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/) - to be released in v0.17.0
+
+* [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+* [Kubernetes LoadBalancer Service](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)
+* [Istio Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
+* Gateway API's [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) and [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/) - to be released in v0.17.0
 
 ## 1. Declaration by Name
 The simplest way is to directly specify the name of the resource you want to reference in your GSLB. The namespace will be automatically taken from the GSLB’s namespace.
@@ -21,6 +23,19 @@ spec:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
     name: playground-failover-ingress
+```
+
+LoadBalancer Service:
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: playground-failover
+spec:
+  resourceRef:
+    apiVersion: v1
+    kind: Service
+    name: playground-failover-lbservice
 ```
 
 Istio Virtual Service:
