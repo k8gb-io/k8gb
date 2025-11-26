@@ -148,3 +148,50 @@ func TestReconciliation(t *testing.T) {
 		})
 	}
 }
+
+func TestSplitIPsByVersion(t *testing.T) {
+	tests := []struct {
+		name         string
+		ips          []string
+		expectedIPv4 []string
+		expectedIPv6 []string
+	}{
+		{
+			name:         "no addresses",
+			ips:          []string{},
+			expectedIPv4: []string{},
+			expectedIPv6: []string{},
+		},
+		{
+			name:         "invalid address",
+			ips:          []string{"invalid"},
+			expectedIPv4: []string{},
+			expectedIPv6: []string{},
+		},
+		{
+			name:         "single IPv4 address",
+			ips:          []string{"192.168.1.1"},
+			expectedIPv4: []string{"192.168.1.1"},
+			expectedIPv6: []string{},
+		},
+		{
+			name:         "single IPv6 address",
+			ips:          []string{"2001:db8::1"},
+			expectedIPv4: []string{},
+			expectedIPv6: []string{"2001:db8::1"},
+		},
+		{
+			name:         "multiple addresses",
+			ips:          []string{"192.168.1.1", "2001:db8::1"},
+			expectedIPv4: []string{"192.168.1.1"},
+			expectedIPv6: []string{"2001:db8::1"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ipv4Addresses, ipv6Addresses := splitIPsByVersion(test.ips)
+			assert.Equal(t, test.expectedIPv4, ipv4Addresses)
+			assert.Equal(t, test.expectedIPv6, ipv6Addresses)
+		})
+	}
+}
