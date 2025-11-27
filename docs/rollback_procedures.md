@@ -45,3 +45,21 @@ helm list -n k8gb
 kubectl get pods -n k8gb
 kubectl get gslb -A
 ```
+
+You may also come across issues with CRD conflicts during rollback. If so, follow these steps:
+
+```bash
+kubectl annotate crd dnsendpoints.externaldns.k8s.io meta.helm.sh/release-name=k8gb --overwrite
+
+kubectl annotate crd dnsendpoints.externaldns.k8s.io meta.helm.sh/release-namespace=k8gb --overwrite
+
+kubectl label crd dnsendpoints.externaldns.k8s.io app.kubernetes.io/managed-by=Helm --overwrite
+
+helm upgrade k8gb k8gb/k8gb --version v0.14.0 -n k8gb -f new-values.yaml
+```
+This method manually sets the necessary Helm annotations and labels on the CRDs to allow Helm to manage them during the rollback.
+
+You can also fix this by using the `--force` flag with Helm upgrade:
+```bash
+helm upgrade k8gb k8gb/k8gb --version v0.14.0 -n k8gb -f new-values.yaml --force
+```
