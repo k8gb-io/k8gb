@@ -450,6 +450,22 @@ spec:
                     items:
                       type: string
                     type: array
+                  service:
+                    description: Service that exposes the ingress controller
+                    properties:
+                      name:
+                        description: Name of the resource
+                        type: string
+                      namespace:
+                        description: Namespace where the resource can be found
+                        type: string
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  status:
+                    description: Status of the load balancer service
+                    type: string
                 type: object
               servers:
                 description: Servers configuration

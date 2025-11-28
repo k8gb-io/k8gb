@@ -163,3 +163,14 @@ func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string
 
 	return gslbServiceIPs, nil
 }
+
+// GetLbService retrieves the service that exposes the ingress controller (the service itself for LoadBalancer type)
+func (rr *ReferenceResolver) GetLbService(_ context.Context) (*k8gbv1beta1.NamespacedName, error) {
+	if rr.service == nil {
+		return nil, nil
+	}
+	return &k8gbv1beta1.NamespacedName{
+		Namespace: rr.service.Namespace,
+		Name:      rr.service.Name,
+	}, nil
+}

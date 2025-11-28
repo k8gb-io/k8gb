@@ -238,3 +238,14 @@ func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string
 
 	return gslbIngressIPs, nil
 }
+
+// GetLbService retrieves the service that exposes the ingress controller (Istio gateway service)
+func (rr *ReferenceResolver) GetLbService(_ context.Context) (*k8gbv1beta1.NamespacedName, error) {
+	if rr.lbService == nil {
+		return nil, nil
+	}
+	return &k8gbv1beta1.NamespacedName{
+		Namespace: rr.lbService.Namespace,
+		Name:      rr.lbService.Name,
+	}, nil
+}
