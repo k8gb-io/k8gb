@@ -109,9 +109,9 @@ func TestGetServers(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
-			grpcRoute := utils.FileToGatewayAPIGRPCRoute(test.grpcRouteFile)
+			grpcRoute := utils.FileToGatewayApiGrpcRoute(test.grpcRouteFile)
 			resolver := ReferenceResolver{
-				grpcRoute: grpcRoute,
+				grpcRoute: NewGRPCRouteAdapter(grpcRoute),
 			}
 
 			// act

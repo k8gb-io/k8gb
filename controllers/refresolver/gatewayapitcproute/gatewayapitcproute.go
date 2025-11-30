@@ -1,4 +1,4 @@
-package gatewayapihttproute
+package gatewayapitcproute
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
@@ -31,41 +31,43 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
+	gatewayapiv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 )
 
 var log = logging.Logger()
 
 type ReferenceResolver struct {
-	httpRoute *HTTPRouteAdapter
-	gateway   *gatewayapiv1.Gateway
+	route   *TCPRouteAdapter
+	gateway *gatewayapiv1.Gateway
 }
 
 // NewReferenceResolver creates a new reference resolver capable of understanding `networking.gateway.api/v1` resources
 func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
-	httpRouteList, err := getGslbHTTPRouteRef(gslb, k8sClient)
+	tcpRouteList, err := getGslbTCPRouteRef(gslb, k8sClient)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(httpRouteList) != 1 {
-		return nil, fmt.Errorf("exactly 1 HTTPRoute resource expected but %d were found", len(httpRouteList))
+	if len(tcpRouteList) != 1 {
+		return nil, fmt.Errorf("exactly 1 TCPRoute resource expected but %d were found", len(tcpRouteList))
 	}
-	httpRoute := httpRouteList[0]
+	tcpRoute := tcpRouteList[0]
 
-	httpRouteAdapter := NewHTTPRouteAdapter(&httpRoute)
-	gateway, err := gatewayapi.GetGateway(httpRouteAdapter, k8sClient)
+	route := NewTCPRouteAdapter(&tcpRoute, gslb.Annotations[utils.HostnameAnnotation])
+
+	gateway, err := gatewayapi.GetGateway(route, k8sClient)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ReferenceResolver{
-		httpRoute: httpRouteAdapter,
-		gateway:   gateway,
+		route:   route,
+		gateway: gateway,
 	}, nil
 }
 
-// getGslbHTTPRouteRef resolves a Gateway API HTTPRoute resource referenced by the Gslb spec
-func getGslbHTTPRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1.HTTPRoute, error) {
+// getGslbTCPRouteRef resolves a Gateway API TCPRoute resource referenced by the Gslb spec
+func getGslbTCPRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha2.TCPRoute, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -73,39 +75,39 @@ func getGslbHTTPRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gat
 
 	switch query.Mode {
 	case queryopts.QueryModeGet:
-		var httproute = gatewayapiv1.HTTPRoute{}
-		err = k8sClient.Get(context.TODO(), *query.GetKey, &httproute)
+		var tcpRoute = gatewayapiv1alpha2.TCPRoute{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, &tcpRoute)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().
 					Str("gslb", gslb.Name).
 					Str("namespace", gslb.Namespace).
-					Msg("Can't find referenced HTTPRoute resource")
+					Msg("Can't find referenced TCPRoute resource")
 			}
 			return nil, err
 		}
-		return []gatewayapiv1.HTTPRoute{httproute}, nil
+		return []gatewayapiv1alpha2.TCPRoute{tcpRoute}, nil
 
 	case queryopts.QueryModeList:
-		httprouteList := &gatewayapiv1.HTTPRouteList{}
-		err = k8sClient.List(context.TODO(), httprouteList, query.ListOpts...)
+		tcpRouteList := &gatewayapiv1alpha2.TCPRouteList{}
+		err = k8sClient.List(context.TODO(), tcpRouteList, query.ListOpts...)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().
 					Str("gslb", gslb.Name).
 					Str("namespace", gslb.Namespace).
-					Msg("Can't find referenced HTTPRoute resource")
+					Msg("Can't find referenced TCPRoute resource")
 			}
 			return nil, err
 		}
-		return httprouteList.Items, nil
+		return tcpRouteList.Items, nil
 	}
 	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }
 
-// GetServers retrieves the GSLB server configuration from the HTTPRoute resource
+// GetServers retrieves the GSLB server configuration from the TCPRoute resource
 func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
-	return gatewayapi.GetServersFromRoute(rr.httpRoute)
+	return gatewayapi.GetServersFromRoute(rr.route)
 }
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB

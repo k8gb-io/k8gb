@@ -36,10 +36,28 @@ func TestGetServers(t *testing.T) {
 		expectError     bool
 	}{
 		{
+			name:            "missing hostname annotation",
+			serviceFile:     "./testdata/lb_service_multiple_ips.yaml",
+			gslbAnnotations: map[string]string{
+				// Missing hostname annotation
+			},
+			expectedServers: nil,
+			expectError:     true,
+		},
+		{
+			name:        "empty hostname annotation",
+			serviceFile: "./testdata/lb_service_multiple_ips.yaml",
+			gslbAnnotations: map[string]string{
+				utils.HostnameAnnotation: "",
+			},
+			expectedServers: nil,
+			expectError:     true,
+		},
+		{
 			name:        "valid LoadBalancer service with hostname annotation",
 			serviceFile: "./testdata/lb_service_multiple_ips.yaml",
 			gslbAnnotations: map[string]string{
-				hostnameAnnotation: "test.example.com",
+				utils.HostnameAnnotation: "test.example.com",
 			},
 			expectedServers: []*k8gbv1beta1.Server{
 				{
@@ -53,24 +71,6 @@ func TestGetServers(t *testing.T) {
 				},
 			},
 			expectError: false,
-		},
-		{
-			name:            "missing hostname annotation",
-			serviceFile:     "./testdata/lb_service_multiple_ips.yaml",
-			gslbAnnotations: map[string]string{
-				// Missing hostname annotation
-			},
-			expectedServers: nil,
-			expectError:     true,
-		},
-		{
-			name:        "empty hostname annotation",
-			serviceFile: "./testdata/lb_service_multiple_ips.yaml",
-			gslbAnnotations: map[string]string{
-				hostnameAnnotation: "",
-			},
-			expectedServers: nil,
-			expectError:     true,
 		},
 	}
 
