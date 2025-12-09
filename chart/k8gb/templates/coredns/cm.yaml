@@ -28,10 +28,10 @@ data:
             negttl {{ .dnsZoneNegTTL | default 30 }}
             loadbalance weight
             {{- if .geoDataFilePath }}
-            geoDataFilePath {{ .geoDataFilePath }}
+            geodatafilepath {{ .geoDataFilePath }}
             {{- end }}
             {{- if .geoDataField }}
-            geoDataField {{ .geoDataField }}
+            geodatafield {{ .geoDataField }}
             {{- end }}
         }
     }
