@@ -1808,8 +1808,8 @@ Should return <strong><em>two A records</em></strong> from both clusters (IP add
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>k3d-test-gslb2-agent-0    172.20.0.5
 </code></pre></div></p>
 <p>Or you can ask specific CoreDNS instance for its local targets:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5053</span><span class="w"> </span>+tcp<span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5054</span><span class="w"> </span>+tcp<span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5053</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5054</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com
 </code></pre></div>
 As expected result you should see <strong>two A records</strong> divided between both clusters.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>...
@@ -1936,7 +1936,7 @@ Optionally you can switch GLSB back to round-robin mode
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 22, 2025 14:57:09 UTC">November 22, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 12, 2025 22:52:45 UTC">December 12, 2025</span>
   </span>
 
     
