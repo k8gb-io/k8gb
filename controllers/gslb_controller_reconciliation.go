@@ -146,11 +146,44 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	lbIpv4Addresses, _ := splitIPsByVersion(loadBalancerExposedIPs)
 	gslb.Status.LoadBalancer.ExposedIPs = lbIpv4Addresses
 
+	// Discover load balancer service reference from resolver
+	lbService, err := refResolver.GetLbService(ctx)
+	if err != nil {
+		m.IncrementError(gslb)
+		r.Recorder.Eventf(gslb, corev1.EventTypeWarning, "LoadBalancerServiceDiscoveryFailed",
+			"Failed to discover load balancer service: %s", err.Error())
+		return result.RequeueError(fmt.Errorf("discovering load balancer service (%s)", err))
+	}
+	gslb.Status.LoadBalancer.Service = lbService
+
+	// Emit event for service discovery result
+	if r.Config.IngressControllerHealthCheckEnabled {
+		if lbService != nil {
+			r.Recorder.Eventf(gslb, corev1.EventTypeNormal, "LoadBalancerServiceDiscovered",
+				"Discovered ingress controller service: %s/%s", lbService.Namespace, lbService.Name)
+		} else {
+			r.Recorder.Event(gslb, corev1.EventTypeNormal, "LoadBalancerServiceNotFound",
+				"No ingress controller service found - health check will be disabled")
+		}
+	}
+
 	log.Debug().
 		Str("gslb", gslb.Name).
 		Msg("Resolved LoadBalancer and Server configuration referenced by Ingress")
 
+	// Check load balancer health BEFORE checking application health
+	// This ensures the LB status is available when evaluating overall health
+	if r.Config.IngressControllerHealthCheckEnabled {
+		lbHealth, err := r.getLoadBalancerHealthStatus(ctx, gslb)
+		if err != nil {
+			m.IncrementError(gslb)
+			return result.RequeueError(err)
+		}
+		gslb.Status.LoadBalancer.Status = lbHealth
+	}
+
 	// == health status of applications ==
+	// This checks application health and combines it with LB health (if enabled)
 	serviceHealth, err := r.getServiceHealthStatus(ctx, gslb)
 	if err != nil {
 		m.IncrementError(gslb)

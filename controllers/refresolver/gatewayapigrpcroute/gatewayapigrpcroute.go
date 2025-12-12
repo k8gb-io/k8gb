@@ -113,3 +113,9 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
 	return gatewayapi.GetGslbExposedIPs(rr.gateway, gslbAnnotations, parentZoneDNSServers)
 }
+
+// GetLbService retrieves the service that exposes the gateway
+// Gateway API does not require ingress controller service discovery, so this returns nil
+func (rr *ReferenceResolver) GetLbService(_ context.Context) (*k8gbv1beta1.NamespacedName, error) {
+	return nil, nil
+}

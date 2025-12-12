@@ -28,11 +28,16 @@ k8gb:
   edgeDNSServers:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
-  # -- Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags
+  # -- Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters' extGslbClustersGeoTags
   clusterGeoTag: "eu"
   # -- Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances
   # If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used.
   extGslbClustersGeoTags: "eu,us"
+  # -- Ingress controller health check configuration
+  ingressController:
+    healthCheck:
+      # -- Enable health checking for the ingress controller/load balancer. When enabled, k8gb considers both application health and ingress controller health in failover decisions. The ingress controller service is automatically discovered based on the ingress type.
+      enabled: false
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
   # -- TTL of the NS and respective glue record used by external DNS
