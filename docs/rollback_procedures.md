@@ -46,7 +46,7 @@ kubectl get pods -n k8gb
 kubectl get gslb -A
 ```
 
-You may also come across issues with CRD conflicts during rollback. If so, follow these steps:
+You may also run into CRD ownership conflicts when downgrading/rolling back, because the CRD already exists but Helm can’t “adopt” it. Since CRDs are cluster-scoped, Helm relies on specific annotations/labels to recognize them as part of the release.
 
 ```bash
 kubectl annotate crd dnsendpoints.externaldns.k8s.io meta.helm.sh/release-name=k8gb --overwrite
@@ -58,8 +58,9 @@ kubectl label crd dnsendpoints.externaldns.k8s.io app.kubernetes.io/managed-by=H
 helm upgrade k8gb k8gb/k8gb --version v0.14.0 -n k8gb -f new-values.yaml
 ```
 This method manually sets the necessary Helm annotations and labels on the CRDs to allow Helm to manage them during the rollback.
-
-You can also fix this by using the `--force` flag with Helm upgrade:
+> NOTE: by rollback, we mean downgrading to the previous version, not specific `helm rollback` functionality 
+If the chart version changes the CRD schema (or conversion webhook behavior), downgrading can still fail even after adoption, because existing CR instances may not validate against the older schema. In that case you may need to align CRD versions more explicitly (or avoid downgrading CRDs altogether).
+You can use --force, but treat it as a last resort because it may replace resources to apply changes.:
 ```bash
 helm upgrade k8gb k8gb/k8gb --version v0.14.0 -n k8gb -f new-values.yaml --force
 ```
