@@ -17,7 +17,7 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     env:
-      OCI_REPO: oci://ghcr.io/k8gb-io/charts
+      OCI_REPO: oci://ghcr.io/itsfarhan/charts
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -32,7 +32,7 @@ jobs:
         with:
           access-token: ${{ secrets.CR_TOKEN }}
           source-charts-folder: 'chart'
-          destination-repo: k8gb-io/k8gb
+          destination-repo: itsfarhan/k8gb
           destination-branch: gh-pages
 
       - name: Push to OCI Registry
@@ -41,7 +41,7 @@ jobs:
           git fetch origin gh-pages
           git checkout origin/gh-pages -- charts/
           ls -la charts/
-          OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
+          OCI_REPO="${OCI_REPO:-oci://ghcr.io/itsfarhan/charts}"
           VERSION=$(make version)
           CHART_FILE="charts/k8gb-${VERSION}.tgz"
           if [ -f "$CHART_FILE" ]; then
