@@ -6,44 +6,47 @@ repo_name: k8gb-io/k8gb
 edit_uri: edit/master/docs/
 
 nav:
-  - Home: index.md
-  - Getting Started: intro.md
-  - Installation & Configuration: tutorials.md
-  - Components: components.md
-  - Load Balancing Strategy: strategy.md
-  - DNS Providers:
-    - AWS Route53: deploy_route53.md
-    - Azure DNS: deploy_azuredns.md
-    - Google Cloud DNS: provider_gcp.md
-    - Infoblox: deploy_infoblox.md
-    - NS1: deploy_ns1.md
-    - Windows DNS: deploy_windowsdns.md
-    - Cloudflare: deploy_cloudflare.md
-    - RFC2136/Bind9: provider_rfc2136.md
-  - Configuration:
-    - Resource References: resource_ref.md
-    - Address Discovery: address_discovery.md
-    - Dynamic Geotags: dynamic_geotags.md
-    - Multi-zone Setup: multizone.md
-    - Exposing DNS: exposing_dns.md
-  - Development & Testing:
-    - Local Setup: local.md
-    - Local with Kuar: local-kuar.md
-  - Monitoring and Observability:
-    - Metrics: metrics.md
-    - Traces: traces.md
-  - Platform Integrations:
-    - Admiralty: admiralty.md
-    - Liqo: liqo.md
-    - Rancher: rancher.md
-    - Crossplane Global Control Plane: examples/crossplane/globalapp/README.md
-  - Advanced:
-    - Service Upgrade: service_upgrade.md
-    - WRR Caveats: wrr_caveats.md
-    - External DNS Proxy: proxy_externaldns.md
-  - Community:
-    - Contributing: CONTRIBUTING.md
-    - Adopters: ADOPTERS.md
+  - Documentation:
+    - Home: index.md
+    - Getting Started: intro.md
+    - Installation & Configuration: tutorials.md
+    - Components: components.md
+    - Load Balancing Strategy: strategy.md
+    - DNS Providers:
+      - AWS Route53: deploy_route53.md
+      - Azure DNS: deploy_azuredns.md
+      - Google Cloud DNS: provider_gcp.md
+      - Infoblox: deploy_infoblox.md
+      - NS1: deploy_ns1.md
+      - Windows DNS: deploy_windowsdns.md
+      - Cloudflare: deploy_cloudflare.md
+      - RFC2136/Bind9: provider_rfc2136.md
+    - Configuration:
+      - Resource References: resource_ref.md
+      - Address Discovery: address_discovery.md
+      - Dynamic Geotags: dynamic_geotags.md
+      - Multi-zone Setup: multizone.md
+      - Exposing DNS: exposing_dns.md
+    - Development & Testing:
+      - Local Setup: local.md
+      - Local with Kuar: local-kuar.md
+    - Monitoring and Observability:
+      - Metrics: metrics.md
+      - Traces: traces.md
+    - Platform Integrations:
+      - Admiralty: admiralty.md
+      - Liqo: liqo.md
+      - Rancher: rancher.md
+      - Crossplane Global Control Plane: examples/crossplane/globalapp/README.md
+    - Advanced:
+      - Service Upgrade: service_upgrade.md
+      - WRR Caveats: wrr_caveats.md
+      - External DNS Proxy: proxy_externaldns.md
+    - Community:
+      - Contributing: CONTRIBUTING.md
+      - Adopters: ADOPTERS.md
+  - Blog:
+    - blog/index.md
 theme:
   name: material
   custom_dir: overrides  
@@ -51,19 +54,21 @@ theme:
   favicon: images/k8gb-icon-color.svg
   palette:
     - scheme: default
-      primary: red
-      accent: deep orange
+      primary: deep red
+      accent: red
       toggle:
         icon: material/brightness-1
         name: Switch to dark mode
     - scheme: slate
-      primary: red
-      accent: deep orange
+      primary: deep red
+      accent: red
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
   features:
+    - navigation.tabs
     - navigation.sections
+    - navigation.indexes
     - navigation.expand
     - navigation.top
     - navigation.tracking
@@ -91,6 +96,21 @@ markdown_extensions:
 
 plugins:
   - search
+  - blog:
+      blog_dir: blog
+      blog_toc: true
+      post_date_format: full
+      post_url_date_format: yyyy/MM/dd
+      post_url_format: "{date}/{slug}"
+      archive_date_format: MMMM yyyy
+      categories_allowed:
+        - Releases
+        - Tutorials
+        - Community
+        - Technical Deep Dive
+        - Integrations
+      authors_profiles: true
+      pagination_per_page: 10
   - git-revision-date-localized:
       enable_creation_date: true
   - mkdocs-simple-hooks:

@@ -1,0 +1,25 @@
+authors:
+  k8gb-team:
+    name: K8GB Team
+    description: Core maintainers and contributors of K8GB
+    avatar: https://raw.githubusercontent.com/cncf/artwork/master/projects/k8gb/icon/color/k8gb-icon-color.svg
+    
+  ytsarev:
+    name: Yury Tsarev
+    description: K8GB Co-founder and Maintainer
+    avatar: https://github.com/ytsarev.png
+
+  elohmrow:
+    name: Bradley Andersen
+    description: Community Manager and Maintainer
+    avatar: https://github.com/elohmrow.png
+    
+  itsfarhan:
+    name: Farhan Ahmed
+    description: Contributor
+    avatar: https://github.com/itsfarhan.png
+    
+  community:
+    name: Community Contributor
+    description: Member of the K8GB community
+    avatar: https://raw.githubusercontent.com/cncf/artwork/master/projects/k8gb/icon/color/k8gb-icon-color.svg

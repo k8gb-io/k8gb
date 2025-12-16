@@ -1,5 +1,5 @@
 [build]
-  command = "pip install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin && mkdocs build"
+  command = "pip install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks && mkdocs build"
   publish = "site/"
 
 [build.environment]
