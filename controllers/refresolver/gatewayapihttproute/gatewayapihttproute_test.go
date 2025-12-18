@@ -40,7 +40,7 @@ func TestGetServers(t *testing.T) {
 					Host: "gatewayapi-httproute.cloud.example.com",
 					Services: []*k8gbv1beta1.NamespacedName{
 						{
-							Name:      "gatewayapi-service",
+							Name:      "gatewayapi-httproute-service",
 							Namespace: "test-gslb",
 						},
 					},
@@ -109,9 +109,9 @@ func TestGetServers(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
-			httpRoute := utils.FileToGatewayAPIHTTPRoute(test.httpRouteFile)
+			httpRoute := utils.FileToGatewayApiHttpRoute(test.httpRouteFile)
 			resolver := ReferenceResolver{
-				httpRoute: httpRoute,
+				httpRoute: NewHTTPRouteAdapter(httpRoute),
 			}
 
 			// act

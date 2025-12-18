@@ -35,7 +35,7 @@ import (
 var log = logging.Logger()
 
 // GetGateway retrieves the gateway referenced by a route resource
-func GetGateway(route RouteSpec, k8sClient client.Client) (*gatewayapiv1.Gateway, error) {
+func GetGateway(route RouteAdapter, k8sClient client.Client) (*gatewayapiv1.Gateway, error) {
 	var gateways []types.NamespacedName
 	for _, parentRef := range route.GetParentRefs() {
 		if parentRef.Kind != nil && string(*parentRef.Kind) != "Gateway" {
@@ -76,8 +76,11 @@ func GetGateway(route RouteSpec, k8sClient client.Client) (*gatewayapiv1.Gateway
 }
 
 // GetServersFromRoute retrieves the GSLB server configuration from a route resource
-func GetServersFromRoute(route RouteSpec) ([]*k8gbv1beta1.Server, error) {
-	hostnames := route.GetHostnames()
+func GetServersFromRoute(route RouteAdapter) ([]*k8gbv1beta1.Server, error) {
+	hostnames, err := route.GetHostnames()
+	if err != nil {
+		return nil, err
+	}
 	if len(hostnames) < 1 {
 		return nil, fmt.Errorf("can't find hosts in route %s", route.GetName())
 	}

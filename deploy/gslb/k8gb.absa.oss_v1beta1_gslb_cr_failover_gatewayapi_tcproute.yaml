@@ -1,0 +1,30 @@
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: failover-tcproute
+  namespace: test-gslb-gatewayapi
+spec:
+  parentRefs:
+  - name: gatewayapi
+    namespace: istio-ingress
+  rules:
+  - backendRefs:
+    - name: frontend-podinfo
+      port: 9898
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-tcproute
+  namespace: test-gslb-gatewayapi
+  annotations:
+    k8gb.io/hostname: gatewayapi-tcproute.cloud.example.com
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha2
+    kind: TCPRoute
+    name: failover-tcproute
+  strategy:
+    type: failover
+    primaryGeoTag: eu
