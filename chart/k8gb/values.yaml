@@ -199,7 +199,7 @@ tracing:
     # -- OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data
     # to somewhere else using exporters (Jaeger for instance)
     repository: otel/opentelemetry-collector
-    tag: 0.141.0
+    tag: 0.142.0
     pullPolicy: Always
 
   jaegerImage:
