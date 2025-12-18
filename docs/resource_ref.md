@@ -36,6 +36,8 @@ kind: Gslb
 metadata:
   name: playground-failover
   namespace: playground
+  annotations:
+    k8gb.io/hostname: "myapp.example.com"
 spec:
   resourceRef:
     apiVersion: v1
