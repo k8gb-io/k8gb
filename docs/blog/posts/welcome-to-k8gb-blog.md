@@ -1,7 +1,6 @@
 ---
 date: 
   created: 2025-12-16
-  updated: 2025-12-16
 authors:
   - ytsarev
   - itsfarhan
@@ -12,7 +11,6 @@ tags:
   - announcement
   - blog
   - community
-readtime: 3
 ---
 
 # Welcome to the K8GB Blog!
