@@ -13,3 +13,9 @@ spec:
     allowedRoutes:
       namespaces:
         from: All
+  - name: tcp
+    protocol: TCP
+    port: 8000
+    allowedRoutes:
+      kinds:
+      - kind: TCPRoute

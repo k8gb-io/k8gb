@@ -3,7 +3,7 @@ kind: Gslb
 metadata:
   name: gatewayapi-tcproute
   namespace: test-gslb
-  labels:
+  annotations:
     k8gb.io/hostname: gatewayapi-tcproute.cloud.example.com
 spec:
   resourceRef:

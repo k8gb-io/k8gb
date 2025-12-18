@@ -2,12 +2,15 @@
 Starting from v0.15.0, k8gb introduces a much simpler way to link a GSLB resource to an Ingress object in Kubernetes. You no longer need to duplicate the Ingress configuration in your GSLB definition—instead, you can simply reference an existing Ingress. 
 This makes your Ingress the single source of truth for application routing.
 
-K8GB supports the following ingress resources: 
+K8GB supports the following ingress resources:
 
 * [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 * [Kubernetes LoadBalancer Service](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)
 * [Istio Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
-* Gateway API's [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) and [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/) - to be released in v0.17.0
+* Gateway API Resources(to be released in **v0.17.0**):
+  - [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/)
+  - [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/)
+  - [TCPRoute](https://gateway-api.sigs.k8s.io/guides/tcp/)
 
 ## 1. Declaration by Name
 The simplest way is to directly specify the name of the resource you want to reference in your GSLB. The namespace will be automatically taken from the GSLB’s namespace.
@@ -18,6 +21,7 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
+  namespace: playground
 spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
@@ -31,6 +35,7 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
+  namespace: playground
 spec:
   resourceRef:
     apiVersion: v1
@@ -44,6 +49,7 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
+  namespace: playground
 spec:
   resourceRef:
     apiVersion: networking.istio.io/v1
@@ -57,6 +63,7 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
+  namespace: playground
 spec:
   resourceRef:
     apiVersion: gateway.networking.k8s.io/v1
@@ -70,11 +77,28 @@ apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
+  namespace: playground
 spec:
   resourceRef:
     apiVersion: gateway.networking.k8s.io/v1
     kind: GRPCRoute
     name: playground-failover-grpcroute
+```
+
+GatewayAPI TCPRoute:
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-tcproute
+  namespace: playground
+  annotations:
+    k8gb.io/hostname: gatewayapi-tcproute.cloud.example.com
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha2
+    kind: TCPRoute
+    name: failover-tcproute
 ```
 
 
