@@ -1,0 +1,1 @@
+examples/crossplane/globalapp/README.md
