@@ -3,7 +3,7 @@ kind: Gslb
 metadata:
   name: gatewayapi-udproute
   namespace: test-gslb
-  labels:
+  annotations:
     k8gb.io/hostname: gatewayapi-udproute.cloud.example.com
 spec:
   resourceRef:
