@@ -7,16 +7,17 @@ K8GB supports the following ingress resources:
 * [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 * [Kubernetes LoadBalancer Service](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)
 * [Istio Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
-* Gateway API Resources(to be released in **v0.17.0**):
+* Gateway API Resources(available since **v0.17.0**):
   - [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/)
   - [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/)
   - [TCPRoute](https://gateway-api.sigs.k8s.io/guides/tcp/)
   - [UDPRoute](https://gateway-api.sigs.k8s.io/reference/1.4/spec/?h=udproute#udproute)
+  - [TLSRoute](https://gateway-api.sigs.k8s.io/geps/gep-2643/?h=tls#tlsroute-tls-passthrough)
 
 ## 1. Declaration by Name
 The simplest way is to directly specify the name of the resource you want to reference in your GSLB. The namespace will be automatically taken from the GSLB’s namespace.
 
-Ingress:
+#### Ingress
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -30,7 +31,7 @@ spec:
     name: playground-failover-ingress
 ```
 
-LoadBalancer Service:
+#### LoadBalancer Service
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -46,7 +47,7 @@ spec:
     name: playground-failover-lbservice
 ```
 
-Istio Virtual Service:
+#### Istio Virtual Service
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -60,7 +61,7 @@ spec:
     name: playground-failover-virtualservice
 ```
 
-GatewayAPI HTTPRoute:
+#### GatewayAPI HTTPRoute
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -74,7 +75,7 @@ spec:
     name: playground-failover-httproute
 ```
 
-GatewayAPI GRPCRoute:
+#### GatewayAPI GRPCRoute
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -88,7 +89,7 @@ spec:
     name: playground-failover-grpcroute
 ```
 
-GatewayAPI TCPRoute:
+#### GatewayAPI TCPRoute
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -104,7 +105,7 @@ spec:
     name: failover-tcproute
 ```
 
-GatewayAPI UDPRoute:
+#### GatewayAPI UDPRoute
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -120,6 +121,19 @@ spec:
     name: failover-udproute
 ```
 
+#### GatewayAPI TLSRoute
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-tlsroute
+  namespace: playground
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha3
+    kind: TLSRoute
+    name: failover-tlsroute
+```
 
 ## 2. Declaration by Label
 Alternatively, you can reference the ingress resource by label. This approach is useful when you need more flexibility—for example, 
