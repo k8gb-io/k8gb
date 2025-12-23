@@ -1,0 +1,15 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: gatewayapi-udproute
+  namespace: test-gslb
+  annotations:
+    k8gb.io/hostname: gatewayapi-udproute.cloud.example.com
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha2
+    kind: UDPRoute
+    name: gatewayapi-udproute
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30

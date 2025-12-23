@@ -19,3 +19,9 @@ spec:
     allowedRoutes:
       kinds:
       - kind: TCPRoute
+  - name: udp
+    protocol: UDP
+    port: 8000
+    allowedRoutes:
+      kinds:
+      - kind: UDPRoute

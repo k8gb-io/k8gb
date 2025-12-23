@@ -280,6 +280,12 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_notfound_gatewayapi_httproute.yaml)
 	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_unhealthy_gatewayapi_httproute.yaml)
 
+	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API TCPRoute $(NC)"
+	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_gatewayapi_tcproute.yaml)
+
+	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API UDPRoute $(NC)"
+	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_gatewayapi_udproute.yaml)
+
 	@echo -e "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo

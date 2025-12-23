@@ -140,6 +140,19 @@ func FileToGatewayApiTcpRoute(file string) *gatewayapiv1alpha2.TCPRoute {
 	return tcpRoute
 }
 
+// FileToGatewayApiUdpRoute takes a file and returns a GatewayAPI UDPRoute object
+func FileToGatewayApiUdpRoute(file string) *gatewayapiv1alpha2.UDPRoute {
+	yaml, err := os.ReadFile(file)
+	if err != nil {
+		panic(fmt.Errorf("can't open example CR file: %s", file))
+	}
+	udpRoute, err := YamlToGatewayApiUdpRoute(yaml)
+	if err != nil {
+		panic(err)
+	}
+	return udpRoute
+}
+
 // FileToService takes a file and returns a Service object
 func FileToService(file string) *corev1.Service {
 	yaml, err := os.ReadFile(file)
@@ -297,4 +310,20 @@ func YamlToGatewayApiTcpRoute(yaml []byte) (*gatewayapiv1alpha2.TCPRoute, error)
 		return &gatewayapiv1alpha2.TCPRoute{}, err
 	}
 	return tcpRoute, nil
+}
+
+// YamlToGatewayApiUdpRoute takes yaml and returns a GatewayAPI UDPRoute object
+func YamlToGatewayApiUdpRoute(yaml []byte) (*gatewayapiv1alpha2.UDPRoute, error) {
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &gatewayapiv1alpha2.UDPRoute{}, err
+	}
+	// unmarshal the json into the kube struct
+	udpRoute := &gatewayapiv1alpha2.UDPRoute{}
+	err = json.Unmarshal(jsonBytes, &udpRoute)
+	if err != nil {
+		return &gatewayapiv1alpha2.UDPRoute{}, err
+	}
+	return udpRoute, nil
 }
