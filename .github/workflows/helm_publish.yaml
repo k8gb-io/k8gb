@@ -38,12 +38,9 @@ jobs:
           destination-branch: gh-pages
 
       - name: Install Cosign
-        run: |
-          COSIGN_VERSION="v3.0.3"
-          curl -O -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64"
-          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-          sudo chmod +x /usr/local/bin/cosign
-          cosign version
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad
+        with:
+          cosign-release: 'v3.0.3' 
 
       - name: Push and Sign Charts to OCI Registry
         env:
