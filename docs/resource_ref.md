@@ -12,6 +12,7 @@ K8GB supports the following ingress resources:
   - [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/)
   - [TCPRoute](https://gateway-api.sigs.k8s.io/guides/tcp/)
   - [UDPRoute](https://gateway-api.sigs.k8s.io/reference/1.4/spec/?h=udproute#udproute)
+  - [TLSRoute](https://gateway-api.sigs.k8s.io/geps/gep-2643/?h=tls#tlsroute-tls-passthrough)
 
 ## 1. Declaration by Name
 The simplest way is to directly specify the name of the resource you want to reference in your GSLB. The namespace will be automatically taken from the GSLB’s namespace.
@@ -118,6 +119,20 @@ spec:
     apiVersion: gateway.networking.k8s.io/v1alpha2
     kind: UDPRoute
     name: failover-udproute
+```
+
+GatewayAPI TLSRoute:
+```yaml
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: failover-tlsroute
+  namespace: playground
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha3
+    kind: TLSRoute
+    name: failover-tlsroute
 ```
 
 

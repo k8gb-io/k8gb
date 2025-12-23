@@ -17,11 +17,23 @@ spec:
     protocol: TCP
     port: 8000
     allowedRoutes:
+      namespaces:
+        from: All
       kinds:
       - kind: TCPRoute
   - name: udp
     protocol: UDP
     port: 8000
     allowedRoutes:
+      namespaces:
+        from: All
       kinds:
       - kind: UDPRoute
+  - name: tls
+    protocol: TLS
+    port: 8000
+    allowedRoutes:
+      namespaces:
+        from: All
+      kinds:
+      - kind: TLSRoute
