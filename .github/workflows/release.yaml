@@ -73,6 +73,20 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Required for linux/arm64 builds on amd64 GitHub runners
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Required for multi-arch builds and OCI attestations (SBOM/provenance)
+      # Default docker driver does not support --attest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          install: true
+          use: true
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
         with:
