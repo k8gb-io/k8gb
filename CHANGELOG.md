@@ -1,5 +1,68 @@
 # Changelog
 
+## [v0.17.0](https://github.com/k8gb-io/k8gb/tree/v0.17.0) (2025-12-24)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.16.0...v0.17.0)
+
+**Closed issues:**
+
+- Release v0.16.0 [\#1992](https://github.com/k8gb-io/k8gb/issues/1992)
+- Unable to connect to CoreDNS instances when running local tutorial [\#1830](https://github.com/k8gb-io/k8gb/issues/1830)
+- Add initial values for metrics [\#715](https://github.com/k8gb-io/k8gb/issues/715)
+
+**Merged pull requests:**
+
+- fix\(release\): enable buildx attestation support for multi-arch images [\#2147](https://github.com/k8gb-io/k8gb/pull/2147) ([ytsarev](https://github.com/ytsarev))
+- RELEASE: v0.17.0 [\#2146](https://github.com/k8gb-io/k8gb/pull/2146) ([ytsarev](https://github.com/ytsarev))
+- Update Helm Docs [\#2145](https://github.com/k8gb-io/k8gb/pull/2145) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update dependency kubernetes-sigs/controller-tools to v0.20.0 [\#2143](https://github.com/k8gb-io/k8gb/pull/2143) ([renovate[bot]](https://github.com/apps/renovate))
+- feat: K8GB Blog [\#2141](https://github.com/k8gb-io/k8gb/pull/2141) ([itsfarhan](https://github.com/itsfarhan))
+- Add Community Meeting Agenda as Markdown [\#2140](https://github.com/k8gb-io/k8gb/pull/2140) ([elohmrow](https://github.com/elohmrow))
+- chore\(deps\): update otel/opentelemetry-collector docker tag to v0.142.0 [\#2139](https://github.com/k8gb-io/k8gb/pull/2139) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#2136](https://github.com/k8gb-io/k8gb/pull/2136) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update actions/upload-artifact action to v6 [\#2134](https://github.com/k8gb-io/k8gb/pull/2134) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update peter-evans/create-pull-request action to v8 [\#2131](https://github.com/k8gb-io/k8gb/pull/2131) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update kyverno/action-install-chainsaw action to v0.2.14 [\#2130](https://github.com/k8gb-io/k8gb/pull/2130) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update terraform kubernetes to v3 [\#2129](https://github.com/k8gb-io/k8gb/pull/2129) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update dependency go to v1.25.5 [\#2128](https://github.com/k8gb-io/k8gb/pull/2128) ([renovate[bot]](https://github.com/apps/renovate))
+- add LB Service to ResourceRef docs [\#2126](https://github.com/k8gb-io/k8gb/pull/2126) ([abaguas](https://github.com/abaguas))
+- Introduce support for IPv4 addresses in dual-stack setups [\#2125](https://github.com/k8gb-io/k8gb/pull/2125) ([abaguas](https://github.com/abaguas))
+- Update Helm Docs [\#2124](https://github.com/k8gb-io/k8gb/pull/2124) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Initialize Prometheus metrics with zero values at startup [\#2123](https://github.com/k8gb-io/k8gb/pull/2123) ([angelbarrera92](https://github.com/angelbarrera92))
+- chore\(deps\): update actions/checkout action to v6 [\#2122](https://github.com/k8gb-io/k8gb/pull/2122) ([renovate[bot]](https://github.com/apps/renovate))
+- Document GatewayAPI integration, and include it in local setup [\#2119](https://github.com/k8gb-io/k8gb/pull/2119) ([abaguas](https://github.com/abaguas))
+- Add support for GatewayAPI's TLSRoute [\#2118](https://github.com/k8gb-io/k8gb/pull/2118) ([abaguas](https://github.com/abaguas))
+- Add support for GatewayAPI's UDPRoute [\#2117](https://github.com/k8gb-io/k8gb/pull/2117) ([abaguas](https://github.com/abaguas))
+- Add support for GatewayAPI's TCPRoute [\#2116](https://github.com/k8gb-io/k8gb/pull/2116) ([abaguas](https://github.com/abaguas))
+- fix\(deps\): update module sigs.k8s.io/external-dns to v0.20.0 [\#2115](https://github.com/k8gb-io/k8gb/pull/2115) ([renovate[bot]](https://github.com/apps/renovate))
+- Add support for GatewayAPI's HTTPRoute and GRPCRoute [\#2114](https://github.com/k8gb-io/k8gb/pull/2114) ([abaguas](https://github.com/abaguas))
+- fix\(deps\): update kubernetes packages to v0.34.2 [\#2112](https://github.com/k8gb-io/k8gb/pull/2112) ([renovate[bot]](https://github.com/apps/renovate))
+- Add VERSION fallback in Makefile [\#2111](https://github.com/k8gb-io/k8gb/pull/2111) ([WesleyKlop](https://github.com/WesleyKlop))
+- Fix Prometheus and Grafana exposure [\#2109](https://github.com/k8gb-io/k8gb/pull/2109) ([abaguas](https://github.com/abaguas))
+- Fix go-releaser installation [\#2108](https://github.com/k8gb-io/k8gb/pull/2108) ([abaguas](https://github.com/abaguas))
+- fix\(docs\): added more rollback procedures [\#2105](https://github.com/k8gb-io/k8gb/pull/2105) ([itsfarhan](https://github.com/itsfarhan))
+- chore\(deps\): update golangci/golangci-lint-action action to v9 [\#2104](https://github.com/k8gb-io/k8gb/pull/2104) ([renovate[bot]](https://github.com/apps/renovate))
+- fix: geodatafilepath and geodatafield are lowercase in coredns [\#2103](https://github.com/k8gb-io/k8gb/pull/2103) ([actionjax](https://github.com/actionjax))
+- Bump goreleaser to v2.12.7 [\#2101](https://github.com/k8gb-io/k8gb/pull/2101) ([k0da](https://github.com/k0da))
+- Update README and website with new talks and publications [\#2096](https://github.com/k8gb-io/k8gb/pull/2096) ([ytsarev](https://github.com/ytsarev))
+- fix\(deps\): update module github.com/gruntwork-io/terratest to v0.54.0 [\#2094](https://github.com/k8gb-io/k8gb/pull/2094) ([renovate[bot]](https://github.com/apps/renovate))
+- Update chart README template for helm-docs [\#2093](https://github.com/k8gb-io/k8gb/pull/2093) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update actions/upload-artifact action to v5 [\#2091](https://github.com/k8gb-io/k8gb/pull/2091) ([renovate[bot]](https://github.com/apps/renovate))
+- test\(DTR\): Rollback procedures documentation [\#2090](https://github.com/k8gb-io/k8gb/pull/2090) ([itsfarhan](https://github.com/itsfarhan))
+- feat: OCI Registry support fix [\#2089](https://github.com/k8gb-io/k8gb/pull/2089) ([itsfarhan](https://github.com/itsfarhan))
+- chore\(deps\): update otel/opentelemetry-collector docker tag to v0.141.0 [\#2088](https://github.com/k8gb-io/k8gb/pull/2088) ([renovate[bot]](https://github.com/apps/renovate))
+- Temporary disable OCI publish to unblock release [\#2087](https://github.com/k8gb-io/k8gb/pull/2087) ([ytsarev](https://github.com/ytsarev))
+- fix\(deps\): update all non-major dependencies [\#2086](https://github.com/k8gb-io/k8gb/pull/2086) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update dependency k8gb-io/k8gb to v0.16.0 [\#2085](https://github.com/k8gb-io/k8gb/pull/2085) ([renovate[bot]](https://github.com/apps/renovate))
+- Fix OCI helm publish, enable workflow\_dispatch for manual trigger [\#2084](https://github.com/k8gb-io/k8gb/pull/2084) ([ytsarev](https://github.com/ytsarev))
+- Update Offline Changelog [\#2083](https://github.com/k8gb-io/k8gb/pull/2083) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update Helm Docs [\#2081](https://github.com/k8gb-io/k8gb/pull/2081) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update dependency go to v1.25.4 [\#2079](https://github.com/k8gb-io/k8gb/pull/2079) ([renovate[bot]](https://github.com/apps/renovate))
+- fix\(deps\): update module sigs.k8s.io/controller-runtime to v0.22.4 [\#2041](https://github.com/k8gb-io/k8gb/pull/2041) ([renovate[bot]](https://github.com/apps/renovate))
+- fix\(docs\): fix dig commands for each CoreDNS instance in local tutorial [\#1832](https://github.com/k8gb-io/k8gb/pull/1832) ([mattwelke](https://github.com/mattwelke))
+
+
+
 ## [v0.16.0](https://github.com/k8gb-io/k8gb/tree/v0.16.0) (2025-10-20)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.15.0...v0.16.0)
