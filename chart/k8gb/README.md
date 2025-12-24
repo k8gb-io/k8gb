@@ -122,9 +122,9 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | tracing.endpoint | string | `"localhost:4318"` | `host:port` where the spans from the applications (traces) should be sent, sets the `OTEL_EXPORTER_OTLP_ENDPOINT` env var This is not the final destination where all the traces are going. Otel collector has its configuration in the associated configmap (`tracing.otelConfig`). |
 | tracing.jaegerImage.pullPolicy | string | `"Always"` |  |
 | tracing.jaegerImage.repository | string | `"jaegertracing/all-in-one"` | if `tracing.deployJaeger==true` this image will be used in the deployment for Jaeger |
-| tracing.jaegerImage.tag | string | `"1.74.0"` |  |
+| tracing.jaegerImage.tag | string | `"1.76.0"` |  |
 | tracing.otelConfig | string | `nil` | configuration for OTEL collector, this will be represented as configmap called `agent-config` |
 | tracing.samplingRatio | string | `nil` | float representing the ratio of how often the span should be kept/dropped (env var `TRACING_SAMPLING_RATIO`) if not specified, the AlwaysSample will be used which is the same as 1.0. `0.1` would mean that 10% of samples will be kept |
 | tracing.sidecarImage.pullPolicy | string | `"Always"` |  |
 | tracing.sidecarImage.repository | string | `"otel/opentelemetry-collector"` | OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data to somewhere else using exporters (Jaeger for instance) |
-| tracing.sidecarImage.tag | string | `"0.141.0"` |  |
+| tracing.sidecarImage.tag | string | `"0.142.0"` |  |
