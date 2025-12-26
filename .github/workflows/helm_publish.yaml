@@ -46,12 +46,13 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
-          echo ${{ secrets.CR_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
-          echo ${{ secrets.CR_TOKEN }} | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo ${{ secrets.GITHUB_TOKEN }} | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
           git fetch origin gh-pages
           git checkout origin/gh-pages -- charts/
           ls -la charts/
           OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
+          PUSHED_CHARTS=()
           for chart in charts/k8gb-*.tgz; do
             if [ -f "$chart" ]; then
               PUSH_OUTPUT=$(helm push "$chart" "$OCI_REPO" 2>&1)
@@ -59,31 +60,22 @@ jobs:
               if [ -n "$DIGEST" ]; then
                 # Sign using digest
                 CHART_REF="ghcr.io/k8gb-io/charts/k8gb@${DIGEST}"
-                echo "Signing with digest: $CHART_REF"
-                if cosign sign --yes "$CHART_REF"; then
-                  echo "Successfully signed: $CHART_REF"
-                else
-                  echo "Failed to sign: $CHART_REF"
-                  exit 1
-                fi
               else
                 # Incase digest didnt worked then tag signing
                 CHART_NAME=$(basename "$chart" .tgz)
                 CHART_VERSION=$(echo "$CHART_NAME" | sed 's/k8gb-//')
                 CHART_REF="ghcr.io/k8gb-io/charts/k8gb:${CHART_VERSION}"
-                echo "Signing with tag: $CHART_REF"
-                if cosign sign --yes "$CHART_REF"; then
-                  echo "Successfully signed: $CHART_REF"
-                else
-                  echo "Failed to sign: $CHART_REF"
-                  exit 1
-                fi
               fi              
-              echo "Verifying signature for: $CHART_REF"
-              cosign verify "$CHART_REF" \
-                --certificate-identity-regexp "https://github.com/${{ github.repository }}/.*" \
-                --certificate-oidc-issuer "https://token.actions.githubusercontent.com" || echo "Verification failed, but continuing..."
+              echo "Signing chart: $CHART_REF"
+              cosign sign --yes "$CHART_REF"
+              PUSHED_CHARTS+=("$CHART_REF")
             fi
+          done
+          echo "Verifying all pushed charts"
+          for chart_ref in "${PUSHED_CHARTS[@]}"; do
+            cosign verify "$chart_ref" \
+              --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_publish.yaml@${{ github.ref }}" \
+              --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
           done
 
       - name: Create k3s cluster
