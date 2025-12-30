@@ -37,7 +37,7 @@ func (p *EmptyDNSProvider) CreateZoneDelegation(_ *resolver.DelegationZoneInfo) 
 	return nil
 }
 
-func (p *EmptyDNSProvider) Finalize(_ *resolver.DelegationZoneInfo) (err error) {
+func (p *EmptyDNSProvider) Finalize(_ *resolver.DelegationZoneInfo, _ bool) (err error) {
 	return nil
 }
 
