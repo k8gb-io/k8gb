@@ -30,6 +30,7 @@ nav:
     - Development & Testing:
       - Local Setup: local.md
       - Local with Kuar: local-kuar.md
+      - Rollback Process: rollback_procedures.md
     - Monitoring and Observability:
       - Metrics: metrics.md
       - Traces: traces.md
