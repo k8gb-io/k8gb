@@ -33,7 +33,83 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Community user reporting docker hub rate limiting during k8gb installation - republish to github
 - [https://github.com/k8gb-io/k8gb/issues/1314](https://github.com/k8gb-io/k8gb/issues/1314) - split brain documentation request
 
-</details><details open><summary><strong>Dec 10, 2025 #82</strong></summary>
+
+</details><details open><summary><strong>Jan 07, 2026 #83</strong></summary>
+
+## Jan 07, 2026 #83
+
+Recording: https://zoom.us/rec/share/ukYqcJtxJH2wkDFmaK0xo09aYNal3yHdzsW1-FU1rmuL8JKyd4T5TXUmeIwhklgl.OK4fbf5aodiPF3z4
+
+Attendees:
+
+- Tomáš Boros
+- Farhan Ahmed
+- Yury Tsarev
+- Bradley Andersen
+
+Agenda:
+
+- **News**
+    - blog added: https://www.k8gb.io/blog/
+    - agenda moved to markdown
+    - Community Meetings now on [YouTube](https://www.youtube.com/@k8gb823)
+    - KubeCon
+      - co-located talk waitlisted: "Building Unified Global Load Balancing for the Edge With k8gb" (Yur, Bradley)
+      - lightning talk: to be delivered by Nuno
+      - non-accepted talks: to be / submitted to Rejekts and possibly made into blog posts
+      - kiosk: waiting
+    - Incubation kickoff with TOC held
+      - 3-month plan
+        - ADOPTER reviews (2 already WIP) and TOC availability
+      - need to make sure everything on the [Incubation Application](https://github.com/cncf/toc/issues/1472) is up2date
+        - especially: licensing and governance
+          - licensing is handled by FOSSA
+          - how do other projects handle governance? do we need a steering
+          committee?
+    - Christmas Release v0.17.0 with Gateway API support
+      - 4 new contributors!
+        - 🙇 @WesleyKlop, @angelbarrera92, @actionjax, @mattwelke
+      - Supported resources: HTTPRoute, GRPCRoute, TCPRoute, UDPRoute, TLSRoute
+      - See [resource reference examples](https://www.k8gb.io/resource_ref/)
+      - Full [release notes](https://github.com/k8gb-io/k8gb/releases/tag/v0.17.0)
+- **Discuss**
+- **PR review**
+    - Merged / closed since last time:
+      - (m) fix: geodatafilepath and geodatafield are lowercase in coredns [https://github.com/k8gb-io/k8gb/pull/2103](https://github.com/k8gb-io/k8gb/pull/2103) 
+      - (m) fix(docs): fix dig commands for each CoreDNS instance in local tutorial [https://github.com/k8gb-io/k8gb/pull/1832](https://github.com/k8gb-io/k8gb/pull/1832)
+      - (c) Add support for ExternalName service health checks [https://github.com/k8gb-io/k8gb/pull/1888](https://github.com/k8gb-io/k8gb/pull/1888) 
+      - (m) feat: OCI Registry support fix [https://github.com/k8gb-io/k8gb/pull/2089](https://github.com/k8gb-io/k8gb/pull/2089) 
+      - (m) fix(docs): added more rollback procedures [https://github.com/k8gb-io/k8gb/pull/2105](https://github.com/k8gb-io/k8gb/pull/2105)
+    - No change since last time:
+      - DynamicZones [https://github.com/k8gb-io/k8gb/pull/2102](https://github.com/k8gb-io/k8gb/pull/2102) / Dinar 
+      - fix: restore extraServerBlocks as global setting [https://github.com/k8gb-io/k8gb/pull/2121](https://github.com/k8gb-io/k8gb/pull/2121)
+      - feat: Add health checking for ingress controllers [https://github.com/k8gb-io/k8gb/pull/2110](https://github.com/k8gb-io/k8gb/pull/2110)
+      - test(DTR): Testing different K8S versions for DTR (incubation)  [https://github.com/k8gb-io/k8gb/pull/2095](https://github.com/k8gb-io/k8gb/pull/2095) 
+- **Issue Review**
+    - 67 (+4) currently open - need to review
+    - André / Peishu: In-cluster DNS Issue [https://github.com/k8gb-io/k8gb/issues/2022](https://github.com/k8gb-io/k8gb/issues/2022) <-- close
+    - Yury / Farhan: Switch Helm Repo to OCI [https://github.com/k8gb-io/k8gb/issues/1973](https://github.com/k8gb-io/k8gb/issues/1973)
+    - Incubating DD Review [https://github.com/k8gb-io/k8gb/issues/1906](https://github.com/k8gb-io/k8gb/issues/1906) 
+- **Community Update**
+    - WIP: "what is k8gb" and "k8gb getting started" videos
+    - LinkedIn vanity stats
+      - Followers +10.7% last week, +60 since last meeting
+      - Page visitors +21.4% last week
+      - Search appearances +106.3% last week
+      - Posting
+        - 5 posts since last community meeting:
+          - CTR 6.62% - cta, join community meeting (post)
+          - CTR 2.35% - community meeting highlights (repost)
+          - CTR 3.6% - announcing youtube uploads (post)
+          - CTR 5% - gw api release announcement (post)
+          - CTR 9.03% - cta, add to adopters (post)
+        - CTR = clicks / impressions
+        - impression = >= 50% of the post is visible on a member's screen for >= 300ms
+    - 11 new [stars](https://github.com/k8gb-io/k8gb/stargazers) since last community meeting 📈
+- **Other**
+- **Action Items**
+
+</details><details><summary><strong>Dec 10, 2025 #82</strong></summary>
 
 ## Dec 10, 2025 #82
 
