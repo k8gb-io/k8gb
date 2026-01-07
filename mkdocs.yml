@@ -38,6 +38,7 @@ nav:
       - Liqo: liqo.md
       - Rancher: rancher.md
       - Crossplane Global Control Plane: crossplane_globalapp.md
+      - Load Balancer: lbservice-integration.md
     - Advanced:
       - Service Upgrade: service_upgrade.md
       - WRR Caveats: wrr_caveats.md

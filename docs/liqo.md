@@ -67,8 +67,8 @@ affinity:
       topologyKey: "kubernetes.io/hostname"
 ```
 
-Additionally, it creates an *Ingress* resource configured with the ingress_annotations.mdThis annotation will [instruct the K8GB Global Ingress Controller](ingress_annotations.md) to distribute the traffic across the different clusters.
-ingress_annotations.mdis an HTTP service, you can contact it using the *curl* command.
+Additionally, it creates an *Ingress* resource configured with the ingress_annotations.md. This annotation will [instruct the K8GB Global Ingress Controller](ingress_annotations.md) to distribute the traffic across the different clusters.
+ingress_annotations.md is an HTTP service, you can contact it using the *curl* command.
 Use the `-v` option to understand which of the nodes is being targeted.
 
 You need to use the DNS server in order to resolve the hostname to the IP address of the service.
