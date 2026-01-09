@@ -1051,6 +1051,8 @@
       
         
       
+        
+      
     
     
     
@@ -1141,6 +1143,34 @@
     
   
     Local with Kuar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rollback_procedures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rollback Process
   
 
     
@@ -1303,6 +1333,8 @@
       
         
       
+        
+      
     
     
     
@@ -1449,6 +1481,34 @@
     
   
     Crossplane Global Control Plane
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../lbservice-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Balancer
   
 
     
@@ -2414,10 +2474,10 @@
 </ul>
 <h2 id="architecture-diagrams">Architecture Diagrams<a class="headerlink" href="#architecture-diagrams" title="Permanent link">&para;</a></h2>
 <h3 id="crossplane-function-health-monitoring-flow">Crossplane Function Health Monitoring Flow<a class="headerlink" href="#crossplane-function-health-monitoring-flow" title="Permanent link">&para;</a></h3>
-<p><img alt="Crossplane Function Health Monitoring" src="assets/crossplane-function-health-monitoring.png" /></p>
+<p><img alt="Crossplane Function Health Monitoring" src="/docs/examples/crossplane/globalapp/assets/crossplane-function-health-monitoring.png" /></p>
 <p>This diagram illustrates how the Crossplane function dynamically monitors GSLB health status and adjusts management policies. The function observes the GSLB resource status and conditionally sets management policies - when active and healthy, it enables full management (<code>managementPolicies: ["*"]</code>), otherwise it switches to observe-only mode (<code>managementPolicies: ["Observe"]</code>).</p>
 <h3 id="activepassive-cluster-management-policies">Active/Passive Cluster Management Policies<a class="headerlink" href="#activepassive-cluster-management-policies" title="Permanent link">&para;</a></h3>
-<p><img alt="Active Passive Cluster Policies" src="assets/active-passive-cluster-policies.png" /></p>
+<p><img alt="Active Passive Cluster Policies" src="/docs/examples/crossplane/globalapp/assets/active-passive-cluster-policies.png" /></p>
 <p>This diagram shows the management policy differences between Active and Passive clusters. The Active cluster (with green checkmark) has full management policies including Create, Delete, Observe, and Update capabilities. The Passive cluster (with red X) is restricted to Observe-only mode, ensuring it monitors health without making changes until it needs to become active during failover.</p>
 <h2 id="conference-presentation">Conference Presentation<a class="headerlink" href="#conference-presentation" title="Permanent link">&para;</a></h2>
 <p>This reference PoC architecture was presented at <strong>KubeCon China in Hong Kong 2025</strong>:</p>
@@ -2540,7 +2600,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2025 08:34:56 UTC">August 25, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 9, 2026 19:07:07 UTC">January 9, 2026</span>
   </span>
 
     
