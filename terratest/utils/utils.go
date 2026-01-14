@@ -67,12 +67,22 @@ func Dig(t *testing.T, dnsServer string, dnsPort int, dnsName string, additional
 		Args:    append([]string{port, dnsServer, dnsName, "+short"}, additionalArgs...),
 	}
 
-	digAppOut := shell.RunCommandAndGetOutput(t, digApp)
+	digAppOut, err := shell.RunCommandAndGetOutputE(t, digApp)
+	if err != nil {
+		return nil, err
+	}
 	digAppSlice := strings.Split(digAppOut, "\n")
+	// filter out empty lines that may appear due to trailing newline
+	filtered := make([]string, 0, len(digAppSlice))
+	for _, v := range digAppSlice {
+		if strings.TrimSpace(v) != "" {
+			filtered = append(filtered, v)
+		}
+	}
 
-	sort.Strings(digAppSlice)
+	sort.Strings(filtered)
 
-	return digAppSlice, nil
+	return filtered, nil
 }
 
 // DoWithRetryWaitingForValueE Concept is borrowed from terratest/modules/retry and extended to our use case
@@ -85,7 +95,8 @@ func DoWithRetryWaitingForValueE(t *testing.T, actionDescription string, maxRetr
 		output, err = action()
 		if err != nil {
 			t.Logf("%s returned an error: %s. Sleeping for %s and will try again.", actionDescription, err.Error(), sleepBetweenRetries)
-			return output, nil
+			time.Sleep(sleepBetweenRetries)
+			continue
 		}
 
 		if EqualStringSlices(output, expectedResult) {
