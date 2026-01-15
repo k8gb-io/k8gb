@@ -74,20 +74,20 @@ jobs:
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "edgedns"
-          k3d-version: v5.9.0-rc.0
-          args: --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/edge-dns.yaml
+          k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/edge-dns.yaml
 
       - name: Create 1st k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
-          args: --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb1.yaml
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb1.yaml
 
       - name: Create 2nd k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb2"
-          args: --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb2.yaml
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb2.yaml
 
       - name: K8GB deployment
         run: |
