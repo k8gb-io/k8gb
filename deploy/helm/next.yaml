@@ -9,7 +9,7 @@ k8gb:
     level: debug
 
 coredns:
-  serviceType: LoadBalancer
+  serviceType: NodePort
   servers:
   - zones:
     - zone: .
