@@ -38,7 +38,7 @@ jobs:
           destination-branch: gh-pages
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad
+        uses: sigstore/cosign-installer@430b6a704fe0c92f1b1261d84376a900f38d90ff
         with:
           cosign-release: 'v3.0.3' 
 
