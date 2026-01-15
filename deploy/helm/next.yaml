@@ -10,6 +10,16 @@ k8gb:
 
 coredns:
   serviceType: LoadBalancer
+  servers:
+  - zones:
+    - zone: .
+      use_tcp: true
+    port: 5353
+    servicePort: 53
+    nodePort: 30053
+    plugins:
+    - name: prometheus
+      parameters: 0.0.0.0:9153
 
 extdns:
   enabled: true
