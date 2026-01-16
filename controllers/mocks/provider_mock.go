@@ -72,17 +72,17 @@ func (mr *MockProviderMockRecorder) CreateZoneDelegation(arg0 any) *gomock.Call 
 }
 
 // Finalize mocks base method.
-func (m *MockProvider) Finalize(arg0 *resolver.DelegationZoneInfo) error {
+func (m *MockProvider) Finalize(arg0 *resolver.DelegationZoneInfo, arg1 bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Finalize", arg0)
+	ret := m.ctrl.Call(m, "Finalize", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Finalize indicates an expected call of Finalize.
-func (mr *MockProviderMockRecorder) Finalize(arg0 any) *gomock.Call {
+func (mr *MockProviderMockRecorder) Finalize(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalize", reflect.TypeOf((*MockProvider)(nil).Finalize), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalize", reflect.TypeOf((*MockProvider)(nil).Finalize), arg0, arg1)
 }
 
 // String mocks base method.
