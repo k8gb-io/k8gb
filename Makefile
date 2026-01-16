@@ -305,7 +305,13 @@ deploy-k8gb-with-helm:
 		$(call get-helm-args,$(CLUSTER_ID)) \
 		$(call get-next-args,$(CHART),$(CLUSTER_ID)) \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
-		--wait --timeout=10m0s
+		--wait --timeout=10m0s || { \
+			echo "Helm upgrade failed. Printing debug info:"; \
+			kubectl get pods -n k8gb -o wide; \
+			kubectl describe pods -n k8gb; \
+			kubectl get events -n k8gb --sort-by='.lastTimestamp'; \
+			exit 1; \
+		}
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: ## Deploy k8gb operator
