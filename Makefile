@@ -311,6 +311,10 @@ deploy-k8gb-with-helm:
 			kubectl describe pods -n k8gb; \
 			kubectl logs -n k8gb -l app.kubernetes.io/name=extdns --tail=20 --all-containers=true; \
 			kubectl get events -n k8gb --sort-by='.lastTimestamp'; \
+			echo "Debug EdgeDNS Cluster:"; \
+			kubectl get pods -n default --context=k3d-edgedns -o wide; \
+			kubectl describe pods -n default --context=k3d-edgedns; \
+			kubectl logs -n default -l app=edge --context=k3d-edgedns --tail=50 --all-containers=true; \
 			exit 1; \
 		}
 
