@@ -52,7 +52,9 @@
   margin: 0 !important;
   padding: 0 !important;
   min-width: 0 !important;
-  max-width: 400px !important;  
+  max-width: none !important;
+  align-items: center !important;
+  gap: 1rem !important;
 }
 
 .md-header__ellipsis {
@@ -360,4 +362,42 @@
   border-radius: 0.5rem;
   border: 1px solid var(--k8gb-border);
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+/* Mike Version Selector Positioning - "K8GB - Kubernetes Global Balancer    latest ▼" */
+.md-version {
+  position: relative !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  order: 1 !important;
+}
+
+/* Style the version button to match Material Design */
+.md-version__current {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0.25rem !important;
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  color: white !important;
+  min-width: 4rem !important;
+  text-align: center !important;
+  cursor: pointer !important;
+}
+
+.md-version__current:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Ensure version selector appears inline with title */
+.md-header__title .md-version {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Version dropdown styling */
+.md-version__list {
+  background: var(--md-default-bg-color) !important;
+  border: 1px solid var(--md-default-fg-color--lightest) !important;
+  border-radius: 0.25rem !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
 }
