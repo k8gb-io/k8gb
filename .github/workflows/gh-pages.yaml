@@ -47,8 +47,8 @@ jobs:
       - name: Backup preserved files
         run: |
           mkdir -p /tmp/preserved
-          git fetch origin gh-pages:gh-pages || echo "No gh-pages branch yet"
-          if git checkout gh-pages 2>/dev/null; then
+          git fetch origin gh-pages:gh-pages
+          if git checkout gh-pages; then
             echo "Backing up existing files..."
             test -d charts && cp -r charts /tmp/preserved/
             test -f artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .
@@ -81,10 +81,10 @@ jobs:
           test -f /tmp/preserved/index.yaml && cp /tmp/preserved/index.yaml .
           test -f /tmp/preserved/CNAME && cp /tmp/preserved/CNAME .
           
-          # Commit if there are changes
+          # Commit and push if there are changes
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "Restore preserved files"
+            git commit -m "Deploy documentation from ${{ github.sha }}"
             git push origin gh-pages
           fi
         env:

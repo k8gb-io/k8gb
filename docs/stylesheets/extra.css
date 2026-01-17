@@ -46,13 +46,13 @@
 
 .md-header__title {
   display: flex !important;
-  flex: 0 1 auto !important;
+  flex: 0 1 auto !important;  
   opacity: 1 !important;
   visibility: visible !important;
   margin: 0 !important;
   padding: 0 !important;
   min-width: 0 !important;
-  max-width: 400px !important;
+  max-width: 400px !important;  
 }
 
 .md-header__ellipsis {
@@ -87,8 +87,49 @@
   margin: 0 !important;
 }
 
+/* Source Container (GitHub Integration) */
+.k8gb-source-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .md-source__repository {
   max-width: none !important;
+}
+
+/* Star Button Component */
+.k8gb-star-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.26);
+  border-radius: 0.1rem;
+  color: white;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: nowrap;
+  min-height: 1.8rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.k8gb-star-button:hover {
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.k8gb-star-button svg {
+  flex-shrink: 0;
+}
+
+/* Mobile Navigation */
+@media screen and (min-width: 76.25em) {
+  .md-header__button[for="__drawer"] {
+    display: none;
+  }
 }
 
 .md-footer {
@@ -145,7 +186,8 @@
   --k8gb-card-foreground: hsl(222.2 84% 4.9%);
   --k8gb-accent: hsl(210 40% 98%);
   --k8gb-accent-foreground: hsl(222.2 84% 4.9%);
-
+  
+  /* Custom darker red override */
   --md-primary-fg-color: hsl(0 70% 35%);
   --md-primary-fg-color--light: hsl(0 70% 45%);
   --md-primary-fg-color--dark: hsl(0 70% 25%);
@@ -159,7 +201,7 @@
   --k8gb-card-foreground: hsl(210 40% 98%);
   --k8gb-accent: hsl(217.2 32.6% 17.5%);
   --k8gb-accent-foreground: hsl(210 40% 98%);
-
+  
   --md-primary-fg-color: hsl(0 70% 45%);
   --md-primary-fg-color--light: hsl(0 70% 55%);
   --md-primary-fg-color--dark: hsl(0 70% 35%);
@@ -318,62 +360,4 @@
   border-radius: 0.5rem;
   border: 1px solid var(--k8gb-border);
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-}
-
-@media screen and (min-width: 76.25em) {
-  .md-header__button[for="__drawer"] {
-    display: none;
-  }
-}
-
-/* ============================================
-   VERSION SELECTOR POSITIONING
-   ============================================ */
-
-/* Hide ALL version selectors first */
-.md-version {
-  display: none !important;
-}
-
-/* Only show version selector when it's inside the header */
-.md-header .md-version {
-  display: inline-flex !important;
-  position: fixed !important;
-  right: 9.5rem !important;
-  top: 0.5rem !important;
-  z-index: 10 !important;
-}
-
-/* Move Star project button to the far right */
-.md-header__source {
-  margin-right: 1rem !important;
-}
-
-/* Adjust for smaller screens */
-@media screen and (max-width: 76.24em) {
-  .md-header .md-version {
-    right: 7rem !important;
-  }
-}
-
-@media screen and (max-width: 60em) {
-  .md-header .md-version {
-    right: 5rem !important;
-    font-size: 0.7rem !important;
-  }
-
-  .md-header__source {
-    margin-right: 0.5rem !important;
-  }
-}
-
-@media screen and (max-width: 44em) {
-  .md-header .md-version {
-    right: 3rem !important;
-    font-size: 0.65rem !important;
-  }
-
-  .md-header__source {
-    margin-right: 0.25rem !important;
-  }
 }
