@@ -46,13 +46,13 @@
 
 .md-header__title {
   display: flex !important;
-  flex: 0 1 auto !important;  
+  flex: 0 1 auto !important;
   opacity: 1 !important;
   visibility: visible !important;
   margin: 0 !important;
   padding: 0 !important;
   min-width: 0 !important;
-  max-width: 400px !important;  
+  max-width: 400px !important;
 }
 
 .md-header__ellipsis {
@@ -145,7 +145,7 @@
   --k8gb-card-foreground: hsl(222.2 84% 4.9%);
   --k8gb-accent: hsl(210 40% 98%);
   --k8gb-accent-foreground: hsl(222.2 84% 4.9%);
-  
+
   --md-primary-fg-color: hsl(0 70% 35%);
   --md-primary-fg-color--light: hsl(0 70% 45%);
   --md-primary-fg-color--dark: hsl(0 70% 25%);
@@ -159,7 +159,7 @@
   --k8gb-card-foreground: hsl(210 40% 98%);
   --k8gb-accent: hsl(217.2 32.6% 17.5%);
   --k8gb-accent-foreground: hsl(210 40% 98%);
-  
+
   --md-primary-fg-color: hsl(0 70% 45%);
   --md-primary-fg-color--light: hsl(0 70% 55%);
   --md-primary-fg-color--dark: hsl(0 70% 35%);
@@ -323,5 +323,57 @@
 @media screen and (min-width: 76.25em) {
   .md-header__button[for="__drawer"] {
     display: none;
+  }
+}
+
+/* ============================================
+   VERSION SELECTOR POSITIONING
+   ============================================ */
+
+/* Hide ALL version selectors first */
+.md-version {
+  display: none !important;
+}
+
+/* Only show version selector when it's inside the header */
+.md-header .md-version {
+  display: inline-flex !important;
+  position: fixed !important;
+  right: 9.5rem !important;
+  top: 0.5rem !important;
+  z-index: 10 !important;
+}
+
+/* Move Star project button to the far right */
+.md-header__source {
+  margin-right: 1rem !important;
+}
+
+/* Adjust for smaller screens */
+@media screen and (max-width: 76.24em) {
+  .md-header .md-version {
+    right: 7rem !important;
+  }
+}
+
+@media screen and (max-width: 60em) {
+  .md-header .md-version {
+    right: 5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .md-header__source {
+    margin-right: 0.5rem !important;
+  }
+}
+
+@media screen and (max-width: 44em) {
+  .md-header .md-version {
+    right: 3rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .md-header__source {
+    margin-right: 0.25rem !important;
   }
 }
