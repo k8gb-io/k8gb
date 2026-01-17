@@ -33,8 +33,53 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Community user reporting docker hub rate limiting during k8gb installation - republish to github
 - [https://github.com/k8gb-io/k8gb/issues/1314](https://github.com/k8gb-io/k8gb/issues/1314) - split brain documentation request
 
+</details><details open><summary><strong>Jan 21, 2026 #84</strong></summary>
 
-</details><details open><summary><strong>Jan 07, 2026 #83</strong></summary>
+## Jan 21, 2026 #84
+
+**Attendees**
+
+- elohmrow
+
+**Agenda**
+
+- [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **News**
+    - KubeCon
+      - co-located talk waitlisted: _Building Unified Global Load Balancing for the Edge With k8gb_
+      - [Maintainer Summit talk](https://sched.co/2EF6x) accepted
+      - kiosk approved  
+      - no lightning talk this time
+      - submitted to Rejekts:
+        - _Building Unified Global Load Balancing for the Edge With k8gb_
+        - _Community Manager Speedrun: Sandbox to Incubation_
+        - _Brea-k8gb-ing Good: Say My (Domain) Name_
+    - Incubation
+      - ADOPTER reviews WIP
+      - need to make sure everything on the [Incubation Application](https://github.com/cncf/toc/issues/1472) is up2date
+        - especially: licensing and governance
+          - licensing is handled by FOSSA
+          - how do other projects handle governance? do we need a steering committee?
+      - Incubating DD Review
+        - [https://github.com/k8gb-io/k8gb/issues/1906](https://github.com/k8gb-io/k8gb/issues/1906) 
+        - [https://github.com/k8gb-io/k8gb/pull/2095](https://github.com/k8gb-io/k8gb/pull/2095) 
+- **Discuss**
+  - k8gb-kb?
+    - https://github.com/k8gb-io/k8gb/issues/2022
+    - https://github.com/k8gb-io/k8gb/issues/1872
+- **PR review**
+    - No change since last time:
+      - DynamicZones [https://github.com/k8gb-io/k8gb/pull/2102](https://github.com/k8gb-io/k8gb/pull/2102) / Dinar 
+      - fix: restore extraServerBlocks as global setting [https://github.com/k8gb-io/k8gb/pull/2121](https://github.com/k8gb-io/k8gb/pull/2121)
+      - feat: Add health checking for ingress controllers [https://github.com/k8gb-io/k8gb/pull/2110](https://github.com/k8gb-io/k8gb/pull/2110)
+- **Issue Review**
+    - 46 (-21) after Yury's heroic review 💪
+- **Community Update**
+    - WIP: "what is k8gb" and "k8gb getting started" videos
+- **Other**
+- **Action Items**
+
+</details><details><summary><strong>Jan 07, 2026 #83</strong></summary>
 
 ## Jan 07, 2026 #83
 
