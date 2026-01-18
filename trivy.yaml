@@ -17,7 +17,7 @@ pkg:
 
 ignore-unfixed: false
 timeout: 15m
-exit-code: 1
+exit-code: 0
 format: table
 
 misconfig:

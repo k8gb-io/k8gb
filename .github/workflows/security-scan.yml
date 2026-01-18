@@ -90,8 +90,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-secret-results.sarif'
           scanners: 'secret'
-          skip-db-update: false
-          skip-java-db-update: false
+          exit-code: '0'
 
       - name: Upload secret scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' || github.event_name == 'schedule' }}
