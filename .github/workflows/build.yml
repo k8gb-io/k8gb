@@ -96,6 +96,7 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-fs-results.sarif'
+          category: 'trivy-filesystem'
 
       - name: Run Trivy scanner for IaC misconfigurations
         uses: aquasecurity/trivy-action@0.33.1
@@ -112,6 +113,7 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
 
       - name: Run Trivy vulnerability scanner (table output for logs)
         uses: aquasecurity/trivy-action@0.33.1

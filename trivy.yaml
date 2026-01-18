@@ -36,3 +36,4 @@ skip-dirs:
   - "node_modules"
   - "docs/examples"
   - "dns-provider-test"
+  - "chart/k8gb/charts"

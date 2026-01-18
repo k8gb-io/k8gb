@@ -15,5 +15,6 @@
 **/*.md
 **/*.template
 **/*.example
+chart/k8gb/charts/**
 
 # Add specific CVE ignores below as needed
