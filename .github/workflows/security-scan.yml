@@ -86,9 +86,12 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: '.'
+          trivy-config: trivy.yaml
           format: 'sarif'
           output: 'trivy-secret-results.sarif'
           scanners: 'secret'
+          skip-db-update: false
+          skip-java-db-update: false
 
       - name: Upload secret scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' || github.event_name == 'schedule' }}
