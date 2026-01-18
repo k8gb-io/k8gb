@@ -90,6 +90,7 @@ jobs:
           trivy-config: trivy.yaml
           format: 'sarif'
           output: 'trivy-fs-results.sarif'
+          scanners: 'vuln,secret,misconfig,license'
 
       - name: Upload Trivy FS scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
@@ -105,3 +106,4 @@ jobs:
           scan-ref: '.'
           trivy-config: trivy.yaml
           format: 'table'
+          scanners: 'vuln,secret,misconfig,license'
