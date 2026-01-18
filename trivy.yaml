@@ -25,7 +25,6 @@ misconfig:
 
 skip-files:
   - "**/*.md"
-  - "**/test/**"
   - "**/tests/**"
   - "**/*_test.go"
 
