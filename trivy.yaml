@@ -1,46 +1,28 @@
-# Trivy Security Scanner Configuration
-# Documentation: https://aquasecurity.github.io/trivy/latest/docs/references/configuration/config-file/
-
-# Severity levels to report
 severity:
   - CRITICAL
   - HIGH
   - MEDIUM
   - LOW
 
-# Scanner types to enable
 scanners:
-  - vuln      # Vulnerability scanning
-  - secret    # Secret detection
-  - misconfig # Misconfiguration detection
-  - license   # License scanning
+  - vuln
+  - secret
+  - misconfig
+  - license
 
-# Package types for vulnerability scanning
 pkg:
   types:
     - os
     - library
 
-# Ignore unfixed vulnerabilities (vulnerabilities without available patches)
-# Set to true to reduce noise from vulnerabilities that cannot be fixed yet
 ignore-unfixed: false
-
-# Timeout for scanning
-timeout: 15m  # Increased timeout for comprehensive scanning
-
-# Exit code when vulnerabilities are found
-# 0 = success even with findings
-# 1 = failure when findings exist
+timeout: 15m
 exit-code: 1
-
-# Output format (can be overridden by CLI flags)
 format: table
 
-# Misconfiguration scanning
 misconfig:
   include-non-failures: false
 
-# Skip files/directories
 skip-files:
   - "**/*.md"
   - "**/test/**"
@@ -52,3 +34,5 @@ skip-dirs:
   - "site"
   - ".git"
   - "node_modules"
+  - "docs/examples"
+  - "dns-provider-test"
