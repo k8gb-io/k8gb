@@ -108,7 +108,7 @@ jobs:
           skip-dirs: 'mkdocs-venv,site'
 
       - name: Upload Trivy Config scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-config-results.sarif'

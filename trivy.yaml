@@ -15,9 +15,9 @@ scanners:
   - misconfig # Misconfiguration detection
   - license   # License scanning
 
-# Vulnerability settings
-vulnerability:
-  type:
+# Package types for vulnerability scanning
+pkg:
+  types:
     - os
     - library
 
@@ -35,10 +35,6 @@ exit-code: 1
 
 # Output format (can be overridden by CLI flags)
 format: table
-
-# Secret scanning configuration
-secret:
-  config: .trivyignore-secrets
 
 # Misconfiguration scanning
 misconfig:

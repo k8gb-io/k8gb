@@ -5,7 +5,15 @@
 # Example: Ignore a specific CVE that's not applicable
 # CVE-2021-12345
 
-# Example: Ignore findings in test files
-# **/test/**
+# Ignore findings in test files and documentation
+**/test/**
+**/tests/**
+**/*_test.go
+**/testdata/**
+**/docs/**
+**/examples/**
+**/*.md
+**/*.template
+**/*.example
 
-# Add specific ignores below as needed
+# Add specific CVE ignores below as needed
