@@ -161,6 +161,40 @@ jobs:
         run: |
           rm -f cosign.key
 
+  container-scan:
+    name: Container Security Scan
+    needs: [release]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+      security-events: write  # Required to upload SARIF files to Security tab
+    env:
+      TAGS: "${{ needs.release.outputs.container_tags }}"
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Run Trivy vulnerability scanner on container image
+        uses: aquasecurity/trivy-action@0.33.1
+        continue-on-error: true  # Don't fail the release on vulnerabilities
+        with:
+          image-ref: 'docker.io/absaoss/k8gb:${{ github.ref_name }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          scanners: 'vuln,secret,misconfig'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()  # Upload even if scan found issues
+        with:
+          sarif_file: 'trivy-results.sarif'
+
   provenance:
     name: provenance
     needs: [release]
@@ -196,7 +230,7 @@ jobs:
 
   slsa-summary:
     name: Release Summary
-    needs: [sbom, provenance, container-provenance, release]
+    needs: [sbom, provenance, container-provenance, container-scan, release]
     runs-on: ubuntu-24.04
     env:
       TAGS: "${{ needs.release.outputs.container_tags }}"
