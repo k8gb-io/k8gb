@@ -80,6 +80,24 @@ jobs:
           sarif_file: 'trivy-config-results.sarif'
           category: 'trivy-config'
 
+      - name: Run Trivy Helm chart scan
+        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'config'
+          scan-ref: 'chart/k8gb'
+          trivy-config: trivy.yaml
+          format: 'sarif'
+          output: 'trivy-helm-results.sarif'
+          severity: ${{ github.event.inputs.severity || 'MEDIUM, HIGH,CRITICAL' }}
+
+      - name: Upload Helm chart scan results
+        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-helm-results.sarif'
+          category: 'trivy-helm-charts'
+
       - name: Run Trivy secret scan
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' || github.event_name == 'schedule' }}
         uses: aquasecurity/trivy-action@0.33.1
