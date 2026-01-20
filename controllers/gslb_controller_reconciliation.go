@@ -136,7 +136,24 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting GSLB servers (%s)", err))
 	}
-	gslb.Status.Servers = servers
+
+	var filteredServers []*k8gbv1beta1.Server
+
+	for _, server := range servers {
+		if r.Config.DelegationZones.ContainsZone(server.Host) {
+			filteredServers = append(filteredServers, server)
+		} else {
+			log.Debug().
+				Str("host", server.Host).
+				Strs("delegationZones", r.Config.DelegationZones.ListZones()).
+				Msg("Skipping host - does not match any delegated zone")
+		}
+	}
+	if len(filteredServers) == 0 {
+		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", r.Config.DelegationZones.ListZones()))
+	}
+
+	gslb.Status.Servers = filteredServers
 
 	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(gslb.Annotations, r.Config.ParentZoneDNSServers)
 	if err != nil {
