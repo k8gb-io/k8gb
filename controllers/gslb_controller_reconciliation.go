@@ -136,7 +136,14 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting GSLB servers (%s)", err))
 	}
-	gslb.Status.Servers = servers
+
+	filteredServers := filterServersByDelegationZones(servers, r.Config.DelegationZones)
+
+	if len(filteredServers) == 0 {
+		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", r.Config.DelegationZones.ListZones()))
+	}
+
+	gslb.Status.Servers = filteredServers
 
 	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(gslb.Annotations, r.Config.ParentZoneDNSServers)
 	if err != nil {
@@ -221,4 +228,20 @@ func splitIPsByVersion(ips []string) ([]string, []string) {
 		}
 	}
 	return ipv4Addresses, ipv6Addresses
+}
+
+// filterServersByDelegationZones filters servers to only include those with hosts that match the delegation zones
+func filterServersByDelegationZones(servers []*k8gbv1beta1.Server, delegationZones resolver.DelegationZones) []*k8gbv1beta1.Server {
+	var filtered []*k8gbv1beta1.Server
+	for _, server := range servers {
+		if delegationZones.ContainsZone(server.Host) {
+			filtered = append(filtered, server)
+		} else {
+			log.Debug().
+				Str("host", server.Host).
+				Strs("delegationZones", delegationZones.ListZones()).
+				Msg("Skipping host - does not match any delegated zone")
+		}
+	}
+	return filtered
 }
