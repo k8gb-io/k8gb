@@ -41,7 +41,7 @@ Below is the list of a maintainer's general responsibilities in addition to thos
 
 ## Project Lead
 
-The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The current Project Lead is @ytsarev, as listed in our MAINTAINERS.md file.
+The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The current Project Lead is @ytsarev, as listed in our [CODEOWNERS](CODEOWNERS) file.
 
 ## Conflict Resolutions
 
