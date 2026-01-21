@@ -25,6 +25,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - LinkedIn: [https://www.linkedin.com/company/k8gb/](https://www.linkedin.com/company/k8gb/) 
 - Twitter / X: [https://x.com/k8gb\_io](https://x.com/k8gb_io) 
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
+- YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
 <details><summary><strong>Backlog</strong></summary>
 
@@ -37,9 +38,15 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## Jan 21, 2026 #84
 
+Zoom Recording: https://zoom.us/rec/share/VoC_axlmGGixnrhlu0Wa4S9B69GRzsHr5vSZCUnkX4a7ame_b_YOoubxUg0pV1Ld.4Y-OjjxtdMoR3lSc
+
+On YouTube: [https://youtu.be/uIAZB8DFzqo](https://youtu.be/uIAZB8DFzqo)
+
 **Attendees**
 
-- elohmrow
+- Farhan Ahmed
+- Yury Tsarev
+- Bradley Andersen
 
 **Agenda**
 
@@ -68,10 +75,10 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
     - https://github.com/k8gb-io/k8gb/issues/2022
     - https://github.com/k8gb-io/k8gb/issues/1872
 - **PR review**
-    - No change since last time:
-      - DynamicZones [https://github.com/k8gb-io/k8gb/pull/2102](https://github.com/k8gb-io/k8gb/pull/2102) / Dinar 
-      - fix: restore extraServerBlocks as global setting [https://github.com/k8gb-io/k8gb/pull/2121](https://github.com/k8gb-io/k8gb/pull/2121)
-      - feat: Add health checking for ingress controllers [https://github.com/k8gb-io/k8gb/pull/2110](https://github.com/k8gb-io/k8gb/pull/2110)
+    - Trivy implementation [https://github.com/k8gb-io/k8gb/pull/2179](https://github.com/k8gb-io/k8gb/pull/2179) 🙏 @itsfarhan
+    - Mkdocs versioning [https://github.com/k8gb-io/k8gb/pull/2178](https://github.com/k8gb-io/k8gb/pull/2178) 🙏 @itsfarhan
+    - Incubation DTR [https://github.com/k8gb-io/k8gb/pull/1909](https://github.com/k8gb-io/k8gb/pull/1909) 🙏 @itsfarhan
+    - GSLB reconciliation should not fail on hostnames outside delegated zones in referenced resources [https://github.com/k8gb-io/k8gb/issues/2183](https://github.com/k8gb-io/k8gb/issues/2183) 🙏 @Piroddi
 - **Issue Review**
     - 46 (-21) after Yury's heroic review 💪
 - **Community Update**
