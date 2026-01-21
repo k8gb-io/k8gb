@@ -195,3 +195,97 @@ func TestSplitIPsByVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterServersByDelegationZones(t *testing.T) {
+	tests := []struct {
+		name              string
+		servers           []*v1beta1.Server
+		delegationZones   []string
+		expectedHostCount int
+		expectedHosts     []string
+	}{
+		{
+			name: "all hosts match single delegation zone",
+			servers: []*v1beta1.Server{
+				{Host: "app.cloud.example.com"},
+				{Host: "api.cloud.example.com"},
+			},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 2,
+			expectedHosts:     []string{"app.cloud.example.com", "api.cloud.example.com"},
+		},
+		{
+			name: "no hosts match delegation zone",
+			servers: []*v1beta1.Server{
+				{Host: "app.other.com"},
+				{Host: "api.other.com"},
+			},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 0,
+			expectedHosts:     []string{},
+		},
+		{
+			name: "mixed - some hosts match delegation zone",
+			servers: []*v1beta1.Server{
+				{Host: "app.cloud.example.com"},
+				{Host: "app.other.com"},
+				{Host: "api.cloud.example.com"},
+			},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 2,
+			expectedHosts:     []string{"app.cloud.example.com", "api.cloud.example.com"},
+		},
+		{
+			name:              "empty servers list",
+			servers:           []*v1beta1.Server{},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 0,
+			expectedHosts:     []string{},
+		},
+		{
+			name: "multiple delegation zones",
+			servers: []*v1beta1.Server{
+				{Host: "app.zone1.example.com"},
+				{Host: "app.zone2.example.com"},
+				{Host: "app.other.com"},
+			},
+			delegationZones:   []string{"zone1.example.com", "zone2.example.com"},
+			expectedHostCount: 2,
+			expectedHosts:     []string{"app.zone1.example.com", "app.zone2.example.com"},
+		},
+		{
+			name:              "nil servers list",
+			servers:           nil,
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 0,
+			expectedHosts:     []string{},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			delegationZones := createTestDelegationZones(test.delegationZones)
+
+			filtered := filterServersByDelegationZones(test.servers, delegationZones)
+
+			assert.Equal(t, test.expectedHostCount, len(filtered))
+			if test.expectedHostCount > 0 {
+				actualHosts := make([]string, len(filtered))
+				for i, s := range filtered {
+					actualHosts[i] = s.Host
+				}
+				assert.ElementsMatch(t, test.expectedHosts, actualHosts)
+			}
+		})
+	}
+}
+
+// createTestDelegationZones creates a DelegationZones for testing
+func createTestDelegationZones(zones []string) resolver.DelegationZones {
+	delegationZones := resolver.DelegationZones{}
+	for _, zone := range zones {
+		delegationZones = append(delegationZones, &resolver.DelegationZoneInfo{
+			LoadBalancedZone: zone,
+		})
+	}
+	return delegationZones
+}
