@@ -51,11 +51,11 @@ jobs:
           if git checkout gh-pages; then
             echo "Backing up existing files..."
             test -d charts && cp -r charts /tmp/preserved/
-            test -f artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .
-            test -f index.yaml && cp /tmp/preserved/index.yaml .
-            test -f CNAME && cp /tmp/preserved/CNAME .
-            git checkout master
+            test -f artifacthub-repo.yml && cp artifacthub-repo.yml /tmp/preserved/
+            test -f index.yaml && cp index.yaml /tmp/preserved/
+            test -f CNAME && cp CNAME /tmp/preserved/
           fi
+          git checkout master      
 
       - name: Deploy documentation with Mike
         run: |
