@@ -23,7 +23,7 @@ Anyone can contribute to the k8gb project. More about contribution rules and tec
 ## Maintainers
 
 Maintainers are defined in the [CODEOWNERS](CODEOWNERS) file by their GitHub user handles.
-New maintainers are nominated by existing maintainers and are elected by a supermajority of votes of existing maintainers.
+To elect a new maintainer, an existing maintainer must open a GitHub issue in the project repository nominating the candidate. The issue must remain open for at least 14 days to allow for public feedback and a formal vote by existing maintainers. New maintainers are elected by a supermajority of votes of existing maintainers.
 If a maintainer is no longer able to perform their duties, they should volunteer to be moved to emeritus status.
 Maintainers can be also removed from the active maintainers list by a supermajority of votes of existing maintainers.
 
@@ -41,7 +41,7 @@ Below is the list of a maintainer's general responsibilities in addition to thos
 
 ## Project Lead
 
-The Project Lead is a project maintainer with the final vote on project decisions.
+The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The current Project Lead is @ytsarev, as listed in our [CODEOWNERS](CODEOWNERS) file.
 
 ## Conflict Resolutions
 
