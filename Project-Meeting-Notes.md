@@ -25,6 +25,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - LinkedIn: [https://www.linkedin.com/company/k8gb/](https://www.linkedin.com/company/k8gb/) 
 - Twitter / X: [https://x.com/k8gb\_io](https://x.com/k8gb_io) 
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
+- YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
 <details><summary><strong>Backlog</strong></summary>
 
@@ -33,8 +34,59 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Community user reporting docker hub rate limiting during k8gb installation - republish to github
 - [https://github.com/k8gb-io/k8gb/issues/1314](https://github.com/k8gb-io/k8gb/issues/1314) - split brain documentation request
 
+</details><details open><summary><strong>Jan 21, 2026 #84</strong></summary>
 
-</details><details open><summary><strong>Jan 07, 2026 #83</strong></summary>
+## Jan 21, 2026 #84
+
+Zoom Recording: https://zoom.us/rec/share/VoC_axlmGGixnrhlu0Wa4S9B69GRzsHr5vSZCUnkX4a7ame_b_YOoubxUg0pV1Ld.4Y-OjjxtdMoR3lSc
+
+On YouTube: [https://youtu.be/uIAZB8DFzqo](https://youtu.be/uIAZB8DFzqo)
+
+**Attendees**
+
+- Farhan Ahmed
+- Yury Tsarev
+- Bradley Andersen
+
+**Agenda**
+
+- [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **News**
+    - KubeCon
+      - co-located talk waitlisted: _Building Unified Global Load Balancing for the Edge With k8gb_
+      - [Maintainer Summit talk](https://sched.co/2EF6x) accepted
+      - kiosk approved  
+      - no lightning talk this time
+      - submitted to Rejekts:
+        - _Building Unified Global Load Balancing for the Edge With k8gb_
+        - _Community Manager Speedrun: Sandbox to Incubation_
+        - _Brea-k8gb-ing Good: Say My (Domain) Name_
+    - Incubation
+      - ADOPTER reviews WIP
+      - need to make sure everything on the [Incubation Application](https://github.com/cncf/toc/issues/1472) is up2date
+        - especially: licensing and governance
+          - licensing is handled by FOSSA
+          - how do other projects handle governance? do we need a steering committee?
+      - Incubating DD Review
+        - [https://github.com/k8gb-io/k8gb/issues/1906](https://github.com/k8gb-io/k8gb/issues/1906) 
+        - [https://github.com/k8gb-io/k8gb/pull/2095](https://github.com/k8gb-io/k8gb/pull/2095) 
+- **Discuss**
+  - k8gb-kb?
+    - https://github.com/k8gb-io/k8gb/issues/2022
+    - https://github.com/k8gb-io/k8gb/issues/1872
+- **PR review**
+    - Trivy implementation [https://github.com/k8gb-io/k8gb/pull/2179](https://github.com/k8gb-io/k8gb/pull/2179) 🙏 @itsfarhan
+    - Mkdocs versioning [https://github.com/k8gb-io/k8gb/pull/2178](https://github.com/k8gb-io/k8gb/pull/2178) 🙏 @itsfarhan
+    - Incubation DTR [https://github.com/k8gb-io/k8gb/pull/1909](https://github.com/k8gb-io/k8gb/pull/1909) 🙏 @itsfarhan
+    - GSLB reconciliation should not fail on hostnames outside delegated zones in referenced resources [https://github.com/k8gb-io/k8gb/issues/2183](https://github.com/k8gb-io/k8gb/issues/2183) 🙏 @Piroddi
+- **Issue Review**
+    - 46 (-21) after Yury's heroic review 💪
+- **Community Update**
+    - WIP: "what is k8gb" and "k8gb getting started" videos
+- **Other**
+- **Action Items**
+
+</details><details><summary><strong>Jan 07, 2026 #83</strong></summary>
 
 ## Jan 07, 2026 #83
 
