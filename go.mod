@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/infobloxopen/infoblox-go-client v1.1.1
 	github.com/infobloxopen/infoblox-go-client/v2 v2.11.0
-	github.com/miekg/dns v1.1.70
+	github.com/miekg/dns v1.1.72
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.1
