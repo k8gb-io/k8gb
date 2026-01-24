@@ -97,6 +97,7 @@ dig -p 5053 @localhost localtargets-roundrobin.cloud.example.com && \
 dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
 ```
 As expected result you should see **two A records** divided between both clusters.
+If you see a connection reset or "no servers could be reached", see Troubleshooting below.
 ```sh
 ...
 ...
@@ -122,6 +123,40 @@ To check whether everything is running properly execute [terratest](https://terr
 ```sh
 make terratest
 ```
+
+### Troubleshooting: localhost:5053/5054 +tcp fails
+
+If `dig -p 5053/5054 +tcp @localhost ...` returns "connection reset" or "no servers could be reached":
+
+1. Ensure recent local tooling
+   - k3d >= v5.3.0 (recommended v5.6+)
+   - Docker running and healthy
+
+2. Recreate local clusters
+```sh
+make destroy-full-local-setup
+make deploy-full-local-setup
+```
+
+3. Verify CoreDNS Services are LoadBalancer and have ingress
+```sh
+# Quick helper
+make verify-dns-lb
+
+# Or manually:
+kubectl get svc -n k8gb k8gb-coredns --context k3d-test-gslb1 -o wide
+kubectl get svc -n k8gb k8gb-coredns --context k3d-test-gslb2 -o wide
+```
+Expected: `TYPE` is `LoadBalancer` and `.status.loadBalancer.ingress` is populated.
+
+4. Re-test DNS (TCP)
+```sh
+dig @localhost -p 1053 roundrobin.cloud.example.com +short +tcp
+dig -p 5053 +tcp @localhost localtargets-roundrobin.cloud.example.com
+dig -p 5054 +tcp @localhost localtargets-roundrobin.cloud.example.com
+```
+
+If issues persist, upgrade k3d and retry. Very old k3d/k3s combinations may not forward TCP/53 reliably via the local load balancer.
 
 ## Cleaning
 
