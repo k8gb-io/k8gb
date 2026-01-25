@@ -8,6 +8,10 @@
   <a href="https://landscape.cncf.io/?item=orchestration-management--coordination-service-discovery--k8gb">CNCF Sandbox Project</a> | 
   <a href="https://github.com/orgs/k8gb-io/projects/2/views/2">Roadmap</a> | 
   <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a> 
+  <!-- Scarf pixel for aggregate usage metrics (CNCF-approved) -->
+  <img referrerpolicy="no-referrer-when-downgrade"
+       src="https://static.scarf.sh/a.png?x-pxid=f1358b06-c78b-4191-8a13-9160ca3a58dc"
+       width="1" height="1" alt="" />
 </p>
 
 
