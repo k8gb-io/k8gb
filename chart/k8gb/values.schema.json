@@ -363,6 +363,14 @@
                     "type": "string",
                     "minLength": 0
                 },
+                "feature":  {
+                    "type":  "object",
+                    "properties": {
+                        "dynamicZones": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "reconcileRequeueSeconds": {
                     "type": "integer",
                     "minimum": 0
