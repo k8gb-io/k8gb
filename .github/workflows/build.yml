@@ -156,36 +156,3 @@ jobs:
           format: 'json'
           output: 'trivy-results.json'
           exit-code: '0'
-
-      - name: Comment PR with results
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            try {
-              const results = JSON.parse(fs.readFileSync('trivy-results.json', 'utf8'));
-              const vulns = results.Results?.flatMap(r => r.Vulnerabilities || []) || [];
-              const critical = vulns.filter(v => v.Severity === 'CRITICAL').length;
-              const high = vulns.filter(v => v.Severity === 'HIGH').length;
-              
-              const comment = `## 🔒 Trivy Security Scan Results
-              
-              - **CRITICAL**: ${critical}
-              - **HIGH**: ${high}
-              
-              ${critical > 0 ? '⚠️ Critical vulnerabilities detected. Please review the Security tab.' : '✅ No critical vulnerabilities detected.'}
-              
-              Full details available in the [Security tab](https://github.com/${{ github.repository }}/security/code-scanning).
-              
-              > Note: This scan is informational for PRs. Use \`.trivyignore\` to suppress known/accepted vulnerabilities.`;
-              
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment
-              });
-            } catch (error) {
-              console.log('No vulnerabilities found or error reading results:', error.message);
-            }
