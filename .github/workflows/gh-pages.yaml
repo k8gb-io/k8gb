@@ -63,13 +63,77 @@ jobs:
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
             echo "Deploying version: $VERSION"
-            # Deploy version and set as latest
+            
+            # Version configuration
+            KEEP_LAST_N_VERSIONS=4 
+            PINNED_VERSIONS=("v0.16.0" "v0.15.0" "v0.12.0")
+            echo "Keep last $KEEP_LAST_N_VERSIONS versions"
+            echo "Always keep pinned versions: ${PINNED_VERSIONS[@]}"
+            
+            # Deploy the new version and set as latest
             mike deploy --push --update-aliases $VERSION latest
-            # Set latest as the default (root domain)
+            
+            # Get current state
+            CURRENT_DEPLOYED=$(mike list | grep -v latest | awk '{print $1}' | sort -V -r)
+            ALL_GIT_TAGS=$(git tag -l 'v*' | sort -V -r)
+            
+            echo "Currently deployed: $CURRENT_DEPLOYED"
+            echo "Available git tags: $ALL_GIT_TAGS"
+            
+            # Determine what should be deployed
+            SHOULD_BE_DEPLOYED=()
+            
+            # Add latest N versions from git tags
+            TAGS_ARRAY=($ALL_GIT_TAGS)
+            for i in $(seq 0 $((KEEP_LAST_N_VERSIONS-1))); do
+              if [[ $i -lt ${#TAGS_ARRAY[@]} ]]; then
+                SHOULD_BE_DEPLOYED+=("${TAGS_ARRAY[$i]}")
+              fi
+            done
+            # Add pinned versions
+            for pinned in "${PINNED_VERSIONS[@]}"; do
+              if [[ " ${ALL_GIT_TAGS[@]} " =~ " ${pinned} " ]] && [[ ! " ${SHOULD_BE_DEPLOYED[@]} " =~ " ${pinned} " ]]; then
+                SHOULD_BE_DEPLOYED+=("$pinned")
+              fi
+            done
+            echo "Should be deployed: ${SHOULD_BE_DEPLOYED[@]}"
+
+            # Only deploy missing versions
+            CURRENTLY_DEPLOYED_ARRAY=($CURRENT_DEPLOYED)
+            for should_deploy in "${SHOULD_BE_DEPLOYED[@]}"; do
+              if [[ ! " ${CURRENTLY_DEPLOYED_ARRAY[@]} " =~ " ${should_deploy} " ]]; then
+                if [[ "$should_deploy" != "$VERSION" ]]; then  # Skip current (already deployed)
+                  echo "Deploying missing version: $should_deploy"
+                  if git checkout $should_deploy 2>/dev/null; then
+                    mike deploy --push $should_deploy
+                    git checkout master
+                    echo "Deployed $should_deploy"
+                  else
+                    echo "Failed to checkout $should_deploy"
+                  fi
+                fi
+              else
+                echo "$should_deploy already deployed"
+              fi
+            done
+            echo "Removing Unwanted Versions"
+            for currently_deployed in "${CURRENTLY_DEPLOYED_ARRAY[@]}"; do
+              if [[ ! " ${SHOULD_BE_DEPLOYED[@]} " =~ " ${currently_deployed} " ]]; then
+                echo "Removing unwanted version: $currently_deployed"
+                mike delete --push $currently_deployed
+              fi
+            done
+            
+            # Set latest as default
             mike set-default --push latest
+            
+            # Final verification
+            mike list
+            FINAL_VERSIONS=$(mike list | grep -v latest | awk '{print $1}' | sort -V -r)
+            for version in $FINAL_VERSIONS; do
+            done            
           else
-            echo "Skipping deployment - only deploying tagged releases"
-            echo "Current ref: ${{ github.ref }}"
+            echo "Skipping deployment.. only deploying tagged releases"
           fi
 
       - name: Restore preserved files
