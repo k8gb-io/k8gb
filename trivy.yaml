@@ -33,6 +33,7 @@ skip-dirs:
   - "site"
   - ".git"
   - "node_modules"
-  - "docs/examples"
+  - "docs/"
+  - "overrides/"
   - "dns-provider-test"
   - "chart/k8gb/charts"

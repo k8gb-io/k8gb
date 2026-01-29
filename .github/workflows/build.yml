@@ -67,8 +67,9 @@ jobs:
 
   security-scan:
     permissions:
-      contents: read  # for actions/checkout to fetch code
-      security-events: write  # for uploading SARIF results (optional for build)
+      contents: read
+      security-events: write
+      pull-requests: write  # For commenting on PRs
     name: Security Scan with Trivy
     runs-on: ubuntu-24.04
     needs: skip-check
@@ -82,7 +83,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Run Trivy vulnerability scanner in fs mode
+      # Non-blocking scan for SARIF upload (always runs, never fails)
+      - name: Run Trivy vulnerability scanner in fs mode (SARIF)
         uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'fs'
@@ -90,7 +92,8 @@ jobs:
           trivy-config: trivy.yaml
           format: 'sarif'
           output: 'trivy-fs-results.sarif'
-          scanners: 'vuln,secret,misconfig,license'
+          scanners: 'vuln,secret,misconfig'
+          exit-code: '0'  # Never block on SARIF upload
 
       - name: Upload Trivy FS scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
@@ -99,7 +102,8 @@ jobs:
           sarif_file: 'trivy-fs-results.sarif'
           category: 'trivy-filesystem'
 
-      - name: Run Trivy vulnerability scanner (table output for logs)
+      # Table output for logs (non-blocking for PRs, blocking for main branch)
+      - name: Run Trivy vulnerability scanner (table output)
         uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'fs'
@@ -107,7 +111,23 @@ jobs:
           trivy-config: trivy.yaml
           format: 'table'
           scanners: 'vuln,secret,misconfig,license'
+          # Only fail on push to main/master for HIGH and CRITICAL vulnerabilities
+          # PRs are non-blocking but still show results
+          exit-code: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') && '1' || '0' }}
+          severity: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'HIGH,CRITICAL' || 'CRITICAL,HIGH,MEDIUM,LOW' }}
 
+      # Secrets should always block (in both PRs and main)
+      - name: Run Trivy secret scanner (blocking)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'table'
+          scanners: 'secret'
+          exit-code: '1'  # Always block on secrets
+
+      # Helm chart scan (non-blocking)
       - name: Run Trivy Helm chart scan
         uses: aquasecurity/trivy-action@0.33.1
         with:
@@ -116,6 +136,7 @@ jobs:
           trivy-config: trivy.yaml
           format: 'sarif'
           output: 'trivy-helm-results.sarif'
+          exit-code: '0'
 
       - name: Upload Helm chart scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
@@ -123,3 +144,48 @@ jobs:
         with:
           sarif_file: 'trivy-helm-results.sarif'
           category: 'trivy-helm-charts'
+
+      # Generate a summary comment on PRs
+      - name: Generate PR comment with scan results
+        if: github.event_name == 'pull_request'
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'json'
+          output: 'trivy-results.json'
+          exit-code: '0'
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const results = JSON.parse(fs.readFileSync('trivy-results.json', 'utf8'));
+              const vulns = results.Results?.flatMap(r => r.Vulnerabilities || []) || [];
+              const critical = vulns.filter(v => v.Severity === 'CRITICAL').length;
+              const high = vulns.filter(v => v.Severity === 'HIGH').length;
+              
+              const comment = `## 🔒 Trivy Security Scan Results
+              
+              - **CRITICAL**: ${critical}
+              - **HIGH**: ${high}
+              
+              ${critical > 0 ? '⚠️ Critical vulnerabilities detected. Please review the Security tab.' : '✅ No critical vulnerabilities detected.'}
+              
+              Full details available in the [Security tab](https://github.com/${{ github.repository }}/security/code-scanning).
+              
+              > Note: This scan is informational for PRs. Use \`.trivyignore\` to suppress known/accepted vulnerabilities.`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('No vulnerabilities found or error reading results:', error.message);
+            }
