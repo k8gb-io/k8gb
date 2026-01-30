@@ -310,6 +310,7 @@ func TestWeight(t *testing.T) {
 			defer ctrl.Finish()
 			cl := mocks.NewMockClient(ctrl)
 			qs := mocks.NewMockDNSQueryService(ctrl)
+			zs := mocks.NewMockZoneService(ctrl)
 			for i, d := range test.mockData {
 				ips := []dns.RR{}
 				nsIP := fmt.Sprintf("172.168.10.%v", i+1)
@@ -326,13 +327,16 @@ func TestWeight(t *testing.T) {
 				qs.EXPECT().
 					Query("localtargets-app.gslb.cloud.example.com", utils.DNSList{utils.DNSServer{Host: nsIP, Port: 53}}).Return(&dns.Msg{Answer: ips}, nil).
 					AnyTimes()
+
 			}
 			qs.EXPECT().ExtractARecords(gomock.Any()).DoAndReturn(
 				func(q *dns.Msg) []string { return utils.NewDNSQueryService().ExtractARecords(q) },
 			).AnyTimes()
+			zs.EXPECT().
+				List(gomock.Any()).Return(test.config.DelegationZones, nil).AnyTimes()
 
 			// act
-			ep := NewApplicationDNSEndpoint(context.TODO(), cl, test.config, test.gslb, &logger, qs, metrics)
+			ep := NewApplicationDNSEndpoint(context.TODO(), cl, test.config, test.gslb, &logger, qs, zs, metrics)
 			endpoint, err := ep.GetDNSEndpoint()
 
 			// assert
