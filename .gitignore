@@ -56,3 +56,9 @@ tofu.tfstate.*
 mkdocs-env/
 site/
 docs/__pycache__/
+
+# Trivy security scan results
+trivy-*.sarif
+trivy-*.json
+trivy-*.html
+.trivy/

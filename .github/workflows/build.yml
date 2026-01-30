@@ -64,3 +64,95 @@ jobs:
           golic inject --dry -x -t apache2
       - name: go test
         run: go test ./...
+
+  security-scan:
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write  # For commenting on PRs
+    name: Security Scan with Trivy
+    runs-on: ubuntu-24.04
+    needs: skip-check
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      # Non-blocking scan for SARIF upload (always runs, never fails)
+      - name: Run Trivy vulnerability scanner in fs mode (SARIF)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'sarif'
+          output: 'trivy-fs-results.sarif'
+          scanners: 'vuln,secret,misconfig'
+          exit-code: '0'  # Never block on SARIF upload
+
+      - name: Upload Trivy FS scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: 'trivy-fs-results.sarif'
+          category: 'trivy-filesystem'
+
+      # Table output for logs (non-blocking for PRs, blocking for main branch)
+      - name: Run Trivy vulnerability scanner (table output)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'table'
+          scanners: 'vuln,secret,misconfig,license'
+          # Only fail on push to main/master for HIGH and CRITICAL vulnerabilities
+          # PRs are non-blocking but still show results
+          exit-code: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') && '1' || '0' }}
+          severity: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'HIGH,CRITICAL' || 'CRITICAL,HIGH,MEDIUM,LOW' }}
+
+      # Secrets should always block (in both PRs and main)
+      - name: Run Trivy secret scanner (blocking)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'table'
+          scanners: 'secret'
+          exit-code: '1'  # Always block on secrets
+
+      # Helm chart scan (non-blocking)
+      - name: Run Trivy Helm chart scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'config'
+          scan-ref: 'chart/k8gb'
+          trivy-config: trivy.yaml
+          format: 'sarif'
+          output: 'trivy-helm-results.sarif'
+          exit-code: '0'
+
+      - name: Upload Helm chart scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: 'trivy-helm-results.sarif'
+          category: 'trivy-helm-charts'
+
+      # Generate a summary comment on PRs
+      - name: Generate PR comment with scan results
+        if: github.event_name == 'pull_request'
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'json'
+          output: 'trivy-results.json'
+          exit-code: '0'

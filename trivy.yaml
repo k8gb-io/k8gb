@@ -1,0 +1,39 @@
+severity:
+  - CRITICAL
+  - HIGH
+  - MEDIUM
+  - LOW
+
+scanners:
+  - vuln
+  - secret
+  - misconfig
+  - license
+
+pkg:
+  types:
+    - os
+    - library
+
+ignore-unfixed: false
+timeout: 15m
+exit-code: 0
+format: table
+
+misconfig:
+  include-non-failures: false
+
+skip-files:
+  - "**/*.md"
+  - "**/tests/**"
+  - "**/*_test.go"
+
+skip-dirs:
+  - "mkdocs-venv"
+  - "site"
+  - ".git"
+  - "node_modules"
+  - "docs/"
+  - "overrides/"
+  - "dns-provider-test"
+  - "chart/k8gb/charts"
