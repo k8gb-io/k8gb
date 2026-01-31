@@ -69,3 +69,5 @@ trivy-*.sarif
 trivy-*.json
 trivy-*.html
 .trivy/
+# worktrees
+.worktrees/
