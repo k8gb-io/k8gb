@@ -1,3 +1,4 @@
+<!-- K8GB Custom Header with Mobile Navigation and Star Button -->
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="{{ lang.t('header') }}">
     <!-- Mobile navigation button -->
@@ -5,10 +6,12 @@
       {% include ".icons/material/menu.svg" %}
     </label>
     
+    <!-- Logo -->
     <a href="{{ config.site_url | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}" class="md-header__button md-logo" aria-label="{{ config.site_name }}" data-md-component="logo">
       {% include "partials/logo.html" %}
     </a>
     
+    <!-- Site title -->
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
@@ -19,6 +22,7 @@
       </div>
     </div>
 
+    <!-- Theme toggle -->
     {% if config.theme.palette %}
       {% if not config.theme.palette is mapping %}
         <form class="md-header__option" data-md-component="palette">
@@ -35,6 +39,7 @@
       {% endif %}
     {% endif %}
 
+    <!-- Search -->
     {% if "material/search" in config.plugins %}
       <label class="md-header__button md-icon" for="__search">
         {% include ".icons/material/magnify.svg" %}
@@ -42,10 +47,17 @@
       {% include "partials/search.html" %}
     {% endif %}
 
+    <!-- GitHub source and star button -->
     {% if config.repo_url %}
       <div class="md-header__source">
         {% include "partials/source.html" %}
       </div>
+      <a href="{{ config.repo_url }}" class="md-header__button md-header__star" title="Star K8GB on GitHub" target="_blank">
+        <svg class="md-icon" viewBox="0 0 16 16" width="20" height="20">
+          <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
+        </svg>
+        <span class="md-header__star-text">Star K8GB</span>
+      </a>
     {% endif %}
 
   </nav>
