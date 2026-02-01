@@ -75,13 +75,20 @@ jobs:
             # Deploy all missing versions
             for version in $ALL_VERSIONS; do
               if [[ ! " $DEPLOYED_VERSIONS " =~ " $version " ]]; then
-                echo "Deploying missing version: $version"
-                if git checkout $version 2>/dev/null; then
-                  mike deploy --push $version
-                  echo "Deployed $version"
-                  git checkout master
+                echo "Checking and deploying missing version: $version"
+                
+                # Check if the tag has mkdocs.yml before trying to deploy
+                if git show $version:mkdocs.yml >/dev/null 2>&1; then
+                  echo "$version has mkdocs.yml - deploying"
+                  if git checkout $version 2>/dev/null; then
+                    mike deploy --push $version
+                    echo "Deployed $version"
+                    git checkout master
+                  else
+                    echo "Failed to checkout $version"
+                  fi
                 else
-                  echo "Failed to checkout $version"
+                  echo "$version doesn't have mkdocs.yml - skipping (pre-docs version)"
                 fi
               else
                 echo "$version already deployed"
@@ -91,9 +98,21 @@ jobs:
             # Deploy the current version without latest alias yet!
             mike deploy --push $VERSION
             
-            # Determine the actual latest version (highest semver)
-            LATEST_VERSION=$(echo "$ALL_VERSIONS" | tail -1)
-            echo "Actual latest version: $LATEST_VERSION"
+            # Determine the actual latest version that has mkdocs.yml (highest semver)
+            LATEST_VERSION=""
+            for version in $(echo "$ALL_VERSIONS" | tac); do  # Reverse order (newest first)
+              if git show $version:mkdocs.yml >/dev/null 2>&1; then
+                LATEST_VERSION=$version
+                break
+              fi
+            done
+            
+            if [[ -z "$LATEST_VERSION" ]]; then
+              echo "No versions found with mkdocs.yml"
+              exit 1
+            fi
+            
+            echo "Actual latest version with docs: $LATEST_VERSION"
             echo "Current deployment version: $VERSION"
             
             # Only update latest alias if this version is actually the latest
