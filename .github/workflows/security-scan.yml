@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Trivy filesystem scan
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' || github.event_name == 'schedule' }}
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -57,14 +57,14 @@ jobs:
 
       - name: Upload filesystem scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' || github.event_name == 'schedule' }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-fs-results.sarif'
           category: 'trivy-filesystem'
 
       - name: Run Trivy configuration scan
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'config'
           scan-ref: '.'
@@ -75,14 +75,14 @@ jobs:
 
       - name: Upload configuration scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-config-results.sarif'
           category: 'trivy-config'
 
       - name: Run Trivy Helm chart scan
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'config'
           scan-ref: 'chart/k8gb'
@@ -93,14 +93,14 @@ jobs:
 
       - name: Upload Helm chart scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-helm-results.sarif'
           category: 'trivy-helm-charts'
 
       - name: Run Trivy secret scan
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' || github.event_name == 'schedule' }}
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -112,7 +112,7 @@ jobs:
 
       - name: Upload secret scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' || github.event_name == 'schedule' }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-secret-results.sarif'
           category: 'trivy-secrets'
