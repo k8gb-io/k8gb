@@ -6,6 +6,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const migrationLabelKey = "k8gb.io/migrated-to-k8gb-io"
+
 func convertGslbLegacyToIO(gslb *k8gbv1beta1.Gslb) *k8gbv1beta1io.Gslb {
 	if gslb == nil {
 		return &k8gbv1beta1io.Gslb{}
