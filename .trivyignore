@@ -1,20 +1,9 @@
-# Trivy ignore file
-# Use this file to ignore specific vulnerabilities or findings
-# Format: CVE-ID or finding ID per line
+# Trivy ignore file for specific CVE exceptions
+# Directory exclusions are handled in trivy.yaml skip-dirs/skip-files
+# Use this file only for specific vulnerability ignores
 
-# Example: Ignore a specific CVE that's not applicable
+# Example: Ignore a specific CVE that's not applicable to K8GB
 # CVE-2021-12345
 
-# Ignore findings in test files and documentation
-**/test/**
-**/tests/**
-**/*_test.go
-**/testdata/**
-**/docs/**
-**/examples/**
-**/*.md
-**/*.template
-**/*.example
-chart/k8gb/charts/**
-
-# Add specific CVE ignores below as needed
+# Add specific CVE ignores below as needed for accepted risks
+# Format: CVE-ID per line with optional comment explaining why

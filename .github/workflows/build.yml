@@ -85,7 +85,7 @@ jobs:
 
       # Non-blocking scan for SARIF upload (always runs, never fails)
       - name: Run Trivy vulnerability scanner in fs mode (SARIF)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -96,7 +96,7 @@ jobs:
           exit-code: '0'  # Never block on SARIF upload
 
       - name: Upload Trivy FS scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         if: always()
         with:
           sarif_file: 'trivy-fs-results.sarif'
@@ -104,7 +104,7 @@ jobs:
 
       # Table output for logs (non-blocking for PRs, blocking for main branch)
       - name: Run Trivy vulnerability scanner (table output)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -118,7 +118,7 @@ jobs:
 
       # Secrets should always block (in both PRs and main)
       - name: Run Trivy secret scanner (blocking)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -129,7 +129,7 @@ jobs:
 
       # Helm chart scan (non-blocking)
       - name: Run Trivy Helm chart scan
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'config'
           scan-ref: 'chart/k8gb'
@@ -139,7 +139,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload Helm chart scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         if: always()
         with:
           sarif_file: 'trivy-helm-results.sarif'
@@ -148,7 +148,7 @@ jobs:
       # Generate a summary comment on PRs
       - name: Generate PR comment with scan results
         if: github.event_name == 'pull_request'
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
           scan-ref: '.'
