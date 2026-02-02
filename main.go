@@ -34,6 +34,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -178,7 +179,15 @@ func run() error {
 		return err
 	}
 
-	if err = legacyMigrator.SetupWithManager(mgr); err != nil {
+	legacyGVK := k8gbv1beta1.GroupVersion.WithKind("Gslb")
+	if _, err = mgr.GetRESTMapper().RESTMapping(legacyGVK.GroupKind(), legacyGVK.Version); err != nil {
+		if meta.IsNoMatchError(err) {
+			log.Info().Msg("Legacy Gslb CRD not found; skipping legacy migration controller")
+		} else {
+			log.Err(err).Msg("Unable to resolve legacy Gslb mapping")
+			return err
+		}
+	} else if err = legacyMigrator.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create legacy Gslb migration reconciler")
 		return err
 	}
