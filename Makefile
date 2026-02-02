@@ -463,6 +463,12 @@ license:
 	@echo -e "\n$(YELLOW)Injecting the license$(NC)"
 	$(call golic,-t apache2)
 
+# runs golic license header check
+.PHONY: golic
+golic:
+	@echo -e "\n$(YELLOW)Running golic license header check$(NC)"
+	$(call golic,--dry -x -t apache2)
+
 # creates ns1 secret in current cluster
 .PHONY: ns1-secret
 ns1-secret:
