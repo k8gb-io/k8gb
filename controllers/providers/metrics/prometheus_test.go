@@ -82,11 +82,11 @@ func TestPrometheusRegistry(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
 	fieldCnt := reflect.TypeOf(metrics.metrics).NumField()
-	items := []string{K8gbGslbErrorsTotal, K8gbGslbHealthyRecords, K8gbGslbReconciliationLoopsTotal,
-		K8gbGslbServiceStatusNum, K8gbGslbStatusCountForFailover, K8gbGslbStatusCountForRoundrobin,
-		K8gbGslbStatusCountForGeoIP, K8gbInfobloxHeartbeatsTotal, K8gbInfobloxHeartbeatErrorsTotal,
-		K8gbInfobloxRequestDuration, K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal,
-		K8gbEndpointStatusNum, K8gbRuntimeInfo}
+	items := []string{K8gbGslbErrorsTotal, K8gbGslbHealthyRecords, K8gbGslbHealthyLocalRecords,
+		K8gbGslbReconciliationLoopsTotal, K8gbGslbServiceStatusNum, K8gbGslbStatusCountForFailover,
+		K8gbGslbStatusCountForRoundrobin, K8gbGslbStatusCountForGeoIP, K8gbInfobloxHeartbeatsTotal,
+		K8gbInfobloxHeartbeatErrorsTotal, K8gbInfobloxRequestDuration, K8gbInfobloxZoneUpdatesTotal,
+		K8gbInfobloxZoneUpdateErrorsTotal, K8gbEndpointStatusNum, K8gbRuntimeInfo}
 	// act
 	registry := m.registry()
 	// assert
@@ -144,6 +144,100 @@ func TestEmptyHealthyRecords(t *testing.T) {
 	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbHealthyRecords).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
 	// assert
 	assert.Equal(t, 0.0, cnt1)
+	assert.Equal(t, 0.0, cnt2)
+}
+
+func TestHealthyLocalRecords(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "eu"
+
+	healthyRecords := map[string][]string{
+		"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.1.1", "10.0.1.2"},
+	}
+
+	exposedIPs := []string{"10.0.0.1", "10.0.0.2", "10.0.2.1"}
+
+	// act
+	cnt1 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
+	m.UpdateHealthyLocalRecordsMetric(gslb, healthyRecords, exposedIPs)
+	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
+
+	// assert
+	assert.Equal(t, 0.0, cnt1)
+	assert.Equal(t, 2.0, cnt2)
+}
+
+func TestHealthyLocalRecordsAllMatch(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "us"
+
+	healthyRecords := map[string][]string{
+		"host1.cloud.example.com": {"10.0.0.1", "10.0.0.2"},
+		"host2.cloud.example.com": {"10.0.0.1", "10.0.0.3"},
+	}
+
+	exposedIPs := []string{"10.0.0.1", "10.0.0.2", "10.0.0.3"}
+
+	// act
+	m.UpdateHealthyLocalRecordsMetric(gslb, healthyRecords, exposedIPs)
+	cnt := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "us"}))
+
+	// assert
+	assert.Equal(t, 3.0, cnt)
+}
+
+func TestHealthyLocalRecordsNoneMatch(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "apac"
+
+	healthyRecords := map[string][]string{
+		"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+	}
+
+	exposedIPs := []string{"10.0.1.1", "10.0.1.2"}
+
+	// act
+	m.UpdateHealthyLocalRecordsMetric(gslb, healthyRecords, exposedIPs)
+	cnt := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "apac"}))
+
+	// assert
+	assert.Equal(t, 0.0, cnt)
+}
+
+func TestHealthyLocalRecordsEmptyInputs(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "eu"
+
+	// act & assert - empty healthy records
+	m.UpdateHealthyLocalRecordsMetric(gslb, nil, []string{"10.0.0.1"})
+	cnt1 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
+	assert.Equal(t, 0.0, cnt1)
+
+	// act & assert - empty exposed IPs
+	m.UpdateHealthyLocalRecordsMetric(gslb, map[string][]string{"host": {"10.0.0.1"}}, nil)
+	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
 	assert.Equal(t, 0.0, cnt2)
 }
 
@@ -394,6 +488,10 @@ func TestInitializeZeroValues(t *testing.T) {
 
 	// assert - verify gauge metrics are initialized with 0
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbHealthyRecords).AsGaugeVec().With(initLabels)))
+
+	// assert - verify healthy local records metric is initialized with 0
+	localRecordsLabels := prometheus.Labels{"namespace": namespace, "name": "init", "geotag": ""}
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(localRecordsLabels)))
 
 	// assert - verify gauge metrics with status labels are initialized with 0
 	statusLabels := prometheus.Labels{"namespace": namespace, "name": "init", "status": "Healthy"}

@@ -57,11 +57,13 @@ const (
 	K8gbInfobloxZoneUpdateErrorsTotal = "k8gb_infoblox_zone_update_errors_total"
 	K8gbEndpointStatusNum             = "k8gb_endpoint_status_num"
 	K8gbRuntimeInfo                   = "k8gb_runtime_info"
+	K8gbGslbHealthyLocalRecords       = "k8gb_gslb_healthy_local_records"
 )
 
 // collectors contains list of metrics.
 type collectors struct {
 	K8gbGslbHealthyRecords            *prometheus.GaugeVec
+	K8gbGslbHealthyLocalRecords       *prometheus.GaugeVec
 	K8gbGslbServiceStatusNum          *prometheus.GaugeVec
 	K8gbGslbStatusCountForFailover    *prometheus.GaugeVec
 	K8gbGslbStatusCountForRoundrobin  *prometheus.GaugeVec
@@ -134,6 +136,30 @@ func (m *PrometheusMetrics) UpdateHealthyRecordsMetric(gslb *k8gbv1beta1.Gslb, h
 		hrsCount += len(hrs)
 	}
 	m.metrics.K8gbGslbHealthyRecords.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsCount))
+}
+
+func (m *PrometheusMetrics) UpdateHealthyLocalRecordsMetric(gslb *k8gbv1beta1.Gslb, healthyRecords map[string][]string, exposedIPs []string) {
+	healthySet := make(map[string]struct{})
+	for _, ips := range healthyRecords {
+		for _, ip := range ips {
+			healthySet[ip] = struct{}{}
+		}
+	}
+
+	var localHealthyCount int
+	for _, ip := range exposedIPs {
+		if _, exists := healthySet[ip]; exists {
+			localHealthyCount++
+		}
+	}
+	labels := prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}
+	// Add geotag label if available
+	if gslb.Status.GeoTag != "" {
+		labels["geotag"] = gslb.Status.GeoTag
+	} else {
+		labels["geotag"] = ""
+	}
+	m.metrics.K8gbGslbHealthyLocalRecords.With(labels).Set(float64(localHealthyCount))
 }
 
 func (m *PrometheusMetrics) UpdateEndpointStatus(ep *externaldnsApi.DNSEndpoint) {
@@ -248,6 +274,14 @@ func (m *PrometheusMetrics) InitializeZeroValues() {
 	// Initialize gauge metrics
 	m.metrics.K8gbGslbHealthyRecords.With(initLabels).Set(0)
 
+	// Initialize healthy local records metric with geotag label
+	localRecordsLabels := prometheus.Labels{
+		"namespace": m.config.K8gbNamespace,
+		"name":      "init",
+		"geotag":    m.config.ClusterGeoTag,
+	}
+	m.metrics.K8gbGslbHealthyLocalRecords.With(localRecordsLabels).Set(0)
+
 	// Initialize gauge metrics with status labels
 	statusLabels := prometheus.Labels{
 		"namespace": m.config.K8gbNamespace,
@@ -308,6 +342,14 @@ func (m *PrometheusMetrics) init() {
 			Help: "Number of healthy records observed by K8GB.",
 		},
 		[]string{"namespace", "name"},
+	)
+
+	m.metrics.K8gbGslbHealthyLocalRecords = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: K8gbGslbHealthyLocalRecords,
+			Help: "Number of local cluster healthy records observed by K8GB.",
+		},
+		[]string{"namespace", "name", "geotag"},
 	)
 
 	m.metrics.K8gbGslbServiceStatusNum = prometheus.NewGaugeVec(
