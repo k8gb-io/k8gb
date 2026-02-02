@@ -26,7 +26,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,13 +34,13 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-type UpdateRuntimeStatus func(gslb *k8gbv1beta1.Gslb, isPrimary bool, isHealthy k8gbv1beta1.HealthStatus, finalTargets []string)
+type UpdateRuntimeStatus func(gslb *k8gbv1beta1io.Gslb, isPrimary bool, isHealthy k8gbv1beta1io.HealthStatus, finalTargets []string)
 type ApplicationDNSEndpoint struct {
 	context             context.Context
 	endpointType        dnsEndpointType
 	client              client.Client
 	config              *resolver.Config
-	gslb                *k8gbv1beta1.Gslb
+	gslb                *k8gbv1beta1io.Gslb
 	logger              *zerolog.Logger
 	updateRuntimeStatus UpdateRuntimeStatus
 	queryService        utils.DNSQueryService
@@ -50,7 +50,7 @@ func NewApplicationDNSEndpoint(
 	ctx context.Context,
 	client client.Client,
 	config *resolver.Config,
-	gslb *k8gbv1beta1.Gslb,
+	gslb *k8gbv1beta1io.Gslb,
 	logger *zerolog.Logger,
 	queryService utils.DNSQueryService,
 	urs UpdateRuntimeStatus) *ApplicationDNSEndpoint {
@@ -88,7 +88,7 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 		}
 
 		isPrimary := d.gslb.Spec.Strategy.PrimaryGeoTag == d.config.ClusterGeoTag
-		isHealthy := health == k8gbv1beta1.Healthy
+		isHealthy := health == k8gbv1beta1io.Healthy
 
 		if isHealthy {
 			finalTargets.Append(d.config.ClusterGeoTag, localTargets)
@@ -121,7 +121,7 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 							Str("gslb", d.gslb.Name).
 							Str("cluster", d.gslb.Spec.Strategy.PrimaryGeoTag).
 							Strs("targets", finalTargets.GetIPs()).
-							Str("workload", k8gbv1beta1.Unhealthy.String()).
+							Str("workload", k8gbv1beta1io.Unhealthy.String()).
 							Msg("Executing failover strategy for primary cluster")
 					}
 				} else {
@@ -138,7 +138,7 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 						Str("gslb", d.gslb.Name).
 						Str("cluster", d.gslb.Spec.Strategy.PrimaryGeoTag).
 						Strs("targets", finalTargets.GetIPs()).
-						Str("workload", k8gbv1beta1.Healthy.String()).
+						Str("workload", k8gbv1beta1io.Healthy.String()).
 						Msg("Executing failover strategy for secondary cluster")
 				}
 			}
@@ -247,7 +247,7 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 }
 
 // getLabels map of where key identifies region and weight, value identifies IP.
-func (d *ApplicationDNSEndpoint) getLabels(gslb *k8gbv1beta1.Gslb, targets Targets) (labels map[string]string) {
+func (d *ApplicationDNSEndpoint) getLabels(gslb *k8gbv1beta1io.Gslb, targets Targets) (labels map[string]string) {
 	labels = make(map[string]string)
 	for k, v := range gslb.Spec.Strategy.Weight {
 		t, found := targets[k]
