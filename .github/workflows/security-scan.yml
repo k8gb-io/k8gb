@@ -89,7 +89,7 @@ jobs:
           trivy-config: trivy.yaml
           format: 'sarif'
           output: 'trivy-helm-results.sarif'
-          severity: ${{ github.event.inputs.severity || 'MEDIUM, HIGH,CRITICAL' }}
+          severity: ${{ github.event.inputs.severity || 'MEDIUM,HIGH,CRITICAL' }}
 
       - name: Upload Helm chart scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
