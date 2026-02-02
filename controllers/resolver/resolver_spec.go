@@ -24,7 +24,7 @@ import (
 	"reflect"
 	"regexp"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -43,7 +43,7 @@ var geoTagRegex = regexp.MustCompile(`^[a-zA-Z\-\d]+$`)
 
 // ResolveGslbSpec fills Gslb by spec values. It executes always, when gslb is initialised.
 // If spec value is not defined, it will use the default value. Function returns error if input is invalid.
-func (r *Resolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1beta1.Gslb, client client.Client) error {
+func (r *Resolver) ResolveGslbSpec(ctx context.Context, gslb *k8gbv1beta1io.Gslb, client client.Client) error {
 	if client == nil {
 		return fmt.Errorf("nil client")
 	}
