@@ -23,9 +23,9 @@ on:
         type: choice
         options:
           - CRITICAL
-          - HIGH
-          - MEDIUM
-          - LOW
+          - HIGH,CRITICAL
+          - MEDIUM,HIGH,CRITICAL
+          - LOW,MEDIUM,HIGH,CRITICAL
 
 permissions:
   contents: read
@@ -82,14 +82,15 @@ jobs:
 
       - name: Run Trivy Helm chart scan
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@0.33.1
+        env:
+          TRIVY_SEVERITY: ${{ github.event.inputs.severity || 'MEDIUM,HIGH,CRITICAL' }}
         with:
           scan-type: 'config'
           scan-ref: 'chart/k8gb'
           trivy-config: trivy.yaml
           format: 'sarif'
           output: 'trivy-helm-results.sarif'
-          severity: ${{ github.event.inputs.severity || 'MEDIUM,HIGH,CRITICAL' }}
 
       - name: Upload Helm chart scan results
         if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
