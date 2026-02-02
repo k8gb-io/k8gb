@@ -1,0 +1,494 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  name: gslbs.k8gb.io
+spec:
+  group: k8gb.io
+  names:
+    kind: Gslb
+    listKind: GslbList
+    plural: gslbs
+    singular: gslb
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.strategy.type
+      name: strategy
+      type: string
+    - jsonPath: .status.geoTag
+      name: geoTag
+      type: string
+    - jsonPath: .status.hosts
+      name: hosts
+      priority: 1
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Gslb is the Schema for the gslbs API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GslbSpec defines the desired state of Gslb
+            properties:
+              ingress:
+                description: Gslb-enabled Ingress Spec
+                properties:
+                  backend:
+                    description: |-
+                      A default backend capable of servicing requests that don't match any
+                      rule. At least one of 'backend' or 'rules' must be specified. This field
+                      is optional to allow the loadbalancer controller or defaulting logic to
+                      specify a global default.
+                    properties:
+                      resource:
+                        description: |-
+                          resource is an ObjectRef to another Kubernetes resource in the namespace
+                          of the Ingress object. If resource is specified, a service.Name and
+                          service.Port must not be specified.
+                          This is a mutually exclusive setting with "Service".
+                        properties:
+                          apiGroup:
+                            description: |-
+                              APIGroup is the group for the resource being referenced.
+                              If APIGroup is not specified, the specified Kind must be in the core API group.
+                              For any other third-party types, APIGroup is required.
+                            type: string
+                          kind:
+                            description: Kind is the type of resource being referenced
+                            type: string
+                          name:
+                            description: Name is the name of resource being referenced
+                            type: string
+                        required:
+                        - kind
+                        - name
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      service:
+                        description: |-
+                          service references a service as a backend.
+                          This is a mutually exclusive setting with "Resource".
+                        properties:
+                          name:
+                            description: |-
+                              name is the referenced service. The service must exist in
+                              the same namespace as the Ingress object.
+                            type: string
+                          port:
+                            description: |-
+                              port of the referenced service. A port name or port number
+                              is required for a IngressServiceBackend.
+                            properties:
+                              name:
+                                description: |-
+                                  name is the name of the port on the Service.
+                                  This is a mutually exclusive setting with "Number".
+                                type: string
+                              number:
+                                description: |-
+                                  number is the numerical port number (e.g. 80) on the Service.
+                                  This is a mutually exclusive setting with "Name".
+                                format: int32
+                                type: integer
+                            type: object
+                            x-kubernetes-map-type: atomic
+                        required:
+                        - name
+                        type: object
+                    type: object
+                  ingressClassName:
+                    description: |-
+                      IngressClassName is the name of the IngressClass cluster resource. The
+                      associated IngressClass defines which controller will implement the
+                      resource. This replaces the deprecated `kubernetes.io/ingress.class`
+                      annotation. For backwards compatibility, when that annotation is set, it
+                      must be given precedence over this field. The controller may emit a
+                      warning if the field and annotation have different values.
+                      Implementations of this API should ignore Ingresses without a class
+                      specified. An IngressClass resource may be marked as default, which can
+                      be used to set a default value for this field. For more information,
+                      refer to the IngressClass documentation.
+                    type: string
+                  rules:
+                    description: |-
+                      A list of host rules used to configure the Ingress. If unspecified, or
+                      no rule matches, all traffic is sent to the default backend.
+                    items:
+                      description: |-
+                        IngressRule represents the rules mapping the paths under a specified host to
+                        the related backend services. Incoming requests are first evaluated for a host
+                        match, then routed to the backend associated with the matching IngressRuleValue.
+                      properties:
+                        host:
+                          description: "Host is the fully qualified domain name of
+                            a network host, as defined by RFC 3986.\nNote the following
+                            deviations from the \"host\" part of the\nURI as defined
+                            in RFC 3986:\n1. IPs are not allowed. Currently an IngressRuleValue
+                            can only apply to\n   the IP in the Spec of the parent
+                            Ingress.\n2. The `:` delimiter is not respected because
+                            ports are not allowed.\n\t  Currently the port of an Ingress
+                            is implicitly :80 for http and\n\t  :443 for https.\nBoth
+                            these may change in the future.\nIncoming requests are
+                            matched against the host before the\nIngressRuleValue.
+                            If the host is unspecified, the Ingress routes all\ntraffic
+                            based on the specified IngressRuleValue.\n\nHost can be
+                            \"precise\" which is a domain name without the terminating
+                            dot of\na network host (e.g. \"foo.bar.com\") or \"wildcard\",
+                            which is a domain name\nprefixed with a single wildcard
+                            label (e.g. \"*.foo.com\").\nThe wildcard character '*'
+                            must appear by itself as the first DNS label and\nmatches
+                            only a single label. You cannot have a wildcard label
+                            by itself (e.g. Host == \"*\").\nRequests will be matched
+                            against the Host field in the following way:\n1. If Host
+                            is precise, the request matches this rule if the http
+                            host header is equal to Host.\n2. If Host is a wildcard,
+                            then the request matches this rule if the http host header\nis
+                            to equal to the suffix (removing the first label) of the
+                            wildcard rule."
+                          type: string
+                        http:
+                          description: |-
+                            HTTPIngressRuleValue is a list of http selectors
+                            pointing to backends. In the example: http://<host>/<path>?<searchpart>
+                            -> backend where where parts of the url correspond to
+                            RFC 3986, this resource will be used to match against
+                            everything after the last '/' and before the first '?'
+                            or '#'.
+                          properties:
+                            paths:
+                              description: paths is a collection of paths that map
+                                requests to backends.
+                              items:
+                                description: |-
+                                  HTTPIngressPath associates a path with a backend. Incoming urls matching the
+                                  path are forwarded to the backend.
+                                properties:
+                                  backend:
+                                    description: |-
+                                      backend defines the referenced service endpoint to which the traffic
+                                      will be forwarded to.
+                                    properties:
+                                      resource:
+                                        description: |-
+                                          resource is an ObjectRef to another Kubernetes resource in the namespace
+                                          of the Ingress object. If resource is specified, a service.Name and
+                                          service.Port must not be specified.
+                                          This is a mutually exclusive setting with "Service".
+                                        properties:
+                                          apiGroup:
+                                            description: |-
+                                              APIGroup is the group for the resource being referenced.
+                                              If APIGroup is not specified, the specified Kind must be in the core API group.
+                                              For any other third-party types, APIGroup is required.
+                                            type: string
+                                          kind:
+                                            description: Kind is the type of resource
+                                              being referenced
+                                            type: string
+                                          name:
+                                            description: Name is the name of resource
+                                              being referenced
+                                            type: string
+                                        required:
+                                        - kind
+                                        - name
+                                        type: object
+                                        x-kubernetes-map-type: atomic
+                                      service:
+                                        description: |-
+                                          service references a service as a backend.
+                                          This is a mutually exclusive setting with "Resource".
+                                        properties:
+                                          name:
+                                            description: |-
+                                              name is the referenced service. The service must exist in
+                                              the same namespace as the Ingress object.
+                                            type: string
+                                          port:
+                                            description: |-
+                                              port of the referenced service. A port name or port number
+                                              is required for a IngressServiceBackend.
+                                            properties:
+                                              name:
+                                                description: |-
+                                                  name is the name of the port on the Service.
+                                                  This is a mutually exclusive setting with "Number".
+                                                type: string
+                                              number:
+                                                description: |-
+                                                  number is the numerical port number (e.g. 80) on the Service.
+                                                  This is a mutually exclusive setting with "Name".
+                                                format: int32
+                                                type: integer
+                                            type: object
+                                            x-kubernetes-map-type: atomic
+                                        required:
+                                        - name
+                                        type: object
+                                    type: object
+                                  path:
+                                    description: |-
+                                      path is matched against the path of an incoming request. Currently it can
+                                      contain characters disallowed from the conventional "path" part of a URL
+                                      as defined by RFC 3986. Paths must begin with a '/' and must be present
+                                      when using PathType with value "Exact" or "Prefix".
+                                    type: string
+                                  pathType:
+                                    description: |-
+                                      pathType determines the interpretation of the path matching. PathType can
+                                      be one of the following values:
+                                      * Exact: Matches the URL path exactly.
+                                      * Prefix: Matches based on a URL path prefix split by '/'. Matching is
+                                        done on a path element by element basis. A path element refers is the
+                                        list of labels in the path split by the '/' separator. A request is a
+                                        match for path p if every p is an element-wise prefix of p of the
+                                        request path. Note that if the last element of the path is a substring
+                                        of the last element in request path, it is not a match (e.g. /foo/bar
+                                        matches /foo/bar/baz, but does not match /foo/barbaz).
+                                      * ImplementationSpecific: Interpretation of the Path matching is up to
+                                        the IngressClass. Implementations can treat this as a separate PathType
+                                        or treat it identically to Prefix or Exact path types.
+                                      Implementations are required to support all path types.
+                                    type: string
+                                required:
+                                - backend
+                                - pathType
+                                type: object
+                              type: array
+                              x-kubernetes-list-type: atomic
+                          required:
+                          - paths
+                          type: object
+                      required:
+                      - http
+                      type: object
+                    type: array
+                  tls:
+                    description: |-
+                      TLS configuration. Currently the Ingress only supports a single TLS
+                      port, 443. If multiple members of this list specify different hosts, they
+                      will be multiplexed on the same port according to the hostname specified
+                      through the SNI TLS extension, if the ingress controller fulfilling the
+                      ingress supports SNI.
+                    items:
+                      description: IngressTLS describes the transport layer security
+                        associated with an ingress.
+                      properties:
+                        hosts:
+                          description: |-
+                            hosts is a list of hosts included in the TLS certificate. The values in
+                            this list must match the name/s used in the tlsSecret. Defaults to the
+                            wildcard host setting for the loadbalancer controller fulfilling this
+                            Ingress, if left unspecified.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        secretName:
+                          description: |-
+                            secretName is the name of the secret used to terminate TLS traffic on
+                            port 443. Field is left optional to allow TLS routing based on SNI
+                            hostname alone. If the SNI host in a listener conflicts with the "Host"
+                            header field used by an IngressRule, the SNI host is used for termination
+                            and value of the "Host" header is used for routing.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              resourceRef:
+                description: ResourceRef spec
+                properties:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
+                    description: |-
+                      If referring to a piece of an object instead of an entire object, this string
+                      should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within a pod, this would take on a value like:
+                      "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]" (container with
+                      index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                      referencing a part of an object.
+                    type: string
+                  kind:
+                    description: |-
+                      Kind of the referent.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                    type: string
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: |-
+                        A label selector requirement is a selector that contains values, a key, and an operator that
+                        relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: |-
+                            operator represents a key's relationship to a set of values.
+                            Valid operators are In, NotIn, Exists and DoesNotExist.
+                          type: string
+                        values:
+                          description: |-
+                            values is an array of string values. If the operator is In or NotIn,
+                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                            the values array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                      map is equivalent to an element of matchExpressions, whose key field is "key", the
+                      operator is "In", and the values array contains only "value". The requirements are ANDed.
+                    type: object
+                  name:
+                    description: |-
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                    type: string
+                  resourceVersion:
+                    description: |-
+                      Specific resourceVersion to which this reference is made, if any.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                    type: string
+                  uid:
+                    description: |-
+                      UID of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              strategy:
+                description: Gslb Strategy spec
+                properties:
+                  dnsTtlSeconds:
+                    description: Defines DNS record TTL in seconds
+                    type: integer
+                  primaryGeoTag:
+                    description: Primary Geo Tag. Valid for failover strategy only
+                    type: string
+                  splitBrainThresholdSeconds:
+                    description: Split brain TXT record expiration in seconds. The
+                      field is deprecated and not used.
+                    type: integer
+                  type:
+                    description: Load balancing strategy type:(roundRobin|failover)
+                    type: string
+                  weight:
+                    additionalProperties:
+                      type: integer
+                    description: Weight is defined by map region:weight
+                    type: object
+                required:
+                - type
+                type: object
+            required:
+            - strategy
+            type: object
+          status:
+            description: GslbStatus defines the observed state of Gslb
+            properties:
+              geoTag:
+                description: Cluster Geo Tag
+                type: string
+              healthyRecords:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                description: Current Healthy DNS record structure
+                type: object
+              hosts:
+                description: Comma-separated list of hosts
+                type: string
+              loadBalancer:
+                description: LoadBalancer configuration
+                properties:
+                  exposedIps:
+                    description: ExposedIPs on the local Load Balancer
+                    items:
+                      type: string
+                    type: array
+                type: object
+              servers:
+                description: Servers configuration
+                items:
+                  description: Servers holds the GSLB's servers' configuration
+                  properties:
+                    host:
+                      description: Hostname exposed by the GSLB
+                      type: string
+                    services:
+                      description: Kubernetes Services backing the load balanced application
+                      items:
+                        description: NamespacedName holds a reference to a k8s resource
+                        properties:
+                          name:
+                            description: Name of the resource
+                            type: string
+                          namespace:
+                            description: Namespace where the resource can be found
+                            type: string
+                        required:
+                        - name
+                        - namespace
+                        type: object
+                      type: array
+                  type: object
+                type: array
+              serviceHealth:
+                additionalProperties:
+                  type: string
+                description: Associated Service status
+                type: object
+            required:
+            - geoTag
+            - healthyRecords
+            - serviceHealth
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

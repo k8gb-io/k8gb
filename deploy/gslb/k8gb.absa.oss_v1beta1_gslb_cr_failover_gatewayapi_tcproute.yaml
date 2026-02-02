@@ -13,7 +13,7 @@ spec:
     - name: frontend-podinfo
       port: 9898
 ---
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: failover-tcproute

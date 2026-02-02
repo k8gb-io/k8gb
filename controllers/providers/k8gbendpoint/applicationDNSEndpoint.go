@@ -178,8 +178,8 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        d.gslb.Name,
 			Namespace:   d.gslb.Namespace,
-			Annotations: map[string]string{"k8gb.absa.oss/dnstype": "local"},
-			Labels:      map[string]string{"k8gb.absa.oss/dnstype": "local"},
+			Annotations: map[string]string{"k8gb.io/dnstype": "local", "k8gb.absa.oss/dnstype": "local"},
+			Labels:      map[string]string{"k8gb.io/dnstype": "local", "k8gb.absa.oss/dnstype": "local"},
 		},
 		Spec: dnsEndpointSpec,
 	}

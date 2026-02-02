@@ -63,7 +63,7 @@ DNS_ZONE ?= cloud.example.com
 DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
-GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
+GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.io_gslbs.yaml
 DZ_CRD_YAML ?= chart/k8gb/crd/k8gb.io_zonedelegation.yaml
 
 # GCP Cloud DNS testing variables
@@ -669,7 +669,8 @@ endef
 define debug
 	$(call manifest)
 	kubectl apply -f deploy/gslb/test-namespace-ingress.yaml
-	kubectl apply -f ./chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
+	kubectl apply -f ./chart/k8gb/crd/k8gb.io_gslbs.yaml
+	kubectl apply -f ./chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
 	kubectl apply -f ./deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml
 	dlv $1
 endef

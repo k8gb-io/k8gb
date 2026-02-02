@@ -206,7 +206,7 @@ func AssertDNSEndpointLabel(t *testing.T, options *k8s.KubectlOptions, label str
 
 func AssertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName string) {
 	t.Helper()
-	deletionExpected := []string{fmt.Sprintf("Error from server (NotFound): gslbs.k8gb.absa.oss \"%s\" not found", gslbName)}
+	deletionExpected := []string{fmt.Sprintf("Error from server (NotFound): gslbs.k8gb.io \"%s\" not found", gslbName)}
 	deletionActual, err := DoWithRetryWaitingForValueE(
 		t,
 		"Waiting for Gslb CR to be deleted...",
