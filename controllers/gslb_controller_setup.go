@@ -23,7 +23,7 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	discov1 "k8s.io/api/discovery/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -44,7 +44,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	endpointMapHandler := handler.EnqueueRequestsFromMapFunc(
 		func(_ context.Context, a client.Object) []reconcile.Request {
-			gslbList := &k8gbv1beta1.GslbList{}
+			gslbList := &k8gbv1beta1io.GslbList{}
 			opts := []client.ListOption{
 				client.InNamespace(a.GetNamespace()),
 			}
@@ -80,7 +80,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		})
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&k8gbv1beta1.Gslb{}).
+		For(&k8gbv1beta1io.Gslb{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&externaldnsApi.DNSEndpoint{}).
 		Watches(&discov1.EndpointSlice{}, endpointMapHandler).

@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"strings"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	corev1 "k8s.io/api/core/v1"
 	discov1 "k8s.io/api/discovery/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -32,7 +32,7 @@ import (
 	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
-func (r *GslbReconciler) updateGslbStatus(ctx context.Context, gslb *k8gbv1beta1.Gslb, ep *externaldnsApi.DNSEndpoint) error {
+func (r *GslbReconciler) updateGslbStatus(ctx context.Context, gslb *k8gbv1beta1io.Gslb, ep *externaldnsApi.DNSEndpoint) error {
 
 	m.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
 
@@ -53,10 +53,10 @@ func (r *GslbReconciler) updateGslbStatus(ctx context.Context, gslb *k8gbv1beta1
 	return err
 }
 
-func (r *GslbReconciler) getServiceHealthStatus(ctx context.Context, gslb *k8gbv1beta1.Gslb) (map[string]k8gbv1beta1.HealthStatus, error) {
-	serviceHealth := make(map[string]k8gbv1beta1.HealthStatus)
+func (r *GslbReconciler) getServiceHealthStatus(ctx context.Context, gslb *k8gbv1beta1io.Gslb) (map[string]k8gbv1beta1io.HealthStatus, error) {
+	serviceHealth := make(map[string]k8gbv1beta1io.HealthStatus)
 	for _, server := range gslb.Status.Servers {
-		serviceHealth[server.Host] = k8gbv1beta1.NotFound
+		serviceHealth[server.Host] = k8gbv1beta1io.NotFound
 		for _, svc := range server.Services {
 			service := &corev1.Service{}
 			finder := client.ObjectKey{
@@ -77,12 +77,12 @@ func (r *GslbReconciler) getServiceHealthStatus(ctx context.Context, gslb *k8gbv
 				return serviceHealth, err
 			}
 
-			serviceHealth[server.Host] = k8gbv1beta1.Unhealthy
+			serviceHealth[server.Host] = k8gbv1beta1io.Unhealthy
 			if len(endpoints.Items) > 0 {
 				if len(endpoints.Items[0].Endpoints) > 0 {
 					for _, e := range endpoints.Items[0].Endpoints {
 						if len(e.Addresses) > 0 && (e.Conditions.Ready == nil || *e.Conditions.Ready) {
-							serviceHealth[server.Host] = k8gbv1beta1.Healthy
+							serviceHealth[server.Host] = k8gbv1beta1io.Healthy
 						}
 					}
 				}
@@ -92,7 +92,7 @@ func (r *GslbReconciler) getServiceHealthStatus(ctx context.Context, gslb *k8gbv
 	return serviceHealth, nil
 }
 
-func (r *GslbReconciler) getHealthyRecords(ctx context.Context, gslb *k8gbv1beta1.Gslb) (map[string][]string, error) {
+func (r *GslbReconciler) getHealthyRecords(ctx context.Context, gslb *k8gbv1beta1io.Gslb) (map[string][]string, error) {
 
 	dnsEndpoint := &externaldnsApi.DNSEndpoint{}
 
@@ -121,7 +121,7 @@ func (r *GslbReconciler) getHealthyRecords(ctx context.Context, gslb *k8gbv1beta
 	return healthyRecords, nil
 }
 
-func (r *GslbReconciler) hostsToCSV(gslb *k8gbv1beta1.Gslb) string {
+func (r *GslbReconciler) hostsToCSV(gslb *k8gbv1beta1io.Gslb) string {
 	var hosts []string
 	for _, server := range gslb.Status.Servers {
 		hosts = append(hosts, server.Host)

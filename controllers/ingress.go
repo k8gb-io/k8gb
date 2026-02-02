@@ -24,7 +24,7 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,13 +32,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *GslbReconciler) createIngressFromGslb(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, error) {
+func (r *GslbReconciler) createIngressFromGslb(gslb *k8gbv1beta1io.Gslb) (*netv1.Ingress, error) {
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      gslb.Name,
 			Namespace: gslb.Namespace,
 		},
-		Spec: k8gbv1beta1.ToV1IngressSpec(gslb.Spec.Ingress),
+		Spec: k8gbv1beta1io.ToV1IngressSpec(gslb.Spec.Ingress),
 	}
 	utils.SetCommonGslbLabels(ingress)
 	err := controllerutil.SetControllerReference(gslb, ingress, r.Scheme)
@@ -48,7 +48,7 @@ func (r *GslbReconciler) createIngressFromGslb(gslb *k8gbv1beta1.Gslb) (*netv1.I
 	return ingress, err
 }
 
-func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8gbv1beta1.Gslb, i *netv1.Ingress) error {
+func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8gbv1beta1io.Gslb, i *netv1.Ingress) error {
 	found := &netv1.Ingress{}
 	err := r.Get(ctx, types.NamespacedName{
 		Name:      instance.Name,
