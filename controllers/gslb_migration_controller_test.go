@@ -49,3 +49,38 @@ func TestLegacyMigrationCreatesIOAndLabelsLegacy(t *testing.T) {
 	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: "demo", Namespace: "default"}})
 	require.NoError(t, err)
 }
+
+func TestLegacyMigrationIgnoresMigratedObject(t *testing.T) {
+	ctrlMock := gomock.NewController(t)
+	defer ctrlMock.Finish()
+
+	legacy := &k8gbv1beta1.Gslb{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: "default",
+			Labels: map[string]string{
+				migrationLabelKey: "true",
+			},
+		},
+	}
+
+	cl := mocks.NewMockClient(ctrlMock)
+	cl.EXPECT().Get(gomock.Any(), types.NamespacedName{Name: "demo", Namespace: "default"}, gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ types.NamespacedName, obj client.Object, _ ...client.GetOption) error {
+			*obj.(*k8gbv1beta1.Gslb) = *legacy
+			return nil
+		})
+
+	recorder := record.NewFakeRecorder(5)
+	r := &LegacyGslbMigrationReconciler{Client: cl, Recorder: recorder}
+
+	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: "demo", Namespace: "default"}})
+	require.NoError(t, err)
+
+	select {
+	case evt := <-recorder.Events:
+		require.Contains(t, evt, "LegacyIgnored")
+	default:
+		t.Fatalf("expected warning event")
+	}
+}
