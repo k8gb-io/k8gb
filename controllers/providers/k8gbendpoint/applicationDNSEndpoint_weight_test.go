@@ -25,7 +25,7 @@ import (
 	"net"
 	"testing"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
@@ -39,7 +39,7 @@ func TestWeight(t *testing.T) {
 	// void logger
 	logger := zerolog.New(io.Discard).With().Timestamp().Logger()
 	// void metrics
-	metrics := func(*k8gbv1beta1.Gslb, bool, k8gbv1beta1.HealthStatus, []string) {}
+	metrics := func(*k8gbv1beta1io.Gslb, bool, k8gbv1beta1io.HealthStatus, []string) {}
 
 	parentZoneDNSServers := []utils.DNSServer{
 		{Host: "10.0.0.1", Port: 53},
@@ -54,7 +54,7 @@ func TestWeight(t *testing.T) {
 		name           string
 		mockData       []wrr
 		config         *resolver.Config
-		gslb           *k8gbv1beta1.Gslb
+		gslb           *k8gbv1beta1io.Gslb
 		expectedLabels map[string]string
 	}{
 		{
@@ -74,9 +74,9 @@ func TestWeight(t *testing.T) {
 				},
 				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 35,
@@ -85,11 +85,11 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -128,9 +128,9 @@ func TestWeight(t *testing.T) {
 				},
 				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 1,
@@ -139,11 +139,11 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -182,9 +182,9 @@ func TestWeight(t *testing.T) {
 				},
 				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 0,
@@ -193,11 +193,11 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -236,18 +236,18 @@ func TestWeight(t *testing.T) {
 				},
 				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type:   resolver.RoundRobinStrategy,
 						Weight: map[string]int{},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -277,18 +277,18 @@ func TestWeight(t *testing.T) {
 				},
 				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type:   resolver.RoundRobinStrategy,
 						Weight: map[string]int{},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
