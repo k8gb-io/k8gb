@@ -28,7 +28,14 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if legacy.Labels != nil && legacy.Labels[migrationLabelKey] == "true" {
-		r.Recorder.Eventf(legacy, corev1.EventTypeWarning, "LegacyIgnored", "Legacy Gslb ignored. Edit k8gb.io Gslb %s/%s instead.", legacy.Namespace, legacy.Name)
+		r.Recorder.Eventf(
+			legacy,
+			corev1.EventTypeWarning,
+			"LegacyIgnored",
+			"Legacy Gslb ignored. Edit k8gb.io Gslb %s/%s instead.",
+			legacy.Namespace,
+			legacy.Name,
+		)
 		return ctrl.Result{}, nil
 	}
 
@@ -60,7 +67,14 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{}, err
 	}
 
-	r.Recorder.Eventf(legacy, corev1.EventTypeNormal, "LegacyMigrated", "Legacy Gslb migrated to k8gb.io Gslb %s/%s. Edit the k8gb.io object going forward.", legacy.Namespace, legacy.Name)
+	r.Recorder.Eventf(
+		legacy,
+		corev1.EventTypeNormal,
+		"LegacyMigrated",
+		"Legacy Gslb migrated to k8gb.io Gslb %s/%s. Edit the k8gb.io object going forward.",
+		legacy.Namespace,
+		legacy.Name,
+	)
 	return ctrl.Result{}, nil
 }
 
