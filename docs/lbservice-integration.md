@@ -32,7 +32,7 @@ spec:
 ### 2. Create a GSLB Resource
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: my-app-gslb
@@ -105,7 +105,7 @@ If you need multiple hostnames for the same service, you can create multiple GSL
 
 ```yaml
 # GSLB 1
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: my-app-gslb-primary
@@ -123,7 +123,7 @@ spec:
 
 ---
 # GSLB 2
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: my-app-gslb-alias

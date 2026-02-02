@@ -19,7 +19,7 @@ spec:
 ---
 # GSLB Resource for LoadBalancer Service
 # Note: Hostname must be explicitly specified via annotation
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: hello-world-gslb

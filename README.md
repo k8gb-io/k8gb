@@ -35,7 +35,7 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
 Just a single Gslb CRD to enable the Global Load Balancing:
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: test-gslb-failover
@@ -49,6 +49,8 @@ spec:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag
 ```
+
+Legacy `k8gb.absa.oss/v1beta1` resources are still accepted and automatically migrated to `k8gb.io/v1beta1`. Legacy objects are labeled `k8gb.io/migrated-to-k8gb-io=true` and emit a warning event telling users to edit the `k8gb.io` object going forward. Legacy example: `docs/examples/legacy/gslb-legacy.yaml`.
 
 [Global load balancing](https://cloud.redhat.com/blog/global-load-balancer-approaches), commonly referred to as GSLB (Global Server Load Balancing) solutions, has been typically the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 

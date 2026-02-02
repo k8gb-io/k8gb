@@ -24,7 +24,7 @@ data:
         prometheus 0.0.0.0:9153
         forward . /etc/resolv.conf
         k8s_crd {
-            filter k8gb.absa.oss/dnstype=local
+            filter k8gb.io/dnstype=local
             negttl {{ .dnsZoneNegTTL | default 30 }}
             loadbalance weight
             {{- if .geoDataFilePath }}

@@ -69,7 +69,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | extdns.domainFilters[0] | string | `"example.com"` |  |
 | extdns.enabled | bool | `false` |  |
 | extdns.interval | string | `"20s"` |  |
-| extdns.labelFilter | string | `"k8gb.absa.oss/dnstype=extdns"` |  |
+| extdns.labelFilter | string | `"k8gb.io/dnstype=extdns"` |  |
 | extdns.logLevel | string | `"debug"` |  |
 | extdns.managedRecordTypes[0] | string | `"A"` |  |
 | extdns.managedRecordTypes[1] | string | `"CNAME"` |  |
@@ -92,6 +92,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | istio.enabled | bool | `true` | install istio RBAC |
 | k8gb.clusterGeoTag | string | `"eu"` | Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
+| k8gb.installLegacyCrds | bool | `true` | whether it should also deploy the legacy k8gb.absa.oss CRD |
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
 | k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"extraPlugins":[],"extraServerBlocks":"","geoDataField":"","geoDataFilePath":"","loadBalancedZone":"cloud.example.com","parentZone":"example.com"}]` | array of dns zones controlled by gslb |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |

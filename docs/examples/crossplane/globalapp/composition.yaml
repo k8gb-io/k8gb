@@ -191,7 +191,7 @@ spec:
                 watch = True
                 forProvider = {
                   manifest = {
-                    apiVersion = "k8gb.absa.oss/v1beta1"
+                    apiVersion = "k8gb.io/v1beta1"
                     kind = "Gslb"
                     metadata = {
                       name = "failover-ingress"

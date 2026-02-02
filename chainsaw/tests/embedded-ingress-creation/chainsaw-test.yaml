@@ -46,7 +46,7 @@ spec:
     try:
     - assert:
         resource:
-          apiVersion: k8gb.absa.oss/v1beta1
+          apiVersion: k8gb.io/v1beta1
           kind: Gslb
           metadata:
             name: ($test.metadata.name)
@@ -71,7 +71,7 @@ spec:
             ownerReferences:
               (length(@)): 1
             labels:
-              k8gb.absa.oss/dnstype: local
+              k8gb.io/dnstype: local
         timeout: 10s
   - name: apply broken resources
     description: broken resources should be rejected by the API server

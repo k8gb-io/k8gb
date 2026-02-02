@@ -74,7 +74,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      d.info.GetExternalDNSEndpointName(),
 			Namespace: d.config.K8gbNamespace,
-			Labels:    map[string]string{"k8gb.absa.oss/dnstype": externalDNSTypeCommon},
+			Labels:    map[string]string{"k8gb.io/dnstype": externalDNSTypeCommon, "k8gb.absa.oss/dnstype": externalDNSTypeCommon},
 		},
 		Spec: externaldnsApi.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{

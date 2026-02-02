@@ -10,7 +10,7 @@ spec:
         duration: 40s # reconcile requeue seconds + coreDNS
     - assert:
         resource:
-          apiVersion: k8gb.absa.oss/v1beta1
+          apiVersion: k8gb.io/v1beta1
           kind: Gslb
           metadata:
             name: ($test.metadata.name)
