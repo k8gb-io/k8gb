@@ -29,7 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	"github.com/rs/zerolog"
@@ -109,46 +109,46 @@ func TestDepResolver(t *testing.T) {
 func TestSpec(t *testing.T) {
 	var tests = []struct {
 		name                string
-		spec                v1beta1.GslbSpec
+		spec                v1beta1io.GslbSpec
 		expectedError       bool
 		expectedUpdateCount int
-		getClient           func(*v1beta1.Gslb) *SpyClient
+		getClient           func(*v1beta1io.Gslb) *SpyClient
 	}{
 		{
 			name: "valid Spec 1",
-			spec: v1beta1.GslbSpec{
-				Strategy: v1beta1.Strategy{
+			spec: v1beta1io.GslbSpec{
+				Strategy: v1beta1io.Strategy{
 					DNSTtlSeconds: DefaultTTLSeconds,
 					Type:          FailoverStrategy,
 					PrimaryGeoTag: "us",
 				},
 			},
 			expectedUpdateCount: 1,
-			getClient: func(gslb *v1beta1.Gslb) *SpyClient {
+			getClient: func(gslb *v1beta1io.Gslb) *SpyClient {
 				return NewSpyClient(gslb, func(_ client.Object) {})
 			},
 		},
 		{
 			name: "valid Spec 2 - empty DNSTTLSeconds",
-			spec: v1beta1.GslbSpec{
-				Strategy: v1beta1.Strategy{
+			spec: v1beta1io.GslbSpec{
+				Strategy: v1beta1io.Strategy{
 					DNSTtlSeconds: 0,
 					Type:          FailoverStrategy,
 					PrimaryGeoTag: "us",
 				},
 			},
 			expectedUpdateCount: 1,
-			getClient: func(gslb *v1beta1.Gslb) *SpyClient {
+			getClient: func(gslb *v1beta1io.Gslb) *SpyClient {
 				return NewSpyClient(gslb, func(obj client.Object) {
-					gslb := obj.(*v1beta1.Gslb)
+					gslb := obj.(*v1beta1io.Gslb)
 					assert.Equal(t, DefaultTTLSeconds, gslb.Spec.Strategy.DNSTtlSeconds)
 				})
 			},
 		},
 		{
 			name: "valid Spec 3 weight",
-			spec: v1beta1.GslbSpec{
-				Strategy: v1beta1.Strategy{
+			spec: v1beta1io.GslbSpec{
+				Strategy: v1beta1io.Strategy{
 					DNSTtlSeconds: 0,
 					Type:          RoundRobinStrategy,
 					PrimaryGeoTag: "us",
@@ -160,14 +160,14 @@ func TestSpec(t *testing.T) {
 				},
 			},
 			expectedUpdateCount: 1,
-			getClient: func(gslb *v1beta1.Gslb) *SpyClient {
+			getClient: func(gslb *v1beta1io.Gslb) *SpyClient {
 				return NewSpyClient(gslb, func(_ client.Object) {})
 			},
 		},
 		{
 			name: "invalid Spec 2 out of Type",
-			spec: v1beta1.GslbSpec{
-				Strategy: v1beta1.Strategy{
+			spec: v1beta1io.GslbSpec{
+				Strategy: v1beta1io.Strategy{
 					DNSTtlSeconds: 0,
 					Type:          "Invalid",
 					PrimaryGeoTag: "us",
@@ -175,14 +175,14 @@ func TestSpec(t *testing.T) {
 			},
 			expectedError:       true,
 			expectedUpdateCount: 0,
-			getClient: func(gslb *v1beta1.Gslb) *SpyClient {
+			getClient: func(gslb *v1beta1io.Gslb) *SpyClient {
 				return NewSpyClient(gslb, func(_ client.Object) {})
 			},
 		},
 		{
 			name: "invalid Spec 3 weight",
-			spec: v1beta1.GslbSpec{
-				Strategy: v1beta1.Strategy{
+			spec: v1beta1io.GslbSpec{
+				Strategy: v1beta1io.Strategy{
 					DNSTtlSeconds: 0,
 					Type:          RoundRobinStrategy,
 					PrimaryGeoTag: "us",
@@ -195,27 +195,27 @@ func TestSpec(t *testing.T) {
 			},
 			expectedError:       true,
 			expectedUpdateCount: 0,
-			getClient: func(gslb *v1beta1.Gslb) *SpyClient {
+			getClient: func(gslb *v1beta1io.Gslb) *SpyClient {
 				return NewSpyClient(gslb, func(_ client.Object) {})
 			},
 		},
 		{
 			name: "valid Spec 4 missing geotag",
-			spec: v1beta1.GslbSpec{
-				Strategy: v1beta1.Strategy{
+			spec: v1beta1io.GslbSpec{
+				Strategy: v1beta1io.Strategy{
 					DNSTtlSeconds: 0,
 					Type:          RoundRobinStrategy,
 				},
 			},
 			expectedUpdateCount: 1,
-			getClient: func(gslb *v1beta1.Gslb) *SpyClient {
+			getClient: func(gslb *v1beta1io.Gslb) *SpyClient {
 				return NewSpyClient(gslb, func(_ client.Object) {})
 			},
 		},
 		{
 			name: "invalid Spec 4 weight",
-			spec: v1beta1.GslbSpec{
-				Strategy: v1beta1.Strategy{
+			spec: v1beta1io.GslbSpec{
+				Strategy: v1beta1io.Strategy{
 					DNSTtlSeconds: 0,
 					Type:          RoundRobinStrategy,
 					PrimaryGeoTag: "us",
@@ -228,7 +228,7 @@ func TestSpec(t *testing.T) {
 			},
 			expectedError:       true,
 			expectedUpdateCount: 0,
-			getClient: func(gslb *v1beta1.Gslb) *SpyClient {
+			getClient: func(gslb *v1beta1io.Gslb) *SpyClient {
 				return NewSpyClient(gslb, func(_ client.Object) {})
 			},
 		},
@@ -237,7 +237,7 @@ func TestSpec(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 
 			// arrange
-			gslb := &v1beta1.Gslb{ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "default"}, Spec: test.spec}
+			gslb := &v1beta1io.Gslb{ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "default"}, Spec: test.spec}
 			cl := test.getClient(gslb)
 
 			// act
@@ -800,9 +800,9 @@ type SpyClient struct {
 	assertFunc  func(client.Object)
 }
 
-func NewSpyClient(obj *v1beta1.Gslb, a func(client.Object)) *SpyClient {
+func NewSpyClient(obj *v1beta1io.Gslb, a func(client.Object)) *SpyClient {
 	scheme := runtime.NewScheme()
-	_ = v1beta1.AddToScheme(scheme)
+	_ = v1beta1io.AddToScheme(scheme)
 	cl := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
 	return &SpyClient{Client: cl, UpdateCount: 0, assertFunc: a}
 }
