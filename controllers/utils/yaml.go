@@ -25,7 +25,7 @@ import (
 	"os"
 
 	yamlConv "github.com/ghodss/yaml"
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -37,7 +37,7 @@ import (
 )
 
 // FileToGSLB takes a file and returns a GSLB object
-func FileToGSLB(file string) *k8gbv1beta1.Gslb {
+func FileToGSLB(file string) *k8gbv1beta1io.Gslb {
 	yaml, err := os.ReadFile(file)
 	if err != nil {
 		panic(fmt.Errorf("can't open example CR file: %s", file))
@@ -181,18 +181,18 @@ func FileToService(file string) *corev1.Service {
 }
 
 // YamlToGslb takes yaml and returns a Gslb object
-func YamlToGslb(yaml []byte) (*k8gbv1beta1.Gslb, error) {
+func YamlToGslb(yaml []byte) (*k8gbv1beta1io.Gslb, error) {
 	// yamlBytes contains a []byte of my yaml job spec
 	// convert the yaml to json
 	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
 	if err != nil {
-		return &k8gbv1beta1.Gslb{}, err
+		return &k8gbv1beta1io.Gslb{}, err
 	}
 	// unmarshal the json into the kube struct
-	gslb := &k8gbv1beta1.Gslb{}
+	gslb := &k8gbv1beta1io.Gslb{}
 	err = json.Unmarshal(jsonBytes, &gslb)
 	if err != nil {
-		return &k8gbv1beta1.Gslb{}, err
+		return &k8gbv1beta1io.Gslb{}, err
 	}
 	return gslb, nil
 }
