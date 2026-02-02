@@ -25,6 +25,7 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers"
 	boot "github.com/k8gb-io/k8gb/controllers/bootstrap"
 	"github.com/k8gb-io/k8gb/controllers/logging"
@@ -57,6 +58,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(runtimescheme))
 	utilruntime.Must(k8gbv1beta1.AddToScheme(runtimescheme))
+	utilruntime.Must(k8gbv1beta1io.AddToScheme(runtimescheme))
 	utilruntime.Must(istio.AddToScheme(runtimescheme))
 	utilruntime.Must(gatewayapiv1.Install(runtimescheme))
 	utilruntime.Must(gatewayapiv1alpha2.Install(runtimescheme))
