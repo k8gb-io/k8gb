@@ -29,6 +29,7 @@
 - [Release process](#release-process)
   - [Signed releases](#signed-releases)
   - [Software bill of materials](#software-bill-of-materials)
+- [Governance](https://github.com/k8gb-io/k8gb/blob/master/GOVERNANCE.md)
 
 k8gb is licensed under [Apache 2 License](https://github.com/k8gb-io/k8gb/blob/master/LICENSE) and accepts contributions via GitHub pull requests.
 This document outlines the resources and guidelines necessary to follow by contributors to the k8gb project.
