@@ -46,6 +46,7 @@ func (r *GslbReconciler) updateGslbStatus(ctx context.Context, gslb *k8gbv1beta1
 	gslb.Status.Hosts = r.hostsToCSV(gslb)
 
 	m.UpdateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
+	m.UpdateHealthyLocalRecordsMetric(gslb, gslb.Status.HealthyRecords, gslb.Status.LoadBalancer.ExposedIPs)
 
 	m.UpdateEndpointStatus(ep)
 
