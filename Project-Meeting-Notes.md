@@ -34,7 +34,51 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Community user reporting docker hub rate limiting during k8gb installation - republish to github
 - [https://github.com/k8gb-io/k8gb/issues/1314](https://github.com/k8gb-io/k8gb/issues/1314) - split brain documentation request
 
-</details><details open><summary><strong>Jan 21, 2026 #84</strong></summary>
+</details>
+
+<details open><summary><strong>Feb 4, 2026 #85</strong></summary>
+
+## Feb 4, 2026 #85
+
+Zoom Recording: https://zoom.us/rec/share/VoC_axlmGGixnrhlu0Wa4S9B69GRzsHr5vSZCUnkX4a7ame_b_YOoubxUg0pV1Ld.4Y-OjjxtdMoR3lSc
+
+On YouTube: []()
+
+**Attendees**
+
+- Farhan Ahmed
+- Yury Tsarev
+- 
+
+**Agenda**
+
+- [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **News**
+    - Incubation
+      - https://github.com/cncf/toc/pull/2020 Governance review
+        - https://github.com/k8gb-io/k8gb/issues/2210 Related Project Lead Election
+      - https://github.com/cncf/toc/pull/2029 Tech review
+- **Discuss**
+  - https://github.com/k8gb-io/k8gb/issues/2195 Switch to vendor neutral OCI registry and repository
+  - https://github.com/k8gb-io/k8gb/issues/2180 Switch to vendor-neutral API group
+    - this one is tricky to make non-intrusive https://github.com/k8gb-io/k8gb/pull/2203 - testing this approach
+  - Release this week?
+- **PR review**
+    - Trivy implementation [https://github.com/k8gb-io/k8gb/pull/2179](https://github.com/k8gb-io/k8gb/pull/2179) 🙏 @itsfarhan - merged, needs some follow up fixes
+    - Mkdocs versioning [https://github.com/k8gb-io/k8gb/pull/2178](https://github.com/k8gb-io/k8gb/pull/2178) 🙏 @itsfarhan
+    - Incubation DTR [https://github.com/k8gb-io/k8gb/pull/1909](https://github.com/k8gb-io/k8gb/pull/1909) 🙏 @itsfarhan
+    - GSLB reconciliation should not fail on hostnames outside delegated zones in referenced resources [https://github.com/k8gb-io/k8gb/issues/2183](https://github.com/k8gb-io/k8gb/issues/2183) 🙏 @Piroddi - merged
+    - https://github.com/k8gb-io/k8gb/pull/2204 Add new k8gb_gslb_healthy_local_records prom metrics 🙏 @Piroddi - merged
+    - https://github.com/k8gb-io/k8gb/pull/2184 🙏 @Piroddi - merged
+- **Issue Review**
+    - Good first issues: https://github.com/k8gb-io/k8gb/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22 
+- **Community Update**
+    - WIP: "what is k8gb" and "k8gb getting started" videos
+- **Other**
+- **Action Items**
+
+
+<details><summary><strong>Feb 4, 2026 #85</strong></summary>
 
 ## Jan 21, 2026 #84
 
