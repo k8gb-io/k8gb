@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Run Trivy filesystem scan
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' }}
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
@@ -56,14 +56,14 @@ jobs:
           severity: ${{ github.event.inputs.severity || 'HIGH,CRITICAL' }}
 
       - name: Upload filesystem scan results
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' }}
         uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-fs-results.sarif'
           category: 'trivy-filesystem'
 
       - name: Run Trivy configuration scan
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'config'
@@ -74,14 +74,14 @@ jobs:
           severity: ${{ github.event.inputs.severity || 'HIGH,CRITICAL' }}
 
       - name: Upload configuration scan results
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
         uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-config-results.sarif'
           category: 'trivy-config'
 
       - name: Run Trivy Helm chart scan
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
         uses: aquasecurity/trivy-action@0.33.1
         env:
           TRIVY_SEVERITY: ${{ github.event.inputs.severity || 'MEDIUM,HIGH,CRITICAL' }}
@@ -93,14 +93,14 @@ jobs:
           output: 'trivy-helm-results.sarif'
 
       - name: Upload Helm chart scan results
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
         uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-helm-results.sarif'
           category: 'trivy-helm-charts'
 
       - name: Run Trivy secret scan
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' }}
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: 'fs'
@@ -112,7 +112,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload secret scan results
-        if: ${{ github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' || github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' }}
         uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
         with:
           sarif_file: 'trivy-secret-results.sarif'

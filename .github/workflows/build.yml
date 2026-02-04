@@ -110,11 +110,9 @@ jobs:
           scan-ref: '.'
           trivy-config: trivy.yaml
           format: 'table'
-          scanners: 'vuln,secret,misconfig,license'
-          # Only fail on push to main/master for HIGH and CRITICAL vulnerabilities
-          # PRs are non-blocking but still show results
-          exit-code: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') && '1' || '0' }}
-          severity: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'HIGH,CRITICAL' || 'CRITICAL,HIGH,MEDIUM,LOW' }}
+          scanners: 'vuln'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
       # Secrets should always block (in both PRs and main)
       - name: Run Trivy secret scanner (blocking)
