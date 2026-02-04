@@ -31,7 +31,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	v1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	resolver "github.com/k8gb-io/k8gb/controllers/resolver"
 	gomock "go.uber.org/mock/gomock"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
@@ -75,7 +75,7 @@ func (mr *MockGslbResolverMockRecorder) GetDeprecations() *gomock.Call {
 }
 
 // ResolveGslbSpec mocks base method.
-func (m *MockGslbResolver) ResolveGslbSpec(ctx context.Context, gslb *v1beta1.Gslb, client client.Client) error {
+func (m *MockGslbResolver) ResolveGslbSpec(ctx context.Context, gslb *v1beta1io.Gslb, client client.Client) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResolveGslbSpec", ctx, gslb, client)
 	ret0, _ := ret[0].(error)

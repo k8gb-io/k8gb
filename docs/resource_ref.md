@@ -19,7 +19,7 @@ The simplest way is to directly specify the name of the resource you want to ref
 
 #### Ingress
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
@@ -33,7 +33,7 @@ spec:
 
 #### LoadBalancer Service
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
@@ -49,7 +49,7 @@ spec:
 
 #### Istio Virtual Service
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
@@ -63,7 +63,7 @@ spec:
 
 #### GatewayAPI HTTPRoute
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
@@ -77,7 +77,7 @@ spec:
 
 #### GatewayAPI GRPCRoute
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
@@ -91,7 +91,7 @@ spec:
 
 #### GatewayAPI TCPRoute
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: failover-tcproute
@@ -107,7 +107,7 @@ spec:
 
 #### GatewayAPI UDPRoute
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: failover-udproute
@@ -123,7 +123,7 @@ spec:
 
 #### GatewayAPI TLSRoute
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: failover-tlsroute
@@ -143,7 +143,7 @@ an error.
 Here we show only an example for Ingress resources, but the same applies for Istio and GatewayAPI integrations.
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: playground-failover
@@ -159,7 +159,7 @@ spec:
 For backward compatibility, you can still use the original way where the Ingress configuration is embedded directly inside the GSLB resource. This method will continue to work, but we recommend switching to reference-based configuration for simpler management and to avoid configuration drift.
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: failover-playground-embedded

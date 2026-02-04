@@ -23,7 +23,7 @@ import (
 
 	context "context"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapi"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
@@ -42,7 +42,7 @@ type ReferenceResolver struct {
 }
 
 // NewReferenceResolver creates a new reference resolver capable of understanding `networking.gateway.api/v1` resources
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	udpRouteList, err := getGslbUDPRouteRef(gslb, k8sClient)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 }
 
 // getGslbUDPRouteRef resolves a Gateway API UDPRoute resource referenced by the Gslb spec
-func getGslbUDPRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha2.UDPRoute, error) {
+func getGslbUDPRouteRef(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha2.UDPRoute, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func getGslbUDPRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gate
 }
 
 // GetServers retrieves the GSLB server configuration from the UDPRoute resource
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
+func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1io.Server, error) {
 	return gatewayapi.GetServersFromRoute(rr.route)
 }
 

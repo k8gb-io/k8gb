@@ -25,7 +25,7 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	netv1 "k8s.io/api/networking/v1"
@@ -41,7 +41,7 @@ type ReferenceResolver struct {
 }
 
 // NewReferenceResolver creates a reference resolver capable of understanding referenced ingresses.networking.k8s.io resources
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	ingressList, err := getGslbIngressRef(gslb, k8sClient)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 }
 
 // getGslbIngressRef resolves a Kubernetes Ingress resource referenced by the Gslb spec
-func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1.Ingress, error) {
+func getGslbIngressRef(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]netv1.Ingress, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func getGslbIngressRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]netv1
 }
 
 // NewEmbeddedResolver creates a reference resolver capable of understanding embedded ingresses.networking.k8s.io resources
-func NewEmbeddedResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+func NewEmbeddedResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	ingressEmbedded, err := getGslbIngressEmbedded(gslb, k8sClient)
 	if err != nil {
 		return nil, err
@@ -116,8 +116,8 @@ func NewEmbeddedResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Refe
 }
 
 // getGslbIngressEmbedded resolves a Kubernetes Ingress resource embedded in the Gslb spec
-func getGslbIngressEmbedded(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*netv1.Ingress, error) {
-	if reflect.DeepEqual(gslb.Spec.Ingress, k8gbv1beta1.IngressSpec{}) {
+func getGslbIngressEmbedded(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*netv1.Ingress, error) {
+	if reflect.DeepEqual(gslb.Spec.Ingress, k8gbv1beta1io.IngressSpec{}) {
 		log.Info().
 			Str("gslb", gslb.Name).
 			Msg("No configuration for embedded Ingress resource")
@@ -143,13 +143,13 @@ func getGslbIngressEmbedded(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*n
 }
 
 // GetServers retrieves the GSLB server configuration from the gateway resource
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
-	servers := []*k8gbv1beta1.Server{}
+func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1io.Server, error) {
+	servers := []*k8gbv1beta1io.Server{}
 
 	for _, rule := range rr.ingress.Spec.Rules {
-		server := &k8gbv1beta1.Server{
+		server := &k8gbv1beta1io.Server{
 			Host:     rule.Host,
-			Services: []*k8gbv1beta1.NamespacedName{},
+			Services: []*k8gbv1beta1io.NamespacedName{},
 		}
 		for _, path := range rule.HTTP.Paths {
 			if path.Backend.Service == nil || path.Backend.Service.Name == "" {
@@ -159,7 +159,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 				continue
 			}
 
-			server.Services = append(server.Services, &k8gbv1beta1.NamespacedName{
+			server.Services = append(server.Services, &k8gbv1beta1io.NamespacedName{
 				Name:      path.Backend.Service.Name,
 				Namespace: rr.ingress.Namespace,
 			})

@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"strconv"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -88,7 +88,7 @@ func (g *IngressHandler) isK8gbAnnotated(obj client.Object) bool {
 	return found
 }
 
-func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) *k8gbv1beta1.Gslb {
+func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) *k8gbv1beta1io.Gslb {
 	log.Warn().
 		Str("ingress", ing.GetName()).
 		Msg("Configuration GSLB resources via Ingress annotations is deprecated. " +
@@ -150,8 +150,8 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 	return gslb
 }
 
-func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, error) {
-	gslb := &k8gbv1beta1.Gslb{}
+func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1io.Gslb, bool, error) {
+	gslb := &k8gbv1beta1io.Gslb{}
 	objectKey := client.ObjectKey{Namespace: obj.GetNamespace(), Name: obj.GetName()}
 	isNew := false
 	err := g.client.Get(context.Background(), objectKey, gslb)
@@ -189,8 +189,8 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 		gslb.ObjectMeta.Annotations[utils.ExternalIPsAnnotation] = val
 	}
 	// migration to resourceRef
-	gslb.Spec = k8gbv1beta1.GslbSpec{
-		ResourceRef: k8gbv1beta1.ResourceRef{
+	gslb.Spec = k8gbv1beta1io.GslbSpec{
+		ResourceRef: k8gbv1beta1io.ResourceRef{
 			ObjectReference: corev1.ObjectReference{
 				Name:       obj.GetName(),
 				Kind:       "Ingress",
@@ -198,14 +198,14 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1.Gslb, bool, er
 			},
 		},
 		// detaching ingress spec
-		Ingress:  k8gbv1beta1.IngressSpec{},
+		Ingress:  k8gbv1beta1io.IngressSpec{},
 		Strategy: strategyObj,
 	}
 	return gslb, isNew, nil
 }
 
 // parseStrategySpec parses strategy specifications from annotations for Ingress resources
-func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (result k8gbv1beta1.Strategy, err error) {
+func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (result k8gbv1beta1io.Strategy, err error) {
 	toInt := func(k string, v string) (int, error) {
 		intValue, err := strconv.Atoi(v)
 		if err != nil {
@@ -214,7 +214,7 @@ func (g *IngressHandler) parseStrategySpec(annotations map[string]string) (resul
 		return intValue, nil
 	}
 
-	result = k8gbv1beta1.Strategy{}
+	result = k8gbv1beta1io.Strategy{}
 
 	if value, found := annotations[strategyAnnotation]; found {
 		result.Type = value

@@ -25,7 +25,7 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
@@ -44,7 +44,7 @@ type ReferenceResolver struct {
 }
 
 // NewReferenceResolver creates a new reference resolver capable of understanding `networking.istio.io/v1` resources
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	virtualServiceList, err := getGslbVirtualServiceRef(gslb, k8sClient)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 }
 
 // getGslbVirtualServiceRef resolves an istio virtual service resource referenced by the Gslb spec
-func getGslbVirtualServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]*istio.VirtualService, error) {
+func getGslbVirtualServiceRef(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]*istio.VirtualService, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -171,21 +171,21 @@ func getLbService(gateway *istio.Gateway, k8sClient client.Client) (*corev1.Serv
 }
 
 // GetServers retrieves the GSLB server configuration from the istio virtual service resource
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
+func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1io.Server, error) {
 	hostnames := rr.virtualService.Spec.Hosts
 	if len(hostnames) < 1 {
 		return nil, fmt.Errorf("can't find hosts in VirtualService %s", rr.virtualService.Name)
 	}
 
-	servers := []*k8gbv1beta1.Server{}
+	servers := []*k8gbv1beta1io.Server{}
 	for _, hostname := range hostnames {
-		server := &k8gbv1beta1.Server{
+		server := &k8gbv1beta1io.Server{
 			Host:     hostname,
-			Services: []*k8gbv1beta1.NamespacedName{},
+			Services: []*k8gbv1beta1io.NamespacedName{},
 		}
 		for _, http := range rr.virtualService.Spec.Http {
 			for _, route := range http.Route {
-				server.Services = append(server.Services, &k8gbv1beta1.NamespacedName{
+				server.Services = append(server.Services, &k8gbv1beta1io.NamespacedName{
 					Name:      route.Destination.Host,
 					Namespace: rr.virtualService.Namespace,
 				})
@@ -193,7 +193,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 		}
 		for _, tls := range rr.virtualService.Spec.Tls {
 			for _, route := range tls.Route {
-				server.Services = append(server.Services, &k8gbv1beta1.NamespacedName{
+				server.Services = append(server.Services, &k8gbv1beta1io.NamespacedName{
 					Name:      route.Destination.Host,
 					Namespace: rr.virtualService.Namespace,
 				})
@@ -201,7 +201,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 		}
 		for _, tcp := range rr.virtualService.Spec.Tcp {
 			for _, route := range tcp.Route {
-				server.Services = append(server.Services, &k8gbv1beta1.NamespacedName{
+				server.Services = append(server.Services, &k8gbv1beta1io.NamespacedName{
 					Name:      route.Destination.Host,
 					Namespace: rr.virtualService.Namespace,
 				})

@@ -80,7 +80,7 @@ func TestK8gbBasicAppExample(t *testing.T) {
 
 	utils.AssertGslbStatus(t, options, "test-gslb", "terratest-notfound."+settings.DNSZone+":NotFound terratest-roundrobin."+settings.DNSZone+":Healthy terratest-unhealthy."+settings.DNSZone+":Unhealthy")
 	// Ensure controller labels DNSEndpoint objects
-	utils.AssertDNSEndpointLabel(t, options, "k8gb.absa.oss/dnstype")
+	utils.AssertDNSEndpointLabel(t, options, "k8gb.io/dnstype")
 
 	t.Run("Broken object rejected by API", func(t *testing.T) {
 		err := k8s.KubectlApplyE(t, options, brokenResourcePath)

@@ -78,7 +78,7 @@ Note: you can create Cloudflare API tokens at https://dash.cloudflare.com/profil
 Now we can test the setup with a pretty standard Gslb resource configuration.
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: test-gslb-failover
@@ -115,7 +115,7 @@ apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
   labels:
-    k8gb.absa.oss/dnstype: extdns
+    k8gb.io/dnstype: extdns
   creationTimestamp: "2023-11-12T19:55:20Z"
   generation: 3
   name: k8gb-ns-extdns
