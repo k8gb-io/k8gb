@@ -46,7 +46,6 @@ On YouTube: []()
 
 **Attendees**
 
-- Farhan Ahmed
 - Yury Tsarev
 - 
 
