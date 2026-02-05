@@ -102,6 +102,24 @@ jobs:
           sarif_file: 'trivy-fs-results.sarif'
           category: 'trivy-filesystem'
 
+      # Configuration scan (creates trivy-config category for security-scan.yml)
+      - name: Run Trivy configuration scan (SARIF)
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'sarif'
+          output: 'trivy-config-results.sarif'
+          exit-code: '0'
+
+      - name: Upload configuration scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
+        if: always()
+        with:
+          sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
+
       # Table output for logs (non-blocking for PRs, blocking for main branch)
       - name: Run Trivy vulnerability scanner (table output)
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
@@ -115,6 +133,26 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
       # Secrets should always block (in both PRs and main)
+      # First upload SARIF for Security tab (creates trivy-secrets category)
+      - name: Run Trivy secret scanner (SARIF)
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'sarif'
+          output: 'trivy-secret-results.sarif'
+          scanners: 'secret'
+          exit-code: '0'
+
+      - name: Upload secret scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@b20883b0cd1f46c72ae0ba6d1090936928f9fa30 # v4
+        if: always()
+        with:
+          sarif_file: 'trivy-secret-results.sarif'
+          category: 'trivy-secrets'
+
+      # Then run blocking check (table format for logs)
       - name: Run Trivy secret scanner (blocking)
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:

@@ -7,3 +7,36 @@
 
 # Add specific CVE ignores below as needed for accepted risks
 # Format: CVE-ID per line with optional comment explaining why
+
+# Trivy ignore files/dirs
+
+# Documentation directories (match anywhere in the tree)
+**/docs/**
+**/mkdocs-venv/**
+**/site/**
+**/overrides/**
+**/adr/**
+
+# Test directories
+**/tests/**
+**/terratest/**
+**/chainsaw/**
+**/dns-provider-test/**
+
+# Development/tooling directories
+**/.git/**
+**/node_modules/**
+**/hack/**
+**/deploy/**
+**/k3d/**
+**/grafana/**
+**/olm/**
+
+# Helm chart dependencies
+**/chart/k8gb/charts/**
+
+# Specific file patterns
+**/*.md
+**/*.svg
+**/*.drawio
+**/*_test.go
