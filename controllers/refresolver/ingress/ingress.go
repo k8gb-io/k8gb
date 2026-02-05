@@ -28,6 +28,7 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
+	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,7 +38,8 @@ import (
 var log = logging.Logger()
 
 type ReferenceResolver struct {
-	ingress *netv1.Ingress
+	ingress   *netv1.Ingress
+	lbService *corev1.Service
 }
 
 // NewReferenceResolver creates a reference resolver capable of understanding referenced ingresses.networking.k8s.io resources
@@ -55,10 +57,53 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	if len(ingressList) != 1 {
 		return nil, fmt.Errorf("exactly 1 Ingress resource expected but %d were found", len(ingressList))
 	}
+	svc, err := getLbService(&ingressList[0], k8sClient)
+	if err != nil {
+		log.Info().
+			Str("Name", ingressList[0].Name).
+			Msg("LB Service for ingress controller not found skipping")
+	}
 
 	return &ReferenceResolver{
-		ingress: &ingressList[0],
+		ingress:   &ingressList[0],
+		lbService: svc,
 	}, nil
+}
+
+// getLbService retrieves the kubernetes service referenced by an ingress
+func getLbService(ingress *netv1.Ingress, k8sClient client.Client) (*corev1.Service, error) {
+	serviceList := &corev1.ServiceList{}
+
+	// Verify if ingress has loadbalancer ip on status
+	if len(ingress.Status.LoadBalancer.Ingress) == 0 || ingress.Status.LoadBalancer.Ingress[0].IP == "" {
+		return nil, fmt.Errorf("ingress does not have a LoadBalancer IP")
+	}
+
+	lbIP := ingress.Status.LoadBalancer.Ingress[0].IP
+
+	err := k8sClient.List(context.TODO(), serviceList)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info().
+				Str("ingress service not found for ip", lbIP).
+				Msg("Can't add service")
+		}
+		return nil, err
+	}
+
+	// look for service based on LoadBalancer IP
+	for _, svc := range serviceList.Items {
+		if svc.Spec.Type == corev1.ServiceTypeLoadBalancer {
+			for _, i := range svc.Status.LoadBalancer.Ingress {
+				if i.IP == lbIP {
+					return &svc, nil
+				}
+			}
+		}
+	}
+
+	return nil, err
+
 }
 
 // getGslbIngressRef resolves a Kubernetes Ingress resource referenced by the Gslb spec
@@ -164,6 +209,11 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 				Namespace: rr.ingress.Namespace,
 			})
 		}
+
+		server.Services = append(server.Services, &k8gbv1beta1.NamespacedName{
+			Name:      rr.lbService.Name,
+			Namespace: rr.lbService.Namespace,
+		})
 		servers = append(servers, server)
 	}
 
