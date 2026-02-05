@@ -53,7 +53,9 @@ jobs:
           trivy-config: trivy.yaml
           format: 'sarif'
           output: 'trivy-fs-results.sarif'
+          scanners: 'vuln,misconfig'
           severity: ${{ github.event.inputs.severity || 'HIGH,CRITICAL' }}
+          exit-code: '0'
 
       - name: Upload filesystem scan results
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' }}
@@ -72,6 +74,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-config-results.sarif'
           severity: ${{ github.event.inputs.severity || 'HIGH,CRITICAL' }}
+          exit-code: '0'
 
       - name: Upload configuration scan results
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}

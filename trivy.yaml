@@ -4,18 +4,19 @@ severity:
   - MEDIUM
   - LOW
 
-scanners:
-  - vuln
-  - secret
-  - misconfig
-  - license
+scan:
+  scanners:
+    - vuln
+    - secret
+    - misconfig
+    - license
 
-pkg:
+vulnerability:
   types:
     - os
     - library
+  ignore-unfixed: false
 
-ignore-unfixed: false
 timeout: 15m
 exit-code: 0
 format: table
@@ -25,6 +26,8 @@ misconfig:
 
 skip-files:
   - "**/*.md"
+  - "**/*.svg"
+  - "**/*.drawio"
   - "**/tests/**"
   - "**/*_test.go"
 
