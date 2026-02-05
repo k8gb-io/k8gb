@@ -31,13 +31,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// ReferenceResolver resolves LoadBalancer service references
+// ReferenceResolver resolves Kubernetes service references
 type ReferenceResolver struct {
 	service *corev1.Service
 	gslb    *k8gbv1beta1.Gslb
 }
 
-// NewReferenceResolver creates a new reference resolver for LoadBalancer services
+// NewReferenceResolver creates a new reference resolver for Kubernetes services
 func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	serviceList, err := getGslbServiceRef(gslb, k8sClient)
 	if err != nil {
@@ -49,11 +49,6 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}
 
 	service := serviceList[0]
-
-	// Verify it's a LoadBalancer service
-	if service.Spec.Type != corev1.ServiceTypeLoadBalancer {
-		return nil, fmt.Errorf("service %s is not of type LoadBalancer", service.Name)
-	}
 
 	return &ReferenceResolver{
 		service: &service,
@@ -103,16 +98,16 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 	hostname, ok := rr.gslb.Annotations[utils.HostnameAnnotation]
 	if !ok {
 		log.FromContext(context.TODO()).Error(fmt.Errorf("missing required hostname annotation"),
-			fmt.Sprintf("LoadBalancer service GSLB requires %s annotation", utils.HostnameAnnotation),
+			fmt.Sprintf("Service GSLB requires %s annotation", utils.HostnameAnnotation),
 			"gslb", rr.gslb.Name)
-		return nil, fmt.Errorf("LoadBalancer service GSLB %s requires %s annotation", rr.gslb.Name, utils.HostnameAnnotation)
+		return nil, fmt.Errorf("Service GSLB %s requires %s annotation", rr.gslb.Name, utils.HostnameAnnotation)
 	}
 
 	if hostname == "" {
 		log.FromContext(context.TODO()).Error(fmt.Errorf("empty hostname annotation"),
 			fmt.Sprintf("%s annotation cannot be empty", utils.HostnameAnnotation),
 			"gslb", rr.gslb.Name)
-		return nil, fmt.Errorf("LoadBalancer service GSLB %s has empty %s annotation", rr.gslb.Name, utils.HostnameAnnotation)
+		return nil, fmt.Errorf("Service GSLB %s has empty %s annotation", rr.gslb.Name, utils.HostnameAnnotation)
 	}
 
 	// Create server with the specified hostname
@@ -135,6 +130,21 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
+
+	// For non LoadBalancer services, the exposed ip must be explicitly specified via annotation
+	// since a non LoadBalancer service itself doesn't contain the external ips's
+
+	// Check for required exposed ip annotation
+	if rr.service.Spec.Type != corev1.ServiceTypeLoadBalancer {
+		_, ok := gslbAnnotations[utils.ExternalIPsAnnotation]
+		if !ok {
+			log.FromContext(context.TODO()).Error(fmt.Errorf("missing required exposed ip annotation"),
+				fmt.Sprintf("%s service GSLB requires %s annotation", rr.service.Spec.Type, utils.ExternalIPsAnnotation),
+				"gslb", rr.gslb.Name)
+			return nil, fmt.Errorf("%s service GSLB %s requires %s annotation", rr.service.Spec.Type, rr.gslb.Name, utils.ExternalIPsAnnotation)
+		}
+	}
+
 	// Check for explicit IP addresses in annotations first
 	if serviceIPsFromAnnotation, ok := gslbAnnotations[utils.ExternalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(serviceIPsFromAnnotation)
