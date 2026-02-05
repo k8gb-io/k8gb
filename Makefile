@@ -324,11 +324,6 @@ deploy-k8gb-with-helm:
 	$(call setup-dns-provider-secrets,$(CLUSTER_ID))
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	# Deletion of the coredns service is needed because of the bug below
-	# The bug is triggered by the local setup change where we start exposing the port tcp/53 using a LoadBalancer service
-	# Can be removed once we upgrade to k8gb v0.16.0
-	# https://github.com/kubernetes/kubernetes/issues/105610
-	kubectl -n k8gb delete svc k8gb-coredns --ignore-not-found
 	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} \
 		-f $(call get-helm-values-file,$(CHART)) \
 		-f $(VALUES_YAML) \
