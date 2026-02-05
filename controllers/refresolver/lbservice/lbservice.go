@@ -89,9 +89,9 @@ func getGslbServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]corev
 	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }
 
-// GetServers retrieves the GSLB server configuration from the LoadBalancer service
+// GetServers retrieves the GSLB server configuration from the service
 func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
-	// For LoadBalancer services, the hostname must be explicitly specified via annotation
+	// For services, the hostname must be explicitly specified via annotation
 	// since the service itself doesn't contain hostname information
 
 	// Check for required hostname annotation
@@ -108,6 +108,20 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 			fmt.Sprintf("%s annotation cannot be empty", utils.HostnameAnnotation),
 			"gslb", rr.gslb.Name)
 		return nil, fmt.Errorf("Service GSLB %s has empty %s annotation", rr.gslb.Name, utils.HostnameAnnotation)
+	}
+
+	// For non-LoadBalancer services, the exposed IPs must be explicitly specified via annotation
+	// since only LoadBalancer services have external IPs in their status
+
+	// Check for required exposed ip annotation
+	if rr.service.Spec.Type != corev1.ServiceTypeLoadBalancer {
+		_, ok := rr.gslb.Annotations[utils.ExternalIPsAnnotation]
+		if !ok {
+			log.FromContext(context.TODO()).Error(fmt.Errorf("missing required exposed ip annotation"),
+				fmt.Sprintf("%s service GSLB requires %s annotation", rr.service.Spec.Type, utils.ExternalIPsAnnotation),
+				"gslb", rr.gslb.Name)
+			return nil, fmt.Errorf("%s service GSLB %s requires %s annotation", rr.service.Spec.Type, rr.gslb.Name, utils.ExternalIPsAnnotation)
+		}
 	}
 
 	// Create server with the specified hostname
@@ -128,23 +142,8 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 	return []*k8gbv1beta1.Server{server}, nil
 }
 
-// GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
+// GetGslbExposedIPs retrieves the exposed IP addresses of the GSLB
 func (rr *ReferenceResolver) GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
-
-	// For non LoadBalancer services, the exposed ip must be explicitly specified via annotation
-	// since a non LoadBalancer service itself doesn't contain the external ips's
-
-	// Check for required exposed ip annotation
-	if rr.service.Spec.Type != corev1.ServiceTypeLoadBalancer {
-		_, ok := gslbAnnotations[utils.ExternalIPsAnnotation]
-		if !ok {
-			log.FromContext(context.TODO()).Error(fmt.Errorf("missing required exposed ip annotation"),
-				fmt.Sprintf("%s service GSLB requires %s annotation", rr.service.Spec.Type, utils.ExternalIPsAnnotation),
-				"gslb", rr.gslb.Name)
-			return nil, fmt.Errorf("%s service GSLB %s requires %s annotation", rr.service.Spec.Type, rr.gslb.Name, utils.ExternalIPsAnnotation)
-		}
-	}
-
 	// Check for explicit IP addresses in annotations first
 	if serviceIPsFromAnnotation, ok := gslbAnnotations[utils.ExternalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(serviceIPsFromAnnotation)
