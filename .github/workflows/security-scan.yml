@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload filesystem scan results
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' }}
-        uses: github/codeql-action/upload-sarif@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v4
+        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # v4
         with:
           sarif_file: 'trivy-fs-results.sarif'
           category: 'trivy-filesystem'
@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload configuration scan results
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
-        uses: github/codeql-action/upload-sarif@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v4
+        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # v4
         with:
           sarif_file: 'trivy-config-results.sarif'
           category: 'trivy-config'
@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload Helm chart scan results
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
-        uses: github/codeql-action/upload-sarif@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v4
+        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # v4
         with:
           sarif_file: 'trivy-helm-results.sarif'
           category: 'trivy-helm-charts'
@@ -116,7 +116,7 @@ jobs:
 
       - name: Upload secret scan results
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' }}
-        uses: github/codeql-action/upload-sarif@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v4
+        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # v4
         with:
           sarif_file: 'trivy-secret-results.sarif'
           category: 'trivy-secrets'
