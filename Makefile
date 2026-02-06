@@ -714,7 +714,7 @@ endef
 # values here are only available in the not released (next) version.
 # by releases the content would be moved into get-helm-args
 define get-next-args
-$(if $(filter ./chart/k8gb,$(1)),--set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$2)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$2)')
+$(if $(filter ./chart/k8gb,$(1)),--set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$2)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$2)' --set-string k8gb.imageRepo='$(REPO)')
 endef
 
 define setup-dns-provider-secrets
