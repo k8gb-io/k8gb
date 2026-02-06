@@ -56,7 +56,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | coredns.corefile | object | `{"enabled":true,"reload":{"enabled":true,"interval":"30s","jitter":"15s"}}` | CoreDNS configmap |
 | coredns.corefile.reload | object | `{"enabled":true,"interval":"30s","jitter":"15s"}` | Reload CoreDNS configmap when it changes https://coredns.io/plugins/reload/ |
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
-| coredns.image.repository | string | `"absaoss/k8s_crd"` | CoreDNS CRD plugin image |
+| coredns.image.repository | string | `"k8gb-io.gateway.scarf.sh/absaoss/k8s_crd"` | CoreDNS CRD plugin image |
 | coredns.image.tag | string | `"v0.2.0"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` | requests and limits for the coredns container |
@@ -97,7 +97,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
 | k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used. |
-| k8gb.imageRepo | string | `"docker.io/absaoss/k8gb"` | image repository |
+| k8gb.imageRepo | string | `"k8gb-io.gateway.scarf.sh/absaoss/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
 | k8gb.log.level | string | `"info"` | log level (panic,fatal,error,warn,info,debug,trace) |
