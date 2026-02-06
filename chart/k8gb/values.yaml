@@ -6,7 +6,7 @@ global:
 
 k8gb:
   # -- image repository
-  imageRepo: "docker.io/absaoss/k8gb"
+  imageRepo: k8gb-io.gateway.scarf.sh/absaoss/k8gb
   # -- ( string ) image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key
   imageTag:
   # -- whether it should also deploy the gslb and dnsendpoints CRDs
@@ -90,7 +90,7 @@ coredns:
     skipConfig: true
   image:
     # -- CoreDNS CRD plugin image
-    repository: absaoss/k8s_crd
+    repository: k8gb-io.gateway.scarf.sh/absaoss/k8s_crd
     # -- image tag
     tag: v0.2.0
   # -- Creates serviceAccount for coredns
