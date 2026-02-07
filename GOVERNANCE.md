@@ -18,7 +18,7 @@ k8gb follows a [Code of Conduct](CODE_OF_CONDUCT.md), which is aligned with the 
 
 ## Contributors
 
-Anyone can contribute to the k8gb project. More about contribution rules and technical aspects can be found in the [CONTRIBUTING](CONTRIBUTING.md) documentation.
+Anyone can contribute to the k8gb project. More about contribution rules and technical aspects can be found in the [CONTRIBUTING](CONTRIBUTING.md) documentation. A great way to contribute is to attend the community meetings. Community meetings take place every other Wednesday from 13:00 CET to 13:30 CET [calendar](https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month). You can join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10).
 
 ## Maintainers
 
@@ -36,6 +36,7 @@ Below is the list of a maintainer's general responsibilities in addition to thos
 - Actively supports the k8gb community in related channels
 - Represents the k8gb project in public media (events, slack channels, etc.)
 - Is involved in CNCF-related activities and projects
+- Regularly attends the recurring community meetings
 - Ensures compliance with CNCF guidelines
 - Owns project infrastructure
 

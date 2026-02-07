@@ -45,6 +45,8 @@ Feel free to ask for help and join the discussions at [k8gb community discussion
 We have [dedicated `#k8gb` channel on Cloud Native Computing Foundation (CNCF) Slack](https://cloud-native.slack.com/archives/C021P656HGB),
 and we can also actively monitoring [`#sig-multicluster` channel on Kubernetes Slack](https://kubernetes.slack.com/archives/C09R1PJR3).
 
+Another great way to get help is to attend the community meetings. Community meetings take place every other Wednesday from 13:00 CET to 13:30 CET [calendar](https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month). You can join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10).
+
 ## Reporting issues
 
 Reporting bugs is one of the best ways to contribute.
