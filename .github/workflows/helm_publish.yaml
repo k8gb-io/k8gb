@@ -12,14 +12,10 @@ on:
         type: string
 permissions:
   contents: read
-  id-token: write  
-  packages: write 
 
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    env:
-      OCI_REPO: oci://ghcr.io/k8gb-io/charts
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
@@ -36,47 +32,6 @@ jobs:
           source-charts-folder: 'chart'
           destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@430b6a704fe0c92f1b1261d84376a900f38d90ff
-        with:
-          cosign-release: 'v3.0.3' 
-
-      - name: Push and Sign Charts to OCI Registry
-        env:
-          COSIGN_EXPERIMENTAL: 1
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
-          echo ${{ secrets.GITHUB_TOKEN }} | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
-          git fetch origin gh-pages
-          git checkout origin/gh-pages -- charts/
-          ls -la charts/
-          OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
-          PUSHED_CHARTS=()
-          for chart in charts/k8gb-*.tgz; do
-            if [ -f "$chart" ]; then
-              PUSH_OUTPUT=$(helm push "$chart" "$OCI_REPO" 2>&1)
-              DIGEST=$(echo "$PUSH_OUTPUT" | grep -oE 'sha256:[a-f0-9]{64}' | head -1)
-              if [ -n "$DIGEST" ]; then
-                # Sign using digest
-                CHART_REF="ghcr.io/k8gb-io/charts/k8gb@${DIGEST}"
-              else
-                # Incase digest didnt worked then tag signing
-                CHART_NAME=$(basename "$chart" .tgz)
-                CHART_VERSION=$(echo "$CHART_NAME" | sed 's/k8gb-//')
-                CHART_REF="ghcr.io/k8gb-io/charts/k8gb:${CHART_VERSION}"
-              fi              
-              echo "Signing chart: $CHART_REF"
-              cosign sign --yes "$CHART_REF"
-              PUSHED_CHARTS+=("$CHART_REF")
-            fi
-          done
-          echo "Verifying all pushed charts"
-          for chart_ref in "${PUSHED_CHARTS[@]}"; do
-            cosign verify "$chart_ref" \
-              --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_publish.yaml@${{ github.ref }}" \
-              --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
-          done
 
       - name: Create k3s cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
