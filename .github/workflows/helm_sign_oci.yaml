@@ -6,7 +6,7 @@ on:
   #   types:
   #     - completed
   push:
-    branches: ['master','fix-oci-workflow']
+    branches: ['master']
   workflow_dispatch:
     inputs:
       tag:
