@@ -722,3 +722,45 @@ define setup-dns-provider-secrets
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	[ -n "$(GCP_CREDENTIALS_FILE)" ] && kubectl -n k8gb create secret generic external-dns-gcp-sa --from-file=credentials.json=$(GCP_CREDENTIALS_FILE) || true
 endef
+
+# Documentation with Mkdocs
+
+.PHONY: docs-deploy docs-list
+
+docs-list: ## List deployed versions
+	mike list
+
+docs-deploy: ## Deploy docs with mike (requires VERSION)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "ERROR: VERSION is required"; \
+		exit 1; \
+	fi
+	@echo "Deploying documentation for $(VERSION)"
+	@ALL_VERSIONS=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./' | sort -V); \
+	DEPLOYED_VERSIONS=$$(mike list | grep -v latest | awk '{print $$1}' | sort -V); \
+	echo "All versions from v0.14.0 onwards: $$ALL_VERSIONS"; \
+	echo "Currently deployed: $$DEPLOYED_VERSIONS"; \
+	for version in $$ALL_VERSIONS; do \
+		if ! echo " $$DEPLOYED_VERSIONS " | grep -q " $$version "; then \
+			echo "Checking missing version: $$version"; \
+			if git show $$version:mkdocs.yml >/dev/null 2>&1; then \
+				echo "  Deploying $$version"; \
+				git checkout $$version 2>/dev/null && mike deploy --push $$version && git checkout - || true; \
+			else \
+				echo "  Skipping $$version (no mkdocs.yml)"; \
+			fi; \
+		fi; \
+	done; \
+	mike deploy --push $(VERSION); \
+	LATEST_VERSION=$$(echo "$$ALL_VERSIONS" | tac | while read v; do \
+		if git show $$v:mkdocs.yml >/dev/null 2>&1; then echo $$v; break; fi; \
+	done); \
+	echo "Latest version with docs: $$LATEST_VERSION"; \
+	if [ "$(VERSION)" = "$$LATEST_VERSION" ]; then \
+		echo "Updating latest alias to $(VERSION)"; \
+		mike deploy --push --update-aliases $(VERSION) latest; \
+		mike set-default --push latest; \
+	else \
+		echo "$(VERSION) is not latest, keeping existing alias"; \
+	fi; \
+	mike list

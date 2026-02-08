@@ -2,6 +2,8 @@ name: Github Pages
 
 on:
   push:
+    tags:
+      - 'v*'
     branches:
       - master
     paths:
@@ -35,7 +37,7 @@ jobs:
 
       - name: Install MkDocs
         run: |
-          pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks
+          pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks mike
 
       - name: Setup git config
         run: |
@@ -53,30 +55,23 @@ jobs:
             test -f index.yaml && cp index.yaml /tmp/preserved/
             test -f CNAME && cp CNAME /tmp/preserved/
           fi
-          git checkout master
+          git checkout master      
 
-      - name: Build documentation
-        run: mkdocs build --clean
+      - name: Deploy documentation with Mike
+        if: startsWith(github.ref, 'refs/tags/')
+        run: make docs-deploy VERSION=${GITHUB_REF#refs/tags/}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Deploy to gh-pages
+      - name: Restore preserved files
         run: |
-          # Copy built site to temp location
-          cp -r site /tmp/mkdocs-site
-
           git checkout gh-pages
-
-          # Clean everything except git files and preserved files
-          find . -maxdepth 1 -not -name '.git*' -not -name '.' -not -name '..' -exec rm -rf {} +
-
-          # Deploy new site
-          cp -r /tmp/mkdocs-site/* .
-
           # Restore preserved files
           test -d /tmp/preserved/charts && cp -r /tmp/preserved/charts .
           test -f /tmp/preserved/artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .
           test -f /tmp/preserved/index.yaml && cp /tmp/preserved/index.yaml .
           test -f /tmp/preserved/CNAME && cp /tmp/preserved/CNAME .
-
+          
           # Commit and push if there are changes
           git add .
           if ! git diff --cached --quiet; then
