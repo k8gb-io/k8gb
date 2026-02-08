@@ -441,6 +441,67 @@ The verification confirms that artifacts were:
 - From the expected source repository (github.com/k8gb-io/k8gb)
 - Without tampering during the build process
 
+### Helm Chart Verification
+
+All Helm charts published to the OCI registry are signed using keyless cosign signatures. End users can verify chart authenticity before installation.
+
+#### Prerequisites
+
+Install cosign:
+```bash
+# Install cosign (choose your platform)
+# Linux/macOS via Homebrew
+brew install cosign
+
+# Or download binary from GitHub releases
+wget https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+sudo mv cosign-linux-amd64 /usr/local/bin/cosign && chmod +x cosign-linux-amd64
+cosign version
+```
+
+#### Verifying Helm Charts
+
+**1. Verify chart signature before installation:**
+```bash
+# Verify specific release version (replace v0.16.0 with desired version)
+cosign verify oci://ghcr.io/k8gb-io/charts/k8gb:v0.16.0 \
+  --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_publish.yaml@refs/tags/v0.16.0" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+```
+
+**2. Install verified chart:**
+```bash
+# After successful verification, install the chart
+helm install k8gb oci://ghcr.io/k8gb-io/charts/k8gb --version v0.16.0
+```
+
+**3. Verify using digest:**
+```bash
+# Get chart digest
+helm show chart oci://ghcr.io/k8gb-io/charts/k8gb:v0.16.0
+
+# Verify using digest for immutable reference
+cosign verify oci://ghcr.io/k8gb-io/charts/k8gb@sha256:abc123... \
+  --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_publish.yaml@refs/tags/v0.16.0" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+```
+
+#### Understanding the Verification
+
+The verification confirms that:
+- **Chart authenticity**: The chart was built and signed by the official k8gb GitHub Actions workflow
+- **Source integrity**: The chart originates from the official k8gb-io/k8gb repository
+- **Supply chain security**: No tampering occurred between build and distribution
+
+**Certificate Identity**: Matches the exact Github Actions workflow that signed the chart
+**OIDC Issuer**: Github token service that issued the signing certificate
+
+#### Troubleshooting Verification
+
+If verification fails:
+- **Check chart version exists**: `helm show chart oci://ghcr.io/k8gb-io/charts/k8gb:VERSION`
+- **Verify cosign version**: Ensure you're using cosign v2.0+ for keyless verification (recommended to have v3.0)
+
 ### Software bill of materials
 
 For each container image we also create Software bill of materials (SBOM) file + its signature that ends up
