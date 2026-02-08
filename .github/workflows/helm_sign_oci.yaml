@@ -1,4 +1,4 @@
-name: Push Helm Charts to OCI and Sign with OCI
+name: Push Helm Charts to OCI and Sign with Cosign
 
 on:
   # workflow_run:
