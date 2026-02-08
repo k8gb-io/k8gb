@@ -5,6 +5,8 @@ on:
   #   workflows: ["Helm Publish"]
   #   types:
   #     - completed
+  push:
+    branches: ['master','fix-oci-workflow']
   workflow_dispatch:
     inputs:
       tag:
