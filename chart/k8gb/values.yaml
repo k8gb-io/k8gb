@@ -92,7 +92,7 @@ coredns:
     # -- CoreDNS CRD plugin image
     repository: k8gb-io.gateway.scarf.sh/absaoss/k8s_crd
     # -- image tag
-    tag: v0.2.0
+    tag: v0.2.1
   # -- Creates serviceAccount for coredns
   serviceAccount:
     create: true
