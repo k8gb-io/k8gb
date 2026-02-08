@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     # if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     env:
-      OCI_REPO: oci://ghcr.io/itsfarhan/charts
+      OCI_REPO: oci://ghcr.io/k8gb-io/charts
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
@@ -50,7 +50,7 @@ jobs:
           git fetch origin gh-pages
           git checkout origin/gh-pages -- charts/
           ls -la charts/
-          OCI_REPO="${OCI_REPO:-oci://ghcr.io/itsfarhan/charts}"
+          OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
           SIGNED_CHARTS=()
           for chart in charts/k8gb-*.tgz; do
             if [ -f "$chart" ]; then
@@ -62,13 +62,13 @@ jobs:
                 DIGEST=$(echo "$PUSH_OUTPUT" | grep -oE 'sha256:[a-f0-9]{64}' | head -1)
                 
                 if [ -n "$DIGEST" ]; then
-                  CHART_REF="ghcr.io/itsfarhan/charts/k8gb@${DIGEST}"
+                  CHART_REF="ghcr.io/k8gb-io/charts/k8gb@${DIGEST}"
                   echo "Signing with digest: $CHART_REF"
                 else
                   # Fallback to tag-based signing
                   CHART_NAME=$(basename "$chart" .tgz)
                   CHART_VERSION=$(echo "$CHART_NAME" | sed 's/k8gb-//')
-                  CHART_REF="ghcr.io/itsfarhan/charts/k8gb:${CHART_VERSION}"
+                  CHART_REF="ghcr.io/k8gb-io/charts/k8gb:${CHART_VERSION}"
                   echo "No digest found, signing with tag: $CHART_REF"
                 fi
                 
@@ -87,7 +87,7 @@ jobs:
             for chart_ref in "${SIGNED_CHARTS[@]}"; do
               echo "Verifying: $chart_ref"
               cosign verify "$chart_ref" \
-                --certificate-identity "https://github.com/itsfarhan/k8gb/.github/workflows/helm_sign_oci.yaml@${{ github.ref }}" \
+                --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_sign_oci.yaml@${{ github.ref }}" \
                 --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
             done
             echo "All signatures verified!"
