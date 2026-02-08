@@ -43,6 +43,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    strategy:
+      matrix:
+        k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -79,19 +82,22 @@ jobs:
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "edgedns"
-          args: -c k3d/edge-dns.yaml
+          k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/edge-dns.yaml
 
       - name: Create 1st k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
-          args: -c k3d/test-gslb1.yaml
+          k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb1.yaml
 
       - name: Create 2nd k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb2"
-          args: -c k3d/test-gslb2.yaml
+          k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb2.yaml
 
       - name: K8GB deployment
         run: |
@@ -111,5 +117,5 @@ jobs:
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
-          name: chainsaw-logs
+          name: chainsaw-logs-${{ matrix.k8s-version }}
           path: ${{ github.workspace }}/tmp/chainsaw
