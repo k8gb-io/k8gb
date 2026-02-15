@@ -1,6 +1,6 @@
 module k8gbterratest
 
-go 1.25.7
+go 1.26.0
 
 require (
 	github.com/AbsaOSS/gopkg v0.1.3
