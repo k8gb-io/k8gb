@@ -40,7 +40,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## Feb 4, 2026 #85
 
-Zoom Recording: 
+Zoom Recording: no enough attendees - topics were discussed in async mode
 
 On YouTube: []()
 
