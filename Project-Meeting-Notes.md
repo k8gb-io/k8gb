@@ -40,7 +40,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## Feb 4, 2026 #85
 
-Zoom Recording: https://zoom.us/rec/share/VoC_axlmGGixnrhlu0Wa4S9B69GRzsHr5vSZCUnkX4a7ame_b_YOoubxUg0pV1Ld.4Y-OjjxtdMoR3lSc
+Zoom Recording: 
 
 On YouTube: []()
 
