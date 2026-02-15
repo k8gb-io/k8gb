@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Trivy filesystem scan
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'filesystem' }}
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -66,7 +66,7 @@ jobs:
 
       - name: Run Trivy configuration scan
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'config'
           scan-ref: '.'
@@ -85,7 +85,7 @@ jobs:
 
       - name: Run Trivy Helm chart scan
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'config' }}
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         env:
           TRIVY_SEVERITY: ${{ github.event.inputs.severity || 'MEDIUM,HIGH,CRITICAL' }}
         with:
@@ -104,7 +104,7 @@ jobs:
 
       - name: Run Trivy secret scan
         if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets' }}
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
