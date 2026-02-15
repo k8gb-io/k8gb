@@ -45,7 +45,7 @@ HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
-CONTROLLER_GEN_VERSION ?= v0.20.0
+CONTROLLER_GEN_VERSION ?= v0.20.1
 GOLIC_VERSION ?= v0.7.2
 GOLANGCI_VERSION ?= v2.8.0
 GRAFANA_VERSION ?= 10.5.15
