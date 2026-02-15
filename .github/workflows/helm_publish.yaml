@@ -12,8 +12,11 @@ on:
         type: string
 permissions:
   contents: read
-  id-token: write  
-  packages: write 
+  id-token: write
+  packages: write
+
+env:
+  K3D_VERSION: v5.8.3
 
 jobs:
   publish:
@@ -83,6 +86,8 @@ jobs:
         with:
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
+          k3d-version: ${{ env.K3D_VERSION }}
+
       - name: Smoke test helm installation
         run: |
           helm repo add k8gb https://k8gb.io/
