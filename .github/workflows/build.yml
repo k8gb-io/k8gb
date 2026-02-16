@@ -85,7 +85,7 @@ jobs:
 
       # Non-blocking scan for SARIF upload (always runs, never fails)
       - name: Run Trivy vulnerability scanner in fs mode (SARIF)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -104,7 +104,7 @@ jobs:
 
       # Configuration scan (creates trivy-config category for security-scan.yml)
       - name: Run Trivy configuration scan (SARIF)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'config'
           scan-ref: '.'
@@ -122,7 +122,7 @@ jobs:
 
       # Table output for logs (non-blocking for PRs, blocking for main branch)
       - name: Run Trivy vulnerability scanner (table output)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -135,7 +135,7 @@ jobs:
       # Secrets should always block (in both PRs and main)
       # First upload SARIF for Security tab (creates trivy-secrets category)
       - name: Run Trivy secret scanner (SARIF)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -154,7 +154,7 @@ jobs:
 
       # Then run blocking check (table format for logs)
       - name: Run Trivy secret scanner (blocking)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -165,7 +165,7 @@ jobs:
 
       # Helm chart scan (non-blocking)
       - name: Run Trivy Helm chart scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'config'
           scan-ref: 'chart/k8gb'
@@ -184,7 +184,7 @@ jobs:
       # Generate a summary comment on PRs
       - name: Generate PR comment with scan results
         if: github.event_name == 'pull_request'
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # 0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
