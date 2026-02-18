@@ -55,11 +55,17 @@ jobs:
             test -f index.yaml && cp index.yaml /tmp/preserved/
             test -f CNAME && cp CNAME /tmp/preserved/
           fi
-          git checkout master      
+          git checkout master
 
       - name: Deploy documentation with Mike
         if: startsWith(github.ref, 'refs/tags/')
         run: make docs-deploy VERSION=${GITHUB_REF#refs/tags/}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy latest 3 documentation versions
+        if: github.ref == 'refs/heads/master'
+        run: make docs-deploy-last-3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -71,7 +77,7 @@ jobs:
           test -f /tmp/preserved/artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .
           test -f /tmp/preserved/index.yaml && cp /tmp/preserved/index.yaml .
           test -f /tmp/preserved/CNAME && cp /tmp/preserved/CNAME .
-          
+
           # Commit and push if there are changes
           git add .
           if ! git diff --cached --quiet; then

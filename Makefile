@@ -725,42 +725,72 @@ endef
 
 # Documentation with Mkdocs
 
-.PHONY: docs-deploy docs-list
+.PHONY: docs-deploy docs-deploy-last-3 docs-list
 
 docs-list: ## List deployed versions
 	mike list
 
-docs-deploy: ## Deploy docs with mike (requires VERSION)
+docs-deploy: ## Deploy docs with mike for VERSION (requires VERSION)
 	@if [ -z "$(VERSION)" ]; then \
 		echo "ERROR: VERSION is required"; \
 		exit 1; \
 	fi
-	@echo "Deploying documentation for $(VERSION)"
-	@ALL_VERSIONS=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./' | sort -V); \
-	DEPLOYED_VERSIONS=$$(mike list | grep -v latest | awk '{print $$1}' | sort -V); \
-	echo "All versions from v0.14.0 onwards: $$ALL_VERSIONS"; \
-	echo "Currently deployed: $$DEPLOYED_VERSIONS"; \
-	for version in $$ALL_VERSIONS; do \
-		if ! echo " $$DEPLOYED_VERSIONS " | grep -q " $$version "; then \
-			echo "Checking missing version: $$version"; \
-			if git show $$version:mkdocs.yml >/dev/null 2>&1; then \
-				echo "  Deploying $$version"; \
-				git checkout $$version 2>/dev/null && mike deploy --push $$version && git checkout - || true; \
-			else \
-				echo "  Skipping $$version (no mkdocs.yml)"; \
-			fi; \
+	@set -eu; \
+	VERSION="$(VERSION)"; \
+	git fetch --force --tags; \
+	ORIGINAL_REF=$$(git symbolic-ref --short -q HEAD || git rev-parse HEAD); \
+	cleanup() { git checkout --quiet "$$ORIGINAL_REF"; }; \
+	trap cleanup EXIT INT TERM; \
+	echo "Deploying documentation for $$VERSION"; \
+	if ! git show "$$VERSION:mkdocs.yml" >/dev/null 2>&1; then \
+		echo "ERROR: $$VERSION does not contain mkdocs.yml"; \
+		exit 1; \
+	fi; \
+	git checkout --quiet "$$VERSION"; \
+	mike deploy --push "$$VERSION"; \
+	LATEST_VERSION=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./' | while read version; do \
+		if git show "$$version:mkdocs.yml" >/dev/null 2>&1; then \
+			echo "$$version"; \
+		fi; \
+	done | tail -n 1); \
+	if [ "$$VERSION" = "$$LATEST_VERSION" ]; then \
+		echo "Updating latest alias to $$VERSION"; \
+		mike deploy --push --update-aliases "$$VERSION" latest; \
+		mike set-default --push latest; \
+	fi; \
+	mike list
+
+docs-deploy-last-3: ## Deploy docs for latest 3 release tags
+	@set -eu; \
+	git fetch --force --tags; \
+	VERSIONS=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./' | tail -n 3); \
+	if [ -z "$$VERSIONS" ]; then \
+		echo "ERROR: no release tags found to deploy docs"; \
+		exit 1; \
+	fi; \
+	DEPLOYABLE_VERSIONS=$$(for version in $$VERSIONS; do \
+		if git show "$$version:mkdocs.yml" >/dev/null 2>&1; then \
+			echo "$$version"; \
+		fi; \
+	done); \
+	if [ -z "$$DEPLOYABLE_VERSIONS" ]; then \
+		echo "ERROR: no deployable documentation versions found in latest 3 tags"; \
+		exit 1; \
+	fi; \
+	ORIGINAL_REF=$$(git symbolic-ref --short -q HEAD || git rev-parse HEAD); \
+	cleanup() { git checkout --quiet "$$ORIGINAL_REF"; }; \
+	trap cleanup EXIT INT TERM; \
+	echo "Deploying latest 3 documentation versions:"; \
+	printf '%s\n' $$DEPLOYABLE_VERSIONS; \
+	LATEST_VERSION=$$(printf '%s\n' $$DEPLOYABLE_VERSIONS | sort -V | tail -n 1); \
+	for version in $$DEPLOYABLE_VERSIONS; do \
+		echo "Deploying $$version"; \
+		git checkout --quiet "$$version"; \
+		if [ "$$version" = "$$LATEST_VERSION" ]; then \
+			mike deploy --push --update-aliases "$$version" latest; \
+		else \
+			mike deploy --push "$$version"; \
 		fi; \
 	done; \
-	mike deploy --push $(VERSION); \
-	LATEST_VERSION=$$(echo "$$ALL_VERSIONS" | tac | while read v; do \
-		if git show $$v:mkdocs.yml >/dev/null 2>&1; then echo $$v; break; fi; \
-	done); \
-	echo "Latest version with docs: $$LATEST_VERSION"; \
-	if [ "$(VERSION)" = "$$LATEST_VERSION" ]; then \
-		echo "Updating latest alias to $(VERSION)"; \
-		mike deploy --push --update-aliases $(VERSION) latest; \
-		mike set-default --push latest; \
-	else \
-		echo "$(VERSION) is not latest, keeping existing alias"; \
-	fi; \
+	mike set-default --push latest; \
 	mike list
