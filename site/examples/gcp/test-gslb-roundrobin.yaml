@@ -1,0 +1,19 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: test-gslb-roundrobin
+  namespace: test-gslb
+spec:
+  ingress:
+    rules:
+      - host: roundrobin.gcp-test.k8gb.io # Desired GSLB enabled FQDN
+        http:
+          paths:
+          - path: /
+            backend:
+              service:
+                name: frontend-podinfo # Service name to enable GSLB for
+                port:
+                  name: http
+  strategy:
+    type: roundRobin # Global load balancing strategy
