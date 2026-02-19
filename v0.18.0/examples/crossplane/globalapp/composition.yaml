@@ -1,0 +1,325 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: global-app
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: GlobalApp
+  mode: Pipeline
+  pipeline:
+  # Step 1: Infrastructure (Redis Cache)
+  - step: infrastructure
+    functionRef:
+      name: crossplane-contrib-function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: infrastructure
+      spec:
+        source: |
+
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          _dxr = {
+              **option("params").dxr
+              status.infrastructure = {}
+          }
+
+          # Determine which management policy to use
+          _autoApply = oxr.spec?.autoApplyRecommendedPolicy or False
+          _manualPolicy = oxr.spec?.managementPolicies or ["*"]
+          _recommendedFromStatus = oxr.status?.gslb?.recommendedPolicy or "*"
+          _finalPolicy = [_recommendedFromStatus] if _autoApply else _manualPolicy
+
+          # Azure Resource Group
+          resourceGroup = {
+            apiVersion = "azure.upbound.io/v1beta1"
+            kind = "ResourceGroup"
+            metadata = {
+              name = "gslb-demo-rg-{}".format(oxr.metadata.name)
+              annotations = {
+                "krm.kcl.dev/composition-resource-name" = "resource-group"
+                "crossplane.io/external-name" = "gslb-demo-rg-{}".format(oxr.metadata.name)
+              }
+              labels = {
+                "demo" = "gslb"
+              }
+            }
+            spec = {
+              managementPolicies = _finalPolicy
+              forProvider = {
+                location = oxr.spec?.region or "West US"
+              }
+            }
+          }
+
+          # Azure Redis Cache
+          redisCache = {
+            apiVersion = "cache.azure.upbound.io/v1beta2"
+            kind = "RedisCache"
+            metadata = {
+              name = "redis-cache-{}".format(oxr.metadata.name)
+              annotations = {
+                "krm.kcl.dev/composition-resource-name" = "redis-cache"
+                "crossplane.io/external-name" = "redis-cache-{}".format(oxr.metadata.name)
+              }
+            }
+            spec = {
+              managementPolicies = _finalPolicy
+              forProvider = {
+                location = oxr.spec?.region or "West US"
+                resourceGroupNameSelector = {
+                  matchControllerRef = True
+                }
+                capacity = 2
+                family = "C"
+                skuName = "Standard"
+                redisVersion = "6"
+                enableNonSslPort = False
+                minimumTlsVersion = "1.2"
+                redisConfiguration = {}
+              }
+            }
+          }
+
+          # Update status based on infrastructure readiness
+          if "resource-group" in ocds:
+            _rgReadyCondition = [c for c in ocds["resource-group"].Resource?.status?.conditions or [] if c.type == "Ready" and c.status == "True"]
+            if len(_rgReadyCondition) > 0:
+              _dxr.status.infrastructure.resourceGroup = "Resource group ready"
+            else:
+              _dxr.status.infrastructure.resourceGroup = "Resource group provisioning"
+          else:
+            _dxr.status.infrastructure.resourceGroup = "Resource group not found"
+
+          if "redis-cache" in ocds:
+            _redisReadyCondition = [c for c in ocds["redis-cache"].Resource?.status?.conditions or [] if c.type == "Ready" and c.status == "True"]
+            if len(_redisReadyCondition) > 0:
+              _dxr.status.infrastructure.redis = "Redis cache ready"
+            else:
+              _dxr.status.infrastructure.redis = "Redis cache provisioning"
+          else:
+            _dxr.status.infrastructure.redis = "Redis cache not found"
+
+          items = [ resourceGroup, redisCache, _dxr ]
+
+  # Step 2: Application (Podinfo)
+  - step: application
+    functionRef:
+      name: crossplane-contrib-function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: application
+      spec:
+        source: |
+
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          _dxr = {
+              **option("params").dxr
+              status.application = {}
+          }
+
+          # Get Redis connection string if available
+          _redisHost = ""
+          _redisReady = False
+          if "redis-cache" in ocds:
+            _redisHost = ocds["redis-cache"].Resource?.status?.atProvider?.hostname or ""
+            _redisReady = _redisHost != ""
+
+          _items = []
+
+          # Only create Podinfo when Redis hostname is available
+          if _redisReady:
+            podinfo = {
+              apiVersion = "helm.crossplane.io/v1beta1"
+              kind = "Release"
+              metadata = {
+                name = "podinfo-app"
+                annotations = {
+                  "krm.kcl.dev/composition-resource-name" = "podinfo"
+                }
+              }
+              spec = {
+                forProvider = {
+                  chart = {
+                    name = "podinfo"
+                    repository = "https://stefanprodan.github.io/podinfo"
+                    version = "6.5.4"
+                  }
+                  namespace = oxr.spec?.namespace or "demo"
+                  values = {
+                    ingress = {
+                      enabled = True
+                      className = "nginx"
+                      hosts = [
+                        {
+                          host = oxr.spec?.hostname or "globalapp.cloud.example.com"
+                          paths = [
+                            {
+                              path = "/"
+                              pathType = "Prefix"
+                            }
+                          ]
+                        }
+                      ]
+                      additionalLabels = {
+                        "gslb" = "failover-ingress"
+                      }
+                    }
+                    cache = "tcp://{}:6380".format(_redisHost)
+                    ui.message = "Region: {}".format(oxr.status?.gslb?.geoTag or "unknown")
+                  }
+                }
+              }
+            }
+            # GSLB for traffic management
+            gslb = {
+              apiVersion = "kubernetes.crossplane.io/v1alpha2"
+              kind = "Object"
+              metadata = {
+                name = "failover-ingress"
+                annotations = {
+                  "krm.kcl.dev/composition-resource-name" = "gslb-resource"
+                }
+              }
+              spec = {
+                watch = True
+                forProvider = {
+                  manifest = {
+                    apiVersion = "k8gb.absa.oss/v1beta1"
+                    kind = "Gslb"
+                    metadata = {
+                      name = "failover-ingress"
+                      namespace = oxr.spec?.namespace or "demo"
+                    }
+                    spec = {
+                      strategy = {
+                        type = "failover"
+                        primaryGeoTag = oxr.spec?.primaryGeoTag or "eu"
+                      }
+                      resourceRef = {
+                        apiVersion = "networking.k8s.io/v1"
+                        kind = "Ingress"
+                        matchLabels = {
+                          "gslb" = "failover-ingress"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            _items += [podinfo, gslb]
+
+          # Update status based on Redis, Podinfo and GSLB state
+          if not _redisReady:
+            _dxr.status.application.podinfo = "Waiting for Redis hostname"
+            _dxr.status.application.gslb = "Waiting for application deployment"
+          elif "podinfo" in ocds and "gslb-resource" in ocds:
+            if ocds["podinfo"].Resource?.status?.atProvider?.state == "deployed":
+              _dxr.status.application.podinfo = "Podinfo deployed with Redis: {}".format(_redisHost)
+            else:
+              _dxr.status.application.podinfo = "Podinfo deploying with Redis: {}".format(_redisHost)
+            _dxr.status.application.gslb = "GSLB resource created"
+          elif "podinfo" in ocds:
+            _dxr.status.application.podinfo = "Podinfo ready, creating GSLB"
+            _dxr.status.application.gslb = "Creating GSLB resource"
+          else:
+            _dxr.status.application.podinfo = "Creating Podinfo with Redis: {}".format(_redisHost)
+            _dxr.status.application.gslb = "Waiting for Podinfo"
+
+          _items += [_dxr]
+          items = _items
+
+  # Step 3: GSLB Health Monitoring
+  - step: gslb-monitoring
+    functionRef:
+      name: crossplane-contrib-function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: gslb-monitoring
+      spec:
+        source: |
+
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          _dxr = {
+              **option("params").dxr
+              status.gslb = {}
+          }
+
+          # Initialize default values
+          _recommendedPolicy = oxr.spec?.managementPolicies[0] or "*"
+          _policyReason = "Initializing"
+          _isActiveCluster = False
+
+          # Monitor health of GSLB created by application step
+          if "gslb-resource" in ocds:
+            _gslbStatus = ocds["gslb-resource"].Resource?.status?.atProvider?.manifest?.status
+            serviceHealth = _gslbStatus?.serviceHealth
+            geoTag = _gslbStatus?.geoTag or "unknown"
+
+            # Store geoTag in status for use by application step
+            _dxr.status.gslb.geoTag = geoTag
+
+            # Check GSLB health
+            if serviceHealth:
+              _unhealthyDomains = [k for k, v in serviceHealth if v != "Healthy"]
+              _gslbHealthy = len(_unhealthyDomains) == 0
+              if _gslbHealthy:
+                _dxr.status.gslb.healthy = "All {} GSLB domains are healthy".format(len(serviceHealth))
+              else:
+                _dxr.status.gslb.healthy = "GSLB UNHEALTHY: {} ({}/{} unhealthy)".format(_unhealthyDomains, len(_unhealthyDomains), len(serviceHealth))
+            else:
+              _gslbHealthy = False
+              _dxr.status.gslb.healthy = "No GSLB serviceHealth data available"
+
+            # Check if we are the active cluster from GSLB perspective
+            _hostname = oxr.spec?.hostname or "globalapp.cloud.example.com"
+            _healthyRecords = _gslbStatus?.healthyRecords?[_hostname] or []
+            _exposedIps = _gslbStatus?.loadBalancer?.exposedIps or []
+            _isActiveCluster = len(_healthyRecords) > 0 and len(_exposedIps) > 0 and _healthyRecords == _exposedIps
+
+            # Simple GSLB-based policy decision
+            if _gslbHealthy and _isActiveCluster:
+              _recommendedPolicy = "*"
+              _policyReason = "GSLB healthy and cluster is active"
+            else:
+              _recommendedPolicy = "Observe"
+              _policyReason = "GSLB unhealthy or traffic routed elsewhere"
+
+            # Debug info
+            _dxr.status.gslb.debugHealthyRecords = str(_healthyRecords)
+            _dxr.status.gslb.debugExposedIps = str(_exposedIps)
+          else:
+            _dxr.status.gslb.healthy = "GSLB resource not found"
+            _policyReason = "GSLB not available"
+
+          # Always set these fields
+          _dxr.status.gslb.isActiveCluster = _isActiveCluster
+          _dxr.status.gslb.recommendedPolicy = _recommendedPolicy
+          _dxr.status.gslb.policyReason = _policyReason
+
+          # Add auto-apply status
+          _autoApplyEnabled = oxr.spec?.autoApplyRecommendedPolicy or False
+          _currentManualPolicy = oxr.spec?.managementPolicies[0] if oxr.spec?.managementPolicies else "*"
+          _dxr.status.gslb.autoApplyEnabled = _autoApplyEnabled
+          if _autoApplyEnabled:
+            _dxr.status.gslb.appliedPolicy = _recommendedPolicy
+            _dxr.status.gslb.autoApplyStatus = "Policy automatically applied: {}".format(_recommendedPolicy)
+          else:
+            _dxr.status.gslb.appliedPolicy = _currentManualPolicy
+            _dxr.status.gslb.autoApplyStatus = "Manual policy used: {}".format(_currentManualPolicy)
+
+          items = [ _dxr ]
+  - functionRef:
+      name: crossplane-contrib-function-auto-ready
+    step: crossplane-contrib-function-auto-ready

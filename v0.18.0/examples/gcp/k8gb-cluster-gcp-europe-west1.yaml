@@ -1,0 +1,47 @@
+k8gb:
+  dnsZones:
+    - loadBalancedZone: "gcp-test.k8gb.io" # -- dnsZone controlled by gslb
+      parentZone: "k8gb.io" # -- main zone which would contain gslb zone to delegate
+  # -- used for places where we need to distinguish between different Gslb instances
+  clusterGeoTag: "europe-west1"
+  # -- comma-separated list of external gslb geo tags to pair with
+  extGslbClustersGeoTags: "us-central1"
+
+extdns:
+  enabled: true
+  fullnameOverride: "k8gb-external-dns"
+  provider:
+    name: google
+  txtPrefix: k8gb-europe-west1-
+  txtOwnerId: k8gb-gcp-test.k8gb.io-europe-west1
+  domainFilters:
+    - k8gb.io
+  extraArgs:
+    # -- Specify the GCP project containing the Cloud DNS zones
+    google-project: "my-dns-project"
+    # -- Filter to only zones with this visibility. Set to either 'public' or 'private'. Omitting will match public and private zones
+    google-zone-visibility: "public"
+  # -- For Workload Identity authentication (recommended)
+  serviceAccount:
+    annotations:
+      # -- GKE Workload Identity annotation linking Kubernetes SA to Google SA
+      iam.gke.io/gcp-service-account: "k8gb-external-dns@my-dns-project.iam.gserviceaccount.com"
+  # -- For static service account credentials (alternative to Workload Identity)
+  # env:
+  #   - name: GOOGLE_APPLICATION_CREDENTIALS
+  #     value: /etc/secrets/service-account/credentials.json
+  # extraVolumes:
+  #   - name: google-service-account
+  #     secret:
+  #       secretName: external-dns-gcp-sa
+  # extraVolumeMounts:
+  #   - name: google-service-account
+  #     mountPath: /etc/secrets/service-account/
+  #     readOnly: true
+
+coredns:
+  serviceType: LoadBalancer
+  service:
+    annotations:
+      # -- Use GCP Network Load Balancer for better performance
+      cloud.google.com/load-balancer-type: "External"
