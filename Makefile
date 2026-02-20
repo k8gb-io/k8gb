@@ -743,7 +743,7 @@ docs-deploy: ## Deploy docs with mike for VERSION (requires VERSION)
 	fi; \
 	git fetch --force --tags; \
 	ORIGINAL_REF=$$(git symbolic-ref --short -q HEAD || git rev-parse HEAD); \
-	cleanup() { git checkout --quiet "$$ORIGINAL_REF"; }; \
+	cleanup() { git checkout --quiet -- mkdocs.yml 2>/dev/null || true; git checkout --quiet "$$ORIGINAL_REF"; }; \
 	trap cleanup EXIT INT TERM; \
 	echo "Deploying documentation for $$VERSION"; \
 	if ! git show "$$VERSION:mkdocs.yml" >/dev/null 2>&1; then \
@@ -764,6 +764,7 @@ docs-deploy: ## Deploy docs with mike for VERSION (requires VERSION)
 		mike deploy --push --update-aliases "$$VERSION" latest; \
 		mike set-default --push latest; \
 	fi; \
+	git checkout --quiet -- mkdocs.yml; \
 	mike list
 
 docs-deploy-last-3: ## Deploy docs for latest 3 release tags
@@ -788,7 +789,7 @@ docs-deploy-last-3: ## Deploy docs for latest 3 release tags
 		exit 1; \
 	fi; \
 	ORIGINAL_REF=$$(git symbolic-ref --short -q HEAD || git rev-parse HEAD); \
-	cleanup() { git checkout --quiet "$$ORIGINAL_REF"; }; \
+	cleanup() { git checkout --quiet -- mkdocs.yml 2>/dev/null || true; git checkout --quiet "$$ORIGINAL_REF"; }; \
 	trap cleanup EXIT INT TERM; \
 	echo "Deploying latest 3 documentation versions:"; \
 	printf '%s\n' $$DEPLOYABLE_VERSIONS; \
@@ -803,6 +804,7 @@ docs-deploy-last-3: ## Deploy docs for latest 3 release tags
 		else \
 			mike deploy --push "$$version"; \
 		fi; \
+		git checkout --quiet -- mkdocs.yml; \
 	done; \
 	mike set-default --push latest; \
 	mike list
