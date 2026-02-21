@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.18.0](https://img.shields.io/badge/Version-v0.18.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.18.0](https://img.shields.io/badge/AppVersion-v0.18.0-informational?style=flat-square)
+![Version: v0.18.1](https://img.shields.io/badge/Version-v0.18.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.18.1](https://img.shields.io/badge/AppVersion-v0.18.1-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -20,6 +20,7 @@ A Helm chart for Kubernetes Global Balancer
 | Name | Email | Url |
 | ---- | ------ | --- |
 | Andre Baptista Aguas | <andre.aguas@protonmail.com> |  |
+| Bradley Andersen | <bradley@0ttl.ai > |  |
 | Dinar Valeev | <dinar.valeev@absa.africa> |  |
 | Jiri Kremser | <jiri.kremser@gmail.com> |  |
 | Michal Kuritka | <kuritka@gmail.com> |  |
