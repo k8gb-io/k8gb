@@ -1,5 +1,41 @@
 # Changelog
 
+## [v0.18.1](https://github.com/k8gb-io/k8gb/tree/v0.18.1) (2026-02-21)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.18.0...v0.18.1)
+
+**Closed issues:**
+
+- 2026 Project Lead Election [\#2210](https://github.com/k8gb-io/k8gb/issues/2210)
+- Release v0.18.0 [\#2175](https://github.com/k8gb-io/k8gb/issues/2175)
+- Add versioning to k8gb.io documentation [\#794](https://github.com/k8gb-io/k8gb/issues/794)
+
+**Merged pull requests:**
+
+- RELEASE: v0.18.1 [\#2259](https://github.com/k8gb-io/k8gb/pull/2259) ([ytsarev](https://github.com/ytsarev))
+- Update Helm Docs [\#2257](https://github.com/k8gb-io/k8gb/pull/2257) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Bump coredns-plugin to include latest security fixes [\#2256](https://github.com/k8gb-io/k8gb/pull/2256) ([ytsarev](https://github.com/ytsarev))
+- fix\(docs\): restore mkdocs.yml between mike tag checkouts [\#2253](https://github.com/k8gb-io/k8gb/pull/2253) ([ytsarev](https://github.com/ytsarev))
+- Update Helm Docs [\#2252](https://github.com/k8gb-io/k8gb/pull/2252) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update github/codeql-action digest to 89a39a4 [\#2251](https://github.com/k8gb-io/k8gb/pull/2251) ([renovate[bot]](https://github.com/apps/renovate))
+- fix\(docs\): ensure mike provider for legacy docs tags [\#2250](https://github.com/k8gb-io/k8gb/pull/2250) ([ytsarev](https://github.com/ytsarev))
+- Fix: K8gb site banner fix [\#2249](https://github.com/k8gb-io/k8gb/pull/2249) ([itsfarhan](https://github.com/itsfarhan))
+- update governance with information on 2025-2026 project lead election [\#2248](https://github.com/k8gb-io/k8gb/pull/2248) ([elohmrow](https://github.com/elohmrow))
+- add 2026-02-18 community meeting notes [\#2247](https://github.com/k8gb-io/k8gb/pull/2247) ([elohmrow](https://github.com/elohmrow))
+- fix\(docs\): deploy mike docs on master for latest 3 tags [\#2246](https://github.com/k8gb-io/k8gb/pull/2246) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update otel/opentelemetry-collector docker tag to v0.146.1 [\#2245](https://github.com/k8gb-io/k8gb/pull/2245) ([renovate[bot]](https://github.com/apps/renovate))
+- ci: centralize k3d version in workflow env and use the latest one [\#2244](https://github.com/k8gb-io/k8gb/pull/2244) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update dependency kubernetes-sigs/controller-tools to v0.20.1 [\#2242](https://github.com/k8gb-io/k8gb/pull/2242) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update github/codeql-action digest to 9e907b5 [\#2241](https://github.com/k8gb-io/k8gb/pull/2241) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update aquasecurity/trivy-action action to v0.34.0 [\#2240](https://github.com/k8gb-io/k8gb/pull/2240) ([renovate[bot]](https://github.com/apps/renovate))
+- fix\(deps\): update kubernetes packages to v0.35.1 [\#2239](https://github.com/k8gb-io/k8gb/pull/2239) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update dependency k8gb-io/k8gb to v0.18.0 [\#2235](https://github.com/k8gb-io/k8gb/pull/2235) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Offline Changelog [\#2234](https://github.com/k8gb-io/k8gb/pull/2234) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Add meeting notes for Feb 4, 2026 [\#2213](https://github.com/k8gb-io/k8gb/pull/2213) ([ytsarev](https://github.com/ytsarev))
+- \[Enhancement\]: Added versioning to Mkdocs [\#2178](https://github.com/k8gb-io/k8gb/pull/2178) ([itsfarhan](https://github.com/itsfarhan))
+
+
+
 ## [v0.18.0](https://github.com/k8gb-io/k8gb/tree/v0.18.0) (2026-02-07)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.17.0...v0.18.0)
