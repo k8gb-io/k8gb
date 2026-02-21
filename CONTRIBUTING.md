@@ -425,7 +425,7 @@ wget https://github.com/k8gb-io/k8gb/releases/download/v0.15.0/multiple.intoto.j
 
 **4. Verify container images:**
 ```bash
-cosign verify --key cosign.pub docker.io/absaoss/k8gb:v0.15.0
+cosign verify --key cosign.pub ghcr.io/k8gb-io/k8gb:v0.15.0
 ```
 
 **5. Verify container provenance:**
@@ -433,7 +433,7 @@ cosign verify --key cosign.pub docker.io/absaoss/k8gb:v0.15.0
 cosign verify-attestation \
   --key cosign.pub \
   --type slsaprovenance \
-  docker.io/absaoss/k8gb@sha256:digest
+  ghcr.io/k8gb-io/k8gb@sha256:digest
 ```
 
 The verification confirms that artifacts were:
