@@ -754,7 +754,7 @@ docs-deploy: ## Deploy docs with mike for VERSION (requires VERSION)
 	echo "Ensuring mike version provider in mkdocs.yml for $$VERSION"; \
 	yq eval -i '.extra.version.provider = "mike"' mkdocs.yml; \
 	mike deploy --push "$$VERSION"; \
-	LATEST_VERSION=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./' | while read version; do \
+	LATEST_VERSION=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./ && $$0 !~ /-/' | while read version; do \
 		if git show "$$version:mkdocs.yml" >/dev/null 2>&1; then \
 			echo "$$version"; \
 		fi; \
@@ -774,7 +774,7 @@ docs-deploy-last-3: ## Deploy docs for latest 3 release tags
 		exit 1; \
 	fi; \
 	git fetch --force --tags; \
-	VERSIONS=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./' | tail -n 3); \
+	VERSIONS=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./ && $$0 !~ /-/' | tail -n 3); \
 	if [ -z "$$VERSIONS" ]; then \
 		echo "ERROR: no release tags found to deploy docs"; \
 		exit 1; \

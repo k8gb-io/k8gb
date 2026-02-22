@@ -58,7 +58,7 @@ jobs:
           git checkout master
 
       - name: Deploy documentation with Mike
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-')
         run: make docs-deploy VERSION=${GITHUB_REF#refs/tags/}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
