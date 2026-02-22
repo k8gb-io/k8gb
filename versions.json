@@ -2,14 +2,14 @@
   {
     "version": "v0.99.0-rc-ghcrtest1",
     "title": "v0.99.0-rc-ghcrtest1",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   },
   {
     "version": "v0.18.1",
     "title": "v0.18.1",
-    "aliases": []
+    "aliases": [
+      "latest"
+    ]
   },
   {
     "version": "v0.18.0",
