@@ -53,6 +53,13 @@ tofu.tfstate.*
 .tofu/
 .tofu.lock.hcl
 
+# custom org tooling
+# TODO: replace Makefile by taskfile
+taskfile.yaml
+
+# chainsaw local test run
+chainsaw/kubeconfig/
+
 mkdocs-env/
 site/
 docs/__pycache__/
