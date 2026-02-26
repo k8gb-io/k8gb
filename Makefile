@@ -65,8 +65,8 @@ DNS_ZONE ?= cloud.example.com
 DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
-GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.io_gslbs.yaml
-DZ_CRD_YAML ?= chart/k8gb/crd/k8gb.io_zonedelegation.yaml
+GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
+ZD_CRD_YAML ?= chart/k8gb/crd/k8gb.io_zonedelegation.yaml
 
 # GCP Cloud DNS testing variables
 GCP_PROJECT ?=
@@ -711,7 +711,7 @@ define crd-manifest
 	@echo -e "\n$(YELLOW)Generating the CRD manifests$(NC)"
 	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./api/v1beta1" output:crd:stdout > $(GSLB_CRD_YAML)
 	@echo -e "\n$(YELLOW)Generating the k8gb.io CRD manifests$(NC)"
-	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./api/k8gb.io/v1beta1" output:crd:stdout > $(DZ_CRD_YAML)
+	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./api/k8gb.io/v1beta1" output:crd:stdout > $(ZD_CRD_YAML)
 endef
 
 define install-controller-gen

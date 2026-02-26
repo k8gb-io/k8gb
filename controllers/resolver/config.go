@@ -55,6 +55,8 @@ type Config struct {
 
 	MetricsAddress string `env:"METRICS_ADDRESS" optional:"" default:"0.0.0.0:8080" validate:"iphostport" help:"format address:port where address can be empty, IP address, or hostname, e.g: 10.10.0.0:8080"`
 
+	DynamicZones bool `env:"DYNAMIC_ZONES" optional:"" default:"false" help:"decides whether to use dynamic zones"`
+
 	TracingEnabled bool `env:"TRACING_ENABLED" optional:"" default:"false" help:"decides whether to use a real otlp tracer or a noop one"`
 
 	TracingSamplingRatio float64 `env:"TRACING_SAMPLING_RATIO" optionl:"" default:"1.0" help:"how many traces should be kept and sent (1.0 - all, 0.0 - none)"`
