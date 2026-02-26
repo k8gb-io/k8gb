@@ -2,6 +2,7 @@
 
 {{- $files := .Files }}
 {{ $files.Get "crd/k8gb.absa.oss_gslbs.yaml" }}
+{{ $files.Get "crd/k8gb.io_zonedelegation.yaml" }}
 
 {{- if not .Values.extdns.enabled }}
 {{ $files.Get "crd/dns-endpoint-crd-manifest.yaml" }}
