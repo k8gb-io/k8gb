@@ -57,6 +57,11 @@ annotations:
       version: v1alpha1
       displayName: DNSEndpoint
       description: Using ExternalDNS it synchronizes exposed Kubernetes Services and Ingresses with DNS providers
+    - kind: ZoneDelegation
+      version: v1beta1
+      name: zonedelegations.k8gb.io
+      displayName: ZoneDelegation
+      description: ZoneDelegation enables dynamic activation of DNS zones via the ZoneDelegation resource to prevent premature NXDOMAIN responses in multi-tenant or shared clusters.
   artifacthub.io/crdsExamples: |
     - apiVersion: k8gb.absa.oss/v1beta1
       kind: Gslb
@@ -78,3 +83,17 @@ annotations:
         strategy:
           type: failover # Global load balancing strategy
           primaryGeoTag: eu-west-1 # Primary cluster geo tag
+    - apiVersion: k8gb.io/v1beta1
+      kind: ZoneDelegation
+      metadata:
+        name: test-zone
+      spec:
+        loadBalancedZone: test-zone.cloud.example.com
+        parentZone: cloud.example.com
+        dnsZoneNegTTL: 30
+      status:
+        dnsServers:
+          - name: gslb-ns-eu-cloud.example.com
+            address: 172.18.0.6
+          - name: gslb-ns-us-cloud.example.com
+            address: 172.18.0.10
