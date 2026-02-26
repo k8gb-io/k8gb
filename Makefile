@@ -66,6 +66,7 @@ DEMO_DELAY ?=5
 GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
 ZD_CRD_YAML ?= chart/k8gb/crd/k8gb.io_zonedelegation.yaml
 
+
 # GCP Cloud DNS testing variables
 GCP_PROJECT ?=
 GCP_DOMAIN ?=
