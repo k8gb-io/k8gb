@@ -24,6 +24,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 )
 
 type DelegationZones []*DelegationZoneInfo
@@ -44,14 +46,32 @@ func getNsName(tag, zone, edge string) string {
 	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edge)
 }
 
-func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
-	type info struct {
-		loadBalancedZone string
-		parentZone       string
-		negTTL           string
+// parse example.com:cloud.example.com:30;example.io:cloud.example.io:50
+func getZoneConfigFromString(zones string) ([]v1beta1.ZoneDelegationSpec, error) {
+	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
+	tuples := make([]v1beta1.ZoneDelegationSpec, 0)
+	slice := strings.Split(zones, ";")
+	for _, z := range slice {
+		tuple := strings.Split(z, ":")
+		if len(tuple) != 3 {
+			return tuples, fmt.Errorf("invalid format of delegation zones: %s", z)
+		}
+		ttl, err := strconv.Atoi(strings.Trim(tuple[2], " "))
+		if err != nil {
+			return tuples, err
+		}
+		tuples = append(tuples,
+			v1beta1.ZoneDelegationSpec{
+				ParentZone:       strings.Trim(tuple[0], " "),
+				LoadBalancedZone: strings.Trim(tuple[1], " "),
+				DNSZoneNegTTL:    ttl,
+			})
 	}
+	return tuples, nil
+}
 
-	zones := config.DNSZones
+func ParseDelegationZones(config *Config, info []v1beta1.ZoneDelegationSpec) ([]*DelegationZoneInfo, error) {
+	var zones = []*DelegationZoneInfo{}
 
 	extClusterNSNames := func(zone, edge string) map[string]string {
 		m := map[string]string{}
@@ -82,53 +102,24 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 		return nil
 	}
 
-	// parse example.com:cloud.example.com:30;example.io:cloud.example.io:50
-	getEnvAsArrayOfPairsOrFallback := func(zones string) ([]info, error) {
-		tuples := make([]info, 0)
-		slice := strings.Split(zones, ";")
-		for _, z := range slice {
-			touple := strings.Split(z, ":")
-			if len(touple) != 3 {
-				return tuples, fmt.Errorf("invalid format of delegation zones: %s", z)
-			}
-			tuples = append(tuples,
-				info{
-					parentZone:       strings.Trim(touple[0], " "),
-					loadBalancedZone: strings.Trim(touple[1], " "),
-					negTTL:           strings.Trim(touple[2], " "),
-				})
-		}
-		return tuples, nil
-	}
-	var dzi []*DelegationZoneInfo
-	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
-	di, err := getEnvAsArrayOfPairsOrFallback(zones)
-	if err != nil {
-		return dzi, err
-	}
-
-	for _, inf := range di {
-		negTTL, err := strconv.Atoi(inf.negTTL)
-		if err != nil {
-			return dzi, fmt.Errorf("invalid value of delegation zones: %s", zones)
-		}
+	for _, inf := range info {
 		zoneInfo := &DelegationZoneInfo{
-			LoadBalancedZone:  inf.loadBalancedZone,
-			ParentZone:        inf.parentZone,
-			NegativeTTL:       negTTL,
-			ClusterNSName:     getNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
-			ExtClusterNSNames: extClusterNSNames(inf.loadBalancedZone, inf.parentZone),
+			LoadBalancedZone:  inf.LoadBalancedZone,
+			ParentZone:        inf.ParentZone,
+			NegativeTTL:       inf.DNSZoneNegTTL,
+			ClusterNSName:     getNsName(config.ClusterGeoTag, inf.LoadBalancedZone, inf.ParentZone),
+			ExtClusterNSNames: extClusterNSNames(inf.LoadBalancedZone, inf.ParentZone),
 		}
-		dzi = append(dzi, zoneInfo)
+		zones = append(zones, zoneInfo)
 	}
 
-	for _, z := range dzi {
+	for _, z := range zones {
 		if err := validateRFC1035(z); err != nil {
-			return dzi, err
+			return zones, err
 		}
 	}
 
-	return dzi, nil
+	return zones, nil
 }
 
 // GetNSServerList returns a sorted list of all NS servers for the delegation zone

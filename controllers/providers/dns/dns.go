@@ -25,8 +25,8 @@ import (
 type Provider interface {
 	// CreateZoneDelegation handles delegated zone in Edge DNS
 	CreateZoneDelegation(*resolver.DelegationZoneInfo) error
-	// Finalize finalize gslb in k8gbNamespace
-	Finalize(*resolver.DelegationZoneInfo) error
+	// Finalize finalize gslb in k8gbNamespace, bool argument says whether finalizing is skipped.
+	Finalize(*resolver.DelegationZoneInfo, bool) error
 	// String see: Stringer interface
 	String() string
 }
