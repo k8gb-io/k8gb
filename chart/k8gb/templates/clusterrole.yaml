@@ -44,10 +44,12 @@ rules:
     - 'list'
     - 'watch'
 - apiGroups:
+  - k8gb.io
   - k8gb.absa.oss
   resources:
   - '*'
   - gslbs
+  - zonedelegations
   verbs:
   - '*'
 - apiGroups:

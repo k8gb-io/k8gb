@@ -24,6 +24,8 @@ import (
 	"net"
 	"reflect"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
@@ -57,6 +59,7 @@ type GslbReconciler struct {
 	DNSProvider        dns.Provider
 	Recorder           record.EventRecorder
 	Tracer             trace.Tracer
+	ZoneService        zones.ZoneService
 	GslbIngressHandler Handler
 }
 
@@ -82,6 +85,12 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	defer span.End()
 
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	// Check that cluster provides available IPs
+	if !r.ZoneService.HasAvailableIPs(ctx) {
+		log.Info().Msg("Waiting for available IPs.")
+		return result.Requeue()
+	}
+
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
 	err := r.Get(ctx, req.NamespacedName, gslb)
@@ -174,6 +183,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		gslb,
 		log,
 		utils.NewDNSQueryService(),
+		r.ZoneService,
 		r.updateRuntimeStatus)
 	dnsEndpoint, err := epProvider.GetDNSEndpoint()
 	if err != nil {

@@ -22,10 +22,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	k8gbiov1beta1 "github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers"
-	boot "github.com/k8gb-io/k8gb/controllers/bootstrap"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
@@ -33,7 +34,6 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 
 	istio "istio.io/client-go/pkg/apis/networking/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -94,19 +94,6 @@ func run() error {
 
 	ctrl.SetLogger(logging.NewLogrAdapter(log))
 
-	log.Info().Msg("Reading external IPs from cluster")
-	bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
-	if err != nil {
-		if config.CoreDNSServiceType == corev1.ServiceTypeLoadBalancer {
-			log.Err(err).Msg("Can't resolve external IPs")
-			return err
-		}
-		log.Err(err).Msg("Can't resolve ingress IPs")
-		return err
-	}
-	log.Info().Msgf("Found External IP's: %s", bootstrap)
-	config.DelegationZones.SetIPs(bootstrap.IPs)
-
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
 		Metrics: metricsserver.Options{
@@ -152,13 +139,14 @@ func run() error {
 		log.Err(err).Msg("Unable to create DNS provider factory")
 		return err
 	}
-
+	zoneService := zones.NewZoneService(config, mgr.GetClient(), mgr.GetAPIReader())
 	gslbReconciler := &controllers.GslbReconciler{
 		Config:             config,
 		Client:             mgr.GetClient(),
 		Resolver:           r,
 		Scheme:             mgr.GetScheme(),
 		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
+		ZoneService:        zoneService,
 	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{
@@ -166,7 +154,15 @@ func run() error {
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
-		Bootstrap:   bootstrap,
+		ZoneService: zoneService,
+	}
+
+	zoneDelegationReconciler := &controllers.ZoneDelegationReconciler{
+		Config:      config,
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		DNSProvider: f.Provider(),
+		ZoneService: zoneService,
 	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
@@ -176,6 +172,11 @@ func run() error {
 
 	if err = corednsReconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create coreDNS reconciler")
+		return err
+	}
+
+	if err = zoneDelegationReconciler.SetupWithManager(mgr); err != nil {
+		log.Err(err).Msg("Unable to create Zone Delegation reconciler")
 		return err
 	}
 
