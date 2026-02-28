@@ -150,7 +150,7 @@ func TestEmptyHealthyRecords(t *testing.T) {
 func TestHealthyLocalRecords(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	gslb := &k8gbv1beta1.Gslb{}
+	gslb := &k8gbv1beta1io.Gslb{}
 	gslb.Name = gslbName
 	gslb.Namespace = namespace
 	gslb.Status.GeoTag = "eu"
@@ -176,7 +176,7 @@ func TestHealthyLocalRecords(t *testing.T) {
 func TestHealthyLocalRecordsAllMatch(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	gslb := &k8gbv1beta1.Gslb{}
+	gslb := &k8gbv1beta1io.Gslb{}
 	gslb.Name = gslbName
 	gslb.Namespace = namespace
 	gslb.Status.GeoTag = "us"
@@ -200,7 +200,7 @@ func TestHealthyLocalRecordsAllMatch(t *testing.T) {
 func TestHealthyLocalRecordsNoneMatch(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	gslb := &k8gbv1beta1.Gslb{}
+	gslb := &k8gbv1beta1io.Gslb{}
 	gslb.Name = gslbName
 	gslb.Namespace = namespace
 	gslb.Status.GeoTag = "apac"
@@ -223,7 +223,7 @@ func TestHealthyLocalRecordsNoneMatch(t *testing.T) {
 func TestHealthyLocalRecordsEmptyInputs(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	gslb := &k8gbv1beta1.Gslb{}
+	gslb := &k8gbv1beta1io.Gslb{}
 	gslb.Name = gslbName
 	gslb.Namespace = namespace
 	gslb.Status.GeoTag = "eu"

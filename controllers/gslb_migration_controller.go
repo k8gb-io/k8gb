@@ -58,6 +58,7 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	desired := convertGslbLegacyToIO(legacy)
+	createdCanonical := false
 
 	existing := &k8gbv1beta1io.Gslb{}
 	if err := r.Get(ctx, types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace}, existing); err != nil {
@@ -65,13 +66,8 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 			if err := r.Create(ctx, desired); err != nil {
 				return ctrl.Result{}, err
 			}
+			createdCanonical = true
 		} else {
-			return ctrl.Result{}, err
-		}
-	} else {
-		patch := client.MergeFrom(existing.DeepCopy())
-		existing.Spec = desired.Spec
-		if err := r.Patch(ctx, existing, patch); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -85,14 +81,25 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{}, err
 	}
 
-	r.Recorder.Eventf(
-		legacy,
-		corev1.EventTypeNormal,
-		"LegacyMigrated",
-		"Legacy Gslb migrated to k8gb.io Gslb %s/%s. Edit the k8gb.io object going forward.",
-		legacy.Namespace,
-		legacy.Name,
-	)
+	if createdCanonical {
+		r.Recorder.Eventf(
+			legacy,
+			corev1.EventTypeNormal,
+			"LegacyMigrated",
+			"Legacy Gslb migrated to k8gb.io Gslb %s/%s. Edit the k8gb.io object going forward.",
+			legacy.Namespace,
+			legacy.Name,
+		)
+	} else {
+		r.Recorder.Eventf(
+			legacy,
+			corev1.EventTypeWarning,
+			"LegacyIgnored",
+			"Legacy Gslb ignored because k8gb.io Gslb %s/%s already exists. Edit the k8gb.io object instead.",
+			legacy.Namespace,
+			legacy.Name,
+		)
+	}
 	return ctrl.Result{}, nil
 }
 

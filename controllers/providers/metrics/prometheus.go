@@ -138,7 +138,7 @@ func (m *PrometheusMetrics) UpdateHealthyRecordsMetric(gslb *k8gbv1beta1io.Gslb,
 	m.metrics.K8gbGslbHealthyRecords.With(prometheus.Labels{"namespace": gslb.Namespace, "name": gslb.Name}).Set(float64(hrsCount))
 }
 
-func (m *PrometheusMetrics) UpdateHealthyLocalRecordsMetric(gslb *k8gbv1beta1.Gslb, healthyRecords map[string][]string, exposedIPs []string) {
+func (m *PrometheusMetrics) UpdateHealthyLocalRecordsMetric(gslb *k8gbv1beta1io.Gslb, healthyRecords map[string][]string, exposedIPs []string) {
 	healthySet := make(map[string]struct{})
 	for _, ips := range healthyRecords {
 		for _, ip := range ips {
