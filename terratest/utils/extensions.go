@@ -650,7 +650,7 @@ func (i *Instance) GetStatus(annotation string) (s *InstanceStatus) {
 	if err != nil {
 		s.AppReplicas = na
 	}
-	s.GslbHealthStatus, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "gslb", i.w.state.gslb.name, "-o",
+	s.GslbHealthStatus, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", canonicalGslbResource, i.w.state.gslb.name, "-o",
 		"custom-columns=SERVICESTATUS:.status.serviceHealth", "--no-headers")
 	if err != nil {
 		s.GslbHealthStatus = na
@@ -732,7 +732,7 @@ type Resources struct {
 
 // GslbSpecProperty returns actual value of one Spec property, e.g: `spec.ingress.rules[0].host`
 func (g *Gslb) GslbSpecProperty(specPath string) string {
-	actualValue, _ := k8s.RunKubectlAndGetOutputE(g.i.w.t, g.i.w.k8sOptions, "get", "gslb", g.i.w.state.gslb.name,
+	actualValue, _ := k8s.RunKubectlAndGetOutputE(g.i.w.t, g.i.w.k8sOptions, "get", canonicalGslbResource, g.i.w.state.gslb.name,
 		"-o", fmt.Sprintf("custom-columns=SERVICESTATUS:%s", specPath), "--no-headers")
 	return actualValue
 }
@@ -801,7 +801,7 @@ func (g *Gslb) GetAnnotations() (a map[string]string) {
 			Annotations map[string]string `yaml:"annotations"`
 		} `yaml:"metadata"`
 	}{}
-	strValue, err := k8s.RunKubectlAndGetOutputE(g.i.w.t, g.i.w.k8sOptions, "get", "gslb", g.i.w.state.gslb.name, "-ojson")
+	strValue, err := k8s.RunKubectlAndGetOutputE(g.i.w.t, g.i.w.k8sOptions, "get", canonicalGslbResource, g.i.w.state.gslb.name, "-ojson")
 	require.NoError(g.i.w.t, err)
 	err = json.Unmarshal([]byte(strValue), &m)
 	require.NoError(g.i.w.t, err)
@@ -809,7 +809,7 @@ func (g *Gslb) GetAnnotations() (a map[string]string) {
 }
 
 func (g *Gslb) PatchAnnotations(a map[string]string) (err error) {
-	return g.i.patchAnnotations(g.i.w.state.gslb.name, "gslb", a)
+	return g.i.patchAnnotations(g.i.w.state.gslb.name, canonicalGslbResource, a)
 }
 
 func (ing *Ingress) PatchAnnotations(a map[string]string) (err error) {
