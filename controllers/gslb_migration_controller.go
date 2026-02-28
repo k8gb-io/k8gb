@@ -105,6 +105,7 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 func (r *LegacyGslbMigrationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		Named("legacy-gslb-migration-controller").
 		For(&k8gbv1beta1.Gslb{}).
 		Complete(r)
 }

@@ -80,6 +80,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		})
 
 	return ctrl.NewControllerManagedBy(mgr).
+		Named("gslb-controller").
 		For(&k8gbv1beta1io.Gslb{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&externaldnsApi.DNSEndpoint{}).
