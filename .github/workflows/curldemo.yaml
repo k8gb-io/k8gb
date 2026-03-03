@@ -9,6 +9,7 @@ on:
 
 permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
+  packages: write
 
 jobs:
   curldemo:
@@ -24,11 +25,12 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
-      - name: Login to Dockerhub
+      - name: Login to GHCR
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -36,4 +38,4 @@ jobs:
           context: ./deploy/test-apps/curldemo/
           file: ./deploy/test-apps/curldemo/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USER }}/k8gb-demo-curl:latest
+          tags: ghcr.io/k8gb-io/k8gb-demo-curl:latest

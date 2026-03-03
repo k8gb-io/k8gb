@@ -43,7 +43,7 @@ documentation:
 
 distribution-points:
   - https://github.com/k8gb-io/k8gb/releases
-  - https://hub.docker.com/r/absaoss/k8gb/tags
+  - https://github.com/orgs/k8gb-io/packages/container/package/k8gb
 
 security-artifacts:
   self-assessment:
