@@ -36,7 +36,7 @@ main() {
 }
 
 generate() {
-    echo "    containerImage: docker.io/absaoss/k8gb:v${_VERSION}" >> ${DIR}/annotations.yaml.tmpl
+    echo "    containerImage: k8gb-io.gateway.scarf.sh/k8gb-io/k8gb:v${_VERSION}" >> ${DIR}/annotations.yaml.tmpl
     cd ${DIR}/../chart/k8gb && helm dependency update && cd -
     helm -n placeholder template ${DIR}/../chart/k8gb \
         --name-template=k8gb \
