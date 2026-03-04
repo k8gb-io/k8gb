@@ -48,6 +48,7 @@ On YouTube: <update>
 
 - Yury Tsarev
 - Dinar Valeev
+- Farhan Ahmed
 
 **Agenda**
 
@@ -64,7 +65,7 @@ On YouTube: <update>
   - incubation issues:
     - https://github.com/k8gb-io/k8gb/issues/2195 - almost done
       - https://github.com/k8gb-io/k8gb/pull/2264 - merged
-      - https://github.com/k8gb-io/k8gb/pulls - should be last bit
+      - [https://github.com/k8gb-io/k8gb/pulls](https://github.com/k8gb-io/k8gb/pull/2276) - should be last bit
       - Problem with scarf.sh - apparently it does not support multiple backends for the same packages
     - https://github.com/k8gb-io/k8gb/issues/2180 - looks simple, but not ...
     let's organize a meeting with absa
@@ -77,8 +78,10 @@ On YouTube: <update>
     - take first pass at https://github.com/k8gb-io/k8gb/issues/2219
     - go through in progress on project board
     - make sure we are all caught up on incubating tasks
+  - @k0da:
+    - review https://github.com/k8gb-io/k8gb/pull/2203
   - @ytsarev:
-    - 
+    - update  https://github.com/k8gb-io/k8gb/pull/2203 with extra handling of legacy cases
 
 </details>
 
