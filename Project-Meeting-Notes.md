@@ -36,7 +36,56 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 </details>
 
-<details open><summary><strong>Feb 18, 2026 #86</strong></summary>
+<details open><summary><strong>March 4, 2026 #87</strong></summary>
+
+## March 4, 2026 #87
+
+Zoom Recording: <update>
+
+On YouTube: <update>
+
+**Attendees**
+
+- Yury Tsarev
+- Dinar Valeev
+- Farhan Ahmed
+
+**Agenda**
+
+- [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **News**
+    - https://github.com/k8gb-io/k8gb/releases/tag/v0.18.1 release
+    - Incubation
+      - need to make sure everything on the [Incubation Application](https://github.com/cncf/toc/issues/1472) is up2date
+      - Incubating DD Review
+        - Governance review done ✅
+        - Tech review WIP
+        - ADOPTER reviews WIP
+- **Issue Review**
+  - incubation issues:
+    - https://github.com/k8gb-io/k8gb/issues/2195 - almost done
+      - https://github.com/k8gb-io/k8gb/pull/2264 - merged
+      - [https://github.com/k8gb-io/k8gb/pulls](https://github.com/k8gb-io/k8gb/pull/2276) - should be last bit
+      - Problem with scarf.sh - apparently it does not support multiple backends for the same packages
+    - https://github.com/k8gb-io/k8gb/issues/2180 - looks simple, but not ...
+    let's organize a meeting with absa
+      - https://github.com/k8gb-io/k8gb/pull/2203 PR with ADR and implementation proposed - need extra e2e testing
+- **Community Update**
+  - next time
+- **Other**
+- **Action Items**
+  - @elohmrow:
+    - take first pass at https://github.com/k8gb-io/k8gb/issues/2219
+    - go through in progress on project board
+    - make sure we are all caught up on incubating tasks
+  - @k0da:
+    - review https://github.com/k8gb-io/k8gb/pull/2203
+  - @ytsarev:
+    - update  https://github.com/k8gb-io/k8gb/pull/2203 with extra handling of legacy cases
+
+</details>
+
+<details><summary><strong>Feb 18, 2026 #86</strong></summary>
 
 ## Feb 18, 2026 #86
 
