@@ -1,0 +1,95 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  name: zonedelegations.k8gb.io
+spec:
+  group: k8gb.io
+  names:
+    kind: ZoneDelegation
+    listKind: ZoneDelegationList
+    plural: zonedelegations
+    shortNames:
+    - zd
+    singular: zonedelegation
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.loadBalancedZone
+      name: LoadBalancedZone
+      type: string
+    - jsonPath: .spec.parentZone
+      name: ParentZone
+      type: string
+    - jsonPath: .spec.dnsZoneNegTTL
+      name: NegTTL
+      type: integer
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ZoneDelegation is the Schema for the zonedelegations API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              dnsZoneNegTTL:
+                description: DNSZoneNegTTL specifies the negative TTL for the DNS
+                  zone (in seconds)
+                type: integer
+              loadBalancedZone:
+                description: LoadBalancedZone is the DNS zone managed by this ZoneDelegation
+                type: string
+              parentZone:
+                description: ParentZone is the zone under which this load-balanced
+                  zone is delegated
+                type: string
+            required:
+            - dnsZoneNegTTL
+            - loadBalancedZone
+            - parentZone
+            type: object
+          status:
+            description: ZoneDelegationStatus defines the observed state of ZoneDelegation
+            properties:
+              dnsServers:
+                description: DNSServers lists the authoritative DNS servers for the
+                  delegated zone
+                items:
+                  description: DNSServer represents a single DNS server for a zone
+                    delegation
+                  properties:
+                    address:
+                      description: Address of the DNS server (IPv4 or IPv6)
+                      type: string
+                    name:
+                      description: Name of the DNS server (FQDN)
+                      type: string
+                  required:
+                  - address
+                  - name
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
