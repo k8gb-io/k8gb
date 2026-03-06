@@ -112,24 +112,30 @@ For comprehensive installation and configuration guides, see the [Installation a
 A list of publicly known users of the K8GB project can be found in [ADOPTERS.md](ADOPTERS.md).
 We encourage all users of K8GB to add themselves to this list!
 
+## Case Studies
+
+* Featured end-user story: [Millennium bcp CNCF case study](https://www.cncf.io/case-studies/millennium-bcp/)
+
 ## Production Readiness
 
 You can use k8gb in on-prem, cloud and hybrid environments.
 
-k8gb is tested with the following environment options.
+k8gb is tested with the following environment options and integration scenarios.
 
 | Type                             | Implementation                                                               |
 |----------------------------------|------------------------------------------------------------------------------|
 | Kubernetes Version               | >= `1.21`                                                                    |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud                        |
 | Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller [*](#clarify)                     |
-| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                                 |
+| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS                  |
+| Ingress Integration Modes        | Kubernetes Ingress (embedded/referenced), Istio (VirtualService + Gateway)   |
+| Automated E2E Validation         | Multi-cluster automated E2E testing with Terratest and Chainsaw               |
 
 <a name="clarify"></a>
-* We only mention solutions where we have tested and verified a k8gb installation.
-* If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
+* Every entry in this table reflects a setup that has been tested and verified with a working k8gb installation.
+* This matrix is intentionally conservative, not exhaustive. k8gb is Kubernetes-native and designed for standards-compliant clusters and ingress implementations; if your stack is not listed, validate it in staging before production rollout.
 
-## Presentations Featuring k8gb
+## Presentations and Talks
 
 [//]: # (Table is generated with the help of https://www.tablesgenerator.com/markdown_tables#)
 
@@ -148,7 +154,7 @@ k8gb is tested with the following environment options.
 
 <a name="community-meetings"></a>You can also find recordings from our community meetings at [k8gb youtube channel](https://www.youtube.com/channel/UCwvtktvdZu_pg-t-INvuW5g). The meeting runs every other Wednesday from 13:00 CET to 13:30 CET [calendar](https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month). Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10).
 
-## Online Publications Featuring k8gb
+## Online Articles and Publications
 
 * https://oilbeater.com/en/2024/04/18/k8gb-best-cloudnative-gslb/
 * https://medium.com/@kaanara/designing-a-high-availability-kubernetes-cluster-infrastructure-for-a-major-digital-travel-agency-7663465871fd
@@ -156,7 +162,7 @@ k8gb is tested with the following environment options.
 * https://blog.neilfren.ch/global-service-loadbalancers-for-your-homelab/
 * https://andrewbaker.ninja/2021/01/22/external-k8gb-presentation-to-kubernetes-sig-multicluster/
 
-## And Even Books Featuring k8gb :)
+## Books Covering k8gb
 
 | **Kubernetes - An Enterprise Guide - Second Edition** [![](https://m.media-amazon.com/images/I/81zq0mNn-WL._AC_UY436_FMwebp_QL65_.jpg)](https://www.amazon.com/Kubernetes-Enterprise-Effectively-containerize-applications/dp/1803230037 "Kubernetes - An Enterprise Guide - Second Edition: Effectively containerize applications, integrate enterprise systems, and scale applications in your enterprise") | **Kubernetes – An Enterprise Guide - Third Edition** [![](https://m.media-amazon.com/images/I/71mWBgaJMRL._AC_UY436_FMwebp_QL65_.jpg)]( https://www.amazon.com/Kubernetes-Enterprise-Effectively-containerize-applications-ebook/dp/B0CT8M958T/ "Kubernetes – An Enterprise Guide: Effectively containerize applications, integrate enterprise systems, and scale applications in your enterprise 3rd Edition") |
 |---|---|
