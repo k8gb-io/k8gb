@@ -27,6 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const testIngressClassName = "nginx"
+
 func TestConvertLegacyToIOCopiesSpec(t *testing.T) {
 	legacy := &k8gbv1beta1.Gslb{
 		Spec: k8gbv1beta1.GslbSpec{
@@ -43,7 +45,7 @@ func TestConvertLegacyToIOCopiesSpec(t *testing.T) {
 }
 
 func TestConvertLegacyToIOMigratesEmbeddedIngressToResourceRef(t *testing.T) {
-	className := "nginx"
+	className := testIngressClassName
 	legacy := &k8gbv1beta1.Gslb{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "demo",

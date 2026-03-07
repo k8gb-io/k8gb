@@ -63,7 +63,7 @@ func TestLegacyMigrationCreatesIOAndLabelsLegacy(t *testing.T) {
 }
 
 func TestLegacyMigrationConvertsEmbeddedIngressToReference(t *testing.T) {
-	className := "nginx"
+	className := testIngressClassName
 	legacyUID := types.UID("legacy-uid")
 	keepUID := types.UID("other-uid")
 	keepController := true
@@ -173,7 +173,7 @@ func TestLegacyMigrationDoesNotOverwriteExistingCanonical(t *testing.T) {
 }
 
 func TestLegacyMigrationDeletionRemovesFinalizerAndDetachesIngressOwner(t *testing.T) {
-	className := "nginx"
+	className := testIngressClassName
 	legacyUID := types.UID("legacy-uid")
 	deletingAt := metav1.Now()
 	legacy := &k8gbv1beta1.Gslb{
@@ -214,7 +214,7 @@ func TestLegacyMigrationDeletionRemovesFinalizerAndDetachesIngressOwner(t *testi
 }
 
 func TestHasEmbeddedIngress(t *testing.T) {
-	className := "nginx"
+	className := testIngressClassName
 	spec := k8gbv1beta1.GslbSpec{
 		Ingress: k8gbv1beta1.IngressSpec{IngressClassName: &className},
 	}
