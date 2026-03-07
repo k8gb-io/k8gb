@@ -22,6 +22,9 @@ The migration behavior validated here:
 5. Existing canonical GSLB is not overwritten.
 6. Already migrated legacy objects are ignored.
 7. Legacy deletion path removes migration finalizer after cleanup.
+8. Embedded migration does not fail if the Ingress is missing.
+9. OwnerReference cleanup also runs for already-migrated embedded legacy objects.
+10. Finalizer cleanup does not block deletion when embedded Ingress is missing.
 
 ## Prerequisites
 
@@ -247,6 +250,264 @@ Expected:
 
 - Canonical object is not created automatically for this case.
 - `LegacyIgnored` event is emitted.
+
+### Case 6: Embedded legacy migration succeeds even if Ingress is missing
+
+Apply embedded legacy GSLB without creating a matching Ingress resource:
+
+```bash
+kubectl apply -f - <<'EOF_CASE6'
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: embedded-no-ingress
+  namespace: migration-e2e
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: embedded-no-ingress.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: dummy
+                  port:
+                    number: 80
+  strategy:
+    type: roundRobin
+EOF_CASE6
+```
+
+Validate:
+
+```bash
+kubectl get gslb.k8gb.io -n migration-e2e embedded-no-ingress
+kubectl get gslb.k8gb.absa.oss -n migration-e2e embedded-no-ingress -o jsonpath='{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}'
+```
+
+Expected:
+
+- Canonical object exists even though Ingress is missing.
+- Legacy label equals `true`.
+
+### Case 7: Already-migrated embedded legacy still detaches stale Ingress ownerRef
+
+Apply already-migrated embedded legacy object:
+
+```bash
+kubectl apply -f - <<'EOF_CASE7'
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: stale-owner
+  namespace: migration-e2e
+  labels:
+    k8gb.io/migrated-to-k8gb-io: "true"
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: stale-owner.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: dummy
+                  port:
+                    number: 80
+  strategy:
+    type: roundRobin
+EOF_CASE7
+```
+
+Create an Ingress with a stale ownerReference to the legacy GSLB UID, then retrigger reconcile:
+
+```bash
+LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss -n migration-e2e stale-owner -o jsonpath='{.metadata.uid}')
+
+kubectl apply -f - <<EOF_CASE7_ING
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stale-owner
+  namespace: migration-e2e
+  ownerReferences:
+    - apiVersion: k8gb.absa.oss/v1beta1
+      kind: Gslb
+      name: stale-owner
+      uid: ${LEGACY_UID}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: stale-owner.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dummy
+                port:
+                  number: 80
+EOF_CASE7_ING
+
+kubectl annotate gslb.k8gb.absa.oss -n migration-e2e stale-owner migration-recheck-ts="$(date +%s)" --overwrite
+```
+
+Validate:
+
+```bash
+kubectl get ingress -n migration-e2e stale-owner -o json | jq '.metadata.ownerReferences'
+```
+
+Expected:
+
+- Legacy ownerReference is removed from the Ingress.
+
+### Case 8: Existing canonical + embedded legacy still performs owner cleanup
+
+Create canonical object first:
+
+```bash
+kubectl apply -f - <<'EOF_CASE8_CANONICAL'
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: canonical-embedded-cleanup
+  namespace: migration-e2e
+spec:
+  strategy:
+    type: failover
+    primaryGeoTag: eu
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: canonical-embedded-cleanup
+EOF_CASE8_CANONICAL
+```
+
+Apply embedded legacy object with same name:
+
+```bash
+kubectl apply -f - <<'EOF_CASE8_LEGACY'
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: canonical-embedded-cleanup
+  namespace: migration-e2e
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: canonical-embedded-cleanup.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: dummy
+                  port:
+                    number: 80
+  strategy:
+    type: roundRobin
+EOF_CASE8_LEGACY
+```
+
+Inject stale ownerReference and retrigger reconcile:
+
+```bash
+LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss -n migration-e2e canonical-embedded-cleanup -o jsonpath='{.metadata.uid}')
+
+kubectl apply -f - <<EOF_CASE8_ING
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: canonical-embedded-cleanup
+  namespace: migration-e2e
+  ownerReferences:
+    - apiVersion: k8gb.absa.oss/v1beta1
+      kind: Gslb
+      name: canonical-embedded-cleanup
+      uid: ${LEGACY_UID}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: canonical-embedded-cleanup.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dummy
+                port:
+                  number: 80
+EOF_CASE8_ING
+
+kubectl annotate gslb.k8gb.absa.oss -n migration-e2e canonical-embedded-cleanup migration-recheck-ts="$(date +%s)" --overwrite
+```
+
+Validate:
+
+```bash
+kubectl get gslb.k8gb.io -n migration-e2e canonical-embedded-cleanup -o jsonpath='{.spec.strategy.type}'
+kubectl get ingress -n migration-e2e canonical-embedded-cleanup -o json | jq '.metadata.ownerReferences'
+```
+
+Expected:
+
+- Canonical strategy stays `failover` (not overwritten).
+- Legacy ownerReference is removed from Ingress.
+
+### Case 9: Deletion path does not block when embedded Ingress is absent
+
+Apply embedded legacy object:
+
+```bash
+kubectl apply -f - <<'EOF_CASE9'
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: delete-no-ingress
+  namespace: migration-e2e
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: delete-no-ingress.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: dummy
+                  port:
+                    number: 80
+  strategy:
+    type: roundRobin
+EOF_CASE9
+```
+
+Ensure no matching Ingress exists, then delete legacy object:
+
+```bash
+kubectl delete ingress -n migration-e2e delete-no-ingress --ignore-not-found
+kubectl delete gslb.k8gb.absa.oss -n migration-e2e delete-no-ingress
+# Expected to fail with NotFound once deletion completes
+kubectl get gslb.k8gb.absa.oss -n migration-e2e delete-no-ingress || true
+```
+
+Expected:
+
+- Legacy object deletion is not stuck in `Terminating`.
+- Finalizer cleanup completes even without Ingress.
 
 ## Post-Merge Upgrade Validation
 
