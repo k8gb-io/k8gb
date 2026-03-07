@@ -24,6 +24,7 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestConvertLegacyToIOCopiesSpec(t *testing.T) {
@@ -39,4 +40,26 @@ func TestConvertLegacyToIOCopiesSpec(t *testing.T) {
 	require.Equal(t, "Gslb", io.Kind)
 	require.Equal(t, legacy.Spec.Strategy.Type, io.Spec.Strategy.Type)
 	require.Equal(t, legacy.Spec.Strategy.DNSTtlSeconds, io.Spec.Strategy.DNSTtlSeconds)
+}
+
+func TestConvertLegacyToIOMigratesEmbeddedIngressToResourceRef(t *testing.T) {
+	className := "nginx"
+	legacy := &k8gbv1beta1.Gslb{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: "default",
+		},
+		Spec: k8gbv1beta1.GslbSpec{
+			Ingress:  k8gbv1beta1.IngressSpec{IngressClassName: &className},
+			Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30},
+		},
+	}
+
+	io := convertGslbLegacyToIO(legacy)
+
+	require.Equal(t, "networking.k8s.io/v1", io.Spec.ResourceRef.APIVersion)
+	require.Equal(t, "Ingress", io.Spec.ResourceRef.Kind)
+	require.Equal(t, legacy.Name, io.Spec.ResourceRef.Name)
+	require.Equal(t, legacy.Namespace, io.Spec.ResourceRef.Namespace)
+	require.Equal(t, k8gbv1beta1io.IngressSpec{}, io.Spec.Ingress)
 }
