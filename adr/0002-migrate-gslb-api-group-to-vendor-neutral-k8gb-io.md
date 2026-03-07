@@ -86,3 +86,4 @@ Helm continues to support installation of legacy CRDs during the transition wind
 - `main.go` legacy migration controller registration
 - `chart/k8gb/crd/k8gb.io_gslbs.yaml`
 - `chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml`
+- `docs/migration_acceptance.md` manual migration acceptance checklist (pre-merge and post-merge)
