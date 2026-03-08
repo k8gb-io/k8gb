@@ -51,6 +51,14 @@ To spin-up a local environment using two k3s clusters and deploy a test applicat
 make deploy-full-local-setup
 ```
 
+By default, local setup also applies a small set of legacy `k8gb.absa.oss/v1beta1` migration demo resources on each local test cluster (referencing real `test-gslb` Ingress/podinfo resources from the standard setup), injects a realistic legacy ownerReference for the embedded case, and prints legacy/canonical manifests so you can see migration output immediately.
+
+If you want to skip this demo output:
+
+```sh
+make deploy-full-local-setup SHOW_LEGACY_MIGRATION_DEMO=false
+```
+
 ## Verify installation
 
 If local setup runs well, check if clusters are correctly installed
