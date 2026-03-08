@@ -6,7 +6,7 @@ Accepted
 
 ## Date
 
-2026-02-28
+2026-03-09
 
 ## Context
 
@@ -30,13 +30,23 @@ At the same time, existing users already run production objects with the legacy 
 - Pros: low short-term friction for users who stay on legacy manifests.
 - Cons: two sources of truth, conflict resolution complexity, and long-term ambiguity.
 
-### Option C: One-way migration bridge to canonical API (Selected)
+### Option C: Automatic one-way migration bridge to canonical API
 
 - Define `k8gb.io/v1beta1` as the canonical API.
 - Keep legacy CRD support during transition.
-- Migrate legacy objects to canonical objects and direct further edits to canonical objects.
+- Automatically migrate legacy objects to canonical objects.
 - Pros: backward compatibility with a single source of truth.
-- Cons: temporary migration controller and transition communication burden.
+- Cons: larger upgrade blast radius in clusters with many legacy objects.
+
+### Option D: Controlled one-way migration bridge to canonical API (Selected)
+
+- Define `k8gb.io/v1beta1` as the canonical API.
+- Keep legacy CRD support during transition.
+- Keep legacy reconcile behavior active before migration to avoid behavioral regressions.
+- Trigger migration per object with explicit label `k8gb.io/migration-requested=true`.
+- After migration, treat legacy object as compatibility/read-only source and direct further edits to canonical object.
+- Pros: backward compatibility with operator-controlled migration blast radius.
+- Cons: temporary coexistence of legacy and canonical logic during transition.
 
 ## Decision
 
@@ -44,11 +54,26 @@ We introduce `k8gb.io/v1beta1` as the canonical GSLB API group and migrate all f
 
 Compatibility with `k8gb.absa.oss/v1beta1` is preserved through a migration controller:
 
-- Legacy `Gslb` objects are converted to `k8gb.io/v1beta1` objects with the same name and namespace.
-- Legacy objects are marked with `k8gb.io/migrated-to-k8gb-io=true`.
-- A warning event is emitted to indicate that users must edit the `k8gb.io` object going forward.
+- Legacy reconcile stays active before migration to preserve existing behavior.
+- A deprecation warning event is emitted for legacy objects to steer users to `k8gb.io`.
+- Migration runs only when the legacy object has label `k8gb.io/migration-requested=true`.
+- Migration logic remains one-way and unchanged in semantics:
+  - create canonical `k8gb.io/v1beta1` object (same name/namespace),
+  - perform embedded ingress to `resourceRef` conversion,
+  - run ownerReference/finalizer safety cleanup,
+  - mark legacy object with `k8gb.io/migrated-to-k8gb-io=true`.
+- After migration, canonical object is the only write target for new feature work.
 
 Helm continues to support installation of legacy CRDs during the transition window.
+
+### Reconcile Decision Table
+
+| Legacy labels on `k8gb.absa.oss` object | Legacy reconcile mode | Migration action | Notes |
+|---|---|---|---|
+| no migration labels | full legacy reconcile + deprecation warning event | none | no behavioral downgrade before migration |
+| `k8gb.io/migration-requested=true`, not migrated | legacy reconcile + migration | run one-way migration | canonical object becomes write target |
+| `k8gb.io/migrated-to-k8gb-io=true` | compatibility/read-only + deprecation warning event | none | legacy kept for transition visibility |
+| both labels set | compatibility/read-only | none (optional request-label cleanup) | avoids repeated migration attempts |
 
 ## Consequences
 
@@ -57,11 +82,13 @@ Helm continues to support installation of legacy CRDs during the transition wind
 - Public API group is vendor-neutral and aligned with project identity.
 - New integrations and examples consistently target `k8gb.io/v1beta1`.
 - Existing clusters can migrate without immediate breakage.
+- Operators can migrate incrementally instead of cluster-wide big-bang migration.
 
 ### Negative
 
 - Additional controller logic is required during the transition period.
-- Operators must understand that legacy objects become migration sources, not long-term write targets.
+- Legacy and canonical logic coexist during the transition period.
+- Operators must understand migration trigger labels and write-target handoff.
 - Migration events and labels add short-term operational noise during rollout.
 
 ### Neutral
@@ -78,6 +105,8 @@ Helm continues to support installation of legacy CRDs during the transition wind
   - Rejected: unacceptable breaking change for current users (Option A).
 - Support both groups indefinitely as equal first-class writable APIs.
   - Rejected: duplicates maintenance burden and keeps ambiguity (Option B).
+- Keep automatic migration for all legacy objects on reconcile.
+  - Rejected: larger operational blast radius during upgrades compared to controlled migration.
 
 ## References
 

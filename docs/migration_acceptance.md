@@ -26,6 +26,10 @@ The migration behavior validated here:
 9. OwnerReference cleanup also runs for already-migrated embedded legacy objects.
 10. Finalizer cleanup does not block deletion when embedded Ingress is missing.
 
+For controlled migration mode, cases that expect canonical object creation require explicit trigger label:
+
+- `k8gb.io/migration-requested=true`
+
 ## Prerequisites
 
 - Kubernetes cluster with k8gb installed from the target branch/release candidate
@@ -40,6 +44,14 @@ Use a dedicated namespace:
 ```bash
 kubectl create ns migration-e2e || true
 ```
+
+Migration trigger helper (use in cases that expect conversion):
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n migration-e2e <name> k8gb.io/migration-requested=true --overwrite
+```
+
+Cases requiring this trigger: 1, 2, 3, 4, 6, and 8.
 
 ### Case 1: Legacy referenced GSLB migrates to canonical
 
@@ -526,6 +538,16 @@ kubectl get ingress -A -o yaml > pre-ingress.yaml
 Use your standard Helm upgrade flow for the target version.
 
 ### 3. Validate migration outcomes
+
+Request migration for legacy objects you want to migrate in this wave:
+
+```bash
+kubectl get gslb.k8gb.absa.oss -A -o json \
+  | jq -r '.items[] | [.metadata.namespace, .metadata.name] | @tsv' \
+  | while IFS=$'\t' read -r ns name; do
+      kubectl label gslb.k8gb.absa.oss -n "$ns" "$name" k8gb.io/migration-requested=true --overwrite
+    done
+```
 
 Verify every legacy object has matching canonical object:
 
