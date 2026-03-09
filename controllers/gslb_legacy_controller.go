@@ -164,7 +164,12 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return result.Requeue()
 }
 
-func (r *LegacyGslbReconciler) updateLegacyRuntimeStatus(gslb *k8gbv1beta1io.Gslb, isPrimary bool, isHealthy k8gbv1beta1io.HealthStatus, finalTargets []string) {
+func (r *LegacyGslbReconciler) updateLegacyRuntimeStatus(
+	gslb *k8gbv1beta1io.Gslb,
+	isPrimary bool,
+	isHealthy k8gbv1beta1io.HealthStatus,
+	finalTargets []string,
+) {
 	switch gslb.Spec.Strategy.Type {
 	case resolver.RoundRobinStrategy:
 		m.UpdateRoundrobinStatus(gslb, isHealthy, finalTargets)
@@ -214,7 +219,10 @@ func (r *LegacyGslbReconciler) saveDependentLegacyIngress(ctx context.Context, i
 	return nil
 }
 
-func (r *LegacyGslbReconciler) getServiceHealthStatusLegacy(ctx context.Context, gslb *k8gbv1beta1io.Gslb) (map[string]k8gbv1beta1io.HealthStatus, error) {
+func (r *LegacyGslbReconciler) getServiceHealthStatusLegacy(
+	ctx context.Context,
+	gslb *k8gbv1beta1io.Gslb,
+) (map[string]k8gbv1beta1io.HealthStatus, error) {
 	serviceHealth := make(map[string]k8gbv1beta1io.HealthStatus)
 	for _, server := range gslb.Status.Servers {
 		serviceHealth[server.Host] = k8gbv1beta1io.NotFound

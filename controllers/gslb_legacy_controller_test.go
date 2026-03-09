@@ -79,7 +79,9 @@ func TestLegacyRuntimeReconcilesBeforeMigrationRequest(t *testing.T) {
 	}
 
 	reconciler, cl := newLegacyRuntimeReconciler(t, legacy)
-	_, err := reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace}})
+	_, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace},
+	})
 	require.NoError(t, err)
 
 	updatedLegacy := &k8gbv1beta1.Gslb{}
@@ -115,7 +117,9 @@ func TestLegacyRuntimeSkipsRequestedMigrationObjects(t *testing.T) {
 	}
 
 	reconciler, cl := newLegacyRuntimeReconciler(t, legacy)
-	_, err := reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace}})
+	_, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace},
+	})
 	require.NoError(t, err)
 
 	endpoint := &externaldnsApi.DNSEndpoint{}
