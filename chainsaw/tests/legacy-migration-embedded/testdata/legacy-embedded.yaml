@@ -22,6 +22,8 @@ kind: Gslb
 metadata:
   name: legacy-migration-embedded
   namespace: ($namespace)
+  labels:
+    k8gb.io/migration-requested: "true"
 spec:
   ingress:
     ingressClassName: nginx

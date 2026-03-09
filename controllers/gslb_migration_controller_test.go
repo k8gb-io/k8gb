@@ -41,8 +41,14 @@ import (
 
 func TestLegacyMigrationCreatesIOAndLabelsLegacy(t *testing.T) {
 	legacy := &k8gbv1beta1.Gslb{
-		ObjectMeta: metav1.ObjectMeta{Name: "demo", Namespace: "default"},
-		Spec:       k8gbv1beta1.GslbSpec{Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30}},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: "default",
+			Labels: map[string]string{
+				migrationRequestLabelKey: "true",
+			},
+		},
+		Spec: k8gbv1beta1.GslbSpec{Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30}},
 	}
 	r, cl, _ := newLegacyMigrationReconciler(t, legacy)
 
@@ -68,7 +74,14 @@ func TestLegacyMigrationConvertsEmbeddedIngressToReference(t *testing.T) {
 	keepUID := types.UID("other-uid")
 	keepController := true
 	legacy := &k8gbv1beta1.Gslb{
-		ObjectMeta: metav1.ObjectMeta{Name: "demo", Namespace: "default", UID: legacyUID},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: "default",
+			UID:       legacyUID,
+			Labels: map[string]string{
+				migrationRequestLabelKey: "true",
+			},
+		},
 		Spec: k8gbv1beta1.GslbSpec{
 			Ingress:  k8gbv1beta1.IngressSpec{IngressClassName: &className},
 			Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30},
@@ -140,8 +153,14 @@ func TestLegacyMigrationIgnoresMigratedObject(t *testing.T) {
 
 func TestLegacyMigrationDoesNotOverwriteExistingCanonical(t *testing.T) {
 	legacy := &k8gbv1beta1.Gslb{
-		ObjectMeta: metav1.ObjectMeta{Name: "demo", Namespace: "default"},
-		Spec:       k8gbv1beta1.GslbSpec{Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30}},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: "default",
+			Labels: map[string]string{
+				migrationRequestLabelKey: "true",
+			},
+		},
+		Spec: k8gbv1beta1.GslbSpec{Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30}},
 	}
 	existingIO := &k8gbv1beta1io.Gslb{
 		ObjectMeta: metav1.ObjectMeta{Name: "demo", Namespace: "default"},
@@ -167,6 +186,37 @@ func TestLegacyMigrationDoesNotOverwriteExistingCanonical(t *testing.T) {
 	select {
 	case evt := <-recorder.Events:
 		require.Contains(t, evt, "LegacyIgnored")
+	case <-time.After(time.Second):
+		t.Fatalf("expected warning event")
+	}
+}
+
+func TestLegacyMigrationRequiresRequestLabel(t *testing.T) {
+	legacy := &k8gbv1beta1.Gslb{
+		ObjectMeta: metav1.ObjectMeta{Name: "demo", Namespace: "default"},
+		Spec:       k8gbv1beta1.GslbSpec{Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30}},
+	}
+	r, cl, recorder := newLegacyMigrationReconciler(t, legacy)
+
+	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: "demo", Namespace: "default"}})
+	require.NoError(t, err)
+
+	canonical := &k8gbv1beta1io.Gslb{}
+	err = cl.Get(context.Background(), types.NamespacedName{Name: "demo", Namespace: "default"}, canonical)
+	require.True(t, apierrors.IsNotFound(err))
+
+	updatedLegacy := &k8gbv1beta1.Gslb{}
+	err = cl.Get(context.Background(), types.NamespacedName{Name: "demo", Namespace: "default"}, updatedLegacy)
+	require.NoError(t, err)
+	require.NotContains(t, updatedLegacy.Finalizers, legacyMigrationFinalizer)
+	if updatedLegacy.Labels != nil {
+		_, found := updatedLegacy.Labels[migrationLabelKey]
+		require.False(t, found)
+	}
+
+	select {
+	case evt := <-recorder.Events:
+		require.Contains(t, evt, "LegacyDeprecated")
 	case <-time.After(time.Second):
 		t.Fatalf("expected warning event")
 	}

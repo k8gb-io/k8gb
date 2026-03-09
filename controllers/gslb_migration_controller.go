@@ -41,6 +41,7 @@ type LegacyGslbMigrationReconciler struct {
 }
 
 const legacyMigrationFinalizer = "k8gb.io/legacy-migration-protection"
+const migrationRequestLabelKey = "k8gb.io/migration-requested"
 
 func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	legacy := &k8gbv1beta1.Gslb{}
@@ -61,11 +62,12 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.ensureMigrationFinalizer(ctx, legacy); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if legacy.Labels != nil && legacy.Labels[migrationLabelKey] == "true" {
+	migrated := hasTrueLabel(legacy.Labels, migrationLabelKey)
+	requested := hasTrueLabel(legacy.Labels, migrationRequestLabelKey)
+	if migrated {
+		if err := r.ensureMigrationFinalizer(ctx, legacy); err != nil {
+			return ctrl.Result{}, err
+		}
 		if err := r.detachLegacyEmbeddedIngressOwner(ctx, legacy); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -78,6 +80,24 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 			legacy.Name,
 		)
 		return ctrl.Result{}, nil
+	}
+	if !requested {
+		if err := r.removeMigrationFinalizer(ctx, legacy); err != nil {
+			return ctrl.Result{}, err
+		}
+		r.Recorder.Eventf(
+			legacy,
+			corev1.EventTypeWarning,
+			"LegacyDeprecated",
+			"Legacy Gslb %s/%s uses deprecated API group k8gb.absa.oss. Set label %s=true to migrate to k8gb.io.",
+			legacy.Namespace,
+			legacy.Name,
+			migrationRequestLabelKey,
+		)
+		return ctrl.Result{}, nil
+	}
+	if err := r.ensureMigrationFinalizer(ctx, legacy); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	desired := convertGslbLegacyToIO(legacy)
@@ -128,6 +148,13 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 		)
 	}
 	return ctrl.Result{}, nil
+}
+
+func hasTrueLabel(labels map[string]string, key string) bool {
+	if labels == nil {
+		return false
+	}
+	return labels[key] == "true"
 }
 
 func (r *LegacyGslbMigrationReconciler) ensureMigrationFinalizer(ctx context.Context, legacy *k8gbv1beta1.Gslb) error {

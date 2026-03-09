@@ -3,6 +3,8 @@ kind: Gslb
 metadata:
   name: legacy-ref-demo
   namespace: test-gslb
+  labels:
+    k8gb.io/migration-requested: "true"
 spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
@@ -36,6 +38,8 @@ kind: Gslb
 metadata:
   name: legacy-embedded-demo
   namespace: test-gslb
+  labels:
+    k8gb.io/migration-requested: "true"
 spec:
   ingress:
     ingressClassName: nginx
