@@ -47,6 +47,28 @@ func convertGslbLegacyToIO(gslb *k8gbv1beta1.Gslb) *k8gbv1beta1io.Gslb {
 	}
 }
 
+func convertGslbLegacyToIORuntime(gslb *k8gbv1beta1.Gslb) *k8gbv1beta1io.Gslb {
+	if gslb == nil {
+		return &k8gbv1beta1io.Gslb{}
+	}
+
+	return &k8gbv1beta1io.Gslb{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: k8gbv1beta1io.GroupVersion.String(),
+			Kind:       "Gslb",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      gslb.Name,
+			Namespace: gslb.Namespace,
+		},
+		Spec: k8gbv1beta1io.GslbSpec{
+			Ingress:     k8gbv1beta1io.FromV1IngressSpec(k8gbv1beta1.ToV1IngressSpec(gslb.Spec.Ingress)),
+			Strategy:    convertStrategyLegacyToIO(gslb.Spec.Strategy),
+			ResourceRef: convertResourceRefLegacyToIO(gslb.Spec.ResourceRef),
+		},
+	}
+}
+
 func convertSpecLegacyToIO(gslb *k8gbv1beta1.Gslb) k8gbv1beta1io.GslbSpec {
 	if gslb == nil {
 		return k8gbv1beta1io.GslbSpec{}

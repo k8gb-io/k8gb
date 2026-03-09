@@ -161,6 +161,11 @@ func run() error {
 		Scheme:             mgr.GetScheme(),
 		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
 	}
+	legacyReconciler := &controllers.LegacyGslbReconciler{
+		Config: config,
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}
 	legacyMigrator := &controllers.LegacyGslbMigrationReconciler{
 		Client:   mgr.GetClient(),
 		Recorder: mgr.GetEventRecorderFor("legacy-gslb-migrator"),
@@ -187,9 +192,15 @@ func run() error {
 			log.Err(err).Msg("Unable to resolve legacy Gslb mapping")
 			return err
 		}
-	} else if err = legacyMigrator.SetupWithManager(mgr); err != nil {
-		log.Err(err).Msg("Unable to create legacy Gslb migration reconciler")
-		return err
+	} else {
+		if err = legacyReconciler.SetupWithManager(mgr); err != nil {
+			log.Err(err).Msg("Unable to create legacy Gslb reconciler")
+			return err
+		}
+		if err = legacyMigrator.SetupWithManager(mgr); err != nil {
+			log.Err(err).Msg("Unable to create legacy Gslb migration reconciler")
+			return err
+		}
 	}
 
 	if err = corednsReconciler.SetupWithManager(mgr); err != nil {
