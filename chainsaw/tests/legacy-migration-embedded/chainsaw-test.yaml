@@ -42,7 +42,7 @@ spec:
     - script:
         content: |
           kubectl get gslb.k8gb.io legacy-migration-embedded -n "$NAMESPACE" -o json | \
-            jq -e '.spec.ingress == null and .spec.resourceRef.name == "legacy-migration-embedded"' >/dev/null
+            jq -e '(((.spec.ingress // {}) | keys | length) == 0) and .spec.resourceRef.name == "legacy-migration-embedded"' >/dev/null
   - name: inject stale owner reference
     description: simulate legacy ownerReference and retrigger migration reconcile
     cluster: eu
