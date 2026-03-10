@@ -43,6 +43,7 @@ At the same time, existing users already run production objects with the legacy 
 - Define `k8gb.io/v1beta1` as the canonical API.
 - Keep legacy CRD support during transition.
 - Keep legacy reconcile behavior active before migration to avoid behavioral regressions.
+- Once `k8gb.io/migration-requested=true` is set, pause legacy runtime reconcile for that object and let migration controller own the transition to avoid dual-writer conflicts.
 - Trigger migration per object with explicit label `k8gb.io/migration-requested=true`.
 - After migration, treat legacy object as compatibility/read-only source and direct further edits to canonical object.
 - Pros: backward compatibility with operator-controlled migration blast radius.
@@ -55,6 +56,7 @@ We introduce `k8gb.io/v1beta1` as the canonical GSLB API group and migrate all f
 Compatibility with `k8gb.absa.oss/v1beta1` is preserved through a migration controller:
 
 - Legacy reconcile stays active before migration to preserve existing behavior.
+- When migration is requested, legacy runtime reconcile is paused for that object to avoid concurrent writes with canonical reconcile.
 - A deprecation warning event is emitted for legacy objects to steer users to `k8gb.io`.
 - Migration runs only when the legacy object has label `k8gb.io/migration-requested=true`.
 - Migration logic remains one-way and unchanged in semantics:
@@ -71,7 +73,7 @@ Helm continues to support installation of legacy CRDs during the transition wind
 | Legacy labels on `k8gb.absa.oss` object | Legacy reconcile mode | Migration action | Notes |
 |---|---|---|---|
 | no migration labels | full legacy reconcile + deprecation warning event | none | no behavioral downgrade before migration |
-| `k8gb.io/migration-requested=true`, not migrated | legacy reconcile + migration | run one-way migration | canonical object becomes write target |
+| `k8gb.io/migration-requested=true`, not migrated | migration transition mode (legacy runtime paused) | run one-way migration | canonical object becomes write target; avoids dual writers |
 | `k8gb.io/migrated-to-k8gb-io=true` | compatibility/read-only + deprecation warning event | none | legacy kept for transition visibility |
 | both labels set | compatibility/read-only | none (optional request-label cleanup) | avoids repeated migration attempts |
 
