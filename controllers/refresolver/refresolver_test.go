@@ -98,6 +98,12 @@ func TestNew(t *testing.T) {
 			expectedReferenceResolverType: "*gatewayapitlsroute.ReferenceResolver",
 			expectedError:                 nil,
 		},
+		{
+			name:                          "referenced gateway API TLSRoute v1alpha2",
+			gslbYaml:                      "./testdata/gslb_gatewayapi_tlsroute_v1alpha2.yaml",
+			expectedReferenceResolverType: "*gatewayapitlsroute.ReferenceResolver",
+			expectedError:                 nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -129,6 +135,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 		utils.FileToGatewayApiHttpRoute("./testdata/gatewayapi_httproute.yaml"),
 		utils.FileToGatewayApiGrpcRoute("./testdata/gatewayapi_grpcroute.yaml"),
 		utils.FileToGatewayApiTlsRoute("./testdata/gatewayapi_tlsroute.yaml"),
+		utils.FileToGatewayApiTlsRouteV1Alpha2("./testdata/gatewayapi_tlsroute_v1alpha2.yaml"),
 		utils.FileToGatewayApiTcpRoute("./testdata/gatewayapi_tcproute.yaml"),
 		utils.FileToGatewayApiUdpRoute("./testdata/gatewayapi_udproute.yaml"),
 		utils.FileToService("./testdata/istio_service.yaml"),
@@ -143,6 +150,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.Gateway{}, &gatewayapiv1.GatewayList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.TCPRoute{}, &gatewayapiv1alpha2.TCPRouteList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.UDPRoute{}, &gatewayapiv1alpha2.UDPRouteList{})
+	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.TLSRoute{}, &gatewayapiv1alpha2.TLSRouteList{})
 	s.AddKnownTypes(gatewayapiv1alpha3.SchemeGroupVersion, &gatewayapiv1alpha3.TLSRoute{}, &gatewayapiv1alpha3.TLSRouteList{})
 	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
 

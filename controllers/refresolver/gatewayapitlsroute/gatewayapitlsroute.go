@@ -31,29 +31,44 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
+	gatewayapiv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 	gatewayapiv1alpha3 "sigs.k8s.io/gateway-api/apis/v1alpha3"
 )
 
 var log = logging.Logger()
 
 type ReferenceResolver struct {
-	tlsRoute *TLSRouteAdapter
+	tlsRoute gatewayapi.RouteAdapter
 	gateway  *gatewayapiv1.Gateway
 }
 
-// NewReferenceResolver creates a new reference resolver capable of understanding `networking.gateway.api/v1` resources
+// NewReferenceResolver creates a new reference resolver capable of understanding Gateway API TLSRoute resources (v1alpha2 and v1alpha3)
 func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
-	tlsRouteList, err := getGslbTLSRouteRef(gslb, k8sClient)
-	if err != nil {
-		return nil, err
+	apiVersion := gslb.Spec.ResourceRef.APIVersion
+
+	var tlsRouteAdapter gatewayapi.RouteAdapter
+	if apiVersion == "gateway.networking.k8s.io/v1alpha2" {
+		tlsRouteList, err := getGslbTLSRouteRefV1Alpha2(gslb, k8sClient)
+		if err != nil {
+			return nil, err
+		}
+		if len(tlsRouteList) != 1 {
+			return nil, fmt.Errorf("exactly 1 TLSRoute resource expected but %d were found", len(tlsRouteList))
+		}
+		tlsRoute := tlsRouteList[0]
+		tlsRouteAdapter = NewTLSRouteAdapterV1Alpha2(&tlsRoute)
+	} else {
+		tlsRouteList, err := getGslbTLSRouteRefV1Alpha3(gslb, k8sClient)
+		if err != nil {
+			return nil, err
+		}
+		if len(tlsRouteList) != 1 {
+			return nil, fmt.Errorf("exactly 1 TLSRoute resource expected but %d were found", len(tlsRouteList))
+		}
+		tlsRoute := tlsRouteList[0]
+		tlsRouteAdapter = NewTLSRouteAdapter(&tlsRoute)
 	}
 
-	if len(tlsRouteList) != 1 {
-		return nil, fmt.Errorf("exactly 1 TLSRoute resource expected but %d were found", len(tlsRouteList))
-	}
-	tlsRoute := tlsRouteList[0]
-
-	tlsRouteAdapter := NewTLSRouteAdapter(&tlsRoute)
 	gateway, err := gatewayapi.GetGateway(tlsRouteAdapter, k8sClient)
 	if err != nil {
 		return nil, err
@@ -65,8 +80,47 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}, nil
 }
 
-// getGslbTLSRouteRef resolves a Gateway API TLSRoute resource referenced by the Gslb spec
-func getGslbTLSRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha3.TLSRoute, error) {
+// getGslbTLSRouteRefV1Alpha2 resolves a Gateway API TLSRoute resource (v1alpha2) referenced by the Gslb spec
+func getGslbTLSRouteRefV1Alpha2(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha2.TLSRoute, error) {
+	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	switch query.Mode {
+	case queryopts.QueryModeGet:
+		var tlsRoute = gatewayapiv1alpha2.TLSRoute{}
+		err = k8sClient.Get(context.TODO(), *query.GetKey, &tlsRoute)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced TLSRoute resource")
+			}
+			return nil, err
+		}
+		return []gatewayapiv1alpha2.TLSRoute{tlsRoute}, nil
+
+	case queryopts.QueryModeList:
+		tlsrouteList := &gatewayapiv1alpha2.TLSRouteList{}
+		err = k8sClient.List(context.TODO(), tlsrouteList, query.ListOpts...)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info().
+					Str("gslb", gslb.Name).
+					Str("namespace", gslb.Namespace).
+					Msg("Can't find referenced TLSRoute resource")
+			}
+			return nil, err
+		}
+		return tlsrouteList.Items, nil
+	}
+	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
+}
+
+// getGslbTLSRouteRefV1Alpha3 resolves a Gateway API TLSRoute resource (v1alpha3) referenced by the Gslb spec
+func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha3.TLSRoute, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err

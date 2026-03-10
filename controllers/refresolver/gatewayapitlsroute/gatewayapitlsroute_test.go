@@ -30,11 +30,13 @@ func TestGetServers(t *testing.T) {
 	var tests = []struct {
 		name            string
 		tlsRouteFile    string
+		useV1Alpha2     bool
 		expectedServers []*k8gbv1beta1.Server
 	}{
 		{
 			name:         "single hostname and backend; backend without namespace specified",
 			tlsRouteFile: "../testdata/gatewayapi_tlsroute.yaml",
+			useV1Alpha2:  false,
 			expectedServers: []*k8gbv1beta1.Server{
 				{
 					Host: "gatewayapi-tlsroute.cloud.example.com",
@@ -50,6 +52,7 @@ func TestGetServers(t *testing.T) {
 		{
 			name:         "single hostname and backend; backend with namespace specified",
 			tlsRouteFile: "./testdata/gatewayapi_tlsroute_backend_with_namespace.yaml",
+			useV1Alpha2:  false,
 			expectedServers: []*k8gbv1beta1.Server{
 				{
 					Host: "gatewayapi-tlsroute.cloud.example.com",
@@ -65,6 +68,7 @@ func TestGetServers(t *testing.T) {
 		{
 			name:         "multiple hostnames",
 			tlsRouteFile: "./testdata/gatewayapi_tlsroute_multiple_hostnames.yaml",
+			useV1Alpha2:  false,
 			expectedServers: []*k8gbv1beta1.Server{
 				{
 					Host: "gatewayapi-tlsroute1.cloud.example.com",
@@ -105,13 +109,37 @@ func TestGetServers(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:         "v1alpha2 TLSRoute - single hostname and backend",
+			tlsRouteFile: "../testdata/gatewayapi_tlsroute_v1alpha2.yaml",
+			useV1Alpha2:  true,
+			expectedServers: []*k8gbv1beta1.Server{
+				{
+					Host: "gatewayapi-tlsroute.cloud.example.com",
+					Services: []*k8gbv1beta1.NamespacedName{
+						{
+							Name:      "gatewayapi-tlsroute-service",
+							Namespace: "test-gslb",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
-			tlsRoute := utils.FileToGatewayApiTlsRoute(test.tlsRouteFile)
-			resolver := ReferenceResolver{
-				tlsRoute: NewTLSRouteAdapter(tlsRoute),
+			var resolver ReferenceResolver
+			if test.useV1Alpha2 {
+				tlsRoute := utils.FileToGatewayApiTlsRouteV1Alpha2(test.tlsRouteFile)
+				resolver = ReferenceResolver{
+					tlsRoute: NewTLSRouteAdapterV1Alpha2(tlsRoute),
+				}
+			} else {
+				tlsRoute := utils.FileToGatewayApiTlsRoute(test.tlsRouteFile)
+				resolver = ReferenceResolver{
+					tlsRoute: NewTLSRouteAdapter(tlsRoute),
+				}
 			}
 
 			// act

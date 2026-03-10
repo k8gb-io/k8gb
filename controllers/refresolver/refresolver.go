@@ -72,7 +72,9 @@ func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver
 	if gslb.Spec.ResourceRef.Kind == "UDPRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha2" {
 		return gatewayapiudproute.NewReferenceResolver(gslb, k8sClient)
 	}
-	if gslb.Spec.ResourceRef.Kind == "TLSRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha3" {
+	if gslb.Spec.ResourceRef.Kind == "TLSRoute" &&
+		(gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha2" ||
+			gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha3") {
 		return gatewayapitlsroute.NewReferenceResolver(gslb, k8sClient)
 	}
 	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)
