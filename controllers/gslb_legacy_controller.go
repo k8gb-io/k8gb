@@ -22,7 +22,6 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"strings"
 
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
@@ -30,8 +29,6 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/refresolver"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
-	corev1 "k8s.io/api/core/v1"
-	discov1 "k8s.io/api/discovery/v1"
 	netv1 "k8s.io/api/networking/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -115,7 +112,7 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	lbIPv4Addresses, _ := splitIPsByVersion(loadBalancerExposedIPs)
 	gslb.Status.LoadBalancer.ExposedIPs = lbIPv4Addresses
 
-	serviceHealth, err := r.getServiceHealthStatusLegacy(ctx, gslb)
+	serviceHealth, err := calculateServiceHealth(ctx, r.Client, gslb)
 	if err != nil {
 		m.IncrementError(gslb)
 		return result.RequeueError(err)
@@ -145,9 +142,9 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return result.RequeueError(err)
 	}
 
-	gslb.Status.HealthyRecords = getHealthyRecordsFromDNSEndpoint(dnsEndpoint)
+	gslb.Status.HealthyRecords = collectHealthyRecordsFromDNSEndpoint(dnsEndpoint)
 	gslb.Status.GeoTag = r.Config.ClusterGeoTag
-	gslb.Status.Hosts = hostsToCSVIO(gslb)
+	gslb.Status.Hosts = serversHostsToCSV(gslb)
 
 	m.UpdateIngressHostsPerStatusMetric(gslb, gslb.Status.ServiceHealth)
 	m.UpdateHealthyRecordsMetric(gslb, gslb.Status.HealthyRecords)
@@ -170,14 +167,7 @@ func (r *LegacyGslbReconciler) updateLegacyRuntimeStatus(
 	isHealthy k8gbv1beta1io.HealthStatus,
 	finalTargets []string,
 ) {
-	switch gslb.Spec.Strategy.Type {
-	case resolver.RoundRobinStrategy:
-		m.UpdateRoundrobinStatus(gslb, isHealthy, finalTargets)
-	case resolver.GeoStrategy:
-		m.UpdateGeoIPStatus(gslb, isHealthy, finalTargets)
-	case resolver.FailoverStrategy:
-		m.UpdateFailoverStatus(gslb, isPrimary, isHealthy, finalTargets)
-	}
+	updateRuntimeStatusMetrics(gslb, isPrimary, isHealthy, finalTargets)
 }
 
 func (r *LegacyGslbReconciler) createIngressFromLegacyGslb(gslb *k8gbv1beta1.Gslb) (*netv1.Ingress, error) {
@@ -217,70 +207,6 @@ func (r *LegacyGslbReconciler) saveDependentLegacyIngress(ctx context.Context, i
 		return err
 	}
 	return nil
-}
-
-func (r *LegacyGslbReconciler) getServiceHealthStatusLegacy(
-	ctx context.Context,
-	gslb *k8gbv1beta1io.Gslb,
-) (map[string]k8gbv1beta1io.HealthStatus, error) {
-	serviceHealth := make(map[string]k8gbv1beta1io.HealthStatus)
-	for _, server := range gslb.Status.Servers {
-		serviceHealth[server.Host] = k8gbv1beta1io.NotFound
-		for _, svc := range server.Services {
-			service := &corev1.Service{}
-			finder := client.ObjectKey{
-				Namespace: svc.Namespace,
-				Name:      svc.Name,
-			}
-			err := r.Get(ctx, finder, service)
-			if err != nil {
-				if k8serrors.IsNotFound(err) {
-					continue
-				}
-				return serviceHealth, err
-			}
-
-			endpoints := &discov1.EndpointSliceList{}
-			err = r.List(ctx, endpoints, client.InNamespace(svc.Namespace), client.MatchingLabels{discov1.LabelServiceName: svc.Name})
-			if err != nil {
-				return serviceHealth, err
-			}
-
-			serviceHealth[server.Host] = k8gbv1beta1io.Unhealthy
-			if len(endpoints.Items) > 0 && len(endpoints.Items[0].Endpoints) > 0 {
-				for _, endpoint := range endpoints.Items[0].Endpoints {
-					if len(endpoint.Addresses) > 0 && (endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready) {
-						serviceHealth[server.Host] = k8gbv1beta1io.Healthy
-					}
-				}
-			}
-		}
-	}
-	return serviceHealth, nil
-}
-
-func getHealthyRecordsFromDNSEndpoint(dnsEndpoint *externaldnsApi.DNSEndpoint) map[string][]string {
-	healthyRecords := make(map[string][]string)
-	if dnsEndpoint == nil {
-		return healthyRecords
-	}
-	for _, endpoint := range dnsEndpoint.Spec.Endpoints {
-		if strings.HasPrefix(endpoint.DNSName, "localtargets-") {
-			continue
-		}
-		if endpoint.RecordType == "A" && len(endpoint.Targets) > 0 {
-			healthyRecords[endpoint.DNSName] = endpoint.Targets
-		}
-	}
-	return healthyRecords
-}
-
-func hostsToCSVIO(gslb *k8gbv1beta1io.Gslb) string {
-	var hosts []string
-	for _, server := range gslb.Status.Servers {
-		hosts = append(hosts, server.Host)
-	}
-	return strings.Join(hosts, ", ")
 }
 
 func statusIOToLegacy(status k8gbv1beta1io.GslbStatus) k8gbv1beta1.GslbStatus {
