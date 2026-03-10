@@ -1,0 +1,115 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: legacy-migration-requested-pauses-runtime
+spec:
+  namespace: legacy-migration-requested-pauses-runtime
+  steps:
+  - name: namespace
+    description: create namespace
+    cluster: eu
+    use:
+      template: ../../step-templates/namespace.yaml
+  - name: migrate requested legacy object
+    description: migration request should create canonical object and label legacy as migrated
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/legacy-requested.yaml
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-requested-pause
+            namespace: ($namespace)
+          spec:
+            resourceRef:
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              name: legacy-requested-pause
+        timeout: 75s
+    - assert:
+        resource:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-requested-pause
+            namespace: ($namespace)
+            labels:
+              k8gb.io/migration-requested: "true"
+              k8gb.io/migrated-to-k8gb-io: "true"
+        timeout: 45s
+  - name: assert dnsendpoint canonical owner
+    description: requested migration must not leave legacy runtime ownership on DNSEndpoint
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-requested-pause
+        content: |
+          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          TMP_JSON=$(mktemp)
+          trap 'rm -f "$TMP_JSON"' EXIT
+          for i in $(seq 1 30); do
+            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
+              if jq -e --arg name "$NAME" --arg legacy_uid "$LEGACY_UID" '
+                (.metadata.ownerReferences | length) == 1 and
+                .metadata.ownerReferences[0].apiVersion == "k8gb.io/v1beta1" and
+                .metadata.ownerReferences[0].kind == "Gslb" and
+                .metadata.ownerReferences[0].name == $name and
+                .metadata.ownerReferences[0].uid != $legacy_uid and
+                ([.metadata.ownerReferences[]? | select(.apiVersion == "k8gb.absa.oss/v1beta1")] | length) == 0
+              ' "$TMP_JSON" >/dev/null; then
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          echo "DNSEndpoint ownership is not canonical-only"
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
+          exit 1
+  - name: retrigger reconcile remains canonical-owned
+    description: repeated reconcile with both labels should not reintroduce legacy ownership
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-requested-pause
+        content: |
+          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          kubectl annotate gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" migration-recheck-ts="$(date +%s)" --overwrite
+          TMP_JSON=$(mktemp)
+          trap 'rm -f "$TMP_JSON"' EXIT
+          for i in $(seq 1 30); do
+            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
+              if jq -e --arg name "$NAME" --arg legacy_uid "$LEGACY_UID" '
+                (.metadata.ownerReferences | length) == 1 and
+                .metadata.ownerReferences[0].apiVersion == "k8gb.io/v1beta1" and
+                .metadata.ownerReferences[0].kind == "Gslb" and
+                .metadata.ownerReferences[0].name == $name and
+                .metadata.ownerReferences[0].uid != $legacy_uid and
+                ([.metadata.ownerReferences[]? | select(.apiVersion == "k8gb.absa.oss/v1beta1")] | length) == 0
+              ' "$TMP_JSON" >/dev/null; then
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          echo "DNSEndpoint ownership changed after retrigger"
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
+          exit 1
+  - name: delete legacy object keeps canonical resources
+    description: deleting legacy object must not delete canonical and DNSEndpoint
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-requested-pause
+        content: |
+          kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=90s
+          kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE"
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE"
