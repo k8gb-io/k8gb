@@ -37,6 +37,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
@@ -313,6 +314,59 @@ func TestHasEmbeddedIngress(t *testing.T) {
 	require.False(t, hasEmbeddedIngress(k8gbv1beta1.GslbSpec{}))
 	spec.ResourceRef = k8gbv1beta1.ResourceRef{ObjectReference: corev1.ObjectReference{Name: "demo"}}
 	require.False(t, hasEmbeddedIngress(spec))
+}
+
+func TestShouldReconcileLegacyMigrationUpdate(t *testing.T) {
+	base := func() *k8gbv1beta1.Gslb {
+		return &k8gbv1beta1.Gslb{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:       "demo",
+				Namespace:  "default",
+				Generation: 1,
+			},
+		}
+	}
+
+	t.Run("ignores status only changes", func(t *testing.T) {
+		oldObj := base()
+		newObj := oldObj.DeepCopy()
+		newObj.Status.GeoTag = "us"
+		require.False(t, shouldReconcileLegacyMigrationUpdate(event.TypedUpdateEvent[client.Object]{
+			ObjectOld: oldObj,
+			ObjectNew: newObj,
+		}))
+	})
+
+	t.Run("reconciles when requested label changes", func(t *testing.T) {
+		oldObj := base()
+		newObj := oldObj.DeepCopy()
+		newObj.Labels = map[string]string{migrationRequestLabelKey: "true"}
+		require.True(t, shouldReconcileLegacyMigrationUpdate(event.TypedUpdateEvent[client.Object]{
+			ObjectOld: oldObj,
+			ObjectNew: newObj,
+		}))
+	})
+
+	t.Run("reconciles when migrated label changes", func(t *testing.T) {
+		oldObj := base()
+		newObj := oldObj.DeepCopy()
+		newObj.Labels = map[string]string{migrationLabelKey: "true"}
+		require.True(t, shouldReconcileLegacyMigrationUpdate(event.TypedUpdateEvent[client.Object]{
+			ObjectOld: oldObj,
+			ObjectNew: newObj,
+		}))
+	})
+
+	t.Run("reconciles when deletion starts", func(t *testing.T) {
+		oldObj := base()
+		newObj := oldObj.DeepCopy()
+		now := metav1.Now()
+		newObj.DeletionTimestamp = &now
+		require.True(t, shouldReconcileLegacyMigrationUpdate(event.TypedUpdateEvent[client.Object]{
+			ObjectOld: oldObj,
+			ObjectNew: newObj,
+		}))
+	})
 }
 
 func newLegacyMigrationReconciler(t *testing.T, objs ...client.Object) (*LegacyGslbMigrationReconciler, client.Client, *record.FakeRecorder) {

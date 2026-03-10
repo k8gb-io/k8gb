@@ -33,6 +33,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
@@ -173,6 +175,32 @@ func hasTrueLabel(labels map[string]string, key string) bool {
 		return false
 	}
 	return labels[key] == "true"
+}
+
+func shouldReconcileLegacyMigrationUpdate(e event.TypedUpdateEvent[client.Object]) bool {
+	if e.ObjectOld == nil || e.ObjectNew == nil {
+		return false
+	}
+
+	oldDeleting := e.ObjectOld.GetDeletionTimestamp() != nil
+	newDeleting := e.ObjectNew.GetDeletionTimestamp() != nil
+	if oldDeleting != newDeleting {
+		return true
+	}
+	if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {
+		return true
+	}
+
+	oldLabels := e.ObjectOld.GetLabels()
+	newLabels := e.ObjectNew.GetLabels()
+	if hasTrueLabel(oldLabels, migrationRequestLabelKey) != hasTrueLabel(newLabels, migrationRequestLabelKey) {
+		return true
+	}
+	if hasTrueLabel(oldLabels, migrationLabelKey) != hasTrueLabel(newLabels, migrationLabelKey) {
+		return true
+	}
+
+	return false
 }
 
 func (r *LegacyGslbMigrationReconciler) ensureMigrationFinalizer(ctx context.Context, legacy *k8gbv1beta1.Gslb) error {
@@ -318,5 +346,8 @@ func (r *LegacyGslbMigrationReconciler) SetupWithManager(mgr ctrl.Manager) error
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("legacy-gslb-migration-controller").
 		For(&k8gbv1beta1.Gslb{}).
+		WithEventFilter(predicate.Funcs{
+			UpdateFunc: shouldReconcileLegacyMigrationUpdate,
+		}).
 		Complete(r)
 }
