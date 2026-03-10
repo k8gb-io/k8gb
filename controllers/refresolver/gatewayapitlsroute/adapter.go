@@ -35,7 +35,7 @@ func NewTLSRouteAdapter(tlsRoute *gatewayapiv1alpha3.TLSRoute) *TLSRouteAdapter 
 	return &TLSRouteAdapter{tlsRoute: tlsRoute}
 }
 
-func (a *TLSRouteAdapter) GetHostnames() ([]gatewayapiv1alpha3.Hostname, error) {
+func (a *TLSRouteAdapter) GetHostnames() ([]gatewayapiv1.Hostname, error) {
 	return a.tlsRoute.Spec.Hostnames, nil
 }
 
@@ -66,4 +66,38 @@ type TLSRouteRuleAdapter struct {
 
 func (a *TLSRouteRuleAdapter) GetBackendRefs() []gatewayapiv1.BackendRef {
 	return a.rule.BackendRefs
+}
+
+// TLSRouteAdapterV1Alpha2 adapts v1alpha2 TLSRoute to the RouteAdapter interface
+type TLSRouteAdapterV1Alpha2 struct {
+	tlsRoute *gatewayapiv1alpha2.TLSRoute
+}
+
+// NewTLSRouteAdapterV1Alpha2 creates a new TLSRoute adapter for v1alpha2
+func NewTLSRouteAdapterV1Alpha2(tlsRoute *gatewayapiv1alpha2.TLSRoute) *TLSRouteAdapterV1Alpha2 {
+	return &TLSRouteAdapterV1Alpha2{tlsRoute: tlsRoute}
+}
+
+func (a *TLSRouteAdapterV1Alpha2) GetHostnames() ([]gatewayapiv1.Hostname, error) {
+	return a.tlsRoute.Spec.Hostnames, nil
+}
+
+func (a *TLSRouteAdapterV1Alpha2) GetParentRefs() []gatewayapiv1.ParentReference {
+	return a.tlsRoute.Spec.ParentRefs
+}
+
+func (a *TLSRouteAdapterV1Alpha2) GetRules() []gatewayapi.RouteRule {
+	rules := make([]gatewayapi.RouteRule, len(a.tlsRoute.Spec.Rules))
+	for i := range a.tlsRoute.Spec.Rules {
+		rules[i] = &TLSRouteRuleAdapter{rule: &a.tlsRoute.Spec.Rules[i]}
+	}
+	return rules
+}
+
+func (a *TLSRouteAdapterV1Alpha2) GetName() string {
+	return a.tlsRoute.Name
+}
+
+func (a *TLSRouteAdapterV1Alpha2) GetNamespace() string {
+	return a.tlsRoute.Namespace
 }

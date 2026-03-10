@@ -122,6 +122,8 @@ spec:
 ```
 
 #### GatewayAPI TLSRoute
+TLSRoute is supported in both `gateway.networking.k8s.io/v1alpha2` and `gateway.networking.k8s.io/v1alpha3`:
+
 ```yaml
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
@@ -130,7 +132,7 @@ metadata:
   namespace: playground
 spec:
   resourceRef:
-    apiVersion: gateway.networking.k8s.io/v1alpha3
+    apiVersion: gateway.networking.k8s.io/v1alpha3  # or v1alpha2
     kind: TLSRoute
     name: failover-tlsroute
 ```

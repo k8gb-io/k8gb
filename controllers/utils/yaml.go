@@ -310,7 +310,7 @@ func YamlToGatewayApiGrpcRoute(yaml []byte) (*gatewayapiv1.GRPCRoute, error) {
 	return grpcroute, nil
 }
 
-// YamlToGatewayApiTlsRoute takes yaml and returns a GatewayAPI TLSRoute object
+// YamlToGatewayApiTlsRoute takes yaml and returns a GatewayAPI TLSRoute object (v1alpha3)
 func YamlToGatewayApiTlsRoute(yaml []byte) (*gatewayapiv1alpha3.TLSRoute, error) {
 	// convert the yaml to json
 	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
@@ -324,6 +324,35 @@ func YamlToGatewayApiTlsRoute(yaml []byte) (*gatewayapiv1alpha3.TLSRoute, error)
 		return &gatewayapiv1alpha3.TLSRoute{}, err
 	}
 	return tlsRoute, nil
+}
+
+// YamlToGatewayApiTlsRouteV1Alpha2 takes yaml and returns a GatewayAPI TLSRoute object (v1alpha2)
+func YamlToGatewayApiTlsRouteV1Alpha2(yaml []byte) (*gatewayapiv1alpha2.TLSRoute, error) {
+	// convert the yaml to json
+	jsonBytes, err := yamlConv.YAMLToJSON(yaml)
+	if err != nil {
+		return &gatewayapiv1alpha2.TLSRoute{}, err
+	}
+	// unmarshal the json into the kube struct
+	tlsRoute := &gatewayapiv1alpha2.TLSRoute{}
+	err = json.Unmarshal(jsonBytes, &tlsRoute)
+	if err != nil {
+		return &gatewayapiv1alpha2.TLSRoute{}, err
+	}
+	return tlsRoute, nil
+}
+
+// FileToGatewayApiTlsRouteV1Alpha2 takes a file and returns a GatewayAPI TLSRoute object (v1alpha2)
+func FileToGatewayApiTlsRouteV1Alpha2(file string) *gatewayapiv1alpha2.TLSRoute {
+	yaml, err := os.ReadFile(file)
+	if err != nil {
+		panic(fmt.Errorf("can't open example CR file: %s", err))
+	}
+	tlsRoute, err := YamlToGatewayApiTlsRouteV1Alpha2(yaml)
+	if err != nil {
+		panic(err)
+	}
+	return tlsRoute
 }
 
 // YamlToGatewayApiTcpRoute takes yaml and returns a GatewayAPI TCPRoute object
