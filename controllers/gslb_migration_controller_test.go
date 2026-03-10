@@ -37,6 +37,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
 func TestLegacyMigrationCreatesIOAndLabelsLegacy(t *testing.T) {
@@ -152,10 +153,13 @@ func TestLegacyMigrationIgnoresMigratedObject(t *testing.T) {
 }
 
 func TestLegacyMigrationDoesNotOverwriteExistingCanonical(t *testing.T) {
+	legacyUID := types.UID("legacy-uid")
+	canonicalUID := types.UID("canonical-uid")
 	legacy := &k8gbv1beta1.Gslb{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "demo",
 			Namespace: "default",
+			UID:       legacyUID,
 			Labels: map[string]string{
 				migrationRequestLabelKey: "true",
 			},
@@ -163,11 +167,25 @@ func TestLegacyMigrationDoesNotOverwriteExistingCanonical(t *testing.T) {
 		Spec: k8gbv1beta1.GslbSpec{Strategy: k8gbv1beta1.Strategy{Type: "roundRobin", DNSTtlSeconds: 30}},
 	}
 	existingIO := &k8gbv1beta1io.Gslb{
-		ObjectMeta: metav1.ObjectMeta{Name: "demo", Namespace: "default"},
+		ObjectMeta: metav1.ObjectMeta{Name: "demo", Namespace: "default", UID: canonicalUID},
 		Spec:       k8gbv1beta1io.GslbSpec{Strategy: k8gbv1beta1io.Strategy{Type: "failover", DNSTtlSeconds: 60}},
 	}
+	dnsEndpoint := &externaldnsApi.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: "default",
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					UID:        legacyUID,
+					APIVersion: k8gbv1beta1.GroupVersion.String(),
+					Kind:       "Gslb",
+					Name:       "demo",
+				},
+			},
+		},
+	}
 
-	r, cl, recorder := newLegacyMigrationReconciler(t, legacy, existingIO)
+	r, cl, recorder := newLegacyMigrationReconciler(t, legacy, existingIO, dnsEndpoint)
 	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: "demo", Namespace: "default"}})
 	require.NoError(t, err)
 
@@ -182,6 +200,15 @@ func TestLegacyMigrationDoesNotOverwriteExistingCanonical(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "true", updatedLegacy.Labels[migrationLabelKey])
 	require.Contains(t, updatedLegacy.Finalizers, legacyMigrationFinalizer)
+
+	updatedDNSEndpoint := &externaldnsApi.DNSEndpoint{}
+	err = cl.Get(context.Background(), types.NamespacedName{Name: "demo", Namespace: "default"}, updatedDNSEndpoint)
+	require.NoError(t, err)
+	require.Len(t, updatedDNSEndpoint.OwnerReferences, 1)
+	require.Equal(t, k8gbv1beta1io.GroupVersion.String(), updatedDNSEndpoint.OwnerReferences[0].APIVersion)
+	require.Equal(t, "Gslb", updatedDNSEndpoint.OwnerReferences[0].Kind)
+	require.Equal(t, "demo", updatedDNSEndpoint.OwnerReferences[0].Name)
+	require.Equal(t, canonicalUID, updatedDNSEndpoint.OwnerReferences[0].UID)
 
 	select {
 	case evt := <-recorder.Events:
@@ -248,7 +275,16 @@ func TestLegacyMigrationDeletionRemovesFinalizerAndDetachesIngressOwner(t *testi
 			},
 		},
 	}
-	r, cl, _ := newLegacyMigrationReconciler(t, legacy, ingress)
+	dnsEndpoint := &externaldnsApi.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: "default",
+			OwnerReferences: []metav1.OwnerReference{
+				{UID: legacyUID, APIVersion: k8gbv1beta1.GroupVersion.String(), Kind: "Gslb", Name: "demo"},
+			},
+		},
+	}
+	r, cl, _ := newLegacyMigrationReconciler(t, legacy, ingress, dnsEndpoint)
 
 	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: "demo", Namespace: "default"}})
 	require.NoError(t, err)
@@ -261,6 +297,11 @@ func TestLegacyMigrationDeletionRemovesFinalizerAndDetachesIngressOwner(t *testi
 	err = cl.Get(context.Background(), types.NamespacedName{Name: "demo", Namespace: "default"}, updatedIngress)
 	require.NoError(t, err)
 	require.Empty(t, updatedIngress.OwnerReferences)
+
+	updatedDNSEndpoint := &externaldnsApi.DNSEndpoint{}
+	err = cl.Get(context.Background(), types.NamespacedName{Name: "demo", Namespace: "default"}, updatedDNSEndpoint)
+	require.NoError(t, err)
+	require.Empty(t, updatedDNSEndpoint.OwnerReferences)
 }
 
 func TestHasEmbeddedIngress(t *testing.T) {
@@ -281,6 +322,7 @@ func newLegacyMigrationReconciler(t *testing.T, objs ...client.Object) (*LegacyG
 	require.NoError(t, clientgoscheme.AddToScheme(s))
 	require.NoError(t, k8gbv1beta1.AddToScheme(s))
 	require.NoError(t, k8gbv1beta1io.AddToScheme(s))
+	require.NoError(t, externaldnsApi.AddToScheme(s))
 
 	cl := fake.NewClientBuilder().WithScheme(s).WithObjects(objs...).Build()
 	recorder := record.NewFakeRecorder(10)

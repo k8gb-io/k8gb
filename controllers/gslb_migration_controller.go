@@ -33,6 +33,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
 )
 
 type LegacyGslbMigrationReconciler struct {
@@ -56,6 +57,9 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 		if err := r.detachLegacyEmbeddedIngressOwner(ctx, legacy); err != nil {
 			return ctrl.Result{}, err
 		}
+		if err := r.detachLegacyDNSEndpointOwner(ctx, legacy, nil); err != nil {
+			return ctrl.Result{}, err
+		}
 		if err := r.removeMigrationFinalizer(ctx, legacy); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -69,6 +73,13 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 			return ctrl.Result{}, err
 		}
 		if err := r.detachLegacyEmbeddedIngressOwner(ctx, legacy); err != nil {
+			return ctrl.Result{}, err
+		}
+		canonical, err := r.getCanonicalGslb(ctx, legacy)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if err := r.detachLegacyDNSEndpointOwner(ctx, legacy, canonical); err != nil {
 			return ctrl.Result{}, err
 		}
 		r.Recorder.Eventf(
@@ -116,6 +127,13 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if err := r.detachLegacyEmbeddedIngressOwner(ctx, legacy); err != nil {
+		return ctrl.Result{}, err
+	}
+	canonical, err := r.getCanonicalGslb(ctx, legacy)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if err := r.detachLegacyDNSEndpointOwner(ctx, legacy, canonical); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -204,6 +222,91 @@ func (r *LegacyGslbMigrationReconciler) detachLegacyEmbeddedIngressOwner(ctx con
 	patch := client.MergeFrom(ingress.DeepCopy())
 	ingress.OwnerReferences = filteredOwners
 	return r.Patch(ctx, ingress, patch)
+}
+
+func (r *LegacyGslbMigrationReconciler) getCanonicalGslb(
+	ctx context.Context,
+	legacy *k8gbv1beta1.Gslb,
+) (*k8gbv1beta1io.Gslb, error) {
+	if legacy == nil {
+		return nil, nil
+	}
+
+	canonical := &k8gbv1beta1io.Gslb{}
+	if err := r.Get(
+		ctx,
+		types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace},
+		canonical,
+	); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return canonical, nil
+}
+
+func (r *LegacyGslbMigrationReconciler) detachLegacyDNSEndpointOwner(
+	ctx context.Context,
+	legacy *k8gbv1beta1.Gslb,
+	canonical *k8gbv1beta1io.Gslb,
+) error {
+	if legacy == nil {
+		return nil
+	}
+
+	dnsEndpoint := &externaldnsApi.DNSEndpoint{}
+	if err := r.Get(
+		ctx,
+		types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace},
+		dnsEndpoint,
+	); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	filteredOwners := make([]metav1.OwnerReference, 0, len(dnsEndpoint.OwnerReferences))
+	removedLegacyOwner := false
+	hasCanonicalOwner := false
+	hasControllerOwner := false
+	for _, owner := range dnsEndpoint.OwnerReferences {
+		if owner.UID == legacy.UID {
+			removedLegacyOwner = true
+			continue
+		}
+		if canonical != nil && owner.UID == canonical.UID {
+			hasCanonicalOwner = true
+		}
+		if owner.Controller != nil && *owner.Controller {
+			hasControllerOwner = true
+		}
+		filteredOwners = append(filteredOwners, owner)
+	}
+
+	addedCanonicalOwner := false
+	if canonical != nil && canonical.UID != "" && !hasCanonicalOwner && !hasControllerOwner {
+		controllerTrue := true
+		blockOwnerDeletion := true
+		filteredOwners = append(filteredOwners, metav1.OwnerReference{
+			APIVersion:         k8gbv1beta1io.GroupVersion.String(),
+			Kind:               "Gslb",
+			Name:               canonical.Name,
+			UID:                canonical.UID,
+			Controller:         &controllerTrue,
+			BlockOwnerDeletion: &blockOwnerDeletion,
+		})
+		addedCanonicalOwner = true
+	}
+
+	if !removedLegacyOwner && !addedCanonicalOwner {
+		return nil
+	}
+
+	patch := client.MergeFrom(dnsEndpoint.DeepCopy())
+	dnsEndpoint.OwnerReferences = filteredOwners
+	return r.Patch(ctx, dnsEndpoint, patch)
 }
 
 func hasEmbeddedIngress(spec k8gbv1beta1.GslbSpec) bool {
