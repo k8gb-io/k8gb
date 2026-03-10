@@ -37,6 +37,54 @@ For controlled migration mode, cases that expect canonical object creation requi
 - `kubectl` configured for the test cluster
 - `jq` recommended for easier inspection
 
+## Quick Manual Flow: Request-Driven Migration
+
+Use this short flow when you just want to validate how migration is driven in practice.
+
+### 1. Deploy local setup with legacy demo objects
+
+```bash
+make deploy-full-local-setup
+```
+
+Legacy demo objects are created in `test-gslb`, including:
+
+- `legacy-ref-non-migrated-demo` (intentionally non-requested)
+- `legacy-ref-demo` and `legacy-embedded-demo` (requested)
+
+### 2. Confirm non-requested legacy object stays in legacy runtime mode
+
+```bash
+kubectl get gslb.k8gb.absa.oss -n test-gslb legacy-ref-non-migrated-demo
+# Expected to fail with NotFound before migration request
+kubectl get gslb.k8gb.io -n test-gslb legacy-ref-non-migrated-demo || true
+kubectl get events -n test-gslb --sort-by=.lastTimestamp | grep -E 'LegacyDeprecated|legacy-ref-non-migrated-demo'
+```
+
+### 3. Request migration explicitly
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n test-gslb legacy-ref-non-migrated-demo \
+  k8gb.io/migration-requested=true --overwrite
+```
+
+### 4. Verify migration completion
+
+```bash
+kubectl wait -n test-gslb \
+  --for=jsonpath='{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}'=true \
+  gslb.k8gb.absa.oss/legacy-ref-non-migrated-demo \
+  --timeout=90s
+kubectl get gslb.k8gb.io -n test-gslb legacy-ref-non-migrated-demo -o yaml
+kubectl get events -n test-gslb --sort-by=.lastTimestamp | grep -E 'LegacyMigrated|legacy-ref-non-migrated-demo'
+```
+
+Use the same label operation to migrate any selected legacy object:
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n <ns> <name> k8gb.io/migration-requested=true --overwrite
+```
+
 ## Pre-Merge Manual Acceptance
 
 Use a dedicated namespace:
@@ -93,6 +141,12 @@ spec:
 EOF_CASE1
 ```
 
+Request migration:
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n migration-e2e legacy-ref k8gb.io/migration-requested=true --overwrite
+```
+
 Validate:
 
 ```bash
@@ -133,6 +187,12 @@ spec:
   strategy:
     type: roundRobin
 EOF_CASE2
+```
+
+Request migration:
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n migration-e2e legacy-embedded k8gb.io/migration-requested=true --overwrite
 ```
 
 Validate canonical spec:
@@ -183,6 +243,12 @@ spec:
 EOF_CASE3
 ```
 
+Request migration:
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n migration-e2e existing-canonical k8gb.io/migration-requested=true --overwrite
+```
+
 Validate:
 
 ```bash
@@ -198,6 +264,12 @@ Expected:
 ### Case 4: OwnerReference handoff and deletion safety
 
 For an embedded legacy object, verify Ingress survives legacy deletion.
+
+Request migration first:
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n migration-e2e legacy-embedded k8gb.io/migration-requested=true --overwrite
+```
 
 Capture ownerRefs before deletion:
 
@@ -291,6 +363,12 @@ spec:
   strategy:
     type: roundRobin
 EOF_CASE6
+```
+
+Request migration:
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n migration-e2e embedded-no-ingress k8gb.io/migration-requested=true --overwrite
 ```
 
 Validate:
@@ -429,6 +507,12 @@ spec:
   strategy:
     type: roundRobin
 EOF_CASE8_LEGACY
+```
+
+Request migration:
+
+```bash
+kubectl label gslb.k8gb.absa.oss -n migration-e2e canonical-embedded-cleanup k8gb.io/migration-requested=true --overwrite
 ```
 
 Inject stale ownerReference and retrigger reconcile:
