@@ -339,8 +339,8 @@ show-legacy-migration-manifests: ## Print legacy and canonical GSLB manifests fr
 	@echo -e "\n$(YELLOW)Legacy migration demo objects in $(MIGRATION_DEMO_NAMESPACE) $(NC)"
 	@kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) || true
 	@kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) || true
-	@echo -e "\n$(YELLOW)Waiting for canonical objects to appear for non-ignored legacy resources $(NC)"
-	@expected=$$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) -o jsonpath='{range .items[*]}{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}{"\n"}{end}' 2>/dev/null | awk '$$1 != "true" {count++} END {print count+0}'); \
+	@echo -e "\n$(YELLOW)Waiting for canonical objects to appear for requested legacy resources $(NC)"
+	@expected=$$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) -o jsonpath='{range .items[*]}{.metadata.labels.k8gb\.io/migration-requested}{" "}{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}{"\n"}{end}' 2>/dev/null | awk '$$1 == "true" && $$2 != "true" {count++} END {print count+0}'); \
 	for i in $$(seq 1 20); do \
 		actual=$$(kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) --no-headers 2>/dev/null | wc -l | tr -d ' '); \
 		if [ "$$actual" -ge "$$expected" ]; then \
@@ -350,11 +350,11 @@ show-legacy-migration-manifests: ## Print legacy and canonical GSLB manifests fr
 	done
 	@echo -e "\n$(YELLOW)Legacy -> Canonical manifest pairs $(NC)"
 	@for name in $$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null); do \
-		echo -e "\n$(CYAN)Legacy: $$name$(NC)"; \
-		kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml; \
-		echo -e "\n$(CYAN)Canonical: $$name$(NC)"; \
-		kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml || echo "(canonical object missing; expected for already-migrated legacy case)"; \
-	done
+			echo -e "\n$(CYAN)Legacy: $$name$(NC)"; \
+			kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml; \
+			echo -e "\n$(CYAN)Canonical: $$name$(NC)"; \
+			kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml || echo "(canonical object missing; expected for already-migrated or non-requested legacy case)"; \
+		done
 	@echo -e "\n$(YELLOW)Ingress ownerReferences after migration cleanup (legacy-embedded-demo) $(NC)"
 	@owner_refs=$$(kubectl get ingress -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo -o jsonpath='{range .metadata.ownerReferences[*]}{.apiVersion}{\" \"}{.kind}{\" \"}{.name}{\" uid=\"}{.uid}{\"\\n\"}{end}' 2>/dev/null || true); \
 	if [ -n "$$owner_refs" ]; then \

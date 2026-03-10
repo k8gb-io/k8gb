@@ -75,3 +75,19 @@ spec:
     type: failover
     primaryGeoTag: eu
     dnsTtlSeconds: 30
+---
+# Intentionally non-migrated legacy case for manual local upgrade flow.
+# No k8gb.io/migration-requested label means the object stays in legacy runtime mode.
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-ref-non-migrated-demo
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: roundrobin-ingress
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30
