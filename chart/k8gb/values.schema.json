@@ -339,6 +339,9 @@
                 "deployCrds": {
                     "type": "boolean"
                 },
+                "installLegacyCrds": {
+                    "type": "boolean"
+                },
                 "deployRbac": {
                     "type": "boolean"
                 },

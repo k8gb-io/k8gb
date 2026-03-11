@@ -49,7 +49,7 @@ In the use case above, the following resources are configured by the _applicatio
 A potential example of what this `Gslb` resource would look like:
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: app
@@ -61,6 +61,8 @@ spec:
       app: app
   strategy: roundRobin # Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too
 ```
+
+Legacy `k8gb.absa.oss/v1beta1` resources are still accepted. Migration to `k8gb.io/v1beta1` is initiated by setting `k8gb.io/migration-requested=true` on the legacy object. Migrated legacy objects are labeled `k8gb.io/migrated-to-k8gb-io=true`, and warning events indicate that users should edit the canonical `k8gb.io` object going forward.
 
 On creating this `Gslb` resource, the k8gb controller watching the cluster where this resource is created, will:
 

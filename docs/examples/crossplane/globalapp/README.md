@@ -14,7 +14,7 @@ This reference architecture showcases a Crossplane-based Global Control Plane wi
 ## Key Components
 
 - **Composition Pipeline**: Uses KCL function to observe GSLB resources and report health status
-- **GSLB Observation**: Monitors k8gb.absa.oss/v1beta1 Gslb resources in observe-only mode
+- **GSLB Observation**: Monitors k8gb.io/v1beta1 Gslb resources in observe-only mode
 - **Health Status Integration**: Extracts serviceHealth from GSLB and updates XR status for failover decisions
 - **Multiregion Coordination**: Enables Crossplane to make intelligent decisions based on regional health
 

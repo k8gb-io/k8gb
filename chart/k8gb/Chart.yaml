@@ -49,9 +49,14 @@ annotations:
   artifacthub.io/crds: |
     - kind: Gslb
       version: v1beta1
-      name: gslbs.k8gb.absa.oss
+      name: gslbs.k8gb.io
       displayName: Gslb
       description: Gslb resource for global load balancing strategy configuration
+    - kind: Gslb
+      version: v1beta1
+      name: gslbs.k8gb.absa.oss
+      displayName: Gslb
+      description: Legacy Gslb resource (k8gb.absa.oss)
     - kind: DNSEndpoint
       name: dnsendpoints.externaldns.k8s.io
       version: v1alpha1
@@ -63,7 +68,7 @@ annotations:
       displayName: ZoneDelegation
       description: ZoneDelegation enables dynamic activation of DNS zones via the ZoneDelegation resource to prevent premature NXDOMAIN responses in multi-tenant or shared clusters.
   artifacthub.io/crdsExamples: |
-    - apiVersion: k8gb.absa.oss/v1beta1
+    - apiVersion: k8gb.io/v1beta1
       kind: Gslb
       metadata:
         name: test-gslb-failover

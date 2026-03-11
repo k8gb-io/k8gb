@@ -106,7 +106,7 @@ spec:
               port:
                 name: http
 ---
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: podinfo
@@ -122,7 +122,7 @@ spec:
 * And apply the resource in the target app namespace
 ```sh
 kubectl -n test-gslb apply -f podinfogslb.yaml
-gslb.k8gb.absa.oss/podinfo created
+gslb.k8gb.io/podinfo created
 ```
 
 * Check Gslb resource
@@ -138,15 +138,15 @@ kubectl -n test-gslb describe gslb
 Name:         podinfo
 Namespace:    test-gslb
 Labels:       <none>
-Annotations:  API Version:  k8gb.absa.oss/v1beta1
+Annotations:  API Version:  k8gb.io/v1beta1
 Kind:         Gslb
 Metadata:
   Creation Timestamp:  2020-06-24T22:51:09Z
   Finalizers:
-    k8gb.absa.oss/finalizer
+    k8gb.io/finalizer
   Generation:        1
   Resource Version:  14197
-  Self Link:         /apis/k8gb.absa.oss/v1beta1/namespaces/test-gslb/gslbs/podinfo
+  Self Link:         /apis/k8gb.io/v1beta1/namespaces/test-gslb/gslbs/podinfo
   UID:               86d4121b-b870-434e-bd4d-fece681116f0
 Spec:
   Ingress:
@@ -216,15 +216,15 @@ k -n test-gslb describe gslb podinfo
 Name:         podinfo
 Namespace:    test-gslb
 Labels:       <none>
-Annotations:  API Version:  k8gb.absa.oss/v1beta1
+Annotations:  API Version:  k8gb.io/v1beta1
 Kind:         Gslb
 Metadata:
   Creation Timestamp:  2020-06-24T23:25:08Z
   Finalizers:
-    k8gb.absa.oss/finalizer
+    k8gb.io/finalizer
   Generation:        1
   Resource Version:  23881
-  Self Link:         /apis/k8gb.absa.oss/v1beta1/namespaces/test-gslb/gslbs/podinfo
+  Self Link:         /apis/k8gb.io/v1beta1/namespaces/test-gslb/gslbs/podinfo
   UID:               a5ab509b-5ea2-49d6-982e-4129a8410c3e
 Spec:
   Ingress:

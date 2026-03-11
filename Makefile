@@ -36,6 +36,8 @@ CHART ?= k8gb/k8gb
 CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
 CLUSTER_GSLB_GATEWAY = docker network inspect ${CLUSTER_GSLB_NETWORK} -f '{{ (index .IPAM.Config 0).Gateway }}'
 FULL_LOCAL_SETUP_WITH_APPS ?= true
+SHOW_LEGACY_MIGRATION_DEMO ?= true
+MIGRATION_DEMO_NAMESPACE ?= test-gslb
 GSLB_DOMAIN ?= cloud.example.com
 REPO := ghcr.io/k8gb-io/k8gb
 SHELL := bash
@@ -63,7 +65,7 @@ DNS_ZONE ?= cloud.example.com
 DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
-GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
+GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.io_gslbs.yaml
 DZ_CRD_YAML ?= chart/k8gb/crd/k8gb.io_zonedelegation.yaml
 
 # GCP Cloud DNS testing variables
@@ -253,6 +255,10 @@ deploy-local-cluster:
 		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
+	@if [ "$(DEPLOY_APPS)" = true ] && [ "$(SHOW_LEGACY_MIGRATION_DEMO)" = true ]; then \
+		$(MAKE) deploy-legacy-migration-cases ;\
+		$(MAKE) show-legacy-migration-manifests ;\
+	fi
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait-for-ingress)
@@ -311,6 +317,51 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 		--set image.repository="$(PODINFO_IMAGE_REPO)" \
 		podinfo/podinfo \
 		--version $(PODINFO_VERSION)
+
+.PHONY: deploy-legacy-migration-cases
+deploy-legacy-migration-cases: ## Apply legacy migration demo resources for local setup
+	@echo -e "\n$(YELLOW)Deploy legacy migration demo resources in $(MIGRATION_DEMO_NAMESPACE) $(NC)"
+	@sed -e 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' -e 's/test-gslb/$(MIGRATION_DEMO_NAMESPACE)/g' \
+		deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_migration_demo.yaml > /tmp/k8gb-migration-demo.yaml
+	-kubectl apply -f /tmp/k8gb-migration-demo.yaml
+	-rm /tmp/k8gb-migration-demo.yaml
+	@echo -e "\n$(YELLOW)Inject legacy ownerReference on ingress/legacy-embedded-demo (real legacy simulation) $(NC)"
+	@legacy_uid=$$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo -o jsonpath='{.metadata.uid}' 2>/dev/null || true); \
+	if [ -n "$$legacy_uid" ]; then \
+		kubectl patch ingress -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo --type=merge \
+			-p "{\"metadata\":{\"ownerReferences\":[{\"apiVersion\":\"k8gb.absa.oss/v1beta1\",\"kind\":\"Gslb\",\"name\":\"legacy-embedded-demo\",\"uid\":\"$$legacy_uid\",\"controller\":true,\"blockOwnerDeletion\":true}]}}"; \
+		kubectl annotate gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo migration-recheck-ts="$$(date +%s)" --overwrite || true; \
+	fi
+
+.PHONY: show-legacy-migration-manifests
+show-legacy-migration-manifests: ## Print legacy and canonical GSLB manifests from migration demo namespace
+	@echo -e "\n$(CYAN)Context: $$(kubectl config current-context)$(NC)"
+	@echo -e "\n$(YELLOW)Legacy migration demo objects in $(MIGRATION_DEMO_NAMESPACE) $(NC)"
+	@kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) || true
+	@kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) || true
+	@echo -e "\n$(YELLOW)Waiting for canonical objects to appear for requested legacy resources $(NC)"
+	@expected=$$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) -o jsonpath='{range .items[*]}{.metadata.labels.k8gb\.io/migration-requested}{" "}{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}{"\n"}{end}' 2>/dev/null | awk '$$1 == "true" && $$2 != "true" {count++} END {print count+0}'); \
+	for i in $$(seq 1 20); do \
+		actual=$$(kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) --no-headers 2>/dev/null | wc -l | tr -d ' '); \
+		if [ "$$actual" -ge "$$expected" ]; then \
+			break; \
+		fi; \
+		sleep 1; \
+	done
+	@echo -e "\n$(YELLOW)Legacy -> Canonical manifest pairs $(NC)"
+	@for name in $$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null); do \
+			echo -e "\n$(CYAN)Legacy: $$name$(NC)"; \
+			kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml; \
+			echo -e "\n$(CYAN)Canonical: $$name$(NC)"; \
+			kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml || echo "(canonical object missing; expected for already-migrated or non-requested legacy case)"; \
+		done
+	@echo -e "\n$(YELLOW)Ingress ownerReferences after migration cleanup (legacy-embedded-demo) $(NC)"
+	@owner_refs=$$(kubectl get ingress -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo -o jsonpath='{range .metadata.ownerReferences[*]}{.apiVersion}{\" \"}{.kind}{\" \"}{.name}{\" uid=\"}{.uid}{\"\\n\"}{end}' 2>/dev/null || true); \
+	if [ -n "$$owner_refs" ]; then \
+		echo "$$owner_refs"; \
+	else \
+		echo "(none)"; \
+	fi
 
 .PHONY: deploy-kuar-app
 deploy-kuar-app:
@@ -458,6 +509,12 @@ infoblox-secret:
 license:
 	@echo -e "\n$(YELLOW)Injecting the license$(NC)"
 	$(call golic,-t apache2)
+
+# runs golic license header check
+.PHONY: golic
+golic:
+	@echo -e "\n$(YELLOW)Running golic license header check$(NC)"
+	$(call golic,--dry -x -t apache2)
 
 # creates ns1 secret in current cluster
 .PHONY: ns1-secret
@@ -669,7 +726,8 @@ endef
 define debug
 	$(call manifest)
 	kubectl apply -f deploy/gslb/test-namespace-ingress.yaml
-	kubectl apply -f ./chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
+	kubectl apply -f ./chart/k8gb/crd/k8gb.io_gslbs.yaml
+	kubectl apply -f ./chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
 	kubectl apply -f ./deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml
 	dlv $1
 endef

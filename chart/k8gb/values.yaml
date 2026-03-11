@@ -11,6 +11,8 @@ k8gb:
   imageTag:
   # -- whether it should also deploy the gslb and dnsendpoints CRDs
   deployCrds: true
+  # -- whether it should also deploy the legacy k8gb.absa.oss CRD
+  installLegacyCrds: true
   # -- whether it should also deploy the service account, cluster role and cluster role binding
   deployRbac: true
   # DNSZones - For backward compatibility, the dnsZone and edgeDNSZone fields are allowed; otherwise,
@@ -156,7 +158,7 @@ infoblox:
 extdns:
   enabled: false
   interval: 20s
-  labelFilter: "k8gb.absa.oss/dnstype=extdns"
+  labelFilter: "k8gb.io/dnstype=extdns"
   logLevel: debug
   managedRecordTypes:
   - A

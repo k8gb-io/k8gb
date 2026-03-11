@@ -1,0 +1,75 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: legacy-migration-embedded
+spec:
+  namespace: legacy-migration-embedded
+  steps:
+  - name: namespace
+    description: create namespace
+    cluster: eu
+    use:
+      template: ../../step-templates/namespace.yaml
+  - name: migrate legacy embedded
+    description: apply legacy embedded object and verify canonical migration
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/legacy-embedded.yaml
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-migration-embedded
+            namespace: ($namespace)
+          spec:
+            resourceRef:
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              name: legacy-migration-embedded
+        timeout: 75s
+    - assert:
+        resource:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-migration-embedded
+            namespace: ($namespace)
+            labels:
+              k8gb.io/migrated-to-k8gb-io: "true"
+        timeout: 45s
+    - script:
+        content: |
+          kubectl get gslb.k8gb.io legacy-migration-embedded -n "$NAMESPACE" -o json | \
+            jq -e '(((.spec.ingress // {}) | keys | length) == 0) and .spec.resourceRef.name == "legacy-migration-embedded"' >/dev/null
+    - script:
+        env:
+        - name: NAME
+          value: legacy-migration-embedded
+        content: |
+          kubectl get ingress "$NAME" -n "$NAMESPACE" -o json | \
+            jq -e --arg name "$NAME" '
+              ([.metadata.ownerReferences[]? |
+                select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .name == $name)]
+              | length) == 0
+            ' >/dev/null
+  - name: delete legacy object
+    description: deleting legacy object must not delete ingress
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-migration-embedded
+        content: |
+          kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=90s
+          kubectl get ingress "$NAME" -n "$NAMESPACE"
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-migration-embedded
+            namespace: ($namespace)
+        timeout: 30s

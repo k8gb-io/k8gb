@@ -42,6 +42,7 @@ nav:
       - Load Balancer: lbservice-integration.md
     - Advanced:
       - Service Upgrade: service_upgrade.md
+      - Migration Acceptance Tests: migration_acceptance.md
       - WRR Caveats: wrr_caveats.md
       - External DNS Proxy: proxy_externaldns.md
     - Community:

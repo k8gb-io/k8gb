@@ -36,7 +36,7 @@ import (
 
 	"errors"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"go.opentelemetry.io/otel/trace"
@@ -72,8 +72,8 @@ var log = logging.Logger()
 
 var m = metrics.Metrics()
 
-// +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=k8gb.absa.oss,resources=gslbs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=k8gb.io,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=k8gb.io,resources=gslbs/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile runs main reconciliation loop
@@ -83,7 +83,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
 	// Fetch the Gslb instance
-	gslb := &k8gbv1beta1.Gslb{}
+	gslb := &k8gbv1beta1io.Gslb{}
 	err := r.Get(ctx, req.NamespacedName, gslb)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
@@ -109,7 +109,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	// == Ingress ==========
 	// Only create embedded Ingress if ResourceRef is empty (embedded mode)
-	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
+	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1io.ResourceRef{}) {
 		ingress, err := r.createIngressFromGslb(gslb)
 		if err != nil {
 			m.IncrementError(gslb)
@@ -231,8 +231,8 @@ func splitIPsByVersion(ips []string) ([]string, []string) {
 }
 
 // filterServersByDelegationZones filters servers to only include those with hosts that match the delegation zones
-func filterServersByDelegationZones(servers []*k8gbv1beta1.Server, delegationZones resolver.DelegationZones) []*k8gbv1beta1.Server {
-	var filtered []*k8gbv1beta1.Server
+func filterServersByDelegationZones(servers []*k8gbv1beta1io.Server, delegationZones resolver.DelegationZones) []*k8gbv1beta1io.Server {
+	var filtered []*k8gbv1beta1io.Server
 	for _, server := range servers {
 		if delegationZones.ContainsZone(server.Host) {
 			filtered = append(filtered, server)

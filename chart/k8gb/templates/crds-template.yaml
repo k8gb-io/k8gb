@@ -1,7 +1,10 @@
 {{- if .Values.k8gb.deployCrds }}
 
 {{- $files := .Files }}
+{{ $files.Get "crd/k8gb.io_gslbs.yaml" }}
+{{- if .Values.k8gb.installLegacyCrds }}
 {{ $files.Get "crd/k8gb.absa.oss_gslbs.yaml" }}
+{{- end }}
 
 {{- if not .Values.extdns.enabled }}
 {{ $files.Get "crd/dns-endpoint-crd-manifest.yaml" }}
