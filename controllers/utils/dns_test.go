@@ -261,6 +261,44 @@ func TestDigCNAMERecursion(t *testing.T) {
 
 }
 
+func TestResolveHostnamesSingle(t *testing.T) {
+	testServer := DNSServer{
+		Host: server,
+		Port: port,
+	}
+	NewFakeDNS(testSettings).
+		AddARecord("myhost.cloud.example.com.", net.IPv4(1, 2, 3, 4)).
+		Start().
+		RunTestFunc(func() {
+			result, err := ResolveHostnames("myhost.cloud.example.com", testServer)
+			assert.NoError(t, err)
+			assert.Equal(t, []string{"1.2.3.4"}, result)
+		}).RequireNoError(t)
+}
+
+func TestResolveHostnamesMultiple(t *testing.T) {
+	testServer := DNSServer{
+		Host: server,
+		Port: port,
+	}
+	NewFakeDNS(testSettings).
+		AddARecord("host1.cloud.example.com.", net.IPv4(1, 2, 3, 4)).
+		AddARecord("host2.cloud.example.com.", net.IPv4(5, 6, 7, 8)).
+		Start().
+		RunTestFunc(func() {
+			result, err := ResolveHostnames("host1.cloud.example.com, host2.cloud.example.com", testServer)
+			assert.NoError(t, err)
+			assert.Equal(t, []string{"1.2.3.4", "5.6.7.8"}, result)
+		}).RequireNoError(t)
+}
+
+func TestResolveHostnamesUnresolvable(t *testing.T) {
+	// With no DNS servers provided, ResolveHostnames should return an error
+	result, err := ResolveHostnames("nonexistent.example.com")
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
 func connected() (ok bool) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)

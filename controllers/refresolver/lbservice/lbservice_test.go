@@ -151,6 +151,27 @@ func TestGetGslbExposedIPs(t *testing.T) {
 			expectedIPs:          []string{}, // ParseIPAddresses returns empty slice on error
 			expectError:          true,
 		},
+		{
+			name:        "hostname annotation triggers resolution (fails with empty DNS servers)",
+			serviceFile: "./testdata/lb_service_multiple_ips.yaml",
+			gslbAnnotations: map[string]string{
+				"k8gb.io/exposed-hostnames": "myhost.example.com",
+			},
+			parentZoneDNSServers: utils.DNSList{},
+			expectedIPs:          nil,
+			expectError:          true,
+		},
+		{
+			name:        "hostname annotation takes priority over IP annotation",
+			serviceFile: "./testdata/lb_service_multiple_ips.yaml",
+			gslbAnnotations: map[string]string{
+				"k8gb.io/exposed-hostnames":    "myhost.example.com",
+				"k8gb.io/exposed-ip-addresses": "10.0.0.1",
+			},
+			parentZoneDNSServers: utils.DNSList{},
+			expectedIPs:          nil,
+			expectError:          true,
+		},
 	}
 
 	for _, test := range tests {

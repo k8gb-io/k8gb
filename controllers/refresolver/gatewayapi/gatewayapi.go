@@ -110,6 +110,11 @@ func GetServersFromRoute(route RouteAdapter) ([]*k8gbv1beta1.Server, error) {
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 func GetGslbExposedIPs(gateway *gatewayapiv1.Gateway, gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
+	// fetch the IP addresses by resolving hostnames from an annotation if it exists
+	if hostnames, ok := gslbAnnotations[utils.ExposedHostnamesAnnotation]; ok {
+		return utils.ResolveHostnames(hostnames, parentZoneDNSServers...)
+	}
+
 	// fetch the IP addresses of the reverse proxy from an annotation if it exists
 	if ingressIPsFromAnnotation, ok := gslbAnnotations[utils.ExternalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(ingressIPsFromAnnotation)
