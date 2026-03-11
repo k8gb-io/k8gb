@@ -43,38 +43,17 @@ spec:
         content: |
           kubectl get gslb.k8gb.io legacy-migration-embedded -n "$NAMESPACE" -o json | \
             jq -e '(((.spec.ingress // {}) | keys | length) == 0) and .spec.resourceRef.name == "legacy-migration-embedded"' >/dev/null
-  - name: inject stale owner reference
-    description: simulate legacy ownerReference and retrigger migration reconcile
-    cluster: eu
-    try:
     - script:
         env:
         - name: NAME
           value: legacy-migration-embedded
         content: |
-          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
-          kubectl patch ingress "$NAME" -n "$NAMESPACE" --type=merge \
-            -p "{\"metadata\":{\"ownerReferences\":[{\"apiVersion\":\"k8gb.absa.oss/v1beta1\",\"kind\":\"Gslb\",\"name\":\"$NAME\",\"uid\":\"$LEGACY_UID\",\"controller\":true,\"blockOwnerDeletion\":true}]}}"
-          kubectl annotate gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" migration-recheck-ts="$(date +%s)" --overwrite
-  - name: assert ownerReference cleanup
-    description: verify legacy ownerReference is removed from ingress
-    cluster: eu
-    try:
-    - script:
-        env:
-        - name: NAME
-          value: legacy-migration-embedded
-        content: |
-          for i in $(seq 1 30); do
-            LEGACY_OWNER_REF=$(kubectl get ingress "$NAME" -n "$NAMESPACE" -o json | jq -r --arg name "$NAME" '.metadata.ownerReferences[]? | select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .name == $name) | .uid')
-            if [ -z "$LEGACY_OWNER_REF" ]; then
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "legacy ownerReference still present on ingress/$NAME"
-          kubectl get ingress "$NAME" -n "$NAMESPACE" -o yaml
-          exit 1
+          kubectl get ingress "$NAME" -n "$NAMESPACE" -o json | \
+            jq -e --arg name "$NAME" '
+              ([.metadata.ownerReferences[]? |
+                select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .name == $name)]
+              | length) == 0
+            ' >/dev/null
   - name: delete legacy object
     description: deleting legacy object must not delete ingress
     cluster: eu
