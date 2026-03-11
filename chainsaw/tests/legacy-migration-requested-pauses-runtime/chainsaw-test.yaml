@@ -45,6 +45,7 @@ spec:
     cluster: eu
     try:
     - script:
+        timeout: 90s
         env:
         - name: NAME
           value: legacy-requested-pause
@@ -75,6 +76,7 @@ spec:
     cluster: eu
     try:
     - script:
+        timeout: 90s
         env:
         - name: NAME
           value: legacy-requested-pause
