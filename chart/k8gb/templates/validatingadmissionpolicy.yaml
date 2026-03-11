@@ -29,4 +29,34 @@ spec:
         operations: ["CREATE", "UPDATE"]
         resources: ["gslbs"]
   failurePolicy: Fail
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: k8gb-exposed-hostnames-annotation
+spec:
+  policyName: k8gb-exposed-hostnames-annotation
+  matchResources:
+    namespaceSelector: {}
+  validationActions:
+    - Deny
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: k8gb-exposed-hostnames-annotation
+spec:
+  validations:
+    - expression: object.metadata.annotations['k8gb.io/exposed-hostnames'].split(',').all(h, h.trim().matches('^[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?)*$'))
+      message: The annotation 'k8gb.io/exposed-hostnames' must contain valid RFC 1123 hostnames (comma-separated)
+  matchConditions:
+    - name: hasExposedHostnamesAnnotation
+      expression: "has(object.metadata.annotations) && 'k8gb.io/exposed-hostnames' in object.metadata.annotations"
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["k8gb.absa.oss"]
+        apiVersions: ["v1beta1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["gslbs"]
+  failurePolicy: Fail
 {{ end -}}
