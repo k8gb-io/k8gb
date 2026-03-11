@@ -49,22 +49,22 @@ make deploy-full-local-setup
 
 Legacy demo objects are created in `test-gslb`, including:
 
-- `legacy-ref-non-migrated-demo` (intentionally non-requested)
+- `legacy-ref-non-migrated-failover` (intentionally non-requested)
 - `legacy-ref-demo` and `legacy-embedded-demo` (requested)
 
 ### 2. Confirm non-requested legacy object stays in legacy runtime mode
 
 ```bash
-kubectl get gslb.k8gb.absa.oss -n test-gslb legacy-ref-non-migrated-demo
+kubectl get gslb.k8gb.absa.oss -n test-gslb legacy-ref-non-migrated-failover
 # Expected to fail with NotFound before migration request
-kubectl get gslb.k8gb.io -n test-gslb legacy-ref-non-migrated-demo || true
-kubectl get events -n test-gslb --sort-by=.lastTimestamp | grep -E 'LegacyDeprecated|legacy-ref-non-migrated-demo'
+kubectl get gslb.k8gb.io -n test-gslb legacy-ref-non-migrated-failover || true
+kubectl get events -n test-gslb --sort-by=.lastTimestamp | grep -E 'LegacyDeprecated|legacy-ref-non-migrated-failover'
 ```
 
 ### 3. Request migration explicitly
 
 ```bash
-kubectl label gslb.k8gb.absa.oss -n test-gslb legacy-ref-non-migrated-demo \
+kubectl label gslb.k8gb.absa.oss -n test-gslb legacy-ref-non-migrated-failover \
   k8gb.io/migration-requested=true --overwrite
 ```
 
@@ -73,10 +73,10 @@ kubectl label gslb.k8gb.absa.oss -n test-gslb legacy-ref-non-migrated-demo \
 ```bash
 kubectl wait -n test-gslb \
   --for=jsonpath='{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}'=true \
-  gslb.k8gb.absa.oss/legacy-ref-non-migrated-demo \
+  gslb.k8gb.absa.oss/legacy-ref-non-migrated-failover \
   --timeout=90s
-kubectl get gslb.k8gb.io -n test-gslb legacy-ref-non-migrated-demo -o yaml
-kubectl get events -n test-gslb --sort-by=.lastTimestamp | grep -E 'LegacyMigrated|legacy-ref-non-migrated-demo'
+kubectl get gslb.k8gb.io -n test-gslb legacy-ref-non-migrated-failover -o yaml
+kubectl get events -n test-gslb --sort-by=.lastTimestamp | grep -E 'LegacyMigrated|legacy-ref-non-migrated-failover'
 ```
 
 Use the same label operation to migrate any selected legacy object:

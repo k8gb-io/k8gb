@@ -81,13 +81,33 @@ spec:
 apiVersion: k8gb.absa.oss/v1beta1
 kind: Gslb
 metadata:
-  name: legacy-ref-non-migrated-demo
+  name: legacy-ref-non-migrated-failover
   namespace: test-gslb
 spec:
   resourceRef:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
-    name: roundrobin-ingress
+    name: legacy-ref-non-migrated-failover
   strategy:
-    type: roundRobin
+    type: failover
+    primaryGeoTag: eu
     dnsTtlSeconds: 30
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: legacy-ref-non-migrated-failover
+  namespace: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: legacy-ref-non-migrated-failover.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo
+                port:
+                  name: http
