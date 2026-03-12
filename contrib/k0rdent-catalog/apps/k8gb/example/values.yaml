@@ -1,0 +1,11 @@
+# k8gb example values - minimal configuration for k0rdent catalog verification
+# Customize k8gb.k8gb.dnsZones, clusterGeoTag, and extGslbClustersGeoTags for your environment
+k8gb:
+  k8gb:
+    # Example DNS zone configuration - adjust for your domain
+    dnsZones:
+      - parentZone: "example.com"
+        loadBalancedZone: "cloud.example.com"
+        dnsZoneNegTTL: 30
+    clusterGeoTag: "eu"
+    extGslbClustersGeoTags: "eu,us"
