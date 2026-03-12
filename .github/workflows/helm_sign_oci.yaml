@@ -1,0 +1,96 @@
+name: Push Helm Charts to OCI and Sign with Cosign
+
+on:
+  # workflow_run:
+  #   workflows: ["Helm Publish"]
+  #   types:
+  #     - completed
+  push:
+    branches: ['master']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to sign (e.g., v0.16.0)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write  
+  packages: write 
+
+jobs:
+  sign-and-push-oci:
+    runs-on: ubuntu-24.04
+    # if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    env:
+      OCI_REPO: oci://ghcr.io/k8gb-io/charts
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@430b6a704fe0c92f1b1261d84376a900f38d90ff
+        with:
+          cosign-release: 'v3.0.3' 
+
+      - name: Push to OCI Registry and sign with Cosign
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo ${{ secrets.GITHUB_TOKEN }} | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
+          git fetch origin gh-pages
+          git checkout origin/gh-pages -- charts/
+          ls -la charts/
+          OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
+          SIGNED_CHARTS=()
+          for chart in charts/k8gb-*.tgz; do
+            if [ -f "$chart" ]; then
+              echo "Pushing chart: $chart"
+              PUSH_OUTPUT=$(helm push "$chart" "$OCI_REPO" 2>&1 | tee /dev/stderr)
+              
+              # Check if push was successful (new or already exists)
+              if echo "$PUSH_OUTPUT" | grep -q "Pushed\|already exists"; then
+                DIGEST=$(echo "$PUSH_OUTPUT" | grep -oE 'sha256:[a-f0-9]{64}' | head -1)
+                
+                if [ -n "$DIGEST" ]; then
+                  CHART_REF="ghcr.io/k8gb-io/charts/k8gb@${DIGEST}"
+                  echo "Signing with digest: $CHART_REF"
+                else
+                  # Fallback to tag-based signing
+                  CHART_NAME=$(basename "$chart" .tgz)
+                  CHART_VERSION=$(echo "$CHART_NAME" | sed 's/k8gb-//')
+                  CHART_REF="ghcr.io/k8gb-io/charts/k8gb:${CHART_VERSION}"
+                  echo "No digest found, signing with tag: $CHART_REF"
+                fi
+                
+                cosign sign --yes "$CHART_REF" && SIGNED_CHARTS+=("$CHART_REF")
+              else
+                echo "Failed to push $chart"
+              fi
+            fi
+          done
+          
+          echo "Successfully signed ${#SIGNED_CHARTS[@]} chart(s)"
+          
+          # Verify only the charts we just signed
+          if [ ${#SIGNED_CHARTS[@]} -gt 0 ]; then
+            echo "Verifying signed charts..."
+            for chart_ref in "${SIGNED_CHARTS[@]}"; do
+              echo "Verifying: $chart_ref"
+              cosign verify "$chart_ref" \
+                --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_sign_oci.yaml@${{ github.ref }}" \
+                --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+            done
+            echo "All signatures verified!"
+          else
+            echo "No charts were signed in this run"
+          fi
