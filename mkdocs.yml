@@ -41,6 +41,7 @@ nav:
       - Crossplane Global Control Plane: crossplane_globalapp.md
       - Load Balancer: lbservice-integration.md
     - Advanced:
+      - Split-Brain Scenarios: splitbrain.md
       - Service Upgrade: service_upgrade.md
       - Migration Acceptance Tests: migration_acceptance.md
       - WRR Caveats: wrr_caveats.md
