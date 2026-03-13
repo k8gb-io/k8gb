@@ -192,3 +192,11 @@ func (d *DelegationZones) SetIPs(ips []string) {
 		z.IPs = ips
 	}
 }
+
+func (d *DelegationZones) ReadIPs() []string {
+	// ips are same per each Delegation Zone
+	for _, z := range *d {
+		return z.IPs
+	}
+	return []string{}
+}

@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/bootstrap"
+
 	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	corev1 "k8s.io/api/core/v1"
@@ -67,14 +69,21 @@ func (zs *ZoneServiceImpl) Get(ctx context.Context, objKey client.ObjectKey) (re
 
 	return *zoneInfo, nil
 }
+
 func (zs *ZoneServiceImpl) List(ctx context.Context) (resolver.DelegationZones, error) {
 	// Dynamic: true
+	exposedIPs, err := bootstrap.GetBootstrapWithClient(ctx, zs.config, zs.client)
+	if err != nil {
+		return nil, err
+	}
+
 	if !zs.config.DynamicZones {
+		zs.config.DelegationZones.SetIPs(exposedIPs.IPs)
 		return zs.config.DelegationZones, nil
 	}
 	delegationZones := resolver.DelegationZones{}
 	coreDNSZones := &corev1.ConfigMap{}
-	err := zs.apiReader.Get(ctx, client.ObjectKey{Name: zoneCM, Namespace: zs.config.K8gbNamespace}, coreDNSZones)
+	err = zs.apiReader.Get(ctx, client.ObjectKey{Name: zoneCM, Namespace: zs.config.K8gbNamespace}, coreDNSZones)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +112,10 @@ func (zs *ZoneServiceImpl) List(ctx context.Context) (resolver.DelegationZones, 
 	if err != nil {
 		return nil, err
 	}
-	return resolver.ParseDelegationZones(zs.config, list)
+	var dz resolver.DelegationZones
+	dz, err = resolver.ParseDelegationZones(zs.config, list)
+	dz.SetIPs(exposedIPs.IPs)
+	return dz, err
 }
 
 func getCoreDNSData(zone string) string {

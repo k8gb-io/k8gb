@@ -27,7 +27,6 @@ import (
 	k8gbiov1beta1 "github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers"
-	boot "github.com/k8gb-io/k8gb/controllers/bootstrap"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
@@ -35,7 +34,6 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 
 	istio "istio.io/client-go/pkg/apis/networking/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -96,18 +94,18 @@ func run() error {
 
 	ctrl.SetLogger(logging.NewLogrAdapter(log))
 
-	log.Info().Msg("Reading external IPs from cluster")
-	bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
-	if err != nil {
-		if config.CoreDNSServiceType == corev1.ServiceTypeLoadBalancer {
-			log.Err(err).Msg("Can't resolve external IPs")
-			return err
-		}
-		log.Err(err).Msg("Can't resolve ingress IPs")
-		return err
-	}
-	log.Info().Msgf("Found External IP's: %s", bootstrap)
-	config.DelegationZones.SetIPs(bootstrap.IPs)
+	// log.Info().Msg("Reading external IPs from cluster")
+	// bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
+	// if err != nil {
+	//	if config.CoreDNSServiceType == corev1.ServiceTypeLoadBalancer {
+	//		log.Err(err).Msg("Can't resolve external IPs")
+	//		return err
+	//	}
+	//	log.Err(err).Msg("Can't resolve ingress IPs")
+	//	return err
+	// }
+	// log.Info().Msgf("Found External IP's: %s", bootstrap)
+	// config.DelegationZones.SetIPs(bootstrap.IPs)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
@@ -169,7 +167,6 @@ func run() error {
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
-		Bootstrap:   bootstrap,
 		ZoneService: zoneService,
 	}
 
@@ -178,7 +175,6 @@ func run() error {
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
-		Bootstrap:   bootstrap,
 		ZoneService: zoneService,
 	}
 
