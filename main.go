@@ -94,19 +94,6 @@ func run() error {
 
 	ctrl.SetLogger(logging.NewLogrAdapter(log))
 
-	// log.Info().Msg("Reading external IPs from cluster")
-	// bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
-	// if err != nil {
-	//	if config.CoreDNSServiceType == corev1.ServiceTypeLoadBalancer {
-	//		log.Err(err).Msg("Can't resolve external IPs")
-	//		return err
-	//	}
-	//	log.Err(err).Msg("Can't resolve ingress IPs")
-	//	return err
-	// }
-	// log.Info().Msgf("Found External IP's: %s", bootstrap)
-	// config.DelegationZones.SetIPs(bootstrap.IPs)
-
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
 		Metrics: metricsserver.Options{

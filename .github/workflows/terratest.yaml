@@ -98,6 +98,10 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb1
           echo "Cluster 2 (us):"
           kubectl get no -owide --context=k3d-test-gslb2
+          echo "inspection"
+          kubectl get pods -A --context=k3d-test-gslb1
+          kubectl get pods -A --context=k3d-test-gslb2
+          kubectl logs -n k8gb -l name=k8gb --context=k3d-test-gslb2
 
       - name: Run Terratest
         run: |

@@ -55,6 +55,7 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	z, err := r.ZoneService.List(ctx)
 	if err != nil {
 		logger.Err(err).Msg("Error listing zones")
+		return result.Requeue()
 	}
 	logger.Info().Msgf("Reconciling '%s' %s", req, z.ReadIPs())
 
@@ -65,7 +66,7 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				Str("loadBalancedZone", zoneInfo.LoadBalancedZone).
 				Str("IPs", strings.Join(zoneInfo.IPs, ",")).
 				Msg("Error creating zone delegation")
-			return result.RequeueError(err)
+			return result.Requeue()
 		}
 	}
 

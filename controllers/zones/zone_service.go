@@ -42,6 +42,8 @@ const (
 type ZoneService interface {
 	List(ctx context.Context) (resolver.DelegationZones, error)
 	Get(ctx context.Context, objKey client.ObjectKey) (resolver.DelegationZoneInfo, error)
+	AvailableIPs(ctx context.Context) ([]string, error)
+	HasAvailableIPs(ctx context.Context) bool
 }
 
 type ZoneServiceImpl struct {
@@ -72,13 +74,13 @@ func (zs *ZoneServiceImpl) Get(ctx context.Context, objKey client.ObjectKey) (re
 
 func (zs *ZoneServiceImpl) List(ctx context.Context) (resolver.DelegationZones, error) {
 	// Dynamic: true
-	exposedIPs, err := bootstrap.GetBootstrapWithClient(ctx, zs.config, zs.client)
+	exposedIPs, err := zs.AvailableIPs(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	if !zs.config.DynamicZones {
-		zs.config.DelegationZones.SetIPs(exposedIPs.IPs)
+		zs.config.DelegationZones.SetIPs(exposedIPs)
 		return zs.config.DelegationZones, nil
 	}
 	delegationZones := resolver.DelegationZones{}
@@ -114,8 +116,24 @@ func (zs *ZoneServiceImpl) List(ctx context.Context) (resolver.DelegationZones, 
 	}
 	var dz resolver.DelegationZones
 	dz, err = resolver.ParseDelegationZones(zs.config, list)
-	dz.SetIPs(exposedIPs.IPs)
+	dz.SetIPs(exposedIPs)
 	return dz, err
+}
+
+func (zs *ZoneServiceImpl) AvailableIPs(ctx context.Context) ([]string, error) {
+	exposedIPs, err := bootstrap.GetBootstrapWithClient(ctx, zs.config, zs.client)
+	if err != nil {
+		return nil, err
+	}
+	return exposedIPs.IPs, nil
+}
+
+func (zs *ZoneServiceImpl) HasAvailableIPs(ctx context.Context) bool {
+	exposedIPs, err := zs.AvailableIPs(ctx)
+	if err != nil {
+		return false
+	}
+	return len(exposedIPs) != 0
 }
 
 func getCoreDNSData(zone string) string {

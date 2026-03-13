@@ -80,6 +80,7 @@ func TestReconciliation(t *testing.T) {
 				defer cleanup()
 				cl := mocks.NewMockClient(ctrl)
 				resolver := mocks.NewMockGslbResolver(ctrl)
+				zoneService := mocks.NewMockZoneService(ctrl)
 				// reading GSLB from request
 				cl.EXPECT().
 					Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -104,11 +105,14 @@ func TestReconciliation(t *testing.T) {
 						return skipTest
 					}).Times(1)
 
+				zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true)
+
 				reconciler := &GslbReconciler{
-					Config:   config,
-					Tracer:   tracer,
-					Client:   cl,
-					Resolver: resolver,
+					Config:      config,
+					Tracer:      tracer,
+					Client:      cl,
+					Resolver:    resolver,
+					ZoneService: zoneService,
 				}
 				return reconciler
 			},

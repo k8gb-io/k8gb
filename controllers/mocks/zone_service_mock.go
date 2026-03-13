@@ -59,6 +59,21 @@ func (m *MockZoneService) EXPECT() *MockZoneServiceMockRecorder {
 	return m.recorder
 }
 
+// AvailableIPs mocks base method.
+func (m *MockZoneService) AvailableIPs(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AvailableIPs", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AvailableIPs indicates an expected call of AvailableIPs.
+func (mr *MockZoneServiceMockRecorder) AvailableIPs(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AvailableIPs", reflect.TypeOf((*MockZoneService)(nil).AvailableIPs), ctx)
+}
+
 // Get mocks base method.
 func (m *MockZoneService) Get(ctx context.Context, objKey client.ObjectKey) (resolver.DelegationZoneInfo, error) {
 	m.ctrl.T.Helper()
@@ -72,6 +87,20 @@ func (m *MockZoneService) Get(ctx context.Context, objKey client.ObjectKey) (res
 func (mr *MockZoneServiceMockRecorder) Get(ctx, objKey any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockZoneService)(nil).Get), ctx, objKey)
+}
+
+// HasAvailableIPs mocks base method.
+func (m *MockZoneService) HasAvailableIPs(ctx context.Context) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HasAvailableIPs", ctx)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// HasAvailableIPs indicates an expected call of HasAvailableIPs.
+func (mr *MockZoneServiceMockRecorder) HasAvailableIPs(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasAvailableIPs", reflect.TypeOf((*MockZoneService)(nil).HasAvailableIPs), ctx)
 }
 
 // List mocks base method.

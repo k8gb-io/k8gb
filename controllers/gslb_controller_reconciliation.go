@@ -85,6 +85,12 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	defer span.End()
 
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	// Check that cluster provides available IPs
+	if !r.ZoneService.HasAvailableIPs(ctx) {
+		log.Info().Msg("Waiting for available IPs.")
+		return result.Requeue()
+	}
+
 	// Fetch the Gslb instance
 	gslb := &k8gbv1beta1.Gslb{}
 	err := r.Get(ctx, req.NamespacedName, gslb)
