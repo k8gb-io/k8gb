@@ -6,7 +6,7 @@ global:
 
 k8gb:
   # -- image repository
-  imageRepo: k8gb-io.gateway.scarf.sh/k8gb-io/k8gb
+  imageRepo: registry.k8gb.io/k8gb-io/k8gb
   # -- ( string ) image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key
   imageTag:
   # -- whether it should also deploy the gslb and dnsendpoints CRDs
@@ -103,7 +103,7 @@ coredns:
     skipConfig: true
   image:
     # -- CoreDNS CRD plugin image
-    repository: k8gb-io.gateway.scarf.sh/k8gb-io/k8s_crd
+    repository: registry.k8gb.io/k8gb-io/k8s_crd
     # -- image tag
     tag: v0.3.0
   # -- Creates serviceAccount for coredns

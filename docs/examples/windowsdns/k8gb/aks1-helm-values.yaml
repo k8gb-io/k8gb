@@ -1,5 +1,5 @@
 k8gb:
-  imageRepo: "k8gb-io.gateway.scarf.sh/k8gb-io/k8gb"
+  imageRepo: "registry.k8gb.io/k8gb-io/k8gb"
   deployCrds: true
   deployRbac: true
   # -- dns zone that will be managed by CoreDNS
