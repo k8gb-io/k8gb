@@ -36,13 +36,52 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 </details>
 
-<details open><summary><strong>March 4, 2026 #87</strong></summary>
+<details open><summary><strong>March 18, 2026 #88</strong></summary>
+
+## March 18, 2026 #88
+
+Zoom Recording: https://zoom.us/rec/share/zeQ82nsITHnb2vO8dlM4EjS42ldNlPHfDEiMcXIbW75Ql_X1S28aqrCO-leO2erx.lwjr2XFj2EH7G27H 
+
+On YouTube: https://youtu.be/mxJuYXV3p3c
+
+**Attendees**
+
+- Farhan 
+- Dinar
+- Yury
+- Bradley
+
+**Agenda**
+
+- **News**
+  - KubeCon next week 🎉
+    - k8gb kiosk: P-12B | 24th Tuesday 15:10 - 19:00 | Hall 5 - Gouda Zone - Project Pavilion 🍻
+    - 2 talks: [Security Review Panel](https://sched.co/2EF6x) and [Building Unified Global Load Balancing for the Edge With k8gb](https://sched.co/2DY3a)
+- **Issue Review**
+  - [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **Community Update**
+  - Incubation
+    - governance and tech reviews complete, working on ADOPTER interviews
+    - heroic efforts on api group change - @ytsarev
+  - [contribution from Tailscale](https://github.com/k8gb-io/k8gb/pull/2285)
+  - Vanity stats
+    - 300 (140 last 90d) LinkedIn followers 📈
+    - page views up 43% last week, unique visitors up 87%
+    - scarf data - @ytsarev
+    - last month: 1,785 impressions / 64 reactions
+    - 1,153 ⭐
+- **Other**
+  - added [MBCP case study](https://github.com/k8gb-io/k8gb/blob/master/ADOPTERS.md#k8gb-adopters) to the website 
+- **Action Items**
+</details>
+
+<details><summary><strong>March 4, 2026 #87</strong></summary>
 
 ## March 4, 2026 #87
 
-Zoom Recording: <update>
+Zoom Recording: https://zoom.us/rec/share/ktKo_zEgfq4YCL_xOeJiCNR5JcCf4WIKQJtLWCstoqnkF0kYI5UExE2e-3Q2YleB.uGEjLTxEfu6VMGPO
 
-On YouTube: <update>
+On YouTube: https://youtu.be/RugISBr1wds
 
 **Attendees**
 
