@@ -105,7 +105,7 @@ coredns:
     # -- CoreDNS CRD plugin image
     repository: registry.k8gb.io/k8gb-io/k8s_crd
     # -- image tag
-    tag: v0.3.0
+    tag: v0.4.0
   # -- Creates serviceAccount for coredns
   serviceAccount:
     create: true
