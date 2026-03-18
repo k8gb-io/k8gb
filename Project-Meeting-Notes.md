@@ -64,7 +64,7 @@ On YouTube: <update>
     - heroic efforts on api group change - @ytsarev
     - [contribution from Tailscale](https://github.com/k8gb-io/k8gb/pull/2285)
   - Vanity stats
-    - 298 (138 last 90d) LinkedIn followers 📈
+    - 300 (140 last 90d) LinkedIn followers 📈
     - page views up 43% last week, unique visitors up 87%
     - scarf data - @ytsarev
     - last month: 1,785 impressions / 64 reactions
