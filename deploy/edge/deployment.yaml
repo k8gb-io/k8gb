@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
       - name: copy-zone
-        image: gcr.io/google_containers/busybox
+        image: docker.io/library/busybox:1.36.1
         command: [ "cp", "/etc/bind/k8s.zone", "/var/lib/bind/zones/k8s.zone" ]
         volumeMounts:
           - mountPath: /etc/bind
