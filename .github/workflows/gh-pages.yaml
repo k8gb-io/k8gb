@@ -63,6 +63,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Deploy master documentation
+        if: github.ref == 'refs/heads/master'
+        run: make docs-deploy-master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Deploy latest 3 documentation versions
         if: github.ref == 'refs/heads/master'
         run: make docs-deploy-last-3

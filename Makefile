@@ -725,7 +725,7 @@ endef
 
 # Documentation with Mkdocs
 
-.PHONY: docs-deploy docs-deploy-last-3 docs-list
+.PHONY: docs-deploy docs-deploy-master docs-deploy-last-3 docs-list
 
 docs-list: ## List deployed versions
 	mike list
@@ -766,6 +766,17 @@ docs-deploy: ## Deploy docs with mike for VERSION (requires VERSION)
 	fi; \
 	git checkout --quiet -- mkdocs.yml; \
 	mike list
+
+docs-deploy-master: ## Deploy docs for master branch
+	@set -eu; \
+	if ! command -v yq >/dev/null 2>&1; then \
+		echo "ERROR: yq is required (https://github.com/mikefarah/yq)"; \
+		exit 1; \
+	fi; \
+	echo "Deploying documentation for master branch"; \
+	yq eval -i '.extra.version.provider = "mike"' mkdocs.yml; \
+	mike deploy --push master; \
+	git checkout --quiet -- mkdocs.yml
 
 docs-deploy-last-3: ## Deploy docs for latest 3 release tags
 	@set -eu; \

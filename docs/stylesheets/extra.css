@@ -2,7 +2,13 @@
 :root {
   --md-primary-fg-color: #7b0000 !important;
   --md-primary-fg-color--light: #8b0000 !important;
-  --md-primary-fg-color--dark: #e53935 !important;
+  --md-primary-fg-color--dark: #e07070 !important;
+}
+
+/* Sidebar section labels in dark mode — readable rose-red, not harsh */
+[data-md-color-scheme="slate"] .md-nav__title,
+[data-md-color-scheme="slate"] .md-nav__item--section > .md-nav__link {
+  color: #e07070 !important;
 }
 
 /* Header styling */
@@ -17,9 +23,9 @@
 [data-md-color-scheme="slate"] .md-header,
 [data-md-color-scheme="slate"] .md-header[data-md-component="header"],
 [data-md-color-scheme="slate"] header.md-header {
-  background-color: #c62828 !important;
-  background: #c62828 !important;
-  border-bottom: 1px solid #a52a2a !important;
+  background-color: #3d1010 !important;
+  background: #3d1010 !important;
+  border-bottom: 1px solid #2a0a0a !important;
 }
 
 /* Header text color (excluding star button) */
@@ -94,8 +100,8 @@
 }
 
 [data-md-color-scheme="slate"] .md-tabs {
-  background-color: #c62828 !important;
-  border-bottom: 1px solid #a52a2a !important;
+  background-color: #3d1010 !important;
+  border-bottom: 1px solid #2a0a0a !important;
 }
 
 [data-md-color-scheme="slate"] .md-tabs__link {
@@ -163,8 +169,8 @@
 }
 
 [data-md-color-scheme="slate"] .star-banner {
-  background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
-  box-shadow: 0 4px 20px rgba(198, 40, 40, 0.4);
+  background: linear-gradient(135deg, #3d1010 0%, #6b1a1a 100%);
+  box-shadow: 0 4px 20px rgba(61, 16, 16, 0.5);
 }
 
 /* Header star button */
