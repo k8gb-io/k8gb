@@ -5,7 +5,7 @@
   --md-primary-fg-color--dark: #e07070 !important;
 }
 
-/* Sidebar section labels in dark mode — readable rose-red, not harsh */
+/* Sidebar section labels in dark mode */
 [data-md-color-scheme="slate"] .md-nav__title,
 [data-md-color-scheme="slate"] .md-nav__item--section > .md-nav__link {
   color: #e07070 !important;
