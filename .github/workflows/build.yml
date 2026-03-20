@@ -96,7 +96,7 @@ jobs:
           exit-code: '0'  # Never block on SARIF upload
 
       - name: Upload Trivy FS scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@b1bff81932f5cdfc8695c7752dcee935dcd061c8 # v4
+        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
         if: always()
         with:
           sarif_file: 'trivy-fs-results.sarif'
@@ -114,7 +114,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload configuration scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@b1bff81932f5cdfc8695c7752dcee935dcd061c8 # v4
+        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
         if: always()
         with:
           sarif_file: 'trivy-config-results.sarif'
@@ -146,7 +146,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload secret scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@b1bff81932f5cdfc8695c7752dcee935dcd061c8 # v4
+        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
         if: always()
         with:
           sarif_file: 'trivy-secret-results.sarif'
@@ -175,7 +175,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload Helm chart scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@b1bff81932f5cdfc8695c7752dcee935dcd061c8 # v4
+        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
         if: always()
         with:
           sarif_file: 'trivy-helm-results.sarif'
