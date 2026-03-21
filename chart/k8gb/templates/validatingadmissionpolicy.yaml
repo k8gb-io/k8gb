@@ -54,7 +54,7 @@ spec:
       expression: "has(object.metadata.annotations) && 'k8gb.io/exposed-hostnames' in object.metadata.annotations"
   matchConstraints:
     resourceRules:
-      - apiGroups: ["k8gb.absa.oss"]
+      - apiGroups: ["k8gb.io", "k8gb.absa.oss"]
         apiVersions: ["v1beta1"]
         operations: ["CREATE", "UPDATE"]
         resources: ["gslbs"]
