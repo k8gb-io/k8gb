@@ -9,10 +9,12 @@ on:
 
 permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
-  packages: write
 
 jobs:
   curldemo:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-24.04
     env:
       DOCKER_CLI_EXPERIMENTAL: "enabled"

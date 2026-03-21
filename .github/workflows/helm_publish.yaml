@@ -12,8 +12,6 @@ on:
         type: string
 permissions:
   contents: read
-  id-token: write
-  packages: write
 
 env:
   K3D_VERSION: v5.8.3
