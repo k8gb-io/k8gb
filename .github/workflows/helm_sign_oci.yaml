@@ -16,11 +16,13 @@ on:
 
 permissions:
   contents: read
-  id-token: write  
-  packages: write 
 
 jobs:
   sign-and-push-oci:
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
     runs-on: ubuntu-24.04
     # if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     env:
