@@ -140,6 +140,10 @@ debug-idea:
 demo: ## Execute end-to-end demo
 	@$(call demo-host, $(DEMO_URL))
 
+.PHONY: demo-failover
+demo-failover: ## Run local failover walkthrough against k3d clusters
+	@./hack/demo-failover.sh run
+
 K8GB_LOCAL_VERSION ?= stable
 # Spin-up local environment. Deploys stable released version by default
 # Use `K8GB_LOCAL_VERSION=test make deploy-full-local-setup`
