@@ -1,5 +1,61 @@
 # Changelog
 
+## [v0.19.0](https://github.com/k8gb-io/k8gb/tree/v0.19.0) (2026-03-22)
+
+[Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.18.1...v0.19.0)
+
+**Closed issues:**
+
+- Switch to vendor neutral OCI registry and repository [\#2195](https://github.com/k8gb-io/k8gb/issues/2195)
+- Enhance Token permissions according to recommendations in CLO monitor [\#2194](https://github.com/k8gb-io/k8gb/issues/2194)
+- Switch to vendor-neutral API group [\#2180](https://github.com/k8gb-io/k8gb/issues/2180)
+- Switch helm repo to OCI [\#1973](https://github.com/k8gb-io/k8gb/issues/1973)
+- \(vendor-neutrality\) Ensure k8gb.io has vendor-neutral governance [\#1665](https://github.com/k8gb-io/k8gb/issues/1665)
+
+**Merged pull requests:**
+
+- RELEASE: v0.19.0 [\#2303](https://github.com/k8gb-io/k8gb/pull/2303) ([ytsarev](https://github.com/ytsarev))
+- ci: tighten workflow token permissions [\#2300](https://github.com/k8gb-io/k8gb/pull/2300) ([ytsarev](https://github.com/ytsarev))
+- ci: remove trivy workflows [\#2299](https://github.com/k8gb-io/k8gb/pull/2299) ([ytsarev](https://github.com/ytsarev))
+- Update Helm Docs [\#2298](https://github.com/k8gb-io/k8gb/pull/2298) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Bump google.golang.org/grpc from 1.79.2 to 1.79.3 [\#2297](https://github.com/k8gb-io/k8gb/pull/2297) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): update all non-major dependencies [\#2295](https://github.com/k8gb-io/k8gb/pull/2295) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#2290](https://github.com/k8gb-io/k8gb/pull/2290) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Bump coredns plugin to latest v0.4.0 release [\#2289](https://github.com/k8gb-io/k8gb/pull/2289) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update docker/build-push-action action to v7 [\#2288](https://github.com/k8gb-io/k8gb/pull/2288) ([renovate[bot]](https://github.com/apps/renovate))
+- add 2026-03-18 community meeting agenda and notes [\#2287](https://github.com/k8gb-io/k8gb/pull/2287) ([elohmrow](https://github.com/elohmrow))
+- fix\(deps\): update kubernetes monorepo to v0.35.3 [\#2286](https://github.com/k8gb-io/k8gb/pull/2286) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#2284](https://github.com/k8gb-io/k8gb/pull/2284) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Add Millennium bcp case study [\#2280](https://github.com/k8gb-io/k8gb/pull/2280) ([ytsarev](https://github.com/ytsarev))
+- fix\(deps\): update module sigs.k8s.io/controller-runtime to v0.23.3 [\#2279](https://github.com/k8gb-io/k8gb/pull/2279) ([renovate[bot]](https://github.com/apps/renovate))
+- March 4 community meeting agenda [\#2278](https://github.com/k8gb-io/k8gb/pull/2278) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update docker/login-action action to v4 [\#2277](https://github.com/k8gb-io/k8gb/pull/2277) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(images\): switch runtime-facing image refs to registry.k8gb.io [\#2276](https://github.com/k8gb-io/k8gb/pull/2276) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update otel/opentelemetry-collector docker tag to v0.148.0 [\#2275](https://github.com/k8gb-io/k8gb/pull/2275) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update github/codeql-action digest to b1bff81 [\#2274](https://github.com/k8gb-io/k8gb/pull/2274) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update sigstore/cosign-installer digest to ba7bc0a [\#2273](https://github.com/k8gb-io/k8gb/pull/2273) ([renovate[bot]](https://github.com/apps/renovate))
+- DynamicZones \(4/4\): documentation and usage guide [\#2272](https://github.com/k8gb-io/k8gb/pull/2272) ([kuritka](https://github.com/kuritka))
+- DynamicZones \(2/4\): add Helm chart integration and installation support [\#2271](https://github.com/k8gb-io/k8gb/pull/2271) ([kuritka](https://github.com/kuritka))
+- DynamicZones \(1/4\): introduce API, CRD and type registration [\#2270](https://github.com/k8gb-io/k8gb/pull/2270) ([kuritka](https://github.com/kuritka))
+- chore\(deps\): update actions/upload-artifact action to v7 [\#2268](https://github.com/k8gb-io/k8gb/pull/2268) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#2267](https://github.com/k8gb-io/k8gb/pull/2267) ([github-actions[bot]](https://github.com/apps/github-actions))
+- docs: prevent prerelease tags from publishing to gh-pages [\#2266](https://github.com/k8gb-io/k8gb/pull/2266) ([ytsarev](https://github.com/ytsarev))
+- Add Bradley to chart metadata [\#2265](https://github.com/k8gb-io/k8gb/pull/2265) ([ytsarev](https://github.com/ytsarev))
+- release: move container release, cosign, and slsa to GHCR [\#2264](https://github.com/k8gb-io/k8gb/pull/2264) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update dependency k8gb-io/k8gb to v0.18.1 [\#2263](https://github.com/k8gb-io/k8gb/pull/2263) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Offline Changelog [\#2262](https://github.com/k8gb-io/k8gb/pull/2262) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update goreleaser/goreleaser-action action to v7 [\#2261](https://github.com/k8gb-io/k8gb/pull/2261) ([renovate[bot]](https://github.com/apps/renovate))
+- Update Helm Docs [\#2260](https://github.com/k8gb-io/k8gb/pull/2260) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update benc-uk/workflow-dispatch digest to 7a02764 [\#2258](https://github.com/k8gb-io/k8gb/pull/2258) ([renovate[bot]](https://github.com/apps/renovate))
+- fix\(deps\): update module github.com/gruntwork-io/terratest to v0.56.0 [\#2243](https://github.com/k8gb-io/k8gb/pull/2243) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update dependency go to v1.26.1 [\#2238](https://github.com/k8gb-io/k8gb/pull/2238) ([renovate[bot]](https://github.com/apps/renovate))
+- Feat: OCI Registry and Cosign signing in separate workflow file [\#2237](https://github.com/k8gb-io/k8gb/pull/2237) ([itsfarhan](https://github.com/itsfarhan))
+- fix\(deps\): update all non-major dependencies [\#2233](https://github.com/k8gb-io/k8gb/pull/2233) ([renovate[bot]](https://github.com/apps/renovate))
+- Switch to vendor‑neutral API group k8gb.io with on‑the‑fly user controlled migration [\#2203](https://github.com/k8gb-io/k8gb/pull/2203) ([ytsarev](https://github.com/ytsarev))
+- chore\(deps\): update rancher/k3s docker tag to v1.35.2 [\#1678](https://github.com/k8gb-io/k8gb/pull/1678) ([renovate[bot]](https://github.com/apps/renovate))
+
+
+
 ## [v0.18.1](https://github.com/k8gb-io/k8gb/tree/v0.18.1) (2026-02-21)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.18.0...v0.18.1)
