@@ -107,6 +107,38 @@ jobs:
           make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
           echo "::endgroup::"
 
+      # --- CRUST-GATHER PIPELINE DEBUGGING START ---
+      - name: Install crust-gather
+        if: failure()
+        run: |
+          curl -sSfL https://github.com/crust-gather/crust-gather/raw/main/install.sh | sh
+          sudo mv crust-gather /usr/local/bin/
+
+      - name: Collect cluster state with crust-gather
+        if: failure()
+        run: |
+          mkdir -p ${{ github.workspace }}/tmp/crust-gather
+          
+          # We use || echo "..." to ensure one failing cluster doesn't crash the pipeline and skip the others
+          echo "Collecting edgedns cluster state..."
+          crust-gather collect --kubeconfig ~/.kube/config --context k3d-edgedns -o ${{ github.workspace }}/tmp/crust-gather/edgedns.tar.gz || echo "Warning: Failed to collect edgedns"
+          
+          echo "Collecting test-gslb1 cluster state..."
+          crust-gather collect --kubeconfig ~/.kube/config --context k3d-test-gslb1 -o ${{ github.workspace }}/tmp/crust-gather/test-gslb1.tar.gz || echo "Warning: Failed to collect test-gslb1"
+          
+          echo "Collecting test-gslb2 cluster state..."
+          crust-gather collect --kubeconfig ~/.kube/config --context k3d-test-gslb2 -o ${{ github.workspace }}/tmp/crust-gather/test-gslb2.tar.gz || echo "Warning: Failed to collect test-gslb2"
+
+      - name: Upload crust-gather artifacts
+        if: failure()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: crust-gather-snapshots-${{ github.run_id }}
+          path: ${{ github.workspace }}/tmp/crust-gather/
+          retention-days: 7
+          if-no-files-found: ignore
+      # --- CRUST-GATHER PIPELINE DEBUGGING END ---
+
       - name: Print debug info
         if: always()
         uses: ./.github/actions/print-terratest-debug
