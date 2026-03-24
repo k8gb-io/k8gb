@@ -95,7 +95,7 @@ jobs:
           echo "Found latest stable version: $LATEST_TAG"
 
       - name: K8GB deploy stable version
-        run: make deploy-stable-version list-running-pods STABLE_VERSION=${{ env.STABLE_VERSION }}
+        run: make deploy-stable-version list-running-pods STABLE_VERSION=${{ env.STABLE_VERSION }} VERSION=${{ env.STABLE_VERSION }}
 
       - name: K8GB deploy test version
         run: make deploy-test-version list-running-pods
