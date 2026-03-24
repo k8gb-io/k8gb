@@ -10,8 +10,6 @@ on:
   pull_request:
     branches:
       - master
-    # The specific activity types are listed here to include "labeled" and "unlabeled"
-    # (which are not included by default for the "pull_request" trigger).
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
     paths-ignore:
       - '**.md'
