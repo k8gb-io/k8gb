@@ -34,7 +34,7 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
       with:
-        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+        egress-policy: audit 
 
     - id: skip_check
       uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
@@ -45,7 +45,7 @@ jobs:
   upgrade-testing:
     runs-on: ubuntu-24.04
     needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    if: needs.skip-check.outputs.should_skip != 'true' && !contains(github.event.pull_request.labels.*.name, 'renovate')
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -89,8 +89,15 @@ jobs:
           args: -c k3d/test-gslb2.yaml
           k3d-version: ${{ env.K3D_VERSION }}
 
+      - name: Get latest stable version
+        id: get-version
+        run: |
+          LATEST_TAG=$(curl -s https://api.github.com/repos/k8gb-io/k8gb/releases/latest | grep -oP '"tag_name": "\K(.*)(=")')
+          echo "STABLE_VERSION=$LATEST_TAG" >> $GITHUB_ENV
+          echo "Found latest stable version: $LATEST_TAG"
+
       - name: K8GB deploy stable version
-        run: make deploy-stable-version list-running-pods
+        run: make deploy-stable-version list-running-pods STABLE_VERSION=${{ env.STABLE_VERSION }}
 
       - name: K8GB deploy test version
         run: make deploy-test-version list-running-pods
