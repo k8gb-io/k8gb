@@ -92,7 +92,7 @@ jobs:
       - name: Get latest stable version
         id: get-version
         run: |
-          LATEST_TAG=$(curl -s https://api.github.com/repos/k8gb-io/k8gb/releases/latest | grep -oP '"tag_name": "\K(.*)(=")')
+          LATEST_TAG=$(curl -s https://api.github.com/repos/k8gb-io/k8gb/releases/latest | jq -r .tag_name)
           echo "STABLE_VERSION=$LATEST_TAG" >> $GITHUB_ENV
           echo "Found latest stable version: $LATEST_TAG"
 
