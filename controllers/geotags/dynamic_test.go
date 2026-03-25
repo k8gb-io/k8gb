@@ -25,6 +25,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
+	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/bootstrap"
+	"go.uber.org/mock/gomock"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
@@ -38,16 +44,28 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 	}
 
 	tests := []struct {
-		name          string
-		config        *resolver.Config
-		expectedError bool
-		host          string
-		result        map[string]string
+		name            string
+		config          *resolver.Config
+		expectedError   bool
+		host            string
+		result          map[string]string
+		zoneDelegations *v1beta1.ZoneDelegationList
 	}{
 		{
 			name: "hit cloud.example.com",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
-				ClusterGeoTag: "us",
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"eu"},
 				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
@@ -67,8 +85,19 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com with three clusters",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
-				ClusterGeoTag: "za",
+				ClusterGeoTag:         "za",
+				ExtClustersGeoTagsRaw: []string{"eu", "us"},
 				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
@@ -89,8 +118,19 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com on multiple DNS servers",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
-				ClusterGeoTag: "us",
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"eu"},
 				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
@@ -116,6 +156,16 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "unsupported host",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
 				ClusterGeoTag: "us",
 				DelegationZones: []*resolver.DelegationZoneInfo{
@@ -137,7 +187,14 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ns, err := NewDynamic(test.config).GetExternalClusterNSNamesByHostname(test.host)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			zs := zones.NewMockZoneDelegation(ctrl)
+			bs := bootstrap.NewMockBoundIPsService(ctrl)
+			zs.EXPECT().List(gomock.Any()).Return(test.zoneDelegations, nil)
+			bs.EXPECT().GetExposedIPs(gomock.Any()).Return(&bootstrap.Bootstrap{IPs: []string{"172.18.0.2"}}, nil).AnyTimes()
+			ns, err := NewDynamic(test.config, zs, bs).GetExternalClusterNSNamesByHostname(context.TODO(), test.host)
 			if test.expectedError {
 				assert.Error(t, err)
 				return

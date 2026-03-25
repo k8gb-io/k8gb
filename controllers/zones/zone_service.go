@@ -23,119 +23,256 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/bootstrap"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/bootstrap"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
-	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	zoneCM       = "coredns-dynamic"
-	zoneTemplate = `
-%s:5353 {
-  import k8gbplugins
-}`
-)
-
-type ZoneService interface {
-	List(ctx context.Context) (resolver.DelegationZones, error)
-	Get(ctx context.Context, objKey client.ObjectKey) (resolver.DelegationZoneInfo, error)
-	AvailableIPs(ctx context.Context) ([]string, error)
+type ZoneDelegation interface {
+	List(ctx context.Context) (*v1beta1.ZoneDelegationList, error)
+	Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1.ZoneDelegation, error)
+	Save(ctx context.Context, z *v1beta1.ZoneDelegation) error
+	GetConfigZoneDelegations(ctx context.Context) ([]*v1beta1.ZoneDelegation, error)
+	AvailableIPs(ctx context.Context) (ZoneDelegationIPs, error)
 	HasAvailableIPs(ctx context.Context) bool
+	HasExtClusterGeoTags(ctx context.Context) bool
+	UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error
 }
 
-type ZoneServiceImpl struct {
-	config    *resolver.Config
-	client    client.Client
-	apiReader client.Reader
+type ZoneDelegationImpl struct {
+	client       client.Client
+	config       *resolver.Config
+	bootstrapSvc bootstrap.BoundIPsService
 }
 
-func NewZoneService(config *resolver.Config, client client.Client, reader client.Reader) ZoneService {
-	return &ZoneServiceImpl{config: config, client: client, apiReader: reader}
+func NewZoneDelegationImpl(client client.Client, config *resolver.Config, bootstrapSvc bootstrap.BoundIPsService) *ZoneDelegationImpl {
+	return &ZoneDelegationImpl{client: client, config: config, bootstrapSvc: bootstrapSvc}
 }
 
-func (zs *ZoneServiceImpl) Get(ctx context.Context, objKey client.ObjectKey) (resolver.DelegationZoneInfo, error) {
-	zoneInfo := &resolver.DelegationZoneInfo{}
+func (z *ZoneDelegationImpl) List(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+	list := &v1beta1.ZoneDelegationList{}
+	err := z.client.List(ctx, list)
+	if err != nil {
+		return nil, fmt.Errorf("error listing zones: %v", err)
+	}
+	return list, nil
+}
+
+func (z *ZoneDelegationImpl) Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1.ZoneDelegation, error) {
 	delegationZone := &v1beta1.ZoneDelegation{}
-	err := zs.client.Get(ctx, objKey, delegationZone)
-
-	if err != nil {
-		return *zoneInfo, err
-	}
-	// Convert ZoneDelegation into known to Provider Delegation info
-	zoneInfo.ParentZone = delegationZone.Spec.ParentZone
-	zoneInfo.LoadBalancedZone = delegationZone.Spec.LoadBalancedZone
-	zoneInfo.NegativeTTL = delegationZone.Spec.DNSZoneNegTTL
-
-	return *zoneInfo, nil
+	err := z.client.Get(ctx, objKey, delegationZone)
+	return delegationZone, err
 }
 
-func (zs *ZoneServiceImpl) List(ctx context.Context) (resolver.DelegationZones, error) {
-	// Dynamic: true
-	exposedIPs, err := zs.AvailableIPs(ctx)
-	if err != nil {
-		return nil, err
+// Save creates or updates ZoneDelegation, updates its status if needed,
+// and reconciles the related CoreDNS configuration.
+func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+	current := &v1beta1.ZoneDelegation{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: zd.Name,
+		},
 	}
 
-	if !zs.config.DynamicZones {
-		zs.config.DelegationZones.SetIPs(exposedIPs)
-		return zs.config.DelegationZones, nil
-	}
-	delegationZones := resolver.DelegationZones{}
-	coreDNSZones := &corev1.ConfigMap{}
-	err = zs.apiReader.Get(ctx, client.ObjectKey{Name: zoneCM, Namespace: zs.config.K8gbNamespace}, coreDNSZones)
+	_, err := controllerutil.CreateOrUpdate(ctx, z.client, current, func() error {
+		// Only manage fields owned by this controller.
+		current.Spec.LoadBalancedZone = zd.Spec.LoadBalancedZone
+		current.Spec.ParentZone = zd.Spec.ParentZone
+		current.Spec.DNSZoneNegTTL = zd.Spec.DNSZoneNegTTL
+		return nil
+	})
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("error creating/updating zone delegation: %w", err)
 	}
 
-	if coreDNSZones.Data == nil {
-		coreDNSZones.Data = make(map[string]string)
+	if err := z.updateCoreDNSConfiguration(ctx, current); err != nil {
+		return fmt.Errorf("error updating CoreDNS configuration: %w", err)
 	}
 
-	zoneList := &v1beta1.ZoneDelegationList{}
-	err = zs.client.List(ctx, zoneList)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(zoneList.Items) == 0 {
-		return delegationZones, nil
-	}
-	list := []v1beta1.ZoneDelegationSpec{}
-	for _, i := range zoneList.Items {
-		zoneInfo := i.Spec
-		zoneKey := fmt.Sprintf("%s.conf", strings.ReplaceAll(zoneInfo.LoadBalancedZone, ".", "-"))
-		coreDNSZones.Data[zoneKey] = getCoreDNSData(zoneInfo.LoadBalancedZone)
-		list = append(list, zoneInfo)
-	}
-	err = zs.client.Update(ctx, coreDNSZones)
-	if err != nil {
-		return nil, err
-	}
-	var dz resolver.DelegationZones
-	dz, err = resolver.ParseDelegationZones(zs.config, list)
-	dz.SetIPs(exposedIPs)
-	return dz, err
+	return nil
 }
 
-func (zs *ZoneServiceImpl) AvailableIPs(ctx context.Context) ([]string, error) {
-	exposedIPs, err := bootstrap.GetBootstrapWithClient(ctx, zs.config, zs.client)
+// GetDefaultZoneDelegations reads internal resolver.Config and gets ZoneDelegationList
+func (z *ZoneDelegationImpl) GetConfigZoneDelegations(ctx context.Context) ([]*v1beta1.ZoneDelegation, error) {
+	ips, err := z.AvailableIPs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	zoneDelegation := []*v1beta1.ZoneDelegation{}
+	for _, dzi := range z.config.DelegationZones {
+		zd := &v1beta1.ZoneDelegation{}
+		zd.Name = dzi.LoadBalancedZone
+		zd.Spec.LoadBalancedZone = dzi.LoadBalancedZone
+		zd.Spec.ParentZone = dzi.ParentZone
+		zd.Spec.DNSZoneNegTTL = dzi.NegativeTTL
+		zd.Status.DNSServers = []v1beta1.DNSServer{}
+		for _, ns := range dzi.GetNSServerList() {
+			for _, ip := range ips {
+				zd.Status.DNSServers = append(zd.Status.DNSServers, v1beta1.DNSServer{Name: ns, Address: ip})
+			}
+		}
+	}
+	return zoneDelegation, nil
+}
+
+func (z *ZoneDelegationImpl) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+	current, err := z.Get(ctx, types.NamespacedName{
+		Name: zd.Name,
+	})
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return fmt.Errorf("zone delegation %s not found", zd.Name)
+		}
+		return fmt.Errorf("error getting zone delegation: %w", err)
+	}
+
+	detail, err := NewZoneDelegationWrapper(current, z.config, z.bootstrapSvc).GetDetail(ctx)
+	if err != nil {
+		return err
+	}
+
+	ips := detail.IPs
+	nsServerList := detail.GetNSServerList()
+
+	desiredStatus := v1beta1.ZoneDelegationStatus{
+		DNSServers: []v1beta1.DNSServer{},
+	}
+
+	for _, ns := range nsServerList {
+		for _, ip := range ips.Sorted() {
+			desiredStatus.DNSServers = append(desiredStatus.DNSServers, v1beta1.DNSServer{
+				Name:    ns,
+				Address: ip,
+			})
+		}
+	}
+
+	if equalStatus(current.Status, desiredStatus) {
+		return nil
+	}
+
+	current.Status = desiredStatus
+	if err := z.client.Status().Update(ctx, current); err != nil {
+		return fmt.Errorf("error updating zone delegation status: %w", err)
+	}
+
+	return nil
+}
+
+func equalStatus(a, b v1beta1.ZoneDelegationStatus) bool {
+	if len(a.DNSServers) != len(b.DNSServers) {
+		return false
+	}
+
+	// build maps: key = name|address
+	toMap := func(servers []v1beta1.DNSServer) map[string]struct{} {
+		m := make(map[string]struct{}, len(servers))
+		for _, s := range servers {
+			key := s.Name + "|" + s.Address
+			m[key] = struct{}{}
+		}
+		return m
+	}
+
+	am := toMap(a.DNSServers)
+	bm := toMap(b.DNSServers)
+
+	if len(am) != len(bm) {
+		return false
+	}
+
+	for k := range am {
+		if _, ok := bm[k]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+// AvailableIPs gets exposed IPs from the cluster
+func (z *ZoneDelegationImpl) AvailableIPs(ctx context.Context) (ZoneDelegationIPs, error) {
+	exposedIPs, err := z.bootstrapSvc.GetExposedIPs(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return exposedIPs.IPs, nil
 }
 
-func (zs *ZoneServiceImpl) HasAvailableIPs(ctx context.Context) bool {
-	exposedIPs, err := zs.AvailableIPs(ctx)
+// HasAvailableIPs returns false if any error during IP reading or IPs are not available yet
+func (z *ZoneDelegationImpl) HasAvailableIPs(ctx context.Context) bool {
+	exposedIPs, err := z.AvailableIPs(ctx)
 	if err != nil {
 		return false
 	}
 	return len(exposedIPs) != 0
 }
 
+func (z *ZoneDelegationImpl) HasExtClusterGeoTags(ctx context.Context) bool {
+	l, err := z.List(ctx)
+	if err != nil {
+		return false
+	}
+	if len(l.Items) == 0 {
+		return false
+	}
+	detail, err := NewZoneDelegationWrapper(&l.Items[0], z.config, z.bootstrapSvc).GetDetail(ctx)
+	if err != nil {
+		return false
+	}
+	return len(detail.ExtClusterNSNames) > 0
+}
+
+// updateCoreDNSConfiguration creates, updates, or skips the coredns-dynamic ConfigMap.
+// controllerutil.CreateOrUpdate was avoided to keep full control over update conditions (DeepEqual is too coarse).
+func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+	const zoneCM = "coredns-dynamic"
+	notFound := false
+	coreDNSZones := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      zoneCM,
+			Namespace: z.config.K8gbNamespace,
+		},
+	}
+	err := z.client.Get(ctx, client.ObjectKey{Name: zoneCM, Namespace: z.config.K8gbNamespace}, coreDNSZones)
+	if err != nil {
+		if !errors.IsNotFound(err) {
+			return err
+		}
+		notFound = true
+	}
+
+	if coreDNSZones.Data == nil {
+		coreDNSZones.Data = make(map[string]string)
+	}
+
+	// update coreDNS data if necessary
+	zoneKey := fmt.Sprintf("%s.conf", strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-"))
+	// skipping update if ZD exists in coredns
+	if value, found := coreDNSZones.Data[zoneKey]; found {
+		if value == getCoreDNSData(zd.Spec.LoadBalancedZone) {
+			return nil
+		}
+	}
+	coreDNSZones.Data[zoneKey] = getCoreDNSData(zd.Spec.LoadBalancedZone)
+	if notFound {
+		return z.client.Create(ctx, coreDNSZones)
+	}
+	return z.client.Update(ctx, coreDNSZones)
+}
+
 func getCoreDNSData(zone string) string {
+	const (
+		zoneTemplate = `
+%s:5353 {
+  import k8gbplugins
+}`
+	)
 	return fmt.Sprintf(zoneTemplate, zone)
 }

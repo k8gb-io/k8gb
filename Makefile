@@ -494,12 +494,14 @@ mocks:
 	mockgen -package=mocks -destination=controllers/mocks/infoblox-object-manager_mock.go github.com/infobloxopen/infoblox-go-client/v2 IBObjectManager
 	mockgen -package=mocks -destination=controllers/mocks/infoblox-connection_mock.go github.com/infobloxopen/infoblox-go-client IBConnector
 	mockgen -package=mocks -destination=controllers/mocks/client_mock.go sigs.k8s.io/controller-runtime/pkg/client Client
+	mockgen	-package=mocks -destination=controllers/mocks/status_client_subresource_mocks.go sigs.k8s.io/controller-runtime/pkg/client SubResourceWriter
 	mockgen -package=mocks -destination=controllers/mocks/resolver_mock.go -source=controllers/resolver/resolver.go GslbResolver
 	mockgen -package=mocks -destination=controllers/mocks/dns_query_service_mock.go -source=controllers/utils/dns_query_service.go DNSQueryService
 	mockgen -package=mocks -destination=controllers/mocks/refresolver_mock.go -source=controllers/refresolver/refresolver.go GslbRefResolver
-	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
+	mockgen -package=dns -destination=controllers/providers/dns/provider_mock.go -source=controllers/providers/dns/dns.go Provider
 	mockgen -package=mocks -destination=controllers/mocks/geotags_mock.go -source=controllers/geotags/geotags.go GeoTags
-	mockgen -package=mocks -destination=controllers/mocks/zone_service_mock.go -source=controllers/zones/zone_service.go ZoneService
+	mockgen -package=zones -destination=controllers/zones/zone_delegation_service_mock.go -source=controllers/zones/zone_service.go ZoneDelegationService
+	mockgen -package=bootstrap -destination=controllers/bootstrap/bootstrap_mock.go -source=controllers/bootstrap/bootstrap.go BoundIPsService
 	$(call golic)
 
 # remove clusters and redeploy

@@ -23,6 +23,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/stretchr/testify/assert"
 
@@ -90,23 +92,22 @@ func TestCreateZoneDelegation(t *testing.T) {
 		config        resolver.Config
 		expectedError bool
 		client        client.Client
+		detail        *zones.ZoneDelegationDetail
 	}{
 		{
 			name: "existing cloud.example.com",
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   60,
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						LoadBalancedZone: "cloud.example.com",
-						ParentZone:       "example.com",
-						NegativeTTL:      60,
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
-						},
-					},
+			},
+			detail: &zones.ZoneDelegationDetail{
+				LoadBalancedZone: "cloud.example.com",
+				ParentZone:       "example.com",
+				NegativeTTL:      60,
+				IPs:              []string{"10.0.0.1", "10.0.0.2"},
+				ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
+				ExtClusterNSNames: map[string]string{
+					"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
 				},
 			},
 			client:        getFakeClientForExistingEndpoint(ctx, getExistingEndpoint("k8gb-ns-extdns-cloud-example-com", "k8gb")),
@@ -117,51 +118,18 @@ func TestCreateZoneDelegation(t *testing.T) {
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   60,
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						LoadBalancedZone: "cloud.example.com",
-						ParentZone:       "example.com",
-						NegativeTTL:      60,
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
-						},
-					},
+			},
+			detail: &zones.ZoneDelegationDetail{
+				LoadBalancedZone: "cloud.example.com",
+				ParentZone:       "example.com",
+				NegativeTTL:      60,
+				IPs:              []string{"10.0.0.1", "10.0.0.2"},
+				ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
+				ExtClusterNSNames: map[string]string{
+					"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
 				},
 			},
 			client:        getFakeClient(ctx, "k8gb", "k8gb-ns-extdns-cloud-example-com"),
-			expectedError: false,
-		},
-		{
-			name: "new cloud.example.com, cloud.example.org",
-			config: resolver.Config{
-				K8gbNamespace: "k8gb",
-				NSRecordTTL:   60,
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						LoadBalancedZone: "cloud.example.com",
-						ParentZone:       "example.com",
-						NegativeTTL:      60,
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
-						},
-					},
-					{
-						LoadBalancedZone: "cloud.example.org",
-						ParentZone:       "example.org",
-						NegativeTTL:      60,
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.org",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.org",
-						},
-					},
-				},
-			},
-			client:        getFakeClient(ctx, "k8gb", "k8gb-ns-extdns-cloud-example-com", "k8gb-ns-extdns-cloud-example-org"),
 			expectedError: false,
 		},
 	}
@@ -171,10 +139,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			externalDNSProvider := NewExternalDNS(ctx, test.client, test.config)
-			for _, zone := range test.config.DelegationZones {
-				err := externalDNSProvider.CreateZoneDelegation(zone)
-				assert.Equal(t, test.expectedError, err != nil)
-			}
+			err := externalDNSProvider.CreateZoneDelegation(test.detail)
+			assert.Equal(t, test.expectedError, err != nil)
 		})
 	}
 }

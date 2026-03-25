@@ -22,6 +22,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/k8gb-io/k8gb/controllers/bootstrap"
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
 	"github.com/k8gb-io/k8gb/api/v1beta1"
@@ -80,7 +83,8 @@ func TestReconciliation(t *testing.T) {
 				defer cleanup()
 				cl := mocks.NewMockClient(ctrl)
 				resolver := mocks.NewMockGslbResolver(ctrl)
-				zoneService := mocks.NewMockZoneService(ctrl)
+				zoneService := zones.NewMockZoneDelegation(ctrl)
+				bootstrapService := bootstrap.NewMockBoundIPsService(ctrl)
 				// reading GSLB from request
 				cl.EXPECT().
 					Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -88,8 +92,7 @@ func TestReconciliation(t *testing.T) {
 						gslb := obj.(*v1beta1.Gslb)
 						*gslb = *found
 						return nil
-					}).
-					Times(1)
+					}).Times(1)
 				// resolve GSLB spec
 				resolver.EXPECT().ResolveGslbSpec(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// Create ingress from GLSB, check if ingress exists - doesnt exists
@@ -108,11 +111,12 @@ func TestReconciliation(t *testing.T) {
 				zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true)
 
 				reconciler := &GslbReconciler{
-					Config:      config,
-					Tracer:      tracer,
-					Client:      cl,
-					Resolver:    resolver,
-					ZoneService: zoneService,
+					Config:           config,
+					Tracer:           tracer,
+					Client:           cl,
+					Resolver:         resolver,
+					ZoneService:      zoneService,
+					BootstrapService: bootstrapService,
 				}
 				return reconciler
 			},

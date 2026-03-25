@@ -226,7 +226,7 @@ func TestBootstrap(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			cl := test.setupClient(test.expectedIPs)
-			bootstrap, err := GetBootstrapWithClient(ctx, test.config, cl)
+			bootstrap, err := NewBootstrap(test.config, cl).GetExposedIPs(ctx)
 			if test.expectedError {
 				assert.Nil(t, bootstrap)
 				assert.Error(t, err)

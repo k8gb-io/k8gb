@@ -22,13 +22,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
-	netv1 "k8s.io/api/networking/v1"
-
-	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/rest"
+	netv1 "k8s.io/api/networking/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -40,16 +38,24 @@ type Bootstrap struct {
 	Name   string
 }
 
-func GetBootstrap(ctx context.Context, config *resolver.Config, kubeconfig *rest.Config) (*Bootstrap, error) {
-	cl, err := client.New(kubeconfig, client.Options{})
-	if err != nil {
-		return nil, err
-	}
-	return GetBootstrapWithClient(ctx, config, cl)
+type BoundIPsService interface {
+	GetExposedIPs(ctx context.Context) (*Bootstrap, error)
 }
 
-func GetBootstrapWithClient(ctx context.Context, config *resolver.Config, cl client.Client) (*Bootstrap, error) {
-	bootstrap, err := readIPs(ctx, cl, config)
+type BoundIPsServiceImpl struct {
+	config *resolver.Config
+	client client.Client
+}
+
+func NewBootstrap(config *resolver.Config, cl client.Client) *BoundIPsServiceImpl {
+	return &BoundIPsServiceImpl{
+		config: config,
+		client: cl,
+	}
+}
+
+func (b *BoundIPsServiceImpl) GetExposedIPs(ctx context.Context) (*Bootstrap, error) {
+	bootstrap, err := readIPs(ctx, b.client, b.config)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +64,17 @@ func GetBootstrapWithClient(ctx context.Context, config *resolver.Config, cl cli
 	}
 	return bootstrap, nil
 }
+
+// func GetBootstrapWithClient(ctx context.Context, config *resolver.Config, cl client.Client) (*Bootstrap, error) {
+//	bootstrap, err := readIPs(ctx, cl, config)
+//	if err != nil {
+//		return nil, err
+//	}
+//	if len(bootstrap.IPs) == 0 {
+//		return nil, fmt.Errorf("no IP addresses found")
+//	}
+//	return bootstrap, nil
+// }
 
 func readIPs(ctx context.Context, cl client.Client, config *resolver.Config) (*Bootstrap, error) {
 	var err error
@@ -80,5 +97,5 @@ func (b *Bootstrap) String() string {
 	if b.HasIngress() {
 		return fmt.Sprintf("Ingress %s/%s %s", b.ing.Namespace, b.ing.Name, b.IPs)
 	}
-	return fmt.Sprintf("Service type LoadBalancer %s/%s %s", b.svc.Namespace, b.svc.Name, b.IPs)
+	return fmt.Sprintf("BoundIPsService type LoadBalancer %s/%s %s", b.svc.Namespace, b.svc.Name, b.IPs)
 }

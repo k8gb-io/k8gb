@@ -22,6 +22,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/bootstrap"
+
 	"github.com/k8gb-io/k8gb/controllers/zones"
 
 	"github.com/k8gb-io/k8gb/controllers/geotags"
@@ -46,7 +48,8 @@ type ApplicationDNSEndpoint struct {
 	logger              *zerolog.Logger
 	updateRuntimeStatus UpdateRuntimeStatus
 	queryService        utils.DNSQueryService
-	zoneService         zones.ZoneService
+	zoneService         zones.ZoneDelegation
+	bootstrapService    bootstrap.BoundIPsService
 }
 
 func NewApplicationDNSEndpoint(
@@ -56,7 +59,8 @@ func NewApplicationDNSEndpoint(
 	gslb *k8gbv1beta1.Gslb,
 	logger *zerolog.Logger,
 	queryService utils.DNSQueryService,
-	zoneService zones.ZoneService,
+	zoneService zones.ZoneDelegation,
+	bootstrapService bootstrap.BoundIPsService,
 	urs UpdateRuntimeStatus) *ApplicationDNSEndpoint {
 	return &ApplicationDNSEndpoint{
 		context:             ctx,
@@ -66,6 +70,7 @@ func NewApplicationDNSEndpoint(
 		gslb:                gslb,
 		logger:              logger,
 		zoneService:         zoneService,
+		bootstrapService:    bootstrapService,
 		queryService:        queryService,
 		updateRuntimeStatus: urs,
 	}
@@ -198,7 +203,7 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 
 func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Targets) {
 	targets = NewTargets()
-	gt, err := geotags.GeoTag(d.config).GetExternalClusterNSNamesByHostname(host)
+	gt, err := geotags.GeoTag(d.config, d.zoneService, d.bootstrapService).GetExternalClusterNSNamesByHostname(context.TODO(), host)
 	if err != nil {
 		d.logger.
 			Err(err).

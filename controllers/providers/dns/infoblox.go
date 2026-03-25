@@ -22,11 +22,12 @@ import (
 	"reflect"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/k8gb-io/k8gb/controllers/zones"
 
 	ibcl "github.com/infobloxopen/infoblox-go-client/v2"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 type InfobloxProvider struct {
@@ -44,7 +45,7 @@ func NewInfobloxDNS(config resolver.Config, client InfobloxClient) *InfobloxProv
 }
 
 // current IP list is up to date, so we remove it from delegatedTo.
-func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServer, zoneInfo *resolver.DelegationZoneInfo) []ibcl.NameServer {
+func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServer, zoneInfo *zones.ZoneDelegationDetail) []ibcl.NameServer {
 	// Drop own records for straight away update
 	// And ensure local entries are up to date
 	// And final list is sorted
@@ -56,7 +57,7 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServe
 	return final
 }
 
-func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *resolver.DelegationZoneInfo) error {
+func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *zones.ZoneDelegationDetail) error {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		return err
@@ -67,7 +68,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *resolver.DelegationZon
 	}
 
 	var delegateTo []ibcl.NameServer
-	for _, address := range zoneInfo.GetSortedIPs() {
+	for _, address := range zoneInfo.IPs.Sorted() {
 		nameServer := ibcl.NameServer{Address: address, Name: zoneInfo.ClusterNSName}
 		delegateTo = append(delegateTo, nameServer)
 	}
@@ -107,7 +108,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *resolver.DelegationZon
 	return nil
 }
 
-func (p *InfobloxProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo, finalize bool) error {
+func (p *InfobloxProvider) Finalize(zoneInfo *zones.ZoneDelegationDetail, finalize bool) error {
 	if !finalize {
 		log.Info().Msgf("Zone %s must deleted by manually in Infoblox", zoneInfo.LoadBalancedZone)
 	}

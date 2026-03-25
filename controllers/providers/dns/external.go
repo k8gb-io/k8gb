@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -47,7 +49,7 @@ func NewExternalDNS(ctx context.Context, client client.Client, config resolver.C
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *resolver.DelegationZoneInfo) error {
+func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *zones.ZoneDelegationDetail) error {
 	log.Info().
 		Str("provider", p.String()).
 		Msg("Creating/Updating DNSEndpoint CR")
@@ -65,7 +67,7 @@ func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *resolver.Delegation
 	return nil
 }
 
-func (p *ExternalDNSProvider) Finalize(zoneInfo *resolver.DelegationZoneInfo, finalize bool) error {
+func (p *ExternalDNSProvider) Finalize(zoneInfo *zones.ZoneDelegationDetail, finalize bool) error {
 	if !finalize {
 		log.Info().Msgf("Domain %s will be deleted by removing delegation DNSEndpoint %s", zoneInfo.LoadBalancedZone, zoneInfo.GetExternalDNSEndpointName())
 	}

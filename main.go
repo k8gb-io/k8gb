@@ -22,6 +22,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/k8gb-io/k8gb/controllers/bootstrap"
+
 	"github.com/k8gb-io/k8gb/controllers/zones"
 
 	k8gbiov1beta1 "github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
@@ -139,30 +141,34 @@ func run() error {
 		log.Err(err).Msg("Unable to create DNS provider factory")
 		return err
 	}
-	zoneService := zones.NewZoneService(config, mgr.GetClient(), mgr.GetAPIReader())
+	bootstrapService := bootstrap.NewBootstrap(config, mgr.GetClient())
+	zoneDelegationService := zones.NewZoneDelegationImpl(mgr.GetClient(), config, bootstrapService)
 	gslbReconciler := &controllers.GslbReconciler{
 		Config:             config,
 		Client:             mgr.GetClient(),
 		Resolver:           r,
 		Scheme:             mgr.GetScheme(),
 		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
-		ZoneService:        zoneService,
+		ZoneService:        zoneDelegationService,
+		BootstrapService:   bootstrapService,
 	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{
-		Config:      config,
-		Client:      mgr.GetClient(),
-		Scheme:      mgr.GetScheme(),
-		DNSProvider: f.Provider(),
-		ZoneService: zoneService,
+		Config:           config,
+		Client:           mgr.GetClient(),
+		Scheme:           mgr.GetScheme(),
+		DNSProvider:      f.Provider(),
+		ZoneService:      zoneDelegationService,
+		BootstrapService: bootstrapService,
 	}
 
 	zoneDelegationReconciler := &controllers.ZoneDelegationReconciler{
-		Config:      config,
-		Client:      mgr.GetClient(),
-		Scheme:      mgr.GetScheme(),
-		DNSProvider: f.Provider(),
-		ZoneService: zoneService,
+		Config:           config,
+		Client:           mgr.GetClient(),
+		Scheme:           mgr.GetScheme(),
+		DNSProvider:      f.Provider(),
+		ZoneService:      zoneDelegationService,
+		BootstrapService: bootstrapService,
 	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
