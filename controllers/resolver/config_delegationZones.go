@@ -53,18 +53,6 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 
 	zones := config.DNSZones
 
-	extClusterNSNames := func(zone, edge string) map[string]string {
-		m := map[string]string{}
-		for _, tag := range config.ExtClustersGeoTagsRaw {
-			if tag == config.ClusterGeoTag {
-				// skip the cluster GeoTag, see: https://github.com/k8gb-io/k8gb/issues/720
-				continue
-			}
-			m[tag] = getNsName(tag, zone, edge)
-		}
-		return m
-	}
-
 	validateRFC1035 := func(zoneInfo *DelegationZoneInfo) error {
 		const dnsNameMax = 253
 		const dnsLabelMax = 63
@@ -117,7 +105,7 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 			ParentZone:        inf.parentZone,
 			NegativeTTL:       negTTL,
 			ClusterNSName:     getNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
-			ExtClusterNSNames: extClusterNSNames(inf.loadBalancedZone, inf.parentZone),
+			ExtClusterNSNames: config.GetExtClusterNSNames(inf.loadBalancedZone, inf.parentZone),
 		}
 		dzi = append(dzi, zoneInfo)
 	}

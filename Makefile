@@ -560,6 +560,9 @@ mocks:
 	mockgen -package=mocks -destination=controllers/mocks/refresolver_mock.go -source=controllers/refresolver/refresolver.go GslbRefResolver
 	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
 	mockgen -package=mocks -destination=controllers/mocks/geotags_mock.go -source=controllers/geotags/geotags.go GeoTags
+	mockgen -package=ipresolver -destination=controllers/ipresolver/ipresolver_mock.go -source=controllers/ipresolver/ipresolver.go Resolver
+	mockgen -package=zones -destination=controllers/zones/zone_delegation_service_mock.go -source=controllers/zones/zone_service.go ZoneDelegationService
+	mockgen	-package=mocks -destination=controllers/mocks/status_client_subresource_mocks.go sigs.k8s.io/controller-runtime/pkg/client SubResourceWriter
 	$(call golic)
 
 # remove clusters and redeploy
