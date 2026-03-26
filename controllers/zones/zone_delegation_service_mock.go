@@ -89,21 +89,6 @@ func (mr *MockZoneDelegationMockRecorder) Get(ctx, objKey any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockZoneDelegation)(nil).Get), ctx, objKey)
 }
 
-// GetConfigZoneDelegations mocks base method.
-func (m *MockZoneDelegation) GetConfigZoneDelegations(ctx context.Context) ([]*v1beta1.ZoneDelegation, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetConfigZoneDelegations", ctx)
-	ret0, _ := ret[0].([]*v1beta1.ZoneDelegation)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetConfigZoneDelegations indicates an expected call of GetConfigZoneDelegations.
-func (mr *MockZoneDelegationMockRecorder) GetConfigZoneDelegations(ctx any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfigZoneDelegations", reflect.TypeOf((*MockZoneDelegation)(nil).GetConfigZoneDelegations), ctx)
-}
-
 // HasAvailableIPs mocks base method.
 func (m *MockZoneDelegation) HasAvailableIPs(ctx context.Context) bool {
 	m.ctrl.T.Helper()
@@ -145,6 +130,36 @@ func (m *MockZoneDelegation) List(ctx context.Context) (*v1beta1.ZoneDelegationL
 func (mr *MockZoneDelegationMockRecorder) List(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockZoneDelegation)(nil).List), ctx)
+}
+
+// ListAllZoneDelegations mocks base method.
+func (m *MockZoneDelegation) ListAllZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAllZoneDelegations", ctx)
+	ret0, _ := ret[0].(*v1beta1.ZoneDelegationList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAllZoneDelegations indicates an expected call of ListAllZoneDelegations.
+func (mr *MockZoneDelegationMockRecorder) ListAllZoneDelegations(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAllZoneDelegations", reflect.TypeOf((*MockZoneDelegation)(nil).ListAllZoneDelegations), ctx)
+}
+
+// ListConfigZoneDelegations mocks base method.
+func (m *MockZoneDelegation) ListConfigZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListConfigZoneDelegations", ctx)
+	ret0, _ := ret[0].(*v1beta1.ZoneDelegationList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListConfigZoneDelegations indicates an expected call of ListConfigZoneDelegations.
+func (mr *MockZoneDelegationMockRecorder) ListConfigZoneDelegations(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListConfigZoneDelegations", reflect.TypeOf((*MockZoneDelegation)(nil).ListConfigZoneDelegations), ctx)
 }
 
 // Save mocks base method.

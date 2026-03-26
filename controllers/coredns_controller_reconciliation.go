@@ -57,42 +57,40 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl
 	result := utils.NewReconcileResultHandler(0)
 	log.Info().Msg("Reconciling CoreDNS delegation")
 
-	ips, err := r.ZoneService.AvailableIPs(ctx)
+	ips, err := r.BootstrapService.GetExposedIPs(ctx)
 	if err != nil {
 		logger.Err(err).Msg("Error listing zones")
 		return result.Stop()
 	}
 
-	log.Info().Msgf("available IPs: [%s]", strings.Join(ips, ","))
-	if len(ips) == 0 {
+	log.Info().Msgf("available IPs: [%s]", strings.Join(ips.IPs, ","))
+	if len(ips.IPs) == 0 {
 		log.Info().Msg("Waiting for IPs to be assigned.")
 		return result.Stop()
 	}
 
-	// TODO: breaks single source of truth!, remove all references
-	// to this and use r.ZoneService.AvailableIPs(ctx) instead
-	r.Config.DelegationZones.SetIPs(ips)
-
-	zd, err := r.ZoneService.GetConfigZoneDelegations(ctx)
+	// list existing ZoneDelegations and config DelegationZones
+	zd, err := r.ZoneService.ListAllZoneDelegations(ctx)
 	if err != nil {
 		logger.Err(err).Msg("Error creating zone delegation")
 		return result.RequeueError(err)
 	}
 
-	for _, zoneDelegation := range zd {
-
-		err = r.ZoneService.Save(ctx, zoneDelegation)
+	for _, zoneDelegation := range zd.Items {
+		// save zoneDelegation and update coredns config map
+		err = r.ZoneService.Save(ctx, &zoneDelegation)
 		if err != nil {
 			logger.Err(err).Msg("Error creating zone delegation")
 			return result.RequeueError(err)
 		}
 
-		detail, err := zones.NewZoneDelegationWrapper(zoneDelegation, r.Config, r.BootstrapService).GetDetail(ctx)
+		detail, err := zones.NewZoneDelegationWrapper(&zoneDelegation, r.Config, r.BootstrapService).GetDetail(ctx)
 		if err != nil {
 			logger.Err(err).Msg("Error creating zone delegation")
 			return result.RequeueError(err)
 		}
 
+		// Create zoneDelegation in edge DNS
 		err = r.DNSProvider.CreateZoneDelegation(detail)
 		if err != nil {
 			logger.Err(err).Msg("Error creating zone delegation")
@@ -100,7 +98,7 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl
 	}
 
 	log.Info().
-		Str("IPs", strings.Join(ips, ",")).
+		Str("IPs", strings.Join(ips.IPs, ",")).
 		Msg("CoreDNS delegation created")
 	return result.Stop()
 }

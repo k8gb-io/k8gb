@@ -39,7 +39,8 @@ type ZoneDelegation interface {
 	List(ctx context.Context) (*v1beta1.ZoneDelegationList, error)
 	Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1.ZoneDelegation, error)
 	Save(ctx context.Context, z *v1beta1.ZoneDelegation) error
-	GetConfigZoneDelegations(ctx context.Context) ([]*v1beta1.ZoneDelegation, error)
+	ListConfigZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error)
+	ListAllZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error)
 	AvailableIPs(ctx context.Context) (ZoneDelegationIPs, error)
 	HasAvailableIPs(ctx context.Context) bool
 	HasExtClusterGeoTags(ctx context.Context) bool
@@ -71,8 +72,8 @@ func (z *ZoneDelegationImpl) Get(ctx context.Context, objKey client.ObjectKey) (
 	return delegationZone, err
 }
 
-// Save creates or updates ZoneDelegation, updates its status if needed,
-// and reconciles the related CoreDNS configuration.
+// Save creates or updates ZoneDelegation, updates apart status.
+// Updates coreDNS configuration.
 func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
 	current := &v1beta1.ZoneDelegation{
 		ObjectMeta: metav1.ObjectMeta{
@@ -98,16 +99,15 @@ func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegatio
 	return nil
 }
 
-// GetDefaultZoneDelegations reads internal resolver.Config and gets ZoneDelegationList
-func (z *ZoneDelegationImpl) GetConfigZoneDelegations(ctx context.Context) ([]*v1beta1.ZoneDelegation, error) {
+// ListConfigZoneDelegations reads internal resolver.Config and gets ZoneDelegationList
+func (z *ZoneDelegationImpl) ListConfigZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
 	ips, err := z.AvailableIPs(ctx)
 	if err != nil {
 		return nil, err
 	}
-	zoneDelegation := []*v1beta1.ZoneDelegation{}
+	zoneDelegationList := &v1beta1.ZoneDelegationList{}
 	for _, dzi := range z.config.DelegationZones {
-		zd := &v1beta1.ZoneDelegation{}
-		zd.Name = dzi.LoadBalancedZone
+		zd := v1beta1.ZoneDelegation{}
 		zd.Spec.LoadBalancedZone = dzi.LoadBalancedZone
 		zd.Spec.ParentZone = dzi.ParentZone
 		zd.Spec.DNSZoneNegTTL = dzi.NegativeTTL
@@ -117,8 +117,40 @@ func (z *ZoneDelegationImpl) GetConfigZoneDelegations(ctx context.Context) ([]*v
 				zd.Status.DNSServers = append(zd.Status.DNSServers, v1beta1.DNSServer{Name: ns, Address: ip})
 			}
 		}
+		zd.Name = name(zd)
+		zoneDelegationList.Items = append(zoneDelegationList.Items, zd)
 	}
-	return zoneDelegation, nil
+	return zoneDelegationList, nil
+}
+
+// ListAllZoneDelegations list existing zone delegations and config zone delegations and merge them.
+// Existing zones has precedence and overrides config ones
+func (z *ZoneDelegationImpl) ListAllZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+	finalList := &v1beta1.ZoneDelegationList{}
+	finalMap := make(map[string]v1beta1.ZoneDelegation)
+
+	cfgList, err := z.ListConfigZoneDelegations(ctx)
+	if err != nil {
+		return nil, err
+	}
+	currentList, err := z.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cfg := range cfgList.Items {
+		finalMap[name(cfg)] = cfg
+	}
+
+	for _, current := range currentList.Items {
+		finalMap[name(current)] = current
+	}
+
+	for _, final := range finalMap {
+		finalList.Items = append(finalList.Items, final)
+	}
+
+	return finalList, nil
 }
 
 func (z *ZoneDelegationImpl) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
@@ -253,7 +285,7 @@ func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd 
 	}
 
 	// update coreDNS data if necessary
-	zoneKey := fmt.Sprintf("%s.conf", strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-"))
+	zoneKey := name(*zd)
 	// skipping update if ZD exists in coredns
 	if value, found := coreDNSZones.Data[zoneKey]; found {
 		if value == getCoreDNSData(zd.Spec.LoadBalancedZone) {
@@ -275,4 +307,8 @@ func getCoreDNSData(zone string) string {
 }`
 	)
 	return fmt.Sprintf(zoneTemplate, zone)
+}
+
+func name(zd v1beta1.ZoneDelegation) string {
+	return fmt.Sprintf("%s.conf", strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-"))
 }
