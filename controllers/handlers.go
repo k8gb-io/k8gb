@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/rs/zerolog"
+
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
@@ -44,13 +46,15 @@ type IngressHandler struct {
 	client  client.Client
 	scheme  *runtime.Scheme
 	context context.Context
+	logger  *zerolog.Logger
 }
 
-func NewIngressHandler(ctx context.Context, client client.Client, scheme *runtime.Scheme) *IngressHandler {
+func NewIngressHandler(ctx context.Context, client client.Client, scheme *runtime.Scheme, logger *zerolog.Logger) *IngressHandler {
 	return &IngressHandler{
 		context: ctx,
 		client:  client,
 		scheme:  scheme,
+		logger:  logger,
 	}
 }
 
@@ -89,14 +93,14 @@ func (g *IngressHandler) isK8gbAnnotated(obj client.Object) bool {
 }
 
 func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) *k8gbv1beta1io.Gslb {
-	log.Warn().
+	g.logger.Warn().
 		Str("ingress", ing.GetName()).
 		Msg("Configuration GSLB resources via Ingress annotations is deprecated. " +
 			"This feature will be removed in k8gb v0.17. Please explicitly define a GSLB resource instead")
 
 	strategy := ing.GetAnnotations()[strategyAnnotation]
 	objectKey := client.ObjectKey{Namespace: ing.GetNamespace(), Name: ing.GetName()}
-	log.Info().
+	g.logger.Info().
 		Str("annotation", fmt.Sprintf("(%s:%s)", strategyAnnotation, strategy)).
 		Str("ingress", ing.GetName()).
 		Msg("Detected strategy annotation on ingress")
@@ -104,7 +108,7 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 	ingressToReuse := &netv1.Ingress{}
 	err := g.client.Get(context.Background(), objectKey, ingressToReuse)
 	if err != nil {
-		log.Info().
+		g.logger.Info().
 			Str("ingress", objectKey.Name).
 			Msg("Ingress doesn't exist anymore. Skipping Gslb creation...")
 		return nil
@@ -112,14 +116,14 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 
 	gslb, isNew, err := g.getGslb(ing)
 	if err != nil {
-		log.Err(err).
+		g.logger.Err(err).
 			Str("gslb", ing.GetName()).
 			Msg("Cannot build the Gslb object from ingress")
 		return nil
 	}
 	err = controllerutil.SetControllerReference(ingressToReuse, gslb, scheme)
 	if err != nil {
-		log.Err(err).
+		g.logger.Err(err).
 			Str("ingress", ingressToReuse.Name).
 			Str("gslb", gslb.Name).
 			Msg("Cannot set the Ingress as the owner of the Gslb")
@@ -127,24 +131,24 @@ func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtim
 	}
 	// create
 	if isNew {
-		log.Info().
+		g.logger.Info().
 			Str("gslb", gslb.Name).
 			Msg(fmt.Sprintf("Creating a new Gslb out of Ingress with '%s' annotation", strategyAnnotation))
 		err = g.client.Create(context.Background(), gslb)
 		if err != nil {
-			log.Err(err).Msg("Gslb creation failed")
+			g.logger.Err(err).Msg("Gslb creation failed")
 			return nil
 		}
 		return gslb
 	}
 	// update
-	log.Info().
+	g.logger.Info().
 		Str("gslb", gslb.Name).
 		Str("namespace", objectKey.Namespace).
 		Msg(fmt.Sprintf("Updating a Gslb out of Ingress %s", objectKey.Name))
 	err = g.client.Update(context.Background(), gslb)
 	if err != nil {
-		log.Err(err).Msg("Gslb update failed")
+		g.logger.Err(err).Msg("Gslb update failed")
 		return nil
 	}
 	return gslb
@@ -157,7 +161,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1io.Gslb, bool, 
 	err := g.client.Get(context.Background(), objectKey, gslb)
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
-			log.Err(err).
+			g.logger.Err(err).
 				Str("gslb", objectKey.Name).
 				Str("namespace", objectKey.Namespace).
 				Msg("reading Gslb object failed")
@@ -165,7 +169,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1io.Gslb, bool, 
 		}
 		// is not found
 		isNew = true
-		log.Info().
+		g.logger.Info().
 			Str("gslb", objectKey.Name).
 			Str("namespace", objectKey.Namespace).
 			Msg("Gslb doesn't exist, creating...")
@@ -173,7 +177,7 @@ func (g *IngressHandler) getGslb(obj client.Object) (*k8gbv1beta1io.Gslb, bool, 
 
 	strategyObj, err := g.parseStrategySpec(obj.GetAnnotations())
 	if err != nil {
-		log.Err(err).
+		g.logger.Err(err).
 			Str("gslb", obj.GetName()).
 			Msg("can't parse Gslb strategy")
 		return nil, isNew, err

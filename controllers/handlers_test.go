@@ -22,6 +22,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/logging"
+
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/utils"
@@ -37,6 +39,7 @@ import (
 )
 
 func TestIngressHandler(t *testing.T) {
+	log := logging.Logger()
 	const dummy = "default"
 	var spec = netv1.IngressSpec{
 		IngressClassName: utils.Ptr("nginx"),
@@ -215,7 +218,7 @@ func TestIngressHandler(t *testing.T) {
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 			utilruntime.Must(netv1.AddToScheme(scheme))
 			utilruntime.Must(k8gbv1beta1io.AddToScheme(scheme))
-			handler := NewIngressHandler(context.TODO(), client, scheme)
+			handler := NewIngressHandler(context.TODO(), client, scheme, log)
 
 			// act
 			result := handler.Handle(test.ing)

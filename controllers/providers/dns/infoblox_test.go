@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 
 	"github.com/k8gb-io/k8gb/controllers/mocks"
@@ -37,25 +39,24 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		config        resolver.Config
 		getClient     func(*gomock.Controller) InfobloxClient
 		expectedError bool
+		detail        *zones.ExtendedZoneDelegation
 	}{
 		{
 			name:          "create cloud.example.com",
 			expectedError: false,
+			detail: &zones.ExtendedZoneDelegation{
+				ParentZone:       "example.com",
+				LoadBalancedZone: "cloud.example.com",
+				ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+				IPs:              []string{"10.0.0.1", "10.0.0.2"},
+				NegativeTTL:      30,
+				ExtClusterNSNames: map[string]string{
+					"us": "gslb-ns-us-cloud.example.com",
+				},
+			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						ParentZone:       "example.com",
-						LoadBalancedZone: "cloud.example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:      30,
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-						},
-					},
-				},
 			},
 			getClient: func(ctrl *gomock.Controller) InfobloxClient {
 				findZone := &ibclient.ZoneDelegated{
@@ -97,22 +98,20 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		{
 			name:          "found cloud.example.com WITHOUT updating",
 			expectedError: false,
+			detail: &zones.ExtendedZoneDelegation{
+				ParentZone:       "example.com",
+				LoadBalancedZone: "cloud.example.com",
+				ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+				IPs:              []string{"10.0.0.1", "10.0.0.2"},
+				NegativeTTL:      30,
+				ExtClusterNSNames: map[string]string{
+					"us": "gslb-ns-us-cloud.example.com",
+					"za": "gslb-ns-za-cloud.example.com",
+				},
+			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						ParentZone:       "example.com",
-						LoadBalancedZone: "cloud.example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:      30,
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-							"za": "gslb-ns-za-cloud.example.com",
-						},
-					},
-				},
 			},
 			getClient: func(ctrl *gomock.Controller) InfobloxClient {
 				findZone := &ibclient.ZoneDelegated{
@@ -142,22 +141,20 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		{
 			name:          "found cloud.example.com WITH updating",
 			expectedError: false,
+			detail: &zones.ExtendedZoneDelegation{
+				ParentZone:       "example.com",
+				LoadBalancedZone: "cloud.example.com",
+				ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+				IPs:              []string{"10.0.0.1", "10.0.0.2"},
+				NegativeTTL:      30,
+				ExtClusterNSNames: map[string]string{
+					"us": "gslb-ns-us-cloud.example.com",
+					"za": "gslb-ns-za-cloud.example.com",
+				},
+			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						ParentZone:       "example.com",
-						LoadBalancedZone: "cloud.example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:      30,
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-							"za": "gslb-ns-za-cloud.example.com",
-						},
-					},
-				},
 			},
 			getClient: func(ctrl *gomock.Controller) InfobloxClient {
 				findZone := &ibclient.ZoneDelegated{
@@ -216,22 +213,20 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		{
 			name:          "error during Infoblox interraction",
 			expectedError: true,
+			detail: &zones.ExtendedZoneDelegation{
+				ParentZone:       "example.com",
+				LoadBalancedZone: "cloud.example.com",
+				ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+				IPs:              []string{"10.0.0.1", "10.0.0.2"},
+				NegativeTTL:      30,
+				ExtClusterNSNames: map[string]string{
+					"us": "gslb-ns-us-cloud.example.com",
+					"za": "gslb-ns-za-cloud.example.com",
+				},
+			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						ParentZone:       "example.com",
-						LoadBalancedZone: "cloud.example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:      30,
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-							"za": "gslb-ns-za-cloud.example.com",
-						},
-					},
-				},
 			},
 			getClient: func(ctrl *gomock.Controller) InfobloxClient {
 				mgr := mocks.NewMockIBObjectManager(ctrl)
@@ -256,23 +251,21 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		{
 			name:          "create cloud.example.com with custom DNS view",
 			expectedError: false,
+			detail: &zones.ExtendedZoneDelegation{
+				ParentZone:       "example.com",
+				LoadBalancedZone: "cloud.example.com",
+				ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+				IPs:              []string{"10.0.0.1", "10.0.0.2"},
+				NegativeTTL:      30,
+				ExtClusterNSNames: map[string]string{
+					"us": "gslb-ns-us-cloud.example.com",
+				},
+			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   30,
 				Infoblox: resolver.Infoblox{
 					DNSView: "custom-view",
-				},
-				DelegationZones: []*resolver.DelegationZoneInfo{
-					{
-						ParentZone:       "example.com",
-						LoadBalancedZone: "cloud.example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						IPs:              []string{"10.0.0.1", "10.0.0.2"},
-						NegativeTTL:      30,
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-						},
-					},
 				},
 			},
 			getClient: func(ctrl *gomock.Controller) InfobloxClient {
@@ -319,14 +312,12 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 			defer ctrl.Finish()
 			client := test.getClient(ctrl)
 			ibx := NewInfobloxDNS(test.config, client)
-			for _, zone := range test.config.DelegationZones {
-				err := ibx.CreateZoneDelegation(zone)
-				if test.expectedError {
-					assert.Error(t, err)
-					continue
-				}
-				assert.NoError(t, err)
+			err := ibx.CreateZoneDelegation(test.detail)
+			if test.expectedError {
+				assert.Error(t, err)
+				return
 			}
+			assert.NoError(t, err)
 		})
 	}
 }

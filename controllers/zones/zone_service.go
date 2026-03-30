@@ -52,10 +52,15 @@ type ZoneDelegationImpl struct {
 	client     client.Client
 	config     *resolver.Config
 	ipresolver ipresolver.Resolver
+	apiReader  client.Reader
 }
 
-func NewZoneDelegationImpl(client client.Client, config *resolver.Config, bootstrapSvc ipresolver.Resolver) *ZoneDelegationImpl {
-	return &ZoneDelegationImpl{client: client, config: config, ipresolver: bootstrapSvc}
+func NewZoneDelegationImpl(
+	client client.Client,
+	apiReader client.Reader,
+	config *resolver.Config,
+	bootstrapSvc ipresolver.Resolver) *ZoneDelegationImpl {
+	return &ZoneDelegationImpl{client: client, config: config, apiReader: apiReader, ipresolver: bootstrapSvc}
 }
 
 func (z *ZoneDelegationImpl) List(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
@@ -81,8 +86,7 @@ func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegatio
 			Name: zd.Name,
 		},
 	}
-
-	_, err := controllerutil.CreateOrUpdate(ctx, z.client, current, func() error {
+	op, err := controllerutil.CreateOrUpdate(ctx, z.client, current, func() error {
 		// Only manage fields owned by this controller.
 		current.Spec.LoadBalancedZone = zd.Spec.LoadBalancedZone
 		current.Spec.ParentZone = zd.Spec.ParentZone
@@ -93,8 +97,11 @@ func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegatio
 		return fmt.Errorf("error creating/updating zone delegation: %w", err)
 	}
 
-	if err := z.updateCoreDNSConfiguration(ctx, current); err != nil {
-		return fmt.Errorf("error updating CoreDNS configuration: %w", err)
+	// Only update CoreDNS if something actually changed
+	if op != controllerutil.OperationResultNone {
+		if err := z.updateCoreDNSConfiguration(ctx, *current); err != nil {
+			return fmt.Errorf("error updating CoreDNS configuration: %w", err)
+		}
 	}
 
 	return nil
@@ -262,23 +269,15 @@ func (z *ZoneDelegationImpl) HasExtClusterGeoTags(ctx context.Context) bool {
 	return len(detail.ExtClusterNSNames) > 0
 }
 
-// updateCoreDNSConfiguration creates, updates, or skips the coredns-dynamic ConfigMap.
+// updateCoreDNSConfiguration creates, updates, or skips the k8gb-zone-delegation ConfigMap.
 // controllerutil.CreateOrUpdate was avoided to keep full control over update conditions (DeepEqual is too coarse).
-func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
-	const zoneCM = "coredns-dynamic"
-	notFound := false
-	coreDNSZones := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      zoneCM,
-			Namespace: z.config.K8gbNamespace,
-		},
-	}
-	err := z.client.Get(ctx, client.ObjectKey{Name: zoneCM, Namespace: z.config.K8gbNamespace}, coreDNSZones)
+func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd v1beta1.ZoneDelegation) error {
+	const zoneCM = "k8gb-zone-delegation"
+
+	coreDNSZones := &corev1.ConfigMap{}
+	err := z.apiReader.Get(ctx, types.NamespacedName{Namespace: z.config.K8gbNamespace, Name: zoneCM}, coreDNSZones)
 	if err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-		notFound = true
+		return fmt.Errorf("failed to get ConfigMap %s: %w", zoneCM, err)
 	}
 
 	if coreDNSZones.Data == nil {
@@ -286,26 +285,23 @@ func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd 
 	}
 
 	// update coreDNS data if necessary
-	zoneKey := name(*zd)
-	// skipping update if ZD exists in coredns
-	if value, found := coreDNSZones.Data[zoneKey]; found {
-		if value == getCoreDNSData(zd.Spec.LoadBalancedZone) {
-			return nil
-		}
+	zoneKey := name(zd)
+	// Skip update if the zone entry already exists.
+	if _, found := coreDNSZones.Data[zoneKey]; found {
+		return nil
 	}
+
 	coreDNSZones.Data[zoneKey] = getCoreDNSData(zd.Spec.LoadBalancedZone)
-	if notFound {
-		return z.client.Create(ctx, coreDNSZones)
-	}
+
 	return z.client.Update(ctx, coreDNSZones)
 }
 
 func getCoreDNSData(zone string) string {
 	const (
-		zoneTemplate = `
-%s:5353 {
+		zoneTemplate = `%s:5353 {
   import k8gbplugins
-}`
+}
+`
 	)
 	return fmt.Sprintf(zoneTemplate, zone)
 }

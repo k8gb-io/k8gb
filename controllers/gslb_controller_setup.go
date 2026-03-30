@@ -51,7 +51,7 @@ func (r *GslbReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			c := mgr.GetClient()
 			err := c.List(context.TODO(), gslbList, opts...)
 			if err != nil {
-				log.Info().Msg("Can't fetch gslb objects")
+				r.Logger.Info().Msg("Can't fetch gslb objects")
 				return nil
 			}
 			reconcileRequests := []reconcile.Request{}

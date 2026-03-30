@@ -23,6 +23,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+	"github.com/rs/zerolog"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
@@ -44,14 +47,25 @@ import (
 // LegacyGslbReconciler keeps legacy apiGroup runtime behavior active until migration is explicitly requested.
 type LegacyGslbReconciler struct {
 	client.Client
-	Scheme   *runtime.Scheme
-	Config   *resolver.Config
-	Recorder record.EventRecorder
+	Scheme      *runtime.Scheme
+	Config      *resolver.Config
+	Recorder    record.EventRecorder
+	ZoneService zones.ZoneDelegation
+	Logger      *zerolog.Logger
 }
 
 // Reconcile runs legacy runtime reconciliation only for legacy objects that are not migration requested/migrated yet.
 func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+
+	// Check that cluster provides available IPs. Without IP's I'm skipping GSLB reconciliation
+	if !r.ZoneService.HasAvailableIPs(ctx) {
+		r.Logger.Info().
+			Str("name", req.Name).
+			Str("namespace", req.Namespace).
+			Msg("Waiting for available IPs. Skipping GSLB reconciliation")
+		return result.Requeue()
+	}
 
 	legacy := &k8gbv1beta1.Gslb{}
 	if err := r.Get(ctx, req.NamespacedName, legacy); err != nil {
@@ -98,7 +112,7 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting GSLB servers (%s)", err))
 	}
-	filteredServers := filterServersByDelegationZones(servers, r.Config.DelegationZones)
+	filteredServers := filterServersByDelegationZones(r.Logger, servers, r.Config.DelegationZones)
 	if len(filteredServers) == 0 {
 		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", r.Config.DelegationZones.ListZones()))
 	}
@@ -109,7 +123,7 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting load balancer exposed IPs (%s)", err))
 	}
-	lbIPv4Addresses, _ := splitIPsByVersion(loadBalancerExposedIPs)
+	lbIPv4Addresses, _ := splitIPsByVersion(r.Logger, loadBalancerExposedIPs)
 	gslb.Status.LoadBalancer.ExposedIPs = lbIPv4Addresses
 
 	serviceHealth, err := calculateServiceHealth(ctx, r.Client, gslb)
@@ -124,7 +138,7 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		r.Client,
 		r.Config,
 		gslb,
-		log,
+		r.Logger,
 		utils.NewDNSQueryService(),
 		r.updateLegacyRuntimeStatus)
 

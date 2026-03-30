@@ -22,6 +22,8 @@ import (
 	"context"
 
 	"github.com/k8gb-io/k8gb/controllers/resolver"
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,12 +33,12 @@ import (
 )
 
 type DelegationDNSEndpoint struct {
-	context      context.Context
-	endpointType dnsEndpointType
-	client       client.Client
-	config       resolver.Config
-	logger       *zerolog.Logger
-	info         resolver.DelegationZoneInfo
+	context                context.Context
+	endpointType           dnsEndpointType
+	client                 client.Client
+	config                 resolver.Config
+	logger                 *zerolog.Logger
+	extendedZoneDelegation zones.ExtendedZoneDelegation
 }
 
 func NewDelegationDNSEndpoint(
@@ -44,14 +46,14 @@ func NewDelegationDNSEndpoint(
 	client client.Client,
 	config resolver.Config,
 	logger *zerolog.Logger,
-	info resolver.DelegationZoneInfo) *DelegationDNSEndpoint {
+	extendedZoneDelegation zones.ExtendedZoneDelegation) *DelegationDNSEndpoint {
 	return &DelegationDNSEndpoint{
-		context:      context,
-		client:       client,
-		config:       config,
-		logger:       logger,
-		endpointType: delegationDNSEndpoint,
-		info:         info,
+		context:                context,
+		client:                 client,
+		config:                 config,
+		logger:                 logger,
+		endpointType:           delegationDNSEndpoint,
+		extendedZoneDelegation: extendedZoneDelegation,
 	}
 }
 
@@ -60,7 +62,12 @@ func (d *DelegationDNSEndpoint) SaveDNSEndpoint(e *externaldnsApi.DNSEndpoint) e
 }
 
 func (d *DelegationDNSEndpoint) RemoveEndpoint() error {
-	return removeEndpoint(d.context, d.client, client.ObjectKey{Namespace: d.config.K8gbNamespace, Name: d.info.GetExternalDNSEndpointName()}, d.logger)
+	return removeEndpoint(d.context,
+		d.client,
+		client.ObjectKey{
+			Namespace: d.config.K8gbNamespace,
+			Name:      d.extendedZoneDelegation.GetExternalDNSEndpointName()},
+		d.logger)
 }
 
 func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, error) {
@@ -72,23 +79,23 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 
 	NSRecord := &externaldnsApi.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      d.info.GetExternalDNSEndpointName(),
+			Name:      d.extendedZoneDelegation.GetExternalDNSEndpointName(),
 			Namespace: d.config.K8gbNamespace,
 			Labels:    map[string]string{"k8gb.io/dnstype": externalDNSTypeCommon, "k8gb.absa.oss/dnstype": externalDNSTypeCommon},
 		},
 		Spec: externaldnsApi.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{
 				{
-					DNSName:    d.info.LoadBalancedZone,
+					DNSName:    d.extendedZoneDelegation.LoadBalancedZone,
 					RecordTTL:  ttl,
 					RecordType: "NS",
-					Targets:    d.info.GetNSServerList(),
+					Targets:    d.extendedZoneDelegation.GetNSServerList(),
 				},
 				{
-					DNSName:    d.info.ClusterNSName,
+					DNSName:    d.extendedZoneDelegation.ClusterNSName,
 					RecordTTL:  ttl,
 					RecordType: "A",
-					Targets:    d.info.IPs,
+					Targets:    d.extendedZoneDelegation.IPs.Unsorted(),
 				},
 			},
 		},
