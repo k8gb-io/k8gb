@@ -12,7 +12,7 @@ tags:
   - beginners
 ---
 
-![alt text](../blog-banners/k8gb-blog-1.png)
+![Blog Banner](../blog-banners/k8gb-blog-1.png)
 
 # A Beginner-Friendly Guide to k8gb Local Setup
 
@@ -24,7 +24,7 @@ So I decided to write the walkthrough I wish I had when I was getting started.
 
 <!-- more -->
 
-## 🤔 Why Does the Local Setup Feel Like a Lot?
+## Why Does the Local Setup Feel Like a Lot?
 
 Before we get into the actual setup, let me explain what's actually happening. This context makes everything else much easier to follow.
 
@@ -49,7 +49,7 @@ k8gb on each cluster talks to the edgedns cluster to register which cluster is h
 
 That's the whole idea. Now let's set it up.
 
-## 🛠️ What You Actually Need (And Why)
+## What You Actually Need (And Why)
 
 The setup requires a few tools. Here's what each one is for so you know what you're installing:
 
@@ -67,7 +67,7 @@ For just running the local demo, you really only need **Docker, k3d, kubectl, an
 
 > ⚠️ **Important**: Docker needs at least **8GB of memory** allocated. Three clusters running simultaneously is memory-heavy. Check your Docker Desktop settings and bump it up if needed.
 
-## 📦 Installing the Prerequisites
+## Installing the Prerequisites
 
 If you're on macOS, the easiest way:
 
@@ -105,18 +105,16 @@ kubectl version --client
 helm version
 ```
 
-## 🚀 Cloning the Repo
+## Cloning the Repo
 
 ```sh
 git clone https://github.com/k8gb-io/k8gb.git
 cd k8gb
 ```
 
-## ⚡ Running the Setup
+## Running the Setup
 
 Now the magic command:
-
-GIF
 
 ```sh
 make deploy-full-local-setup
@@ -135,7 +133,7 @@ This takes a few minutes. Grab a coffee. ☕
 
 When it's done, you'll see output confirming everything is up.
 
-## ✅ Verifying the Setup
+## Verifying the Setup
 
 First, check that all three clusters are running:
 
@@ -209,7 +207,7 @@ You should see the `message` field alternating between `eu` and `us`:
 
 That's round-robin load balancing working across two clusters. Each DNS response picks a different cluster's IP.
 
-## 🔄 Trying the Failover Demo
+## Trying the Failover Demo
 
 Failover is where k8gb really shines. Let's see it in action.
 
@@ -256,7 +254,7 @@ After another ~30 seconds, `eu` will be back in the DNS rotation.
 
 > 💡 **Why 30 seconds?** That's the DNS TTL (Time To Live). DNS records are cached for 30 seconds, so changes take up to 30 seconds to propagate. This is configurable in the GSLB resource via `dnsTtlSeconds`.
 
-## 🧹 Cleaning Up
+## Cleaning Up
 
 When you're done experimenting:
 
@@ -274,7 +272,7 @@ This removes all three clusters and cleans everything up.
 - **Ports to remember**: edgedns answers on `:1053`, test-gslb1 CoreDNS on `:5053`, test-gslb2 on `:5054`
 - **The Makefile is your friend** — run `make help` to see all available targets
 
-## 🤔 Things That Took Me a Moment to Understand
+## Things That Took Me a Moment to Understand!!!!
 
 The biggest thing for me was building the mental model first — understanding that you're running three clusters, not one. Once that clicked, the rest of the setup made a lot more sense.
 
@@ -282,7 +280,7 @@ The DNS verification step also took a moment. Commands like `dig @localhost -p 1
 
 The 30-second wait during the failover demo also caught me off guard the first time. I stopped the app, immediately tested, and got confused when `eu` was still responding. DNS caching is real!
 
-## 🎯 What's Next?
+## What's Next?
 
 Now that you have k8gb running locally, here's what I'd suggest exploring next:
 
