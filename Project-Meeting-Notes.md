@@ -36,7 +36,51 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 </details>
 
-<details open><summary><strong>March 18, 2026 #88</strong></summary>
+<details open><summary><strong>April 1, 2026 #89</strong></summary>
+
+## April 1, 2026 #89
+
+Zoom Recording: <tbd> 
+
+On YouTube: <tbd>
+
+**Attendees**
+
+- Farhan 
+- Michal
+- Yury
+  
+**Agenda**
+
+- **News**
+  - KubeCon happened last week 🎉
+    - k8gb kiosk: P-12B | 24th Tuesday 15:10 - 19:00 | Hall 5 - Gouda Zone - Project Pavilion 🍻
+    - 2 talks: [Security Review Panel](https://sched.co/2EF6x) and [Building Unified Global Load Balancing for the Edge With k8gb](https://sched.co/2DY3a)
+- **Issue Review**
+  - [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+  - Zone Delegation discussion and demo - Michal
+- **PR Reviews**
+  - https://github.com/k8gb-io/k8gb/pull/2291 - Farhan
+  - https://github.com/k8gb-io/k8gb/pull/2307/ - Farhan
+  - https://github.com/k8gb-io/k8gb/pull/2095 - Farhan
+  - https://github.com/k8gb-io/k8gb/pull/2313 - Michal - ZD for review
+- **Community Update**
+  - Incubation
+    - governance and tech reviews complete, working on ADOPTER interviews
+  - [contribution from Tailscale](https://github.com/k8gb-io/k8gb/pull/2285)
+  - Vanity stats
+    - 300 (140 last 90d) LinkedIn followers 📈
+    - page views up 43% last week, unique visitors up 87%
+    - scarf data - @ytsarev
+    - last month: 1,785 impressions / 64 reactions
+    - 1,161 ⭐
+- **Other**
+  - Trivy incident review https://github.com/k8gb-io/k8gb/issues/2294
+  - https://deathbyclawd.com/?url=k8gb.io we are immortal 
+- **Action Items**
+</details>
+
+<details><summary><strong>March 18, 2026 #88</strong></summary>
 
 ## March 18, 2026 #88
 
