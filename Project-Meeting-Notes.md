@@ -40,9 +40,9 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## April 1, 2026 #89
 
-Zoom Recording: <tbd> 
+Zoom Recording: https://zoom.us/rec/share/65uyJVFyYDdJGeF4ymPUC_NA99mSCGBiD8lH5FQtZMeWjYNWGSlKHHhKBnCwll23.EDaZ0E2WuBgquspX 
 
-On YouTube: <tbd>
+On YouTube: https://youtu.be/PgBJj2tOVww
 
 **Attendees**
 
@@ -69,7 +69,7 @@ On YouTube: <tbd>
     - governance and tech reviews complete, working on ADOPTER interviews
   - [contribution from Tailscale](https://github.com/k8gb-io/k8gb/pull/2285)
   - Vanity stats
-    - 300 (140 last 90d) LinkedIn followers 📈
+    - 305 (140 last 90d) LinkedIn followers 📈
     - page views up 43% last week, unique visitors up 87%
     - scarf data - @ytsarev
     - last month: 1,785 impressions / 64 reactions
