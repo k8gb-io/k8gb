@@ -725,7 +725,7 @@ endef
 
 # Documentation with Mkdocs
 
-.PHONY: docs-deploy docs-deploy-master docs-deploy-last-3 docs-list
+.PHONY: docs-list docs-deploy docs-deploy-master docs-deploy-last-3
 
 docs-list: ## List deployed versions
 	mike list
