@@ -13,12 +13,12 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 jobs:
   release:
     permissions:
       contents: write
+      packages: write
     runs-on: ubuntu-24.04
     outputs:
       container_tags: ${{ steps.container_info.outputs.container_tags }}
@@ -68,11 +68,26 @@ jobs:
         uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
         with:
           go-version-file: ./go.mod
-      - name: Login to Dockerhub
+      - name: Login to GHCR
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Required for linux/arm64 builds on amd64 GitHub runners
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Required for multi-arch builds and OCI attestations (SBOM/provenance)
+      # Default docker driver does not support --attest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          install: true
+          use: true
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
         with:
@@ -85,8 +100,8 @@ jobs:
         run: |
           function digest_tags {
             while IFS= read -r line ; do
-              jq -n "{digest: \"$line\", tags: \$ARGS.positional}" --args $(docker inspect docker.io/absaoss/k8gb@$line --format '{{ join .RepoTags "\n" }}' | sed 's/.*://' | awk '!_[$0]++')
-            done <<< "$(docker manifest inspect docker.io/absaoss/k8gb:${{ github.ref_name }} | grep digest | cut -d '"' -f 4)"
+              jq -n "{digest: \"$line\", tags: \$ARGS.positional}" --args $(docker inspect ghcr.io/k8gb-io/k8gb@$line --format '{{ join .RepoTags "\n" }}' | sed 's/.*://' | awk '!_[$0]++')
+            done <<< "$(docker manifest inspect ghcr.io/k8gb-io/k8gb:${{ github.ref_name }} | grep digest | cut -d '"' -f 4)"
           }
           CONTAINER_INFO="$(digest_tags | jq --slurp . -c)"
           CONTAINER_DIGEST="$(echo ${CONTAINER_INFO} | jq --raw-output '.[0].digest')"
@@ -109,6 +124,9 @@ jobs:
     name: sbom
     needs: [release]
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
     env:
       TAGS: "${{ needs.release.outputs.container_tags }}"
 
@@ -125,11 +143,12 @@ jobs:
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@b5042e9d19d8b32849779bfe17673ff84aec702d # renovate: tag=v0.12.0
-      - name: Login to Dockerhub
+      - name: Login to GHCR
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Attach SBOM
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
@@ -137,10 +156,10 @@ jobs:
           echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
           for t in `echo ${TAGS}`; do
-            cosign verify --key cosign.pub docker.io/absaoss/k8gb:${t}
-            syft docker.io/absaoss/k8gb:${t} -o spdx-json > sbom-spdx.json
-            cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key docker.io/absaoss/k8gb:${t}
-            cosign verify-attestation -o verified-sbom-spdx.json --type spdx --key cosign.pub docker.io/absaoss/k8gb:${t}
+            cosign verify --key cosign.pub ghcr.io/k8gb-io/k8gb:${t}
+            syft ghcr.io/k8gb-io/k8gb:${t} -o spdx-json > sbom-spdx.json
+            cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key ghcr.io/k8gb-io/k8gb:${t}
+            cosign verify-attestation -o verified-sbom-spdx.json --type spdx --key cosign.pub ghcr.io/k8gb-io/k8gb:${t}
           done
       - name: Clean up
         if: ${{ always() }}
@@ -174,11 +193,11 @@ jobs:
         container: ${{ fromJSON(needs.release.outputs.container_info) }}
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
     with:
-      image: docker.io/absaoss/k8gb
+      image: ghcr.io/k8gb-io/k8gb
       digest: ${{ matrix.container.digest }}
     secrets:
-      registry-username: ${{ secrets.DOCKER_USER }}
-      registry-password: ${{ secrets.DOCKER_PASSWORD }}
+      registry-username: ${{ github.actor }}
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   slsa-summary:
     name: Release Summary
@@ -203,12 +222,12 @@ jobs:
             echo "- self reference: [action run #${{ github.run_id }}](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }})"
             echo "- release page: [${{ github.ref_name }}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ github.ref_name }})"
             echo "- this github workflow (code): [ci.yaml](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/.github/workflows/release.yaml)"
-            echo "- container images at dockerhub: [docker.io/absaoss/k8gb](https://hub.docker.com/r/absaoss/k8gb/tags)"
+            echo "- container images at GHCR: [ghcr.io/k8gb-io/k8gb](https://github.com/k8gb-io/k8gb/pkgs/container/k8gb)"
             echo ""
             echo "## :closed_lock_with_key: Secure Software Supply Chain"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
-          repo="docker.io/absaoss/k8gb"
+          repo="ghcr.io/k8gb-io/k8gb"
           for tag in `echo ${TAGS}`; do
             img="${repo}:${tag}"
             digest=$(echo $CONTAINER_INFO | jq "map(select(.tags[] | contains(\"${tag}\"))) | .[].digest")
@@ -236,7 +255,7 @@ jobs:
             echo
             echo 'Instead of using `--key cosign.pub` that requires having the public key locally present, you can alternatively use:'
             echo '```bash'
-            echo "cosign verify --key https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/blob/${{ github.ref_name }}/cosign.pub \${image}"
+            echo "cosign verify --key https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{ github.ref_name }}/cosign.pub \${image}"
             echo '```'
             echo
             echo "---"

@@ -90,6 +90,7 @@ The k8gb exposes several metrics to help you monitor the health and behavior.
 | `k8gb_infoblox_zone_updates_total` | Counter | Number of k8gb Infoblox zone updates. | `namespace`, `name` |
 | `k8gb_endpoint_status_num` | Gauge | Number of targets in DNS endpoint. | `namespace`, `name`, `dns_name` |
 | `k8gb_runtime_info` | Gauge | K8gb runtime info. | `namespace`, `k8gb_version`, <br>`go_version`, `arch`, `os`, `git_sha` |
+| `k8gb_gslb_healthy_local_records` | Gauge | Number of local cluster IPs in healthy records.| `namespace`, `name`, `geotag`|
 
 ## OpenTracing
 

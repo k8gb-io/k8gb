@@ -1,6 +1,41 @@
 # K8GB Rollback Procedures
 
-## v0.15.0 → v0.14.0 Rollback
+## Rollback Compatibility
+
+| From | To | Method | Status |
+|------|----|---------| -------|
+| v0.17.0 | v0.16.0 | `helm rollback` | ✅ Works |
+| v0.16.0+| v0.15.0 | `helm upgrade` + values file | ⚠️ Needs CoreDNS fix |
+| v0.15.0+ | v0.14.0 | `helm upgrade` + schema conversion | ⚠️ Needs dnsZones conversion |
+
+## v0.16.0+ → v0.15.0 Rollback
+
+### Issue
+Direct rollback fails due to CoreDNS service configuration changes.
+
+Note: v0.16.0 introduced zones configuration that breaks rollback to v0.15.0
+
+### Solution
+Use values file with v0.15.0 compatible CoreDNS config:
+
+```yaml
+# v015-rollback-values.yaml
+coredns:
+# v0.15.0 compatible CoreDNS configuration
+  servers:
+  - port: 5353
+    servicePort: 53
+    plugins:
+    - name: prometheus
+      parameters: 0.0.0.0:9153
+```
+
+**Rollback command:**
+```bash
+helm upgrade k8gb k8gb/k8gb --version v0.15.0 -n k8gb -f v015-rollback-values.yaml
+```
+
+## v0.15.0+→ v0.14.0 Rollback
 
 ### Issue
 

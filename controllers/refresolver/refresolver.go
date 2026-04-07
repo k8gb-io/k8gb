@@ -22,9 +22,12 @@ import (
 	"fmt"
 	"reflect"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapigrpcroute"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapihttproute"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapitcproute"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapitlsroute"
+	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapiudproute"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/ingress"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/istiovirtualservice"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/lbservice"
@@ -35,14 +38,14 @@ import (
 // GslbReferenceResolver resolves references to other kubernetes resources concerning ingress configuration
 type GslbReferenceResolver interface {
 	// GetServers retrieves GSLB the server configuration
-	GetServers() ([]*k8gbv1beta1.Server, error)
+	GetServers() ([]*k8gbv1beta1io.Server, error)
 	// GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 	GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error)
 }
 
 // New creates a new GSLBReferenceResolver
-func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver, error) {
-	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
+func New(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (GslbReferenceResolver, error) {
+	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1io.ResourceRef{}) {
 		return ingress.NewEmbeddedResolver(gslb, k8sClient)
 	}
 	if gslb.Spec.ResourceRef.Kind == "Ingress" && gslb.Spec.ResourceRef.APIVersion == "networking.k8s.io/v1" {
@@ -62,6 +65,15 @@ func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver
 	}
 	if gslb.Spec.ResourceRef.Kind == "GRPCRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1" {
 		return gatewayapigrpcroute.NewReferenceResolver(gslb, k8sClient)
+	}
+	if gslb.Spec.ResourceRef.Kind == "TCPRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha2" {
+		return gatewayapitcproute.NewReferenceResolver(gslb, k8sClient)
+	}
+	if gslb.Spec.ResourceRef.Kind == "UDPRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha2" {
+		return gatewayapiudproute.NewReferenceResolver(gslb, k8sClient)
+	}
+	if gslb.Spec.ResourceRef.Kind == "TLSRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha3" {
+		return gatewayapitlsroute.NewReferenceResolver(gslb, k8sClient)
 	}
 	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)
 }

@@ -2,6 +2,8 @@ name: Github Pages
 
 on:
   push:
+    tags:
+      - 'v*'
     branches:
       - master
     paths:
@@ -20,22 +22,22 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.x'
 
       - name: Install MkDocs
         run: |
-          pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks
+          pip3 install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks mike
 
       - name: Setup git config
         run: |
@@ -55,22 +57,21 @@ jobs:
           fi
           git checkout master
 
-      - name: Build documentation
-        run: mkdocs build --clean
+      - name: Deploy documentation with Mike
+        if: startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-')
+        run: make docs-deploy VERSION=${GITHUB_REF#refs/tags/}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Deploy to gh-pages
+      - name: Deploy latest 3 documentation versions
+        if: github.ref == 'refs/heads/master'
+        run: make docs-deploy-last-3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore preserved files
         run: |
-          # Copy built site to temp location
-          cp -r site /tmp/mkdocs-site
-
           git checkout gh-pages
-
-          # Clean everything except git files and preserved files
-          find . -maxdepth 1 -not -name '.git*' -not -name '.' -not -name '..' -exec rm -rf {} +
-
-          # Deploy new site
-          cp -r /tmp/mkdocs-site/* .
-
           # Restore preserved files
           test -d /tmp/preserved/charts && cp -r /tmp/preserved/charts .
           test -f /tmp/preserved/artifacthub-repo.yml && cp /tmp/preserved/artifacthub-repo.yml .

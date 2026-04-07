@@ -13,18 +13,19 @@ on:
 permissions:
   contents: read
 
+env:
+  K3D_VERSION: v5.8.3
+
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    env:
-      OCI_REPO: oci://ghcr.io/k8gb-io/charts
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           ref: ${{ inputs.tag || github.ref }}
@@ -35,29 +36,13 @@ jobs:
           destination-repo: k8gb-io/k8gb
           destination-branch: gh-pages
 
-      - name: Push to OCI Registry
-        run: |
-          echo ${{ secrets.CR_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
-          git fetch origin gh-pages
-          git checkout origin/gh-pages -- charts/
-          ls -la charts/
-          OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
-          VERSION=$(make version)
-          CHART_FILE="charts/k8gb-${VERSION}.tgz"
-          if [ -f "$CHART_FILE" ]; then
-            echo "Pushing chart for version: $VERSION"
-            helm push "$CHART_FILE" "$OCI_REPO"
-          else
-            echo "Chart file $CHART_FILE not found. Available charts:"
-            ls -la charts/k8gb-*.tgz || echo "No k8gb charts found"
-            exit 1
-          fi
-
       - name: Create k3s cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
           args: -c k3d/test-gslb1.yaml
+          k3d-version: ${{ env.K3D_VERSION }}
+
       - name: Smoke test helm installation
         run: |
           helm repo add k8gb https://k8gb.io/
@@ -72,7 +57,7 @@ jobs:
       - name: Invoke workflow for OLM (community-operators)
         if: always()
         continue-on-error: true
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc
+        uses: benc-uk/workflow-dispatch@7a027648b88c2413826b6ddd6c76114894dc5ec4
         with:
           workflow: olm_pr.yaml
           token: ${{ secrets.CR_TOKEN }}
@@ -80,7 +65,7 @@ jobs:
       - name: Invoke workflow for OLM (community-operators-prod)
         if: always()
         continue-on-error: true
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc
+        uses: benc-uk/workflow-dispatch@7a027648b88c2413826b6ddd6c76114894dc5ec4
         with:
           workflow: olm_pr.yaml
           token: ${{ secrets.CR_TOKEN }}

@@ -7,9 +7,15 @@
 <p align="center">
   <a href="https://landscape.cncf.io/?item=orchestration-management--coordination-service-discovery--k8gb">CNCF Sandbox Project</a> | 
   <a href="https://github.com/orgs/k8gb-io/projects/2/views/2">Roadmap</a> | 
-  <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a> 
+  <a href="https://cloud-native.slack.com/archives/C021P656HGB">Join #k8gb on CNCF Slack</a> |  
+  <a href="#community-meetings">Join our Community Meetings</a> 
+  <!-- Scarf pixel for aggregate usage metrics (CNCF-approved) -->
+  <img referrerpolicy="no-referrer-when-downgrade"
+       src="https://static.scarf.sh/a.png?x-pxid=f1358b06-c78b-4191-8a13-9160ca3a58dc"
+       width="1" height="1" alt="" />
 </p>
 
+<div id="star-banner-placeholder"></div>
 
 [![License: Apache_2](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Golang lint, golic and test](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/k8gb-io/k8gb/actions/workflows/build.yml)
@@ -31,7 +37,7 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
 Just a single Gslb CRD to enable the Global Load Balancing:
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: test-gslb-failover
@@ -45,6 +51,8 @@ spec:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag
 ```
+
+Legacy `k8gb.absa.oss/v1beta1` resources are still accepted and automatically migrated to `k8gb.io/v1beta1`. Legacy objects are labeled `k8gb.io/migrated-to-k8gb-io=true` and emit a warning event telling users to edit the `k8gb.io` object going forward. Legacy example: `docs/examples/legacy/gslb-legacy.yaml`.
 
 [Global load balancing](https://cloud.redhat.com/blog/global-load-balancer-approaches), commonly referred to as GSLB (Global Server Load Balancing) solutions, has been typically the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 
@@ -106,29 +114,36 @@ For comprehensive installation and configuration guides, see the [Installation a
 A list of publicly known users of the K8GB project can be found in [ADOPTERS.md](ADOPTERS.md).
 We encourage all users of K8GB to add themselves to this list!
 
+## Case Studies
+
+* Featured end-user story: [Millennium bcp CNCF case study](https://www.cncf.io/case-studies/millennium-bcp/)
+
 ## Production Readiness
 
 You can use k8gb in on-prem, cloud and hybrid environments.
 
-k8gb is tested with the following environment options.
+k8gb is tested with the following environment options and integration scenarios.
 
 | Type                             | Implementation                                                               |
 |----------------------------------|------------------------------------------------------------------------------|
 | Kubernetes Version               | >= `1.21`                                                                    |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud                        |
 | Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller [*](#clarify)                     |
-| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS                                 |
+| EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS                  |
+| Ingress Integration Modes        | Kubernetes Ingress (embedded/referenced), Istio (VirtualService + Gateway)   |
+| Automated E2E Validation         | Multi-cluster automated E2E testing with Terratest and Chainsaw               |
 
 <a name="clarify"></a>
-* We only mention solutions where we have tested and verified a k8gb installation.
-* If your Kubernetes version or Ingress controller is not included in the table above, it does not mean that k8gb will not work for you. k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller.
+* Every entry in this table reflects a setup that has been tested and verified with a working k8gb installation.
+* This matrix is intentionally conservative, not exhaustive. k8gb is Kubernetes-native and designed for standards-compliant clusters and ingress implementations; if your stack is not listed, validate it in staging before production rollout.
 
-## Presentations Featuring k8gb
+## Presentations and Talks
 
 [//]: # (Table is generated with the help of https://www.tablesgenerator.com/markdown_tables#)
 
-| **Container Days Conference 2025**  [![](https://img.youtube.com/vi/FoKE2dST8HI/0.jpg)](https://www.youtube.com/watch?v=FoKE2dST8HI "Evaluating Global Load Balancing Options for Kubernetes in Practice") | **Container Days Conference 2025**  [![](https://img.youtube.com/vi/e-_zhuwNCAM/0.jpg)](https://www.youtube.com/watch?v=e-_zhuwNCAM "Ensuring high availability with global load balancing in Kubernetes") |
+|  | **KubeCon NA 2025**  [![](https://img.youtube.com/vi/4rpPTWIV5DA/0.jpg)](https://www.youtube.com/watch?v=4rpPTWIV5DA "Project Lightning Talk: Introducing k8gb: Kubernetes Native Global Load Balancing Made Simple - Yury Tsarev, Founder And Maintainer") |
 |---|---|
+| **Container Days Conference 2025**  [![](https://img.youtube.com/vi/FoKE2dST8HI/0.jpg)](https://www.youtube.com/watch?v=FoKE2dST8HI "Evaluating Global Load Balancing Options for Kubernetes in Practice") | **Container Days Conference 2025**  [![](https://img.youtube.com/vi/e-_zhuwNCAM/0.jpg)](https://www.youtube.com/watch?v=e-_zhuwNCAM "Ensuring high availability with global load balancing in Kubernetes") |
 | **KCD Czech&Slovak 2025**   [![](https://img.youtube.com/vi/kpxS7cJtxcs/0.jpg)](https://www.youtube.com/watch?v=kpxS7cJtxcs "Multi-Cloud Global Content Distribution at Cloud Native Speeds") | **Cloud Native Rejekts 2025**   [![](https://img.youtube.com/vi/RBMRU8rtxfI/0.jpg)](https://www.youtube.com/watch?v=RBMRU8rtxfI "Evaluating Global Load Balancing Options for Kubernetes in Practice") |
 | **KubeCon China 2025**   [![](https://img.youtube.com/vi/L9mRWljLnzw/0.jpg)](https://www.youtube.com/watch?v=L9mRWljLnzw "Resilient Multiregion Global Control Planes With Crossplane and K8gb ") | **KubeCon EU 2025** [![](https://img.youtube.com/vi/YMyrcqZ2sbU/0.jpg)](https://www.youtube.com/watch?v=YMyrcqZ2sbU "Project Lightning Talk: What's New in k8gb: CNCF's Multicluster Global Balancer - Bradley Andersen") |
 | **ChatLoopBackOff - Episode 42 (K8gb)** [![](https://img.youtube.com/vi/tKUNI6E1_7c/0.jpg)](https://www.youtube.com/watch?v=tKUNI6E1_7c "ChatLoopBackOff - Episode 42 (K8gb)") | **KubeCon NA 2024** [![](https://img.youtube.com/vi/vCzl15AIoU0/0.jpg)](https://www.youtube.com/watch?v=vCzl15AIoU0 "k8gb: Global Load Balancing, the Kubernetes Way \| Project Lightning Talk") |
@@ -139,9 +154,9 @@ k8gb is tested with the following environment options.
 | **#29 DoK Community** [![](https://img.youtube.com/vi/MluFlwPFZws/hqdefault.jpg)](https://www.youtube.com/watch?v=MluFlwPFZws "#29 DoK Community: How Absa Developed Cloud Native Global Load Balancer for Kubernetes") | **AWS Containers from the Couch show** [![](https://img.youtube.com/vi/5pe3ezSnVI8/hqdefault.jpg)](https://www.youtube.com/watch?v=5pe3ezSnVI8 "AWS Containers from the Couch") |
 | **OpenShift Commons Briefings** [![](https://img.youtube.com/vi/5DhO9C2NCrk/0.jpg)](https://www.youtube.com/watch?v=5DhO9C2NCrk "OpenShift Commons Briefings") | **Demo at Kubernetes SIG Multicluster** [![](https://img.youtube.com/vi/jeUeRQM-ZyM/0.jpg)](https://www.youtube.com/watch?v=jeUeRQM-ZyM "Kubernetes SIG Multicluster") |
 
-You can also find recordings from our community meetings at [k8gb youtube channel](https://www.youtube.com/channel/UCwvtktvdZu_pg-t-INvuW5g).
+<a name="community-meetings"></a>You can also find recordings from our community meetings at [k8gb youtube channel](https://www.youtube.com/channel/UCwvtktvdZu_pg-t-INvuW5g). The meeting runs every other Wednesday from 13:00 CET to 13:30 CET [calendar](https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month). Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10).
 
-## Online Publications Featuring k8gb
+## Online Articles and Publications
 
 * https://oilbeater.com/en/2024/04/18/k8gb-best-cloudnative-gslb/
 * https://medium.com/@kaanara/designing-a-high-availability-kubernetes-cluster-infrastructure-for-a-major-digital-travel-agency-7663465871fd
@@ -149,7 +164,7 @@ You can also find recordings from our community meetings at [k8gb youtube channe
 * https://blog.neilfren.ch/global-service-loadbalancers-for-your-homelab/
 * https://andrewbaker.ninja/2021/01/22/external-k8gb-presentation-to-kubernetes-sig-multicluster/
 
-## And Even Books Featuring k8gb :)
+## Books Covering k8gb
 
 | **Kubernetes - An Enterprise Guide - Second Edition** [![](https://m.media-amazon.com/images/I/81zq0mNn-WL._AC_UY436_FMwebp_QL65_.jpg)](https://www.amazon.com/Kubernetes-Enterprise-Effectively-containerize-applications/dp/1803230037 "Kubernetes - An Enterprise Guide - Second Edition: Effectively containerize applications, integrate enterprise systems, and scale applications in your enterprise") | **Kubernetes – An Enterprise Guide - Third Edition** [![](https://m.media-amazon.com/images/I/71mWBgaJMRL._AC_UY436_FMwebp_QL65_.jpg)]( https://www.amazon.com/Kubernetes-Enterprise-Effectively-containerize-applications-ebook/dp/B0CT8M958T/ "Kubernetes – An Enterprise Guide: Effectively containerize applications, integrate enterprise systems, and scale applications in your enterprise 3rd Edition") |
 |---|---|

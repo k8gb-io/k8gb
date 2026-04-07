@@ -22,7 +22,7 @@ import (
 	"context"
 	"fmt"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -31,18 +31,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-const (
-	hostnameAnnotation = "k8gb.io/hostname"
-)
-
 // ReferenceResolver resolves LoadBalancer service references
 type ReferenceResolver struct {
 	service *corev1.Service
-	gslb    *k8gbv1beta1.Gslb
+	gslb    *k8gbv1beta1io.Gslb
 }
 
 // NewReferenceResolver creates a new reference resolver for LoadBalancer services
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	serviceList, err := getGslbServiceRef(gslb, k8sClient)
 	if err != nil {
 		return nil, err
@@ -66,7 +62,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 }
 
 // getGslbServiceRef resolves a Kubernetes Service resource referenced by the Gslb spec
-func getGslbServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]corev1.Service, error) {
+func getGslbServiceRef(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]corev1.Service, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -99,30 +95,30 @@ func getGslbServiceRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]corev
 }
 
 // GetServers retrieves the GSLB server configuration from the LoadBalancer service
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
+func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1io.Server, error) {
 	// For LoadBalancer services, the hostname must be explicitly specified via annotation
 	// since the service itself doesn't contain hostname information
 
 	// Check for required hostname annotation
-	hostname, ok := rr.gslb.Annotations[hostnameAnnotation]
+	hostname, ok := rr.gslb.Annotations[utils.HostnameAnnotation]
 	if !ok {
 		log.FromContext(context.TODO()).Error(fmt.Errorf("missing required hostname annotation"),
-			fmt.Sprintf("LoadBalancer service GSLB requires %s annotation", hostnameAnnotation),
+			fmt.Sprintf("LoadBalancer service GSLB requires %s annotation", utils.HostnameAnnotation),
 			"gslb", rr.gslb.Name)
-		return nil, fmt.Errorf("LoadBalancer service GSLB %s requires %s annotation", rr.gslb.Name, hostnameAnnotation)
+		return nil, fmt.Errorf("LoadBalancer service GSLB %s requires %s annotation", rr.gslb.Name, utils.HostnameAnnotation)
 	}
 
 	if hostname == "" {
 		log.FromContext(context.TODO()).Error(fmt.Errorf("empty hostname annotation"),
-			fmt.Sprintf("%s annotation cannot be empty", hostnameAnnotation),
+			fmt.Sprintf("%s annotation cannot be empty", utils.HostnameAnnotation),
 			"gslb", rr.gslb.Name)
-		return nil, fmt.Errorf("LoadBalancer service GSLB %s has empty %s annotation", rr.gslb.Name, hostnameAnnotation)
+		return nil, fmt.Errorf("LoadBalancer service GSLB %s has empty %s annotation", rr.gslb.Name, utils.HostnameAnnotation)
 	}
 
 	// Create server with the specified hostname
-	server := &k8gbv1beta1.Server{
+	server := &k8gbv1beta1io.Server{
 		Host: hostname,
-		Services: []*k8gbv1beta1.NamespacedName{
+		Services: []*k8gbv1beta1io.NamespacedName{
 			{
 				Name:      rr.service.Name,
 				Namespace: rr.service.Namespace,
@@ -134,7 +130,7 @@ func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
 		"gslb", rr.gslb.Name,
 		"hostname", hostname)
 
-	return []*k8gbv1beta1.Server{server}, nil
+	return []*k8gbv1beta1io.Server{server}, nil
 }
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB

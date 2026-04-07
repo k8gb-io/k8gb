@@ -25,7 +25,7 @@ import (
 	"runtime"
 	"testing"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +44,7 @@ const (
 )
 
 var (
-	defaultGslb     = new(k8gbv1beta1.Gslb)
+	defaultGslb     = new(k8gbv1beta1io.Gslb)
 	defaultEndpoint = new(externaldnsApi.DNSEndpoint)
 	defaultConfig   = resolver.Config{
 		K8gbNamespace: namespace,
@@ -82,11 +82,11 @@ func TestPrometheusRegistry(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
 	fieldCnt := reflect.TypeOf(metrics.metrics).NumField()
-	items := []string{K8gbGslbErrorsTotal, K8gbGslbHealthyRecords, K8gbGslbReconciliationLoopsTotal,
-		K8gbGslbServiceStatusNum, K8gbGslbStatusCountForFailover, K8gbGslbStatusCountForRoundrobin,
-		K8gbGslbStatusCountForGeoIP, K8gbInfobloxHeartbeatsTotal, K8gbInfobloxHeartbeatErrorsTotal,
-		K8gbInfobloxRequestDuration, K8gbInfobloxZoneUpdatesTotal, K8gbInfobloxZoneUpdateErrorsTotal,
-		K8gbEndpointStatusNum, K8gbRuntimeInfo}
+	items := []string{K8gbGslbErrorsTotal, K8gbGslbHealthyRecords, K8gbGslbHealthyLocalRecords,
+		K8gbGslbReconciliationLoopsTotal, K8gbGslbServiceStatusNum, K8gbGslbStatusCountForFailover,
+		K8gbGslbStatusCountForRoundrobin, K8gbGslbStatusCountForGeoIP, K8gbInfobloxHeartbeatsTotal,
+		K8gbInfobloxHeartbeatErrorsTotal, K8gbInfobloxRequestDuration, K8gbInfobloxZoneUpdatesTotal,
+		K8gbInfobloxZoneUpdateErrorsTotal, K8gbEndpointStatusNum, K8gbRuntimeInfo}
 	// act
 	registry := m.registry()
 	// assert
@@ -144,6 +144,100 @@ func TestEmptyHealthyRecords(t *testing.T) {
 	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbHealthyRecords).AsGaugeVec().With(prometheus.Labels{"namespace": namespace, "name": gslbName}))
 	// assert
 	assert.Equal(t, 0.0, cnt1)
+	assert.Equal(t, 0.0, cnt2)
+}
+
+func TestHealthyLocalRecords(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1io.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "eu"
+
+	healthyRecords := map[string][]string{
+		"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.1.1", "10.0.1.2"},
+	}
+
+	exposedIPs := []string{"10.0.0.1", "10.0.0.2", "10.0.2.1"}
+
+	// act
+	cnt1 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
+	m.UpdateHealthyLocalRecordsMetric(gslb, healthyRecords, exposedIPs)
+	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
+
+	// assert
+	assert.Equal(t, 0.0, cnt1)
+	assert.Equal(t, 2.0, cnt2)
+}
+
+func TestHealthyLocalRecordsAllMatch(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1io.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "us"
+
+	healthyRecords := map[string][]string{
+		"host1.cloud.example.com": {"10.0.0.1", "10.0.0.2"},
+		"host2.cloud.example.com": {"10.0.0.1", "10.0.0.3"},
+	}
+
+	exposedIPs := []string{"10.0.0.1", "10.0.0.2", "10.0.0.3"}
+
+	// act
+	m.UpdateHealthyLocalRecordsMetric(gslb, healthyRecords, exposedIPs)
+	cnt := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "us"}))
+
+	// assert
+	assert.Equal(t, 3.0, cnt)
+}
+
+func TestHealthyLocalRecordsNoneMatch(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1io.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "apac"
+
+	healthyRecords := map[string][]string{
+		"roundrobin.cloud.example.com": {"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+	}
+
+	exposedIPs := []string{"10.0.1.1", "10.0.1.2"}
+
+	// act
+	m.UpdateHealthyLocalRecordsMetric(gslb, healthyRecords, exposedIPs)
+	cnt := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "apac"}))
+
+	// assert
+	assert.Equal(t, 0.0, cnt)
+}
+
+func TestHealthyLocalRecordsEmptyInputs(t *testing.T) {
+	// arrange
+	m := newPrometheusMetrics(defaultConfig)
+	gslb := &k8gbv1beta1io.Gslb{}
+	gslb.Name = gslbName
+	gslb.Namespace = namespace
+	gslb.Status.GeoTag = "eu"
+
+	// act & assert - empty healthy records
+	m.UpdateHealthyLocalRecordsMetric(gslb, nil, []string{"10.0.0.1"})
+	cnt1 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
+	assert.Equal(t, 0.0, cnt1)
+
+	// act & assert - empty exposed IPs
+	m.UpdateHealthyLocalRecordsMetric(gslb, map[string][]string{"host": {"10.0.0.1"}}, nil)
+	cnt2 := testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "geotag": "eu"}))
 	assert.Equal(t, 0.0, cnt2)
 }
 
@@ -214,26 +308,26 @@ func TestInfobloxZoneUpdateIncrement(t *testing.T) {
 func TestUpgradeIngressHost(t *testing.T) {
 	// arrange
 	m := newPrometheusMetrics(defaultConfig)
-	var serviceHealth = map[string]k8gbv1beta1.HealthStatus{
-		"roundrobin.cloud.example.com": k8gbv1beta1.Healthy,
-		"failover.cloud.example.com":   k8gbv1beta1.Healthy,
-		"unhealthy.cloud.example.com":  k8gbv1beta1.Unhealthy,
-		"notfound.cloud.example.com":   k8gbv1beta1.NotFound,
+	var serviceHealth = map[string]k8gbv1beta1io.HealthStatus{
+		"roundrobin.cloud.example.com": k8gbv1beta1io.Healthy,
+		"failover.cloud.example.com":   k8gbv1beta1io.Healthy,
+		"unhealthy.cloud.example.com":  k8gbv1beta1io.Unhealthy,
+		"notfound.cloud.example.com":   k8gbv1beta1io.NotFound,
 	}
 	// act
 	cntHealthy1 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().With(
-		prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
+		prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Healthy.String()}))
 	cntUnhealthy1 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Unhealthy.String()}))
 	cntNotFound1 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.NotFound.String()}))
 	m.UpdateIngressHostsPerStatusMetric(defaultGslb, serviceHealth)
 	cntHealthy2 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Healthy.String()}))
 	ctnUnhealthy2 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Unhealthy.String()}))
 	cntNotFound2 := testutil.ToFloat64(m.Get(K8gbGslbServiceStatusNum).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.NotFound.String()}))
 	// assert
 	assert.Equal(t, .0, cntHealthy1)
 	assert.Equal(t, .0, cntUnhealthy1)
@@ -248,27 +342,27 @@ func TestUpdateFailover(t *testing.T) {
 	m := newPrometheusMetrics(defaultConfig)
 
 	// act
-	m.UpdateFailoverStatus(defaultGslb, true, k8gbv1beta1.Healthy, []string{"10.0.0.1", "10.0.0.2"})
+	m.UpdateFailoverStatus(defaultGslb, true, k8gbv1beta1io.Healthy, []string{"10.0.0.1", "10.0.0.2"})
 	// assert
 	hp := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1.Healthy, primary)}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1io.Healthy, primary)}))
 	up := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1.Unhealthy, primary)}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1io.Unhealthy, primary)}))
 	fp := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1.NotFound, primary)}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1io.NotFound, primary)}))
 	assert.Equal(t, 2., hp)
 	assert.Equal(t, 0., up)
 	assert.Equal(t, 0., fp)
 
 	// act
-	m.UpdateFailoverStatus(defaultGslb, false, k8gbv1beta1.Unhealthy, []string{"10.0.1.1", "10.0.1.2"})
+	m.UpdateFailoverStatus(defaultGslb, false, k8gbv1beta1io.Unhealthy, []string{"10.0.1.1", "10.0.1.2"})
 	// assert
 	hs := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1.Healthy, secondary)}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1io.Healthy, secondary)}))
 	us := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1.Unhealthy, secondary)}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1io.Unhealthy, secondary)}))
 	fs := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForFailover).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1.NotFound, secondary)}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": fmt.Sprintf("%s_%s", k8gbv1beta1io.NotFound, secondary)}))
 	assert.Equal(t, 0., hs)
 	assert.Equal(t, 2., us)
 	assert.Equal(t, 0., fs)
@@ -279,27 +373,27 @@ func TestUpdateRoundRobin(t *testing.T) {
 	m := newPrometheusMetrics(defaultConfig)
 
 	// act
-	m.UpdateRoundrobinStatus(defaultGslb, k8gbv1beta1.Healthy, []string{"10.0.0.1", "10.0.0.2"})
+	m.UpdateRoundrobinStatus(defaultGslb, k8gbv1beta1io.Healthy, []string{"10.0.0.1", "10.0.0.2"})
 	// assert
 	hp := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Healthy.String()}))
 	up := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Unhealthy.String()}))
 	fp := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.NotFound.String()}))
 	assert.Equal(t, 2., hp)
 	assert.Equal(t, 0., up)
 	assert.Equal(t, 0., fp)
 
 	// act
-	m.UpdateRoundrobinStatus(defaultGslb, k8gbv1beta1.Unhealthy, []string{"10.0.1.1", "10.0.1.2"})
+	m.UpdateRoundrobinStatus(defaultGslb, k8gbv1beta1io.Unhealthy, []string{"10.0.1.1", "10.0.1.2"})
 	// assert
 	hs := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Healthy.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Healthy.String()}))
 	us := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.Unhealthy.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.Unhealthy.String()}))
 	fs := testutil.ToFloat64(m.Get(K8gbGslbStatusCountForRoundrobin).AsGaugeVec().
-		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1.NotFound.String()}))
+		With(prometheus.Labels{"namespace": namespace, "name": gslbName, "status": k8gbv1beta1io.NotFound.String()}))
 	assert.Equal(t, 0., hs)
 	assert.Equal(t, 2., us)
 	assert.Equal(t, 0., fs)
@@ -394,6 +488,10 @@ func TestInitializeZeroValues(t *testing.T) {
 
 	// assert - verify gauge metrics are initialized with 0
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbHealthyRecords).AsGaugeVec().With(initLabels)))
+
+	// assert - verify healthy local records metric is initialized with 0
+	localRecordsLabels := prometheus.Labels{"namespace": namespace, "name": "init", "geotag": ""}
+	assert.Equal(t, 0.0, testutil.ToFloat64(m.Get(K8gbGslbHealthyLocalRecords).AsGaugeVec().With(localRecordsLabels)))
 
 	// assert - verify gauge metrics with status labels are initialized with 0
 	statusLabels := prometheus.Labels{"namespace": namespace, "name": "init", "status": "Healthy"}

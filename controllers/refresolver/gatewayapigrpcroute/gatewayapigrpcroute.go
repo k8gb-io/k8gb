@@ -23,7 +23,7 @@ import (
 
 	context "context"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapi"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
@@ -36,12 +36,12 @@ import (
 var log = logging.Logger()
 
 type ReferenceResolver struct {
-	grpcRoute *gatewayapiv1.GRPCRoute
+	grpcRoute *GRPCRouteAdapter
 	gateway   *gatewayapiv1.Gateway
 }
 
 // NewReferenceResolver creates a new reference resolver capable of understanding `networking.gateway.api/v1` resources
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	grpcRouteList, err := getGslbGRPCRouteRef(gslb, k8sClient)
 	if err != nil {
 		return nil, err
@@ -52,20 +52,20 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 	}
 	grpcRoute := grpcRouteList[0]
 
-	route := gatewayapi.NewGRPCRouteAdapter(&grpcRoute)
-	gateway, err := gatewayapi.GetGateway(route, k8sClient)
+	grpcRouteAdapter := NewGRPCRouteAdapter(&grpcRoute)
+	gateway, err := gatewayapi.GetGateway(grpcRouteAdapter, k8sClient)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ReferenceResolver{
-		grpcRoute: &grpcRoute,
+		grpcRoute: grpcRouteAdapter,
 		gateway:   gateway,
 	}, nil
 }
 
 // getGslbGRPCRouteRef resolves a Gateway API GRPCRoute resource referenced by the Gslb spec
-func getGslbGRPCRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1.GRPCRoute, error) {
+func getGslbGRPCRouteRef(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]gatewayapiv1.GRPCRoute, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -104,9 +104,8 @@ func getGslbGRPCRouteRef(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gat
 }
 
 // GetServers retrieves the GSLB server configuration from the GRPCRoute resource
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
-	route := gatewayapi.NewGRPCRouteAdapter(rr.grpcRoute)
-	return gatewayapi.GetServersFromRoute(route)
+func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1io.Server, error) {
+	return gatewayapi.GetServersFromRoute(rr.grpcRoute)
 }
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB

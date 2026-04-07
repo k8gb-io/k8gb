@@ -24,7 +24,7 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
-	"github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 	"github.com/stretchr/testify/assert"
@@ -62,14 +62,14 @@ func TestReconciliation(t *testing.T) {
 			expectedError: false,
 			setup: func(ctrl *gomock.Controller) *GslbReconciler {
 
-				found := &v1beta1.Gslb{
+				found := &v1beta1io.Gslb{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:        reqName,
 						Namespace:   reqNamespace,
 						Annotations: map[string]string{"app": reqName},
 					},
-					Spec: v1beta1.GslbSpec{
-						Strategy: v1beta1.Strategy{
+					Spec: v1beta1io.GslbSpec{
+						Strategy: v1beta1io.Strategy{
 							DNSTtlSeconds: 5,
 							Type:          "roundRobin",
 						},
@@ -84,7 +84,7 @@ func TestReconciliation(t *testing.T) {
 				cl.EXPECT().
 					Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					DoAndReturn(func(_ context.Context, _ client.ObjectKey, obj client.Object, _ ...client.GetOption) error {
-						gslb := obj.(*v1beta1.Gslb)
+						gslb := obj.(*v1beta1io.Gslb)
 						*gslb = *found
 						return nil
 					}).
@@ -124,7 +124,7 @@ func TestReconciliation(t *testing.T) {
 			scheme := runtime.NewScheme()
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 			utilruntime.Must(netv1.AddToScheme(scheme))
-			utilruntime.Must(v1beta1.AddToScheme(scheme))
+			utilruntime.Must(v1beta1io.AddToScheme(scheme))
 			reconciler.Scheme = scheme
 
 			// act
@@ -194,4 +194,98 @@ func TestSplitIPsByVersion(t *testing.T) {
 			assert.Equal(t, test.expectedIPv6, ipv6Addresses)
 		})
 	}
+}
+
+func TestFilterServersByDelegationZones(t *testing.T) {
+	tests := []struct {
+		name              string
+		servers           []*v1beta1io.Server
+		delegationZones   []string
+		expectedHostCount int
+		expectedHosts     []string
+	}{
+		{
+			name: "all hosts match single delegation zone",
+			servers: []*v1beta1io.Server{
+				{Host: "app.cloud.example.com"},
+				{Host: "api.cloud.example.com"},
+			},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 2,
+			expectedHosts:     []string{"app.cloud.example.com", "api.cloud.example.com"},
+		},
+		{
+			name: "no hosts match delegation zone",
+			servers: []*v1beta1io.Server{
+				{Host: "app.other.com"},
+				{Host: "api.other.com"},
+			},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 0,
+			expectedHosts:     []string{},
+		},
+		{
+			name: "mixed - some hosts match delegation zone",
+			servers: []*v1beta1io.Server{
+				{Host: "app.cloud.example.com"},
+				{Host: "app.other.com"},
+				{Host: "api.cloud.example.com"},
+			},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 2,
+			expectedHosts:     []string{"app.cloud.example.com", "api.cloud.example.com"},
+		},
+		{
+			name:              "empty servers list",
+			servers:           []*v1beta1io.Server{},
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 0,
+			expectedHosts:     []string{},
+		},
+		{
+			name: "multiple delegation zones",
+			servers: []*v1beta1io.Server{
+				{Host: "app.zone1.example.com"},
+				{Host: "app.zone2.example.com"},
+				{Host: "app.other.com"},
+			},
+			delegationZones:   []string{"zone1.example.com", "zone2.example.com"},
+			expectedHostCount: 2,
+			expectedHosts:     []string{"app.zone1.example.com", "app.zone2.example.com"},
+		},
+		{
+			name:              "nil servers list",
+			servers:           nil,
+			delegationZones:   []string{"cloud.example.com"},
+			expectedHostCount: 0,
+			expectedHosts:     []string{},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			delegationZones := createTestDelegationZones(test.delegationZones)
+
+			filtered := filterServersByDelegationZones(test.servers, delegationZones)
+
+			assert.Equal(t, test.expectedHostCount, len(filtered))
+			if test.expectedHostCount > 0 {
+				actualHosts := make([]string, len(filtered))
+				for i, s := range filtered {
+					actualHosts[i] = s.Host
+				}
+				assert.ElementsMatch(t, test.expectedHosts, actualHosts)
+			}
+		})
+	}
+}
+
+// createTestDelegationZones creates a DelegationZones for testing
+func createTestDelegationZones(zones []string) resolver.DelegationZones {
+	delegationZones := resolver.DelegationZones{}
+	for _, zone := range zones {
+		delegationZones = append(delegationZones, &resolver.DelegationZoneInfo{
+			LoadBalancedZone: zone,
+		})
+	}
+	return delegationZones
 }

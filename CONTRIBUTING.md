@@ -29,6 +29,7 @@
 - [Release process](#release-process)
   - [Signed releases](#signed-releases)
   - [Software bill of materials](#software-bill-of-materials)
+- [Governance](https://github.com/k8gb-io/k8gb/blob/master/GOVERNANCE.md)
 
 k8gb is licensed under [Apache 2 License](https://github.com/k8gb-io/k8gb/blob/master/LICENSE) and accepts contributions via GitHub pull requests.
 This document outlines the resources and guidelines necessary to follow by contributors to the k8gb project.
@@ -43,6 +44,8 @@ This document outlines the resources and guidelines necessary to follow by contr
 Feel free to ask for help and join the discussions at [k8gb community discussions forum](https://github.com/k8gb-io/k8gb/discussions).
 We have [dedicated `#k8gb` channel on Cloud Native Computing Foundation (CNCF) Slack](https://cloud-native.slack.com/archives/C021P656HGB),
 and we can also actively monitoring [`#sig-multicluster` channel on Kubernetes Slack](https://kubernetes.slack.com/archives/C09R1PJR3).
+
+Another great way to get help is to attend the community meetings. Community meetings take place every other Wednesday from 13:00 CET to 13:30 CET [calendar](https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month). You can join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10).
 
 ## Reporting issues
 
@@ -422,15 +425,44 @@ wget https://github.com/k8gb-io/k8gb/releases/download/v0.15.0/multiple.intoto.j
 
 **4. Verify container images:**
 ```bash
-cosign verify --key cosign.pub docker.io/absaoss/k8gb:v0.15.0
+TAG=v0.15.0
+IMG=ghcr.io/k8gb-io/k8gb:${TAG}
+
+# GHCR package may be private to org members, authenticate first
+GH_USER=$(gh api user --jq .login)
+GH_TOKEN=$(gh auth token)
+echo "${GH_TOKEN}" | docker login ghcr.io -u "${GH_USER}" --password-stdin
+cosign login ghcr.io -u "${GH_USER}" -p "${GH_TOKEN}"
+
+# verify key-based image signature on the image index digest
+INDEX_DIGEST=$(docker buildx imagetools inspect "${IMG}" | awk '/Digest:/ {print $2; exit}')
+
+# release pipeline currently signs container images with a legacy key-based
+# cosign flow (v1.12.1). Modern cosign enforces transparency log checks by
+# default, so use --insecure-ignore-tlog=true for compatibility verification.
+cosign verify --key cosign.pub --insecure-ignore-tlog=true "ghcr.io/k8gb-io/k8gb@${INDEX_DIGEST}"
 ```
 
 **5. Verify container provenance:**
 ```bash
-cosign verify-attestation \
-  --key cosign.pub \
-  --type slsaprovenance \
-  docker.io/absaoss/k8gb@sha256:digest
+TAG=v0.15.0
+IMG=ghcr.io/k8gb-io/k8gb:${TAG}
+
+# keyless SLSA verification requires modern cosign (v2+; tested with v3.0.5)
+cosign version
+SLSA_ID_RE='^https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v.*$'
+
+# verify provenance on platform manifests in the multi-arch image index
+for D in $(docker buildx imagetools inspect --raw "${IMG}" \
+  | jq -r '.manifests[] | select(.platform.architecture != "unknown") | .digest'); do
+  cosign verify-attestation \
+    --output=json \
+    --type slsaprovenance \
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+    --certificate-identity-regexp "${SLSA_ID_RE}" \
+    "ghcr.io/k8gb-io/k8gb@${D}" \
+  | jq -r '.payload | @base64d | fromjson | .predicateType'
+done
 ```
 
 The verification confirms that artifacts were:

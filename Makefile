@@ -36,8 +36,10 @@ CHART ?= k8gb/k8gb
 CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
 CLUSTER_GSLB_GATEWAY = docker network inspect ${CLUSTER_GSLB_NETWORK} -f '{{ (index .IPAM.Config 0).Gateway }}'
 FULL_LOCAL_SETUP_WITH_APPS ?= true
+SHOW_LEGACY_MIGRATION_DEMO ?= true
+MIGRATION_DEMO_NAMESPACE ?= test-gslb
 GSLB_DOMAIN ?= cloud.example.com
-REPO := absaoss/k8gb
+REPO := ghcr.io/k8gb-io/k8gb
 SHELL := bash
 VALUES_YAML ?= ""
 PODINFO_IMAGE_REPO ?= ghcr.io/stefanprodan/podinfo
@@ -45,15 +47,15 @@ HELM_ARGS ?=
 K8GB_COREDNS_IP ?= kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers
 LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
-CONTROLLER_GEN_VERSION ?= v0.19.0
+CONTROLLER_GEN_VERSION ?= v0.20.1
 GOLIC_VERSION ?= v0.7.2
-GOLANGCI_VERSION ?= v2.5.0
-GRAFANA_VERSION ?= 10.1.2
-GATEWAY_API_VERSION ?= v1.4.0
-ISTIO_VERSION ?= v1.27.2
-NGINX_INGRESS_VERSION ?= 4.13.3
-PODINFO_VERSION ?= 6.9.2
-PROMETHEUS_VERSION ?= 27.41.1
+GOLANGCI_VERSION ?= v2.11.4
+GRAFANA_VERSION ?= 10.5.15
+GATEWAY_API_VERSION ?= v1.5.1
+ISTIO_VERSION ?= v1.29.1
+NGINX_INGRESS_VERSION ?= 4.15.1
+PODINFO_VERSION ?= 6.11.2
+PROMETHEUS_VERSION ?= 28.16.0
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -64,6 +66,7 @@ DEMO_URL ?= http://failover.cloud.example.com
 DEMO_DEBUG ?=0
 DEMO_DELAY ?=5
 GSLB_CRD_YAML ?= chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
+ZD_CRD_YAML ?= chart/k8gb/crd/k8gb.io_zonedelegation.yaml
 
 # GCP Cloud DNS testing variables
 GCP_PROJECT ?=
@@ -136,6 +139,10 @@ debug-idea:
 .PHONY: demo
 demo: ## Execute end-to-end demo
 	@$(call demo-host, $(DEMO_URL))
+
+.PHONY: demo-failover
+demo-failover: ## Run local failover walkthrough against k3d clusters
+	@./hack/demo-failover.sh run
 
 K8GB_LOCAL_VERSION ?= stable
 # Spin-up local environment. Deploys stable released version by default
@@ -235,7 +242,7 @@ deploy-local-cluster:
 	$(MAKE) deploy-k8gb-with-helm
 
 	@echo -e "\n$(YELLOW)Install Gateway API CRDs $(NC)"
-	kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/standard-install.yaml
+	kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/experimental-install.yaml
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
@@ -252,6 +259,10 @@ deploy-local-cluster:
 		--version "$(ISTIO_VERSION)" -f $(ISTIO_INGRESS_VALUES_PATH)
 
 	@if [ "$(DEPLOY_APPS)" = true ]; then $(MAKE) deploy-test-apps ; fi
+	@if [ "$(DEPLOY_APPS)" = true ] && [ "$(SHOW_LEGACY_MIGRATION_DEMO)" = true ]; then \
+		$(MAKE) deploy-legacy-migration-cases ;\
+		$(MAKE) show-legacy-migration-manifests ;\
+	fi
 
 	@echo -e "\n$(YELLOW)Wait until Ingress controller is ready $(NC)"
 	$(call wait-for-ingress)
@@ -280,6 +291,15 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_notfound_gatewayapi_httproute.yaml)
 	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_unhealthy_gatewayapi_httproute.yaml)
 
+	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API TCPRoute $(NC)"
+	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_gatewayapi_tcproute.yaml)
+
+	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API UDPRoute $(NC)"
+	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_gatewayapi_udproute.yaml)
+
+	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API TLSRoute $(NC)"
+	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_gatewayapi_tlsroute.yaml)
+
 	@echo -e "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
@@ -302,6 +322,51 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 		podinfo/podinfo \
 		--version $(PODINFO_VERSION)
 
+.PHONY: deploy-legacy-migration-cases
+deploy-legacy-migration-cases: ## Apply legacy migration demo resources for local setup
+	@echo -e "\n$(YELLOW)Deploy legacy migration demo resources in $(MIGRATION_DEMO_NAMESPACE) $(NC)"
+	@sed -e 's/cloud\.example\.com/$(GSLB_DOMAIN)/g' -e 's/test-gslb/$(MIGRATION_DEMO_NAMESPACE)/g' \
+		deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_migration_demo.yaml > /tmp/k8gb-migration-demo.yaml
+	-kubectl apply -f /tmp/k8gb-migration-demo.yaml
+	-rm /tmp/k8gb-migration-demo.yaml
+	@echo -e "\n$(YELLOW)Inject legacy ownerReference on ingress/legacy-embedded-demo (real legacy simulation) $(NC)"
+	@legacy_uid=$$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo -o jsonpath='{.metadata.uid}' 2>/dev/null || true); \
+	if [ -n "$$legacy_uid" ]; then \
+		kubectl patch ingress -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo --type=merge \
+			-p "{\"metadata\":{\"ownerReferences\":[{\"apiVersion\":\"k8gb.absa.oss/v1beta1\",\"kind\":\"Gslb\",\"name\":\"legacy-embedded-demo\",\"uid\":\"$$legacy_uid\",\"controller\":true,\"blockOwnerDeletion\":true}]}}"; \
+		kubectl annotate gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo migration-recheck-ts="$$(date +%s)" --overwrite || true; \
+	fi
+
+.PHONY: show-legacy-migration-manifests
+show-legacy-migration-manifests: ## Print legacy and canonical GSLB manifests from migration demo namespace
+	@echo -e "\n$(CYAN)Context: $$(kubectl config current-context)$(NC)"
+	@echo -e "\n$(YELLOW)Legacy migration demo objects in $(MIGRATION_DEMO_NAMESPACE) $(NC)"
+	@kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) || true
+	@kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) || true
+	@echo -e "\n$(YELLOW)Waiting for canonical objects to appear for requested legacy resources $(NC)"
+	@expected=$$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) -o jsonpath='{range .items[*]}{.metadata.labels.k8gb\.io/migration-requested}{" "}{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}{"\n"}{end}' 2>/dev/null | awk '$$1 == "true" && $$2 != "true" {count++} END {print count+0}'); \
+	for i in $$(seq 1 20); do \
+		actual=$$(kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) --no-headers 2>/dev/null | wc -l | tr -d ' '); \
+		if [ "$$actual" -ge "$$expected" ]; then \
+			break; \
+		fi; \
+		sleep 1; \
+	done
+	@echo -e "\n$(YELLOW)Legacy -> Canonical manifest pairs $(NC)"
+	@for name in $$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null); do \
+			echo -e "\n$(CYAN)Legacy: $$name$(NC)"; \
+			kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml; \
+			echo -e "\n$(CYAN)Canonical: $$name$(NC)"; \
+			kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) "$$name" -o yaml || echo "(canonical object missing; expected for already-migrated or non-requested legacy case)"; \
+		done
+	@echo -e "\n$(YELLOW)Ingress ownerReferences after migration cleanup (legacy-embedded-demo) $(NC)"
+	@owner_refs=$$(kubectl get ingress -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo -o jsonpath='{range .metadata.ownerReferences[*]}{.apiVersion}{\" \"}{.kind}{\" \"}{.name}{\" uid=\"}{.uid}{\"\\n\"}{end}' 2>/dev/null || true); \
+	if [ -n "$$owner_refs" ]; then \
+		echo "$$owner_refs"; \
+	else \
+		echo "(none)"; \
+	fi
+
 .PHONY: deploy-kuar-app
 deploy-kuar-app:
 	./deploy/test-apps/kuar/deploy.sh $(CLUSTERS_NUMBER)
@@ -315,11 +380,6 @@ deploy-k8gb-with-helm:
 	$(call setup-dns-provider-secrets,$(CLUSTER_ID))
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	# Deletion of the coredns service is needed because of the bug below
-	# The bug is triggered by the local setup change where we start exposing the port tcp/53 using a LoadBalancer service
-	# Can be removed once we upgrade to k8gb v0.16.0
-	# https://github.com/kubernetes/kubernetes/issues/105610
-	kubectl -n k8gb delete svc k8gb-coredns --ignore-not-found
 	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} \
 		-f $(call get-helm-values-file,$(CHART)) \
 		-f $(VALUES_YAML) \
@@ -454,6 +514,12 @@ license:
 	@echo -e "\n$(YELLOW)Injecting the license$(NC)"
 	$(call golic,-t apache2)
 
+# runs golic license header check
+.PHONY: golic
+golic:
+	@echo -e "\n$(YELLOW)Running golic license header check$(NC)"
+	$(call golic,--dry -x -t apache2)
+
 # creates ns1 secret in current cluster
 .PHONY: ns1-secret
 ns1-secret:
@@ -494,6 +560,9 @@ mocks:
 	mockgen -package=mocks -destination=controllers/mocks/refresolver_mock.go -source=controllers/refresolver/refresolver.go GslbRefResolver
 	mockgen -package=mocks -destination=controllers/mocks/provider_mock.go -source=controllers/providers/dns/dns.go Provider
 	mockgen -package=mocks -destination=controllers/mocks/geotags_mock.go -source=controllers/geotags/geotags.go GeoTags
+	mockgen -package=ipresolver -destination=controllers/ipresolver/ipresolver_mock.go -source=controllers/ipresolver/ipresolver.go Resolver
+	mockgen -package=zones -destination=controllers/zones/zone_delegation_service_mock.go -source=controllers/zones/zone_service.go ZoneDelegationService
+	mockgen	-package=mocks -destination=controllers/mocks/status_client_subresource_mocks.go sigs.k8s.io/controller-runtime/pkg/client SubResourceWriter
 	$(call golic)
 
 # remove clusters and redeploy
@@ -629,7 +698,7 @@ define testapp-set-replicas
 endef
 
 define demo-host
-	kubectl run -it --rm k8gb-demo --restart=Never --image=absaoss/k8gb-demo-curl --env="DELAY=$(DEMO_DELAY)" --env="DEBUG=$(DEMO_DEBUG)" \
+	kubectl run -it --rm k8gb-demo --restart=Never --image=registry.k8gb.io/k8gb-io/k8gb-demo-curl --env="DELAY=$(DEMO_DELAY)" --env="DEBUG=$(DEMO_DEBUG)" \
 	"`$(K8GB_COREDNS_IP)`" $1
 endef
 
@@ -647,7 +716,9 @@ endef
 define crd-manifest
 	$(call install-controller-gen)
 	@echo -e "\n$(YELLOW)Generating the CRD manifests$(NC)"
-	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./..." output:crd:stdout > $(GSLB_CRD_YAML)
+	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./api/v1beta1" output:crd:stdout > $(GSLB_CRD_YAML)
+	@echo -e "\n$(YELLOW)Generating the k8gb.io CRD manifests$(NC)"
+	$(GOBIN)/controller-gen crd:crdVersions=v1 paths="./api/k8gb.io/v1beta1" output:crd:stdout > $(ZD_CRD_YAML)
 endef
 
 define install-controller-gen
@@ -662,7 +733,8 @@ endef
 define debug
 	$(call manifest)
 	kubectl apply -f deploy/gslb/test-namespace-ingress.yaml
-	kubectl apply -f ./chart/k8gb/templates/k8gb.absa.oss_gslbs.yaml
+	kubectl apply -f ./chart/k8gb/crd/k8gb.io_gslbs.yaml
+	kubectl apply -f ./chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
 	kubectl apply -f ./deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml
 	dlv $1
 endef
@@ -710,7 +782,7 @@ endef
 # values here are only available in the not released (next) version.
 # by releases the content would be moved into get-helm-args
 define get-next-args
-$(if $(filter ./chart/k8gb,$(1)),--set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$2)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$2)')
+$(if $(filter ./chart/k8gb,$(1)),--set extdns.txtPrefix='k8gb-$(call nth-geo-tag,$2)-' --set extdns.txtOwnerId='k8gb-$(call nth-geo-tag,$2)' --set-string k8gb.imageRepo='$(REPO)')
 endef
 
 define setup-dns-provider-secrets
@@ -718,3 +790,89 @@ define setup-dns-provider-secrets
 	kubectl -n k8gb create secret generic rfc2136 --from-literal=secret=96Ah/a2g0/nLeFGK+d/0tzQcccf9hCEIy34PoXX2Qg8= || true
 	[ -n "$(GCP_CREDENTIALS_FILE)" ] && kubectl -n k8gb create secret generic external-dns-gcp-sa --from-file=credentials.json=$(GCP_CREDENTIALS_FILE) || true
 endef
+
+# Documentation with Mkdocs
+
+.PHONY: docs-deploy docs-deploy-last-3 docs-list
+
+docs-list: ## List deployed versions
+	mike list
+
+docs-deploy: ## Deploy docs with mike for VERSION (requires VERSION)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "ERROR: VERSION is required"; \
+		exit 1; \
+	fi
+	@set -eu; \
+	VERSION="$(VERSION)"; \
+	if ! command -v yq >/dev/null 2>&1; then \
+		echo "ERROR: yq is required (https://github.com/mikefarah/yq)"; \
+		exit 1; \
+	fi; \
+	git fetch --force --tags; \
+	ORIGINAL_REF=$$(git symbolic-ref --short -q HEAD || git rev-parse HEAD); \
+	cleanup() { git checkout --quiet -- mkdocs.yml 2>/dev/null || true; git checkout --quiet "$$ORIGINAL_REF"; }; \
+	trap cleanup EXIT INT TERM; \
+	echo "Deploying documentation for $$VERSION"; \
+	if ! git show "$$VERSION:mkdocs.yml" >/dev/null 2>&1; then \
+		echo "ERROR: $$VERSION does not contain mkdocs.yml"; \
+		exit 1; \
+	fi; \
+	git checkout --quiet "$$VERSION"; \
+	echo "Ensuring mike version provider in mkdocs.yml for $$VERSION"; \
+	yq eval -i '.extra.version.provider = "mike"' mkdocs.yml; \
+	mike deploy --push "$$VERSION"; \
+	LATEST_VERSION=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./ && $$0 !~ /-/' | while read version; do \
+		if git show "$$version:mkdocs.yml" >/dev/null 2>&1; then \
+			echo "$$version"; \
+		fi; \
+	done | tail -n 1); \
+	if [ "$$VERSION" = "$$LATEST_VERSION" ]; then \
+		echo "Updating latest alias to $$VERSION"; \
+		mike deploy --push --update-aliases "$$VERSION" latest; \
+		mike set-default --push latest; \
+	fi; \
+	git checkout --quiet -- mkdocs.yml; \
+	mike list
+
+docs-deploy-last-3: ## Deploy docs for latest 3 release tags
+	@set -eu; \
+	if ! command -v yq >/dev/null 2>&1; then \
+		echo "ERROR: yq is required (https://github.com/mikefarah/yq)"; \
+		exit 1; \
+	fi; \
+	git fetch --force --tags; \
+	VERSIONS=$$(git tag -l 'v*' | sort -V | awk '/^v0\.1[4-9]\.|^v0\.[2-9][0-9]\.|^v[1-9]\./ && $$0 !~ /-/' | tail -n 3); \
+	if [ -z "$$VERSIONS" ]; then \
+		echo "ERROR: no release tags found to deploy docs"; \
+		exit 1; \
+	fi; \
+	DEPLOYABLE_VERSIONS=$$(for version in $$VERSIONS; do \
+		if git show "$$version:mkdocs.yml" >/dev/null 2>&1; then \
+			echo "$$version"; \
+		fi; \
+	done); \
+	if [ -z "$$DEPLOYABLE_VERSIONS" ]; then \
+		echo "ERROR: no deployable documentation versions found in latest 3 tags"; \
+		exit 1; \
+	fi; \
+	ORIGINAL_REF=$$(git symbolic-ref --short -q HEAD || git rev-parse HEAD); \
+	cleanup() { git checkout --quiet -- mkdocs.yml 2>/dev/null || true; git checkout --quiet "$$ORIGINAL_REF"; }; \
+	trap cleanup EXIT INT TERM; \
+	echo "Deploying latest 3 documentation versions:"; \
+	printf '%s\n' $$DEPLOYABLE_VERSIONS; \
+	LATEST_VERSION=$$(printf '%s\n' $$DEPLOYABLE_VERSIONS | sort -V | tail -n 1); \
+	for version in $$DEPLOYABLE_VERSIONS; do \
+		echo "Deploying $$version"; \
+		git checkout --quiet "$$version"; \
+		echo "Ensuring mike version provider in mkdocs.yml for $$version"; \
+		yq eval -i '.extra.version.provider = "mike"' mkdocs.yml; \
+		if [ "$$version" = "$$LATEST_VERSION" ]; then \
+			mike deploy --push --update-aliases "$$version" latest; \
+		else \
+			mike deploy --push "$$version"; \
+		fi; \
+		git checkout --quiet -- mkdocs.yml; \
+	done; \
+	mike set-default --push latest; \
+	mike list

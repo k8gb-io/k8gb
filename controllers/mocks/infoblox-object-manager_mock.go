@@ -283,6 +283,21 @@ func (mr *MockIBObjectManagerMockRecorder) CreateEADefinition(arg0 any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEADefinition", reflect.TypeOf((*MockIBObjectManager)(nil).CreateEADefinition), arg0)
 }
 
+// CreateHTTPSRecord mocks base method.
+func (m *MockIBObjectManager) CreateHTTPSRecord(arg0 string, arg1 uint32, arg2, arg3, arg4, arg5 string, arg6, arg7 bool, arg8 ibclient.EA, arg9 bool, arg10 []ibclient.SVCParams, arg11 uint32, arg12 bool, arg13 string) (*ibclient.RecordHttps, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateHTTPSRecord", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
+	ret0, _ := ret[0].(*ibclient.RecordHttps)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateHTTPSRecord indicates an expected call of CreateHTTPSRecord.
+func (mr *MockIBObjectManagerMockRecorder) CreateHTTPSRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateHTTPSRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateHTTPSRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
+}
+
 // CreateHostRecord mocks base method.
 func (m *MockIBObjectManager) CreateHostRecord(arg0, arg1 bool, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 string, arg11 bool, arg12 uint32, arg13 string, arg14 ibclient.EA, arg15 []string, arg16 bool) (*ibclient.HostRecord, error) {
 	m.ctrl.T.Helper()
@@ -446,6 +461,21 @@ func (m *MockIBObjectManager) CreateSRVRecord(arg0, arg1 string, arg2, arg3, arg
 func (mr *MockIBObjectManagerMockRecorder) CreateSRVRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSRVRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateSRVRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+}
+
+// CreateSVCBRecord mocks base method.
+func (m *MockIBObjectManager) CreateSVCBRecord(arg0 string, arg1 uint32, arg2, arg3, arg4, arg5 string, arg6, arg7 bool, arg8 ibclient.EA, arg9 bool, arg10 []ibclient.SVCParams, arg11 uint32, arg12 bool, arg13 string) (*ibclient.RecordSVCB, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSVCBRecord", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
+	ret0, _ := ret[0].(*ibclient.RecordSVCB)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateSVCBRecord indicates an expected call of CreateSVCBRecord.
+func (mr *MockIBObjectManagerMockRecorder) CreateSVCBRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSVCBRecord", reflect.TypeOf((*MockIBObjectManager)(nil).CreateSVCBRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
 }
 
 // CreateTXTRecord mocks base method.
@@ -628,6 +658,21 @@ func (mr *MockIBObjectManagerMockRecorder) DeleteFixedAddress(arg0 any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFixedAddress", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteFixedAddress), arg0)
 }
 
+// DeleteHTTPSRecord mocks base method.
+func (m *MockIBObjectManager) DeleteHTTPSRecord(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteHTTPSRecord", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteHTTPSRecord indicates an expected call of DeleteHTTPSRecord.
+func (mr *MockIBObjectManagerMockRecorder) DeleteHTTPSRecord(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHTTPSRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteHTTPSRecord), arg0)
+}
+
 // DeleteHostRecord mocks base method.
 func (m *MockIBObjectManager) DeleteHostRecord(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
@@ -791,6 +836,21 @@ func (m *MockIBObjectManager) DeleteSRVRecord(arg0 string) (string, error) {
 func (mr *MockIBObjectManagerMockRecorder) DeleteSRVRecord(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSRVRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteSRVRecord), arg0)
+}
+
+// DeleteSVCBRecord mocks base method.
+func (m *MockIBObjectManager) DeleteSVCBRecord(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSVCBRecord", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteSVCBRecord indicates an expected call of DeleteSVCBRecord.
+func (mr *MockIBObjectManagerMockRecorder) DeleteSVCBRecord(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSVCBRecord", reflect.TypeOf((*MockIBObjectManager)(nil).DeleteSVCBRecord), arg0)
 }
 
 // DeleteTXTRecord mocks base method.
@@ -1003,6 +1063,21 @@ func (mr *MockIBObjectManagerMockRecorder) GetAllFixedAddress(arg0, arg1 any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFixedAddress", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllFixedAddress), arg0, arg1)
 }
 
+// GetAllHTTPSRecord mocks base method.
+func (m *MockIBObjectManager) GetAllHTTPSRecord(arg0 *ibclient.QueryParams) ([]ibclient.RecordHttps, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllHTTPSRecord", arg0)
+	ret0, _ := ret[0].([]ibclient.RecordHttps)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllHTTPSRecord indicates an expected call of GetAllHTTPSRecord.
+func (mr *MockIBObjectManagerMockRecorder) GetAllHTTPSRecord(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllHTTPSRecord", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllHTTPSRecord), arg0)
+}
+
 // GetAllIpv4SharedNetwork mocks base method.
 func (m *MockIBObjectManager) GetAllIpv4SharedNetwork(arg0 *ibclient.QueryParams) ([]ibclient.SharedNetwork, error) {
 	m.ctrl.T.Helper()
@@ -1061,6 +1136,21 @@ func (m *MockIBObjectManager) GetAllRecordNS(arg0 *ibclient.QueryParams) ([]ibcl
 func (mr *MockIBObjectManagerMockRecorder) GetAllRecordNS(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRecordNS", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllRecordNS), arg0)
+}
+
+// GetAllSVCBRecords mocks base method.
+func (m *MockIBObjectManager) GetAllSVCBRecords(arg0 *ibclient.QueryParams) ([]ibclient.RecordSVCB, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllSVCBRecords", arg0)
+	ret0, _ := ret[0].([]ibclient.RecordSVCB)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllSVCBRecords indicates an expected call of GetAllSVCBRecords.
+func (mr *MockIBObjectManagerMockRecorder) GetAllSVCBRecords(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSVCBRecords", reflect.TypeOf((*MockIBObjectManager)(nil).GetAllSVCBRecords), arg0)
 }
 
 // GetCNAMERecord mocks base method.
@@ -1316,6 +1406,21 @@ func (m *MockIBObjectManager) GetGridLicense() ([]ibclient.License, error) {
 func (mr *MockIBObjectManagerMockRecorder) GetGridLicense() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGridLicense", reflect.TypeOf((*MockIBObjectManager)(nil).GetGridLicense))
+}
+
+// GetHTTPSRecordByRef mocks base method.
+func (m *MockIBObjectManager) GetHTTPSRecordByRef(arg0 string) (*ibclient.RecordHttps, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetHTTPSRecordByRef", arg0)
+	ret0, _ := ret[0].(*ibclient.RecordHttps)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetHTTPSRecordByRef indicates an expected call of GetHTTPSRecordByRef.
+func (mr *MockIBObjectManagerMockRecorder) GetHTTPSRecordByRef(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHTTPSRecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetHTTPSRecordByRef), arg0)
 }
 
 // GetHostRecord mocks base method.
@@ -1616,6 +1721,21 @@ func (m *MockIBObjectManager) GetSRVRecordByRef(arg0 string) (*ibclient.RecordSR
 func (mr *MockIBObjectManagerMockRecorder) GetSRVRecordByRef(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSRVRecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetSRVRecordByRef), arg0)
+}
+
+// GetSVCBRecordByRef mocks base method.
+func (m *MockIBObjectManager) GetSVCBRecordByRef(arg0 string) (*ibclient.RecordSVCB, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSVCBRecordByRef", arg0)
+	ret0, _ := ret[0].(*ibclient.RecordSVCB)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSVCBRecordByRef indicates an expected call of GetSVCBRecordByRef.
+func (mr *MockIBObjectManagerMockRecorder) GetSVCBRecordByRef(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSVCBRecordByRef", reflect.TypeOf((*MockIBObjectManager)(nil).GetSVCBRecordByRef), arg0)
 }
 
 // GetTXTRecord mocks base method.
@@ -1948,6 +2068,21 @@ func (mr *MockIBObjectManagerMockRecorder) UpdateFixedAddress(arg0, arg1, arg2, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFixedAddress", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateFixedAddress), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
 }
 
+// UpdateHTTPSRecord mocks base method.
+func (m *MockIBObjectManager) UpdateHTTPSRecord(arg0, arg1 string, arg2 uint32, arg3, arg4, arg5, arg6 string, arg7, arg8 bool, arg9 ibclient.EA, arg10 bool, arg11 []ibclient.SVCParams, arg12 uint32, arg13 bool) (*ibclient.RecordHttps, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateHTTPSRecord", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
+	ret0, _ := ret[0].(*ibclient.RecordHttps)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateHTTPSRecord indicates an expected call of UpdateHTTPSRecord.
+func (mr *MockIBObjectManagerMockRecorder) UpdateHTTPSRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateHTTPSRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateHTTPSRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
+}
+
 // UpdateHostRecord mocks base method.
 func (m *MockIBObjectManager) UpdateHostRecord(arg0 string, arg1, arg2 bool, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 string, arg12 bool, arg13 uint32, arg14 string, arg15 ibclient.EA, arg16 []string, arg17 bool) (*ibclient.HostRecord, error) {
 	m.ctrl.T.Helper()
@@ -2111,6 +2246,21 @@ func (m *MockIBObjectManager) UpdateSRVRecord(arg0, arg1 string, arg2, arg3, arg
 func (mr *MockIBObjectManagerMockRecorder) UpdateSRVRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSRVRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateSRVRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+}
+
+// UpdateSVCBRecord mocks base method.
+func (m *MockIBObjectManager) UpdateSVCBRecord(arg0, arg1 string, arg2 uint32, arg3, arg4, arg5, arg6 string, arg7, arg8 bool, arg9 ibclient.EA, arg10 bool, arg11 []ibclient.SVCParams, arg12 uint32, arg13 bool) (*ibclient.RecordSVCB, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSVCBRecord", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
+	ret0, _ := ret[0].(*ibclient.RecordSVCB)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateSVCBRecord indicates an expected call of UpdateSVCBRecord.
+func (mr *MockIBObjectManagerMockRecorder) UpdateSVCBRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSVCBRecord", reflect.TypeOf((*MockIBObjectManager)(nil).UpdateSVCBRecord), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
 }
 
 // UpdateTXTRecord mocks base method.

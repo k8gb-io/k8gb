@@ -18,12 +18,12 @@ k8gb follows a [Code of Conduct](CODE_OF_CONDUCT.md), which is aligned with the 
 
 ## Contributors
 
-Anyone can contribute to the k8gb project. More about contribution rules and technical aspects can be found in the [CONTRIBUTING](CONTRIBUTING.md) documentation.
+Anyone can contribute to the k8gb project. More about contribution rules and technical aspects can be found in the [CONTRIBUTING](CONTRIBUTING.md) documentation. A great way to contribute is to attend the community meetings. Community meetings take place every other Wednesday from 13:00 CET to 13:30 CET [calendar](https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month). You can join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10).
 
 ## Maintainers
 
 Maintainers are defined in the [CODEOWNERS](CODEOWNERS) file by their GitHub user handles.
-New maintainers are nominated by existing maintainers and are elected by a supermajority of votes of existing maintainers.
+To elect a new maintainer, an existing maintainer must open a GitHub issue in the project repository nominating the candidate. The issue must remain open for at least 14 days to allow for public feedback and a formal vote by existing maintainers. New maintainers are elected by a supermajority of votes of existing maintainers.
 If a maintainer is no longer able to perform their duties, they should volunteer to be moved to emeritus status.
 Maintainers can be also removed from the active maintainers list by a supermajority of votes of existing maintainers.
 
@@ -36,12 +36,13 @@ Below is the list of a maintainer's general responsibilities in addition to thos
 - Actively supports the k8gb community in related channels
 - Represents the k8gb project in public media (events, slack channels, etc.)
 - Is involved in CNCF-related activities and projects
+- Regularly attends the recurring community meetings
 - Ensures compliance with CNCF guidelines
 - Owns project infrastructure
 
 ## Project Lead
 
-The Project Lead is a project maintainer with the final vote on project decisions.
+The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The Project Lead for 2025-2026 is @ytsarev, as listed in our [CODEOWNERS](CODEOWNERS) file. @ytsarev was voted Project Lead for 2025-2026 through the election in https://github.com/k8gb-io/k8gb/issues/2210. 
 
 ## Conflict Resolutions
 

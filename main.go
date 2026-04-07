@@ -22,17 +22,19 @@ import (
 	"context"
 	"os"
 
-	"github.com/k8gb-io/k8gb/controllers/resolver"
-
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers"
 	boot "github.com/k8gb-io/k8gb/controllers/bootstrap"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/tracing"
+
 	istio "istio.io/client-go/pkg/apis/networking/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -57,6 +59,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(runtimescheme))
 	utilruntime.Must(k8gbv1beta1.AddToScheme(runtimescheme))
+	utilruntime.Must(k8gbv1beta1io.AddToScheme(runtimescheme))
 	utilruntime.Must(istio.AddToScheme(runtimescheme))
 	utilruntime.Must(gatewayapiv1.Install(runtimescheme))
 	utilruntime.Must(gatewayapiv1alpha2.Install(runtimescheme))
@@ -158,6 +161,15 @@ func run() error {
 		Scheme:             mgr.GetScheme(),
 		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
 	}
+	legacyReconciler := &controllers.LegacyGslbReconciler{
+		Config: config,
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}
+	legacyMigrator := &controllers.LegacyGslbMigrationReconciler{
+		Client:   mgr.GetClient(),
+		Recorder: mgr.GetEventRecorderFor("legacy-gslb-migrator"),
+	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{
 		Config:      config,
@@ -170,6 +182,25 @@ func run() error {
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create Gslb reconciler")
 		return err
+	}
+
+	legacyGVK := k8gbv1beta1.GroupVersion.WithKind("Gslb")
+	if _, err = mgr.GetRESTMapper().RESTMapping(legacyGVK.GroupKind(), legacyGVK.Version); err != nil {
+		if meta.IsNoMatchError(err) {
+			log.Info().Msg("Legacy Gslb CRD not found; skipping legacy migration controller")
+		} else {
+			log.Err(err).Msg("Unable to resolve legacy Gslb mapping")
+			return err
+		}
+	} else {
+		if err = legacyReconciler.SetupWithManager(mgr); err != nil {
+			log.Err(err).Msg("Unable to create legacy Gslb reconciler")
+			return err
+		}
+		if err = legacyMigrator.SetupWithManager(mgr); err != nil {
+			log.Err(err).Msg("Unable to create legacy Gslb migration reconciler")
+			return err
+		}
 	}
 
 	if err = corednsReconciler.SetupWithManager(mgr); err != nil {

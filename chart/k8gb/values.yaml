@@ -6,13 +6,26 @@ global:
 
 k8gb:
   # -- image repository
-  imageRepo: "docker.io/absaoss/k8gb"
+  imageRepo: registry.k8gb.io/k8gb-io/k8gb
   # -- ( string ) image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key
   imageTag:
   # -- whether it should also deploy the gslb and dnsendpoints CRDs
   deployCrds: true
+  # -- whether it should also deploy the legacy k8gb.absa.oss CRD
+  installLegacyCrds: true
   # -- whether it should also deploy the service account, cluster role and cluster role binding
   deployRbac: true
+  # -- whether to use Dynamic Zone Delegation feature
+  dynamicZones: false
+  # -- dynamic zones configmap
+  extraVolumeMounts:
+    - name: dynamic-zones
+      mountPath: /etc/dynamic
+  extraVolumes:
+    - name: dynamic-zones
+      configMap:
+        name: coredns-dynamic
+        optional: true
   # DNSZones - For backward compatibility, the dnsZone and edgeDNSZone fields are allowed; otherwise,
   # the dnsZones array is used. For valid values, use either dnsZone and edgeDNSZone or dnsZones.
   #
@@ -90,9 +103,9 @@ coredns:
     skipConfig: true
   image:
     # -- CoreDNS CRD plugin image
-    repository: absaoss/k8s_crd
+    repository: registry.k8gb.io/k8gb-io/k8s_crd
     # -- image tag
-    tag: v0.1.2
+    tag: v0.4.0
   # -- Creates serviceAccount for coredns
   serviceAccount:
     create: true
@@ -156,7 +169,7 @@ infoblox:
 extdns:
   enabled: false
   interval: 20s
-  labelFilter: "k8gb.absa.oss/dnstype=extdns"
+  labelFilter: "k8gb.io/dnstype=extdns"
   logLevel: debug
   managedRecordTypes:
   - A
@@ -199,13 +212,13 @@ tracing:
     # -- OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data
     # to somewhere else using exporters (Jaeger for instance)
     repository: otel/opentelemetry-collector
-    tag: 0.141.0
+    tag: 0.148.0
     pullPolicy: Always
 
   jaegerImage:
     # -- if `tracing.deployJaeger==true` this image will be used in the deployment for Jaeger
     repository: jaegertracing/all-in-one
-    tag: 1.74.0
+    tag: 1.76.0
     pullPolicy: Always
 
 istio:

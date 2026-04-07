@@ -10,5 +10,5 @@ spec:
   - gatewayapi-httproute.cloud.example.com
   rules:
   - backendRefs:
-    - name: gatewayapi-service
+    - name: gatewayapi-httproute-service
       port: 8080

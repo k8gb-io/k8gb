@@ -40,6 +40,7 @@ import (
 )
 
 const DefaultRetries = 120
+const canonicalGslbResource = "gslbs.k8gb.io"
 
 // GetIngressIPs returns slice of IP's related to ingress
 func GetIngressIPs(t *testing.T, options *k8s.KubectlOptions, ingressName string) []string {
@@ -174,7 +175,7 @@ func AssertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName, servi
 	t.Helper()
 
 	actualHealthStatus := func() ([]string, error) {
-		k8gbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o",
+		k8gbServiceHealth, err := k8s.RunKubectlAndGetOutputE(t, options, "get", canonicalGslbResource, gslbName, "-o",
 			"custom-columns=SERVICESTATUS:.status.serviceHealth", "--no-headers")
 		if err != nil {
 			t.Logf("Failed to get k8gb status with kubectl (%s)", err)
@@ -194,7 +195,7 @@ func AssertGslbStatus(t *testing.T, options *k8s.KubectlOptions, gslbName, servi
 
 func AssertGslbSpec(t *testing.T, options *k8s.KubectlOptions, gslbName, specPath, expectedValue string) {
 	t.Helper()
-	actualValue, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName, "-o", fmt.Sprintf("custom-columns=SERVICESTATUS:%s", specPath), "--no-headers")
+	actualValue, err := k8s.RunKubectlAndGetOutputE(t, options, "get", canonicalGslbResource, gslbName, "-o", fmt.Sprintf("custom-columns=SERVICESTATUS:%s", specPath), "--no-headers")
 	require.NoError(t, err)
 	assert.Equal(t, expectedValue, actualValue)
 }
@@ -206,14 +207,14 @@ func AssertDNSEndpointLabel(t *testing.T, options *k8s.KubectlOptions, label str
 
 func AssertGslbDeleted(t *testing.T, options *k8s.KubectlOptions, gslbName string) {
 	t.Helper()
-	deletionExpected := []string{fmt.Sprintf("Error from server (NotFound): gslbs.k8gb.absa.oss \"%s\" not found", gslbName)}
+	deletionExpected := []string{fmt.Sprintf("Error from server (NotFound): %s \"%s\" not found", canonicalGslbResource, gslbName)}
 	deletionActual, err := DoWithRetryWaitingForValueE(
 		t,
 		"Waiting for Gslb CR to be deleted...",
 		300,
 		1*time.Second,
 		func() ([]string, error) {
-			out, err := k8s.RunKubectlAndGetOutputE(t, options, "get", "gslb", gslbName)
+			out, err := k8s.RunKubectlAndGetOutputE(t, options, "get", canonicalGslbResource, gslbName)
 			return []string{out}, err
 		},
 		deletionExpected)
