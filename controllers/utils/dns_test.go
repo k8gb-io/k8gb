@@ -299,6 +299,20 @@ func TestResolveHostnamesUnresolvable(t *testing.T) {
 	assert.Nil(t, result)
 }
 
+func TestResolveHostnamesEmpty(t *testing.T) {
+	result, err := ResolveHostnames("")
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "empty exposed-hostnames annotation value")
+}
+
+func TestResolveHostnamesWhitespaceOnly(t *testing.T) {
+	result, err := ResolveHostnames("   ")
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "empty exposed-hostnames annotation value")
+}
+
 func connected() (ok bool) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)

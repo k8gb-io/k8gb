@@ -24,6 +24,7 @@ nav:
     - Configuration:
       - Resource References: resource_ref.md
       - Address Discovery: address_discovery.md
+      - Exposed Hostnames: exposed-hostnames.md
       - Dynamic Geotags: dynamic_geotags.md
       - Multi-zone Setup: multizone.md
       - Exposing DNS: exposing_dns.md

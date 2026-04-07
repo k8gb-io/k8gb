@@ -34,7 +34,7 @@ spec:
 
 1. On each reconciliation, k8gb reads the `k8gb.io/exposed-hostnames` annotation
 2. Each hostname is resolved to its current IP address(es) using the configured DNS servers
-3. The resolved IPs are used for DNS delegation records
+3.  The resolved IPs are written to the generated `DNSEndpoint` records responsible for publishing the `localtargets-*` and final `Gslb` DNS A records.
 
 This works across all supported resource types: Ingress, LoadBalancer Service, Istio VirtualService, and Gateway API.
 

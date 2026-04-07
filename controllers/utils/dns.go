@@ -124,8 +124,13 @@ func Dig(fqdn string, maxRecursion int, parentZoneDNSServers ...DNSServer) (ips 
 	return ips, nil
 }
 
-// ResolveHostnames resolves a comma-separated list of hostnames to IP addresses using DNS
+// ResolveHostnames resolves a comma-separated list of hostnames to IP addresses using DNS.
+// Returns an error if the input is empty or contains no valid hostnames.
 func ResolveHostnames(hostnamesStr string, parentZoneDNSServers ...DNSServer) ([]string, error) {
+	hostnamesStr = strings.TrimSpace(hostnamesStr)
+	if hostnamesStr == "" {
+		return nil, fmt.Errorf("empty exposed-hostnames annotation value")
+	}
 	IPs := []string{}
 	for _, hostname := range strings.Split(hostnamesStr, ",") {
 		hostname = strings.TrimSpace(hostname)

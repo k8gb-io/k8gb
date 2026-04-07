@@ -148,7 +148,9 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(gslb.Annotations, r.Config.ParentZoneDNSServers)
 	if err != nil {
 		m.IncrementError(gslb)
-		return result.RequeueError(fmt.Errorf("getting load balancer exposed IPs (%s)", err))
+		errorMsg := fmt.Sprintf("getting load balancer exposed IPs (%s)", err)
+		r.Recorder.Event(gslb, corev1.EventTypeWarning, "ExposedIPResolutionError", errorMsg)
+		return result.RequeueError(errors.New(errorMsg))
 	}
 	lbIpv4Addresses, _ := splitIPsByVersion(loadBalancerExposedIPs)
 	gslb.Status.LoadBalancer.ExposedIPs = lbIpv4Addresses
