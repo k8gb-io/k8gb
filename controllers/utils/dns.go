@@ -141,7 +141,13 @@ func ResolveHostnames(hostnamesStr string, parentZoneDNSServers ...DNSServer) ([
 		if err != nil {
 			return nil, fmt.Errorf("failed to resolve hostname %s: %w", hostname, err)
 		}
+		if len(ips) == 0 {
+			return nil, fmt.Errorf("hostname %s resolved to no IP addresses", hostname)
+		}
 		IPs = append(IPs, ips...)
+	}
+	if len(IPs) == 0 {
+		return nil, fmt.Errorf("exposed-hostnames annotation value produced no IP addresses")
 	}
 	return IPs, nil
 }

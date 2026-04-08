@@ -313,6 +313,21 @@ func TestResolveHostnamesWhitespaceOnly(t *testing.T) {
 	assert.Contains(t, err.Error(), "empty exposed-hostnames annotation value")
 }
 
+func TestResolveHostnamesNoARecords(t *testing.T) {
+	testServer := DNSServer{
+		Host: server,
+		Port: port,
+	}
+	NewFakeDNS(testSettings).
+		Start().
+		RunTestFunc(func() {
+			result, err := ResolveHostnames("noanswer.cloud.example.com", testServer)
+			assert.Error(t, err)
+			assert.Nil(t, result)
+			assert.Contains(t, err.Error(), "resolved to no IP addresses")
+		}).RequireNoError(t)
+}
+
 func connected() (ok bool) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
