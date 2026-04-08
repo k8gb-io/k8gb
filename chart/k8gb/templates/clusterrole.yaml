@@ -7,19 +7,37 @@ metadata:
   labels:
 {{ include "chart.labels" . | indent 4  }}
 rules:
-{{- if .Values.k8gb.dynamicZones }}
 - apiGroups:
     - ""
   resources:
     - configmaps
   verbs:
-    - list
     - get
+    - list
+    - watch
     - update
     - patch
   resourceNames:
-    - "coredns-dynamic"
-{{- end }}
+    - "k8gb-zone-delegation"
+- apiGroups:
+    - k8gb.io
+  resources:
+    - zonedelegations
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+
+- apiGroups:
+    - k8gb.io
+  resources:
+    - zonedelegations/status
+  verbs:
+    - update
+
 - apiGroups:
   - ""
   resources:

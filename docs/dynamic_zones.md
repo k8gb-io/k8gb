@@ -58,7 +58,7 @@ metadata:
     meta.helm.sh/release-namespace: k8gb
   labels:
     app.kubernetes.io/managed-by: Helm
-  name: coredns-dynamic
+  name: k8gb-zone-delegation
 ```
 
 This configmap is mounted into CoreDNS pod and imported with import plugin:

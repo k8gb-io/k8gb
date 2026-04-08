@@ -143,7 +143,7 @@ spec:
             - name: METRICS_ADDRESS
               value: {{ .Values.k8gb.metricsAddress }}
             - name: DYNAMIC_ZONES
-              value: {{ .Values.k8gb.dynamicZones | quote }}
+              value: "true"
       {{- if .Values.tracing.enabled }}
         - image: {{ .Values.tracing.sidecarImage.repository }}:{{ .Values.tracing.sidecarImage.tag }}
           name: otel-collector

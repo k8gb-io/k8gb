@@ -42,16 +42,13 @@ data:
 {{- with .extraServerBlocks -}}
 {{- tpl . $ | nindent 4 }}
 {{- end }}
-{{- if .Values.k8gb.dynamicZones }}
     import ../dynamic/*.conf
 {{- end }}
-{{- end }}
 ---
-{{- if .Values.k8gb.dynamicZones }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: coredns-dynamic
+  name: k8gb-zone-delegation
   namespace: {{ .Release.Namespace }}
 data: {}
-{{- end }}
+
