@@ -8,7 +8,7 @@ k8gb:
   extraVolumes:
     - name: dynamic-zones
       configMap:
-        name: coredns-dynamic
+        name: k8gb-zone-delegation
         optional: true
 
   dnsZones:

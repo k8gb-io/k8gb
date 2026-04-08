@@ -100,7 +100,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
 | k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used. |
 | k8gb.extraVolumeMounts | list | `[{"mountPath":"/etc/dynamic","name":"dynamic-zones"}]` | dynamic zones configmap |
-| k8gb.extraVolumes[0].configMap.name | string | `"coredns-dynamic"` |  |
+| k8gb.extraVolumes[0].configMap.name | string | `"k8gb-zone-delegation"` |  |
 | k8gb.extraVolumes[0].configMap.optional | bool | `true` |  |
 | k8gb.extraVolumes[0].name | string | `"dynamic-zones"` |  |
 | k8gb.imageRepo | string | `"registry.k8gb.io/k8gb-io/k8gb"` | image repository |
