@@ -37,7 +37,7 @@ jobs:
           ref: ${{ inputs.tag || github.ref }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22
+        uses: sigstore/cosign-installer@115e4ce455e573aa6e9ba51e8d040ddd5c1378af
         with:
           cosign-release: 'v3.0.3' 
 
