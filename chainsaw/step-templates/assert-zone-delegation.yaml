@@ -1,0 +1,32 @@
+---
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation
+spec:
+  try:
+    - assert:
+        timeout: 15s
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: ZoneDelegation
+          metadata:
+            name: ($zoneFile)
+          spec:
+            dnsZoneNegTTL: 10
+            loadBalancedZone: ($loadBalancedZone)
+            parentZone: ($parentZone)
+
+    - assert:
+        timeout: 15s
+        resource:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: k8gb-zone-delegation
+            namespace: k8gb
+          data:
+            cloud-example-com.conf: |
+              cloud.example.com:5353 {
+                import k8gbplugins
+              }
