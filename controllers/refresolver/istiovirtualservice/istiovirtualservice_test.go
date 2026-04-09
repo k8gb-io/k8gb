@@ -159,6 +159,20 @@ func TestGetGslbExposedIPs(t *testing.T) {
 			expectedIPs:   []string{},
 			expectedError: true,
 		},
+		{
+			name:          "hostname annotation triggers resolution (fails with empty DNS servers)",
+			annotations:   map[string]string{"k8gb.io/exposed-hostnames": "myhost.example.com"},
+			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			expectedIPs:   nil,
+			expectedError: true,
+		},
+		{
+			name:          "hostname annotation takes priority over IP annotation",
+			annotations:   map[string]string{"k8gb.io/exposed-hostnames": "myhost.example.com", "k8gb.io/exposed-ip-addresses": "1.2.3.4"},
+			serviceYaml:   "./testdata/istio_service_multiple_ips.yaml",
+			expectedIPs:   nil,
+			expectedError: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
