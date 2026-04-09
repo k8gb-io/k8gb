@@ -24,17 +24,17 @@ So I decided to write the walkthrough I wish I had when I was getting started.
 
 <!-- more -->
 
-## Why Does the Local Setup Feel Like a Lot?
+## Why the Local Setup Needs a Mental Model First
 
-Before we get into the actual setup, let me explain what's actually happening. This context makes everything else much easier to follow.
+Before we get into the actual setup, let me explain what's actually happening. This context makes everything else click.
 
-When you run k8gb locally, you're not just spinning up one Kubernetes cluster. You're spinning up **three separate clusters**:
+When you run k8gb locally, you're spinning up **three separate clusters**:
 
 - `test-gslb1` — your first Kubernetes cluster (tagged as `eu` region)
 - `test-gslb2` — your second Kubernetes cluster (tagged as `us` region)
 - `edgedns` — a special cluster that runs a DNS server (BIND) acting as your "global" DNS
 
-This is what makes k8gb feel complex at first. You're simulating a real-world multi-region setup on your laptop. Once that clicks, everything else starts to make sense.
+You're simulating a real-world multi-region setup on your laptop. Once that model clicks, the rest of the setup is straightforward.
 
 Here's the mental model:
 
@@ -53,23 +53,35 @@ That's the whole idea. Now let's set it up.
 
 The setup requires a few tools. Here's what each one is for so you know what you're installing:
 
+**Required** — you need these to run the local demo:
+
 | Tool | Why You Need It |
 |------|----------------|
-| **Docker** | k3d creates Kubernetes clusters inside Docker containers |
 | **k3d** | The tool that creates and manages your local k3s clusters |
+| **Docker** | k3d creates Kubernetes clusters inside Docker containers |
 | **kubectl** | To interact with your clusters (check pods, apply configs, etc.) |
 | **helm** | To install k8gb and test apps onto the clusters |
-| **Go** | Only needed if you want to run the integration tests (terratest) |
-| **golangci-lint** | Only needed if you're contributing code, not just running the demo |
 | **Git** | To clone the repo |
 
-For just running the local demo, you really only need **Docker, k3d, kubectl, and helm**. Go and golangci-lint are for development work.
+**Optional** — only needed if you're doing development work:
+
+| Tool | Why You Need It |
+|------|----------------|
+| **Go** | To run the integration tests (terratest) |
+| **golangci-lint** | To lint code when contributing |
 
 > ⚠️ **Important**: Docker needs at least **8GB of memory** allocated. Three clusters running simultaneously is memory-heavy. Check your Docker Desktop settings and bump it up if needed.
 
 ## Installing the Prerequisites
 
-If you're on macOS, the easiest way:
+**Docker** is the foundation so install it first before anything else.
+
+- macOS / Windows: Download [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- Linux: Follow the [official install guide](https://docs.docker.com/engine/install/) for your distro
+
+Once Docker is installed, the rest is straightforward.
+
+If you're on macOS:
 
 ```sh
 # Install k3d
@@ -145,15 +157,14 @@ kubectl cluster-info --context k3d-test-gslb2
 
 You should see connection info for all three. If any of them fail, something went wrong during setup.
 
-Now let's verify that DNS is actually working. This is the key test:
+Now let's verify that DNS is actually working. This is the key test — we're asking the edgedns cluster's DNS server directly what IPs it knows about:
 
 ```sh
 dig @localhost -p 1053 roundrobin.cloud.example.com +short +tcp
 ```
 
-Breaking down this command:
-- `dig` — a DNS lookup tool
-- `@localhost -p 1053` — ask the edgedns cluster's DNS server (running on port 1053 locally)
+What each part does:
+- `@localhost -p 1053` — ask the edgedns DNS server, which is exposed on port 1053 locally
 - `roundrobin.cloud.example.com` — the hostname k8gb is managing
 - `+short` — show just the IP addresses
 - `+tcp` — use TCP instead of UDP
@@ -272,22 +283,20 @@ This removes all three clusters and cleans everything up.
 - **Ports to remember**: edgedns answers on `:1053`, test-gslb1 CoreDNS on `:5053`, test-gslb2 on `:5054`
 - **The Makefile is your friend** — run `make help` to see all available targets
 
-## Things That Took Me a Moment to Understand!!!!
+## Things Worth Knowing Before You Start
 
-The biggest thing for me was building the mental model first — understanding that you're running three clusters, not one. Once that clicked, the rest of the setup made a lot more sense.
+The three-cluster architecture is the key mental model — once you see that `test-gslb1`, `test-gslb2`, and `edgedns` are three distinct clusters with distinct roles, everything else makes sense.
 
-The DNS verification step also took a moment. Commands like `dig @localhost -p 1053` look intimidating if you haven't used `dig` before. But it's just asking "hey DNS server, what's the IP for this hostname?" — once you see it that way, it's straightforward.
-
-The 30-second wait during the failover demo also caught me off guard the first time. I stopped the app, immediately tested, and got confused when `eu` was still responding. DNS caching is real!
+One thing worth noting on the failover demo: after stopping the app, wait about 30 seconds before testing. That's the DNS TTL doing its job — records are cached intentionally, and the TTL is configurable via `dnsTtlSeconds` in the GSLB resource.
 
 ## What's Next?
 
 Now that you have k8gb running locally, here's what I'd suggest exploring next:
 
 - Look at the actual GSLB resource files in `deploy/gslb/` to understand the configuration
-- Try the [Kuar app demo](../local-kuar.md) for a visual way to see DNS resolution in action
-- Read about the different [load balancing strategies](../strategy.md) — round-robin, failover, weighted, and GeoIP
-- Check out the [metrics](../metrics.md) docs and run `make deploy-prometheus` to see k8gb's Prometheus metrics
+- Try the [Kuar app demo](../../local-kuar.md) for a visual way to see DNS resolution in action
+- Read about the different [load balancing strategies](../../strategy.md) — round-robin, failover, weighted, and GeoIP
+- Check out the [metrics](../../metrics.md) docs and run `make deploy-prometheus` to see k8gb's Prometheus metrics
 
 The local setup is the best way to understand how k8gb works before deploying it to a real cluster. Play around with it, break things, and see how k8gb responds!
 
