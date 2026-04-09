@@ -180,6 +180,20 @@ func run() error {
 		Logger:      log,
 	}
 
+	zoneDelegationReconciler := &controllers.ZoneDelegationReconciler{
+		Config:      config,
+		Client:      mgr.GetClient(),
+		ZoneService: zoneDelegationService,
+		IPResolver:  ipResolver,
+		DNSProvider: f.Provider(),
+		Logger:      log,
+	}
+
+	if err = zoneDelegationReconciler.SetupWithManager(mgr); err != nil {
+		log.Err(err).Msg("Unable to create ZoneDelegation reconciler")
+		return err
+	}
+
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create Gslb reconciler")
 		return err

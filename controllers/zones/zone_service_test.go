@@ -59,8 +59,14 @@ func TestUpdateStatus(t *testing.T) {
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"eu", "za"},
 			},
-			arrangemocks: func(bs *ipresolver.MockResolver) {
-				bs.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
+			arrangemocks: func(ips *ipresolver.MockResolver) {
+				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
+				ips.EXPECT().GetGlueAInfo(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*ipresolver.GlueAInfo{
+					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com"},
+					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com"},
+					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com"},
+					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com"},
+				}, nil)
 			},
 			expectedStatus: []v1beta1.DNSServer{
 				{
@@ -73,19 +79,11 @@ func TestUpdateStatus(t *testing.T) {
 				},
 				{
 					Name:    "gslb-ns-us-cloud.example.com",
-					Address: "172.18.0.1",
+					Address: "172.28.0.1",
 				},
 				{
 					Name:    "gslb-ns-us-cloud.example.com",
-					Address: "172.18.0.2",
-				},
-				{
-					Name:    "gslb-ns-za-cloud.example.com",
-					Address: "172.18.0.1",
-				},
-				{
-					Name:    "gslb-ns-za-cloud.example.com",
-					Address: "172.18.0.2",
+					Address: "172.28.0.2",
 				},
 			},
 		},
@@ -125,8 +123,16 @@ func TestUpdateStatus(t *testing.T) {
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"eu", "za"},
 			},
-			arrangemocks: func(bs *ipresolver.MockResolver) {
-				bs.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
+			arrangemocks: func(ips *ipresolver.MockResolver) {
+				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
+				ips.EXPECT().GetGlueAInfo(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*ipresolver.GlueAInfo{
+					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com"},
+					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com"},
+					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com"},
+					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com"},
+					{IP: "172.38.0.1", Cluster: "gslb-ns-za-cloud.example.com"},
+					{IP: "172.38.0.2", Cluster: "gslb-ns-za-cloud.example.com"},
+				}, nil)
 			},
 			expectedStatus: []v1beta1.DNSServer{
 				{
@@ -139,19 +145,19 @@ func TestUpdateStatus(t *testing.T) {
 				},
 				{
 					Name:    "gslb-ns-us-cloud.example.com",
-					Address: "172.18.0.1",
+					Address: "172.28.0.1",
 				},
 				{
 					Name:    "gslb-ns-us-cloud.example.com",
-					Address: "172.18.0.2",
+					Address: "172.28.0.2",
 				},
 				{
 					Name:    "gslb-ns-za-cloud.example.com",
-					Address: "172.18.0.1",
+					Address: "172.38.0.1",
 				},
 				{
 					Name:    "gslb-ns-za-cloud.example.com",
-					Address: "172.18.0.2",
+					Address: "172.38.0.2",
 				},
 			},
 		},
@@ -178,19 +184,19 @@ func TestUpdateStatus(t *testing.T) {
 						},
 						{
 							Name:    "gslb-ns-us-cloud.example.com",
-							Address: "172.18.0.1",
+							Address: "172.28.0.1",
 						},
 						{
 							Name:    "gslb-ns-us-cloud.example.com",
-							Address: "172.18.0.2",
+							Address: "172.28.0.2",
 						},
 						{
 							Name:    "gslb-ns-za-cloud.example.com",
-							Address: "172.18.0.1",
+							Address: "172.38.0.1",
 						},
 						{
 							Name:    "gslb-ns-za-cloud.example.com",
-							Address: "172.18.0.2",
+							Address: "172.38.0.2",
 						},
 					},
 				},
@@ -199,8 +205,16 @@ func TestUpdateStatus(t *testing.T) {
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"eu", "za"},
 			},
-			arrangemocks: func(bs *ipresolver.MockResolver) {
-				bs.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
+			arrangemocks: func(ips *ipresolver.MockResolver) {
+				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
+				ips.EXPECT().GetGlueAInfo(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*ipresolver.GlueAInfo{
+					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com"},
+					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com"},
+					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com"},
+					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com"},
+					{IP: "172.38.0.1", Cluster: "gslb-ns-za-cloud.example.com"},
+					{IP: "172.38.0.2", Cluster: "gslb-ns-za-cloud.example.com"},
+				}, nil)
 			},
 			expectedStatus: []v1beta1.DNSServer{
 				{
@@ -213,19 +227,19 @@ func TestUpdateStatus(t *testing.T) {
 				},
 				{
 					Name:    "gslb-ns-us-cloud.example.com",
-					Address: "172.18.0.1",
+					Address: "172.28.0.1",
 				},
 				{
 					Name:    "gslb-ns-us-cloud.example.com",
-					Address: "172.18.0.2",
+					Address: "172.28.0.2",
 				},
 				{
 					Name:    "gslb-ns-za-cloud.example.com",
-					Address: "172.18.0.1",
+					Address: "172.38.0.1",
 				},
 				{
 					Name:    "gslb-ns-za-cloud.example.com",
-					Address: "172.18.0.2",
+					Address: "172.38.0.2",
 				},
 			},
 		},
@@ -235,7 +249,7 @@ func TestUpdateStatus(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			bs := ipresolver.NewMockResolver(ctrl)
+			ips := ipresolver.NewMockResolver(ctrl)
 			cl := mocks.NewMockClient(ctrl)
 			clsr := mocks.NewMockSubResourceWriter(ctrl)
 			cl.EXPECT().
@@ -245,7 +259,7 @@ func TestUpdateStatus(t *testing.T) {
 					*zd = *test.zoneDelegation
 					return nil
 				}).AnyTimes()
-			test.arrangemocks(bs)
+			test.arrangemocks(ips)
 
 			cl.EXPECT().Status().Return(clsr).AnyTimes()
 			clsr.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, obj client.Object, _ ...client.SubResourceUpdateOption) error {
@@ -254,7 +268,7 @@ func TestUpdateStatus(t *testing.T) {
 				assert.True(t, equalDNSServers(test.expectedStatus, zd.Status.DNSServers))
 				return nil
 			}).AnyTimes()
-			err := NewZoneDelegationImpl(cl, nil, test.config, bs).UpdateStatus(context.TODO(), test.zoneDelegation)
+			err := NewZoneDelegationImpl(cl, nil, test.config, ips).UpdateStatus(context.TODO(), test.zoneDelegation)
 			if test.expectedError {
 				assert.Error(t, err)
 				return
