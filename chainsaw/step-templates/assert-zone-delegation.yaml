@@ -5,6 +5,24 @@ metadata:
   name: assert-zone-delegation
 spec:
   try:
+    - script:
+        content: |
+          dig gslb-ns-eu-cloud.example.com. @localhost -p 1053 +short \
+            | sort -V \
+            | jq -Rsc 'split("\n") | map(select(length > 0))'
+        outputs:
+          - name: euIPs
+            value: (json_parse($stdout))
+
+    - script:
+        content: |
+          dig gslb-ns-us-cloud.example.com. @localhost -p 1053 +short \
+            | sort -V \
+            | jq -Rsc 'split("\n") | map(select(length > 0))'
+        outputs:
+          - name: usIPs
+            value: (json_parse($stdout))
+
     - assert:
         timeout: 15s
         resource:
@@ -16,7 +34,16 @@ spec:
             dnsZoneNegTTL: 10
             loadBalancedZone: ($loadBalancedZone)
             parentZone: ($parentZone)
-
+          status:
+            dnsServers:
+            - name: gslb-ns-eu-cloud.example.com
+              address: ($euIPs[0])
+            - name: gslb-ns-eu-cloud.example.com
+              address: ($euIPs[1])
+            - name: gslb-ns-us-cloud.example.com
+              address: ($usIPs[0])
+            - name: gslb-ns-us-cloud.example.com
+              address: ($usIPs[1])
     - assert:
         timeout: 15s
         resource:
