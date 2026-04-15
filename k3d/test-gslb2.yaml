@@ -38,6 +38,11 @@ ports:
       - loadbalancer
 options:
   k3s:
+    nodeLabels:
+      - label: svccontroller.k3s.cattle.io/enablelb=true
+        nodeFilters:
+          - agent:*
+          - server:*
     extraArgs:
       - arg: --disable=traefik,metrics-server,local-storage
         nodeFilters:
