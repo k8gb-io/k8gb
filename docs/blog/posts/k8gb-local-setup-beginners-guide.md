@@ -24,7 +24,7 @@ So I decided to write the walkthrough I wish I had when I was getting started.
 
 <!-- more -->
 
-## Why the Local Setup Needs a Mental Model First
+## A Quick Look at What's Happening Under the Hood
 
 Before we get into the actual setup, let me explain what's actually happening. This context makes everything else click.
 
@@ -34,7 +34,7 @@ When you run k8gb locally, you're spinning up **three separate clusters**:
 - `test-gslb2` — your second Kubernetes cluster (tagged as `us` region)
 - `edgedns` — a special cluster that runs a DNS server (BIND) acting as your "global" DNS
 
-You're simulating a real-world multi-region setup on your laptop. Once that model clicks, the rest of the setup is straightforward.
+You're simulating a real-world multi-region environment on your laptop. Once you see it that way, the whole setup starts to make sense.
 
 Here's the mental model:
 
