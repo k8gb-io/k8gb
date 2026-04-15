@@ -4,7 +4,7 @@ date:
 authors:
   - itsfarhan
 categories:
-  - Tutorial
+  - Tutorials
 tags:
   - k8gb
   - kubernetes
