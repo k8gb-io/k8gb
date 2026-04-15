@@ -229,17 +229,22 @@ deploy-local-cluster:
 	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
 		--version "$(NGINX_INGRESS_VERSION)" -f $(NGINX_INGRESS_VALUES_PATH)
 
-	@echo -e "\n$(YELLOW)Create coredns init-ingress $(NC)"
-	kubectl apply -f ./deploy/gslb/init-ingress.yaml
-	@echo -e "\n$(YELLOW)Wait for ingress IP $(NC)"
-	@while [ -z "$$(kubectl get ingress init-ingress -n k8gb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" ]; do \
-		echo "Waiting for external IP..."; \
-		sleep 5; \
-	done
-	@echo "Ingress is ready with IP: $$(kubectl get ingress init-ingress -n k8gb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
+
+	@echo -e "\n$(YELLOW)Wait for CoreDNS service to exist $(NC)"
+	@until kubectl get svc k8gb-coredns -n k8gb >/dev/null 2>&1; do \
+		echo "Waiting for CoreDNS service..."; \
+		sleep 10; \
+	done
+
+	@echo -e "\n$(YELLOW)Wait for CoreDNS service external IPs (2) $(NC)"
+	@while [ "$$(kubectl get svc k8gb-coredns -n k8gb -o jsonpath='{.status.loadBalancer.ingress[*].ip}' 2>/dev/null | wc -w)" -lt 2 ]; do \
+		echo "Waiting for CoreDNS service external IPs..."; \
+		sleep 10; \
+	done
+
+	@echo "CoreDNS service is ready with IPs: $$(kubectl get svc k8gb-coredns -n k8gb -o jsonpath='{.status.loadBalancer.ingress[*].ip}' 2>/dev/null)"
 
 	@echo -e "\n$(YELLOW)Install Gateway API CRDs $(NC)"
 	kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/experimental-install.yaml
