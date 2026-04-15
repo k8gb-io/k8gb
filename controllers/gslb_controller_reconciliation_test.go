@@ -22,7 +22,10 @@ import (
 	"context"
 	"errors"
 
+	"github.com/k8gb-io/k8gb/controllers/logging"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
+	"github.com/k8gb-io/k8gb/controllers/zones"
 
 	"github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
@@ -48,6 +51,7 @@ func TestReconciliation(t *testing.T) {
 		reqName      = "test"
 		reqNamespace = "default"
 	)
+	log := logging.Logger()
 	skipTest := errors.New("this indicates that test successfully passed but skipping reconciliation")
 	config := &resolver.Config{
 		ReconcileRequeueSeconds: 0,
@@ -80,6 +84,8 @@ func TestReconciliation(t *testing.T) {
 				defer cleanup()
 				cl := mocks.NewMockClient(ctrl)
 				resolver := mocks.NewMockGslbResolver(ctrl)
+				zoneService := zones.NewMockZoneDelegation(ctrl)
+				zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true).AnyTimes()
 				// reading GSLB from request
 				cl.EXPECT().
 					Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -105,10 +111,12 @@ func TestReconciliation(t *testing.T) {
 					}).Times(1)
 
 				reconciler := &GslbReconciler{
-					Config:   config,
-					Tracer:   tracer,
-					Client:   cl,
-					Resolver: resolver,
+					Config:      config,
+					Tracer:      tracer,
+					Client:      cl,
+					Resolver:    resolver,
+					ZoneService: zoneService,
+					Logger:      log,
 				}
 				return reconciler
 			},
@@ -150,6 +158,7 @@ func TestReconciliation(t *testing.T) {
 }
 
 func TestSplitIPsByVersion(t *testing.T) {
+	log := logging.Logger()
 	tests := []struct {
 		name         string
 		ips          []string
@@ -189,7 +198,7 @@ func TestSplitIPsByVersion(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ipv4Addresses, ipv6Addresses := splitIPsByVersion(test.ips)
+			ipv4Addresses, ipv6Addresses := splitIPsByVersion(log, test.ips)
 			assert.Equal(t, test.expectedIPv4, ipv4Addresses)
 			assert.Equal(t, test.expectedIPv6, ipv6Addresses)
 		})
@@ -197,6 +206,7 @@ func TestSplitIPsByVersion(t *testing.T) {
 }
 
 func TestFilterServersByDelegationZones(t *testing.T) {
+	log := logging.Logger()
 	tests := []struct {
 		name              string
 		servers           []*v1beta1io.Server
@@ -265,7 +275,7 @@ func TestFilterServersByDelegationZones(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			delegationZones := createTestDelegationZones(test.delegationZones)
 
-			filtered := filterServersByDelegationZones(test.servers, delegationZones)
+			filtered := filterServersByDelegationZones(log, test.servers, delegationZones)
 
 			assert.Equal(t, test.expectedHostCount, len(filtered))
 			if test.expectedHostCount > 0 {

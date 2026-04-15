@@ -22,6 +22,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/logging"
+
+	"github.com/k8gb-io/k8gb/controllers/zones"
+	"go.uber.org/mock/gomock"
+
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -129,7 +134,8 @@ func TestLegacyRuntimeSkipsRequestedMigrationObjects(t *testing.T) {
 
 func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGslbReconciler, client.Client) {
 	t.Helper()
-
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 	s := runtime.NewScheme()
 	require.NoError(t, clientgoscheme.AddToScheme(s))
 	require.NoError(t, k8gbv1beta1.AddToScheme(s))
@@ -141,11 +147,15 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 		WithObjects(objs...).
 		WithStatusSubresource(&k8gbv1beta1.Gslb{}).
 		Build()
+	zoneService := zones.NewMockZoneDelegation(ctrl)
+	zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true).AnyTimes()
 	recorder := record.NewFakeRecorder(10)
 	reconciler := &LegacyGslbReconciler{
-		Client:   cl,
-		Scheme:   s,
-		Recorder: recorder,
+		Client:      cl,
+		Scheme:      s,
+		Recorder:    recorder,
+		ZoneService: zoneService,
+		Logger:      logging.Logger(),
 		Config: &resolver.Config{
 			ClusterGeoTag:           "eu",
 			ReconcileRequeueSeconds: 1,

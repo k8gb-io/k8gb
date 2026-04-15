@@ -37,7 +37,7 @@ type ZoneDelegationWrapper struct {
 	ipr            ipresolver.Resolver
 }
 
-type ZoneDelegationDetail struct {
+type ExtendedZoneDelegation struct {
 	wrapper           *ZoneDelegationWrapper
 	LoadBalancedZone  string
 	ParentZone        string
@@ -54,9 +54,9 @@ func NewZoneDelegationWrapper(
 	return &ZoneDelegationWrapper{zoneDelegation: zoneDelegation, config: config, ipr: bootstrap}
 }
 
-func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ZoneDelegationDetail, error) {
+func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ExtendedZoneDelegation, error) {
 
-	validateRFC1035 := func(detail *ZoneDelegationDetail) error {
+	validateRFC1035 := func(detail *ExtendedZoneDelegation) error {
 		const dnsNameMax = 253
 		const dnsLabelMax = 63
 		for _, ns := range detail.GetNSServerList() {
@@ -77,7 +77,7 @@ func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ZoneDelegationD
 	if err != nil {
 		return nil, err
 	}
-	zoneDetail := &ZoneDelegationDetail{
+	zoneDetail := &ExtendedZoneDelegation{
 		wrapper:           z,
 		LoadBalancedZone:  z.zoneDelegation.Spec.LoadBalancedZone,
 		ParentZone:        z.zoneDelegation.Spec.ParentZone,
@@ -94,7 +94,7 @@ func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ZoneDelegationD
 }
 
 // GetNSServerList returns a sorted list of all NS servers for the delegation zone
-func (d *ZoneDelegationDetail) GetNSServerList() []string {
+func (d *ExtendedZoneDelegation) GetNSServerList() []string {
 	list := []string{d.ClusterNSName}
 	for _, v := range d.ExtClusterNSNames {
 		list = append(list, v)
@@ -104,12 +104,12 @@ func (d *ZoneDelegationDetail) GetNSServerList() []string {
 }
 
 // GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
-func (d *ZoneDelegationDetail) GetExternalDNSEndpointName() string {
+func (d *ExtendedZoneDelegation) GetExternalDNSEndpointName() string {
 	var suffix = strings.Trim(strings.ReplaceAll(d.LoadBalancedZone, ".", "-"), " ")
 	return fmt.Sprintf("k8gb-ns-extdns-%s", suffix)
 }
 
-func (d *ZoneDelegationDetail) GetNSName(tag string) string {
+func (d *ExtendedZoneDelegation) GetNSName(tag string) string {
 	return getNsName(tag, d.LoadBalancedZone, d.ParentZone)
 }
 

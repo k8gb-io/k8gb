@@ -254,7 +254,7 @@ func TestUpdateStatus(t *testing.T) {
 				assert.True(t, equalDNSServers(test.expectedStatus, zd.Status.DNSServers))
 				return nil
 			}).AnyTimes()
-			err := NewZoneDelegationImpl(cl, test.config, bs).UpdateStatus(context.TODO(), test.zoneDelegation)
+			err := NewZoneDelegationImpl(cl, nil, test.config, bs).UpdateStatus(context.TODO(), test.zoneDelegation)
 			if test.expectedError {
 				assert.Error(t, err)
 				return
@@ -405,7 +405,7 @@ func TestListAllZones(t *testing.T) {
 			}).AnyTimes()
 			bt.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
 
-			zd, err := NewZoneDelegationImpl(cl, test.config, bt).ListAllZoneDelegations(context.TODO())
+			zd, err := NewZoneDelegationImpl(cl, nil, test.config, bt).ListAllZoneDelegations(context.TODO())
 			if test.expectedError {
 				assert.Error(t, err)
 				return

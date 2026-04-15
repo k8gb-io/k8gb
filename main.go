@@ -22,10 +22,16 @@ import (
 	"context"
 	"os"
 
+	"github.com/go-logr/logr"
+
+	"github.com/k8gb-io/k8gb/controllers/ipresolver"
+	"github.com/k8gb-io/k8gb/controllers/utils"
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
+	k8gbv1beta1iozonedeleagtion "github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers"
-	boot "github.com/k8gb-io/k8gb/controllers/bootstrap"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
@@ -33,7 +39,6 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/tracing"
 
 	istio "istio.io/client-go/pkg/apis/networking/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -60,6 +65,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(runtimescheme))
 	utilruntime.Must(k8gbv1beta1.AddToScheme(runtimescheme))
 	utilruntime.Must(k8gbv1beta1io.AddToScheme(runtimescheme))
+	utilruntime.Must(k8gbv1beta1iozonedeleagtion.AddToScheme(runtimescheme))
 	utilruntime.Must(istio.AddToScheme(runtimescheme))
 	utilruntime.Must(gatewayapiv1.Install(runtimescheme))
 	utilruntime.Must(gatewayapiv1alpha2.Install(runtimescheme))
@@ -93,20 +99,7 @@ func run() error {
 		Interface("config", config).
 		Msg("Resolved config")
 
-	ctrl.SetLogger(logging.NewLogrAdapter(log))
-
-	log.Info().Msg("Reading external IPs from cluster")
-	bootstrap, err := boot.GetBootstrap(context.TODO(), config, ctrl.GetConfigOrDie())
-	if err != nil {
-		if config.CoreDNSServiceType == corev1.ServiceTypeLoadBalancer {
-			log.Err(err).Msg("Can't resolve external IPs")
-			return err
-		}
-		log.Err(err).Msg("Can't resolve ingress IPs")
-		return err
-	}
-	log.Info().Msgf("Found External IP's: %s", bootstrap)
-	config.DelegationZones.SetIPs(bootstrap.IPs)
+	ctrl.SetLogger(logr.Discard())
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
@@ -153,18 +146,24 @@ func run() error {
 		log.Err(err).Msg("Unable to create DNS provider factory")
 		return err
 	}
-
+	log.Info().Str("provider", f.Provider().String()).Msg("DNS provider resolved")
+	ipResolver := ipresolver.NewResolver(config, mgr.GetClient(), utils.NewDNSQueryService())
+	zoneDelegationService := zones.NewZoneDelegationImpl(mgr.GetClient(), mgr.GetAPIReader(), config, ipResolver)
 	gslbReconciler := &controllers.GslbReconciler{
 		Config:             config,
 		Client:             mgr.GetClient(),
 		Resolver:           r,
 		Scheme:             mgr.GetScheme(),
-		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
+		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme(), log),
+		ZoneService:        zoneDelegationService,
+		Logger:             log,
 	}
 	legacyReconciler := &controllers.LegacyGslbReconciler{
-		Config: config,
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Config:      config,
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		ZoneService: zoneDelegationService,
+		Logger:      log,
 	}
 	legacyMigrator := &controllers.LegacyGslbMigrationReconciler{
 		Client:   mgr.GetClient(),
@@ -176,7 +175,9 @@ func run() error {
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
-		Bootstrap:   bootstrap,
+		ZoneService: zoneDelegationService,
+		IPResolver:  ipResolver,
+		Logger:      log,
 	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {

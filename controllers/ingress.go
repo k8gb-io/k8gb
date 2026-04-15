@@ -57,7 +57,7 @@ func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8g
 	if err != nil && errors.IsNotFound(err) {
 
 		// Create the service
-		log.Info().
+		r.Logger.Info().
 			Str("namespace", i.Namespace).
 			Str("ingress", i.Name).
 			Msg("Creating a new Ingress")
@@ -65,7 +65,7 @@ func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8g
 
 		if err != nil {
 			// Creation failed
-			log.Err(err).
+			r.Logger.Err(err).
 				Str("namespace", i.Namespace).
 				Str("name", i.Name).
 				Msg("Failed to create new Ingress")
@@ -75,7 +75,7 @@ func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8g
 		return nil
 	} else if err != nil {
 		// Error that isn't due to the service not existing
-		log.Err(err).Msg("Failed to get Ingress")
+		r.Logger.Err(err).Msg("Failed to get Ingress")
 		return err
 	}
 
@@ -85,7 +85,7 @@ func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8g
 		utils.SetCommonGslbLabels(found)
 		err = r.Update(ctx, found)
 		if errors.IsConflict(err) {
-			log.Info().
+			r.Logger.Info().
 				Str("namespace", found.Namespace).
 				Str("name", found.Name).
 				Msg("Ingress has been modified outside of controller, retrying reconciliation")
@@ -93,7 +93,7 @@ func (r *GslbReconciler) saveDependentIngress(ctx context.Context, instance *k8g
 		}
 		if err != nil {
 			// Update failed
-			log.Err(err).
+			r.Logger.Err(err).
 				Str("namespace", found.Namespace).
 				Str("name", found.Name).
 				Msg("Failed to update Ingress")
