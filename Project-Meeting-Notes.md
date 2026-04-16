@@ -36,7 +36,53 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 </details>
 
-<details open><summary><strong>April 1, 2026 #89</strong></summary>
+<details open><summary><strong>April 15, 2026 #90</strong></summary>
+
+## April 15, 2026 #90 The Tax Man Cometh!
+
+Zoom Recording: https://zoom.us/rec/share/RjAVXKCGYWZJ32bJFIyqqtCzCxxmLOK3F_e0KRYeUM5faSZ3PONdaD_uRyq8TaYx.-fn3QMuG9L2Qyz42 
+
+On YouTube: https://youtu.be/N46N19RmQ2w 
+
+**Attendees**
+
+- Farhan
+- Michal
+- Dinar
+- Yury
+- Bradley
+
+**Agenda**
+
+- **News**
+  - [first blog post](https://deploy-preview-2329--k8gb-preview.netlify.app/blog/2026/03/22/k8gb-local-setup-beginners-guide/) 🎉
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
+  - [project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+  - ZoneDelegation and friends ... are [2323](https://github.com/k8gb-io/k8gb/pull/2323)-[2328](https://github.com/k8gb-io/k8gb/pull/2328) prereqs for [2102](https://github.com/k8gb-io/k8gb/pull/2102)?
+  - ready? [test(DTR): Testing different K8S versions for DTR (incubation)](https://github.com/k8gb-io/k8gb/pull/2095)
+  - renovate stuff
+  - community contributions
+    - [2282](https://github.com/k8gb-io/k8gb/pull/2282), [2281](https://github.com/k8gb-io/k8gb/pull/2281) @aryasoni98
+    - [2224](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+    - [2121](https://github.com/k8gb-io/k8gb/pull/2121) @angelbarrera92
+    - [2110](https://github.com/k8gb-io/k8gb/pull/2110) @sudhamshk
+    - [2106](https://github.com/k8gb-io/k8gb/pull/2106) @ljluestc
+  - prune old things?
+- **Community Update**
+  - no Incubating update
+  - since KubeCon ...
+    - page views +33%
+    - unique visitors +65%
+    - followers +19
+- **Other**
+- **Action Items**
+  - pruning Issues and PRs
+  - who will lead the next community meeting?
+
+</details>
+
+<details><summary><strong>April 1, 2026 #89</strong></summary>
 
 ## April 1, 2026 #89
 
