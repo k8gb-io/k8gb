@@ -1,0 +1,14 @@
+## nginx configuration
+## Ref: https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
+##
+controller:
+  kind: DaemonSet
+  service:
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
+
+# UDP service key:value pairs
+# Ref: https://github.com/kubernetes/contrib/tree/master/ingress/controllers/nginx/examples/udp
+##
+udp:
+  53: "k8gb/k8gb-coredns:53"

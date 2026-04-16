@@ -1,0 +1,12 @@
+apiVersion: example.crossplane.io/v1
+kind: GlobalApp
+metadata:
+  name: example-gslb-yury
+spec:
+  region: "West Europe"  # Same shared infrastructure region
+  primaryGeoTag: "eu"    # Same primary geo tag for consistent failover
+  namespace: "demo"
+  hostname: "globalapp.cloud.example.com"
+  managementPolicies: ["Observe"]  # Initial policy
+  autoApplyRecommendedPolicy: false  # Manual mode
+  #autoApplyRecommendedPolicy: true  # Automatic GSLB-driven failover
