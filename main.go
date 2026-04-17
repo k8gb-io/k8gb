@@ -100,6 +100,7 @@ func run() error {
 		Msg("Resolved config")
 
 	ctrl.SetLogger(logr.Discard())
+	log.Debug().Msg("hello")
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: runtimescheme,
