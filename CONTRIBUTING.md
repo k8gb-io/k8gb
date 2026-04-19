@@ -461,8 +461,9 @@ cosign version
 **1. Verify chart signature before installation:**
 ```bash
 # Verify specific release version (replace v0.16.0 with desired version)
-cosign verify oci://ghcr.io/k8gb-io/charts/k8gb:v0.16.0 \
-  --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_publish.yaml@refs/tags/v0.16.0" \
+DIGEST=$(crane digest ghcr.io/k8gb-io/charts/k8gb:v0.16.0) && \
+cosign verify ghcr.io/k8gb-io/charts/k8gb@$DIGEST \
+  --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_sign_oci.yaml@refs/heads/master" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 ```
 
@@ -479,7 +480,7 @@ helm show chart oci://ghcr.io/k8gb-io/charts/k8gb:v0.16.0
 
 # Verify using digest for immutable reference
 cosign verify oci://ghcr.io/k8gb-io/charts/k8gb@sha256:abc123... \
-  --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_publish.yaml@refs/tags/v0.16.0" \
+  --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_sign_oci.yaml@refs/heads/master" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 ```
 
