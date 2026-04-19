@@ -13,7 +13,7 @@ This document describes the mechanisms k8gb uses to handle network partitions an
 
 Before understanding split-brain behavior, it's important to understand the normal communication path between k8gb instances:
 
-![Clusters discover each other](/docs/images/splitbrain.png)
+![Clusters discover each other](images/splitbrain.png)
 
 1. Each k8gb instance publishes its local healthy IPs as `localtargets-<host>` A records on its local CoreDNS.
 2. Each instance publishes NS delegation records and glue A records to the edge DNS via ExternalDNS (or Infoblox).
@@ -45,7 +45,7 @@ A split-brain occurs when k8gb instances in different clusters have **divergent 
 | **Edge DNS down for all** | Each cluster returns **only its own local IPs**. Clients hitting either cluster's CoreDNS get valid responses, but there is no cross-cluster balancing. Traffic is effectively pinned to whichever cluster the client's recursive resolver reaches. |
 
 !!! warning "Stale data window"
-    If the edge DNS was reachable and then becomes unreachable, the last-known remote IPs may persist in DNS caches and in the DNSEndpoint CR until the next successful reconciliation clears them. The staleness window is bounded by `min(dnsTtlSeconds, reconcileRequeueSeconds)`.
+    If the edge DNS becomes unreachable, k8gb will omit remote targets on the next reconciliation and write a reduced `DNSEndpoint`. Stale answers can still persist in recursive resolvers and client caches until their TTLs expire, so the observable stale-data window is driven by reconciliation timing plus downstream DNS caching.
 
 ### Failover
 
@@ -63,7 +63,7 @@ Failover has the most nuanced split-brain behavior because it introduces the con
 !!! danger "Critical: Premature failover"
     The most impactful split-brain scenario for failover is when the **secondary cluster loses connectivity to the edge DNS** while the primary is still healthy. The secondary will start serving its own IPs, effectively splitting traffic between primary and secondary. This is a **false failover**.
 
-    **Mitigation**: Monitor the `k8gb_gslb_errors_total` metric. A sustained increase in errors on a specific cluster is a strong signal of DNS connectivity issues. Consider setting up alerts on this metric.
+    **Mitigation**: Treat `k8gb_gslb_errors_total` as a coarse signal that reconciliations are failing, not as a DNS-specific indicator. For DNS-related diagnosis, monitor controller logs for messages such as `can't lookup GlueA record` and `can't resolve FQDN using nameservers`, and verify DNS reachability from the affected cluster to the edge DNS and remote CoreDNS servers.
 
 ### Weighted Round Robin (WRR)
 
@@ -79,30 +79,20 @@ GeoIP behaves similarly to Round Robin during split-brain. When a cluster is par
 
 ## The Reconciliation Loop and Convergence
 
-Understanding the reconciliation timing is critical for reasoning about split-brain duration:
+When a partition **heals**, convergence usually happens in two stages:
 
-```
-Reconciliation interval:  reconcileRequeueSeconds (default: 30s)
-DNS record TTL:           dnsTtlSeconds (configurable per Gslb, default: 30s)
-NS record TTL:            nsRecordTTL (default: 30s)
-```
+1. **Within 1 reconciliation cycle** (`reconcileRequeueSeconds`, default 30s): the k8gb controller re-discovers remote targets and rewrites the `DNSEndpoint`.
+2. **After DNS caches expire** (`dnsTtlSeconds` for the GSLB record, plus any resolver or client-side caching): clients begin receiving the refreshed answers consistently.
 
-When a partition **heals**, convergence happens in stages:
+`nsRecordTTL` matters when delegation records themselves change, but it is not usually the limiting factor for recovery from a transient partition where the existing NS and glue records remain valid.
 
-1. **Within 1 reconciliation cycle** (~30s): The k8gb controller re-discovers remote targets via DNS.
-2. **Within 1 DNS TTL** (~30s): New DNS responses are served by CoreDNS.
-3. **Within 1 NS record TTL** (~30s): Edge DNS picks up updated delegation records.
-4. **Client-side cache expiry** (varies): Recursive resolvers and client OS caches expire old records.
-
-**Worst-case convergence time**: `reconcileRequeueSeconds + dnsTtlSeconds + nsRecordTTL + client_cache_ttl`
-
-With defaults and assuming no client-side caching beyond TTL: **~90 seconds**.
+**Practical convergence estimate**: about `reconcileRequeueSeconds + dnsTtlSeconds + client_cache_ttl`.
 
 ## Observable Symptoms
 
 | Symptom | Likely Cause | Where to Look |
 |---|---|---|
-| `k8gb_gslb_errors_total` increasing | DNS query failures to edge DNS or remote CoreDNS | Prometheus / metrics endpoint |
+| `k8gb_gslb_errors_total` increasing | Reconciliation failures are increasing; DNS resolution problems are one possible cause, but not the only one | Prometheus / metrics endpoint, controller logs |
 | `localtargets-*` empty for a remote cluster | Remote cluster unhealthy **or** network partition | `dig @<remote-coredns-ip> localtargets-<host>` |
 | `status.healthyRecords` contains only local IPs | Cannot reach remote clusters' CoreDNS | `kubectl get gslb <name> -o yaml` |
 | DNS responses contain stale IPs | Partition healed but caches haven't expired | `dig @<edge-dns> <host>` vs `dig @<coredns> <host>` |
@@ -123,11 +113,11 @@ Set up log-based alerts on these messages.
 
 ### 2. Set appropriate TTLs
 
-Lower TTLs mean faster convergence after a partition heals, but they also mean more DNS traffic. For DR-critical workloads:
+Lower TTLs mean clients and recursive resolvers stop serving stale answers sooner after a change, but they also increase DNS traffic. Choose the lowest `dnsTtlSeconds` value your edge DNS provider supports and your traffic budget allows. For DR-critical workloads:
 
-- `dnsTtlSeconds: 5` — aggressive, fast failover detection
-- `nsRecordTTL: 30` — reasonable for delegation records
-- `reconcileRequeueSeconds: 30` — default is usually sufficient
+- `dnsTtlSeconds` — use the lowest provider-supported TTL; `5` can work in tightly controlled or self-managed environments, but some managed DNS providers require higher minimums
+- `nsRecordTTL: 30` — reasonable for delegation records that do not change often
+- `reconcileRequeueSeconds: 30` — default is usually sufficient; lower it if you need the controller to detect and publish target changes faster
 
 ### 3. Use static geotags in production
 
