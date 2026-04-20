@@ -74,9 +74,6 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl
 		return result.Stop()
 	}
 
-	// TODO: remove this after refactoring applicationDNSEndpoints
-	r.Config.DelegationZones.SetIPs(ips.IPs)
-
 	// list existing ZoneDelegations and config DelegationZones
 	zd, err := r.ZoneService.ListAllZoneDelegations(ctx)
 	if err != nil {

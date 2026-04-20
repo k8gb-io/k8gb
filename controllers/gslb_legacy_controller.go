@@ -114,9 +114,14 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting GSLB servers (%s)", err))
 	}
-	filteredServers := filterServersByDelegationZones(r.Logger, servers, r.Config.DelegationZones)
+	list, err := r.ZoneService.List(ctx)
+	if err != nil {
+		m.IncrementError(gslb)
+		return result.RequeueError(fmt.Errorf("getting delegation zones (%s)", err))
+	}
+	filteredServers := filterServersByZoneDelegations(r.Logger, servers, list)
 	if len(filteredServers) == 0 {
-		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", r.Config.DelegationZones.ListZones()))
+		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", list.ListZones()))
 	}
 	gslb.Status.Servers = filteredServers
 
@@ -144,6 +149,7 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		gslb,
 		r.Logger,
 		utils.NewDNSQueryService(),
+		r.ZoneService,
 		r.updateLegacyRuntimeStatus)
 
 	dnsEndpoint, err := epProvider.GetDNSEndpoint()
