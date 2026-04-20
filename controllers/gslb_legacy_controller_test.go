@@ -22,6 +22,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+
 	"github.com/k8gb-io/k8gb/controllers/logging"
 
 	"github.com/k8gb-io/k8gb/controllers/zones"
@@ -148,7 +150,6 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 		WithStatusSubresource(&k8gbv1beta1.Gslb{}).
 		Build()
 	zoneService := zones.NewMockZoneDelegation(ctrl)
-	zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true).AnyTimes()
 	recorder := record.NewFakeRecorder(10)
 	reconciler := &LegacyGslbReconciler{
 		Client:      cl,
@@ -169,6 +170,18 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 			},
 		},
 	}
+	zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true).AnyTimes()
+	zoneService.EXPECT().HasExtClusterGeoTags(gomock.Any()).Return(len(reconciler.Config.ExtClustersGeoTagsRaw) > 0).AnyTimes()
+	zoneService.EXPECT().List(gomock.Any()).Return(&v1beta1.ZoneDelegationList{
+		Items: []v1beta1.ZoneDelegation{
+			{
+				Spec: v1beta1.ZoneDelegationSpec{
+					LoadBalancedZone: "cloud.example.com",
+					ParentZone:       "example.com",
+				},
+			},
+		},
+	}, nil).AnyTimes()
 
 	return reconciler, cl
 }
