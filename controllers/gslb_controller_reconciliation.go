@@ -25,6 +25,7 @@ import (
 	"net"
 	"reflect"
 
+	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
@@ -143,10 +144,15 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return result.RequeueError(fmt.Errorf("getting GSLB servers (%s)", err))
 	}
 
-	filteredServers := filterServersByDelegationZones(r.Logger, servers, r.Config.DelegationZones)
+	list, err := r.ZoneService.List(ctx)
+	if err != nil {
+		m.IncrementError(gslb)
+		return result.RequeueError(fmt.Errorf("getting delegation zones (%s)", err))
+	}
+	filteredServers := filterServersByZoneDelegations(r.Logger, servers, list)
 
 	if len(filteredServers) == 0 {
-		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", r.Config.DelegationZones.ListZones()))
+		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", list.ListZones()))
 	}
 
 	gslb.Status.Servers = filteredServers
@@ -182,6 +188,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		gslb,
 		r.Logger,
 		utils.NewDNSQueryService(),
+		r.ZoneService,
 		r.updateRuntimeStatus)
 	dnsEndpoint, err := epProvider.GetDNSEndpoint()
 	if err != nil {
@@ -238,19 +245,19 @@ func splitIPsByVersion(logger *zerolog.Logger, ips []string) ([]string, []string
 	return ipv4Addresses, ipv6Addresses
 }
 
-// filterServersByDelegationZones filters servers to only include those with hosts that match the delegation zones
-func filterServersByDelegationZones(
+// filterServersByZoneDelegations filters servers to only include those with hosts that match the delegation zones
+func filterServersByZoneDelegations(
 	logger *zerolog.Logger,
 	servers []*k8gbv1beta1io.Server,
-	delegationZones resolver.DelegationZones) []*k8gbv1beta1io.Server {
+	zoneDelegations *v1beta1.ZoneDelegationList) []*k8gbv1beta1io.Server {
 	var filtered []*k8gbv1beta1io.Server
 	for _, server := range servers {
-		if delegationZones.ContainsZone(server.Host) {
+		if zoneDelegations.ContainsZone(server.Host) {
 			filtered = append(filtered, server)
 		} else {
 			logger.Debug().
 				Str("host", server.Host).
-				Strs("delegationZones", delegationZones.ListZones()).
+				Strs("zoneDelegations", zoneDelegations.ListZones()).
 				Msg("Skipping host - does not match any delegated zone")
 		}
 	}

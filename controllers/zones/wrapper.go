@@ -24,9 +24,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/ipresolver"
-
 	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 )
 

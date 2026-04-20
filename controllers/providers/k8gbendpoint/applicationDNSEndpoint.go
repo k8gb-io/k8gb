@@ -22,6 +22,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	"github.com/k8gb-io/k8gb/controllers/geotags"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
@@ -44,6 +46,7 @@ type ApplicationDNSEndpoint struct {
 	logger              *zerolog.Logger
 	updateRuntimeStatus UpdateRuntimeStatus
 	queryService        utils.DNSQueryService
+	zoneService         zones.ZoneDelegation
 }
 
 func NewApplicationDNSEndpoint(
@@ -53,7 +56,9 @@ func NewApplicationDNSEndpoint(
 	gslb *k8gbv1beta1io.Gslb,
 	logger *zerolog.Logger,
 	queryService utils.DNSQueryService,
-	urs UpdateRuntimeStatus) *ApplicationDNSEndpoint {
+	zoneService zones.ZoneDelegation,
+	urs UpdateRuntimeStatus,
+) *ApplicationDNSEndpoint {
 	return &ApplicationDNSEndpoint{
 		context:             ctx,
 		client:              client,
@@ -62,6 +67,7 @@ func NewApplicationDNSEndpoint(
 		gslb:                gslb,
 		logger:              logger,
 		queryService:        queryService,
+		zoneService:         zoneService,
 		updateRuntimeStatus: urs,
 	}
 }
@@ -83,8 +89,12 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 	for host, health := range d.gslb.Status.ServiceHealth {
 		var finalTargets = NewTargets()
 
-		if !d.config.DelegationZones.ContainsZone(host) {
-			return nil, fmt.Errorf("ingress host %s does not match delegated zone %v", host, d.config.DelegationZones.ListZones())
+		zoneDelegationList, err := d.zoneService.List(context.TODO())
+		if err != nil {
+			return nil, fmt.Errorf("failed to list zones: %w", err)
+		}
+		if !zoneDelegationList.ContainsZone(host) {
+			return nil, fmt.Errorf("ingress host %s does not match delegated zone %v", host, zoneDelegationList.ListZones())
 		}
 
 		isPrimary := d.gslb.Spec.Strategy.PrimaryGeoTag == d.config.ClusterGeoTag
@@ -189,7 +199,7 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 
 func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Targets) {
 	targets = NewTargets()
-	gt, err := geotags.GeoTag(d.config).GetExternalClusterNSNamesByHostname(host)
+	gt, err := geotags.GeoTag(d.config, d.zoneService).GetExternalClusterNSNamesByHostname(context.TODO(), host)
 	if err != nil {
 		d.logger.
 			Err(err).

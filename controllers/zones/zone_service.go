@@ -46,6 +46,7 @@ type ZoneDelegation interface {
 	HasAvailableIPs(ctx context.Context) bool
 	HasExtClusterGeoTags(ctx context.Context) bool
 	UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error
+	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error)
 }
 
 type ZoneDelegationImpl struct {
@@ -267,6 +268,10 @@ func (z *ZoneDelegationImpl) HasExtClusterGeoTags(ctx context.Context) bool {
 		return false
 	}
 	return len(detail.ExtClusterNSNames) > 0
+}
+
+func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error) {
+	return NewZoneDelegationWrapper(zd, z.config, z.ipresolver).GetDetail(ctx)
 }
 
 // updateCoreDNSConfiguration creates, updates, or skips the k8gb-zone-delegation ConfigMap.
