@@ -30,7 +30,7 @@ A split-brain occurs when k8gb instances in different clusters have **divergent 
 |---|---|
 | **Edge DNS unreachable from one cluster** | One cluster cannot query the edge DNS and thus cannot discover remote clusters' NS records. |
 | **Inter-cluster DNS unreachable** | The edge DNS is reachable, but one cluster cannot reach another cluster's CoreDNS to resolve `localtargets-*` records. |
-| **Edge DNS unreachable from all clusters** | No cluster can update or query the shared state. All clusters operate on stale data. |
+| **Edge DNS unreachable from all clusters** | No cluster can read or update the shared DNS state. Each cluster degrades to locally resolvable targets on reconciliation; stale answers may still persist in downstream DNS caches until TTL expiry.|
 | **Edge DNS writable but not readable** | One cluster can push updates (ExternalDNS sync) but can't read answers — or vice versa. |
 
 ## Behavior Per Strategy
