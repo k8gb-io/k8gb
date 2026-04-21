@@ -11,13 +11,13 @@
       
       
       
-        <link rel="canonical" href="https://k8gb.io/master/exposing_dns/">
+        <link rel="canonical" href="https://k8gb.io/master/splitbrain/">
       
       
-        <link rel="prev" href="../multizone/">
+        <link rel="prev" href="../lbservice-integration/">
       
       
-        <link rel="next" href="../local/">
+        <link rel="next" href="../service_upgrade/">
       
       
         
@@ -28,7 +28,7 @@
     
     
       
-        <title>Exposing DNS - K8GB - Kubernetes Global Balancer</title>
+        <title>Split-Brain Scenarios - K8GB - Kubernetes Global Balancer</title>
       
     
     
@@ -81,7 +81,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#exposing-dns-udp-traffic-for-k8gb" class="md-skip">
+        <a href="#split-brain-scenarios-and-system-behavior" class="md-skip">
           Skip to content
         </a>
       
@@ -839,8 +839,6 @@
                 
   
   
-    
-  
   
   
     
@@ -870,11 +868,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_7" >
         
           
           <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="">
@@ -895,7 +895,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1050,37 +1050,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Exposing DNS
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../exposing_dns/" class="md-nav__link">
         
   
   
@@ -1096,59 +1069,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#ingress-controller-with-udp-support-nginx" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ingress Controller with UDP support (NGINX)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#coredns-service-lookup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CoreDNS service lookup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#external-load-balancer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        External load balancer
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1667,8 +1587,10 @@
                 
   
   
+    
   
   
+  
     
     
       
@@ -1694,13 +1616,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_11" checked>
         
           
           <label class="md-nav__link" for="__nav_1_11" id="__nav_1_11_label" tabindex="">
@@ -1721,7 +1641,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_11_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_11_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_11">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1736,10 +1656,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../splitbrain/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Split-Brain Scenarios
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1755,6 +1702,225 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-clusters-discover-each-other" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Clusters Discover Each Other
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-constitutes-a-split-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Constitutes a Split-Brain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-per-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior Per Strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Behavior Per Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#round-robin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round Robin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failover
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weighted-round-robin-wrr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weighted Round Robin (WRR)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geoip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoIP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-reconciliation-loop-and-convergence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Reconciliation Loop and Convergence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observable-symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observable Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operational-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operational Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operational Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-monitor-dns-connectivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Monitor DNS connectivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-set-appropriate-ttls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Set appropriate TTLs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-static-geotags-in-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use static geotags in production
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-redundant-edge-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Redundant edge DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-test-split-brain-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Test split-brain scenarios
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-the-safety-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary: The Safety Properties
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2539,10 +2705,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ingress-controller-with-udp-support-nginx" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ingress Controller with UDP support (NGINX)
+        Overview
       
     </span>
   </a>
@@ -2550,10 +2716,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#coredns-service-lookup" class="md-nav__link">
+  <a href="#how-clusters-discover-each-other" class="md-nav__link">
     <span class="md-ellipsis">
       
-        CoreDNS service lookup
+        How Clusters Discover Each Other
       
     </span>
   </a>
@@ -2561,10 +2727,176 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#external-load-balancer" class="md-nav__link">
+  <a href="#what-constitutes-a-split-brain" class="md-nav__link">
     <span class="md-ellipsis">
       
-        External load balancer
+        What Constitutes a Split-Brain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-per-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior Per Strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Behavior Per Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#round-robin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round Robin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failover
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weighted-round-robin-wrr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weighted Round Robin (WRR)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geoip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoIP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-reconciliation-loop-and-convergence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Reconciliation Loop and Convergence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observable-symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observable Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operational-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operational Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operational Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-monitor-dns-connectivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Monitor DNS connectivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-set-appropriate-ttls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Set appropriate TTLs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-static-geotags-in-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use static geotags in production
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-redundant-edge-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Redundant edge DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-test-split-brain-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Test split-brain scenarios
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-the-safety-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary: The Safety Properties
       
     </span>
   </a>
@@ -2588,7 +2920,7 @@
 
 
   
-    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/exposing_dns.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/splitbrain.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2596,74 +2928,248 @@
   
 
 
-<h1 id="exposing-dns-udp-traffic-for-k8gb">Exposing DNS UDP traffic for k8gb<a class="headerlink" href="#exposing-dns-udp-traffic-for-k8gb" title="Permanent link">&para;</a></h1>
-<p>In order for k8gb to function properly, associated CoreDNS service deployed with k8gb needs to be exposed for external DNS UDP traffic on cluster worker nodes.</p>
-<p>Actual ways to achieve this depend on many factors, such as underlying infrastructure (cloud, on-prem, managed vs bare-metal setup), means to expose CoreDNS service (ClusterIP, LoadBalancer),
-type of load balancer or ingress controller used etc.
-This topic is outside the project's scope, as often the related configuration is shared by cluster services, requires additional permissions, and as result can't be owned by k8gb controller deployment.
-However, we can describe a few examples using common Kubernetes configurations, which have been thoroughly tested in local and production environments.</p>
-<h2 id="ingress-controller-with-udp-support-nginx">Ingress Controller with UDP support (NGINX)<a class="headerlink" href="#ingress-controller-with-udp-support-nginx" title="Permanent link">&para;</a></h2>
-<blockquote>
-<p><em>Check <a href="https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/">NGINX Ingress controller official documentation</a> for additional information</em></p>
-</blockquote>
-<p>In general, an Ingress resource doesn't support TCP or UDP services. In order to let NGINX Ingress controller know that we want to expose UDP port for k8gb CoreDNS service (<code>k8gb-coredns</code>), we need to create or patch <code>udp-services</code> ConfigMap in a namespace where NGINX ingress controller is installed (<code>ingress-nginx</code> by default).
-Its <code>data</code> section would contain UDP 53 port mapping for CoreDNS service deployed with k8gb chart release.</p>
-<blockquote>
-<p><em>Associated CoreDNS service can be found in the same namespace where k8gb chart release is deployed. Service name is prefixed with chart release name.</em></p>
-</blockquote>
-<p>Example <code>udp-services</code> ConfigMap manifest:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">udp-services</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress-nginx</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nt">data</span><span class="p">:</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">53</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;k8gb/k8gb-coredns:53&quot;</span><span class="w">  </span><span class="c1"># &lt;== &quot;&lt;K8GB_DEPLOYMENT_NAMESPACE&gt;/&lt;K8GB_CHART_RELEASE&gt;-coredns&quot;</span>
-</code></pre></div></p>
-<p>It can be also created or patched by running <code>kubectl</code> one-liner:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Patch the existing `udp-services` ConfigMap in NGINX Ingress controller namespace:</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>kubectl<span class="w"> </span>patch<span class="w"> </span>-n<span class="w"> </span>ingress-nginx<span class="w"> </span>-p<span class="w"> </span><span class="s1">&#39;{&quot;data&quot;:{&quot;53&quot;:&quot;k8gb/k8gb-coredns:53&quot;}}&#39;</span><span class="w"> </span>--type<span class="o">=</span>merge<span class="w"> </span>cm/udp-services
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Or create `udp-services` ConfigMap if it doesn&#39;t exist, e.g.:</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>kubectl<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>ingress-nginx<span class="w"> </span>cm<span class="w"> </span>udp-services<span class="w"> </span>--from-literal<span class="o">=</span><span class="s2">&quot;53&quot;</span><span class="o">=</span><span class="s2">&quot;k8gb/k8gb-coredns:53&quot;</span>
+<h1 id="split-brain-scenarios-and-system-behavior">Split-Brain Scenarios and System Behavior<a class="headerlink" href="#split-brain-scenarios-and-system-behavior" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>k8gb operates as a <strong>decentralized, peer-to-peer</strong> global load balancer. There is no central control plane — each k8gb instance runs independently in its own cluster and discovers the state of other clusters via <strong>DNS queries</strong> to the edge (parent) DNS server. This architecture eliminates single points of failure but introduces the possibility of <strong>split-brain scenarios</strong> when network connectivity between clusters, or to the shared edge DNS, is disrupted.</p>
+<p>This document describes the mechanisms k8gb uses to handle network partitions and the resulting system behavior for each load-balancing strategy.</p>
+<div class="admonition note">
+<p class="admonition-title">Why this matters</p>
+<p>k8gb is often the linchpin of a disaster recovery strategy. Understanding its behavior during degraded network conditions is essential for operators who need to reason about worst-case scenarios and set correct expectations with stakeholders.</p>
+</div>
+<h2 id="how-clusters-discover-each-other">How Clusters Discover Each Other<a class="headerlink" href="#how-clusters-discover-each-other" title="Permanent link">&para;</a></h2>
+<p>Before understanding split-brain behavior, it's important to understand the normal communication path between k8gb instances:</p>
+<p><img alt="Clusters discover each other" src="../images/splitbrain.png" /></p>
+<ol>
+<li>Each k8gb instance publishes its local healthy IPs as <code>localtargets-&lt;host&gt;</code> A records on its local CoreDNS.</li>
+<li>Each instance publishes NS delegation records and glue A records to the edge DNS via ExternalDNS (or Infoblox).</li>
+<li>During reconciliation (every <code>reconcileRequeueSeconds</code>, default 30s), each instance queries the <strong>edge DNS</strong> to discover NS records for other clusters, resolves glue A records, and then queries each remote cluster's CoreDNS for that cluster's <code>localtargets-&lt;host&gt;</code> records.</li>
+<li>The combined set of healthy local + discovered remote IPs forms the <strong>final DNS response</strong> served to clients.</li>
+</ol>
+<p><strong>Key insight</strong>: Cluster-to-cluster communication is <strong>indirect</strong> through DNS. Clusters never talk to each other's Kubernetes APIs. The only shared state is the DNS zone on the edge DNS server.</p>
+<h2 id="what-constitutes-a-split-brain">What Constitutes a Split-Brain<a class="headerlink" href="#what-constitutes-a-split-brain" title="Permanent link">&para;</a></h2>
+<p>A split-brain occurs when k8gb instances in different clusters have <strong>divergent views</strong> of the global state. This can happen when:</p>
+<table>
+<thead>
+<tr>
+<th>Failure Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Edge DNS unreachable from one cluster</strong></td>
+<td>One cluster cannot query the edge DNS and thus cannot discover remote clusters' NS records.</td>
+</tr>
+<tr>
+<td><strong>Inter-cluster DNS unreachable</strong></td>
+<td>The edge DNS is reachable, but one cluster cannot reach another cluster's CoreDNS to resolve <code>localtargets-*</code> records.</td>
+</tr>
+<tr>
+<td><strong>Edge DNS unreachable from all clusters</strong></td>
+<td>No cluster can read or update the shared DNS state. Each cluster degrades to locally resolvable targets on reconciliation; stale answers may still persist in downstream DNS caches until TTL expiry.</td>
+</tr>
+<tr>
+<td><strong>Edge DNS writable but not readable</strong></td>
+<td>One cluster can push updates (ExternalDNS sync) but can't read answers — or vice versa.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="behavior-per-strategy">Behavior Per Strategy<a class="headerlink" href="#behavior-per-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="round-robin">Round Robin<a class="headerlink" href="#round-robin" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>System Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Normal</strong></td>
+<td>All clusters' healthy IPs are merged and returned to clients.</td>
+</tr>
+<tr>
+<td><strong>Cluster EU cannot reach edge DNS</strong></td>
+<td>EU returns <strong>only its own local IPs</strong>. US (if edge DNS is reachable) continues to return both EU + US IPs. <em>Asymmetric resolution.</em></td>
+</tr>
+<tr>
+<td><strong>Cluster US pods unhealthy</strong></td>
+<td>EU discovers that <code>localtargets-&lt;host&gt;</code> returns empty for US → only EU IPs are served globally. Self-healing.</td>
+</tr>
+<tr>
+<td><strong>Edge DNS down for all</strong></td>
+<td>Each cluster returns <strong>only its own local IPs</strong>. Clients hitting either cluster's CoreDNS get valid responses, but there is no cross-cluster balancing. Traffic is effectively pinned to whichever cluster the client's recursive resolver reaches.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Stale data window</p>
+<p>If the edge DNS becomes unreachable, k8gb will omit remote targets on the next reconciliation and write a reduced <code>DNSEndpoint</code>. Stale answers can still persist in recursive resolvers and client caches until their TTLs expire, so the observable stale-data window is driven by reconciliation timing plus downstream DNS caching.</p>
+</div>
+<h3 id="failover">Failover<a class="headerlink" href="#failover" title="Permanent link">&para;</a></h3>
+<p>Failover has the most nuanced split-brain behavior because it introduces the concept of <strong>primary</strong> and <strong>secondary</strong> clusters.</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Primary Cluster Behavior</th>
+<th>Secondary Cluster Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Normal, primary healthy</strong></td>
+<td>Returns own IPs.</td>
+<td>Discovers primary is healthy via DNS → returns primary's IPs.</td>
+</tr>
+<tr>
+<td><strong>Normal, primary unhealthy</strong></td>
+<td>Discovers it is unhealthy → returns all discovered external (secondary) IPs.</td>
+<td>Discovers primary's <code>localtargets-*</code> is empty → returns its own IPs.</td>
+</tr>
+<tr>
+<td><strong>Primary cannot reach edge DNS, primary healthy</strong></td>
+<td>Returns own IPs (correct).</td>
+<td>Cannot discover primary's <code>localtargets-*</code> → treats primary as unreachable → returns <strong>own IPs</strong> (premature failover).</td>
+</tr>
+<tr>
+<td><strong>Primary cannot reach edge DNS, primary unhealthy</strong></td>
+<td>Cannot discover secondaries → returns <strong>empty targets</strong> (outage for clients resolved by this cluster's CoreDNS).</td>
+<td>Cannot discover primary → returns own IPs (correct failover).</td>
+</tr>
+<tr>
+<td><strong>Secondary cannot reach edge DNS</strong></td>
+<td>Unaffected. Returns own IPs as primary.</td>
+<td>Cannot discover primary → returns <strong>own IPs</strong> (premature failover). Clients resolved by this cluster receive secondary IPs when they should receive primary IPs.</td>
+</tr>
+<tr>
+<td><strong>Edge DNS down for all</strong></td>
+<td>Returns own IPs if healthy, empty if unhealthy.</td>
+<td>Returns own IPs (premature failover). Both clusters serve traffic independently.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Critical: Premature failover</p>
+<p>The most impactful split-brain scenario for failover is when the <strong>secondary cluster loses connectivity to the edge DNS</strong> while the primary is still healthy. The secondary will start serving its own IPs, effectively splitting traffic between primary and secondary. This is a <strong>false failover</strong>.</p>
+<p><strong>Mitigation</strong>: Treat <code>k8gb_gslb_errors_total</code> as a coarse signal that reconciliations are failing, not as a DNS-specific indicator. For DNS-related diagnosis, monitor controller logs for messages such as <code>can't lookup GlueA record</code> and <code>can't resolve FQDN using nameservers</code>, and verify DNS reachability from the affected cluster to the edge DNS and remote CoreDNS servers.</p>
+</div>
+<h3 id="weighted-round-robin-wrr">Weighted Round Robin (WRR)<a class="headerlink" href="#weighted-round-robin-wrr" title="Permanent link">&para;</a></h3>
+<p>WRR behaves identically to Round Robin during split-brain, with one additional nuance: when a cluster is partitioned and can only see its own targets, the <strong>weight labels are still published</strong> but apply to a reduced target set. The effective traffic distribution will not match the configured weights until connectivity is restored.</p>
+<h3 id="geoip">GeoIP<a class="headerlink" href="#geoip" title="Permanent link">&para;</a></h3>
+<p>GeoIP behaves similarly to Round Robin during split-brain. When a cluster is partitioned:</p>
+<ul>
+<li>It will return only its own IPs regardless of the client's geographic location.</li>
+<li>Clients that should be directed to a closer (but unreachable-from-this-cluster) cluster will instead be served by the local cluster.</li>
+<li>This is a <strong>degraded but functional</strong> state — availability is preserved at the cost of latency optimization.</li>
+</ul>
+<h2 id="the-reconciliation-loop-and-convergence">The Reconciliation Loop and Convergence<a class="headerlink" href="#the-reconciliation-loop-and-convergence" title="Permanent link">&para;</a></h2>
+<p>When a partition <strong>heals</strong>, convergence usually happens in two stages:</p>
+<ol>
+<li><strong>Within 1 reconciliation cycle</strong> (<code>reconcileRequeueSeconds</code>, default 30s): the k8gb controller re-discovers remote targets and rewrites the <code>DNSEndpoint</code>.</li>
+<li><strong>After DNS caches expire</strong> (<code>dnsTtlSeconds</code> for the GSLB record, plus any resolver or client-side caching): clients begin receiving the refreshed answers consistently.</li>
+</ol>
+<p><code>nsRecordTTL</code> matters when delegation records themselves change, but it is not usually the limiting factor for recovery from a transient partition where the existing NS and glue records remain valid.</p>
+<p><strong>Practical convergence estimate</strong>: about <code>reconcileRequeueSeconds + dnsTtlSeconds + client_cache_ttl</code>.</p>
+<h2 id="observable-symptoms">Observable Symptoms<a class="headerlink" href="#observable-symptoms" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely Cause</th>
+<th>Where to Look</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k8gb_gslb_errors_total</code> increasing</td>
+<td>Reconciliation failures are increasing; DNS resolution problems are one possible cause, but not the only one</td>
+<td>Prometheus / metrics endpoint, controller logs</td>
+</tr>
+<tr>
+<td><code>localtargets-*</code> empty for a remote cluster</td>
+<td>Remote cluster unhealthy <strong>or</strong> network partition</td>
+<td><code>dig @&lt;remote-coredns-ip&gt; localtargets-&lt;host&gt;</code></td>
+</tr>
+<tr>
+<td><code>status.healthyRecords</code> contains only local IPs</td>
+<td>Cannot reach remote clusters' CoreDNS</td>
+<td><code>kubectl get gslb &lt;name&gt; -o yaml</code></td>
+</tr>
+<tr>
+<td>DNS responses contain stale IPs</td>
+<td>Partition healed but caches haven't expired</td>
+<td><code>dig @&lt;edge-dns&gt; &lt;host&gt;</code> vs <code>dig @&lt;coredns&gt; &lt;host&gt;</code></td>
+</tr>
+<tr>
+<td>Secondary serving traffic when primary is healthy</td>
+<td>Secondary cannot reach edge DNS (premature failover)</td>
+<td>Check network connectivity from secondary to edge DNS</td>
+</tr>
+</tbody>
+</table>
+<h2 id="operational-recommendations">Operational Recommendations<a class="headerlink" href="#operational-recommendations" title="Permanent link">&para;</a></h2>
+<h3 id="1-monitor-dns-connectivity">1. Monitor DNS connectivity<a class="headerlink" href="#1-monitor-dns-connectivity" title="Permanent link">&para;</a></h3>
+<p>The single most important thing operators can do is monitor the health of DNS queries between clusters and to the edge DNS. k8gb logs warnings when it fails to resolve external targets:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>can&#39;t lookup GlueA record
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>can&#39;t resolve FQDN using nameservers
 </code></pre></div>
-<p><a href="../local/">Local project setup</a> does this patching automatically.</p>
-<h2 id="coredns-service-lookup">CoreDNS service lookup<a class="headerlink" href="#coredns-service-lookup" title="Permanent link">&para;</a></h2>
-<p>k8gb is trying to find a service annotated with <code>app.kubernetes.io/name=coredns</code> within the same namespace where controller itself is deployed into. If the service has <code>Status.LoadBalancer.Ingress[0].Hostname</code>, k8gb will use the resolved IPs to reach CoreDNS on this cluster.</p>
-<h2 id="external-load-balancer">External load balancer<a class="headerlink" href="#external-load-balancer" title="Permanent link">&para;</a></h2>
-<p>CoreDNS can be also exposed for DNS UDP traffic via external load balancer,
-if underlying infrastructure supports that.<br>
-<a href="https://aws.amazon.com/eks">AWS EKS</a> with <a href="https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html">NLB</a> and <a href="https://www.k3d.io">k3d</a> with <a href="https://rancher.com/docs/k3s/latest/en/networking/#service-load-balancer">ServiceLB</a> are good examples of such an infrastructure proven to work for k8gb deployments.<br>
-We're using this approach in our <a href="../deploy_route53/">AWS+Route53</a> reference setup with <a href="https://artifacthub.io/packages/helm/k8gb/k8gb">k8gb helm chart</a> providing out-of-the-box support for external load balancer scenario. CoreDNS service is configured by setting <code>coredns.serviceType</code> helm chart value to <code>LoadBalancer</code>:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># k8gb helm chart values.yaml example:</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">coredns</span><span class="p">:</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">serviceType</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span><span class="w"> </span><span class="c1"># &lt;== expose UDP DNS traffic via external load balancer</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">service</span><span class="p">:</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">       </span><span class="nt">service.beta.kubernetes.io/aws-load-balancer-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nlb</span>
-</code></pre></div></p>
-<p>In general, resulting <code>Service</code> resource configuration for k8gb CoreDNS looks like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">service.beta.kubernetes.io/aws-load-balancer-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nlb</span><span class="w"> </span><span class="c1"># &lt;== tell AWS to use NLB load balancer</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb-coredns</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">udp-53</span><span class="w"> </span><span class="c1"># specify DNS UDP port (53)</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UDP</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">coredns</span>
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span><span class="w"> </span><span class="c1"># &lt;== set service type to LoadBalancer</span>
-</code></pre></div>
+<p>Set up log-based alerts on these messages.</p>
+<h3 id="2-set-appropriate-ttls">2. Set appropriate TTLs<a class="headerlink" href="#2-set-appropriate-ttls" title="Permanent link">&para;</a></h3>
+<p>Lower TTLs mean clients and recursive resolvers stop serving stale answers sooner after a change, but they also increase DNS traffic. Choose the lowest <code>dnsTtlSeconds</code> value your edge DNS provider supports and your traffic budget allows. For DR-critical workloads:</p>
+<ul>
+<li><code>dnsTtlSeconds</code> — use the lowest provider-supported TTL; <code>5</code> can work in tightly controlled or self-managed environments, but some managed DNS providers require higher minimums</li>
+<li><code>nsRecordTTL: 30</code> — reasonable for delegation records that do not change often</li>
+<li><code>reconcileRequeueSeconds: 30</code> — default is usually sufficient; lower it if you need the controller to detect and publish target changes faster</li>
+</ul>
+<h3 id="3-use-static-geotags-in-production">3. Use static geotags in production<a class="headerlink" href="#3-use-static-geotags-in-production" title="Permanent link">&para;</a></h3>
+<p>Dynamic geotag discovery (the default when <code>extGslbClustersGeoTags</code> is empty) queries the edge DNS for NS records on <strong>every reconciliation</strong>. Under network pressure, this can amplify the problem. In production, explicitly set <code>extGslbClustersGeoTags</code> to avoid this extra DNS dependency.</p>
+<h3 id="4-redundant-edge-dns">4. Redundant edge DNS<a class="headerlink" href="#4-redundant-edge-dns" title="Permanent link">&para;</a></h3>
+<p>Since the edge DNS is the shared coordination point, its availability directly impacts k8gb's ability to function globally. Use a managed DNS service (Route53, CloudFlare, Azure DNS) or deploy redundant BIND/CoreDNS instances with anycast.</p>
+<h3 id="5-test-split-brain-scenarios">5. Test split-brain scenarios<a class="headerlink" href="#5-test-split-brain-scenarios" title="Permanent link">&para;</a></h3>
+<p>Operators are encouraged to simulate network partitions in staging environments using tools like:</p>
+<ul>
+<li><strong>iptables rules</strong> to block DNS traffic between clusters</li>
+<li><strong>Chaos Mesh</strong> or <strong>Pumba</strong> for Kubernetes-native network fault injection</li>
+<li><strong>k3d network manipulation</strong> for local development (disconnect the <code>k3d-action-bridge-network</code>)</li>
+</ul>
+<p>See the <a href="https://github.com/k8gb-io/k8gb/tree/master/chainsaw">chainsaw test suite</a> for examples of deterministic splitbrain testing scenarios.</p>
+<h2 id="summary-the-safety-properties">Summary: The Safety Properties<a class="headerlink" href="#summary-the-safety-properties" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Guaranteed?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Availability</strong> (at least one cluster serves traffic)</td>
+<td>✅ Yes</td>
+<td>Each cluster always serves its own healthy IPs, even during total partition.</td>
+</tr>
+<tr>
+<td><strong>Consistency</strong> (all clusters return the same IPs)</td>
+<td>❌ No</td>
+<td>During partition, clusters may return different IP sets. This is an intentional trade-off — k8gb favors <strong>availability over consistency</strong> (AP in CAP theorem terms).</td>
+</tr>
+<tr>
+<td><strong>Convergence</strong> (clusters re-sync after partition heals)</td>
+<td>✅ Yes</td>
+<td>Bounded by <code>reconcileRequeueSeconds + TTLs</code>. No manual intervention required.</td>
+</tr>
+<tr>
+<td><strong>No stale failover</strong> (secondary never serves when primary is healthy)</td>
+<td>❌ No</td>
+<td>Network partitions can cause premature failover. This is the primary risk operators must understand and monitor.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Design philosophy</p>
+<p>k8gb is an <strong>AP system</strong> (Availability + Partition tolerance) in CAP theorem terms. During a network partition, each cluster independently continues to serve DNS responses based on its local view of the world. This is a deliberate design choice: in a global load balancer, <strong>serving a slightly stale or suboptimal answer is always better than serving no answer at all</strong>.</p>
+</div>
 
 
 
@@ -2686,7 +3192,7 @@ We're using this approach in our <a href="../deploy_route53/">AWS+Route53</a> re
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 2, 2021 08:06:41 UTC">September 2, 2021</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 21, 2026 10:11:59 UTC">April 21, 2026</span>
   </span>
 
     
@@ -2696,7 +3202,7 @@ We're using this approach in our <a href="../deploy_route53/">AWS+Route53</a> re
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 11, 2021 10:50:57 UTC">March 11, 2021</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 21, 2026 10:11:59 UTC">April 21, 2026</span>
   </span>
 
     
