@@ -2284,6 +2284,67 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#helm-chart-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helm Chart Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Helm Chart Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verifying-helm-charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying Helm Charts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding the Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#software-bill-of-materials" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3260,6 +3321,67 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#helm-chart-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helm Chart Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Helm Chart Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verifying-helm-charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying Helm Charts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding the Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#software-bill-of-materials" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3683,6 +3805,51 @@ compliant with the <a href="https://in-toto.io/Statement/v0.1">in-toto Attestati
 - Built by the official GitHub Actions workflow
 - From the expected source repository (github.com/k8gb-io/k8gb)
 - Without tampering during the build process</p>
+<h3 id="helm-chart-verification">Helm Chart Verification<a class="headerlink" href="#helm-chart-verification" title="Permanent link">&para;</a></h3>
+<p>All Helm charts published to the OCI registry are signed using keyless cosign signatures. End users can verify chart authenticity before installation.</p>
+<h4 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h4>
+<p>Install cosign:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Install cosign (choose your platform)</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="c1"># Linux/macOS via Homebrew</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>brew<span class="w"> </span>install<span class="w"> </span>cosign
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="c1"># Or download binary from GitHub releases</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>wget<span class="w"> </span>https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>sudo<span class="w"> </span>mv<span class="w"> </span>cosign-linux-amd64<span class="w"> </span>/usr/local/bin/cosign<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>cosign-linux-amd64
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>cosign<span class="w"> </span>version
+</code></pre></div></p>
+<h4 id="verifying-helm-charts">Verifying Helm Charts<a class="headerlink" href="#verifying-helm-charts" title="Permanent link">&para;</a></h4>
+<p><strong>1. Verify chart signature before installation:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Verify specific release version (replace v0.16.0 with desired version)</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nv">DIGEST</span><span class="o">=</span><span class="k">$(</span>crane<span class="w"> </span>digest<span class="w"> </span>ghcr.io/k8gb-io/charts/k8gb:v0.16.0<span class="k">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>cosign<span class="w"> </span>verify<span class="w"> </span>ghcr.io/k8gb-io/charts/k8gb@<span class="nv">$DIGEST</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="w">  </span>--certificate-identity<span class="w"> </span><span class="s2">&quot;https://github.com/k8gb-io/k8gb/.github/workflows/helm_sign_oci.yaml@refs/heads/master&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span><span class="s2">&quot;https://token.actions.githubusercontent.com&quot;</span>
+</code></pre></div></p>
+<p><strong>2. Install verified chart:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># After successful verification, install the chart</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>helm<span class="w"> </span>install<span class="w"> </span>k8gb<span class="w"> </span>oci://ghcr.io/k8gb-io/charts/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.16.0
+</code></pre></div></p>
+<p><strong>3. Verify using digest:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># Get chart digest</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>helm<span class="w"> </span>show<span class="w"> </span>chart<span class="w"> </span>oci://ghcr.io/k8gb-io/charts/k8gb:v0.16.0
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="c1"># Verify using digest for immutable reference</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>cosign<span class="w"> </span>verify<span class="w"> </span>oci://ghcr.io/k8gb-io/charts/k8gb@sha256:abc123...<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">  </span>--certificate-identity<span class="w"> </span><span class="s2">&quot;https://github.com/k8gb-io/k8gb/.github/workflows/helm_sign_oci.yaml@refs/heads/master&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span><span class="s2">&quot;https://token.actions.githubusercontent.com&quot;</span>
+</code></pre></div></p>
+<h4 id="understanding-the-verification">Understanding the Verification<a class="headerlink" href="#understanding-the-verification" title="Permanent link">&para;</a></h4>
+<p>The verification confirms that:
+- <strong>Chart authenticity</strong>: The chart was built and signed by the official k8gb GitHub Actions workflow
+- <strong>Source integrity</strong>: The chart originates from the official k8gb-io/k8gb repository
+- <strong>Supply chain security</strong>: No tampering occurred between build and distribution</p>
+<p><strong>Certificate Identity</strong>: Matches the exact Github Actions workflow that signed the chart
+<strong>OIDC Issuer</strong>: Github token service that issued the signing certificate</p>
+<h4 id="troubleshooting-verification">Troubleshooting Verification<a class="headerlink" href="#troubleshooting-verification" title="Permanent link">&para;</a></h4>
+<p>If verification fails:
+- <strong>Check chart version exists</strong>: <code>helm show chart oci://ghcr.io/k8gb-io/charts/k8gb:VERSION</code>
+- <strong>Verify cosign version</strong>: Ensure you're using cosign v2.0+ for keyless verification (recommended to have v3.0)</p>
 <h3 id="software-bill-of-materials">Software bill of materials<a class="headerlink" href="#software-bill-of-materials" title="Permanent link">&para;</a></h3>
 <p>For each container image we also create Software bill of materials (SBOM) file + its signature that ends up
 as part of the release. These files follows this naming pattern:
@@ -3711,7 +3878,7 @@ as part of the release. These files follows this naming pattern:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="February 22, 2026 22:55:49 UTC">February 22, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 21, 2026 08:22:35 UTC">April 21, 2026</span>
   </span>
 
     
