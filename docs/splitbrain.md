@@ -129,7 +129,7 @@ Since the edge DNS is the shared coordination point, its availability directly i
 
 ### 5. Test split-brain scenarios
 
-See [GitHub Issue #175](https://github.com/k8gb-io/k8gb/issues/175) for ongoing work on deterministic split-brain testing. Operators are encouraged to simulate network partitions in staging environments using tools like:
+See [GitHub Issue #175](https://github.com/k8gb-io/k8gb/issues/175) for the work on deterministic split-brain testing. Operators are encouraged to simulate network partitions in staging environments using tools like:
 
 - **iptables rules** to block DNS traffic between clusters
 - **Chaos Mesh** or **Pumba** for Kubernetes-native network fault injection
