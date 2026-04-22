@@ -24,7 +24,6 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/zones"
 
-	"github.com/k8gb-io/k8gb/controllers/geotags"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
@@ -199,41 +198,20 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 
 func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Targets) {
 	targets = NewTargets()
-	gt, err := geotags.GeoTag(d.config, d.zoneService).GetExternalClusterNSNamesByHostname(context.TODO(), host)
+	authoritativeServers, err := d.zoneService.ResolveAuthoritativeServersFromZoneDelegations(context.TODO(), host)
 	if err != nil {
 		d.logger.
 			Err(err).
 			Str("host", host).
-			Msg("Failed to get external cluster ns names")
-		return targets
+			Msg("Failed to resolve authoritative zones")
 	}
-	for tag, cluster := range gt {
+	extClusters := authoritativeServers.GetExternalAuthoritativeServers()
+	for nsName, authServer := range extClusters {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		d.logger.Info().
-			Str("cluster", cluster).
+			Str("cluster", nsName).
 			Msg("Adding external Gslb targets from cluster")
-		glueA, err := d.queryService.Query(cluster, d.config.ParentZoneDNSServers)
-		if err != nil {
-			d.logger.Warn().
-				Str("fqdn", cluster+".").
-				Str("nameservers", d.config.ParentZoneDNSServers.String()).
-				Err(err).
-				Msg("can't lookup GlueA record")
-			continue
-		}
-		d.logger.Info().
-			Str("nameserver", cluster).
-			Str("edgeDNSServers", d.config.ParentZoneDNSServers.String()).
-			Interface("glueARecord", glueA.Answer).
-			Msg("Resolved glue A record for NS")
-		glueARecords := d.queryService.ExtractARecords(glueA)
-		var hostToUse string
-		if len(glueARecords) > 0 {
-			hostToUse = glueARecords[0]
-		} else {
-			hostToUse = cluster
-		}
-		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, hostToUse)
+		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, authServer.IP)
 		lHost := fmt.Sprintf("localtargets-%s", host)
 		a, err := d.queryService.Query(lHost, nameServersToUse)
 		if err != nil {
@@ -246,10 +224,10 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		}
 		clusterTargets := d.queryService.ExtractARecords(a)
 		if len(clusterTargets) > 0 {
-			targets[tag] = &Target{clusterTargets}
+			targets[authServer.GeoTag] = &Target{clusterTargets}
 			d.logger.Info().
 				Strs("clusterTargets", clusterTargets).
-				Str("cluster", cluster).
+				Str("cluster", nsName).
 				Msg("Extend Gslb targets by targets from cluster")
 		}
 	}

@@ -48,6 +48,7 @@ type ZoneDelegation interface {
 	HasExtClusterGeoTags(ctx context.Context) bool
 	UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error
 	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error)
+	ResolveAuthoritativeServersFromZoneDelegations(ctx context.Context, host string) (AuthoritativeServers, error)
 }
 
 type ZoneDelegationImpl struct {

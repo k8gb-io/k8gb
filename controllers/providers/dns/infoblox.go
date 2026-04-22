@@ -68,7 +68,7 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneDele
 	}
 
 	var delegateTo []ibcl.NameServer
-	for _, address := range zoneInfo.IPs.Sorted() {
+	for _, address := range zoneInfo.LocalCoreDNSExposedIPs.Sorted() {
 		nameServer := ibcl.NameServer{Address: address, Name: zoneInfo.ClusterNSName}
 		delegateTo = append(delegateTo, nameServer)
 	}

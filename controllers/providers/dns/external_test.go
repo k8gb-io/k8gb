@@ -101,11 +101,11 @@ func TestCreateZoneDelegation(t *testing.T) {
 				NSRecordTTL:   60,
 			},
 			detail: &zones.ExtendedZoneDelegation{
-				LoadBalancedZone: "cloud.example.com",
-				ParentZone:       "example.com",
-				NegativeTTL:      60,
-				IPs:              []string{"10.0.0.1", "10.0.0.2"},
-				ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
+				LoadBalancedZone:       "cloud.example.com",
+				ParentZone:             "example.com",
+				NegativeTTL:            60,
+				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
+				ClusterNSName:          "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
 				ExtClusterNSNames: map[string]string{
 					"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
 				},
@@ -120,11 +120,11 @@ func TestCreateZoneDelegation(t *testing.T) {
 				NSRecordTTL:   60,
 			},
 			detail: &zones.ExtendedZoneDelegation{
-				LoadBalancedZone: "cloud.example.com",
-				ParentZone:       "example.com",
-				NegativeTTL:      60,
-				IPs:              []string{"10.0.0.1", "10.0.0.2"},
-				ClusterNSName:    "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
+				LoadBalancedZone:       "cloud.example.com",
+				ParentZone:             "example.com",
+				NegativeTTL:            60,
+				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
+				ClusterNSName:          "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
 				ExtClusterNSNames: map[string]string{
 					"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
 				},

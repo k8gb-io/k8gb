@@ -95,7 +95,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 					DNSName:    d.extendedZoneDelegation.ClusterNSName,
 					RecordTTL:  ttl,
 					RecordType: "A",
-					Targets:    d.extendedZoneDelegation.IPs.Unsorted(),
+					Targets:    d.extendedZoneDelegation.LocalCoreDNSExposedIPs.Unsorted(),
 				},
 			},
 		},

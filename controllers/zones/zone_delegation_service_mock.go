@@ -177,6 +177,21 @@ func (mr *MockZoneDelegationMockRecorder) ListConfigZoneDelegations(ctx any) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListConfigZoneDelegations", reflect.TypeOf((*MockZoneDelegation)(nil).ListConfigZoneDelegations), ctx)
 }
 
+// ResolveAuthoritativeServersFromZoneDelegations mocks base method.
+func (m *MockZoneDelegation) ResolveAuthoritativeServersFromZoneDelegations(ctx context.Context, host string) (AuthoritativeServers, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveAuthoritativeServersFromZoneDelegations", ctx, host)
+	ret0, _ := ret[0].(AuthoritativeServers)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveAuthoritativeServersFromZoneDelegations indicates an expected call of ResolveAuthoritativeServersFromZoneDelegations.
+func (mr *MockZoneDelegationMockRecorder) ResolveAuthoritativeServersFromZoneDelegations(ctx, host any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveAuthoritativeServersFromZoneDelegations", reflect.TypeOf((*MockZoneDelegation)(nil).ResolveAuthoritativeServersFromZoneDelegations), ctx, host)
+}
+
 // Save mocks base method.
 func (m *MockZoneDelegation) Save(ctx context.Context, z *v1beta1.ZoneDelegation) error {
 	m.ctrl.T.Helper()

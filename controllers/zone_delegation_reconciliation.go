@@ -48,8 +48,7 @@ type ZoneDelegationReconciler struct {
 
 func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var err error
-	result := utils.NewReconcileResultHandler(0)
-
+	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
 	if !r.ZoneService.HasAvailableIPs(ctx) {
 		r.Logger.Info().
 			Str("name", req.Name).
@@ -79,7 +78,7 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return result.RequeueError(err)
 	}
 
-	return result.Stop()
+	return result.Requeue()
 }
 
 func (r *ZoneDelegationReconciler) finalize(ctx context.Context, key client.ObjectKey) error {

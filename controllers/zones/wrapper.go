@@ -43,7 +43,8 @@ type ExtendedZoneDelegation struct {
 	NegativeTTL       int
 	ClusterNSName     string
 	ExtClusterNSNames map[string]string
-	IPs               ZoneDelegationIPs
+	// TODO: use directly GetExposedIPs(ctx) on places where LocalCoreDNSExposedIPs are required
+	LocalCoreDNSExposedIPs ZoneDelegationIPs
 }
 
 func NewZoneDelegationWrapper(
@@ -77,13 +78,13 @@ func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ExtendedZoneDel
 		return nil, err
 	}
 	zoneDetail := &ExtendedZoneDelegation{
-		wrapper:           z,
-		LoadBalancedZone:  z.zoneDelegation.Spec.LoadBalancedZone,
-		ParentZone:        z.zoneDelegation.Spec.ParentZone,
-		NegativeTTL:       z.zoneDelegation.Spec.DNSZoneNegTTL,
-		ClusterNSName:     getNsName(z.config.ClusterGeoTag, z.zoneDelegation.Spec.LoadBalancedZone, z.zoneDelegation.Spec.ParentZone),
-		ExtClusterNSNames: z.config.GetExtClusterNSNames(z.zoneDelegation.Spec.LoadBalancedZone, z.zoneDelegation.Spec.ParentZone),
-		IPs:               ZoneDelegationIPs(ips.IPs),
+		wrapper:                z,
+		LoadBalancedZone:       z.zoneDelegation.Spec.LoadBalancedZone,
+		ParentZone:             z.zoneDelegation.Spec.ParentZone,
+		NegativeTTL:            z.zoneDelegation.Spec.DNSZoneNegTTL,
+		ClusterNSName:          getNsName(z.config.ClusterGeoTag, z.zoneDelegation.Spec.LoadBalancedZone, z.zoneDelegation.Spec.ParentZone),
+		ExtClusterNSNames:      z.config.GetExtClusterNSNames(z.zoneDelegation.Spec.LoadBalancedZone, z.zoneDelegation.Spec.ParentZone),
+		LocalCoreDNSExposedIPs: ZoneDelegationIPs(ips.IPs),
 	}
 	err = validateRFC1035(zoneDetail)
 	if err != nil {
