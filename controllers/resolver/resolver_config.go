@@ -62,3 +62,13 @@ func (c *Config) GetExtClusterNSNames(loadBalancedZone, parentZone string) map[s
 func (c *Config) GetNsName(loadBalancedZone, parentZone string) string {
 	return getNsName(c.ClusterGeoTag, loadBalancedZone, parentZone)
 }
+
+func (c *Config) GetTagsByNSNames(loadBalancedZone, parentZone string) map[string]string {
+	m := c.GetExtClusterNSNames(loadBalancedZone, parentZone)
+	m[c.ClusterGeoTag] = c.GetNsName(loadBalancedZone, parentZone)
+	t := make(map[string]string)
+	for k, v := range m {
+		t[v] = k
+	}
+	return t
+}

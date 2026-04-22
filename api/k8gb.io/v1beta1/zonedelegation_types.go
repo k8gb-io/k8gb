@@ -85,6 +85,15 @@ func (l *ZoneDelegationList) ContainsZone(host string) bool {
 	return false
 }
 
+func (l *ZoneDelegationList) FindZone(host string) (bool, ZoneDelegation) {
+	for _, z := range l.Items {
+		if strings.Contains(host, z.Spec.LoadBalancedZone) {
+			return true, z
+		}
+	}
+	return false, ZoneDelegation{}
+}
+
 func (l *ZoneDelegationList) ListZones() []string {
 	var zones []string
 	for _, z := range l.Items {

@@ -84,20 +84,20 @@ func (b *ResolverImpl) GetGlueAInfo(ctx context.Context, loadBalancedZone, paren
 	gainfo := make([]*GlueAInfo, 0)
 	extClusterNSNames := b.config.GetExtClusterNSNames(loadBalancedZone, parentZone)
 	clusterNSName := b.config.GetNsName(loadBalancedZone, parentZone)
-	for tag, cluster := range extClusterNSNames {
+	for tag, extClusterNSName := range extClusterNSNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
-		glueA, err := b.queryService.Query(cluster, b.config.ParentZoneDNSServers)
+		glueA, err := b.queryService.Query(extClusterNSName, b.config.ParentZoneDNSServers)
 		if err != nil {
 			return nil, err
 		}
 		glueARecords := b.queryService.ExtractARecords(glueA)
 		if len(glueARecords) > 0 {
 			for _, glueARecord := range glueARecords {
-				gainfo = append(gainfo, &GlueAInfo{GeoTag: tag, IP: glueARecord, Cluster: cluster})
+				gainfo = append(gainfo, &GlueAInfo{GeoTag: tag, IP: glueARecord, Cluster: extClusterNSName})
 			}
 			continue
 		}
-		gainfo = append(gainfo, &GlueAInfo{GeoTag: tag, IP: "", Cluster: cluster})
+		gainfo = append(gainfo, &GlueAInfo{GeoTag: tag, IP: extClusterNSName, Cluster: extClusterNSName})
 	}
 	localIPs, err := b.GetExposedIPs(ctx)
 	if err != nil {
