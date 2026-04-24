@@ -74,21 +74,6 @@ func (mr *MockZoneDelegationMockRecorder) AvailableIPs(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AvailableIPs", reflect.TypeOf((*MockZoneDelegation)(nil).AvailableIPs), ctx)
 }
 
-// ExtendedZoneDelegation mocks base method.
-func (m *MockZoneDelegation) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExtendedZoneDelegation", ctx, zd)
-	ret0, _ := ret[0].(*ExtendedZoneDelegation)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExtendedZoneDelegation indicates an expected call of ExtendedZoneDelegation.
-func (mr *MockZoneDelegationMockRecorder) ExtendedZoneDelegation(ctx, zd any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExtendedZoneDelegation", reflect.TypeOf((*MockZoneDelegation)(nil).ExtendedZoneDelegation), ctx, zd)
-}
-
 // Get mocks base method.
 func (m *MockZoneDelegation) Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1.ZoneDelegation, error) {
 	m.ctrl.T.Helper()
