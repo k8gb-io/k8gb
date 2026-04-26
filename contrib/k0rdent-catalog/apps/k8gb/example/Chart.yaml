@@ -1,0 +1,8 @@
+apiVersion: v2
+name: example
+type: application
+version: 1.0.0
+dependencies:
+  - name: k8gb
+    version: v0.18.1
+    repository: oci://ghcr.io/k0rdent/catalog/charts

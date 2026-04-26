@@ -1,0 +1,31 @@
+title: "k8gb"
+tags:
+  - Networking
+summary: "Cloud native Kubernetes Global Balancer for multi-cluster load balancing."
+logo: "./assets/k8gb-icon-color.svg"
+created: "2026-03-09T00:00:00Z"
+description: |
+  k8gb (Kubernetes Global Balancer) is an open-source, cloud native global load balancing solution for Kubernetes.
+  It enables load balancing traffic across geographically dispersed Kubernetes clusters using DNS-based strategies.
+
+  Key features:
+  - Load balancing based on the DNS protocol, ideal for global scope and reliability
+  - No dedicated management cluster and no single point of failure
+  - Kubernetes native health checks using Liveness and Readiness probes for load balancing decisions
+  - Configuration with a single Gslb CRD (Custom Resource Definition)
+  - Support for failover, round-robin, and geo-based strategies
+
+  k0rdent integrates with k8gb to provide global load balancing across managed clusters, enabling
+  high availability and traffic distribution for multi-cluster deployments.
+charts:
+  - name: k8gb
+    versions: ['v0.18.1']
+
+doc_link: https://www.k8gb.io/docs/
+support_type: Community
+
+validated_amd64: 'y'
+validated_aws: 'y'
+validated_azure: 'y'
+validated_arm64: 'y'
+validated_local: 'y'
