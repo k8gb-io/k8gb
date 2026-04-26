@@ -34,7 +34,12 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
-        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+        egress-policy: block
+        allowed-endpoints: |
+          github.com
+          docker.io
+          gcr.io
+          registry.k8s.io
 
     - id: skip_check
       uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
