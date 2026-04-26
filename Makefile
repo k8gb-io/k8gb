@@ -797,10 +797,30 @@ endef
 
 # Documentation with Mkdocs
 
-.PHONY: docs-list docs-deploy docs-deploy-master docs-deploy-last-3
+.PHONY: docs-list docs-deploy docs-deploy-master docs-deploy-last-3 docs-sync-blog
 
 docs-list: ## List deployed versions
 	mike list
+
+docs-sync-blog: ## Sync blog posts to all deployed documentation versions
+	@set -eu; \
+	git fetch origin gh-pages:gh-pages --quiet; \
+	if ! git checkout gh-pages 2>/dev/null; then \
+		echo "WARN: gh-pages not found, skipping blog sync"; \
+		exit 0; \
+	fi; \
+	BLOG_DIR="docs/blog"; \
+	if [ ! -d "$$BLOG_DIR/posts" ]; then \
+		echo "No blog posts to sync"; \
+		exit 0; \
+	fi; \
+	for version in */; do \
+		if [ -d "$$version/$$BLOG_DIR" ]; then \
+			echo "Syncing blog to $$version"; \
+			cp -n "$$BLOG_DIR/posts"/*.md "$$version/$$BLOG_DIR/posts/" 2>/dev/null || true; \
+			cp -n "$$BLOG_DIR/blog-banners"/* "$$version/$$BLOG_DIR/blog-banners/" 2>/dev/null || true; \
+		fi \
+	done
 
 docs-deploy: ## Deploy docs with mike for VERSION (requires VERSION)
 	@if [ -z "$(VERSION)" ]; then \
