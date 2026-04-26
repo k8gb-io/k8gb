@@ -131,6 +131,7 @@ const (
 	Healthy   HealthStatus = "Healthy"
 	Unhealthy HealthStatus = "Unhealthy"
 	NotFound  HealthStatus = "NotFound"
+	Partial   HealthStatus = "Partial"
 )
 
 func (h HealthStatus) String() string {

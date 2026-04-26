@@ -54,7 +54,14 @@ func calculateServiceHealth(
 ) (map[string]k8gbv1beta1io.HealthStatus, error) {
 	serviceHealth := make(map[string]k8gbv1beta1io.HealthStatus)
 	for _, server := range gslb.Status.Servers {
-		serviceHealth[server.Host] = k8gbv1beta1io.NotFound
+		if len(server.Services) == 0 {
+			serviceHealth[server.Host] = k8gbv1beta1io.NotFound
+			continue
+		}
+
+		hasNotFound := false
+		hasUnhealthy := false
+
 		for _, svc := range server.Services {
 			service := &corev1.Service{}
 			finder := client.ObjectKey{
@@ -64,6 +71,7 @@ func calculateServiceHealth(
 			err := c.Get(ctx, finder, service)
 			if err != nil {
 				if k8serrors.IsNotFound(err) {
+					hasNotFound = true
 					continue
 				}
 				return serviceHealth, err
@@ -80,15 +88,29 @@ func calculateServiceHealth(
 				return serviceHealth, err
 			}
 
-			serviceHealth[server.Host] = k8gbv1beta1io.Unhealthy
+			healthy := false
 			if len(endpoints.Items) > 0 && len(endpoints.Items[0].Endpoints) > 0 {
 				for _, endpoint := range endpoints.Items[0].Endpoints {
 					if len(endpoint.Addresses) > 0 &&
 						(endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready) {
-						serviceHealth[server.Host] = k8gbv1beta1io.Healthy
+						healthy = true
+						break
 					}
 				}
 			}
+
+			if !healthy {
+				hasUnhealthy = true
+			}
+		}
+
+		switch {
+		case hasNotFound:
+			serviceHealth[server.Host] = k8gbv1beta1io.NotFound
+		case hasUnhealthy:
+			serviceHealth[server.Host] = k8gbv1beta1io.Unhealthy
+		default:
+			serviceHealth[server.Host] = k8gbv1beta1io.Healthy
 		}
 	}
 	return serviceHealth, nil
