@@ -35,6 +35,11 @@ type ZoneDelegationSpec struct {
 
 	// DNSZoneNegTTL specifies the negative TTL for the DNS zone (in seconds)
 	DNSZoneNegTTL int `json:"dnsZoneNegTTL"`
+
+	// DoFinalize indicates that this ZoneDelegation should be withdrawn
+	// from edge DNS. The controller removes the delegation only when it is no
+	// longer served by any known cluster (based on configured geoTags).
+	DoFinalize bool `json:"doFinalize,omitempty"`
 }
 
 // ZoneDelegationStatus defines the observed state of ZoneDelegation

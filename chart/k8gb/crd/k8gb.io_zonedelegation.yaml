@@ -54,6 +54,12 @@ spec:
                 description: DNSZoneNegTTL specifies the negative TTL for the DNS
                   zone (in seconds)
                 type: integer
+              doFinalize:
+                description: |-
+                  DoFinalize indicates that this ZoneDelegation should be withdrawn
+                  from edge DNS. The controller removes the delegation only when it is no
+                  longer served by any known cluster (based on configured geoTags).
+                type: boolean
               loadBalancedZone:
                 description: LoadBalancedZone is the DNS zone managed by this ZoneDelegation
                 type: string
