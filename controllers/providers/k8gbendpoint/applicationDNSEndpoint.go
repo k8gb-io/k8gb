@@ -213,16 +213,17 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 			Msg("Adding external Gslb targets from cluster")
 		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, authServer.IP)
 		lHost := fmt.Sprintf("localtargets-%s", host)
-		a, err := d.queryService.Query(lHost, nameServersToUse)
-		if err != nil {
+		dnsResult := d.queryService.Query(lHost, nameServersToUse)
+		if dnsResult.Err != nil {
 			d.logger.Warn().
 				Str("fqdn", lHost+".").
 				Str("nameservers", nameServersToUse.String()).
-				Err(err).
+				Str("status", dnsResult.Status.String()).
+				Err(dnsResult.Err).
 				Msg("can't resolve FQDN using nameservers")
 			continue
 		}
-		clusterTargets := d.queryService.ExtractARecords(a)
+		clusterTargets := d.queryService.ExtractARecords(dnsResult.Msg)
 		if len(clusterTargets) > 0 {
 			targets[authServer.GeoTag] = &Target{clusterTargets}
 			d.logger.Info().
