@@ -231,7 +231,6 @@ func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd Extend
 	}
 
 	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, exzd.LoadBalancedZone, exzd.ParentZone).FilterResolvedRecords()
-
 	if err := glueAResults.LocalClusterError(); err != nil {
 		return v1beta1.ZoneDelegationStatus{}, err
 	}
