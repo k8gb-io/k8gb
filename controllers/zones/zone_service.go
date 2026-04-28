@@ -230,9 +230,10 @@ func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd Extend
 		DNSServers: make([]v1beta1.DNSServer, 0),
 	}
 
-	glueAList, err := z.ipresolver.GetGlueAInfo(ctx, exzd.LoadBalancedZone, exzd.ParentZone)
-	if err != nil {
-		return v1beta1.ZoneDelegationStatus{}, err
+	glueAList := z.ipresolver.GetClusterGlueAResults(ctx, exzd.LoadBalancedZone, exzd.ParentZone).FilterResolvedRecords()
+
+	if glueAList.LocalClusterError() != nil {
+		return v1beta1.ZoneDelegationStatus{}, glueAList.LocalClusterError()
 	}
 
 	for _, gluea := range glueAList {
@@ -288,6 +289,27 @@ func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1b
 	return NewZoneDelegationWrapper(zd, z.config, z.ipresolver).GetDetail(ctx)
 }
 
+func (z *ZoneDelegationImpl) IsLastServingCluster(_ context.Context, _ *v1beta1.ZoneDelegation) (bool, error) {
+	return true, nil
+}
+
+func (z *ZoneDelegationImpl) IsZoneDelagationDeleted(_ context.Context, _ *v1beta1.ZoneDelegation) (bool, error) {
+	return false, nil
+}
+
+func (z *ZoneDelegationImpl) RemoveZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+	// remove from CM (or update without current ZD)
+	// ExternalDNSEndpoint - cant delete directly because ExDNS will remove ZD once I remove first dnsendpoint
+	//
+
+	// Remove NS record
+	// Remove GlueA record
+	// Remove ZoneDelegation
+	// Remove Delegationendpoint - raising
+	// If LastServingCluster than remove ZoneDelegation from ParentDNS
+	return z.client.Delete(ctx, zd)
+}
+
 // updateCoreDNSConfiguration creates, updates, or skips the k8gb-zone-delegation ConfigMap.
 // controllerutil.CreateOrUpdate was avoided to keep full control over update conditions (DeepEqual is too coarse).
 func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd v1beta1.ZoneDelegation) error {
@@ -310,6 +332,7 @@ func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd 
 		return nil
 	}
 
+	//  exclude if in deletion state (timestamp)
 	coreDNSZones.Data[zoneKey] = getCoreDNSData(zd.Spec.LoadBalancedZone)
 
 	return z.client.Update(ctx, coreDNSZones)

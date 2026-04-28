@@ -39,16 +39,10 @@ type Resolved struct {
 	Name   string
 }
 
-type GlueAInfo struct {
-	GeoTag  string
-	IP      string
-	Cluster string
-}
-
 type Resolver interface {
 	GetExposedIPs(ctx context.Context) (*Resolved, error)
 
-	GetGlueAInfo(ctx context.Context, loadBalancedZone, parentZone string) ([]*GlueAInfo, error)
+	GetClusterGlueAResults(ctx context.Context, loadBalancedZone, parentZone string) ClusterGlueAResults
 }
 
 type ResolverImpl struct {
@@ -76,37 +70,66 @@ func (b *ResolverImpl) GetExposedIPs(ctx context.Context) (*Resolved, error) {
 	return bootstrap, nil
 }
 
-// GetGlueAInfo returns a list of GlueAInfo records containing NS names and their
+// GetClusterGlueAResults returns a list of GlueAInfo records containing NS names and their
 // corresponding IP addresses for both external and local clusters.
 // For external clusters, it resolves NS names via DNS queries and extracts A records.
 // For the local cluster, it uses IPs obtained from exposed services (e.g. LoadBalancer)
-func (b *ResolverImpl) GetGlueAInfo(ctx context.Context, loadBalancedZone, parentZone string) ([]*GlueAInfo, error) {
+func (b *ResolverImpl) GetClusterGlueAResults(ctx context.Context, loadBalancedZone, parentZone string) ClusterGlueAResults {
 	gainfo := make([]*GlueAInfo, 0)
 	extClusterNSNames := b.config.GetExtClusterNSNames(loadBalancedZone, parentZone)
 	clusterNSName := b.config.GetNsName(loadBalancedZone, parentZone)
 	for tag, extClusterNSName := range extClusterNSNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
-		glueA, err := b.queryService.Query(extClusterNSName, b.config.ParentZoneDNSServers)
-		if err != nil {
-			return nil, err
+		dnsResult := b.queryService.Query(extClusterNSName, b.config.ParentZoneDNSServers)
+		if dnsResult.Err != nil {
+			gainfo = append(gainfo, &GlueAInfo{
+				GeoTag:  tag,
+				IP:      "",
+				Cluster: extClusterNSName,
+				Err:     dnsResult.Err,
+				Status:  dnsResult.Status,
+				IsLocal: false})
+			continue
 		}
-		glueARecords := b.queryService.ExtractARecords(glueA)
+		glueARecords := b.queryService.ExtractARecords(dnsResult.Msg)
 		if len(glueARecords) > 0 {
 			for _, glueARecord := range glueARecords {
-				gainfo = append(gainfo, &GlueAInfo{GeoTag: tag, IP: glueARecord, Cluster: extClusterNSName})
+				gainfo = append(gainfo, &GlueAInfo{
+					GeoTag:  tag,
+					IP:      glueARecord,
+					Cluster: extClusterNSName,
+					Status:  utils.DNSQueryStatusResolved,
+					IsLocal: false})
 			}
 			continue
 		}
-		gainfo = append(gainfo, &GlueAInfo{GeoTag: tag, IP: extClusterNSName, Cluster: extClusterNSName})
+		gainfo = append(gainfo, &GlueAInfo{
+			GeoTag:  tag,
+			IP:      extClusterNSName,
+			Cluster: extClusterNSName,
+			Status:  utils.DNSQueryStatusResolved,
+			IsLocal: false})
 	}
 	localIPs, err := b.GetExposedIPs(ctx)
 	if err != nil {
-		return nil, err
+		gainfo = append(gainfo, &GlueAInfo{
+			GeoTag:  b.config.ClusterGeoTag,
+			IP:      "",
+			Cluster: clusterNSName,
+			Status:  utils.DNSQueryStatusError,
+			Err:     err,
+			IsLocal: true})
+		return gainfo
 	}
 	for _, ip := range localIPs.IPs {
-		gainfo = append(gainfo, &GlueAInfo{GeoTag: b.config.ClusterGeoTag, IP: ip, Cluster: clusterNSName})
+		gainfo = append(gainfo, &GlueAInfo{
+			GeoTag:  b.config.ClusterGeoTag,
+			IP:      ip,
+			Cluster: clusterNSName,
+			Status:  utils.DNSQueryStatusResolved,
+			IsLocal: true})
 	}
-	return gainfo, nil
+	return gainfo
 }
 
 func (b *Resolved) HasIngress() bool {
