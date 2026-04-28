@@ -166,5 +166,5 @@ func Exchange(m *dns.Msg, parentZoneDNSServers []DNSServer) (msg *dns.Msg, err e
 		}
 		return
 	}
-	return nil, fmt.Errorf("exchange error: all dns servers were tried and none of them were able to resolve, err: %s", err)
+	return nil, fmt.Errorf("exchange error: all dns servers were tried and none of them were able to resolve, err: %w", err)
 }
