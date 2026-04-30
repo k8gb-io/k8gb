@@ -30,6 +30,9 @@ jobs:
           allowed-endpoints: |
             github.com:443
             api.github.com:443
+            objects.githubusercontent.com:443
+            fossa.com:443
+            app.fossa.com:443
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
