@@ -27,7 +27,10 @@ jobs:
           allowed-endpoints: |
             github.com:443
             api.github.com:443
+            objects.githubusercontent.com:443
             kubernetes-charts.github.io:443
+            k8gb.io:443
+            www.k8gb.io:443
             gcr.io:443
             registry.k8s.io:443
 
