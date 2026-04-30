@@ -36,7 +36,77 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 </details>
 
-<details open><summary><strong>April 15, 2026 #90</strong></summary>
+<details open><summary><strong>April 29, 2026 #91</strong></summary>
+
+## April 29, 2026 #91
+
+Zoom Recording:
+
+On YouTube:
+
+**Attendees**
+
+- Yury
+- Michal
+- Dinar
+
+**Agenda**
+
+- **News**
+  - Blog / website follow-up
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
+  - [project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+  - Security / CI
+    - [Switch Harden-Runner from egress-policy: audit to block in CI workflow](https://github.com/k8gb-io/k8gb/issues/2302)
+    - [Security Alert: Compromised aquasecurity/trivy-action detected in workflow runs](https://github.com/k8gb-io/k8gb/issues/2294)
+  - Governance / community
+    - [Create a Steering Committee](https://github.com/k8gb-io/k8gb/issues/2293)
+    - [Create an official "Contributor" role](https://github.com/k8gb-io/k8gb/issues/2219)
+    - [Are you using K8GB?](https://github.com/k8gb-io/k8gb/issues/2135)
+  - Integrations / docs
+    - [Guided K8gb install mission in KubeStellar Console](https://github.com/k8gb-io/k8gb/issues/2283)
+    - [Add k8gb to k0rdent catalog](https://github.com/k8gb-io/k8gb/issues/2174)
+    - [TLSRoute support in gateway.networking.k8s.io/v1alpha2 vs gateway.networking.k8s.io/v1alpha3 ?](https://github.com/k8gb-io/k8gb/issues/2152)
+    - [Helm publish workflow to only push current release chart](https://github.com/k8gb-io/k8gb/issues/2137)
+    - [extraServerBlocks feature broken after refactoring - location mismatch between schema and template](https://github.com/k8gb-io/k8gb/issues/2120)
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+  - ZoneDelegation work
+    - [ZoneDelegation (3.7/4) feat: ApplicationDNSEndpoint to ZoneService refactor](https://github.com/k8gb-io/k8gb/pull/2335)
+    - [ZoneDelegation (3.6/4) feat: chainsaw ZoneDelegation status](https://github.com/k8gb-io/k8gb/pull/2328)
+    - [Dynamic ZoneDelegations](https://github.com/k8gb-io/k8gb/pull/2102)
+  - Testing / CI
+    - [test(DTR): Testing different K8S versions for DTR (incubation)](https://github.com/k8gb-io/k8gb/pull/2095)
+    - [ci: add crust-gather to collect cluster state on pipeline failure](https://github.com/k8gb-io/k8gb/pull/2310)
+  - Dependencies / renovate
+    - [fix(deps): update kubernetes monorepo to v0.36.0](https://github.com/k8gb-io/k8gb/pull/2332)
+    - [fix(deps): update all non-major dependencies](https://github.com/k8gb-io/k8gb/pull/2318)
+    - [chore(deps): update otel/opentelemetry-collector docker tag to v0.150.1](https://github.com/k8gb-io/k8gb/pull/2315)
+    - [chore(deps): update rancher/k3s docker tag to v1.35.3](https://github.com/k8gb-io/k8gb/pull/2314)
+  - Community contributions
+    - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98
+    - [Add k8gb to k0rdent catalog](https://github.com/k8gb-io/k8gb/pull/2281) @aryasoni98
+    - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+    - [fix: restore extraServerBlocks as global setting](https://github.com/k8gb-io/k8gb/pull/2121) @angelbarrera92
+    - [feat: Add health checking for ingress controllers](https://github.com/k8gb-io/k8gb/pull/2110) @sudhamshk
+    - [Preflight and docs for localhost:5053/5054 +tcp failures; add DNS LB verification test](https://github.com/k8gb-io/k8gb/pull/2106) @ljluestc
+- **Community Update**
+  - Incubation
+    - [CNCF incubation application](https://github.com/cncf/toc/issues/1472) status: Adopter Interviews & Project Discussion
+    - Adopter interviews / outreach
+- **Other**
+  - prune old Issues and PRs?
+- **Action Items**
+  - pruning Issues and PRs
+  - fix service health calculation https://github.com/k8gb-io/k8gb/issues/2326
+    with the strategy that all services should be healthy in multi-service
+    networking object(Dinar, Yury)
+  - https://github.com/k8gb-io/k8gb/issues/1745 - steer design to be based on
+    standard Service+EndpointSlices, avoid external dependency in k8gb
+    reconciliation loop by default(Dinar, Yury)
+
+</details>
+
+<details><summary><strong>April 15, 2026 #90</strong></summary>
 
 ## April 15, 2026 #90 The Tax Man Cometh!
 
@@ -3611,5 +3681,3 @@ Notes
 Action Items
 
 - jkremser: update the PR with colima workaround so that the svc is deployed iif it’s run together with terratests
-
-
