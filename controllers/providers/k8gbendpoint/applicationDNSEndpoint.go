@@ -22,11 +22,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/k8gb-io/k8gb/controllers/geotags"
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,26 +35,29 @@ import (
 	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
-type UpdateRuntimeStatus func(gslb *k8gbv1beta1.Gslb, isPrimary bool, isHealthy k8gbv1beta1.HealthStatus, finalTargets []string)
+type UpdateRuntimeStatus func(gslb *k8gbv1beta1io.Gslb, isPrimary bool, isHealthy k8gbv1beta1io.HealthStatus, finalTargets []string)
 type ApplicationDNSEndpoint struct {
 	context             context.Context
 	endpointType        dnsEndpointType
 	client              client.Client
 	config              *resolver.Config
-	gslb                *k8gbv1beta1.Gslb
+	gslb                *k8gbv1beta1io.Gslb
 	logger              *zerolog.Logger
 	updateRuntimeStatus UpdateRuntimeStatus
 	queryService        utils.DNSQueryService
+	zoneService         zones.ZoneDelegation
 }
 
 func NewApplicationDNSEndpoint(
 	ctx context.Context,
 	client client.Client,
 	config *resolver.Config,
-	gslb *k8gbv1beta1.Gslb,
+	gslb *k8gbv1beta1io.Gslb,
 	logger *zerolog.Logger,
 	queryService utils.DNSQueryService,
-	urs UpdateRuntimeStatus) *ApplicationDNSEndpoint {
+	zoneService zones.ZoneDelegation,
+	urs UpdateRuntimeStatus,
+) *ApplicationDNSEndpoint {
 	return &ApplicationDNSEndpoint{
 		context:             ctx,
 		client:              client,
@@ -62,6 +66,7 @@ func NewApplicationDNSEndpoint(
 		gslb:                gslb,
 		logger:              logger,
 		queryService:        queryService,
+		zoneService:         zoneService,
 		updateRuntimeStatus: urs,
 	}
 }
@@ -83,12 +88,16 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 	for host, health := range d.gslb.Status.ServiceHealth {
 		var finalTargets = NewTargets()
 
-		if !d.config.DelegationZones.ContainsZone(host) {
-			return nil, fmt.Errorf("ingress host %s does not match delegated zone %v", host, d.config.DelegationZones.ListZones())
+		zoneDelegationList, err := d.zoneService.List(context.TODO())
+		if err != nil {
+			return nil, fmt.Errorf("failed to list zones: %w", err)
+		}
+		if !zoneDelegationList.ContainsZone(host) {
+			return nil, fmt.Errorf("ingress host %s does not match delegated zone %v", host, zoneDelegationList.ListZones())
 		}
 
 		isPrimary := d.gslb.Spec.Strategy.PrimaryGeoTag == d.config.ClusterGeoTag
-		isHealthy := health == k8gbv1beta1.Healthy
+		isHealthy := health == k8gbv1beta1io.Healthy
 
 		if isHealthy {
 			finalTargets.Append(d.config.ClusterGeoTag, localTargets)
@@ -121,7 +130,7 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 							Str("gslb", d.gslb.Name).
 							Str("cluster", d.gslb.Spec.Strategy.PrimaryGeoTag).
 							Strs("targets", finalTargets.GetIPs()).
-							Str("workload", k8gbv1beta1.Unhealthy.String()).
+							Str("workload", k8gbv1beta1io.Unhealthy.String()).
 							Msg("Executing failover strategy for primary cluster")
 					}
 				} else {
@@ -138,7 +147,7 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 						Str("gslb", d.gslb.Name).
 						Str("cluster", d.gslb.Spec.Strategy.PrimaryGeoTag).
 						Strs("targets", finalTargets.GetIPs()).
-						Str("workload", k8gbv1beta1.Healthy.String()).
+						Str("workload", k8gbv1beta1io.Healthy.String()).
 						Msg("Executing failover strategy for secondary cluster")
 				}
 			}
@@ -178,8 +187,8 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        d.gslb.Name,
 			Namespace:   d.gslb.Namespace,
-			Annotations: map[string]string{"k8gb.absa.oss/dnstype": "local"},
-			Labels:      map[string]string{"k8gb.absa.oss/dnstype": "local"},
+			Annotations: map[string]string{"k8gb.io/dnstype": "local", "k8gb.absa.oss/dnstype": "local"},
+			Labels:      map[string]string{"k8gb.io/dnstype": "local", "k8gb.absa.oss/dnstype": "local"},
 		},
 		Spec: dnsEndpointSpec,
 	}
@@ -189,41 +198,20 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 
 func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Targets) {
 	targets = NewTargets()
-	gt, err := geotags.GeoTag(d.config).GetExternalClusterNSNamesByHostname(host)
+	authoritativeServers, err := d.zoneService.ResolveAuthoritativeServersFromZoneDelegations(context.TODO(), host)
 	if err != nil {
 		d.logger.
 			Err(err).
 			Str("host", host).
-			Msg("Failed to get external cluster ns names")
-		return targets
+			Msg("Failed to resolve authoritative zones")
 	}
-	for tag, cluster := range gt {
+	extClusters := authoritativeServers.GetExternalAuthoritativeServers()
+	for nsName, authServer := range extClusters {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		d.logger.Info().
-			Str("cluster", cluster).
+			Str("cluster", nsName).
 			Msg("Adding external Gslb targets from cluster")
-		glueA, err := d.queryService.Query(cluster, d.config.ParentZoneDNSServers)
-		if err != nil {
-			d.logger.Warn().
-				Str("fqdn", cluster+".").
-				Str("nameservers", d.config.ParentZoneDNSServers.String()).
-				Err(err).
-				Msg("can't lookup GlueA record")
-			continue
-		}
-		d.logger.Info().
-			Str("nameserver", cluster).
-			Str("edgeDNSServers", d.config.ParentZoneDNSServers.String()).
-			Interface("glueARecord", glueA.Answer).
-			Msg("Resolved glue A record for NS")
-		glueARecords := d.queryService.ExtractARecords(glueA)
-		var hostToUse string
-		if len(glueARecords) > 0 {
-			hostToUse = glueARecords[0]
-		} else {
-			hostToUse = cluster
-		}
-		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, hostToUse)
+		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, authServer.IP)
 		lHost := fmt.Sprintf("localtargets-%s", host)
 		a, err := d.queryService.Query(lHost, nameServersToUse)
 		if err != nil {
@@ -236,10 +224,10 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		}
 		clusterTargets := d.queryService.ExtractARecords(a)
 		if len(clusterTargets) > 0 {
-			targets[tag] = &Target{clusterTargets}
+			targets[authServer.GeoTag] = &Target{clusterTargets}
 			d.logger.Info().
 				Strs("clusterTargets", clusterTargets).
-				Str("cluster", cluster).
+				Str("cluster", nsName).
 				Msg("Extend Gslb targets by targets from cluster")
 		}
 	}
@@ -247,7 +235,7 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 }
 
 // getLabels map of where key identifies region and weight, value identifies IP.
-func (d *ApplicationDNSEndpoint) getLabels(gslb *k8gbv1beta1.Gslb, targets Targets) (labels map[string]string) {
+func (d *ApplicationDNSEndpoint) getLabels(gslb *k8gbv1beta1io.Gslb, targets Targets) (labels map[string]string) {
 	labels = make(map[string]string)
 	for k, v := range gslb.Spec.Strategy.Weight {
 		t, found := targets[k]

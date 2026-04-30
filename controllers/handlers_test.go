@@ -22,7 +22,9 @@ import (
 	"context"
 	"testing"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/logging"
+
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
@@ -37,6 +39,7 @@ import (
 )
 
 func TestIngressHandler(t *testing.T) {
+	log := logging.Logger()
 	const dummy = "default"
 	var spec = netv1.IngressSpec{
 		IngressClassName: utils.Ptr("nginx"),
@@ -119,7 +122,7 @@ func TestIngressHandler(t *testing.T) {
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// existing gslb - doesnt exists
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).
-					Return(k8serrors.NewNotFound(schema.GroupResource{Group: "k8gb.absa.oss/v1beta1", Resource: "Gslb"}, dummy)).
+					Return(k8serrors.NewNotFound(schema.GroupResource{Group: "k8gb.io", Resource: "Gslb"}, dummy)).
 					Times(1)
 				// create gslb
 				cl.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
@@ -144,7 +147,7 @@ func TestIngressHandler(t *testing.T) {
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 				// existing gslb - doesnt exists
 				cl.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).
-					Return(k8serrors.NewNotFound(schema.GroupResource{Group: "k8gb.absa.oss/v1beta1", Resource: "Gslb"}, dummy)).
+					Return(k8serrors.NewNotFound(schema.GroupResource{Group: "k8gb.io", Resource: "Gslb"}, dummy)).
 					Times(1)
 				// create gslb
 				cl.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
@@ -214,8 +217,8 @@ func TestIngressHandler(t *testing.T) {
 			scheme := runtime.NewScheme()
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 			utilruntime.Must(netv1.AddToScheme(scheme))
-			utilruntime.Must(k8gbv1beta1.AddToScheme(scheme))
-			handler := NewIngressHandler(context.TODO(), client, scheme)
+			utilruntime.Must(k8gbv1beta1io.AddToScheme(scheme))
+			handler := NewIngressHandler(context.TODO(), client, scheme, log)
 
 			// act
 			result := handler.Handle(test.ing)

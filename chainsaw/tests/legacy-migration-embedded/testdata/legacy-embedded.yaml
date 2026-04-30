@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: legacy-migration-embedded
+  namespace: ($namespace)
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: legacy-migration-embedded.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo
+                port:
+                  name: http
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-migration-embedded
+  namespace: ($namespace)
+  labels:
+    k8gb.io/migration-requested: "true"
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: legacy-migration-embedded.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: frontend-podinfo
+                  port:
+                    name: http
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
+    dnsTtlSeconds: 5

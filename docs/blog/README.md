@@ -101,7 +101,7 @@ authors:
 Use fenced code blocks with language specification:
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: example

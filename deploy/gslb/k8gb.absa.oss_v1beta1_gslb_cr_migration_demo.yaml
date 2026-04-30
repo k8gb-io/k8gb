@@ -1,0 +1,113 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-ref-demo
+  namespace: test-gslb
+  labels:
+    k8gb.io/migration-requested: "true"
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: roundrobin-ingress
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: legacy-embedded-demo
+  namespace: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: legacy-embedded-demo.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo
+                port:
+                  name: http
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-embedded-demo
+  namespace: test-gslb
+  labels:
+    k8gb.io/migration-requested: "true"
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: legacy-embedded-demo.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: frontend-podinfo
+                  port:
+                    name: http
+  strategy:
+    type: failover
+    primaryGeoTag: eu
+    dnsTtlSeconds: 30
+---
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: already-migrated-demo
+  namespace: test-gslb
+  labels:
+    k8gb.io/migrated-to-k8gb-io: "true"
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: failover-ingress
+  strategy:
+    type: failover
+    primaryGeoTag: eu
+    dnsTtlSeconds: 30
+---
+# Intentionally non-migrated legacy case for manual local upgrade flow.
+# No k8gb.io/migration-requested label means the object stays in legacy runtime mode.
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-ref-non-migrated-failover
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: legacy-ref-non-migrated-failover
+  strategy:
+    type: failover
+    primaryGeoTag: eu
+    dnsTtlSeconds: 30
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: legacy-ref-non-migrated-failover
+  namespace: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: legacy-ref-non-migrated-failover.cloud.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-podinfo
+                port:
+                  name: http

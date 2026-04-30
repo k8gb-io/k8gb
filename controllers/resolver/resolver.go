@@ -23,7 +23,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -34,14 +34,14 @@ type GslbResolver interface {
 
 	// ResolveGslbSpec fills Gslb by spec values. It executes always, when gslb is initialised.
 	// If spec value is not defined, it will use the default value. Function returns error if input is invalid.
-	ResolveGslbSpec(ctx context.Context, gslb *k8gbv1beta1.Gslb, client client.Client) error
+	ResolveGslbSpec(ctx context.Context, gslb *k8gbv1beta1io.Gslb, client client.Client) error
 
 	// GetDeprecations reads deprecation messages if any
 	GetDeprecations() []string
 }
 
 type Resolver struct {
-	spec            k8gbv1beta1.GslbSpec
+	spec            k8gbv1beta1io.GslbSpec
 	specValidator   *validator.Validate
 	configValidator *validator.Validate
 	errorSpec       error
@@ -50,7 +50,7 @@ type Resolver struct {
 // getValidator returns a singleton instance of specValidator.Validate with registered custom struct validations.
 func getValidators() (specValidator *validator.Validate, configValidator *validator.Validate) {
 	specValidator = validator.New()
-	specValidator.RegisterStructValidation(ValidateStrategy, k8gbv1beta1.Strategy{})
+	specValidator.RegisterStructValidation(ValidateStrategy, k8gbv1beta1io.Strategy{})
 
 	configValidator = validator.New(validator.WithRequiredStructEnabled())
 	_ = configValidator.RegisterValidation("geotag", onlyLettersDigitsDash)

@@ -1,0 +1,117 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: legacy-migration-dnsendpoint-handoff
+spec:
+  namespace: legacy-migration-dnsendpoint-handoff
+  steps:
+  - name: namespace
+    description: create namespace
+    cluster: eu
+    use:
+      template: ../../step-templates/namespace.yaml
+  - name: create legacy runtime object
+    description: legacy runtime should create legacy-owned DNSEndpoint before migration is requested
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/legacy-runtime.yaml
+    - script:
+        env:
+        - name: NAME
+          value: legacy-dns-handoff
+        content: |
+          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          TMP_JSON=$(mktemp)
+          trap 'rm -f "$TMP_JSON"' EXIT
+          for i in $(seq 1 45); do
+            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
+              if jq -e --arg legacy_uid "$LEGACY_UID" '
+                ([.metadata.ownerReferences[]? |
+                  select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .uid == $legacy_uid)]
+                | length) == 1
+              ' "$TMP_JSON" >/dev/null; then
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          echo "DNSEndpoint is not legacy-owned before migration request"
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
+          exit 1
+  - name: request migration
+    description: set migration request label and verify canonical object creation
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-dns-handoff
+        content: |
+          kubectl label gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" k8gb.io/migration-requested=true --overwrite
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-dns-handoff
+            namespace: ($namespace)
+          spec:
+            resourceRef:
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              name: legacy-dns-handoff
+        timeout: 75s
+    - assert:
+        resource:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-dns-handoff
+            namespace: ($namespace)
+            labels:
+              k8gb.io/migrated-to-k8gb-io: "true"
+        timeout: 45s
+  - name: assert dnsendpoint owner handoff
+    description: DNSEndpoint ownership should move from legacy to canonical after migration
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-dns-handoff
+        content: |
+          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          CANONICAL_UID=$(kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          TMP_JSON=$(mktemp)
+          trap 'rm -f "$TMP_JSON"' EXIT
+          for i in $(seq 1 45); do
+            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
+              if jq -e --arg canonical_uid "$CANONICAL_UID" --arg legacy_uid "$LEGACY_UID" '
+                ([.metadata.ownerReferences[]? |
+                  select(.apiVersion == "k8gb.io/v1beta1" and .kind == "Gslb" and .uid == $canonical_uid)]
+                | length) == 1 and
+                ([.metadata.ownerReferences[]? |
+                  select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .uid == $legacy_uid)]
+                | length) == 0
+              ' "$TMP_JSON" >/dev/null; then
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          echo "DNSEndpoint owner handoff to canonical did not complete"
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
+          exit 1
+  - name: delete legacy object keeps canonical resources
+    description: deleting legacy object must keep canonical GSLB and DNSEndpoint
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-dns-handoff
+        content: |
+          kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=90s
+          kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE"
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE"

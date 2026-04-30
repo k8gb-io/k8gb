@@ -339,8 +339,75 @@
                 "deployCrds": {
                     "type": "boolean"
                 },
+                "installLegacyCrds": {
+                    "type": "boolean"
+                },
                 "deployRbac": {
                     "type": "boolean"
+                },
+                "dynamicZones": {
+                    "type": "boolean"
+                },
+                "extraVolumeMounts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["name", "mountPath"],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "mountPath": {
+                                "type": "string"
+                            },
+                            "readOnly": {
+                                "type": "boolean"
+                            },
+                            "subPath": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "extraVolumes": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["name"],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "configMap": {
+                                "type": "object",
+                                "required": ["name"],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "optional": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "secret": {
+                                "type": "object",
+                                "required": ["secretName"],
+                                "properties": {
+                                    "secretName": {
+                                        "type": "string"
+                                    },
+                                    "optional": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
                 },
                 "dnsZones": {
                     "type": "array",

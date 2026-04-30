@@ -25,10 +25,14 @@ import (
 	"net"
 	"testing"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/ipresolver"
+
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
+	"github.com/k8gb-io/k8gb/controllers/zones"
 	"github.com/miekg/dns"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -39,7 +43,7 @@ func TestWeight(t *testing.T) {
 	// void logger
 	logger := zerolog.New(io.Discard).With().Timestamp().Logger()
 	// void metrics
-	metrics := func(*k8gbv1beta1.Gslb, bool, k8gbv1beta1.HealthStatus, []string) {}
+	metrics := func(*k8gbv1beta1io.Gslb, bool, k8gbv1beta1io.HealthStatus, []string) {}
 
 	parentZoneDNSServers := []utils.DNSServer{
 		{Host: "10.0.0.1", Port: 53},
@@ -51,32 +55,39 @@ func TestWeight(t *testing.T) {
 	}
 
 	var tests = []struct {
-		name           string
-		mockData       []wrr
-		config         *resolver.Config
-		gslb           *k8gbv1beta1.Gslb
-		expectedLabels map[string]string
+		name               string
+		mockData           []wrr
+		config             *resolver.Config
+		gslb               *k8gbv1beta1io.Gslb
+		expectedLabels     map[string]string
+		zoneDelegationList *v1beta1.ZoneDelegationList
+		authServers        zones.AuthoritativeServers
 	}{
 		{
 			name: "app eu35-us50-za15 - all clusters",
-			config: &resolver.Config{
-				ClusterGeoTag: "eu",
-				DelegationZones: resolver.DelegationZones{
+			authServers: zones.AuthoritativeServers{
+				"gslb-ns-eu-cloud.example.com": zones.AuthoritativeServer{IP: "10.10.0.1", GeoTag: "eu", IsLocal: true},
+				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: "us", IsLocal: false},
+				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: "za", IsLocal: false},
+			},
+			zoneDelegationList: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
 					{
-						LoadBalancedZone: "cloud.example.com",
-						ParentZone:       "example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-							"za": "gslb-ns-za-cloud.example.com",
+						Spec: v1beta1.ZoneDelegationSpec{
+							LoadBalancedZone: "cloud.example.com",
+							ParentZone:       "example.com",
 						},
 					},
 				},
-				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			config: &resolver.Config{
+				ClusterGeoTag:         "eu",
+				ExtClustersGeoTagsRaw: []string{"us", "za"},
+				ParentZoneDNSServers:  parentZoneDNSServers,
+			},
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 35,
@@ -85,11 +96,11 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -113,24 +124,24 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "app eu1-us0-za0 - only current cluster",
-			config: &resolver.Config{
-				ClusterGeoTag: "eu",
-				DelegationZones: resolver.DelegationZones{
+			zoneDelegationList: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
 					{
-						LoadBalancedZone: "cloud.example.com",
-						ParentZone:       "example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-							"za": "gslb-ns-za-cloud.example.com",
+						Spec: v1beta1.ZoneDelegationSpec{
+							LoadBalancedZone: "cloud.example.com",
+							ParentZone:       "example.com",
 						},
 					},
 				},
-				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			config: &resolver.Config{
+				ClusterGeoTag:         "eu",
+				ExtClustersGeoTagsRaw: []string{"us", "za"},
+				ParentZoneDNSServers:  parentZoneDNSServers,
+			},
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 1,
@@ -139,14 +150,19 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
+			},
+			authServers: zones.AuthoritativeServers{
+				"gslb-ns-eu-cloud.example.com": zones.AuthoritativeServer{IP: "10.10.0.1", GeoTag: "eu", IsLocal: true},
+				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: "us", IsLocal: false},
+				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: "za", IsLocal: false},
 			},
 			mockData: []wrr{
 				{region: "eu", weight: 35, targets: []string{"10.10.0.1", "10.10.0.2"}},
@@ -167,24 +183,24 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "app eu0-us1-za0 only external cluster",
-			config: &resolver.Config{
-				ClusterGeoTag: "eu",
-				DelegationZones: resolver.DelegationZones{
+			zoneDelegationList: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
 					{
-						LoadBalancedZone: "cloud.example.com",
-						ParentZone:       "example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-							"za": "gslb-ns-za-cloud.example.com",
+						Spec: v1beta1.ZoneDelegationSpec{
+							LoadBalancedZone: "cloud.example.com",
+							ParentZone:       "example.com",
 						},
 					},
 				},
-				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			config: &resolver.Config{
+				ClusterGeoTag:         "eu",
+				ExtClustersGeoTagsRaw: []string{"us", "za"},
+				ParentZoneDNSServers:  parentZoneDNSServers,
+			},
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type: resolver.RoundRobinStrategy,
 						Weight: map[string]int{
 							"eu": 0,
@@ -193,11 +209,11 @@ func TestWeight(t *testing.T) {
 						},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -206,6 +222,11 @@ func TestWeight(t *testing.T) {
 				{region: "eu", weight: 35, targets: []string{"10.10.0.1", "10.10.0.2"}},
 				{region: "us", weight: 50, targets: []string{"10.0.0.1", "10.0.0.2"}},
 				{region: "za", weight: 15, targets: []string{"10.22.0.1", "10.22.0.2", "10.22.1.1"}},
+			},
+			authServers: zones.AuthoritativeServers{
+				"gslb-ns-eu-cloud.example.com": zones.AuthoritativeServer{IP: "10.10.0.1", GeoTag: "eu", IsLocal: true},
+				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: "us", IsLocal: false},
+				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: "za", IsLocal: false},
 			},
 			expectedLabels: map[string]string{
 				"strategy":      resolver.RoundRobinStrategy,
@@ -221,33 +242,32 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "empty weights with external targets",
-			config: &resolver.Config{
-				ClusterGeoTag: "eu",
-				DelegationZones: resolver.DelegationZones{
+			zoneDelegationList: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
 					{
-						LoadBalancedZone: "cloud.example.com",
-						ParentZone:       "example.com",
-						ClusterNSName:    "gslb-ns-eu-cloud.example.com",
-						ExtClusterNSNames: map[string]string{
-							"us": "gslb-ns-us-cloud.example.com",
-							"za": "gslb-ns-za-cloud.example.com",
+						Spec: v1beta1.ZoneDelegationSpec{
+							LoadBalancedZone: "cloud.example.com",
+							ParentZone:       "example.com",
 						},
 					},
 				},
+			},
+			config: &resolver.Config{
+				ClusterGeoTag:        "eu",
 				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type:   resolver.RoundRobinStrategy,
 						Weight: map[string]int{},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -265,30 +285,33 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "empty weights without",
-			config: &resolver.Config{
-				ClusterGeoTag: "eu",
-				DelegationZones: resolver.DelegationZones{
+			zoneDelegationList: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
 					{
-						LoadBalancedZone:  "cloud.example.com",
-						ParentZone:        "example.com",
-						ClusterNSName:     "gslb-ns-eu-cloud.example.com",
-						ExtClusterNSNames: map[string]string{},
+						Spec: v1beta1.ZoneDelegationSpec{
+							LoadBalancedZone: "cloud.example.com",
+							ParentZone:       "example.com",
+						},
 					},
 				},
-				ParentZoneDNSServers: parentZoneDNSServers,
 			},
-			gslb: &k8gbv1beta1.Gslb{
-				Spec: k8gbv1beta1.GslbSpec{
-					Strategy: k8gbv1beta1.Strategy{
+			config: &resolver.Config{
+				ClusterGeoTag:         "eu",
+				ExtClustersGeoTagsRaw: []string{},
+				ParentZoneDNSServers:  parentZoneDNSServers,
+			},
+			gslb: &k8gbv1beta1io.Gslb{
+				Spec: k8gbv1beta1io.GslbSpec{
+					Strategy: k8gbv1beta1io.Strategy{
 						Type:   resolver.RoundRobinStrategy,
 						Weight: map[string]int{},
 					},
 				},
-				Status: k8gbv1beta1.GslbStatus{
-					ServiceHealth: map[string]k8gbv1beta1.HealthStatus{
-						"app.gslb.cloud.example.com": k8gbv1beta1.Healthy,
+				Status: k8gbv1beta1io.GslbStatus{
+					ServiceHealth: map[string]k8gbv1beta1io.HealthStatus{
+						"app.gslb.cloud.example.com": k8gbv1beta1io.Healthy,
 					},
-					LoadBalancer: k8gbv1beta1.LoadBalancer{
+					LoadBalancer: k8gbv1beta1io.LoadBalancer{
 						ExposedIPs: []string{"10.10.0.1", "10.10.0.2"},
 					},
 				},
@@ -310,19 +333,17 @@ func TestWeight(t *testing.T) {
 			defer ctrl.Finish()
 			cl := mocks.NewMockClient(ctrl)
 			qs := mocks.NewMockDNSQueryService(ctrl)
-			for i, d := range test.mockData {
+			zs := zones.NewMockZoneDelegation(ctrl)
+			ipr := ipresolver.NewMockResolver(ctrl)
+			for _, d := range test.mockData {
 				ips := []dns.RR{}
-				nsIP := fmt.Sprintf("172.168.10.%v", i+1)
-				addr1 := &dns.A{Hdr: dns.RR_Header{Name: dns.Fqdn(
-					fmt.Sprintf("gslb-ns-%s-cloud.example.com", d.region)), Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 30}, A: net.ParseIP(nsIP)}
+				ns := fmt.Sprintf("gslb-ns-%s-cloud.example.com", d.region)
+				nsIP := test.authServers[ns].IP
 				for _, v := range d.targets {
 					record := &dns.A{Hdr: dns.RR_Header{Name: dns.Fqdn("localtargets-app.gslb.cloud.example.com"), Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 30},
 						A: net.ParseIP(v)}
 					ips = append(ips, record)
 				}
-				qs.EXPECT().
-					Query(fmt.Sprintf("gslb-ns-%s-cloud.example.com", d.region), gomock.Any()).Return(&dns.Msg{Answer: []dns.RR{addr1}}, nil).
-					AnyTimes()
 				qs.EXPECT().
 					Query("localtargets-app.gslb.cloud.example.com", utils.DNSList{utils.DNSServer{Host: nsIP, Port: 53}}).Return(&dns.Msg{Answer: ips}, nil).
 					AnyTimes()
@@ -330,9 +351,15 @@ func TestWeight(t *testing.T) {
 			qs.EXPECT().ExtractARecords(gomock.Any()).DoAndReturn(
 				func(q *dns.Msg) []string { return utils.NewDNSQueryService().ExtractARecords(q) },
 			).AnyTimes()
+			zs.EXPECT().List(gomock.Any()).Return(test.zoneDelegationList, nil).AnyTimes()
+			zs.EXPECT().HasExtClusterGeoTags(gomock.Any()).Return(len(test.config.ExtClustersGeoTagsRaw) > 0).AnyTimes()
+			ipr.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: test.gslb.Status.LoadBalancer.ExposedIPs}, nil).AnyTimes()
+			zd, _ := zones.NewZoneDelegationWrapper(&test.zoneDelegationList.Items[0], test.config, ipr).GetDetail(context.TODO())
+			zs.EXPECT().ExtendedZoneDelegation(gomock.Any(), gomock.Any()).Return(zd, nil).AnyTimes()
+			zs.EXPECT().ResolveAuthoritativeServersFromZoneDelegations(gomock.Any(), gomock.Any()).Return(test.authServers, nil)
 
 			// act
-			ep := NewApplicationDNSEndpoint(context.TODO(), cl, test.config, test.gslb, &logger, qs, metrics)
+			ep := NewApplicationDNSEndpoint(context.TODO(), cl, test.config, test.gslb, &logger, qs, zs, metrics)
 			endpoint, err := ep.GetDNSEndpoint()
 
 			// assert

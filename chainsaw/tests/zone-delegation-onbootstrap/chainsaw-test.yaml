@@ -4,8 +4,14 @@ metadata:
   name: zone-delegation-on-bootstrap
 spec:
   namespace: zone-delegation-on-bootstrap
+  bindings:
+    - name: loadBalancedZone
+      value: cloud.example.com
+    - name: zoneFile
+      value: cloud-example-com.conf
+    - name: parentZone
+      value: example.com
   steps:
-
   - name: Verify k8gb-ns-extdns-cloud-example-com on EU
     description: Verify k8gb-ns-extdns-cloud-example-com delegation zone endpoint
     cluster: eu
@@ -17,3 +23,15 @@ spec:
     cluster: us
     use:
       template: ../../step-templates/assert-dnsendpoint.yaml
+
+  - name: Verify ZoneDelegation resource exists on US
+    description: Verify ZoneDelegation cloud-example-com.conf exists
+    cluster: us
+    use:
+      template: ../../step-templates/assert-zone-delegation.yaml
+
+  - name: Verify ZoneDelegation resource exists on EU
+    description: Verify ZoneDelegation cloud-example-com.conf exists
+    cluster: eu
+    use:
+      template: ../../step-templates/assert-zone-delegation.yaml

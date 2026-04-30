@@ -8,6 +8,37 @@ metadata:
 {{ include "chart.labels" . | indent 4  }}
 rules:
 - apiGroups:
+    - ""
+  resources:
+    - configmaps
+  verbs:
+    - get
+    - list
+    - watch
+    - update
+    - patch
+  resourceNames:
+    - "k8gb-zone-delegation"
+- apiGroups:
+    - k8gb.io
+  resources:
+    - zonedelegations
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+
+- apiGroups:
+    - k8gb.io
+  resources:
+    - zonedelegations/status
+  verbs:
+    - update
+
+- apiGroups:
   - ""
   resources:
   - events
@@ -31,6 +62,7 @@ rules:
     - 'list'
     - 'watch'
 - apiGroups:
+  - k8gb.io
   - k8gb.absa.oss
   resources:
   - '*'

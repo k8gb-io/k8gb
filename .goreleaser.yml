@@ -36,7 +36,7 @@ archives:
         formats: ["zip"]
 dockers_v2:
   - images:
-      - absaoss/k8gb
+      - ghcr.io/k8gb-io/k8gb
     tags:
       - "v{{.Version}}"
     platforms:

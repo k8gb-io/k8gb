@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"testing"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	utils "github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
 	istio "istio.io/client-go/pkg/apis/networking/v1"
@@ -117,7 +117,7 @@ func TestNew(t *testing.T) {
 }
 
 // getTextContext creates a kubernetes client with access to all objects that need to be looked up
-func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
+func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1io.Gslb) {
 	gslb := utils.FileToGSLB(gslbFile)
 	objs := []runtime.Object{
 		gslb,
@@ -135,7 +135,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1.Gslb) {
 	}
 	// Register operator types with the runtime scheme.
 	s := scheme.Scheme
-	s.AddKnownTypes(k8gbv1beta1.GroupVersion, &k8gbv1beta1.Gslb{}, &k8gbv1beta1.GslbList{})
+	s.AddKnownTypes(k8gbv1beta1io.GroupVersion, &k8gbv1beta1io.Gslb{}, &k8gbv1beta1io.GslbList{})
 	s.AddKnownTypes(istio.SchemeGroupVersion, &istio.VirtualService{}, &istio.VirtualServiceList{})
 	s.AddKnownTypes(istio.SchemeGroupVersion, &istio.Gateway{}, &istio.GatewayList{})
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.HTTPRoute{}, &gatewayapiv1.HTTPRouteList{})

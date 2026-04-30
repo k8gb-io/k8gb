@@ -1,0 +1,59 @@
+---
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation
+spec:
+  try:
+    - script:
+        content: |
+          dig gslb-ns-eu-cloud.example.com. @localhost -p 1053 +short \
+            | sort -V \
+            | jq -Rsc 'split("\n") | map(select(length > 0))'
+        outputs:
+          - name: euIPs
+            value: (json_parse($stdout))
+
+    - script:
+        content: |
+          dig gslb-ns-us-cloud.example.com. @localhost -p 1053 +short \
+            | sort -V \
+            | jq -Rsc 'split("\n") | map(select(length > 0))'
+        outputs:
+          - name: usIPs
+            value: (json_parse($stdout))
+
+    - assert:
+        timeout: 15s
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: ZoneDelegation
+          metadata:
+            name: ($zoneFile)
+          spec:
+            dnsZoneNegTTL: 10
+            loadBalancedZone: ($loadBalancedZone)
+            parentZone: ($parentZone)
+          status:
+            dnsServers:
+            - name: gslb-ns-eu-cloud.example.com
+              address: ($euIPs[0])
+            - name: gslb-ns-eu-cloud.example.com
+              address: ($euIPs[1])
+            - name: gslb-ns-us-cloud.example.com
+              address: ($usIPs[0])
+            - name: gslb-ns-us-cloud.example.com
+              address: ($usIPs[1])
+    - assert:
+        timeout: 15s
+        resource:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: k8gb-zone-delegation
+            namespace: k8gb
+          data:
+            cloud-example-com.conf: |
+              cloud.example.com:5353 {
+                import k8gbplugins
+              }
