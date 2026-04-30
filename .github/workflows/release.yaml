@@ -33,11 +33,16 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: |
-            github.com
-            hub.docker.com
-            gcr.io
-            ghcr.io
-            sigstore.github.io
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            proxy.golang.org:443
+            sum.golang.org:443
+            sumdb.google.dev:443
+            hub.docker.com:443
+            gcr.io:443
+            ghcr.io:443
+            sigstore.github.io:443
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
@@ -142,11 +147,10 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: |
-            github.com
-            hub.docker.com
-            gcr.io
-            ghcr.io
-            sigstore.github.io
+            github.com:443
+            api.github.com:443
+            ghcr.io:443
+            sigstore.github.io:443
 
       - name: Install cosign
         uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
@@ -224,7 +228,8 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: |
-            github.com
+            github.com:443
+            api.github.com:443
 
       - name: Make summary for the release pipeline
         run: |

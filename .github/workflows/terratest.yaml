@@ -36,10 +36,11 @@ jobs:
       with:
         egress-policy: block
         allowed-endpoints: |
-          github.com
-          docker.io
-          gcr.io
-          registry.k8s.io
+          github.com:443
+          api.github.com:443
+          docker.io:443
+          gcr.io:443
+          registry.k8s.io:443
 
     - id: skip_check
       uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1

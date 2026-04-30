@@ -21,10 +21,11 @@ jobs:
       with:
         egress-policy: block
         allowed-endpoints: |
-          github.com
-          docker.io
-          gcr.io
-          production-k8g-io.s3.amazonaws.com
+          github.com:443
+          api.github.com:443
+          docker.io:443
+          gcr.io:443
+          production-k8g-io.s3.amazonaws.com:443
 
     - name: Checkout Code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

@@ -25,10 +25,11 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: |
-            github.com
-            kubernetes-charts.github.io
-            gcr.io
-            registry.k8s.io
+            github.com:443
+            api.github.com:443
+            kubernetes-charts.github.io:443
+            gcr.io:443
+            registry.k8s.io:443
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
