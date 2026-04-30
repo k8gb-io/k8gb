@@ -22,6 +22,7 @@ jobs:
           allowed-endpoints: |
             github.com:443
             api.github.com:443
+            objects.githubusercontent.com:443
             hub.docker.com:443
             doc.crds.dev:443
 

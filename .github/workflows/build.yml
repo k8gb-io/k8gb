@@ -34,9 +34,7 @@ jobs:
         allowed-endpoints: |
           github.com:443
           api.github.com:443
-          proxy.golang.org:443
-          sum.golang.org:443
-          sumdb.google.dev:443
+          objects.githubusercontent.com:443
 
     - id: skip_check
       uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
