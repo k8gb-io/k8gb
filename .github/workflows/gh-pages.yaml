@@ -77,6 +77,7 @@ jobs:
 
       - name: Restore preserved files
         run: |
+          git fetch origin gh-pages:gh-pages
           git checkout gh-pages
           # Restore preserved files
           test -d /tmp/preserved/charts && cp -r /tmp/preserved/charts .
