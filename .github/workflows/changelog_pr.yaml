@@ -20,8 +20,10 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: |
-            github.com
-            hub.docker.com
+            github.com:443
+            api.github.com:443
+            hub.docker.com:443
+            doc.crds.dev:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

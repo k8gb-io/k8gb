@@ -21,9 +21,10 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: |
-            github.com
-            pypi.org
-            files.pythonhosted.org
+            github.com:443
+            api.github.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
 
       - name: 'Checkout'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -31,9 +31,13 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: |
-            github.com
-            ghcr.io
-            sigstore.github.io
+            github.com:443
+            api.github.com:443
+            ghcr.io:443
+            sigstore.github.io:443
+            fulcio.sigstore.dev:443
+            rekor.sigstore.dev:443
+            tuf-repo-cdn.sigstore.dev:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
