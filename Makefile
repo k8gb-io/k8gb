@@ -36,6 +36,14 @@ CHART ?= k8gb/k8gb
 CLUSTER_GSLB_NETWORK = k3d-action-bridge-network
 CLUSTER_GSLB_GATEWAY = docker network inspect ${CLUSTER_GSLB_NETWORK} -f '{{ (index .IPAM.Config 0).Gateway }}'
 FULL_LOCAL_SETUP_WITH_APPS ?= true
+FULL_LOCAL_SETUP_WITH_AI_DEMO ?= false
+AI_DEMO_ACTION ?= run
+OLLAMA_IMAGE ?= alpine/ollama:latest
+OLLAMA_BASE_MODEL ?= qwen2.5:0.5b
+OLLAMA_MODEL ?= k8gb-resilient-demo:latest
+OLLAMA_STORAGE_SIZE ?= 2Gi
+OLLAMA_HOST_PATH ?= /var/lib/k8gb-ai-inference-demo/ollama
+AI_DEMO_ENV = GSLB_DOMAIN=$(GSLB_DOMAIN) OLLAMA_IMAGE=$(OLLAMA_IMAGE) OLLAMA_BASE_MODEL=$(OLLAMA_BASE_MODEL) OLLAMA_MODEL=$(OLLAMA_MODEL) OLLAMA_STORAGE_SIZE=$(OLLAMA_STORAGE_SIZE) OLLAMA_HOST_PATH=$(OLLAMA_HOST_PATH)
 SHOW_LEGACY_MIGRATION_DEMO ?= true
 MIGRATION_DEMO_NAMESPACE ?= test-gslb
 GSLB_DOMAIN ?= cloud.example.com
@@ -153,6 +161,7 @@ deploy-full-local-setup: ensure-cluster-size ## Deploy full local multicluster s
 
 	@if [ "$(K8GB_LOCAL_VERSION)" = test ]; then $(MAKE) release-images ; fi
 	$(MAKE) deploy-$(K8GB_LOCAL_VERSION)-version DEPLOY_APPS=$(FULL_LOCAL_SETUP_WITH_APPS)
+	@if [ "$(FULL_LOCAL_SETUP_WITH_AI_DEMO)" = true ]; then $(MAKE) ai-inference-demo AI_DEMO_ACTION=deploy ; fi
 
 .PHONY: deploy-gcp-local-setup
 deploy-gcp-local-setup: ## Deploy local setup with GCP Cloud DNS (requires GCP_PROJECT, GCP_DOMAIN, GCP_CREDENTIALS_FILE)
@@ -371,6 +380,10 @@ show-legacy-migration-manifests: ## Print legacy and canonical GSLB manifests fr
 	else \
 		echo "(none)"; \
 	fi
+
+.PHONY: ai-inference-demo
+ai-inference-demo: ## Run AI inference demo action (AI_DEMO_ACTION=run|deploy|probe|failover|failback|logs|status|delete)
+	@$(AI_DEMO_ENV) ./hack/ai-inference-demo.sh $(AI_DEMO_ACTION)
 
 .PHONY: deploy-kuar-app
 deploy-kuar-app:
