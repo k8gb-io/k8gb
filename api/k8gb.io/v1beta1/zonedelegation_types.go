@@ -81,6 +81,10 @@ type ZoneDelegationList struct {
 	Items           []ZoneDelegation `json:"items"`
 }
 
+func (zd *ZoneDelegation) IsInDeletion() bool {
+	return zd.DeletionTimestamp != nil
+}
+
 func (l *ZoneDelegationList) ContainsZone(host string) bool {
 	for _, z := range l.Items {
 		if strings.Contains(host, z.Spec.LoadBalancedZone) {
