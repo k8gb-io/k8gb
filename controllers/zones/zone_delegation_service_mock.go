@@ -74,6 +74,20 @@ func (mr *MockZoneDelegationMockRecorder) AvailableIPs(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AvailableIPs", reflect.TypeOf((*MockZoneDelegation)(nil).AvailableIPs), ctx)
 }
 
+// Delete mocks base method.
+func (m *MockZoneDelegation) Delete(ctx context.Context, z *v1beta1.ZoneDelegation) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, z)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockZoneDelegationMockRecorder) Delete(ctx, z any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockZoneDelegation)(nil).Delete), ctx, z)
+}
+
 // ExtendedZoneDelegation mocks base method.
 func (m *MockZoneDelegation) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error) {
 	m.ctrl.T.Helper()
@@ -175,6 +189,20 @@ func (m *MockZoneDelegation) ListConfigZoneDelegations(ctx context.Context) (*v1
 func (mr *MockZoneDelegationMockRecorder) ListConfigZoneDelegations(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListConfigZoneDelegations", reflect.TypeOf((*MockZoneDelegation)(nil).ListConfigZoneDelegations), ctx)
+}
+
+// RemoveZoneDelegation mocks base method.
+func (m *MockZoneDelegation) RemoveZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveZoneDelegation", ctx, zd)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveZoneDelegation indicates an expected call of RemoveZoneDelegation.
+func (mr *MockZoneDelegationMockRecorder) RemoveZoneDelegation(ctx, zd any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveZoneDelegation", reflect.TypeOf((*MockZoneDelegation)(nil).RemoveZoneDelegation), ctx, zd)
 }
 
 // ResolveAuthoritativeServersFromZoneDelegations mocks base method.
