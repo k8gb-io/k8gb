@@ -1,0 +1,81 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multiservice-gslb-all
+  namespace: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: multiservice-all.cloud.example.com
+    http:
+      paths:
+      - path: /blue
+        pathType: Prefix
+        backend:
+          service:
+            name: multiservice-blue
+            port:
+              name: http
+      - path: /green
+        pathType: Prefix
+        backend:
+          service:
+            name: multiservice-green
+            port:
+              name: http
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: multiservice-gslb-all
+  namespace: test-gslb
+spec:
+  serviceHealthPolicy: All
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: multiservice-gslb-all
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multiservice-gslb-any
+  namespace: test-gslb
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: multiservice-any.cloud.example.com
+    http:
+      paths:
+      - path: /blue
+        pathType: Prefix
+        backend:
+          service:
+            name: multiservice-blue
+            port:
+              name: http
+      - path: /green
+        pathType: Prefix
+        backend:
+          service:
+            name: multiservice-green
+            port:
+              name: http
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: multiservice-gslb-any
+  namespace: test-gslb
+spec:
+  serviceHealthPolicy: Any
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: multiservice-gslb-any
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30

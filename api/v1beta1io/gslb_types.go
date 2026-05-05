@@ -58,6 +58,11 @@ type GslbSpec struct {
 	Strategy Strategy `json:"strategy"`
 	// ResourceRef spec
 	ResourceRef ResourceRef `json:"resourceRef,omitempty"`
+	// ServiceHealthPolicy controls how multiple Services backing the same host are evaluated.
+	// Defaults to Any for backward compatibility.
+	// +kubebuilder:validation:Enum=Any;All
+	// +kubebuilder:default=Any
+	ServiceHealthPolicy ServiceHealthPolicy `json:"serviceHealthPolicy,omitempty"`
 }
 
 // LoadBalancer holds the GSLB's load balancer configuration
@@ -131,11 +136,21 @@ const (
 	Healthy   HealthStatus = "Healthy"
 	Unhealthy HealthStatus = "Unhealthy"
 	NotFound  HealthStatus = "NotFound"
-	Partial   HealthStatus = "Partial"
 )
 
 func (h HealthStatus) String() string {
 	return string(h)
+}
+
+type ServiceHealthPolicy string
+
+const (
+	ServiceHealthPolicyAny ServiceHealthPolicy = "Any"
+	ServiceHealthPolicyAll ServiceHealthPolicy = "All"
+)
+
+func (p ServiceHealthPolicy) String() string {
+	return string(p)
 }
 
 func init() {

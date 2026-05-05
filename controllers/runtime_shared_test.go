@@ -40,10 +40,11 @@ func TestCalculateServiceHealth(t *testing.T) {
 	_ = k8gbv1beta1io.AddToScheme(testScheme)
 
 	tests := []struct {
-		name        string
-		serverHosts []string
-		services    map[string][]serviceFixture
-		expected    map[string]k8gbv1beta1io.HealthStatus
+		name                string
+		serverHosts         []string
+		serviceHealthPolicy k8gbv1beta1io.ServiceHealthPolicy
+		services            map[string][]serviceFixture
+		expected            map[string]k8gbv1beta1io.HealthStatus
 	}{
 		{
 			name:        "single server with single healthy service",
@@ -71,8 +72,36 @@ func TestCalculateServiceHealth(t *testing.T) {
 			},
 		},
 		{
-			name:        "single server with one healthy and one not found service",
+			name:                "all policy with two healthy services",
+			serverHosts:         []string{"app.example.com"},
+			serviceHealthPolicy: k8gbv1beta1io.ServiceHealthPolicyAll,
+			services: map[string][]serviceFixture{
+				"app.example.com": {
+					{namespace: "default", name: "svc-a", healthy: true},
+					{namespace: "default", name: "svc-b", healthy: true},
+				},
+			},
+			expected: map[string]k8gbv1beta1io.HealthStatus{
+				"app.example.com": k8gbv1beta1io.Healthy,
+			},
+		},
+		{
+			name:        "default policy with one healthy and one not found service",
 			serverHosts: []string{"app.example.com"},
+			services: map[string][]serviceFixture{
+				"app.example.com": {
+					{namespace: "default", name: "svc-a", healthy: true},
+					{namespace: "default", name: "svc-b", healthy: true, notFound: true},
+				},
+			},
+			expected: map[string]k8gbv1beta1io.HealthStatus{
+				"app.example.com": k8gbv1beta1io.Healthy,
+			},
+		},
+		{
+			name:                "all policy with one healthy and one not found service",
+			serverHosts:         []string{"app.example.com"},
+			serviceHealthPolicy: k8gbv1beta1io.ServiceHealthPolicyAll,
 			services: map[string][]serviceFixture{
 				"app.example.com": {
 					{namespace: "default", name: "svc-a", healthy: true},
@@ -84,8 +113,22 @@ func TestCalculateServiceHealth(t *testing.T) {
 			},
 		},
 		{
-			name:        "single server with one healthy and one unhealthy service",
+			name:        "default policy with one healthy and one unhealthy service",
 			serverHosts: []string{"app.example.com"},
+			services: map[string][]serviceFixture{
+				"app.example.com": {
+					{namespace: "default", name: "svc-a", healthy: true},
+					{namespace: "default", name: "svc-b", healthy: false},
+				},
+			},
+			expected: map[string]k8gbv1beta1io.HealthStatus{
+				"app.example.com": k8gbv1beta1io.Healthy,
+			},
+		},
+		{
+			name:                "all policy with one healthy and one unhealthy service",
+			serverHosts:         []string{"app.example.com"},
+			serviceHealthPolicy: k8gbv1beta1io.ServiceHealthPolicyAll,
 			services: map[string][]serviceFixture{
 				"app.example.com": {
 					{namespace: "default", name: "svc-a", healthy: true},
@@ -162,8 +205,22 @@ func TestCalculateServiceHealth(t *testing.T) {
 			},
 		},
 		{
-			name:        "Harbor-like ingress with core healthy and portal down",
+			name:        "Harbor-like ingress defaults to healthy when one service is healthy",
 			serverHosts: []string{"harbor.example.com"},
+			services: map[string][]serviceFixture{
+				"harbor.example.com": {
+					{namespace: "harbor", name: "harbor-core", healthy: true},
+					{namespace: "harbor", name: "harbor-portal", healthy: false},
+				},
+			},
+			expected: map[string]k8gbv1beta1io.HealthStatus{
+				"harbor.example.com": k8gbv1beta1io.Healthy,
+			},
+		},
+		{
+			name:                "Harbor-like ingress with all policy and portal down",
+			serverHosts:         []string{"harbor.example.com"},
+			serviceHealthPolicy: k8gbv1beta1io.ServiceHealthPolicyAll,
 			services: map[string][]serviceFixture{
 				"harbor.example.com": {
 					{namespace: "harbor", name: "harbor-core", healthy: true},
@@ -175,8 +232,9 @@ func TestCalculateServiceHealth(t *testing.T) {
 			},
 		},
 		{
-			name:        "Harbor-like ingress with core down and portal healthy",
-			serverHosts: []string{"harbor.example.com"},
+			name:                "Harbor-like ingress with all policy and core down",
+			serverHosts:         []string{"harbor.example.com"},
+			serviceHealthPolicy: k8gbv1beta1io.ServiceHealthPolicyAll,
 			services: map[string][]serviceFixture{
 				"harbor.example.com": {
 					{namespace: "harbor", name: "harbor-core", healthy: false},
@@ -202,8 +260,9 @@ func TestCalculateServiceHealth(t *testing.T) {
 			},
 		},
 		{
-			name:        "three services with one unhealthy",
-			serverHosts: []string{"app.example.com"},
+			name:                "all policy with three services and one unhealthy",
+			serverHosts:         []string{"app.example.com"},
+			serviceHealthPolicy: k8gbv1beta1io.ServiceHealthPolicyAll,
 			services: map[string][]serviceFixture{
 				"app.example.com": {
 					{namespace: "default", name: "svc-a", healthy: true},
@@ -226,7 +285,7 @@ func TestCalculateServiceHealth(t *testing.T) {
 				WithObjects(objs...).
 				Build()
 
-			gslb := buildTestGslb(tt.serverHosts, tt.services)
+			gslb := buildTestGslb(tt.serverHosts, tt.services, tt.serviceHealthPolicy)
 
 			result, err := calculateServiceHealth(ctx, cl, gslb)
 			require.NoError(t, err)
@@ -299,7 +358,11 @@ func buildTestObjects(services map[string][]serviceFixture, testName string) []c
 	return objs
 }
 
-func buildTestGslb(hosts []string, services map[string][]serviceFixture) *k8gbv1beta1io.Gslb {
+func buildTestGslb(
+	hosts []string,
+	services map[string][]serviceFixture,
+	serviceHealthPolicy k8gbv1beta1io.ServiceHealthPolicy,
+) *k8gbv1beta1io.Gslb {
 	servers := make([]*k8gbv1beta1io.Server, 0, len(hosts))
 	for _, host := range hosts {
 		fixtures := services[host]
@@ -319,6 +382,9 @@ func buildTestGslb(hosts []string, services map[string][]serviceFixture) *k8gbv1
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-gslb",
 			Namespace: "default",
+		},
+		Spec: k8gbv1beta1io.GslbSpec{
+			ServiceHealthPolicy: serviceHealthPolicy,
 		},
 		Status: k8gbv1beta1io.GslbStatus{
 			Servers: servers,

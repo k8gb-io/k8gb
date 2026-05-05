@@ -399,6 +399,15 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              serviceHealthPolicy:
+                default: Any
+                description: ServiceHealthPolicy controls how multiple Services
+                  backing the same host are evaluated. Defaults to Any for backward
+                  compatibility.
+                enum:
+                - Any
+                - All
+                type: string
               strategy:
                 description: Gslb Strategy spec
                 properties:

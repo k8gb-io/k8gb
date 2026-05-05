@@ -53,14 +53,16 @@ func calculateServiceHealth(
 	gslb *k8gbv1beta1io.Gslb,
 ) (map[string]k8gbv1beta1io.HealthStatus, error) {
 	serviceHealth := make(map[string]k8gbv1beta1io.HealthStatus)
+	policy := effectiveServiceHealthPolicy(gslb)
 	for _, server := range gslb.Status.Servers {
 		if len(server.Services) == 0 {
 			serviceHealth[server.Host] = k8gbv1beta1io.NotFound
 			continue
 		}
 
-		hasNotFound := false
-		hasUnhealthy := false
+		healthyCount := 0
+		unhealthyCount := 0
+		notFoundCount := 0
 
 		for _, svc := range server.Services {
 			service := &corev1.Service{}
@@ -71,7 +73,7 @@ func calculateServiceHealth(
 			err := c.Get(ctx, finder, service)
 			if err != nil {
 				if k8serrors.IsNotFound(err) {
-					hasNotFound = true
+					notFoundCount++
 					continue
 				}
 				return serviceHealth, err
@@ -100,20 +102,49 @@ func calculateServiceHealth(
 			}
 
 			if !healthy {
-				hasUnhealthy = true
+				unhealthyCount++
+				continue
 			}
+
+			healthyCount++
 		}
 
-		switch {
-		case hasNotFound:
-			serviceHealth[server.Host] = k8gbv1beta1io.NotFound
-		case hasUnhealthy:
-			serviceHealth[server.Host] = k8gbv1beta1io.Unhealthy
-		default:
-			serviceHealth[server.Host] = k8gbv1beta1io.Healthy
-		}
+		serviceHealth[server.Host] = calculateHostHealth(policy, healthyCount, unhealthyCount, notFoundCount)
 	}
 	return serviceHealth, nil
+}
+
+func effectiveServiceHealthPolicy(gslb *k8gbv1beta1io.Gslb) k8gbv1beta1io.ServiceHealthPolicy {
+	if gslb.Spec.ServiceHealthPolicy == k8gbv1beta1io.ServiceHealthPolicyAll {
+		return k8gbv1beta1io.ServiceHealthPolicyAll
+	}
+	return k8gbv1beta1io.ServiceHealthPolicyAny
+}
+
+func calculateHostHealth(
+	policy k8gbv1beta1io.ServiceHealthPolicy,
+	healthyCount int,
+	unhealthyCount int,
+	notFoundCount int,
+) k8gbv1beta1io.HealthStatus {
+	switch policy {
+	case k8gbv1beta1io.ServiceHealthPolicyAll:
+		if notFoundCount > 0 {
+			return k8gbv1beta1io.NotFound
+		}
+		if unhealthyCount > 0 {
+			return k8gbv1beta1io.Unhealthy
+		}
+		return k8gbv1beta1io.Healthy
+	default:
+		if healthyCount > 0 {
+			return k8gbv1beta1io.Healthy
+		}
+		if unhealthyCount > 0 {
+			return k8gbv1beta1io.Unhealthy
+		}
+		return k8gbv1beta1io.NotFound
+	}
 }
 
 func collectHealthyRecordsFromDNSEndpoint(dnsEndpoint *externaldnsApi.DNSEndpoint) map[string][]string {
