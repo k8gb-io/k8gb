@@ -95,7 +95,6 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
 | k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"extraPlugins":[],"extraServerBlocks":"","geoDataField":"","geoDataFilePath":"","loadBalancedZone":"cloud.example.com","parentZone":"example.com"}]` | array of dns zones controlled by gslb |
-| k8gb.dynamicZones | bool | `false` | whether to use Dynamic Zone Delegation feature |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
 | k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used. |
