@@ -37,7 +37,7 @@ Kubernetes: `>= 1.21.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://coredns.github.io/helm | coredns | 1.45.2 |
-| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.20.0 |
+| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.21.1 |
 
 #### Tested Environment Configurations:
 
