@@ -1,7 +1,6 @@
 k8gb:
   reconcileRequeueSeconds: 10
 
-  dynamicZones: false
   extraVolumeMounts:
     - name: dynamic-zones
       mountPath: /etc/dynamic
