@@ -52,10 +52,10 @@ GOLIC_VERSION ?= v0.7.2
 GOLANGCI_VERSION ?= v2.11.4
 GRAFANA_VERSION ?= 10.5.15
 GATEWAY_API_VERSION ?= v1.5.1
-ISTIO_VERSION ?= v1.29.1
+ISTIO_VERSION ?= v1.29.2
 NGINX_INGRESS_VERSION ?= 4.15.1
 PODINFO_VERSION ?= 6.11.2
-PROMETHEUS_VERSION ?= 29.2.0
+PROMETHEUS_VERSION ?= 29.4.0
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -392,7 +392,18 @@ deploy-k8gb-with-helm:
 		$(call get-helm-args,$(CLUSTER_ID)) \
 		$(call get-next-args,$(CHART),$(CLUSTER_ID)) \
 		--set k8gb.imageTag=${VERSION:"stable"=""} \
-		--wait --timeout=10m0s
+		--wait --timeout=10m0s || { \
+			echo "Helm upgrade failed. Printing debug info:"; \
+			kubectl get pods -n k8gb -o wide; \
+			kubectl describe pods -n k8gb; \
+			kubectl logs -n k8gb -l app.kubernetes.io/name=extdns --tail=20 --all-containers=true; \
+			kubectl get events -n k8gb --sort-by='.lastTimestamp'; \
+			echo "Debug EdgeDNS Cluster:"; \
+			kubectl get pods -n default --context=k3d-edgedns -o wide; \
+			kubectl describe pods -n default --context=k3d-edgedns; \
+			kubectl logs -n default -l app=edge --context=k3d-edgedns --tail=50 --all-containers=true; \
+			exit 1; \
+		}
 
 .PHONY: deploy-gslb-operator
 deploy-gslb-operator: ## Deploy k8gb operator

@@ -85,6 +85,14 @@
       ],
       "extractVersionTemplate": "^(?<version>.+)(-k3s1)?(-k3s2)?$",
     },
+    // update bind9 and busybox images in deploy/edge/deployment.yaml
+    {
+      "fileMatch": ["^deploy/edge/deployment\\.yaml$"],
+      "datasourceTemplate": "docker",
+      "matchStrings": [
+        "image: (?<depName>.*):(?<currentValue>.*)"
+      ],
+    },
     // update Istio version in Makefile
     {
       "fileMatch": ["^Makefile$"],

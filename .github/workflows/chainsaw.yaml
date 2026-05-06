@@ -32,7 +32,7 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
@@ -46,6 +46,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    strategy:
+      matrix:
+        k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -71,7 +74,7 @@ jobs:
           version: v3.18.4
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:
           version: v2.12.7
           args: release --clean --skip=publish,validate,sbom,sign --snapshot
@@ -82,14 +85,16 @@ jobs:
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "edgedns"
-          args: -c k3d/edge-dns.yaml
+          # k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/edge-dns.yaml
           k3d-version: ${{ env.K3D_VERSION }}
 
       - name: Create 1st k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
-          args: -c k3d/test-gslb1.yaml
+          # k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb1.yaml
           k3d-version: ${{ env.K3D_VERSION }}
 
 
@@ -97,7 +102,8 @@ jobs:
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb2"
-          args: -c k3d/test-gslb2.yaml
+          # k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb2.yaml
           k3d-version: ${{ env.K3D_VERSION }}
 
 
@@ -116,8 +122,8 @@ jobs:
         if: always()
         uses: ./.github/actions/print-chainsaw-debug
 
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: chainsaw-logs
+          name: chainsaw-logs-${{ matrix.k8s-version }}
           path: ${{ github.workspace }}/tmp/chainsaw
