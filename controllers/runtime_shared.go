@@ -53,8 +53,17 @@ func calculateServiceHealth(
 	gslb *k8gbv1beta1io.Gslb,
 ) (map[string]k8gbv1beta1io.HealthStatus, error) {
 	serviceHealth := make(map[string]k8gbv1beta1io.HealthStatus)
+	policy := effectiveServiceHealthPolicy(gslb)
 	for _, server := range gslb.Status.Servers {
-		serviceHealth[server.Host] = k8gbv1beta1io.NotFound
+		if len(server.Services) == 0 {
+			serviceHealth[server.Host] = k8gbv1beta1io.NotFound
+			continue
+		}
+
+		healthyCount := 0
+		unhealthyCount := 0
+		notFoundCount := 0
+
 		for _, svc := range server.Services {
 			service := &corev1.Service{}
 			finder := client.ObjectKey{
@@ -64,6 +73,7 @@ func calculateServiceHealth(
 			err := c.Get(ctx, finder, service)
 			if err != nil {
 				if k8serrors.IsNotFound(err) {
+					notFoundCount++
 					continue
 				}
 				return serviceHealth, err
@@ -80,18 +90,61 @@ func calculateServiceHealth(
 				return serviceHealth, err
 			}
 
-			serviceHealth[server.Host] = k8gbv1beta1io.Unhealthy
+			healthy := false
 			if len(endpoints.Items) > 0 && len(endpoints.Items[0].Endpoints) > 0 {
 				for _, endpoint := range endpoints.Items[0].Endpoints {
 					if len(endpoint.Addresses) > 0 &&
 						(endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready) {
-						serviceHealth[server.Host] = k8gbv1beta1io.Healthy
+						healthy = true
+						break
 					}
 				}
 			}
+
+			if !healthy {
+				unhealthyCount++
+				continue
+			}
+
+			healthyCount++
 		}
+
+		serviceHealth[server.Host] = calculateHostHealth(policy, healthyCount, unhealthyCount, notFoundCount)
 	}
 	return serviceHealth, nil
+}
+
+func effectiveServiceHealthPolicy(gslb *k8gbv1beta1io.Gslb) k8gbv1beta1io.ServiceHealthPolicy {
+	if gslb.Spec.ServiceHealthPolicy == k8gbv1beta1io.ServiceHealthPolicyAll {
+		return k8gbv1beta1io.ServiceHealthPolicyAll
+	}
+	return k8gbv1beta1io.ServiceHealthPolicyAny
+}
+
+func calculateHostHealth(
+	policy k8gbv1beta1io.ServiceHealthPolicy,
+	healthyCount int,
+	unhealthyCount int,
+	notFoundCount int,
+) k8gbv1beta1io.HealthStatus {
+	switch policy {
+	case k8gbv1beta1io.ServiceHealthPolicyAll:
+		if notFoundCount > 0 {
+			return k8gbv1beta1io.NotFound
+		}
+		if unhealthyCount > 0 {
+			return k8gbv1beta1io.Unhealthy
+		}
+		return k8gbv1beta1io.Healthy
+	default:
+		if healthyCount > 0 {
+			return k8gbv1beta1io.Healthy
+		}
+		if unhealthyCount > 0 {
+			return k8gbv1beta1io.Unhealthy
+		}
+		return k8gbv1beta1io.NotFound
+	}
 }
 
 func collectHealthyRecordsFromDNSEndpoint(dnsEndpoint *externaldnsApi.DNSEndpoint) map[string][]string {

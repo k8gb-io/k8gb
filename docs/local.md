@@ -7,6 +7,7 @@
 - [Run integration tests](#run-integration-tests)
 - [Cleaning](#cleaning)
 - [Sample demo](#sample-demo)
+  - [Multi-Service Ingress](#multi-service-ingress)
   - [Round Robin](#round-robin)
   - [Failover](#failover)
 
@@ -122,6 +123,16 @@ Run following command and check if you get two json responses.
 curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H "Host:roundrobin.cloud.example.com"
 ```
 
+The local setup also deploys small multi-service Ingresses backed by two NGINX services and canonical `k8gb.io/v1beta1` GSLBs using both service health policies.
+
+```sh
+curl localhost:80/blue -H "Host:multiservice-all.cloud.example.com"
+curl localhost:80/green -H "Host:multiservice-any.cloud.example.com"
+kubectl --context k3d-test-gslb1 -n test-gslb get gslb \
+  multiservice-gslb-all multiservice-gslb-any \
+  -o custom-columns=NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+```
+
 ## Run integration tests
 
 There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/k8gb-io/k8gb/tree/master/terratest).
@@ -139,6 +150,18 @@ make destroy-full-local-setup
 ```
 
 ## Sample demo
+
+### Multi-Service Ingress
+
+`multiservice-all.cloud.example.com` and `multiservice-any.cloud.example.com` both route `/blue` and `/green` to separate Services. The `All` GSLB requires both Services to be healthy, while the `Any` GSLB remains healthy as long as at least one backing Service is healthy.
+
+```sh
+kubectl --context k3d-test-gslb1 -n test-gslb scale deploy multiservice-green --replicas=0
+kubectl --context k3d-test-gslb1 -n test-gslb get gslb \
+  multiservice-gslb-all multiservice-gslb-any \
+  -o custom-columns=NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+kubectl --context k3d-test-gslb1 -n test-gslb scale deploy multiservice-green --replicas=1
+```
 
 ### Round Robin
 

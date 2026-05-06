@@ -280,6 +280,7 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 	kubectl apply -f deploy/gslb/namespace_ingress.yaml
 	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress_ref.yaml)
 	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress_ref.yaml)
+	$(call apply-cr,deploy/gslb/k8gb.io_v1beta1_gslb_cr_multiservice_ingress_ref.yaml)
 
 	@echo -e "\n$(YELLOW)Deploy GSLB CR for Istio VirtualService $(NC)"
 	kubectl apply -f deploy/gslb/namespace_istio.yaml
