@@ -77,6 +77,7 @@ jobs:
 
       - name: Restore preserved files
         run: |
+          git fetch origin gh-pages:gh-pages
           git checkout gh-pages
           # Restore preserved files
           test -d /tmp/preserved/charts && cp -r /tmp/preserved/charts .
@@ -84,6 +85,14 @@ jobs:
           test -f /tmp/preserved/index.yaml && cp /tmp/preserved/index.yaml .
           test -f /tmp/preserved/CNAME && cp /tmp/preserved/CNAME .
 
+      - name: Sync blog posts to all versions
+        if: github.ref == 'refs/heads/master'
+        run: make docs-sync-blog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push
+        run: |
           # Commit and push if there are changes
           git add .
           if ! git diff --cached --quiet; then
