@@ -73,12 +73,11 @@ func (mr *MockDNSQueryServiceMockRecorder) ExtractARecords(msg any) *gomock.Call
 }
 
 // Query mocks base method.
-func (m *MockDNSQueryService) Query(host string, nameservers utils.DNSList) (*dns.Msg, error) {
+func (m *MockDNSQueryService) Query(host string, nameservers utils.DNSList) utils.DNSQueryResult {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Query", host, nameservers)
-	ret0, _ := ret[0].(*dns.Msg)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(utils.DNSQueryResult)
+	return ret0
 }
 
 // Query indicates an expected call of Query.

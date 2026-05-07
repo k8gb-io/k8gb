@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/miekg/dns"
 	"go.uber.org/mock/gomock"
@@ -75,15 +77,16 @@ func TestResolveNSNames(t *testing.T) {
 			loadBalancedZone: "cloud.example.com",
 			parentZone:       "example.com",
 			expectedResult: []*GlueAInfo{
-				{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu"},
-				{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu"},
-				{IP: "172.20.0.1", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za"},
-				{IP: "172.20.0.2", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za"},
-				{IP: "172.10.10.10", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us"},
-				{IP: "172.10.10.11", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us"},
+				{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+				{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+				{IP: "172.20.0.1", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+				{IP: "172.20.0.2", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+				{IP: "172.10.10.10", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+				{IP: "172.10.10.11", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
 			},
 			arrange: func(qs *mocks.MockDNSQueryService, cl *mocks.MockClient) {
-				qs.EXPECT().Query(gomock.Any(), gomock.Any()).Return(&dns.Msg{}, nil).AnyTimes()
+				qs.EXPECT().Query(gomock.Any(), gomock.Any()).
+					Return(utils.DNSQueryResult{Msg: &dns.Msg{}, Err: nil, Status: utils.DNSQueryStatusResolved}).AnyTimes()
 				qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{"172.18.0.1", "172.18.0.2"}).Times(1)
 				qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{"172.20.0.1", "172.20.0.2"}).Times(1)
 				svc := coreDNSService.DeepCopy()
@@ -106,15 +109,17 @@ func TestResolveNSNames(t *testing.T) {
 			loadBalancedZone: "cloud.example.com",
 			parentZone:       "example.com",
 			expectedResult: []*GlueAInfo{
-				{IP: "", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu"},
-				{IP: "", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu"},
-				{IP: "", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za"},
-				{IP: "", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za"},
-				{IP: "172.10.10.10", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us"},
-				{IP: "172.10.10.11", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us"},
+				{IP: "", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusNoAnswer, Err: nil, IsLocal: false},
+				{IP: "", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusNoAnswer, Err: nil, IsLocal: false},
+				{IP: "", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusNoAnswer, Err: nil, IsLocal: false},
+				{IP: "", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusNoAnswer, Err: nil, IsLocal: false},
+				{IP: "172.10.10.10", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusNoAnswer, Err: nil, IsLocal: true},
+				{IP: "172.10.10.11", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusNoAnswer, Err: nil, IsLocal: true},
 			},
 			arrange: func(qs *mocks.MockDNSQueryService, cl *mocks.MockClient) {
-				qs.EXPECT().Query(gomock.Any(), gomock.Any()).Return(&dns.Msg{}, nil).AnyTimes()
+				qs.EXPECT().Query(gomock.Any(), gomock.Any()).
+					Return(utils.DNSQueryResult{Msg: &dns.Msg{}, Err: nil, Status: utils.DNSQueryStatusResolved}).
+					AnyTimes()
 				qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{}).Times(1)
 				qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{}).Times(1)
 				svc := coreDNSService.DeepCopy()
@@ -136,9 +141,18 @@ func TestResolveNSNames(t *testing.T) {
 			},
 			loadBalancedZone: "cloud.example.com",
 			parentZone:       "example.com",
-			expectedResult:   nil,
+			expectedResult: []*GlueAInfo{
+				{IP: "", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusError, Err: fmt.Errorf("error"), IsLocal: false},
+				{IP: "", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusError, Err: fmt.Errorf("error"), IsLocal: false},
+				{IP: "", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusError, Err: fmt.Errorf("error"), IsLocal: false},
+				{IP: "", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusError, Err: fmt.Errorf("error"), IsLocal: false},
+				{IP: "172.10.10.10", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+				{IP: "172.10.10.11", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+			},
 			arrange: func(qs *mocks.MockDNSQueryService, cl *mocks.MockClient) {
-				qs.EXPECT().Query(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("dns error")).AnyTimes()
+				qs.EXPECT().Query(gomock.Any(), gomock.Any()).
+					Return(utils.DNSQueryResult{Msg: &dns.Msg{}, Err: fmt.Errorf("dns error"), Status: utils.DNSQueryStatusError}).
+					AnyTimes()
 				svc := coreDNSService.DeepCopy()
 				svc.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{{IP: "172.10.10.10"}, {IP: "172.10.10.11"}}
 				cl.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).
@@ -160,17 +174,19 @@ func TestResolveNSNames(t *testing.T) {
 			qs := mocks.NewMockDNSQueryService(ctrl)
 			test.arrange(qs, cl)
 
-			info, err := NewResolver(test.config, cl, qs).GetGlueAInfo(context.TODO(), test.loadBalancedZone, test.parentZone)
-			if test.expectedError {
-				assert.Nil(t, info)
-				assert.Error(t, err)
-				return
-			}
+			info := NewResolver(test.config, cl, qs).GetClusterGlueAResults(context.TODO(), test.loadBalancedZone, test.parentZone).FilterResolvedRecords()
+			err := info.LocalClusterError()
 			assert.NoError(t, err)
 			for i, glueAInfo := range test.expectedResult {
 				assert.Equal(t, test.expectedResult[i].IP, glueAInfo.IP)
 				assert.Equal(t, test.expectedResult[i].Cluster, glueAInfo.Cluster)
 				assert.Equal(t, test.expectedResult[i].GeoTag, glueAInfo.GeoTag)
+				if test.expectedResult[i].Err != nil {
+					assert.Error(t, test.expectedResult[i].Err)
+				} else {
+					assert.NoError(t, test.expectedResult[i].Err)
+				}
+				assert.Equal(t, test.expectedResult[i].Status, glueAInfo.Status)
 			}
 		})
 	}

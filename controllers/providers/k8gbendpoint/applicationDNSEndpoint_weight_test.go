@@ -345,7 +345,8 @@ func TestWeight(t *testing.T) {
 					ips = append(ips, record)
 				}
 				qs.EXPECT().
-					Query("localtargets-app.gslb.cloud.example.com", utils.DNSList{utils.DNSServer{Host: nsIP, Port: 53}}).Return(&dns.Msg{Answer: ips}, nil).
+					Query("localtargets-app.gslb.cloud.example.com", utils.DNSList{utils.DNSServer{Host: nsIP, Port: 53}}).
+					Return(utils.DNSQueryResult{Msg: &dns.Msg{Answer: ips}, Err: nil, Status: utils.DNSQueryStatusResolved}).
 					AnyTimes()
 			}
 			qs.EXPECT().ExtractARecords(gomock.Any()).DoAndReturn(
