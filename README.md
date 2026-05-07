@@ -83,6 +83,17 @@ This setup is adapted for local scenarios and works without external DNS provide
 
 Consult with [local playground](docs/local.md) documentation to learn all the details of experimenting with local setup.
 
+To demonstrate k8gb as a global resilience layer for AI inference endpoints, run:
+
+```sh
+make deploy-full-local-setup FULL_LOCAL_SETUP_WITH_AI_DEMO=true
+make ai-inference-demo
+```
+
+This deploys a lightweight Ollama model in both clusters, exposes an OpenAI-compatible endpoint, and shows failover through the same global hostname.
+
+See the [AI inference resilience demo](docs/ai-inference-demo.md) for local and real-cluster usage.
+
 Optionally, you can run `make deploy-prometheus` and check the metrics on the test clusters (http://localhost:9090, http://localhost:9091).
 
 ## Motivation and Architecture

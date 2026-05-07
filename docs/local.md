@@ -6,6 +6,7 @@
 - [Verify installation](#verify-installation)
 - [Run integration tests](#run-integration-tests)
 - [Cleaning](#cleaning)
+- [AI inference resilience demo](#ai-inference-resilience-demo)
 - [Sample demo](#sample-demo)
   - [Round Robin](#round-robin)
   - [Failover](#failover)
@@ -137,6 +138,32 @@ Clean up your local development clusters with
 ```sh
 make destroy-full-local-setup
 ```
+
+## AI inference resilience demo
+
+The local setup can also deploy a lightweight Ollama inference endpoint to demonstrate k8gb failover for AI traffic:
+
+```sh
+make deploy-full-local-setup FULL_LOCAL_SETUP_WITH_AI_DEMO=true
+```
+
+If the local setup is already running:
+
+```sh
+make ai-inference-demo AI_DEMO_ACTION=deploy
+make ai-inference-demo AI_DEMO_ACTION=probe
+make ai-inference-demo AI_DEMO_ACTION=failover
+make ai-inference-demo AI_DEMO_ACTION=probe
+make ai-inference-demo AI_DEMO_ACTION=failback
+```
+
+The demo caches the downloaded model in a PVC, so failback does not re-download the model. If model startup is slow, inspect progress with:
+
+```sh
+make ai-inference-demo AI_DEMO_ACTION=logs
+```
+
+See [AI Inference Resilience Demo](ai-inference-demo.md) for the full local and real-environment flow.
 
 ## Sample demo
 

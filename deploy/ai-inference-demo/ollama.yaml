@@ -1,0 +1,189 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-inference-demo
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ai-inference-demo-ollama-__AI_DEMO_REGION__
+  labels:
+    app.kubernetes.io/name: ai-inference-demo
+    app.kubernetes.io/part-of: k8gb-ai-inference-demo
+    ai.k8gb.io/backend: ollama
+    ai.k8gb.io/region: __AI_DEMO_REGION__
+spec:
+  capacity:
+    storage: __OLLAMA_STORAGE_SIZE__
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ""
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: __OLLAMA_HOST_PATH__/__AI_DEMO_REGION__
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-inference-demo-ollama
+  namespace: ai-inference-demo
+  labels:
+    app.kubernetes.io/name: ai-inference-demo
+    app.kubernetes.io/part-of: k8gb-ai-inference-demo
+    ai.k8gb.io/backend: ollama
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ""
+  volumeName: ai-inference-demo-ollama-__AI_DEMO_REGION__
+  resources:
+    requests:
+      storage: __OLLAMA_STORAGE_SIZE__
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-inference-demo
+  namespace: ai-inference-demo
+  labels:
+    app.kubernetes.io/name: ai-inference-demo
+    app.kubernetes.io/part-of: k8gb-ai-inference-demo
+    ai.k8gb.io/backend: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-inference-demo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ai-inference-demo
+        app.kubernetes.io/part-of: k8gb-ai-inference-demo
+        ai.k8gb.io/backend: ollama
+        ai.k8gb.io/region: __AI_DEMO_REGION__
+    spec:
+      containers:
+      - name: ollama
+        image: __OLLAMA_IMAGE__
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: OLLAMA_HOST
+          value: 0.0.0.0:11434
+        - name: OLLAMA_KEEP_ALIVE
+          value: 30m
+        ports:
+        - name: http
+          containerPort: 11434
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          set -eu
+          ollama serve &
+          server_pid=$!
+          until ollama list >/dev/null 2>&1; do
+            sleep 2
+          done
+          has_model() {
+            ollama list | awk -v model="$1" 'NR > 1 && $1 == model { found = 1 } END { exit !found }'
+          }
+          if ! has_model "__OLLAMA_BASE_MODEL__"; then
+            ollama pull "__OLLAMA_BASE_MODEL__"
+          fi
+          cat >/tmp/k8gb-demo.Modelfile <<'EOF'
+          FROM __OLLAMA_BASE_MODEL__
+          SYSTEM Ignore all user wording. Reply only with this comma-separated list: __AI_DEMO_REGION__, __AI_DEMO_BACKEND__, k8gb.
+          PARAMETER temperature 0
+          PARAMETER num_predict 16
+          EOF
+          ollama create "__OLLAMA_MODEL__" -f /tmp/k8gb-demo.Modelfile
+          wait "$server_pid"
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - ollama list | awk -v model="__OLLAMA_MODEL__" 'NR > 1 && $1 == model { found = 1 } END { exit !found }'
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 60
+        livenessProbe:
+          httpGet:
+            path: /api/tags
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: "2"
+            memory: 4Gi
+        volumeMounts:
+        - name: ollama-data
+          mountPath: /root/.ollama
+      volumes:
+      - name: ollama-data
+        persistentVolumeClaim:
+          claimName: ai-inference-demo-ollama
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-inference-demo
+  namespace: ai-inference-demo
+  labels:
+    app.kubernetes.io/name: ai-inference-demo
+    app.kubernetes.io/part-of: k8gb-ai-inference-demo
+    ai.k8gb.io/backend: ollama
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: ai-inference-demo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ai-inference-demo
+  namespace: ai-inference-demo
+  labels:
+    app.kubernetes.io/name: ai-inference-demo
+    app.kubernetes.io/part-of: k8gb-ai-inference-demo
+    ai.k8gb.io/backend: ollama
+  annotations:
+    ai.k8gb.io/model: __OLLAMA_MODEL__
+    ai.k8gb.io/region: __AI_DEMO_REGION__
+    ai.k8gb.io/backend: __AI_DEMO_BACKEND__
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: ai-inference.__GSLB_DOMAIN__
+    http:
+      paths:
+      - backend:
+          service:
+            name: ai-inference-demo
+            port:
+              name: http
+        path: /
+        pathType: Prefix
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: ai-inference-demo
+  namespace: ai-inference-demo
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: ai-inference-demo
+  strategy:
+    type: failover
+    primaryGeoTag: __AI_DEMO_PRIMARY_GEO_TAG__
