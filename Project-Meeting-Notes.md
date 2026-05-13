@@ -40,12 +40,15 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## May 13, 2026 #92
 
-Zoom Recording:
+Zoom Recording: https://zoom.us/rec/share/ApaywV96kTNDOCVmRIOPDTtRFlE2FWH7klTkMZHxO_nTJ4tsZAukU6-BhDdSS66t.tSF1Herv18JM46Uu
 
-On YouTube: 
+On YouTube: https://youtu.be/oH-NQAX9yxM 
 
 **Attendees**
 
+- Michal
+- Dinar
+- Yury
 - Bradley
 
 **Agenda**
@@ -86,13 +89,20 @@ On YouTube:
 - **Other**
   - https://github.com/k8gb-io/k8gb/issues/52 - what does a k8gb 1.0 look like?
 - **Action Items**
-  - ⏳ pruning Issues and PRs
-  - fix service health calculation https://github.com/k8gb-io/k8gb/issues/2326
+  - [ ] Yury: ask about [unmerged incubation tech review](https://github.com/cncf/toc/pull/2029), re-activate ADOPTER
+  questionnaires
+  - [ ] Yury: ping recent community contributors (aryasoni98, piroddi, angelbarrera92, sudhamshk, ljluest, dulaj-me, sjadema) about being ADOPTERs / their use cases
+  - [ ] Bradley: LinkedIn post about [new k8gb blog / post](https://www.k8gb.io/latest/blog/2026/03/22/k8gb-local-setup-beginners-guide/) 
+  - [ ] Bradley: LinkedIn post about this community meeting 
+  - [ ] Michael / Dinar: review [require all services healthy for server health](https://github.com/k8gb-io/k8gb/pull/2342) 
+  - [ ] Dinar / Yury: [Support reading external metrics to assess Service readiness](https://github.com/k8gb-io/k8gb/issues/1745) - let's ping adopters to see
+  if it's a widespread use case. steer design to be based on standard Service+EndpointSlices, avoid external dependency in k8gb reconciliation loop by default                                
+  - [ ] Michal: see if we can [Remove deprecated splitBrainThresholdSeconds](https://github.com/k8gb-io/k8gb/issues/1831) in the next release
+  - [ ] Yury / Michal: Follow up on new community contribution [Allow overriding discovered CoreDNS exposed IPs for bare-metal clusters behind static NAT](https://github.com/k8gb-io/k8gb/issues/2360) ... how does it relate to recent ZoneDelegation work?
+  - [ ] Dinar / Yury: fix [service health calculation](https://github.com/k8gb-io/k8gb/issues/2326)
     with the strategy that all services should be healthy in multi-service
-    networking object(Dinar, Yury)
-  - https://github.com/k8gb-io/k8gb/issues/1745 - steer design to be based on
-    standard Service+EndpointSlices, avoid external dependency in k8gb
-    reconciliation loop by default(Dinar, Yury)
+    networking object
+  - [ ] ⏳ prune Issues and PRs
 
 </details>
 
