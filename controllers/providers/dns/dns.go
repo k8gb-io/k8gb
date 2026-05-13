@@ -25,7 +25,7 @@ import (
 type Provider interface {
 	// CreateZoneDelegation handles delegated zone in Edge DNS
 	CreateZoneDelegation(*zones.ExtendedZoneDelegation) error
-	// Finalize gslb in k8gbNamespace, bool argument says whether finalizing is skipped.
+	// Finalize gslb in k8gbNamespace; bool argument determines whether only GlueA is removed (false) or whole zone is removed (true)
 	Finalize(*zones.ExtendedZoneDelegation, bool) error
 	// String see: Stringer interface
 	String() string

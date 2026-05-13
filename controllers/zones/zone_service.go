@@ -24,9 +24,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/ipresolver"
-
 	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
 	corev1 "k8s.io/api/core/v1"
@@ -286,27 +285,6 @@ func (z *ZoneDelegationImpl) HasExtClusterGeoTags(ctx context.Context) bool {
 
 func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error) {
 	return NewZoneDelegationWrapper(zd, z.config, z.ipresolver).GetDetail(ctx)
-}
-
-func (z *ZoneDelegationImpl) IsLastServingCluster(_ context.Context, _ *v1beta1.ZoneDelegation) (bool, error) {
-	return true, nil
-}
-
-func (z *ZoneDelegationImpl) IsZoneDelagationDeleted(_ context.Context, _ *v1beta1.ZoneDelegation) (bool, error) {
-	return false, nil
-}
-
-func (z *ZoneDelegationImpl) RemoveZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
-	// remove from CM (or update without current ZD)
-	// ExternalDNSEndpoint - cant delete directly because ExDNS will remove ZD once I remove first dnsendpoint
-	//
-
-	// Remove NS record
-	// Remove GlueA record
-	// Remove ZoneDelegation
-	// Remove Delegationendpoint - raising
-	// If LastServingCluster than remove ZoneDelegation from ParentDNS
-	return z.client.Delete(ctx, zd)
 }
 
 // updateCoreDNSConfiguration creates, updates, or skips the k8gb-zone-delegation ConfigMap.
