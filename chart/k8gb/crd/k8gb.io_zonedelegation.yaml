@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.20.1
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: zonedelegations.k8gb.io
 spec:
   group: k8gb.io
@@ -49,12 +49,14 @@ spec:
           metadata:
             type: object
           spec:
+            description: ZoneDelegationSpec defines the desired state of ZoneDelegation
             properties:
               dnsZoneNegTTL:
                 description: DNSZoneNegTTL specifies the negative TTL for the DNS
                   zone (in seconds)
                 type: integer
               doFinalize:
+                default: false
                 description: |-
                   DoFinalize indicates that this ZoneDelegation should be withdrawn
                   from edge DNS. The controller removes the delegation only when it is no
@@ -72,6 +74,11 @@ spec:
             - loadBalancedZone
             - parentZone
             type: object
+            x-kubernetes-validations:
+            - message: loadBalancedZone must not equal parentZone
+              rule: self.loadBalancedZone != self.parentZone
+            - message: loadBalancedZone must be subdomain
+              rule: self.loadBalancedZone.endsWith('.' + self.parentZone)
           status:
             description: ZoneDelegationStatus defines the observed state of ZoneDelegation
             properties:
