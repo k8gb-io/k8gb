@@ -25,7 +25,8 @@ import (
 )
 
 // ZoneDelegationSpec defines the desired state of ZoneDelegation
-
+// +kubebuilder:validation:XValidation:rule="self.loadBalancedZone != self.parentZone",message="loadBalancedZone must not equal parentZone"
+// +kubebuilder:validation:XValidation:rule="self.loadBalancedZone.endsWith('.' + self.parentZone)",message="loadBalancedZone must be subdomain"
 type ZoneDelegationSpec struct {
 	// LoadBalancedZone is the DNS zone managed by this ZoneDelegation
 	LoadBalancedZone string `json:"loadBalancedZone"`
@@ -39,6 +40,7 @@ type ZoneDelegationSpec struct {
 	// DoFinalize indicates that this ZoneDelegation should be withdrawn
 	// from edge DNS. The controller removes the delegation only when it is no
 	// longer served by any known cluster (based on configured geoTags).
+	// +kubebuilder:default=false
 	DoFinalize bool `json:"doFinalize,omitempty"`
 }
 
