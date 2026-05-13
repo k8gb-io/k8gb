@@ -96,6 +96,17 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return result.RequeueError(err)
 	}
 
+	exZD, err := r.ZoneService.ExtendedZoneDelegation(ctx, zone)
+	if err != nil {
+		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error getting extended zone delegation")
+		return result.RequeueError(err)
+	}
+	err = r.DNSProvider.CreateZoneDelegation(exZD)
+	if err != nil {
+		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error creating zone delegation")
+		return result.RequeueError(err)
+	}
+
 	r.Logger.Info().
 		Str("Name", zone.Name).
 		Msg("Finished Reconciling zone delegation")
@@ -108,7 +119,8 @@ func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1.Z
 		if err != nil {
 			return err
 		}
-		err = r.DNSProvider.Finalize(zoneDetail, true)
+		removeZone := zoneDetail.IsLastZoneDelegationResource()
+		err = r.DNSProvider.Finalize(zoneDetail, removeZone)
 		if err != nil {
 			return err
 		}
