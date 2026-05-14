@@ -37,8 +37,6 @@ type Strategy struct {
 	PrimaryGeoTag string `json:"primaryGeoTag,omitempty"`
 	// Defines DNS record TTL in seconds
 	DNSTtlSeconds int `json:"dnsTtlSeconds,omitempty" validate:"gte=0"`
-	// Split brain TXT record expiration in seconds. The field is deprecated and not used.
-	SplitBrainThresholdSeconds int `json:"splitBrainThresholdSeconds,omitempty"`
 }
 
 // ResourceRef selects a resource defining the GSLB's load balancer and server

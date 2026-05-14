@@ -27,7 +27,6 @@ spec:
   strategy:
     type: roundRobin
     dnsTtlSeconds: 30
-  splitBrainThresholdSeconds: 300
 ```
 
 ## How It Works

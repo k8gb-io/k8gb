@@ -99,11 +99,10 @@ func convertSpecLegacyToIO(gslb *k8gbv1beta1.Gslb) k8gbv1beta1io.GslbSpec {
 
 func convertStrategyLegacyToIO(strategy k8gbv1beta1.Strategy) k8gbv1beta1io.Strategy {
 	return k8gbv1beta1io.Strategy{
-		Type:                       strategy.Type,
-		Weight:                     strategy.Weight,
-		PrimaryGeoTag:              strategy.PrimaryGeoTag,
-		DNSTtlSeconds:              strategy.DNSTtlSeconds,
-		SplitBrainThresholdSeconds: strategy.SplitBrainThresholdSeconds,
+		Type:          strategy.Type,
+		Weight:        strategy.Weight,
+		PrimaryGeoTag: strategy.PrimaryGeoTag,
+		DNSTtlSeconds: strategy.DNSTtlSeconds,
 	}
 }
 
