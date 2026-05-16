@@ -11,13 +11,9 @@
       
       
       
-        <link rel="canonical" href="https://k8gb.io/master/local/">
+        <link rel="canonical" href="https://k8gb.io/master/ai-inference-demo/">
       
       
-        <link rel="prev" href="../exposing_dns/">
-      
-      
-        <link rel="next" href="../local-kuar/">
       
       
         
@@ -28,7 +24,7 @@
     
     
       
-        <title>Local Setup - K8GB - Kubernetes Global Balancer</title>
+        <title>AI Inference Resilience Demo - K8GB - Kubernetes Global Balancer</title>
       
     
     
@@ -81,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#local-playground-for-testing-and-development" class="md-skip">
+        <a href="#ai-inference-resilience-demo" class="md-skip">
           Skip to content
         </a>
       
@@ -233,12 +229,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href=".." class="md-tabs__link">
           
   
@@ -326,8 +320,6 @@
       
   
   
-    
-  
   
   
     
@@ -363,19 +355,18 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -397,13 +388,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="">
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -559,13 +550,10 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
@@ -574,7 +562,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_6" >
         
           
-          <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="0">
             
   
   
@@ -862,13 +850,10 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
@@ -877,7 +862,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_7" >
         
           
-          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
             
   
   
@@ -1086,10 +1071,8 @@
                 
   
   
-    
   
   
-  
     
     
       
@@ -1104,21 +1087,20 @@
     
       
       
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
         
           
-          
         
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" checked>
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_8" >
         
           
-          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
             
   
   
@@ -1136,7 +1118,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1151,37 +1133,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Local Setup
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../local/" class="md-nav__link">
         
   
   
@@ -1197,131 +1152,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#environment-prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-project-locally" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running project locally
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-integration-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Run integration tests
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleaning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cleaning
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ai-inference-resilience-demo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        AI inference resilience demo
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sample-demo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Sample demo
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Sample demo">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#round-robin" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Round Robin
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#failover" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Failover
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1410,13 +1240,10 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
@@ -1425,7 +1252,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_9" >
         
           
-          <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
             
   
   
@@ -1543,13 +1370,10 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
@@ -1558,7 +1382,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_10" >
         
           
-          <label class="md-nav__link" for="__nav_1_10" id="__nav_1_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_10" id="__nav_1_10_label" tabindex="0">
             
   
   
@@ -1760,13 +1584,10 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
@@ -1775,7 +1596,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_11" >
         
           
-          <label class="md-nav__link" for="__nav_1_11" id="__nav_1_11_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_11" id="__nav_1_11_label" tabindex="0">
             
   
   
@@ -1971,13 +1792,10 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
@@ -1986,7 +1804,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_12" >
         
           
-          <label class="md-nav__link" for="__nav_1_12" id="__nav_1_12_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_12" id="__nav_1_12_label" tabindex="0">
             
   
   
@@ -2611,10 +2429,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#environment-prerequisites" class="md-nav__link">
+  <a href="#positioning-with-ai-gateways" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Environment prerequisites
+        Positioning With AI Gateways
       
     </span>
   </a>
@@ -2622,10 +2440,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-project-locally" class="md-nav__link">
+  <a href="#why-k8gb-matters-here" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running project locally
+        Why k8gb Matters Here
       
     </span>
   </a>
@@ -2633,10 +2451,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
+  <a href="#quick-demo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify installation
+        Quick Demo
       
     </span>
   </a>
@@ -2644,10 +2462,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-integration-tests" class="md-nav__link">
+  <a href="#useful-actions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run integration tests
+        Useful Actions
       
     </span>
   </a>
@@ -2655,10 +2473,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cleaning" class="md-nav__link">
+  <a href="#what-gets-deployed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cleaning
+        What Gets Deployed
       
     </span>
   </a>
@@ -2666,10 +2484,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ai-inference-resilience-demo" class="md-nav__link">
+  <a href="#real-clusters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        AI inference resilience demo
+        Real Clusters
       
     </span>
   </a>
@@ -2677,41 +2495,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sample-demo" class="md-nav__link">
+  <a href="#message" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sample demo
+        Message
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Sample demo">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#round-robin" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Round Robin
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#failover" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Failover
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -2732,7 +2522,7 @@
 
 
   
-    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/local.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/ai-inference-demo.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2740,220 +2530,102 @@
   
 
 
-<!-- omit in toc -->
-<h1 id="local-playground-for-testing-and-development">Local playground for testing and development<a class="headerlink" href="#local-playground-for-testing-and-development" title="Permanent link">&para;</a></h1>
+<h1 id="ai-inference-resilience-demo">AI Inference Resilience Demo<a class="headerlink" href="#ai-inference-resilience-demo" title="Permanent link">&para;</a></h1>
+<p>This demo shows k8gb as a global resilience layer for AI inference endpoints.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>%%{init: {&quot;flowchart&quot;: {&quot;wrappingWidth&quot;: 1000}} }%%
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>flowchart TD
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    client[&quot;client / OpenAI API&quot;]
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    host[&quot;ai-inference.cloud.example.com&quot;]
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    gslb[&quot;k8gb DNS GSLB&lt;br/&gt;failover strategy&quot;]
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    eu[&quot;k3d-test-gslb1&lt;br/&gt;geo: eu&lt;br/&gt;Ingress / Gateway API / Service&lt;br/&gt;Ollama inference backend&lt;br/&gt;backend label: kubernetes&quot;]
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    us[&quot;k3d-test-gslb2&lt;br/&gt;geo: us&lt;br/&gt;Ingress / Gateway API / Service&lt;br/&gt;Ollama inference backend&lt;br/&gt;backend label: provider-fallback&quot;]
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    client --&gt; host
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    host --&gt; gslb
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    gslb --&gt;|primary healthy| eu
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    gslb --&gt;|primary down| us
+</code></pre></div>
+<p>The demo runs real local inference by default. It deploys Ollama in each cluster, pulls a small model, creates a region-specific OpenAI-compatible model, and probes the same global hostname during failover and failback.</p>
+<p>The k8gb topology is backend-agnostic. The same diagram applies if the regional inference backend is Ollama, vLLM, KServe, Triton, Ray Serve, a provider proxy, or any OpenAI-compatible gateway. k8gb owns global health-aware DNS routing; the inference server behind the regional <code>Service</code> is replaceable.</p>
+<p>The local demo uses Kubernetes <code>Ingress</code> because the k3d setup already includes nginx ingress and it keeps the demo one-command. Treat that as local demo plumbing. The production-facing pattern is k8gb <code>Gslb</code> plus <code>spec.resourceRef</code>, which can point at <code>Ingress</code>, Gateway API <code>HTTPRoute</code>, LoadBalancer <code>Service</code>, Istio <code>VirtualService</code>, and other supported route resources.</p>
+<h2 id="positioning-with-ai-gateways">Positioning With AI Gateways<a class="headerlink" href="#positioning-with-ai-gateways" title="Permanent link">&para;</a></h2>
+<p>k8gb does not replace Envoy Gateway, Envoy AI Gateway, Istio, KServe, vLLM, Triton, LiteLLM, or other AI inference gateways. Those systems remain responsible for in-region L7 traffic concerns such as authentication, TLS, retries, rate limits, token accounting, request mutation, model routing, provider adapters, canary routing, and telemetry.</p>
+<p>k8gb adds the global resilience layer above them. It publishes a global DNS name and returns healthy regional endpoints according to the configured strategy. A typical production path is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>client -&gt; k8gb global DNS name -&gt; regional gateway or service -&gt; inference backend
+</code></pre></div>
+<p>Use k8gb with the platform gateway that already owns regional traffic:</p>
 <ul>
-<li><a href="#environment-prerequisites">Environment prerequisites</a></li>
-<li><a href="#running-project-locally">Running project locally</a></li>
-<li><a href="#verify-installation">Verify installation</a></li>
-<li><a href="#run-integration-tests">Run integration tests</a></li>
-<li><a href="#cleaning">Cleaning</a></li>
-<li><a href="#ai-inference-resilience-demo">AI inference resilience demo</a></li>
-<li><a href="#sample-demo">Sample demo</a></li>
-<li><a href="#round-robin">Round Robin</a></li>
-<li><a href="#failover">Failover</a></li>
+<li>Envoy Gateway or Envoy AI Gateway: reference the Gateway API route, such as <code>HTTPRoute</code>, that fronts the inference gateway.</li>
+<li>Istio: reference the <code>VirtualService</code> and keep Istio policies inside the region.</li>
+<li>Direct model serving or provider proxy: reference the <code>Ingress</code>, Gateway API route, or LoadBalancer <code>Service</code> that exposes it.</li>
 </ul>
-<hr />
-<p><strong>NOTE</strong></p>
-<p>This tutorial relies on some makefile targets, to be able to fully understand what's happening under the covers, check the Makefile
-<a href="https://github.com/k8gb-io/k8gb/blob/master/Makefile">source code</a>.
-Or you may want to run a target first with <code>-n</code> switch that will print what it is going to do (example: <code>make -n test-round-robin</code>).
-For more user-centric targets in that makefile consult <code>make help</code>.</p>
-<hr />
-<h2 id="environment-prerequisites">Environment prerequisites<a class="headerlink" href="#environment-prerequisites" title="Permanent link">&para;</a></h2>
+<p>The positioning is complementary: regional gateways optimize and govern each request; k8gb keeps the global hostname reachable when a cluster, region, gateway, or inference backend stops being healthy.</p>
+<h2 id="why-k8gb-matters-here">Why k8gb Matters Here<a class="headerlink" href="#why-k8gb-matters-here" title="Permanent link">&para;</a></h2>
+<p>AI inference fails in practical ways: GPU pools run hot, clusters get drained, gateways misbehave, cloud regions degrade, provider quotas bite, and model backends become slow or unavailable. If all fallback logic lives inside one region, that logic cannot save users when the regional entrypoint itself is unhealthy.</p>
+<p>k8gb gives the inference endpoint a global failure boundary. Clients keep using one stable hostname. k8gb checks the Kubernetes-backed regional endpoints and stops returning a failed region when the referenced service has no healthy backend. Traffic moves to a healthy cluster, region, or provider-backed endpoint without every client SDK implementing its own regional failover logic.</p>
+<p>That is the useful AI inference angle: not faster tokens, not smarter model routing, and not another AI gateway. k8gb is the global availability layer that keeps an inference hostname reachable when the local serving stack cannot.</p>
+<h2 id="quick-demo">Quick Demo<a class="headerlink" href="#quick-demo" title="Permanent link">&para;</a></h2>
+<p>Deploy the local k3d setup:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">K8GB_LOCAL_VERSION</span><span class="o">=</span><span class="nb">test</span><span class="w"> </span>make<span class="w"> </span>deploy-full-local-setup
+</code></pre></div>
+<p>Run the full AI inference failover demo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>make<span class="w"> </span>ai-inference-demo
+</code></pre></div>
+<p>The script deploys the endpoint to both clusters, probes the global hostname, scales the primary endpoint down, waits for failover to the secondary endpoint, restores the primary, and waits for failback.</p>
+<p>Expected flow:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>eu -&gt; us -&gt; eu
+</code></pre></div>
+<p>Example output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>content=eu,kubernetes,k8gb
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>content=us,provider-fallback,k8gb
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>content=eu,kubernetes,k8gb
+</code></pre></div>
+<p>The default model is <code>qwen2.5:0.5b</code>, wrapped as <code>k8gb-resilient-demo:latest</code>.</p>
+<h2 id="useful-actions">Useful Actions<a class="headerlink" href="#useful-actions" title="Permanent link">&para;</a></h2>
+<p>The demo uses one Make target. Change behavior with <code>AI_DEMO_ACTION</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>status
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failover
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failback
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>logs
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>delete
+</code></pre></div>
+<p>Notes:</p>
 <ul>
-<li>
-<p><a href="https://golang.org/dl/">Install <strong>Go 1.22.3</strong></a></p>
-</li>
-<li>
-<p><a href="https://git-scm.com/downloads">Install <strong>Git</strong></a></p>
-</li>
-<li>
-<p><a href="https://docs.docker.com/get-docker/">Install <strong>Docker</strong></a></p>
+<li>First run needs internet access from the cluster for the model pull.</li>
+<li>Ollama uses a <code>2Gi</code> PVC to cache model data.</li>
+<li>Probes default to one request because local CPU inference is intentionally lightweight but still slower than a static endpoint.</li>
+</ul>
+<h2 id="what-gets-deployed">What Gets Deployed<a class="headerlink" href="#what-gets-deployed" title="Permanent link">&para;</a></h2>
+<p>The demo creates:</p>
+<ul>
+<li>Namespace: <code>ai-inference-demo</code></li>
+<li>Deployment: <code>ai-inference-demo</code></li>
+<li>Service: <code>ai-inference-demo</code></li>
+<li>Route resource: local <code>Ingress</code> named <code>ai-inference-demo</code></li>
+<li>Gslb: <code>ai-inference-demo</code></li>
+<li>PersistentVolume: <code>ai-inference-demo-ollama-&lt;region&gt;</code></li>
+<li>PersistentVolumeClaim: <code>ai-inference-demo-ollama</code></li>
+</ul>
+<p>The global endpoint is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>http://ai-inference.cloud.example.com/v1/chat/completions
+</code></pre></div>
+<h2 id="real-clusters">Real Clusters<a class="headerlink" href="#real-clusters" title="Permanent link">&para;</a></h2>
+<p>Use explicit contexts and a real DNS zone:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">CONTEXTS</span><span class="o">=</span><span class="s2">&quot;prod-eu:eu:kubernetes prod-us:us:provider-fallback&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">PRIMARY_CONTEXT</span><span class="o">=</span>prod-eu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nv">PROBE_CONTEXT</span><span class="o">=</span>prod-eu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nv">PRIMARY_GEO_TAG</span><span class="o">=</span>eu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nv">GSLB_DOMAIN</span><span class="o">=</span>example.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>./hack/ai-inference-demo.sh<span class="w"> </span>run
+</code></pre></div>
+<p>For production, keep the k8gb <code>Gslb</code> and <code>resourceRef</code> pattern and replace the demo route object with the platform standard. Prefer Gateway API <code>HTTPRoute</code> for new HTTP deployments when the cluster has a Gateway implementation. Keep <code>Ingress</code> only where it is already the supported cluster ingress path.</p>
+<h2 id="message">Message<a class="headerlink" href="#message" title="Permanent link">&para;</a></h2>
 <blockquote>
-<p>Ensure you are able to push/pull from your docker registry</p>
+<p>k8gb keeps AI inference endpoints globally reachable across regions, clusters, and providers.</p>
 </blockquote>
-</li>
-</ul>
-<blockquote>
-<p>To run multiple clusters, reserve 8GB of memory<em>
-    <img alt="" src="../images/docker_settings.png" />
-      <div>
-        <sup><i></em> above screenshot is provided for <strong>Docker for Mac</strong>, options for other Docker distributions may vary
-        </i></sup>
-      </div></p>
-</blockquote>
-<ul>
-<li>
-<p><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">install <strong>kubectl</strong></a> to operate k8s clusters</p>
-</li>
-<li>
-<p><a href="https://helm.sh/docs/intro/install/">install <strong>helm3</strong></a> to deploy k8gb and related test workloads</p>
-</li>
-<li>
-<p><a href="https://k3d.io/#installation">install <strong>k3d</strong></a> to run local <a href="https://k3s.io/">k3s</a> clusters (minimum v5.3.0 version is required)</p>
-</li>
-<li>
-<p><a href="https://golangci-lint.run/usage/install/#local-installation">install <strong>golangci-lint</strong></a> for code quality checks</p>
-</li>
-</ul>
-<h2 id="running-project-locally">Running project locally<a class="headerlink" href="#running-project-locally" title="Permanent link">&para;</a></h2>
-<p>To spin-up a local environment using two k3s clusters and deploy a test application to both clusters, execute the command below:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>make<span class="w"> </span>deploy-full-local-setup
-</code></pre></div></p>
-<p>By default, local setup also applies a small set of legacy <code>k8gb.absa.oss/v1beta1</code> migration demo resources on each local test cluster (referencing real <code>test-gslb</code> Ingress/podinfo resources from the standard setup), injects a realistic legacy ownerReference for the embedded case, and prints legacy/canonical manifests so you can see migration output immediately.</p>
-<p>If you want to skip this demo output:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>deploy-full-local-setup<span class="w"> </span><span class="nv">SHOW_LEGACY_MIGRATION_DEMO</span><span class="o">=</span><span class="nb">false</span>
-</code></pre></div>
-<h2 id="verify-installation">Verify installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
-<p>If local setup runs well, check if clusters are correctly installed</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-edgedns<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb2
-</code></pre></div>
-<p>Cluster <a href="https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb1.yaml">test-gslb1</a> is exposing external DNS on default port <code>:5053</code>
-while <a href="https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb2.yaml">test-gslb2</a> on port <code>:5054</code>.</p>
-<p>Cluster <a href="https://github.com/k8gb-io/k8gb/tree/master/k3d/edge-dns.yaml">edgedns</a> runs BIND and acts as EdgeDNS holding Delegated Zone for out test setup and answers
-on port <code>:1053</code>.</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>dig<span class="w"> </span>@localhost<span class="w"> </span>-p<span class="w"> </span><span class="m">1053</span><span class="w"> </span>roundrobin.cloud.example.com<span class="w"> </span>+short<span class="w"> </span>+tcp
-</code></pre></div>
-Should return <strong><em>two A records</em></strong> from both clusters (IP addresses and order may differ):
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>172.20.0.2
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>172.20.0.5
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>172.20.0.4
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>172.20.0.6
-</code></pre></div></p>
-<p>You can verify that correct IP addresses of all the nodes in both clusters were populated:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">for</span><span class="w"> </span>c<span class="w"> </span><span class="k">in</span><span class="w"> </span>k3d-test-gslb<span class="o">{</span><span class="m">1</span>,2<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>no<span class="w"> </span>-ocustom-columns<span class="o">=</span><span class="s2">&quot;NAME:.metadata.name,IP:status.addresses[0].address&quot;</span><span class="w"> </span>--context<span class="w"> </span><span class="nv">$c</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
-</code></pre></div></p>
-<p>Returns a result similar to:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>NAME                      IP
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>k3d-test-gslb1-agent-0    172.20.0.2
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>k3d-test-gslb1-server-0   172.20.0.4
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>NAME                      IP
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>k3d-test-gslb2-server-0   172.20.0.6
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>k3d-test-gslb2-agent-0    172.20.0.5
-</code></pre></div></p>
-<p>Or you can ask specific CoreDNS instance for its local targets:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5053</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5054</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com
-</code></pre></div>
-As expected result you should see <strong>two A records</strong> divided between both clusters.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>...
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>...
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">;;</span><span class="w"> </span>ANSWER<span class="w"> </span>SECTION:
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.4
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.2
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>...
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>...
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.5
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.6
-</code></pre></div>
-Both clusters have <a href="https://github.com/stefanprodan/podinfo">podinfo</a> installed on the top.
-Run following command and check if you get two json responses.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>curl<span class="w"> </span>localhost:80<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:roundrobin.cloud.example.com&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>curl<span class="w"> </span>localhost:81<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:roundrobin.cloud.example.com&quot;</span>
-</code></pre></div></p>
-<h2 id="run-integration-tests">Run integration tests<a class="headerlink" href="#run-integration-tests" title="Permanent link">&para;</a></h2>
-<p>There is wide range of scenarios which <strong>GSLB</strong> provides and all of them are covered within <a href="https://github.com/k8gb-io/k8gb/tree/master/terratest">tests</a>.
-To check whether everything is running properly execute <a href="https://terratest.gruntwork.io/">terratest</a> :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>make<span class="w"> </span>terratest
-</code></pre></div>
-<h2 id="cleaning">Cleaning<a class="headerlink" href="#cleaning" title="Permanent link">&para;</a></h2>
-<p>Clean up your local development clusters with
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>make<span class="w"> </span>destroy-full-local-setup
-</code></pre></div></p>
-<h2 id="ai-inference-resilience-demo">AI inference resilience demo<a class="headerlink" href="#ai-inference-resilience-demo" title="Permanent link">&para;</a></h2>
-<p>The local setup can also deploy a lightweight Ollama inference endpoint to demonstrate k8gb failover for AI traffic:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>make<span class="w"> </span>deploy-full-local-setup<span class="w"> </span><span class="nv">FULL_LOCAL_SETUP_WITH_AI_DEMO</span><span class="o">=</span><span class="nb">true</span>
-</code></pre></div>
-<p>If the local setup is already running:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>deploy
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failover
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failback
-</code></pre></div>
-<p>The demo caches the downloaded model in a PVC, so failback does not re-download the model. If model startup is slow, inspect progress with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>logs
-</code></pre></div>
-<p>See <a href="../ai-inference-demo/">AI Inference Resilience Demo</a> for the full local and real-environment flow.</p>
-<h2 id="sample-demo">Sample demo<a class="headerlink" href="#sample-demo" title="Permanent link">&para;</a></h2>
-<h3 id="round-robin">Round Robin<a class="headerlink" href="#round-robin" title="Permanent link">&para;</a></h3>
-<p>Both clusters have <a href="https://github.com/stefanprodan/podinfo">podinfo</a> installed on the top, where each
-cluster has been tagged to serve a different region. In this demo we will hit podinfo by <code>wget -qO - roundrobin.cloud.example.com</code> and depending
-on the region, podinfo will return <strong>us</strong> or <strong>eu</strong>. In the current round robin implementation IP addresses are randomly picked.
-See <a href="https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_roundrobin_ingress.yaml">Gslb manifest with round robin strategy</a></p>
-<p>Try to run the following command several times and watch the <code>message</code> field.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>make<span class="w"> </span>test-round-robin
-</code></pre></div>
-As expected result you should see podinfo message changing</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>{
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>  ...
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>  &quot;message&quot;: &quot;us&quot;,
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>  ...
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>}
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>{
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>  ...
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  &quot;message&quot;: &quot;eu&quot;,
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>  ...
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>}
-</code></pre></div></p>
-<h3 id="failover">Failover<a class="headerlink" href="#failover" title="Permanent link">&para;</a></h3>
-<p>Both clusters have <a href="https://github.com/stefanprodan/podinfo">podinfo</a> installed on the top where each
-cluster has been tagged to serve a different region. In this demo we will hit podinfo by <code>wget -qO - failover.cloud.example.com</code> and depending
-on whether podinfo is running inside the cluster it returns only <strong>eu</strong> or <strong>us</strong>.
-See <a href="https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_failover_ingress.yaml">Gslb manifest with failover strategy</a></p>
-<p>Switch GLSB to failover mode:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>make<span class="w"> </span>init-failover
-</code></pre></div>
-Now both clusters are running in failover mode and podinfo is running on both of them.
-Run several times command below and watch <code>message</code> field.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>make<span class="w"> </span>test-failover
-</code></pre></div>
-You will see only <strong>eu</strong> podinfo is responsive:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>{
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  ...
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>  &quot;message&quot;: &quot;eu&quot;,
-<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>  ...
-<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>}
-</code></pre></div>
-Stop podinfo on <strong>current (eu)</strong> cluster:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>make stop-test-app
-</code></pre></div>
-Several times hit application again
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>make<span class="w"> </span>test-failover
-</code></pre></div>
-As expected result you should see only podinfo from <strong>second cluster (us)</strong> is responding:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>{
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-v5nll&quot;,
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>  ...
-<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>  &quot;message&quot;: &quot;us&quot;,
-<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>  ...
-<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>}
-</code></pre></div>
-It might happen that podinfo will be unavailable for a while due to
-<a href="https://github.com/k8gb-io/k8gb/pull/81">DNS sync interval</a> and default k8gb DNS TTL of 30 seconds
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
-</code></pre></div>
-Start podinfo again on <strong>current (eu)</strong> cluster:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>make<span class="w"> </span>start-test-app
-</code></pre></div>
-and hit several times hit podinfo:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>make<span class="w"> </span>test-failover
-</code></pre></div>
-After DNS sync interval is over <strong>eu</strong> will be back
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>{
-<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-6945c9ddd7-xksrc&quot;,
-<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>  ...
-<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>  &quot;message&quot;: &quot;eu&quot;,
-<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>  ...
-<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>}
-</code></pre></div>
-Optionally you can switch GLSB back to round-robin mode
-<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>make<span class="w"> </span>init-round-robin
-</code></pre></div></p>
+<p>This is an availability and resilience demo, not an LLM performance benchmark.</p>
 
 
 
@@ -2986,7 +2658,7 @@ Optionally you can switch GLSB back to round-robin mode
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 26, 2020 13:22:16 UTC">October 26, 2020</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 16, 2026 12:14:30 UTC">May 16, 2026</span>
   </span>
 
     

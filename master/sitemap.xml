@@ -2,198 +2,202 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://k8gb.io/master/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/ADOPTERS/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/CONTRIBUTING/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/address_discovery/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/admiralty/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
+    </url>
+    <url>
+         <loc>https://k8gb.io/master/ai-inference-demo/</loc>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/components/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/crossplane_globalapp/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/deploy_azuredns/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/deploy_cloudflare/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/deploy_infoblox/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/deploy_ns1/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/deploy_route53/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/deploy_windowsdns/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/dynamic_geotags/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/dynamic_zones/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/exposed-hostnames/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/exposing_dns/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/intro/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/lbservice-integration/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/liqo/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/local-kuar/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/local/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/metrics/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/migration_acceptance/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/multizone/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/provider_gcp/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/provider_rfc2136/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/proxy_externaldns/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/rancher/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/resource_ref/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/rollback_procedures/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/service_upgrade/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/splitbrain/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/strategy/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/traces/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/tutorials/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/wrr_caveats/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/2026/03/22/k8gb-local-setup-beginners-guide/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/2025/12/16/welcome-to-the-k8gb-blog/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/examples/crossplane/globalapp/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/examples/gcp/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/archive/2026/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/archive/2025/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/category/tutorials/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/category/community/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/author/itsfarhan/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/author/ytsarev/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
     <url>
          <loc>https://k8gb.io/master/blog/author/elohmrow/</loc>
-         <lastmod>2026-05-13</lastmod>
+         <lastmod>2026-05-16</lastmod>
     </url>
 </urlset>
