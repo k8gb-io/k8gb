@@ -362,6 +362,8 @@ sigs.k8s.io/controller-runtime v0.23.3 h1:VjB/vhoPoA9l1kEKZHBMnQF33tdCLQKJtydy4i
 sigs.k8s.io/controller-runtime v0.23.3/go.mod h1:B6COOxKptp+YaUT5q4l6LqUJTRpizbgf9KSRNdQGns0=
 sigs.k8s.io/controller-runtime v0.24.0 h1:Ck6N2LdS8Lovy1o25BB4r1xjvLEKUl1s2o9kU+KWDE4=
 sigs.k8s.io/controller-runtime v0.24.0/go.mod h1:vFkfY5fGt5xAC/sKb8IBFKgWPNKG9OUG29dR8Y2wImw=
+sigs.k8s.io/controller-runtime v0.24.1 h1:miPEwrmirImAvgME1L9qebGHrOnGJoVmVdtOU9fRfo4=
+sigs.k8s.io/controller-runtime v0.24.1/go.mod h1:vFkfY5fGt5xAC/sKb8IBFKgWPNKG9OUG29dR8Y2wImw=
 sigs.k8s.io/external-dns v0.20.0 h1:rJ4Q5c32NStvI8J+u2nyM4bcKxZG4g1NLPL0p994U9M=
 sigs.k8s.io/external-dns v0.20.0/go.mod h1:ccNJqr47BJYN75U9WBgeAdEznyrV7VuIlS3TeO0iqSY=
 sigs.k8s.io/external-dns v0.21.0 h1:YAC7ERW32eZAjSdhu44taaZGII6nwz2/wteT+BtpFzM=
