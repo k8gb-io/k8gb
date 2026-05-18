@@ -26,3 +26,12 @@ To reduce upgrade blast radius, legacy migration is controlled explicitly per le
 | `k8gb.io/migration-requested=true`, not migrated | migration transition mode (legacy runtime paused) | execute one-way migration | switch edits to canonical `k8gb.io` object; avoids dual writers |
 | `k8gb.io/migrated-to-k8gb-io=true` | compatibility/read-only | none | treat legacy object as compatibility artifact |
 | both labels set | compatibility/read-only | none | optional cleanup of request label |
+
+## Multi-Service host health policy
+
+For canonical `k8gb.io/v1beta1` GSLBs, `spec.serviceHealthPolicy` controls how a host backed by multiple Kubernetes Services is evaluated:
+
+- `Any` is the default. The host is healthy when at least one referenced Service exists and has ready endpoints.
+- `All` requires every referenced Service to exist and have ready endpoints.
+
+Upgrade note: omitted values are treated as `Any`. For existing multi-Service hosts, this can change mixed-health behavior from the historical order-dependent status calculation, where the last processed Service could make the host unhealthy. If a host should publish local targets only when all backing Services are ready, migrate the GSLB to canonical `k8gb.io/v1beta1` if needed and set `spec.serviceHealthPolicy: All`.

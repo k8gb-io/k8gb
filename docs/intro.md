@@ -19,6 +19,10 @@ One important aspect of this solution is that the GSLB load balancing should be 
 
 This is in contrast to most existing OSS GSLB solutions which focus on traditional ICMP, TCP and HTTP health checks.
 
+For canonical `k8gb.io/v1beta1` resources, when a host is backed by multiple Kubernetes Services, `spec.serviceHealthPolicy` controls how those Services are evaluated. `Any` is the default and marks the host healthy when at least one referenced Service exists and has ready endpoints. `All` requires every referenced Service to exist and have ready endpoints, which is useful for applications that expose multiple required Services through one Ingress.
+
+Upgrade note: omitted `spec.serviceHealthPolicy` values are treated as `Any`. For existing multi-Service hosts, this can change mixed-health behavior from the historical order-dependent status calculation, where the last processed Service could make the host unhealthy. Hosts that should publish local targets only when all backing Services are ready should set `spec.serviceHealthPolicy: All`. Legacy `k8gb.absa.oss/v1beta1` objects do not expose this field and use the default `Any` behavior in runtime; migrate those objects to canonical `k8gb.io/v1beta1` before setting `All`.
+
 ## Goals
 
 The goal of this project is to provide an implementation of a cloud native GSLB that meets the following requirements:
@@ -54,6 +58,7 @@ kind: Gslb
 metadata:
   name: app
 spec:
+  serviceHealthPolicy: Any
   resourceRef:
     apiVersion: networking.k8s.io/v1
     kind: Ingress
