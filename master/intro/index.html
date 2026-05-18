@@ -3100,6 +3100,8 @@
 <h3 id="service-health">Service health<a class="headerlink" href="#service-health" title="Permanent link">&para;</a></h3>
 <p>One important aspect of this solution is that the GSLB load balancing should be based on the availability of Kubernetes Pods that a GSLB enabled host represents. I.e. Pod health, as determined by the configured <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">liveness probes</a> and <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes">readiness probes</a> of a Pod should determine which resulting IP of the downstream Ingress will be resolved.</p>
 <p>This is in contrast to most existing OSS GSLB solutions which focus on traditional ICMP, TCP and HTTP health checks.</p>
+<p>For canonical <code>k8gb.io/v1beta1</code> resources, when a host is backed by multiple Kubernetes Services, <code>spec.serviceHealthPolicy</code> controls how those Services are evaluated. <code>Any</code> is the default and marks the host healthy when at least one referenced Service exists and has ready endpoints. <code>All</code> requires every referenced Service to exist and have ready endpoints, which is useful for applications that expose multiple required Services through one Ingress.</p>
+<p>Upgrade note: omitted <code>spec.serviceHealthPolicy</code> values are treated as <code>Any</code>. For existing multi-Service hosts, this can change mixed-health behavior from the historical order-dependent status calculation, where the last processed Service could make the host unhealthy. Hosts that should publish local targets only when all backing Services are ready should set <code>spec.serviceHealthPolicy: All</code>. Legacy <code>k8gb.absa.oss/v1beta1</code> objects do not expose this field and use the default <code>Any</code> behavior in runtime; migrate those objects to canonical <code>k8gb.io/v1beta1</code> before setting <code>All</code>.</p>
 <h2 id="goals">Goals<a class="headerlink" href="#goals" title="Permanent link">&para;</a></h2>
 <p>The goal of this project is to provide an implementation of a cloud native GSLB that meets the following requirements:</p>
 <ul>
@@ -3124,12 +3126,13 @@
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">metadata</span><span class="p">:</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">resourceRef</span><span class="p">:</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">roundRobin</span><span class="w"> </span><span class="c1"># Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">serviceHealthPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Any</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">resourceRef</span><span class="p">:</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">roundRobin</span><span class="w"> </span><span class="c1"># Use a round robin load balancing strategy, when deciding which downstream clusters to route clients too</span>
 </code></pre></div>
 <p>Legacy <code>k8gb.absa.oss/v1beta1</code> resources are still accepted. Migration to <code>k8gb.io/v1beta1</code> is initiated by setting <code>k8gb.io/migration-requested=true</code> on the legacy object. Migrated legacy objects are labeled <code>k8gb.io/migrated-to-k8gb-io=true</code>, and warning events indicate that users should edit the canonical <code>k8gb.io</code> object going forward.</p>
 <p>On creating this <code>Gslb</code> resource, the k8gb controller watching the cluster where this resource is created, will:</p>
@@ -3236,7 +3239,7 @@ However, any other global k8gb specific configuration should be specified as arg
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 11, 2026 09:31:30 UTC">March 11, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 18, 2026 11:47:47 UTC">May 18, 2026</span>
   </span>
 
     
