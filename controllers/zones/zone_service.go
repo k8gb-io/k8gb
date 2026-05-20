@@ -24,9 +24,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/controllers/ipresolver"
-
 	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
 	corev1 "k8s.io/api/core/v1"
@@ -230,12 +229,12 @@ func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd Extend
 		DNSServers: make([]v1beta1.DNSServer, 0),
 	}
 
-	glueAList, err := z.ipresolver.GetGlueAInfo(ctx, exzd.LoadBalancedZone, exzd.ParentZone)
-	if err != nil {
+	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, exzd.LoadBalancedZone, exzd.ParentZone).FilterResolvedRecords()
+	if err := glueAResults.LocalClusterError(); err != nil {
 		return v1beta1.ZoneDelegationStatus{}, err
 	}
 
-	for _, gluea := range glueAList {
+	for _, gluea := range glueAResults {
 		status.DNSServers = append(status.DNSServers, v1beta1.DNSServer{
 			Name:    gluea.Cluster,
 			Address: gluea.IP,
@@ -310,6 +309,7 @@ func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd 
 		return nil
 	}
 
+	//  exclude if in deletion state (timestamp)
 	coreDNSZones.Data[zoneKey] = getCoreDNSData(zd.Spec.LoadBalancedZone)
 
 	return z.client.Update(ctx, coreDNSZones)

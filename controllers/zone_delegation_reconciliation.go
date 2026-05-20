@@ -108,7 +108,8 @@ func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1.Z
 		if err != nil {
 			return err
 		}
-		err = r.DNSProvider.Finalize(zoneDetail, true)
+		removeZone := zoneDetail.IsLastZoneDelegationResource()
+		err = r.DNSProvider.Finalize(zoneDetail, removeZone)
 		if err != nil {
 			return err
 		}

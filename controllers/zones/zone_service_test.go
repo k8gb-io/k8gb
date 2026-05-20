@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -56,17 +58,17 @@ func TestUpdateStatus(t *testing.T) {
 				},
 			},
 			config: &resolver.Config{
-				ClusterGeoTag:         "us",
-				ExtClustersGeoTagsRaw: []string{"eu", "za"},
+				ClusterGeoTag:         "eu",
+				ExtClustersGeoTagsRaw: []string{"us", "za"},
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
-				ips.EXPECT().GetGlueAInfo(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*ipresolver.GlueAInfo{
-					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com"},
-					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com"},
-					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com"},
-					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com"},
-				}, nil)
+				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
+					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+				})
 			},
 			expectedStatus: []v1beta1.DNSServer{
 				{
@@ -125,14 +127,14 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
-				ips.EXPECT().GetGlueAInfo(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*ipresolver.GlueAInfo{
-					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com"},
-					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com"},
-					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com"},
-					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com"},
-					{IP: "172.38.0.1", Cluster: "gslb-ns-za-cloud.example.com"},
-					{IP: "172.38.0.2", Cluster: "gslb-ns-za-cloud.example.com"},
-				}, nil)
+				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
+					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+					{IP: "172.38.0.1", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.38.0.2", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+				})
 			},
 			expectedStatus: []v1beta1.DNSServer{
 				{
@@ -207,14 +209,14 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
-				ips.EXPECT().GetGlueAInfo(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*ipresolver.GlueAInfo{
-					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com"},
-					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com"},
-					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com"},
-					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com"},
-					{IP: "172.38.0.1", Cluster: "gslb-ns-za-cloud.example.com"},
-					{IP: "172.38.0.2", Cluster: "gslb-ns-za-cloud.example.com"},
-				}, nil)
+				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
+					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+					{IP: "172.28.0.2", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
+					{IP: "172.38.0.1", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+					{IP: "172.38.0.2", Cluster: "gslb-ns-za-cloud.example.com", GeoTag: "za", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
+				})
 			},
 			expectedStatus: []v1beta1.DNSServer{
 				{
