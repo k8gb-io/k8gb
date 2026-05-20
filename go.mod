@@ -19,7 +19,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.43.0
 	go.opentelemetry.io/otel/trace v1.43.0
 	go.uber.org/mock v0.6.0
-	istio.io/client-go v1.29.2
+	istio.io/client-go v1.30.0
 	k8s.io/api v0.36.0
 	k8s.io/apimachinery v0.36.0
 	k8s.io/client-go v0.36.0
@@ -104,7 +104,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	istio.io/api v1.29.2-0.20260408155000-a0e4e1cbfcc5 // indirect
+	istio.io/api v1.30.0-rc.0.0.20260508191950-a283232d9647 // indirect
 	k8s.io/apiextensions-apiserver v0.36.0 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a // indirect
