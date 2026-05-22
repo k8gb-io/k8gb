@@ -31,7 +31,7 @@ import (
 type Config struct {
 	ClusterGeoTag string `env:"CLUSTER_GEO_TAG" required:"" validate:"geotag" help:"ClusterGeoTag to determine specific location"`
 
-	DNSZones string `env:"DNS_ZONES" required:"" help:"pairs of dnsZone ad edgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io"`
+	DNSZones string `env:"DNS_ZONES" required:"" help:"pairs of dnsZone and edgeDNSZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io"`
 
 	ParentZoneDNSServersRaw []string `env:"EDGE_DNS_SERVERS" optional:"" validate:"unique,dive,iphostport" help:"list of parent DNS servers (ipv4 or domain). If port is missing default value 53 is used; e.g: '10.0.0.1,10.20.20.0.1:5053,edge.test:53'"`
 
@@ -39,7 +39,7 @@ type Config struct {
 
 	FallbackEdgeDNSServerPortRaw int `env:"EDGE_DNS_SERVER_PORT" optional:"" default:"53" help:"deprecated; to avoid breaking changes is used as fallback server port for ParentZoneDNSServers"`
 
-	ExtClustersGeoTagsRaw []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS" optional:"" validate:"unique,dive,geotag" help:"identify clusters gek tags in other locations; separated by comma. i.e.: 'eu,uk,us'"`
+	ExtClustersGeoTagsRaw []string `env:"EXT_GSLB_CLUSTERS_GEO_TAGS" optional:"" validate:"unique,dive,geotag" help:"identify clusters geo tags in other locations; separated by comma. i.e.: 'eu,uk,us'"`
 
 	ReconcileRequeueSeconds int `env:"RECONCILE_REQUEUE_SECONDS" optional:""  default:"30" validate:"min=0" help:"delay between individual reconciliations. If set to 0, reconciliation is only triggered at startup or when the GSLB, Ingress, or DNSEndpoint changes."`
 
@@ -57,7 +57,7 @@ type Config struct {
 
 	TracingEnabled bool `env:"TRACING_ENABLED" optional:"" default:"false" help:"decides whether to use a real otlp tracer or a noop one"`
 
-	TracingSamplingRatio float64 `env:"TRACING_SAMPLING_RATIO" optionl:"" default:"1.0" help:"how many traces should be kept and sent (1.0 - all, 0.0 - none)"`
+	TracingSamplingRatio float64 `env:"TRACING_SAMPLING_RATIO" optional:"" default:"1.0" help:"how many traces should be kept and sent (1.0 - all, 0.0 - none)"`
 
 	OtelExporterOtlpEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" optional:"" default:"localhost:4318" help:"where the traces should be sent to (in case of otel collector deployed on the same pod as sidecar -> localhost:4318). Otel collector itself can be configured via a configmap to send it somewhere else"`
 
@@ -80,7 +80,7 @@ type Infoblox struct {
 	// Host
 	Host string `env:"INFOBLOX_GRID_HOST" optional:""`
 	// Port
-	Port int `env:"INFOBLOX_WAPI_PORT" optional:"" default:"53"`
+	Port int `env:"INFOBLOX_WAPI_PORT" optional:"" default:"443"`
 	// Username
 	Username string `env:"INFOBLOX_WAPI_USERNAME" optional:""`
 	// Password
