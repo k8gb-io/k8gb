@@ -459,7 +459,7 @@ func TestConfigurations(t *testing.T) {
 				 INFOBLOX_WAPI_PASSWORD="testpassword"`,
 			assert: func(t *testing.T, cfg *Config) {
 				assert.Equal(t, "192.168.10.10", cfg.Infoblox.Host)
-				assert.Equal(t, 53, cfg.Infoblox.Port)
+				assert.Equal(t, 443, cfg.Infoblox.Port)
 				assert.Equal(t, "testadmin", cfg.Infoblox.Username)
 				assert.Equal(t, "testpassword", cfg.Infoblox.Password)
 				assert.Equal(t, "v2", cfg.Infoblox.Version)
