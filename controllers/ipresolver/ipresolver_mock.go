@@ -57,6 +57,20 @@ func (m *MockResolver) EXPECT() *MockResolverMockRecorder {
 	return m.recorder
 }
 
+// GetClusterGlueAResults mocks base method.
+func (m *MockResolver) GetClusterGlueAResults(ctx context.Context, loadBalancedZone, parentZone string) ClusterGlueAResults {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetClusterGlueAResults", ctx, loadBalancedZone, parentZone)
+	ret0, _ := ret[0].(ClusterGlueAResults)
+	return ret0
+}
+
+// GetClusterGlueAResults indicates an expected call of GetClusterGlueAResults.
+func (mr *MockResolverMockRecorder) GetClusterGlueAResults(ctx, loadBalancedZone, parentZone any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterGlueAResults", reflect.TypeOf((*MockResolver)(nil).GetClusterGlueAResults), ctx, loadBalancedZone, parentZone)
+}
+
 // GetExposedIPs mocks base method.
 func (m *MockResolver) GetExposedIPs(ctx context.Context) (*Resolved, error) {
 	m.ctrl.T.Helper()
@@ -70,19 +84,4 @@ func (m *MockResolver) GetExposedIPs(ctx context.Context) (*Resolved, error) {
 func (mr *MockResolverMockRecorder) GetExposedIPs(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExposedIPs", reflect.TypeOf((*MockResolver)(nil).GetExposedIPs), ctx)
-}
-
-// GetGlueAInfo mocks base method.
-func (m *MockResolver) GetGlueAInfo(ctx context.Context, loadBalancedZone, parentZone string) ([]*GlueAInfo, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGlueAInfo", ctx, loadBalancedZone, parentZone)
-	ret0, _ := ret[0].([]*GlueAInfo)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetGlueAInfo indicates an expected call of GetGlueAInfo.
-func (mr *MockResolverMockRecorder) GetGlueAInfo(ctx, loadBalancedZone, parentZone any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGlueAInfo", reflect.TypeOf((*MockResolver)(nil).GetGlueAInfo), ctx, loadBalancedZone, parentZone)
 }
