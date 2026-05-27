@@ -31,11 +31,15 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## May 27, 2026 #93
 
-**Zoom Recording:** 
+[**Zoom Recording**](https://zoom.us/rec/share/ybn-H0ZS8of1dZ8GL_eQJZ_NTul7AlX3V1qM9iY84wrzEmVfGzDa0Pl8HGnT4lhE.17lIjsT6oYCSkM_X) 
 
-**On YouTube:** 
+[**On YouTube**](https://youtu.be/lsMCIQtEwDU) 
 
 **Attendees**
+
+- [@kuritka](https://github.com/kuritka)
+- [@ytsarev](https://github.com/ytsarev)
+- [@elohmrow](https://github.com/elohmrow)
 
 **Agenda**
 
@@ -62,6 +66,13 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
   - wip - post about new blog platform
 - **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
 - **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+
+**(new) Actions**
+
+- create a k0rdent reference platform
+- create a blog post highlighting new zone delegation functionality, extend k8gb documentation once the feature is finished
+- work with [@infbase](https://github.com/infbase) to finalize an "intro to k8gb" video
+- rebase / close stale community contributions
 
 </details>
 
