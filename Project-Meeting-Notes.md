@@ -27,16 +27,45 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details><summary><strong>Backlog</strong></summary>
+<details open><summary><strong>May 27, 2026 #93</strong></summary>
 
-## Backlog:
+## May 27, 2026 #93
 
-- Community user reporting docker hub rate limiting during k8gb installation - republish to github
-- [https://github.com/k8gb-io/k8gb/issues/1314](https://github.com/k8gb-io/k8gb/issues/1314) - split brain documentation request
+**Zoom Recording:** 
+
+**On YouTube:** 
+
+**Attendees**
+
+**Agenda**
+
+- important change from @kuritka: [improve the handling of Glue A record resolution failures](https://github.com/k8gb-io/k8gb/pull/2350)
+  - instead of `ipresolver` stopping on first failed Glue A record, return all,
+  even those that do not resolve. filter out the valid ones so we always know
+  the max number of IPs for all live clusters. enable proper cleanup of
+  delegation zones.
+- resubmitted to [k0rdent catalog](https://github.com/k0rdent/catalog/pull/1051)
+  - makes it easier for folks using k0rdent to use k8gb in their deploys.
+- community contributions in progress
+  - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98 - needs rebase
+  - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+  - [fix: restore extraServerBlocks as global setting](https://github.com/k8gb-io/k8gb/pull/2121) @angelbarrera92 - stale?
+  - [feat: Add health checking for ingress controllers](https://github.com/k8gb-io/k8gb/pull/2110) @sudhamshk - needs rebase
+- kubecon na submissions
+  - [ai inference](https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md) ... + blog post wip
+  - joint w/ nutanix
+    - implementing active/passive failover for stateful k8s workloads w/k8gb,
+    velero, gitops. 
+  - what talks / blog posts, etc. would you like to see?
+- no incubation update 
+- action items from last time
+  - wip - post about new blog platform
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
 
 </details>
 
-<details open><summary><strong>May 13, 2026 #92</strong></summary>
+<details><summary><strong>May 13, 2026 #92</strong></summary>
 
 ## May 13, 2026 #92
 
