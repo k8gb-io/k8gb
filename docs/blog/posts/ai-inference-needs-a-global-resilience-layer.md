@@ -1,6 +1,21 @@
-## AI Inference Needs a Global Resilience Layer
+---
+date:
+  created: 2026-05-29
+authors:
+  - elohmrow
+categories:
+  - Technical Deep Dive
+tags:
+  - k8gb
+  - ai
+  - inference
+  - resilience
+  - failover
+---
 
-### Background: AI Inference
+# AI Inference Needs a Global Resilience Layer
+
+## Background: AI Inference
 
 First, some background. What is AI inference?
 
@@ -12,7 +27,9 @@ token, until it has a complete answer, which it then somehow delivers to you.
 > Note: we're _not_ talking about training a model here; rather, about using an
 already-trained model.
 
-### The Problem
+<!-- more -->
+
+## The Problem
 
 So what could go wrong with that process? 
 
@@ -29,7 +46,7 @@ different locations, and what models are available, per location, matters.
 
 AI workload _requests take longer_: we're simply doing more complicated work.
 
-### Why We Built the Demo
+## Why We Built the Demo
 
 If all fallback logic lives inside one region, that logic cannot save you because 
 the entrypoint itself is unhealthy.
@@ -43,7 +60,7 @@ patterns for globally resilient AI inference on Kubernetes, and built a demo. It
 shows how DNS-based global failover can complement existing regional inference 
 gateways and model-serving stacks.
 
-### What does AI inference mean in k8gb land?
+## What does AI inference mean in k8gb land?
 
 k8gb normally pushes traffic toward anything healthy, or the closest thing,
 depending on your chosen [LB strategy](https://www.k8gb.io/latest/strategy/). 
@@ -58,7 +75,7 @@ So serving AI inference requests is different. AI inference in k8gb land means:
 instead of "send traffic to any healthy region", "send this specific request to 
 the best region for _this model_, _this user_, and _current capacity_."
 
-### How does k8gb help?
+## How does k8gb help?
 
 k8gb is: DNS-based GSLB. 
 
@@ -80,7 +97,7 @@ underneath it.
 So ... use Envoy when you want to know "which model" to choose, and use k8gb
 when you want to know "which cluster" to choose.
 
-### The Architecture
+## The Architecture
 
 The key: this is composed from existing Kubernetes primitives.
 
@@ -91,7 +108,7 @@ only existing features, proving once again that k8gb is backend-agnostic. This
 
 ![](ai-inf-arch.png)
 
-### The Walkthrough
+## The Walkthrough
 
 What does the demo do?
 
@@ -211,6 +228,6 @@ deployment "ai-inference-demo" successfully rolled out
 That took about 48 seconds total to failover. Pretty good for a pure DNS-based
 solution without any `spec.strategy.dnsTtlSeconds` fiddling. 
 
-### Try it Yourself
+## Try it Yourself
 
 - [AI Inference Resilience Demo](https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md)
