@@ -114,10 +114,18 @@ func (d *ExtendedZoneDelegation) GetNSName(tag string) string {
 }
 
 func (d *ExtendedZoneDelegation) IsLastZoneDelegationResource() bool {
-	if len(d.wrapper.zoneDelegation.Status.DNSServers) == 1 {
-		return d.wrapper.zoneDelegation.Status.DNSServers[0].Name == d.ClusterNSName
+	servers := d.wrapper.zoneDelegation.Status.DNSServers
+	if len(servers) == 0 {
+		return false
 	}
-	return false
+
+	for _, server := range servers {
+		if server.Name != d.ClusterNSName {
+			return false
+		}
+	}
+
+	return true
 }
 
 func getNsName(tag, zone, edge string) string {
