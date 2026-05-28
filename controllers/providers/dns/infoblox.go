@@ -123,7 +123,7 @@ func (p *InfobloxProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, fina
 
 	// finalize GlueA record only
 	log.Info().Msgf("Removing Glue A %s records for delegated zone %s", zoneInfo.ClusterNSName, zoneInfo.LoadBalancedZone)
-	return p.removeGlueAFromDelegatedZone(objMgr, zoneInfo.LoadBalancedZone, zoneInfo.ClusterNSName, zoneInfo.LocalCoreDNSExposedIPs)
+	return p.removeGlueAFromDelegatedZone(objMgr, zoneInfo.LoadBalancedZone, zoneInfo.ClusterNSName)
 }
 
 func (p *InfobloxProvider) String() string {
@@ -201,34 +201,37 @@ func (p *InfobloxProvider) deleteZoneDelegated(o ibcl.IBObjectManager, fqdn stri
 	return nil
 }
 
-func (p *InfobloxProvider) removeGlueAFromDelegatedZone(o ibcl.IBObjectManager, zoneFQDN string, nsName string, ipsToDelete []string) error {
-
-	contains := func(values []string, value string) bool {
-		for _, v := range values {
-			if v == value {
-				return true
-			}
-		}
-		return false
-	}
-
+func (p *InfobloxProvider) removeGlueAFromDelegatedZone(o ibcl.IBObjectManager, zoneFQDN string, nsName string) error {
 	zone, err := o.GetZoneDelegated(zoneFQDN)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info().Msgf("Delegated zone %s is already absent from edge DNS", zoneFQDN)
+			return nil
+		}
 		return fmt.Errorf("failed to get delegated zone %s: %w", zoneFQDN, err)
 	}
+	if zone == nil {
+		log.Info().Msgf("Delegated zone %s is already absent from edge DNS", zoneFQDN)
+		return nil
+	}
+	if zone.Ref == "" {
+		return fmt.Errorf("delegated zone %s ref is empty", zoneFQDN)
+	}
 
-	var filtered []ibcl.NameServer
-
+	filtered := make([]ibcl.NameServer, 0, len(zone.DelegateTo.NameServers))
+	removed := false
 	for _, ns := range zone.DelegateTo.NameServers {
-		if ns.Name == nsName && contains(ipsToDelete, ns.Address) {
+		if ns.Name == nsName {
+			removed = true
 			continue
 		}
 		filtered = append(filtered, ns)
 	}
+	if !removed {
+		return nil
+	}
 
-	zone.DelegateTo.NameServers = filtered
-	_, err = p.updateZoneDelegated(o, zone.Ref, filtered)
-	if err != nil {
+	if _, err = p.updateZoneDelegated(o, zone.Ref, filtered); err != nil {
 		return fmt.Errorf("failed to update delegated zone %s: %w", zoneFQDN, err)
 	}
 	return nil
