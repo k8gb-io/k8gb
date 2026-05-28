@@ -37,7 +37,7 @@ import (
 
 func (r *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		Named("coredns").
+		Named("k8gb-coredns").
 		Watches(
 			&corev1.Service{},
 			handler.EnqueueRequestsFromMapFunc(watcher),

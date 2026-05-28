@@ -113,6 +113,21 @@ func (d *ExtendedZoneDelegation) GetNSName(tag string) string {
 	return getNsName(tag, d.LoadBalancedZone, d.ParentZone)
 }
 
+func (d *ExtendedZoneDelegation) IsLastZoneDelegationResource() bool {
+	servers := d.wrapper.zoneDelegation.Status.DNSServers
+	if len(servers) == 0 {
+		return false
+	}
+
+	for _, server := range servers {
+		if server.Name != d.ClusterNSName {
+			return false
+		}
+	}
+
+	return true
+}
+
 func getNsName(tag, zone, edge string) string {
 	const prefix = "gslb-ns"
 	d := strings.TrimSuffix(zone, "."+edge)

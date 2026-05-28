@@ -64,7 +64,7 @@ func TestResolveNSNames(t *testing.T) {
 		config           *resolver.Config
 		loadBalancedZone string
 		parentZone       string
-		expectedResult   []*GlueAInfo
+		expectedResult   ClusterGlueAResults
 		arrange          func(*mocks.MockDNSQueryService, *mocks.MockClient)
 	}{
 		{
@@ -87,8 +87,10 @@ func TestResolveNSNames(t *testing.T) {
 			arrange: func(qs *mocks.MockDNSQueryService, cl *mocks.MockClient) {
 				qs.EXPECT().Query(gomock.Any(), gomock.Any()).
 					Return(utils.DNSQueryResult{Msg: &dns.Msg{}, Err: nil, Status: utils.DNSQueryStatusResolved}).AnyTimes()
-				qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{"172.18.0.1", "172.18.0.2"}).Times(1)
-				qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{"172.20.0.1", "172.20.0.2"}).Times(1)
+				gomock.InOrder(
+					qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{"172.18.0.1", "172.18.0.2"}).Times(1),
+					qs.EXPECT().ExtractARecords(gomock.Any()).Return([]string{"172.20.0.1", "172.20.0.2"}).Times(1),
+				)
 				svc := coreDNSService.DeepCopy()
 				svc.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{{IP: "172.10.10.10"}, {IP: "172.10.10.11"}}
 				cl.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).
@@ -169,19 +171,20 @@ func TestResolveNSNames(t *testing.T) {
 			info := NewResolver(test.config, cl, qs).GetClusterGlueAResults(context.TODO(), test.loadBalancedZone, test.parentZone)
 			err := info.LocalClusterError()
 			assert.NoError(t, err)
-			info = info.FilterResolvedRecords()
+			info = info.FilterResolvedRecords().Sort()
+			expectedResults := test.expectedResult.Sort()
 			assert.Len(t, info, len(test.expectedResult))
 
 			for i, glueAInfo := range info {
-				assert.Equal(t, test.expectedResult[i].IP, glueAInfo.IP)
-				assert.Equal(t, test.expectedResult[i].Cluster, glueAInfo.Cluster)
-				assert.Equal(t, test.expectedResult[i].GeoTag, glueAInfo.GeoTag)
-				if test.expectedResult[i].Err != nil {
+				assert.Equal(t, expectedResults[i].IP, glueAInfo.IP)
+				assert.Equal(t, expectedResults[i].Cluster, glueAInfo.Cluster)
+				assert.Equal(t, expectedResults[i].GeoTag, glueAInfo.GeoTag)
+				if expectedResults[i].Err != nil {
 					assert.Error(t, glueAInfo.Err)
 				} else {
 					assert.NoError(t, glueAInfo.Err)
 				}
-				assert.Equal(t, test.expectedResult[i].Status, glueAInfo.Status)
+				assert.Equal(t, expectedResults[i].Status, glueAInfo.Status)
 			}
 		})
 	}
