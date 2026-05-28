@@ -175,17 +175,29 @@ func (p *InfobloxProvider) deleteZoneDelegated(o ibcl.IBObjectManager, fqdn stri
 
 	zone, err := o.GetZoneDelegated(fqdn)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info().Msgf("Delegated zone %s is already absent from edge DNS", fqdn)
+			return nil
+		}
 		return fmt.Errorf("failed to get delegated zone %s: %w", fqdn, err)
 	}
-
-	if zone == nil || zone.Ref == "" {
-		return fmt.Errorf("delegated zone %s not found or ref is empty", fqdn)
+	if zone == nil {
+		log.Info().Msgf("Delegated zone %s is already absent from edge DNS", fqdn)
+		return nil
+	}
+	if zone.Ref == "" {
+		return fmt.Errorf("delegated zone %s ref is empty", fqdn)
 	}
 
-	if _, err := o.DeleteZoneDelegated(zone.Ref); err != nil {
-		return err
+	_, err = o.DeleteZoneDelegated(zone.Ref)
+	if err != nil && errors.IsNotFound(err) {
+		log.Info().Msgf("Delegated zone %s is already absent from edge DNS", fqdn)
+		err = nil
 	}
 	m.InfobloxObserveRequestDuration(start, metrics.DeleteZoneDelegated, err == nil)
+	if err != nil {
+		return fmt.Errorf("failed to delete delegated zone %s: %w", fqdn, err)
+	}
 	return nil
 }
 
