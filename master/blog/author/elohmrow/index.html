@@ -14,10 +14,10 @@
         <link rel="canonical" href="https://k8gb.io/master/blog/author/elohmrow/">
       
       
-        <link rel="prev" href="../ytsarev/">
+        <link rel="prev" href="../../">
       
       
-        <link rel="next" href="../../category/community/">
+        <link rel="next" href="../itsfarhan/">
       
       
         
@@ -2067,7 +2067,7 @@
   <span class="md-ellipsis">
     
   
-    March 2026
+    May 2026
   
 
     
@@ -2127,6 +2127,8 @@
   
     
     
+      
+        
       
         
       
@@ -2199,6 +2201,36 @@
     
   
     Community
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../../category/technical-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Deep Dive
   
 
     
@@ -2319,66 +2351,6 @@
                 
   
   
-  
-    
-  
-  
-    <li class="md-nav__item">
-      <a href="../itsfarhan/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Farhan Ahmed
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    
-  
-  
-    <li class="md-nav__item">
-      <a href="../ytsarev/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Yury Tsarev
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -2446,6 +2418,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#ai-inference-needs-a-global-resilience-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Inference Needs a Global Resilience Layer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#welcome-to-the-k8gb-blog" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2460,6 +2443,66 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../itsfarhan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Farhan Ahmed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../ytsarev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yury Tsarev
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2507,6 +2550,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#ai-inference-needs-a-global-resilience-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Inference Needs a Global Resilience Layer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#welcome-to-the-k8gb-blog" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2531,6 +2585,64 @@
       <header class="md-typeset">
         <h1 id="bradley-andersen">Bradley Andersen<a class="headerlink" href="#bradley-andersen" title="Permanent link">&para;</a></h1>
       </header>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="https://github.com/elohmrow.png" alt="Bradley Andersen">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2026-05-29 00:00:00+00:00">Friday, May 29, 2026</time></li>
+        
+          <li class="md-meta__item">
+            in
+            
+              <a href="../../category/technical-deep-dive/" class="md-meta__link">Technical Deep Dive</a></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              7 min read
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="ai-inference-needs-a-global-resilience-layer"><a class="toclink" href="../../2026/05/29/ai-inference-needs-a-global-resilience-layer/">AI Inference Needs a Global Resilience Layer</a></h2>
+<h3 id="background-ai-inference"><a class="toclink" href="../../2026/05/29/ai-inference-needs-a-global-resilience-layer/#background-ai-inference">Background: AI Inference</a></h3>
+<p>First, some background. What is AI inference?</p>
+<p>When you ask ChatGPT "Can you explain [X] to me?", what happens? A server
+somewhere converts that question to tokens and passes them through some trained
+model. The model performs a lot of calculations, generating a response, token by
+token, until it has a complete answer, which it then somehow delivers to you.</p>
+<blockquote>
+<p>Note: we're <em>not</em> talking about training a model here; rather, about using an
+already-trained model.</p>
+</blockquote>
+
+    
+      <nav class="md-post__action">
+        <a href="../../2026/05/29/ai-inference-needs-a-global-resilience-layer/">
+          Continue reading
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
       
         <article class="md-post md-post--excerpt">
   <header class="md-post__header">

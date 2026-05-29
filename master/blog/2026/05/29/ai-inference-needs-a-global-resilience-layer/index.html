@@ -11,13 +11,11 @@
       
       
       
-        <link rel="canonical" href="https://k8gb.io/master/blog/2026/03/22/k8gb-local-setup-beginners-guide/">
+        <link rel="canonical" href="https://k8gb.io/master/blog/2026/05/29/ai-inference-needs-a-global-resilience-layer/">
       
       
-        <link rel="prev" href="../../../../2025/12/16/welcome-to-the-k8gb-blog/">
+        <link rel="prev" href="../../../03/22/k8gb-local-setup-beginners-guide/">
       
-      
-        <link rel="next" href="../../../05/29/ai-inference-needs-a-global-resilience-layer/">
       
       
         
@@ -28,7 +26,7 @@
     
     
       
-        <title>K8gb local setup beginners guide - K8GB - Kubernetes Global Balancer</title>
+        <title>AI Inference Needs a Global Resilience Layer - K8GB - Kubernetes Global Balancer</title>
       
     
     
@@ -81,7 +79,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#a-beginner-friendly-guide-to-k8gb-local-setup" class="md-skip">
+        <a href="#ai-inference-needs-a-global-resilience-layer" class="md-skip">
           Skip to content
         </a>
       
@@ -2483,10 +2481,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#a-quick-look-at-whats-happening-under-the-hood" class="md-nav__link">
+  <a href="#background-ai-inference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        A Quick Look at What's Happening Under the Hood
+        Background: AI Inference
       
     </span>
   </a>
@@ -2494,10 +2492,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-you-actually-need-and-why" class="md-nav__link">
+  <a href="#the-problem" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What You Actually Need (And Why)
+        The Problem
       
     </span>
   </a>
@@ -2505,10 +2503,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installing-the-prerequisites" class="md-nav__link">
+  <a href="#why-we-built-the-demo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installing the Prerequisites
+        Why We Built the Demo
       
     </span>
   </a>
@@ -2516,10 +2514,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cloning-the-repo" class="md-nav__link">
+  <a href="#what-does-ai-inference-mean-in-k8gb-land" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cloning the Repo
+        What does AI inference mean in k8gb land?
       
     </span>
   </a>
@@ -2527,10 +2525,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-the-setup" class="md-nav__link">
+  <a href="#how-does-k8gb-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running the Setup
+        How does k8gb help?
       
     </span>
   </a>
@@ -2538,10 +2536,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verifying-the-setup" class="md-nav__link">
+  <a href="#the-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verifying the Setup
+        The Architecture
       
     </span>
   </a>
@@ -2549,10 +2547,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#trying-the-round-robin-demo" class="md-nav__link">
+  <a href="#the-walkthrough" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🎮 Trying the Round Robin Demo
+        The Walkthrough
       
     </span>
   </a>
@@ -2560,54 +2558,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#trying-the-failover-demo" class="md-nav__link">
+  <a href="#try-it-yourself" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Trying the Failover Demo
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleaning-up" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cleaning Up
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-things-i-learned" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        💡 Key Things I Learned
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#things-worth-knowing-before-you-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Things Worth Knowing Before You Start
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#whats-next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What's Next?
+        Try it Yourself
       
     </span>
   </a>
@@ -2643,16 +2597,16 @@
                 
                   <div class="md-profile md-post__profile">
                     <span class="md-author md-author--long">
-                      <img src="https://github.com/itsfarhan.png" alt="Farhan Ahmed">
+                      <img src="https://github.com/elohmrow.png" alt="Bradley Andersen">
                     </span>
                     <span class="md-profile__description">
                       <strong>
                         
-                          <a href="../../../../author/itsfarhan/">Farhan Ahmed</a>
+                          <a href="../../../../author/elohmrow/">Bradley Andersen</a>
                         
                       </strong>
                       <br>
-                      Contributor
+                      Community Manager and Maintainer
                     </span>
                   </div>
                 
@@ -2670,7 +2624,7 @@
                     <li class="md-nav__item">
                       <div class="md-nav__link">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 19H5V8h14m-3-7v2H8V1H6v2H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-1V1m-1 11h-5v5h5z"/></svg>
-                        <time datetime="2026-03-22 00:00:00+00:00" class="md-ellipsis">Sunday, March 22, 2026</time>
+                        <time datetime="2026-05-29 00:00:00+00:00" class="md-ellipsis">Friday, May 29, 2026</time>
                       </div>
                     </li>
                     
@@ -2681,7 +2635,7 @@
                           <span class="md-ellipsis">
                             in
                             
-                              <a href="../../../../category/tutorials/">Tutorials</a></span>
+                              <a href="../../../../category/technical-deep-dive/">Technical Deep Dive</a></span>
                         </div>
                       </li>
                     
@@ -2692,7 +2646,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10 10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67-.75 1.23L11 13V7z"/></svg>
                           <span class="md-ellipsis">
                             
-                              8 min read
+                              7 min read
                             
                           </span>
                         </div>
@@ -2716,7 +2670,7 @@
 
 
   
-    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/blog/posts/k8gb-local-setup-beginners-guide.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/blog/posts/ai-inference-needs-a-global-resilience-layer.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2724,239 +2678,180 @@
   
 
 
-<p><img alt="Blog Banner" src="../../../../blog-banners/k8gb-blog-1.png" /></p>
-<h1 id="a-beginner-friendly-guide-to-k8gb-local-setup">A Beginner-Friendly Guide to k8gb Local Setup<a class="headerlink" href="#a-beginner-friendly-guide-to-k8gb-local-setup" title="Permanent link">&para;</a></h1>
-<p>When I first started working with k8gb, the local setup took me a while to fully wrap my head around. And I'm a contributor to this project! So if you're new to k8gb and the local setup feels like a lot to take in, trust me — that's completely normal.</p>
-<p>The local setup simulates a real multi-cluster, multi-region environment on your laptop. That's genuinely powerful, but it also means there's more moving parts than a typical "run one cluster" tutorial. Once the mental model clicks, everything falls into place.</p>
-<p>So I decided to write the walkthrough I wish I had when I was getting started.</p>
+<h1 id="ai-inference-needs-a-global-resilience-layer">AI Inference Needs a Global Resilience Layer<a class="headerlink" href="#ai-inference-needs-a-global-resilience-layer" title="Permanent link">&para;</a></h1>
+<h2 id="background-ai-inference">Background: AI Inference<a class="headerlink" href="#background-ai-inference" title="Permanent link">&para;</a></h2>
+<p>First, some background. What is AI inference?</p>
+<p>When you ask ChatGPT "Can you explain [X] to me?", what happens? A server
+somewhere converts that question to tokens and passes them through some trained
+model. The model performs a lot of calculations, generating a response, token by
+token, until it has a complete answer, which it then somehow delivers to you.</p>
+<blockquote>
+<p>Note: we're <em>not</em> talking about training a model here; rather, about using an
+already-trained model.</p>
+</blockquote>
 <!-- more -->
 
-<h2 id="a-quick-look-at-whats-happening-under-the-hood">A Quick Look at What's Happening Under the Hood<a class="headerlink" href="#a-quick-look-at-whats-happening-under-the-hood" title="Permanent link">&para;</a></h2>
-<p>Before we get into the actual setup, let me explain what's actually happening. This context makes everything else click.</p>
-<p>When you run k8gb locally, you're spinning up <strong>three separate clusters</strong>:</p>
-<ul>
-<li><code>test-gslb1</code> — your first Kubernetes cluster (tagged as <code>eu</code> region)</li>
-<li><code>test-gslb2</code> — your second Kubernetes cluster (tagged as <code>us</code> region)</li>
-<li><code>edgedns</code> — a special cluster that runs a DNS server (BIND) acting as your "global" DNS</li>
-</ul>
-<p>You're simulating a real-world multi-region environment on your laptop. Once you see it that way, the whole setup starts to make sense.</p>
-<p>Here's the mental model:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Your Laptop
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── cluster: test-gslb1 (eu region) → runs k8gb + your app
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── cluster: test-gslb2 (us region) → runs k8gb + your app
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└── cluster: edgedns → runs BIND DNS server (the &quot;global&quot; DNS)
-</code></pre></div>
-<p>k8gb on each cluster talks to the edgedns cluster to register which cluster is healthy. When a client asks "where is <code>roundrobin.cloud.example.com</code>?", the DNS server returns IPs from healthy clusters only.</p>
-<p>That's the whole idea. Now let's set it up.</p>
-<h2 id="what-you-actually-need-and-why">What You Actually Need (And Why)<a class="headerlink" href="#what-you-actually-need-and-why" title="Permanent link">&para;</a></h2>
-<p>The setup requires a few tools. Here's what each one is for so you know what you're installing:</p>
-<p><strong>Required</strong> — you need these to run the local demo:</p>
-<table>
-<thead>
-<tr>
-<th>Tool</th>
-<th>Why You Need It</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>k3d</strong></td>
-<td>The tool that creates and manages your local k3s clusters</td>
-</tr>
-<tr>
-<td><strong>Docker</strong></td>
-<td>k3d creates Kubernetes clusters inside Docker containers</td>
-</tr>
-<tr>
-<td><strong>kubectl</strong></td>
-<td>To interact with your clusters (check pods, apply configs, etc.)</td>
-</tr>
-<tr>
-<td><strong>helm</strong></td>
-<td>To install k8gb and test apps onto the clusters</td>
-</tr>
-<tr>
-<td><strong>Git</strong></td>
-<td>To clone the repo</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Optional</strong> — only needed if you're doing development work:</p>
-<table>
-<thead>
-<tr>
-<th>Tool</th>
-<th>Why You Need It</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Go</strong></td>
-<td>To run the integration tests (terratest)</td>
-</tr>
-<tr>
-<td><strong>golangci-lint</strong></td>
-<td>To lint code when contributing</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>⚠️ <strong>Important</strong>: Docker needs at least <strong>8GB of memory</strong> allocated. Three clusters running simultaneously is memory-heavy. Check your Docker Desktop settings and bump it up if needed.</p>
-</blockquote>
-<h2 id="installing-the-prerequisites">Installing the Prerequisites<a class="headerlink" href="#installing-the-prerequisites" title="Permanent link">&para;</a></h2>
-<p><strong>Docker</strong> is the foundation so install it first before anything else.</p>
-<ul>
-<li>macOS / Windows: Download <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a></li>
-<li>Linux: Follow the <a href="https://docs.docker.com/engine/install/">official install guide</a> for your distro</li>
-</ul>
-<p>Once Docker is installed, the rest is straightforward.</p>
-<p>If you're on macOS:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Install k3d</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>brew<span class="w"> </span>install<span class="w"> </span>k3d
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Install kubectl</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>brew<span class="w"> </span>install<span class="w"> </span>kubectl
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Install helm</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>brew<span class="w"> </span>install<span class="w"> </span>helm
-</code></pre></div>
-<p>On Linux:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Install k3d</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-s<span class="w"> </span>https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Install kubectl</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>curl<span class="w"> </span>-LO<span class="w"> </span><span class="s2">&quot;https://dl.k8s.io/release/</span><span class="k">$(</span>curl<span class="w"> </span>-L<span class="w"> </span>-s<span class="w"> </span>https://dl.k8s.io/release/stable.txt<span class="k">)</span><span class="s2">/bin/linux/amd64/kubectl&quot;</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>chmod<span class="w"> </span>+x<span class="w"> </span>kubectl<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>mv<span class="w"> </span>kubectl<span class="w"> </span>/usr/local/bin/
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Install helm</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>curl<span class="w"> </span>https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
-</code></pre></div>
-<p>Verify everything is installed:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>--version
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>k3d<span class="w"> </span>version
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>kubectl<span class="w"> </span>version<span class="w"> </span>--client
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>helm<span class="w"> </span>version
-</code></pre></div>
-<h2 id="cloning-the-repo">Cloning the Repo<a class="headerlink" href="#cloning-the-repo" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/k8gb-io/k8gb.git
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>k8gb
-</code></pre></div>
-<h2 id="running-the-setup">Running the Setup<a class="headerlink" href="#running-the-setup" title="Permanent link">&para;</a></h2>
-<p>Now the magic command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>deploy-full-local-setup
-</code></pre></div>
-<p>This single command does a lot. Here's what's actually happening under the hood:</p>
+<h2 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
+<p>So what could go wrong with that process? </p>
+<p>Well, AI workloads are different from <code>normal</code> workloads.</p>
+<p>In AI workloads, <em>state</em> and <em>locality</em> matter. Think: model version, context,
+etc. We need to route your question to a specific place, not just any healthy 
+endpoint. This may not always be the <em>nearest</em> place, so we can bump up against 
+latency tradeoffs.</p>
+<p>AI workloads are <em>heavy</em> and <em>expensive</em>. GPU is bound, capacity is limited / uneven 
+at different locations. Where GPUs are available and what they cost at those
+different locations, and what models are available, per location, matters.</p>
+<p>AI workload <em>requests take longer</em>: we're simply doing more complicated work.</p>
+<h2 id="why-we-built-the-demo">Why We Built the Demo<a class="headerlink" href="#why-we-built-the-demo" title="Permanent link">&para;</a></h2>
+<p>If all fallback logic lives inside one region, that logic cannot save you because 
+the entrypoint itself is unhealthy.</p>
+<p>Since clusters don't coordinate globally, GPU capacity is uneven, gateways 
+fail, cloud regions degrade, provider quotas and rate limits happen, etc.</p>
+<p>Because existing gateways solve regional concerns, not global resilience
+(local retry logic cannot recover from regional failure), we've been exploring 
+patterns for globally resilient AI inference on Kubernetes, and built a demo. It 
+shows how DNS-based global failover can complement existing regional inference 
+gateways and model-serving stacks.</p>
+<h2 id="what-does-ai-inference-mean-in-k8gb-land">What does AI inference mean in k8gb land?<a class="headerlink" href="#what-does-ai-inference-mean-in-k8gb-land" title="Permanent link">&para;</a></h2>
+<p>k8gb normally pushes traffic toward anything healthy, or the closest thing,
+depending on your chosen <a href="https://www.k8gb.io/latest/strategy/">LB strategy</a>. </p>
+<p>k8gb doesn't know what "AI" is. k8gb has no idea what traffic it is routing.
+k8gb simply returns the IP of the "best" cluster for this request. </p>
+<p>Unlike traditional stateless applications, the ‘nearest healthy endpoint’ is not 
+always the correct choice for inference traffic. I.e., we may have to choose a different strategy.</p>
+<p>So serving AI inference requests is different. AI inference in k8gb land means: 
+instead of "send traffic to any healthy region", "send this specific request to 
+the best region for <em>this model</em>, <em>this user</em>, and <em>current capacity</em>."</p>
+<h2 id="how-does-k8gb-help">How does k8gb help?<a class="headerlink" href="#how-does-k8gb-help" title="Permanent link">&para;</a></h2>
+<p>k8gb is: DNS-based GSLB. </p>
+<p>k8gb is <em>not</em>: another AI gateway, inference server, or service mesh.</p>
+<p>And k8gb is not an in-path proxy and does not replace Envoy, Istio, KServe, or vLLM.</p>
+<p>k8gb <em>is</em> a router of routers. It is a global layer above regional systems.</p>
+<p>k8gb gives the inference endpoint a global failure boundary. Clients keep using 
+one stable hostname. This matters operationally because clients, SDKs, and gateways 
+no longer need bespoke regional failover logic. k8gb checks the Kubernetes-backed 
+regional endpoints and stops returning a failed region when the referenced service 
+has no healthy backend. Traffic moves to a healthy cluster, region, or provider-backed 
+endpoint without every client SDK implementing its own regional failover logic.
+The application still sees one endpoint, while k8gb absorbs the regional failure 
+underneath it.</p>
+<p>So ... use Envoy when you want to know "which model" to choose, and use k8gb
+when you want to know "which cluster" to choose.</p>
+<h2 id="the-architecture">The Architecture<a class="headerlink" href="#the-architecture" title="Permanent link">&para;</a></h2>
+<p>The key: this is composed from existing Kubernetes primitives.</p>
+<p>No core architecture changes were added to k8gb to support this. The demo intentionally 
+treats inference backends as interchangeable Kubernetes-backed services. It leverages
+only existing features, proving once again that k8gb is backend-agnostic. This
+"new" resilience functionality works OOTB using standard k8gb capabilities. </p>
+<p><img alt="" src="../../../../ai-inf-arch.png" /></p>
+<h2 id="the-walkthrough">The Walkthrough<a class="headerlink" href="#the-walkthrough" title="Permanent link">&para;</a></h2>
+<p>What does the demo do?</p>
+<p>It runs real local inference. It deploys Ollama on each cluster, pulls a small
+model, creates a region-specific OpenAI-compat model, and probes the same global
+hostname during failover and failback.</p>
+<p>Let's do it!</p>
 <ol>
-<li>Creates 3 k3d clusters (test-gslb1, test-gslb2, edgedns)</li>
-<li>Installs BIND DNS server on the edgedns cluster</li>
-<li>Installs k8gb on both test clusters using Helm</li>
-<li>Deploys a test app called <a href="https://github.com/stefanprodan/podinfo">podinfo</a> on both clusters</li>
-<li>Creates GSLB resources (round-robin and failover) on both clusters</li>
-<li>Configures DNS delegation so edgedns knows about both clusters</li>
+<li>Deploy the local (k3d) setup: <code>K8GB_LOCAL_VERSION=test make deploy-full-local-setup</code></li>
+<li>Run the AI inference failover demo: <code>make ai-inference-demo</code> ... this deploys
+   the ep to two clusters, probes the hostname, scales the primary ep down,
+   waits for failover to the secondary, restores the primary, and waits for
+   fallback.</li>
 </ol>
-<p>This takes a few minutes. Grab a coffee. ☕</p>
-<p>When it's done, you'll see output confirming everything is up.</p>
-<h2 id="verifying-the-setup">Verifying the Setup<a class="headerlink" href="#verifying-the-setup" title="Permanent link">&para;</a></h2>
-<p>First, check that all three clusters are running:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-edgedns<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb2
+<p>Here's some output - but you can check <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md#what-gets-deployed">what gets deployed</a> and other <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md#useful-actions">useful actions</a> you can take: </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Deploying AI inference demo to k3d-test-gslb1 region=eu backend=kubernetes
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>...
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>gslb.k8gb.io/ai-inference-demo created
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>...
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Waiting for deployment &quot;ai-inference-demo&quot; rollout to finish: 0 of 1 updated replicas are available...
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>deployment &quot;ai-inference-demo&quot; successfully rolled out
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Waiting for Gslb status in k3d-test-gslb1
 </code></pre></div>
-<p>You should see connection info for all three. If any of them fail, something went wrong during setup.</p>
-<p>Now let's verify that DNS is actually working. This is the key test — we're asking the edgedns cluster's DNS server directly what IPs it knows about:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dig<span class="w"> </span>@localhost<span class="w"> </span>-p<span class="w"> </span><span class="m">1053</span><span class="w"> </span>roundrobin.cloud.example.com<span class="w"> </span>+short<span class="w"> </span>+tcp
+<p>OK, good. The <code>EU</code> cluster is up. </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Deploying AI inference demo to k3d-test-gslb2 region=us backend=provider-fallback
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>...
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>gslb.k8gb.io/ai-inference-demo created
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>...
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Waiting for deployment &quot;ai-inference-demo&quot; rollout to finish: 0 of 1 updated replicas are available...
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>deployment &quot;ai-inference-demo&quot; successfully rolled out
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>...
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>Waiting for Gslb status in k3d-test-gslb2
 </code></pre></div>
-<p>What each part does:
-- <code>@localhost -p 1053</code> — ask the edgedns DNS server, which is exposed on port 1053 locally
-- <code>roundrobin.cloud.example.com</code> — the hostname k8gb is managing
-- <code>+short</code> — show just the IP addresses
-- <code>+tcp</code> — use TCP instead of UDP</p>
-<p>You should see <strong>4 IP addresses</strong> — 2 from each cluster:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>172.20.0.2
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>172.20.0.5
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>172.20.0.4
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>172.20.0.6
+<p>And now so is the <code>US</code> cluster. Let's test it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>AI inference demo deployed. Probe host: http://ai-inference.cloud.example.com/v1/chat/completions
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>k3d-test-gslb1
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>deployment.apps/ai-inference-demo   1/1     1            1           48s
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>NAME                                    READY   STATUS    RESTARTS   AGE
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>pod/ai-inference-demo-695956cbc-pt7rm   1/1     Running   0          48s
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>NAME                        TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>service/ai-inference-demo   ClusterIP   10.43.224.46   &lt;none&gt;        80/TCP    48s
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>NAME                                          CLASS   HOSTS                            ADDRESS                 PORTS   AGE
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>ingress.networking.k8s.io/ai-inference-demo   nginx   ai-inference.cloud.example.com   172.19.0.6,172.19.0.7   80      48s
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>NAME                             STRATEGY   GEOTAG
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>gslb.k8gb.io/ai-inference-demo   failover   eu
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>NAME                                             STATUS   VOLUME                        CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>persistentvolumeclaim/ai-inference-demo-ollama   Bound    ai-inference-demo-ollama-eu   2Gi        RWO                           &lt;unset&gt;                 48s
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>k3d-test-gslb2
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>deployment.apps/ai-inference-demo   1/1     1            1           24s
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>NAME                                    READY   STATUS    RESTARTS   AGE
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>pod/ai-inference-demo-87948f567-x9mt8   1/1     Running   0          23s
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>NAME                        TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>service/ai-inference-demo   ClusterIP   10.43.159.51   &lt;none&gt;        80/TCP    23s
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>NAME                                          CLASS   HOSTS                            ADDRESS                   PORTS   AGE
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>ingress.networking.k8s.io/ai-inference-demo   nginx   ai-inference.cloud.example.com   172.19.0.11,172.19.0.12   80      23s
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>NAME                             STRATEGY   GEOTAG
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>gslb.k8gb.io/ai-inference-demo   failover   us
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>NAME                                             STATUS   VOLUME                        CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>persistentvolumeclaim/ai-inference-demo-ollama   Bound    ai-inference-demo-ollama-us   2Gi        RWO                           &lt;unset&gt;                 24s
 </code></pre></div>
-<p>If you see 4 IPs, k8gb is working. Both clusters are healthy and their IPs are being returned in the DNS response.</p>
-<p>You can also verify the IPs match the actual cluster nodes:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">for</span><span class="w"> </span>c<span class="w"> </span><span class="k">in</span><span class="w"> </span>k3d-test-gslb<span class="o">{</span><span class="m">1</span>,2<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>kubectl<span class="w"> </span>get<span class="w"> </span>no<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span>-ocustom-columns<span class="o">=</span><span class="s2">&quot;NAME:.metadata.name,IP:status.addresses[0].address&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span>--context<span class="w"> </span><span class="nv">$c</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">done</span>
+<p>Looks good. Now simulate the failover. I've left the timestamps in this one for illustrative purposes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>[11:07:19] Primary endpoint is down.
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>[11:07:19] Waiting for failover convergence with up to 20 probes
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>[11:07:20] Expecting ai-inference.cloud.example.com to route to ingress IPs: 172.19.0.11 172.19.0.12
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>[11:07:20] Probing ai-inference.cloud.example.com through k8gb CoreDNS 10.43.40.74 in k3d-test-gslb1
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>Attempt 1/20
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>http_code=503 remote_ip=172.19.0.6
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>&lt;html&gt;
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>&lt;head&gt;&lt;title&gt;503 Service Temporarily Unavailable&lt;/title&gt;&lt;/head&gt;
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>&lt;body&gt;
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>&lt;center&gt;&lt;h1&gt;503 Service Temporarily Unavailable&lt;/h1&gt;&lt;/center&gt;
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>&lt;/body&gt;
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>&lt;/html&gt;
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>route_status=waiting_for_expected_remote_ip expected=&quot;172.19.0.11 172.19.0.12&quot;
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>...
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>Attempt 5/20
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>http_code=200 remote_ip=172.19.0.11
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>content=us, provider-fallback, k8gb.
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>[11:07:54] Scaling ai-inference-demo in primary context k3d-test-gslb1 to 1 replicas
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>deployment.apps/ai-inference-demo scaled
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>Waiting for deployment &quot;ai-inference-demo&quot; rollout to finish: 0 out of 1 new replicas have been updated...
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>Waiting for deployment &quot;ai-inference-demo&quot; rollout to finish: 0 of 1 updated replicas are available...
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>deployment &quot;ai-inference-demo&quot; successfully rolled out
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>[11:08:07] Primary endpoint restored.
 </code></pre></div>
-<h2 id="trying-the-round-robin-demo">🎮 Trying the Round Robin Demo<a class="headerlink" href="#trying-the-round-robin-demo" title="Permanent link">&para;</a></h2>
-<p>Both clusters have podinfo installed. Each cluster is tagged with a region — one returns <code>eu</code>, the other returns <code>us</code> in its response. This makes it easy to see which cluster is serving your request.</p>
-<p>Run this a few times:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>make<span class="w"> </span>test-round-robin
-</code></pre></div>
-<p>You should see the <code>message</code> field alternating between <code>eu</code> and <code>us</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;frontend-podinfo-856bb46677-8p45m&quot;</span><span class="p">,</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eu&quot;</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="p">}</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;frontend-podinfo-856bb46677-8p45m&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us&quot;</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">}</span>
-</code></pre></div>
-<p>That's round-robin load balancing working across two clusters. Each DNS response picks a different cluster's IP.</p>
-<h2 id="trying-the-failover-demo">Trying the Failover Demo<a class="headerlink" href="#trying-the-failover-demo" title="Permanent link">&para;</a></h2>
-<p>Failover is where k8gb really shines. Let's see it in action.</p>
-<p>First, switch to failover mode:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>make<span class="w"> </span>init-failover
-</code></pre></div>
-<p>Now test it — you should only see <code>eu</code> responding (it's the primary):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>make<span class="w"> </span>test-failover
-</code></pre></div>
-<p>Now simulate a failure by stopping the app on the primary cluster:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>make<span class="w"> </span>stop-test-app
-</code></pre></div>
-<p>Wait about 30 seconds (that's the DNS TTL), then test again:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>make<span class="w"> </span>test-failover
-</code></pre></div>
-<p>Now you should see only <code>us</code> responding! k8gb detected that the primary cluster's pods are unhealthy and automatically removed it from DNS. Traffic failed over to the secondary cluster.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;frontend-podinfo-856bb46677-v5nll&quot;</span><span class="p">,</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us&quot;</span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="p">}</span>
-</code></pre></div>
-<p>Bring the primary back:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>make<span class="w"> </span>start-test-app
-</code></pre></div>
-<p>After another ~30 seconds, <code>eu</code> will be back in the DNS rotation.</p>
-<blockquote>
-<p>💡 <strong>Why 30 seconds?</strong> That's the DNS TTL (Time To Live). DNS records are cached for 30 seconds, so changes take up to 30 seconds to propagate. This is configurable in the GSLB resource via <code>dnsTtlSeconds</code>.</p>
-</blockquote>
-<h2 id="cleaning-up">Cleaning Up<a class="headerlink" href="#cleaning-up" title="Permanent link">&para;</a></h2>
-<p>When you're done experimenting:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>make<span class="w"> </span>destroy-full-local-setup
-</code></pre></div>
-<p>This removes all three clusters and cleans everything up.</p>
-<h2 id="key-things-i-learned">💡 Key Things I Learned<a class="headerlink" href="#key-things-i-learned" title="Permanent link">&para;</a></h2>
+<p>That took about 48 seconds total to failover. Pretty good for a pure DNS-based
+solution without any <code>spec.strategy.dnsTtlSeconds</code> fiddling. </p>
+<h2 id="try-it-yourself">Try it Yourself<a class="headerlink" href="#try-it-yourself" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Three clusters, not one</strong> — always remember you're running a full multi-cluster simulation locally</li>
-<li><strong>edgedns is the brain</strong> — it's the DNS server that knows about all clusters and their health</li>
-<li><strong>DNS TTL matters</strong> — changes don't happen instantly, there's always a propagation delay</li>
-<li><strong>Ports to remember</strong>: edgedns answers on <code>:1053</code>, test-gslb1 CoreDNS on <code>:5053</code>, test-gslb2 on <code>:5054</code></li>
-<li><strong>The Makefile is your friend</strong> — run <code>make help</code> to see all available targets</li>
+<li><a href="https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md">AI Inference Resilience Demo</a></li>
 </ul>
-<h2 id="things-worth-knowing-before-you-start">Things Worth Knowing Before You Start<a class="headerlink" href="#things-worth-knowing-before-you-start" title="Permanent link">&para;</a></h2>
-<p>The three-cluster architecture is the key mental model — once you see that <code>test-gslb1</code>, <code>test-gslb2</code>, and <code>edgedns</code> are three distinct clusters with distinct roles, everything else makes sense.</p>
-<p>One thing worth noting on the failover demo: after stopping the app, wait about 30 seconds before testing. That's the DNS TTL doing its job — records are cached intentionally, and the TTL is configurable via <code>dnsTtlSeconds</code> in the GSLB resource.</p>
-<h2 id="whats-next">What's Next?<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h2>
-<p>Now that you have k8gb running locally, here's what I'd suggest exploring next:</p>
-<ul>
-<li>Look at the actual GSLB resource files in <code>deploy/gslb/</code> to understand the configuration</li>
-<li>Try the <a href="../../../../../local-kuar/">Kuar app demo</a> for a visual way to see DNS resolution in action</li>
-<li>Read about the different <a href="../../../../../strategy/">load balancing strategies</a> — round-robin, failover, weighted, and GeoIP</li>
-<li>Check out the <a href="../../../../../metrics/">metrics</a> docs and run <code>make deploy-prometheus</code> to see k8gb's Prometheus metrics</li>
-</ul>
-<p>The local setup is the best way to understand how k8gb works before deploying it to a real cluster. Play around with it, break things, and see how k8gb responds!</p>
-<hr />
-<p>If you have questions or get stuck, join us on <a href="https://cloud-native.slack.com/archives/C021P656HGB">#k8gb on CNCF Slack</a>. The community is friendly and happy to help.</p>
-<p>Happy load balancing! 🚀</p>
 
 
 
@@ -2979,7 +2874,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 15, 2026 08:20:33 UTC">April 15, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 29, 2026 05:33:21 UTC">May 29, 2026</span>
   </span>
 
     
@@ -2989,7 +2884,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 15, 2026 08:01:56 UTC">April 15, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 28, 2026 23:28:55 UTC">May 28, 2026</span>
   </span>
 
     
