@@ -89,23 +89,6 @@ func (r *CoreDNSReconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl
 			return result.RequeueError(err)
 		}
 		r.Logger.Info().Str("name", zoneDelegation.Name).Msg("ZoneDelegation saved")
-
-		detail, err := zones.NewZoneDelegationWrapper(&zoneDelegation, r.Config, r.IPResolver).GetDetail(ctx)
-		if err != nil {
-			r.Logger.Err(err).Msg("Error getting zone delegation data")
-			return result.RequeueError(err)
-		}
-
-		// Create zoneDelegation in edge DNS
-		r.Logger.Info().
-			Str("NS record", detail.GetExternalDNSEndpointName()).
-			Str("ZoneDelegation", zoneDelegation.Name).
-			Str("Provider", r.DNSProvider.String()).
-			Msg("Calling DNS provider")
-		err = r.DNSProvider.CreateZoneDelegation(detail)
-		if err != nil {
-			r.Logger.Err(err).Msg("Error creating zone delegation")
-		}
 	}
 
 	r.Logger.Info().Msg("Finished Reconciling CoreDNS delegation")
