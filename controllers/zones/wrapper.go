@@ -103,6 +103,26 @@ func (d *ExtendedZoneDelegation) GetNSServerList() []string {
 	return list
 }
 
+// GetActiveNSServerList returns only NS servers that are currently present
+// in the ZoneDelegation status and considered active/reachable.
+func (d *ExtendedZoneDelegation) GetActiveNSServerList() []string {
+	zoneList := map[string]bool{}
+	fullList := d.GetNSServerList()
+	var result []string
+	if len(d.wrapper.zoneDelegation.Status.DNSServers) == 0 {
+		return result
+	}
+	for _, glueA := range d.wrapper.zoneDelegation.Status.DNSServers {
+		zoneList[glueA.Name] = true
+	}
+	for _, ns := range fullList {
+		if _, found := zoneList[ns]; found {
+			result = append(result, ns)
+		}
+	}
+	return result
+}
+
 // GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
 func (d *ExtendedZoneDelegation) GetExternalDNSEndpointName() string {
 	var suffix = strings.Trim(strings.ReplaceAll(d.LoadBalancedZone, ".", "-"), " ")

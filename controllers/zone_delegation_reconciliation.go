@@ -101,6 +101,13 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error getting extended zone delegation")
 		return result.RequeueError(err)
 	}
+
+	// Create/Update zoneDelegation in edge DNS
+	r.Logger.Info().
+		Str("NS record", exZD.GetExternalDNSEndpointName()).
+		Str("ZoneDelegation", zone.Name).
+		Str("Provider", r.DNSProvider.String()).
+		Msg("Calling DNS provider")
 	err = r.DNSProvider.CreateZoneDelegation(exZD)
 	if err != nil {
 		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error creating zone delegation")
