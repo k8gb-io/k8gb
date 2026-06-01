@@ -89,7 +89,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 					DNSName:    d.extendedZoneDelegation.LoadBalancedZone,
 					RecordTTL:  ttl,
 					RecordType: "NS",
-					Targets:    d.extendedZoneDelegation.GetNSServerList(),
+					Targets:    d.extendedZoneDelegation.GetActiveNSServerList(),
 				},
 				{
 					DNSName:    d.extendedZoneDelegation.ClusterNSName,

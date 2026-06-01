@@ -27,7 +27,11 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/zones"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	externaldnsApi "sigs.k8s.io/external-dns/apis/v1alpha1"
+	externaldns "sigs.k8s.io/external-dns/endpoint"
 )
 
 const externalDNSTypeCommon = "extdns"
@@ -66,13 +70,80 @@ func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneD
 	return nil
 }
 
-func (p *ExternalDNSProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, finalize bool) error {
-	if !finalize {
-		log.Info().Msgf("Domain %s will be deleted by removing delegation DNSEndpoint %s", zoneInfo.LoadBalancedZone, zoneInfo.GetExternalDNSEndpointName())
+func (p *ExternalDNSProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, finalizeZone bool) *FinalizationResult {
+	if finalizeZone {
+		// finalize LoadBalancedZone ( + GluA, SOA and NS records)
+		log.Info().Msgf("Removing delegated zone %s from edge DNS", zoneInfo.LoadBalancedZone)
+		err := p.deleteZoneDelegated(p.context, zoneInfo)
+		return NewFinalization(err)
 	}
-	return nil
+
+	// finalize GlueA record only
+	log.Info().Msgf("Removing Glue A %s records for delegated zone %s", zoneInfo.ClusterNSName, zoneInfo.LoadBalancedZone)
+	err := p.removeGlueAFromDelegatedZone(p.context, zoneInfo)
+	return NewDelayedFinalization(err)
 }
 
 func (p *ExternalDNSProvider) String() string {
 	return strings.ToUpper(externalDNSTypeCommon)
+}
+
+func (p *ExternalDNSProvider) deleteZoneDelegated(ctx context.Context, zone *zones.ExtendedZoneDelegation) error {
+	delegationDNSEndpoint := &externaldnsApi.DNSEndpoint{}
+	selector := types.NamespacedName{Name: zone.GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
+	if err := p.client.Get(ctx, selector, delegationDNSEndpoint); err != nil {
+		return err
+	}
+	return p.client.Delete(ctx, delegationDNSEndpoint)
+}
+
+func (p *ExternalDNSProvider) removeGlueAFromDelegatedZone(ctx context.Context, zone *zones.ExtendedZoneDelegation) error {
+
+	delegationDNSEndpoint := &externaldnsApi.DNSEndpoint{}
+	selector := types.NamespacedName{Name: zone.GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
+	if err := p.client.Get(ctx, selector, delegationDNSEndpoint); err != nil {
+		return err
+	}
+
+	_, err := controllerutil.CreateOrPatch(ctx, p.client, delegationDNSEndpoint, func() error {
+		delegatedZone := zone.LoadBalancedZone
+		glueAName := zone.ClusterNSName
+
+		endpoints := make([]*externaldns.Endpoint, 0, len(delegationDNSEndpoint.Spec.Endpoints))
+
+		for _, ep := range delegationDNSEndpoint.Spec.Endpoints {
+			if ep == nil {
+				continue
+			}
+
+			// Remove Glue A record for the deleted cluster.
+			if ep.DNSName == glueAName && ep.RecordType == "A" {
+				continue
+			}
+
+			// Remove matching NS target from delegated zone.
+			if ep.DNSName == delegatedZone && ep.RecordType == "NS" {
+				var newTargetList []string
+				for _, target := range ep.Targets {
+					if target == glueAName {
+						continue
+					}
+					newTargetList = append(newTargetList, target)
+				}
+				ep.Targets = newTargetList
+
+				if len(newTargetList) == 0 {
+					continue
+				}
+			}
+
+			endpoints = append(endpoints, ep)
+		}
+
+		delegationDNSEndpoint.Spec.Endpoints = endpoints
+
+		return nil
+
+	})
+	return err
 }

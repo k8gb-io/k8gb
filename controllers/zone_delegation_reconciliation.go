@@ -56,6 +56,9 @@ const zoneDelegationFinalizer = "k8gb.io/finalizer"
 func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	r.Logger.Info().
+		Str("name", req.Name).
+		Msg("Reconciling ZoneDelegation")
 	if !r.ZoneService.HasAvailableIPs(ctx) {
 		r.Logger.Info().
 			Str("name", req.Name).
@@ -82,12 +85,18 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return result.RequeueError(err)
 	}
 
-	if zone.DeletionTimestamp != nil {
+	err = r.ZoneService.UpdateCoreDNSConfiguration(ctx, zone)
+	if err != nil {
+		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
+		return result.RequeueError(err)
+	}
+
+	if zone.IsInDeletion() {
 		err := r.finalize(ctx, zone)
 		if err != nil {
 			return result.RequeueError(err)
 		}
-		return result.Stop()
+		return result.Requeue()
 	}
 
 	err = r.ZoneService.UpdateStatus(ctx, zone)
@@ -101,6 +110,13 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error getting extended zone delegation")
 		return result.RequeueError(err)
 	}
+
+	// Create/Update zoneDelegation in edge DNS
+	r.Logger.Info().
+		Str("NS record", exZD.GetExternalDNSEndpointName()).
+		Str("ZoneDelegation", zone.Name).
+		Str("Provider", r.DNSProvider.String()).
+		Msg("Calling DNS provider")
 	err = r.DNSProvider.CreateZoneDelegation(exZD)
 	if err != nil {
 		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error creating zone delegation")
@@ -120,9 +136,12 @@ func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1.Z
 			return err
 		}
 		removeZone := zoneDetail.IsLastZoneDelegationResource()
-		err = r.DNSProvider.Finalize(zoneDetail, removeZone)
-		if err != nil {
-			return err
+		finalizationResult := r.DNSProvider.Finalize(zoneDetail, removeZone)
+		if finalizationResult.HasError() {
+			return finalizationResult.Error()
+		}
+		if finalizationResult.PostponeFinalization() {
+			return r.ZoneService.UpdateStatus(ctx, zone)
 		}
 	}
 	return r.removeFinalizer(ctx, zone)

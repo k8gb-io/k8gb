@@ -1,0 +1,18 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation-coredns-entry
+spec:
+  try:
+  - script:
+      env:
+        - name: EXPECTED_HOSTS
+          value: (join(' ', $zoneDelegationHosts))
+      content: |
+        kubectl get cm k8gb-zone-delegation -n k8gb -o json | jq -e --arg hosts "$EXPECTED_HOSTS" '
+          ($hosts | split(" ")) as $expectedHosts |
+          (.data | length == ($expectedHosts | length)) and
+          all(.data[]; . as $value |
+            any($expectedHosts[]; $value == (. + ":5353 {\n  import k8gbplugins\n}\n"))
+          )
+        '
