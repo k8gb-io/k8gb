@@ -39,8 +39,8 @@ func (p *EmptyDNSProvider) CreateZoneDelegation(_ *zones.ExtendedZoneDelegation)
 	return nil
 }
 
-func (p *EmptyDNSProvider) Finalize(_ *zones.ExtendedZoneDelegation, _ bool) (err error) {
-	return nil
+func (p *EmptyDNSProvider) Finalize(_ *zones.ExtendedZoneDelegation, _ bool) *FinalizationResult {
+	return NewFinalization(nil)
 }
 
 func (p *EmptyDNSProvider) String() string {

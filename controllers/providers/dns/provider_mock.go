@@ -72,10 +72,10 @@ func (mr *MockProviderMockRecorder) CreateZoneDelegation(arg0 any) *gomock.Call 
 }
 
 // Finalize mocks base method.
-func (m *MockProvider) Finalize(arg0 *zones.ExtendedZoneDelegation, arg1 bool) error {
+func (m *MockProvider) Finalize(arg0 *zones.ExtendedZoneDelegation, arg1 bool) *FinalizationResult {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Finalize", arg0, arg1)
-	ret0, _ := ret[0].(error)
+	ret0, _ := ret[0].(*FinalizationResult)
 	return ret0
 }
 

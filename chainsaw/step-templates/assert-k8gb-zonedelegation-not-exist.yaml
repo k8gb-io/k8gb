@@ -1,0 +1,31 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation-not-exists
+spec:
+  try:
+    - script:
+        env:
+          - name: ZONE_DELEGATION_NAME
+            value: ($zoneDelegationName)
+        content: |
+          set -eu pipefail
+
+          if ! kubectl get zonedelegation "$ZONE_DELEGATION_NAME" >/dev/null 2>&1; then
+            echo "ZoneDelegation does not exist: $ZONE_DELEGATION_NAME"
+            exit 0
+          fi
+
+          echo "Waiting for ZoneDelegation to be deleted: $ZONE_DELEGATION_NAME"
+
+          if ! kubectl wait \
+            --for=delete \
+            zonedelegation/"$ZONE_DELEGATION_NAME" \
+            --timeout=60s; then
+
+            echo "ZoneDelegation still exists after timeout: $ZONE_DELEGATION_NAME"
+            kubectl get zonedelegation "$ZONE_DELEGATION_NAME" -oyaml || true
+            exit 1
+          fi
+
+          echo "ZoneDelegation does not exist: $ZONE_DELEGATION_NAME"

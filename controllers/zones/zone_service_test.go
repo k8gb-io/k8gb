@@ -270,7 +270,7 @@ func TestUpdateStatus(t *testing.T) {
 				assert.True(t, equalDNSServers(test.expectedStatus, zd.Status.DNSServers))
 				return nil
 			}).AnyTimes()
-			err := NewZoneDelegationImpl(cl, nil, test.config, ips).UpdateStatus(context.TODO(), test.zoneDelegation)
+			_, err := NewZoneDelegationImpl(cl, nil, test.config, ips).UpdateStatus(context.TODO(), test.zoneDelegation)
 			if test.expectedError {
 				assert.Error(t, err)
 				return
