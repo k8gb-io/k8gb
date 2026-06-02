@@ -30,10 +30,13 @@ spec:
           kind: ZoneDelegation
           metadata:
             name: ($zoneFile)
+            finalizers:
+              - k8gb.io/finalizer
           spec:
             dnsZoneNegTTL: 10
             loadBalancedZone: ($loadBalancedZone)
             parentZone: ($parentZone)
+            doFinalize: ($doFinalize)
           status:
             dnsServers:
             - name: gslb-ns-eu-cloud.example.com

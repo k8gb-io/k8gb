@@ -11,6 +11,8 @@ spec:
       value: cloud-example-com.conf
     - name: parentZone
       value: example.com
+    - name: doFinalize
+      value: false
   steps:
   - name: Verify k8gb-ns-extdns-cloud-example-com on EU
     description: Verify k8gb-ns-extdns-cloud-example-com delegation zone endpoint
