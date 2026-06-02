@@ -30,10 +30,12 @@ spec:
         ACTUAL_A_RECORD=$(kubectl get dnsendpoint k8gb-ns-extdns-cloud-example-com -n k8gb -o json | jq -r '.spec.endpoints[1].recordType')
         ACTUAL_GLUE_NAME=$(kubectl get dnsendpoint k8gb-ns-extdns-cloud-example-com -n k8gb -o json | jq -r '.spec.endpoints[1].dnsName')
         ACTUAL_GLUE_TARGETS=$(kubectl get dnsendpoint k8gb-ns-extdns-cloud-example-com -n k8gb -o json | jq -r '.spec.endpoints[1].targets | join(",")')
-        
+        ACTUAL_LABEL=$(kubectl get dnsendpoint k8gb-ns-extdns-cloud-example-com  -n k8gb  -o json | jq -r '.metadata.labels["k8gb.io/dnstype"]')
+  
         [ "$EXPECTED_NS_RECORD" = "$ACTUAL_NS_RECORD" ] || { echo "expected NS record should be '$EXPECTED_NS_RECORD' but is $ACTUAL_NS_RECORD"; exit 1; }
         [ "$EXPECTED_DNS_NAME" = "$ACTUAL_DNS_NAME" ] || { echo "expected NS domain should be '$EXPECTED_DNS_NAME' but is '$ACTUAL_DNS_NAME'"; exit 1; }
         [ "$EXPECTED_TARGETS" = "$ACTUAL_TARGETS" ] || { echo "expected NS targets should be '$EXPECTED_TARGETS' but is '$ACTUAL_TARGETS'"; exit 1; }
         [ "$EXPECTED_A_RECORD" = "$ACTUAL_A_RECORD" ] || { echo "expected GLUE target type should be '$EXPECTED_A_RECORD' but is '$ACTUAL_A_RECORD'"; exit 1; }
         [ "$EXPECTED_GLUE_NAME" = "$ACTUAL_GLUE_NAME" ] || { echo "expected GLUE record should be '$EXPECTED_GLUE_NAME' but is '$ACTUAL_GLUE_NAME'"; exit 1; }
         [ "$EXPECTED_GLUE_TARGETS" = "$ACTUAL_GLUE_TARGETS" ] || { echo "expected GLUE targets should be '$EXPECTED_GLUE_TARGETS' but are '$ACTUAL_GLUE_TARGETS'"; exit 1; }
+        [ "$ACTUAL_LABEL" = "extdns" ] || { echo "expected k8gb.io/dnstype=extdns but got '$ACTUAL_LABEL'"; exit 1; }
