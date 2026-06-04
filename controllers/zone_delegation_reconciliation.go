@@ -114,6 +114,12 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return result.RequeueError(err)
 	}
 
+	err = r.ZoneService.UpdateCoreDNSConfiguration(ctx, zone)
+	if err != nil {
+		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
+		return result.RequeueError(err)
+	}
+
 	r.Logger.Info().
 		Str("Name", zone.Name).
 		Msg("Finished Reconciling zone delegation")
