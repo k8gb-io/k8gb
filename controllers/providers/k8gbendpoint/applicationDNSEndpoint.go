@@ -95,13 +95,16 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 		if !zoneDelegationList.ContainsZone(host) {
 			return nil, fmt.Errorf("ingress host %s does not match delegated zone %v", host, zoneDelegationList.ListZones())
 		}
+		localTargetsHost, err := getLocalTargetsHost(host)
+		if err != nil {
+			return nil, fmt.Errorf("invalid internal localtargets record for host %s: %w", host, err)
+		}
 
 		isPrimary := d.gslb.Spec.Strategy.PrimaryGeoTag == d.config.ClusterGeoTag
 		isHealthy := health == k8gbv1beta1io.Healthy
 
 		if isHealthy {
 			finalTargets.Append(d.config.ClusterGeoTag, localTargets)
-			localTargetsHost := fmt.Sprintf("localtargets-%s", host)
 			dnsRecord := &externaldns.Endpoint{
 				RecordType: "A",
 				Targets:    localTargets,
@@ -212,7 +215,14 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 			Str("cluster", nsName).
 			Msg("Adding external Gslb targets from cluster")
 		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, authServer.IP)
-		lHost := fmt.Sprintf("localtargets-%s", host)
+		lHost, err := getLocalTargetsHost(host)
+		if err != nil {
+			d.logger.Warn().
+				Str("host", host).
+				Err(err).
+				Msg("Skipping external localtargets lookup because the derived DNS name is invalid")
+			return targets
+		}
 		dnsResult := d.queryService.Query(lHost, nameServersToUse)
 		if dnsResult.Err != nil {
 			d.logger.Warn().
