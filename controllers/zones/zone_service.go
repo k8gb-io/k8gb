@@ -101,7 +101,7 @@ func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegatio
 
 	// Only update CoreDNS if something actually changed
 	if op != controllerutil.OperationResultNone {
-		if err := z.updateCoreDNSConfiguration(ctx, *current); err != nil {
+		if err := z.UpdateCoreDNSConfiguration(ctx, current); err != nil {
 			return fmt.Errorf("error updating CoreDNS configuration: %w", err)
 		}
 	}
@@ -288,32 +288,45 @@ func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1b
 	return NewZoneDelegationWrapper(zd, z.config, z.ipresolver).GetDetail(ctx)
 }
 
-// updateCoreDNSConfiguration creates, updates, or skips the k8gb-zone-delegation ConfigMap.
-// controllerutil.CreateOrUpdate was avoided to keep full control over update conditions (DeepEqual is too coarse).
-func (z *ZoneDelegationImpl) updateCoreDNSConfiguration(ctx context.Context, zd v1beta1.ZoneDelegation) error {
+// UpdateCoreDNSConfiguration creates or updates the k8gb-zone-delegation ConfigMap.
+// It also removes the zone entry when the ZoneDelegation is being deleted.
+func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
 	const zoneCM = "k8gb-zone-delegation"
 
-	coreDNSZones := &corev1.ConfigMap{}
-	err := z.apiReader.Get(ctx, types.NamespacedName{Namespace: z.config.K8gbNamespace, Name: zoneCM}, coreDNSZones)
+	list, err := z.List(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get ConfigMap %s: %w", zoneCM, err)
+		return fmt.Errorf("failed to list ZoneDelegations: %w", err)
 	}
 
-	if coreDNSZones.Data == nil {
-		coreDNSZones.Data = make(map[string]string)
+	coreDNSZones := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      zoneCM,
+			Namespace: z.config.K8gbNamespace,
+		},
 	}
 
-	// update coreDNS data if necessary
-	zoneKey := name(zd)
-	// Skip update if the zone entry already exists.
-	if _, found := coreDNSZones.Data[zoneKey]; found {
+	_, err = controllerutil.CreateOrUpdate(ctx, z.client, coreDNSZones, func() error {
+		if coreDNSZones.Data == nil {
+			coreDNSZones.Data = make(map[string]string)
+		}
+
+		for _, zone := range list.Items {
+			coreDNSZones.Data[name(zone)] = getCoreDNSData(zone.Spec.LoadBalancedZone)
+		}
+
+		if zd.IsInDeletion() {
+			delete(coreDNSZones.Data, name(*zd))
+			return nil
+		}
+
+		coreDNSZones.Data[name(*zd)] = getCoreDNSData(zd.Spec.LoadBalancedZone)
 		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("cannot interact with %s: %w", zoneCM, err)
 	}
 
-	//  exclude if in deletion state (timestamp)
-	coreDNSZones.Data[zoneKey] = getCoreDNSData(zd.Spec.LoadBalancedZone)
-
-	return z.client.Update(ctx, coreDNSZones)
+	return nil
 }
 
 func getCoreDNSData(zone string) string {
