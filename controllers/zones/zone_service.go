@@ -289,38 +289,44 @@ func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1b
 	return NewZoneDelegationWrapper(zd, z.config, z.ipresolver).GetDetail(ctx)
 }
 
-// UpdateCoreDNSConfiguration creates, updates, or skips the k8gb-zone-delegation ConfigMap.
-// controllerutil.CreateOrUpdate was avoided to keep full control over update conditions (DeepEqual is too coarse).
+// UpdateCoreDNSConfiguration creates or updates the k8gb-zone-delegation ConfigMap.
+// It also removes the zone entry when the ZoneDelegation is being deleted.
 func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
 	const zoneCM = "k8gb-zone-delegation"
-
-	coreDNSZones := &corev1.ConfigMap{}
-	err := z.client.Get(ctx, types.NamespacedName{Namespace: z.config.K8gbNamespace, Name: zoneCM}, coreDNSZones)
-	if err != nil {
-		return fmt.Errorf("failed to get ConfigMap %s: %w", zoneCM, err)
-	}
-
-	if coreDNSZones.Data == nil {
-		coreDNSZones.Data = make(map[string]string)
-	}
 
 	list, err := z.List(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to list ZoneDelegations: %w", err)
 	}
-	list.Items = append(list.Items, *zd)
 
-	// Create, Update or do Nothing
+	coreDNSZones := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      zoneCM,
+			Namespace: z.config.K8gbNamespace,
+		},
+	}
+
 	_, err = controllerutil.CreateOrUpdate(ctx, z.client, coreDNSZones, func() error {
-		for _, zone := range list.Items {
-			zoneKey := name(zone)
-			coreDNSZones.Data[zoneKey] = getCoreDNSData(zone.Spec.LoadBalancedZone)
+		if coreDNSZones.Data == nil {
+			coreDNSZones.Data = make(map[string]string)
 		}
+
+		for _, zone := range list.Items {
+			coreDNSZones.Data[name(zone)] = getCoreDNSData(zone.Spec.LoadBalancedZone)
+		}
+
+		if zd.IsInDeletion() {
+			delete(coreDNSZones.Data, name(*zd))
+			return nil
+		}
+
+		coreDNSZones.Data[name(*zd)] = getCoreDNSData(zd.Spec.LoadBalancedZone)
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("cannot interract with %s: %w", zoneCM, err)
+		return fmt.Errorf("cannot interact with %s: %w", zoneCM, err)
 	}
+
 	return nil
 }
 

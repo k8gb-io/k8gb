@@ -1,0 +1,9 @@
+apiVersion: k8gb.io/v1beta1
+kind: ZoneDelegation
+metadata:
+  name: cloud-example-org.conf
+spec:
+  dnsZoneNegTTL: 10
+  loadBalancedZone: cloud.example.org
+  parentZone: example.org
+  doFinalize: true
