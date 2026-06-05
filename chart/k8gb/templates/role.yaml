@@ -1,0 +1,23 @@
+{{- if .Values.k8gb.deployRbac }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: k8gb
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+{{ include "chart.labels" . | nindent 4 }}
+rules:
+  # Mutating access is restricted to the k8gb namespace.
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    resourceNames:
+      - k8gb-zone-delegation
+    verbs:
+      - get
+      - update
+      - patch
+      - delete
+      - create
+{{- end }}

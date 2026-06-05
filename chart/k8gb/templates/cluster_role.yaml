@@ -2,23 +2,19 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: k8gb
   labels:
 {{ include "chart.labels" . | indent 4  }}
 rules:
+# Needed by controller-runtime cached client.
+# The cache needs list/watch on ConfigMaps cross cluster.
 - apiGroups:
     - ""
   resources:
     - configmaps
   verbs:
-    - get
     - list
     - watch
-    - update
-    - patch
-  resourceNames:
-    - "k8gb-zone-delegation"
 - apiGroups:
     - k8gb.io
   resources:

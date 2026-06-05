@@ -56,6 +56,9 @@ const zoneDelegationFinalizer = "k8gb.io/finalizer"
 func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	r.Logger.Info().
+		Str("name", req.Name).
+		Msg("Reconciling ZoneDelegation")
 	if !r.ZoneService.HasAvailableIPs(ctx) {
 		r.Logger.Info().
 			Str("name", req.Name).
@@ -82,7 +85,13 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return result.RequeueError(err)
 	}
 
-	if zone.DeletionTimestamp != nil {
+	err = r.ZoneService.UpdateCoreDNSConfiguration(ctx, zone)
+	if err != nil {
+		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
+		return result.RequeueError(err)
+	}
+
+	if zone.IsInDeletion() {
 		err := r.finalize(ctx, zone)
 		if err != nil {
 			return result.RequeueError(err)

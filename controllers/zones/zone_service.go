@@ -48,6 +48,7 @@ type ZoneDelegation interface {
 	UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error
 	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error)
 	ResolveAuthoritativeServersFromZoneDelegations(ctx context.Context, host string) (AuthoritativeServers, error)
+	UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error
 }
 
 type ZoneDelegationImpl struct {
@@ -88,7 +89,7 @@ func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegatio
 			Name: zd.Name,
 		},
 	}
-	op, err := controllerutil.CreateOrUpdate(ctx, z.client, current, func() error {
+	_, err := controllerutil.CreateOrUpdate(ctx, z.client, current, func() error {
 		// Only manage fields owned by this controller.
 		current.Spec.LoadBalancedZone = zd.Spec.LoadBalancedZone
 		current.Spec.ParentZone = zd.Spec.ParentZone
@@ -98,14 +99,6 @@ func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegatio
 	if err != nil {
 		return fmt.Errorf("error creating/updating zone delegation: %w", err)
 	}
-
-	// Only update CoreDNS if something actually changed
-	if op != controllerutil.OperationResultNone {
-		if err := z.UpdateCoreDNSConfiguration(ctx, current); err != nil {
-			return fmt.Errorf("error updating CoreDNS configuration: %w", err)
-		}
-	}
-
 	return nil
 }
 
@@ -305,6 +298,9 @@ func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd 
 		},
 	}
 
+	// The controller-runtime client uses a cache for ConfigMap objects.
+	// For the cache to work, the controller needs list/watch permissions for ConfigMaps
+	// across all namespaces, even if it only updates a single ConfigMap.
 	_, err = controllerutil.CreateOrUpdate(ctx, z.client, coreDNSZones, func() error {
 		if coreDNSZones.Data == nil {
 			coreDNSZones.Data = make(map[string]string)

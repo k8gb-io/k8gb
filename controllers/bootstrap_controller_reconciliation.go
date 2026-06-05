@@ -52,7 +52,6 @@ type CoreDNSReconciler struct {
 }
 
 func (r *CoreDNSReconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
-	// todo: introduce variable for reconciliation interval
 	var err error
 	result := utils.NewReconcileResultHandler(0)
 	r.Logger.Info().Msg("Reconciling CoreDNS delegation")
