@@ -32,8 +32,7 @@ echo "---- Creating local clusters ----"
 cd "${SCRIPT_DIR}/../../"
 ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name == 'k8gb.io.'].Id" --output text)
 EDGE_DNS_SERVER=$(aws route53 list-resource-record-sets --hosted-zone-id "$ZONE_ID" --query "ResourceRecordSets[?Type == 'NS'].ResourceRecords[0]" --output text | sed 's/\.$//')
-cp dns-provider-test/route53/values-template.yaml dns-provider-test/route53/values.yaml
-sed -i '' "s/DNS_SERVER_TODO/$EDGE_DNS_SERVER/g" dns-provider-test/route53/values.yaml
+sed "s/DNS_SERVER_TODO/$EDGE_DNS_SERVER/g" dns-provider-test/route53/values-template.yaml > dns-provider-test/route53/values.yaml
 make create-local-clusters
 make release-images
 
