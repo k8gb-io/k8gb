@@ -423,7 +423,7 @@ deploy-gslb-operator: ## Deploy k8gb operator
 	kubectl create namespace k8gb --dry-run=client -o yaml | kubectl apply -f -
 	cd chart/k8gb && helm dependency update
 	helm -n k8gb upgrade -i k8gb chart/k8gb -f $(VALUES_YAML) $(HELM_ARGS) \
-		--set k8gb.log.format=$(LOG_FORMAT)
+		--set k8gb.log.format=$(LOG_FORMAT) \
 		--set k8gb.log.level=$(LOG_LEVEL)
 
 # destroy local test environment
