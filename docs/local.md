@@ -53,7 +53,24 @@ To spin-up a local environment using two k3s clusters and deploy a test applicat
 make deploy-full-local-setup
 ```
 
-By default, local setup also applies a small set of legacy `k8gb.absa.oss/v1beta1` migration demo resources on each local test cluster (referencing real `test-gslb` Ingress/podinfo resources from the standard setup), injects a realistic legacy ownerReference for the embedded case, and prints legacy/canonical manifests so you can see migration output immediately.
+By default, local setup also applies a small set of legacy `k8gb.absa.oss/v1beta1` migration demo resources on each local test cluster. The examples reuse workloads from the standard setup and cover referenced Ingresses, embedded Ingress migration, and annotation-sensitive LoadBalancer Service reconciliation. The setup prints legacy/canonical manifests so you can see migration output immediately.
+
+The Service examples share one LoadBalancer Service backed by the existing `multiservice-blue` pods:
+
+- `legacy-service-runtime-demo` remains in legacy runtime mode.
+- `legacy-service-migration-demo` is migrated to `k8gb.io/v1beta1`.
+
+Verify that both paths retain `k8gb.io/hostname` and reconcile a `DNSEndpoint`:
+
+```sh
+kubectl get gslb.k8gb.absa.oss -n test-gslb legacy-service-runtime-demo \
+  -o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}'
+kubectl get dnsendpoint -n test-gslb legacy-service-runtime-demo
+
+kubectl get gslb.k8gb.io -n test-gslb legacy-service-migration-demo \
+  -o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}'
+kubectl get dnsendpoint -n test-gslb legacy-service-migration-demo
+```
 
 If you want to skip this demo output:
 

@@ -111,3 +111,56 @@ spec:
                 name: frontend-podinfo
                 port:
                   name: http
+---
+# Reuse the existing multiservice-blue workload for Service-based migration demos.
+apiVersion: v1
+kind: Service
+metadata:
+  name: legacy-service-demo
+  namespace: test-gslb
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: multiservice-blue
+  ports:
+    - name: http
+      port: 18080
+      targetPort: http
+---
+# Intentionally non-migrated to demonstrate legacy Service runtime reconciliation.
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-service-runtime-demo
+  namespace: test-gslb
+  annotations:
+    k8gb.io/hostname: legacy-service-runtime-demo.cloud.example.com
+spec:
+  resourceRef:
+    apiVersion: v1
+    kind: Service
+    name: legacy-service-demo
+  strategy:
+    type: failover
+    primaryGeoTag: eu
+    dnsTtlSeconds: 30
+---
+# Requested migration demonstrates that functional annotations reach the canonical object.
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-service-migration-demo
+  namespace: test-gslb
+  annotations:
+    k8gb.io/hostname: legacy-service-migration-demo.cloud.example.com
+  labels:
+    k8gb.io/migration-requested: "true"
+spec:
+  resourceRef:
+    apiVersion: v1
+    kind: Service
+    name: legacy-service-demo
+  strategy:
+    type: failover
+    primaryGeoTag: eu
+    dnsTtlSeconds: 30

@@ -344,6 +344,21 @@ deploy-legacy-migration-cases: ## Apply legacy migration demo resources for loca
 		deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_migration_demo.yaml > /tmp/k8gb-migration-demo.yaml
 	-kubectl apply -f /tmp/k8gb-migration-demo.yaml
 	-rm /tmp/k8gb-migration-demo.yaml
+	@echo -e "\n$(YELLOW)Wait for service/legacy-service-demo external address $(NC)"
+	@address=""; \
+	for i in $$(seq 1 60); do \
+		address=$$(kubectl get service -n $(MIGRATION_DEMO_NAMESPACE) legacy-service-demo \
+			-o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true); \
+		if [ -n "$$address" ]; then \
+			break; \
+		fi; \
+		sleep 1; \
+	done; \
+	if [ -n "$$address" ]; then \
+		echo "service/legacy-service-demo is ready with address $$address"; \
+	else \
+		echo "service/legacy-service-demo has no external address yet"; \
+	fi
 	@echo -e "\n$(YELLOW)Inject legacy ownerReference on ingress/legacy-embedded-demo (real legacy simulation) $(NC)"
 	@legacy_uid=$$(kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) legacy-embedded-demo -o jsonpath='{.metadata.uid}' 2>/dev/null || true); \
 	if [ -n "$$legacy_uid" ]; then \
@@ -381,6 +396,27 @@ show-legacy-migration-manifests: ## Print legacy and canonical GSLB manifests fr
 	else \
 		echo "(none)"; \
 	fi
+	@echo -e "\n$(YELLOW)Service annotation migration examples $(NC)"
+	@for i in $$(seq 1 30); do \
+		runtime_endpoint=$$(kubectl get dnsendpoint -n $(MIGRATION_DEMO_NAMESPACE) legacy-service-runtime-demo -o name 2>/dev/null || true); \
+		migration_endpoint=$$(kubectl get dnsendpoint -n $(MIGRATION_DEMO_NAMESPACE) legacy-service-migration-demo -o name 2>/dev/null || true); \
+		if [ -n "$$runtime_endpoint" ] && [ -n "$$migration_endpoint" ]; then \
+			break; \
+		fi; \
+		sleep 1; \
+	done
+	@for name in legacy-service-runtime-demo legacy-service-migration-demo; do \
+		echo -e "\n$(CYAN)$$name$(NC)"; \
+		echo -n "legacy hostname/status: "; \
+		kubectl get gslb.k8gb.absa.oss -n $(MIGRATION_DEMO_NAMESPACE) "$$name" \
+			-o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}' 2>/dev/null || echo "(missing)"; \
+		echo -n "canonical hostname/status: "; \
+		kubectl get gslb.k8gb.io -n $(MIGRATION_DEMO_NAMESPACE) "$$name" \
+			-o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}' 2>/dev/null || echo "(not migrated)"; \
+		echo -n "DNSEndpoint names: "; \
+		kubectl get dnsendpoint -n $(MIGRATION_DEMO_NAMESPACE) "$$name" \
+			-o jsonpath='{range .spec.endpoints[*]}{.dnsName}{" "}{end}{"\n"}' 2>/dev/null || echo "(not reconciled)"; \
+	done
 
 .PHONY: ai-inference-demo
 ai-inference-demo: ## Run AI inference demo action (AI_DEMO_ACTION=run|deploy|probe|failover|failback|logs|status|delete)

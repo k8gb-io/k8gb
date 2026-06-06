@@ -1,0 +1,146 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: legacy-service-annotation
+spec:
+  namespace: legacy-service-annotation
+  steps:
+  - name: namespace
+    description: create namespace
+    cluster: eu
+    use:
+      template: ../../step-templates/namespace.yaml
+  - name: create podinfo
+    description: create the shared podinfo test application
+    cluster: eu
+    use:
+      template: ../../step-templates/apply-podinfo.yaml
+  - name: expose podinfo through loadbalancer
+    description: change the shared podinfo Service to LoadBalancer for Service GSLB testing
+    cluster: eu
+    try:
+    - script:
+        content: |
+          kubectl patch service frontend-podinfo -n "$NAMESPACE" --type merge -p '{"spec":{"type":"LoadBalancer"}}'
+    - assert:
+        resource:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: frontend-podinfo
+            namespace: ($namespace)
+          spec:
+            type: LoadBalancer
+          status:
+            loadBalancer:
+              ingress:
+                (length(@) > `0`): true
+        timeout: 90s
+  - name: reconcile legacy service gslb
+    description: legacy runtime must retain the hostname annotation and create a DNSEndpoint
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/legacy-gslb.yaml
+    - script:
+        timeout: 120s
+        env:
+        - name: NAME
+          value: legacy-service-annotation
+        - name: EXPECTED_HOSTNAME
+          value: legacy-service-annotation.cloud.example.com
+        content: |
+          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          GSLB_JSON=$(mktemp)
+          ENDPOINT_JSON=$(mktemp)
+          trap 'rm -f "$GSLB_JSON" "$ENDPOINT_JSON"' EXIT
+          for i in $(seq 1 60); do
+            if kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o json >"$GSLB_JSON" 2>/dev/null &&
+              kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$ENDPOINT_JSON" 2>/dev/null; then
+              if jq -e --arg hostname "$EXPECTED_HOSTNAME" '.status.hosts == $hostname' "$GSLB_JSON" >/dev/null &&
+                jq -e --arg hostname "$EXPECTED_HOSTNAME" --arg legacy_uid "$LEGACY_UID" '
+                  any(.spec.endpoints[]?; .dnsName == $hostname) and
+                  ([.metadata.ownerReferences[]? |
+                    select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .uid == $legacy_uid)]
+                  | length) == 1
+                ' "$ENDPOINT_JSON" >/dev/null; then
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          echo "Legacy Service GSLB did not reconcile with its hostname annotation"
+          kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o yaml
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
+          exit 1
+  - name: migrate legacy service gslb
+    description: migration must preserve annotations on the canonical GSLB
+    cluster: eu
+    try:
+    - script:
+        env:
+        - name: NAME
+          value: legacy-service-annotation
+        content: |
+          kubectl label gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" k8gb.io/migration-requested=true --overwrite
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-service-annotation
+            namespace: ($namespace)
+            annotations:
+              k8gb.io/hostname: legacy-service-annotation.cloud.example.com
+          spec:
+            resourceRef:
+              apiVersion: v1
+              kind: Service
+              name: frontend-podinfo
+          status:
+            hosts: legacy-service-annotation.cloud.example.com
+        timeout: 90s
+    - assert:
+        resource:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-service-annotation
+            namespace: ($namespace)
+            labels:
+              k8gb.io/migration-requested: "true"
+              k8gb.io/migrated-to-k8gb-io: "true"
+        timeout: 45s
+  - name: assert canonical dnsendpoint owner
+    description: migrated Service GSLB must own the reconciled DNSEndpoint
+    cluster: eu
+    try:
+    - script:
+        timeout: 90s
+        env:
+        - name: NAME
+          value: legacy-service-annotation
+        - name: EXPECTED_HOSTNAME
+          value: legacy-service-annotation.cloud.example.com
+        content: |
+          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          CANONICAL_UID=$(kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+          ENDPOINT_JSON=$(mktemp)
+          trap 'rm -f "$ENDPOINT_JSON"' EXIT
+          for i in $(seq 1 45); do
+            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$ENDPOINT_JSON" 2>/dev/null; then
+              if jq -e --arg hostname "$EXPECTED_HOSTNAME" --arg canonical_uid "$CANONICAL_UID" --arg legacy_uid "$LEGACY_UID" '
+                any(.spec.endpoints[]?; .dnsName == $hostname) and
+                ([.metadata.ownerReferences[]? |
+                  select(.apiVersion == "k8gb.io/v1beta1" and .kind == "Gslb" and .uid == $canonical_uid)]
+                | length) == 1 and
+                ([.metadata.ownerReferences[]? | select(.uid == $legacy_uid)] | length) == 0
+              ' "$ENDPOINT_JSON" >/dev/null; then
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          echo "DNSEndpoint ownership did not move to the annotated canonical GSLB"
+          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
+          exit 1

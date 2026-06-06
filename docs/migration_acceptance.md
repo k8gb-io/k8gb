@@ -44,13 +44,15 @@ Use this short flow when you just want to validate how migration is driven in pr
 ### 1. Deploy local setup with legacy demo objects
 
 ```bash
-make deploy-full-local-setup
+K8GB_LOCAL_VERSION=test make deploy-full-local-setup
 ```
 
 Legacy demo objects are created in `test-gslb`, including:
 
-- `legacy-ref-non-migrated-failover` (intentionally non-requested)
-- `legacy-ref-demo` and `legacy-embedded-demo` (requested)
+- `legacy-ref-non-migrated-failover` and `legacy-service-runtime-demo` (intentionally non-requested)
+- `legacy-ref-demo`, `legacy-embedded-demo`, and `legacy-service-migration-demo` (requested)
+
+The Service examples reference `service/legacy-service-demo`, which reuses the existing `multiservice-blue` workload. They validate that the required `k8gb.io/hostname` annotation is available during legacy runtime reconciliation and is retained on the migrated canonical object.
 
 ### 2. Confirm non-requested legacy object stays in legacy runtime mode
 
