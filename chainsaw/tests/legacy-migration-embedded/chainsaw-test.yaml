@@ -58,13 +58,26 @@ spec:
     description: deleting legacy object must not delete ingress
     cluster: eu
     try:
-    - script:
-        env:
-        - name: NAME
-          value: legacy-migration-embedded
-        content: |
-          kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=90s
-          kubectl get ingress "$NAME" -n "$NAMESPACE"
+    - delete:
+        ref:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          name: legacy-migration-embedded
+    - wait:
+        apiVersion: k8gb.absa.oss/v1beta1
+        kind: Gslb
+        name: legacy-migration-embedded
+        for:
+          deletion: {}
+        timeout: 120s
+    - assert:
+        resource:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: legacy-migration-embedded
+            namespace: ($namespace)
+        timeout: 30s
     - assert:
         resource:
           apiVersion: k8gb.io/v1beta1
