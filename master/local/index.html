@@ -2856,95 +2856,109 @@ For more user-centric targets in that makefile consult <code>make help</code>.</
 <p>To spin-up a local environment using two k3s clusters and deploy a test application to both clusters, execute the command below:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>make<span class="w"> </span>deploy-full-local-setup
 </code></pre></div></p>
-<p>By default, local setup also applies a small set of legacy <code>k8gb.absa.oss/v1beta1</code> migration demo resources on each local test cluster (referencing real <code>test-gslb</code> Ingress/podinfo resources from the standard setup), injects a realistic legacy ownerReference for the embedded case, and prints legacy/canonical manifests so you can see migration output immediately.</p>
+<p>By default, local setup also applies a small set of legacy <code>k8gb.absa.oss/v1beta1</code> migration demo resources on each local test cluster. The examples reuse workloads from the standard setup and cover referenced Ingresses, embedded Ingress migration, and annotation-sensitive LoadBalancer Service reconciliation. The setup prints legacy/canonical manifests so you can see migration output immediately.</p>
+<p>The Service examples share one LoadBalancer Service backed by the existing <code>multiservice-blue</code> pods:</p>
+<ul>
+<li><code>legacy-service-runtime-demo</code> remains in legacy runtime mode.</li>
+<li><code>legacy-service-migration-demo</code> is migrated to <code>k8gb.io/v1beta1</code>.</li>
+</ul>
+<p>Verify that both paths retain <code>k8gb.io/hostname</code> and reconcile a <code>DNSEndpoint</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-service-runtime-demo<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.annotations.k8gb\.io/hostname}{&quot; / &quot;}{.status.hosts}{&quot;\n&quot;}&#39;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>dnsendpoint<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-service-runtime-demo
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-service-migration-demo<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.annotations.k8gb\.io/hostname}{&quot; / &quot;}{.status.hosts}{&quot;\n&quot;}&#39;</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>kubectl<span class="w"> </span>get<span class="w"> </span>dnsendpoint<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-service-migration-demo
+</code></pre></div>
 <p>If you want to skip this demo output:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>deploy-full-local-setup<span class="w"> </span><span class="nv">SHOW_LEGACY_MIGRATION_DEMO</span><span class="o">=</span><span class="nb">false</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>make<span class="w"> </span>deploy-full-local-setup<span class="w"> </span><span class="nv">SHOW_LEGACY_MIGRATION_DEMO</span><span class="o">=</span><span class="nb">false</span>
 </code></pre></div>
 <h2 id="verify-installation">Verify installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
 <p>If local setup runs well, check if clusters are correctly installed</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-edgedns<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb2
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-edgedns<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb2
 </code></pre></div>
 <p>Cluster <a href="https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb1.yaml">test-gslb1</a> is exposing external DNS on default port <code>:5053</code>
 while <a href="https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb2.yaml">test-gslb2</a> on port <code>:5054</code>.</p>
 <p>Cluster <a href="https://github.com/k8gb-io/k8gb/tree/master/k3d/edge-dns.yaml">edgedns</a> runs BIND and acts as EdgeDNS holding Delegated Zone for out test setup and answers
 on port <code>:1053</code>.</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>dig<span class="w"> </span>@localhost<span class="w"> </span>-p<span class="w"> </span><span class="m">1053</span><span class="w"> </span>roundrobin.cloud.example.com<span class="w"> </span>+short<span class="w"> </span>+tcp
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>dig<span class="w"> </span>@localhost<span class="w"> </span>-p<span class="w"> </span><span class="m">1053</span><span class="w"> </span>roundrobin.cloud.example.com<span class="w"> </span>+short<span class="w"> </span>+tcp
 </code></pre></div>
 Should return <strong><em>two A records</em></strong> from both clusters (IP addresses and order may differ):
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>172.20.0.2
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>172.20.0.5
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>172.20.0.4
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>172.20.0.6
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>172.20.0.2
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>172.20.0.5
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>172.20.0.4
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>172.20.0.6
 </code></pre></div></p>
 <p>You can verify that correct IP addresses of all the nodes in both clusters were populated:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">for</span><span class="w"> </span>c<span class="w"> </span><span class="k">in</span><span class="w"> </span>k3d-test-gslb<span class="o">{</span><span class="m">1</span>,2<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>no<span class="w"> </span>-ocustom-columns<span class="o">=</span><span class="s2">&quot;NAME:.metadata.name,IP:status.addresses[0].address&quot;</span><span class="w"> </span>--context<span class="w"> </span><span class="nv">$c</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">for</span><span class="w"> </span>c<span class="w"> </span><span class="k">in</span><span class="w"> </span>k3d-test-gslb<span class="o">{</span><span class="m">1</span>,2<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>no<span class="w"> </span>-ocustom-columns<span class="o">=</span><span class="s2">&quot;NAME:.metadata.name,IP:status.addresses[0].address&quot;</span><span class="w"> </span>--context<span class="w"> </span><span class="nv">$c</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
 </code></pre></div></p>
 <p>Returns a result similar to:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>NAME                      IP
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>k3d-test-gslb1-agent-0    172.20.0.2
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>k3d-test-gslb1-server-0   172.20.0.4
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>NAME                      IP
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>k3d-test-gslb2-server-0   172.20.0.6
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>k3d-test-gslb2-agent-0    172.20.0.5
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>NAME                      IP
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>k3d-test-gslb1-agent-0    172.20.0.2
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>k3d-test-gslb1-server-0   172.20.0.4
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>NAME                      IP
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>k3d-test-gslb2-server-0   172.20.0.6
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>k3d-test-gslb2-agent-0    172.20.0.5
 </code></pre></div></p>
 <p>Or you can ask specific CoreDNS instance for its local targets:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5053</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5054</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5053</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>dig<span class="w"> </span>-p<span class="w"> </span><span class="m">5054</span><span class="w"> </span>@localhost<span class="w"> </span>localtargets-roundrobin.cloud.example.com
 </code></pre></div>
 As expected result you should see <strong>two A records</strong> divided between both clusters.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>...
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>...
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">;;</span><span class="w"> </span>ANSWER<span class="w"> </span>SECTION:
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.4
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.2
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>...
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>...
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.5
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.6
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>...
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>...
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">;;</span><span class="w"> </span>ANSWER<span class="w"> </span>SECTION:
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.4
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.2
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>...
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>...
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.5
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>localtargets-roundrobin.cloud.example.com.<span class="w"> </span><span class="m">30</span><span class="w"> </span>IN<span class="w"> </span>A<span class="w"> </span><span class="m">172</span>.20.0.6
 </code></pre></div>
 Both clusters have <a href="https://github.com/stefanprodan/podinfo">podinfo</a> installed on the top.
 Run following command and check if you get two json responses.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>curl<span class="w"> </span>localhost:80<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:roundrobin.cloud.example.com&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>curl<span class="w"> </span>localhost:81<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:roundrobin.cloud.example.com&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>curl<span class="w"> </span>localhost:80<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:roundrobin.cloud.example.com&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>curl<span class="w"> </span>localhost:81<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:roundrobin.cloud.example.com&quot;</span>
 </code></pre></div></p>
 <p>The local setup also deploys small multi-service Ingresses backed by two NGINX services and canonical <code>k8gb.io/v1beta1</code> GSLBs using both service health policies.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>curl<span class="w"> </span>localhost:80/blue<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:multiservice-all.cloud.example.com&quot;</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>curl<span class="w"> </span>localhost:80/green<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:multiservice-any.cloud.example.com&quot;</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span>multiservice-gslb-all<span class="w"> </span>multiservice-gslb-any<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span>-o<span class="w"> </span>custom-columns<span class="o">=</span>NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>curl<span class="w"> </span>localhost:80/blue<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:multiservice-all.cloud.example.com&quot;</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>curl<span class="w"> </span>localhost:80/green<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host:multiservice-any.cloud.example.com&quot;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span>multiservice-gslb-all<span class="w"> </span>multiservice-gslb-any<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span>-o<span class="w"> </span>custom-columns<span class="o">=</span>NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
 </code></pre></div>
 <h2 id="run-integration-tests">Run integration tests<a class="headerlink" href="#run-integration-tests" title="Permanent link">&para;</a></h2>
 <p>There is wide range of scenarios which <strong>GSLB</strong> provides and all of them are covered within <a href="https://github.com/k8gb-io/k8gb/tree/master/terratest">tests</a>.
 To check whether everything is running properly execute <a href="https://terratest.gruntwork.io/">terratest</a> :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>make<span class="w"> </span>terratest
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>make<span class="w"> </span>terratest
 </code></pre></div>
 <h2 id="cleaning">Cleaning<a class="headerlink" href="#cleaning" title="Permanent link">&para;</a></h2>
 <p>Clean up your local development clusters with
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>make<span class="w"> </span>destroy-full-local-setup
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>make<span class="w"> </span>destroy-full-local-setup
 </code></pre></div></p>
 <h2 id="ai-inference-resilience-demo">AI inference resilience demo<a class="headerlink" href="#ai-inference-resilience-demo" title="Permanent link">&para;</a></h2>
 <p>The local setup can also deploy a lightweight Ollama inference endpoint to demonstrate k8gb failover for AI traffic:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>make<span class="w"> </span>deploy-full-local-setup<span class="w"> </span><span class="nv">FULL_LOCAL_SETUP_WITH_AI_DEMO</span><span class="o">=</span><span class="nb">true</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>make<span class="w"> </span>deploy-full-local-setup<span class="w"> </span><span class="nv">FULL_LOCAL_SETUP_WITH_AI_DEMO</span><span class="o">=</span><span class="nb">true</span>
 </code></pre></div>
 <p>If the local setup is already running:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>deploy
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failover
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failback
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>deploy
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failover
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failback
 </code></pre></div>
 <p>The demo caches the downloaded model in a PVC, so failback does not re-download the model. If model startup is slow, inspect progress with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>logs
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>logs
 </code></pre></div>
 <p>See <a href="../ai-inference-demo/">AI Inference Resilience Demo</a> for the full local and real-environment flow.</p>
 <h2 id="sample-demo">Sample demo<a class="headerlink" href="#sample-demo" title="Permanent link">&para;</a></h2>
 <h3 id="multi-service-ingress">Multi-Service Ingress<a class="headerlink" href="#multi-service-ingress" title="Permanent link">&para;</a></h3>
 <p><code>multiservice-all.cloud.example.com</code> and <code>multiservice-any.cloud.example.com</code> both route <code>/blue</code> and <code>/green</code> to separate Services. The <code>All</code> GSLB requires both Services to be healthy, while the <code>Any</code> GSLB remains healthy as long as at least one backing Service is healthy.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>scale<span class="w"> </span>deploy<span class="w"> </span>multiservice-green<span class="w"> </span>--replicas<span class="o">=</span><span class="m">0</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span>multiservice-gslb-all<span class="w"> </span>multiservice-gslb-any<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span>-o<span class="w"> </span>custom-columns<span class="o">=</span>NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>scale<span class="w"> </span>deploy<span class="w"> </span>multiservice-green<span class="w"> </span>--replicas<span class="o">=</span><span class="m">1</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>scale<span class="w"> </span>deploy<span class="w"> </span>multiservice-green<span class="w"> </span>--replicas<span class="o">=</span><span class="m">0</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span>multiservice-gslb-all<span class="w"> </span>multiservice-gslb-any<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">  </span>-o<span class="w"> </span>custom-columns<span class="o">=</span>NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>k3d-test-gslb1<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>scale<span class="w"> </span>deploy<span class="w"> </span>multiservice-green<span class="w"> </span>--replicas<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 <h3 id="round-robin">Round Robin<a class="headerlink" href="#round-robin" title="Permanent link">&para;</a></h3>
 <p>Both clusters have <a href="https://github.com/stefanprodan/podinfo">podinfo</a> installed on the top, where each
@@ -2952,22 +2966,22 @@ cluster has been tagged to serve a different region. In this demo we will hit po
 on the region, podinfo will return <strong>us</strong> or <strong>eu</strong>. In the current round robin implementation IP addresses are randomly picked.
 See <a href="https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_roundrobin_ingress.yaml">Gslb manifest with round robin strategy</a></p>
 <p>Try to run the following command several times and watch the <code>message</code> field.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>make<span class="w"> </span>test-round-robin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>make<span class="w"> </span>test-round-robin
 </code></pre></div>
 As expected result you should see podinfo message changing</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>{
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>  ...
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  &quot;message&quot;: &quot;us&quot;,
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>  ...
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>}
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>{
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>{
 <a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
 <a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>  ...
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>  &quot;message&quot;: &quot;eu&quot;,
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>  &quot;message&quot;: &quot;us&quot;,
 <a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>  ...
 <a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>}
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>{
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  ...
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>  &quot;message&quot;: &quot;eu&quot;,
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>  ...
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>}
 </code></pre></div></p>
 <h3 id="failover">Failover<a class="headerlink" href="#failover" title="Permanent link">&para;</a></h3>
 <p>Both clusters have <a href="https://github.com/stefanprodan/podinfo">podinfo</a> installed on the top where each
@@ -2975,54 +2989,54 @@ cluster has been tagged to serve a different region. In this demo we will hit po
 on whether podinfo is running inside the cluster it returns only <strong>eu</strong> or <strong>us</strong>.
 See <a href="https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_failover_ingress.yaml">Gslb manifest with failover strategy</a></p>
 <p>Switch GLSB to failover mode:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>make<span class="w"> </span>init-failover
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>make<span class="w"> </span>init-failover
 </code></pre></div>
 Now both clusters are running in failover mode and podinfo is running on both of them.
 Run several times command below and watch <code>message</code> field.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>make<span class="w"> </span>test-failover
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>make<span class="w"> </span>test-failover
 </code></pre></div>
 You will see only <strong>eu</strong> podinfo is responsive:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>{
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>  ...
-<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>  &quot;message&quot;: &quot;eu&quot;,
-<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>  ...
-<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>}
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>{
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-8p45m&quot;,
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>  ...
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>  &quot;message&quot;: &quot;eu&quot;,
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>  ...
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>}
 </code></pre></div>
 Stop podinfo on <strong>current (eu)</strong> cluster:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>make stop-test-app
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>make stop-test-app
 </code></pre></div>
 Several times hit application again
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>make<span class="w"> </span>test-failover
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>make<span class="w"> </span>test-failover
 </code></pre></div>
 As expected result you should see only podinfo from <strong>second cluster (us)</strong> is responding:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>{
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-v5nll&quot;,
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>  ...
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>  &quot;message&quot;: &quot;us&quot;,
-<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>  ...
-<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>}
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>{
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-856bb46677-v5nll&quot;,
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>  ...
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>  &quot;message&quot;: &quot;us&quot;,
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>  ...
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>}
 </code></pre></div>
 It might happen that podinfo will be unavailable for a while due to
 <a href="https://github.com/k8gb-io/k8gb/pull/81">DNS sync interval</a> and default k8gb DNS TTL of 30 seconds
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
 </code></pre></div>
 Start podinfo again on <strong>current (eu)</strong> cluster:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>make<span class="w"> </span>start-test-app
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>make<span class="w"> </span>start-test-app
 </code></pre></div>
 and hit several times hit podinfo:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>make<span class="w"> </span>test-failover
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>make<span class="w"> </span>test-failover
 </code></pre></div>
 After DNS sync interval is over <strong>eu</strong> will be back
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>{
-<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-6945c9ddd7-xksrc&quot;,
-<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>  ...
-<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>  &quot;message&quot;: &quot;eu&quot;,
-<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>  ...
-<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>}
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>{
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>  &quot;hostname&quot;: &quot;frontend-podinfo-6945c9ddd7-xksrc&quot;,
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>  ...
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>  &quot;message&quot;: &quot;eu&quot;,
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>  ...
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>}
 </code></pre></div>
 Optionally you can switch GLSB back to round-robin mode
-<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>make<span class="w"> </span>init-round-robin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>make<span class="w"> </span>init-round-robin
 </code></pre></div></p>
 
 
@@ -3046,7 +3060,7 @@ Optionally you can switch GLSB back to round-robin mode
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 18, 2026 11:47:47 UTC">May 18, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 7, 2026 10:29:57 UTC">June 7, 2026</span>
   </span>
 
     
