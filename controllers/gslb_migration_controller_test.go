@@ -46,6 +46,9 @@ func TestLegacyMigrationCreatesIOAndLabelsLegacy(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "demo",
 			Namespace: "default",
+			Annotations: map[string]string{
+				"k8gb.io/hostname": "demo.cloud.example.com",
+			},
 			Labels: map[string]string{
 				migrationRequestLabelKey: "true",
 			},
@@ -62,6 +65,7 @@ func TestLegacyMigrationCreatesIOAndLabelsLegacy(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "roundRobin", canonical.Spec.Strategy.Type)
 	require.Equal(t, 30, canonical.Spec.Strategy.DNSTtlSeconds)
+	require.Equal(t, "demo.cloud.example.com", canonical.Annotations["k8gb.io/hostname"])
 
 	updatedLegacy := &k8gbv1beta1.Gslb{}
 	err = cl.Get(context.Background(), types.NamespacedName{Name: "demo", Namespace: "default"}, updatedLegacy)

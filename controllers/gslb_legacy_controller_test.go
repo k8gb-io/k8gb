@@ -32,7 +32,9 @@ import (
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
+	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -100,6 +102,62 @@ func TestLegacyRuntimeReconcilesBeforeMigrationRequest(t *testing.T) {
 	createdIngress := &netv1.Ingress{}
 	err = cl.Get(context.Background(), types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace}, createdIngress)
 	require.NoError(t, err)
+
+	endpoint := &externaldnsApi.DNSEndpoint{}
+	err = cl.Get(context.Background(), types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace}, endpoint)
+	require.NoError(t, err)
+}
+
+func TestLegacyRuntimeReconcilesLoadBalancerServiceWithHostnameAnnotation(t *testing.T) {
+	legacy := &k8gbv1beta1.Gslb{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "legacy-service",
+			Namespace: "default",
+			UID:       types.UID("legacy-service-uid"),
+			Annotations: map[string]string{
+				utils.HostnameAnnotation: "legacy-service.cloud.example.com",
+			},
+		},
+		Spec: k8gbv1beta1.GslbSpec{
+			ResourceRef: k8gbv1beta1.ResourceRef{
+				ObjectReference: corev1.ObjectReference{
+					APIVersion: "v1",
+					Kind:       "Service",
+					Name:       "legacy-service",
+					Namespace:  "default",
+				},
+			},
+			Strategy: k8gbv1beta1.Strategy{
+				Type: resolver.RoundRobinStrategy,
+			},
+		},
+	}
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "legacy-service",
+			Namespace: "default",
+		},
+		Spec: corev1.ServiceSpec{
+			Type: corev1.ServiceTypeLoadBalancer,
+		},
+		Status: corev1.ServiceStatus{
+			LoadBalancer: corev1.LoadBalancerStatus{
+				Ingress: []corev1.LoadBalancerIngress{{IP: "192.0.2.1"}},
+			},
+		},
+	}
+	endpointSlice := buildEndpointSlice("default", "legacy-service", "legacy-service", true)
+
+	reconciler, cl := newLegacyRuntimeReconciler(t, legacy, service, endpointSlice)
+	_, err := reconciler.Reconcile(context.Background(), ctrl.Request{
+		NamespacedName: types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace},
+	})
+	require.NoError(t, err)
+
+	updatedLegacy := &k8gbv1beta1.Gslb{}
+	err = cl.Get(context.Background(), types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace}, updatedLegacy)
+	require.NoError(t, err)
+	require.Equal(t, "legacy-service.cloud.example.com", updatedLegacy.Status.Hosts)
 
 	endpoint := &externaldnsApi.DNSEndpoint{}
 	err = cl.Get(context.Background(), types.NamespacedName{Name: legacy.Name, Namespace: legacy.Namespace}, endpoint)

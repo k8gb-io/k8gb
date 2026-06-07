@@ -44,6 +44,34 @@ func TestConvertLegacyToIOCopiesSpec(t *testing.T) {
 	require.Equal(t, legacy.Spec.Strategy.DNSTtlSeconds, io.Spec.Strategy.DNSTtlSeconds)
 }
 
+func TestConvertLegacyToIOCopiesAnnotations(t *testing.T) {
+	converters := map[string]func(*k8gbv1beta1.Gslb) *k8gbv1beta1io.Gslb{
+		"migration": convertGslbLegacyToIO,
+		"runtime":   convertGslbLegacyToIORuntime,
+	}
+
+	for name, convert := range converters {
+		t.Run(name, func(t *testing.T) {
+			legacy := &k8gbv1beta1.Gslb{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        "demo",
+					Namespace:   "default",
+					Annotations: map[string]string{"k8gb.io/hostname": "demo.cloud.example.com"},
+					Labels:      map[string]string{migrationRequestLabelKey: "true"},
+				},
+			}
+
+			io := convert(legacy)
+
+			require.Equal(t, legacy.Annotations, io.Annotations)
+			require.Nil(t, io.Labels)
+
+			io.Annotations["k8gb.io/hostname"] = "changed.cloud.example.com"
+			require.Equal(t, "demo.cloud.example.com", legacy.Annotations["k8gb.io/hostname"])
+		})
+	}
+}
+
 func TestConvertLegacyToIOMigratesEmbeddedIngressToResourceRef(t *testing.T) {
 	className := testIngressClassName
 	legacy := &k8gbv1beta1.Gslb{
