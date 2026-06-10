@@ -29,16 +29,6 @@ data:
             {{- end }}
         }
     }
-{{- range .Values.k8gb.dnsZones }}
-    {{ .loadBalancedZone }}:5353 {
-        import k8gbplugins
-{{- if .extraPlugins }}
-{{- range .extraPlugins }}
-{{ . | nindent 8 }}
-{{- end }}
-{{- end }}
-    }
-{{- end }}
 {{- with .extraServerBlocks -}}
 {{- tpl . $ | nindent 4 }}
 {{- end }}
