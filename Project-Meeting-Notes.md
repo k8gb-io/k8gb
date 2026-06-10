@@ -31,18 +31,15 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## June 10, 2026 #94
 
-[**Zoom Recording**]() 
+**Backlog**
 
-[**On YouTube**]() 
-
-**Attendees**
-
-- [@elohmrow](https://github.com/elohmrow)
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
 **Agenda**
 
 - news
-  - community member found a [migration issue](https://github.com/k8gb-io/k8gb/issues/2375) - it was a [consequence of the v0.19.0 k8gb.absa.oss → k8gb.io migration work](https://github.com/k8gb-io/k8gb/pull/2203) --> [fixed](https://github.com/k8gb-io/k8gb/pull/2377)  
+  - [community member](https://github.com/PS1c0m) found a [migration issue](https://github.com/k8gb-io/k8gb/issues/2375) - it was a [consequence of the v0.19.0 k8gb.absa.oss → k8gb.io migration work](https://github.com/k8gb-io/k8gb/pull/2203) --> [fixed](https://github.com/k8gb-io/k8gb/pull/2377) thanks! 
   - added a [blog post](https://www.k8gb.io/latest/blog/2026/05/29/ai-inference-needs-a-global-resilience-layer/) about the new [ai inference demo](https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md)
   - added to the [k0rdent catalog](https://catalog.k0rdent.io/latest/apps/k8gb/) - this makes it easier for folks using k0rdent to use k8gb in their deploys.
 - kubecon
@@ -53,9 +50,19 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - community contributions in progress
   - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98 - needs rebase
   - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
-- no incubation update 
-- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
-- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+- no incubation update
+- stargazer chats 
+  - We spoke with 20 [stargazers](https://github.com/k8gb-io/k8gb/stargazers) this week. Some initial findings on how people are using k8gb:
+    - **tl;dr -** People tend to start out with k8gb by running single-node k3s clusters across commodity providers like hetzner, oci, and aws. They use k8gb to replace cloudflare tunnels at the edge. k8gb is increasingly being evaluated not just as a gslb, but as a k8s-native traffic decision layer that lets organizations regain control from cloud-specific or proprietary global traffic management systems while preserving existing dns and networking investments. This all fits well with the broader sovereign cloud trend. The common thread is cloud neutrality, infrastructure ownership, auditability, and avoiding dependence on a single provider's traffic control plane.  
+  - **current**
+    - **regulated fsi multi-region failover**. Multiple conversations point to the same pattern: multi-region resilience, cloud neutrality, dr testing, and regulatory compliance.
+    - **enterprises with existing proprietary dns authority**. People want k8gb as the k8s-native traffic decision layer while retaining existing dns/gtm, governance, and ownership controls.  
+  - **emerging**
+    - **cloudflare / proprietary glb replacement**. Multiple independent signals (incl. folks telling us they want off f5). Teams with their own ip space, bgp, or edge infrastructure want to reduce dependence on cloudflare and similar managed traffic layers while retaining control of routing and failover.
+    - **datacenter <--> cloud hybrid failover**. People want to treat cloud capacity as an extension of existing infrastructure, with k8gb providing a single traffic layer across both environments.
+  - **future**
+    - **k8s-native IDP networking layer**. Platform engineers are positioning k8gb as the multi-cluster traffic and dns layer inside a broader idp, rather than as a standalone gslb product.
+- **what's your use case?**
 
 **Actions**
 
