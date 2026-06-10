@@ -27,7 +27,46 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>May 27, 2026 #93</strong></summary>
+<details open><summary><strong>June 10, 2026 #94</strong></summary>
+
+## June 10, 2026 #94
+
+[**Zoom Recording**]() 
+
+[**On YouTube**]() 
+
+**Attendees**
+
+- [@elohmrow](https://github.com/elohmrow)
+
+**Agenda**
+
+- news
+  - community member found a [migration issue](https://github.com/k8gb-io/k8gb/issues/2375) - it was a [consequence of the v0.19.0 k8gb.absa.oss → k8gb.io migration work](https://github.com/k8gb-io/k8gb/pull/2203) --> [fixed](https://github.com/k8gb-io/k8gb/pull/2377)  
+  - added a [blog post](https://www.k8gb.io/latest/blog/2026/05/29/ai-inference-needs-a-global-resilience-layer/) about the new [ai inference demo](https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md)
+  - added to the [k0rdent catalog](https://catalog.k0rdent.io/latest/apps/k8gb/) - this makes it easier for folks using k0rdent to use k8gb in their deploys.
+- kubecon
+  - submitted a couple joint CFPs for KubeCon Salt Lake City in November / [Edge Day](https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/co-located-events/kubernetes-on-edge-day/) and [Inference Day](https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/co-located-events/cloud-native-ai-inference-day/)
+  - joint w/ nutanix
+    - implementing active/passive failover for stateful k8s workloads w/k8gb, velero, gitops. 
+  - what talks / blog posts, etc. would you like to see?
+- community contributions in progress
+  - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98 - needs rebase
+  - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+- no incubation update 
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+
+**Actions**
+
+- create a k0rdent reference platform
+- create a blog post highlighting new zone delegation functionality, extend k8gb documentation once the feature is finished
+- work with [@infbase](https://github.com/infbase) to finalize an "intro to k8gb" video
+- rebase / close stale community contributions
+
+</details>
+
+<details><summary><strong>May 27, 2026 #93</strong></summary>
 
 ## May 27, 2026 #93
 
