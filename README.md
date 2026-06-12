@@ -37,7 +37,7 @@ A Global Service Load Balancing solution with a focus on having cloud native qua
 Just a single Gslb CRD to enable the Global Load Balancing:
 
 ```yaml
-apiVersion: k8gb.absa.oss/v1beta1
+apiVersion: k8gb.io/v1beta1
 kind: Gslb
 metadata:
   name: test-gslb-failover
@@ -51,6 +51,8 @@ spec:
     type: failover # Global load balancing strategy
     primaryGeoTag: eu-west-1 # Primary cluster geo tag
 ```
+
+Legacy `k8gb.absa.oss/v1beta1` resources are still accepted and automatically migrated to `k8gb.io/v1beta1`. Legacy objects are labeled `k8gb.io/migrated-to-k8gb-io=true` and emit a warning event telling users to edit the `k8gb.io` object going forward. Legacy example: `docs/examples/legacy/gslb-legacy.yaml`.
 
 [Global load balancing](https://cloud.redhat.com/blog/global-load-balancer-approaches), commonly referred to as GSLB (Global Server Load Balancing) solutions, has been typically the domain of proprietary network software and hardware vendors and installed and managed by siloed network teams.
 
@@ -80,6 +82,17 @@ It will deploy two local [k3s](https://k3s.io/) clusters via [k3d](https://k3d.i
 This setup is adapted for local scenarios and works without external DNS provider dependency.
 
 Consult with [local playground](docs/local.md) documentation to learn all the details of experimenting with local setup.
+
+To demonstrate k8gb as a global resilience layer for AI inference endpoints, run:
+
+```sh
+make deploy-full-local-setup FULL_LOCAL_SETUP_WITH_AI_DEMO=true
+make ai-inference-demo
+```
+
+This deploys a lightweight Ollama model in both clusters, exposes an OpenAI-compatible endpoint, and shows failover through the same global hostname.
+
+See the [AI inference resilience demo](docs/ai-inference-demo.md) for local and real-cluster usage.
 
 Optionally, you can run `make deploy-prometheus` and check the metrics on the test clusters (http://localhost:9090, http://localhost:9091).
 

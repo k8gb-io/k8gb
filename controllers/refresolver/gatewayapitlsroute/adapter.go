@@ -61,10 +61,19 @@ func (a *TLSRouteAdapter) GetNamespace() string {
 
 // TLSRouteRuleAdapter adapts TLSRouteRule to the RouteRule interface
 type TLSRouteRuleAdapter struct {
-	rule *gatewayapiv1alpha2.TLSRouteRule
+	rule *gatewayapiv1.TLSRouteRule
 }
 
 func (a *TLSRouteRuleAdapter) GetBackendRefs() []gatewayapiv1.BackendRef {
+	return a.rule.BackendRefs
+}
+
+// TLSRouteRuleAdapterV1Alpha2 adapts v1alpha2 TLSRouteRule to the RouteRule interface
+type TLSRouteRuleAdapterV1Alpha2 struct {
+	rule *gatewayapiv1alpha2.TLSRouteRule
+}
+
+func (a *TLSRouteRuleAdapterV1Alpha2) GetBackendRefs() []gatewayapiv1.BackendRef {
 	return a.rule.BackendRefs
 }
 
@@ -89,7 +98,7 @@ func (a *TLSRouteAdapterV1Alpha2) GetParentRefs() []gatewayapiv1.ParentReference
 func (a *TLSRouteAdapterV1Alpha2) GetRules() []gatewayapi.RouteRule {
 	rules := make([]gatewayapi.RouteRule, len(a.tlsRoute.Spec.Rules))
 	for i := range a.tlsRoute.Spec.Rules {
-		rules[i] = &TLSRouteRuleAdapter{rule: &a.tlsRoute.Spec.Rules[i]}
+		rules[i] = &TLSRouteRuleAdapterV1Alpha2{rule: &a.tlsRoute.Spec.Rules[i]}
 	}
 	return rules
 }

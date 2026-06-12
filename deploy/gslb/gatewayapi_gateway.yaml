@@ -32,6 +32,8 @@ spec:
   - name: tls
     protocol: TLS
     port: 8000
+    tls:
+      mode: Passthrough
     allowedRoutes:
       namespaces:
         from: All

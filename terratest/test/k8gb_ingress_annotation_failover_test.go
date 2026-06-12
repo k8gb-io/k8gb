@@ -70,7 +70,7 @@ func TestK8gbIngressAnnotationFailover(t *testing.T) {
 
 	t.Run("Broken ingress is not proccessed", func(t *testing.T) {
 		utils.CreateGslb(t, options, settings, brokenResourcePath)
-		err := k8s.RunKubectlE(t, options, "get", "gslb", "broken-test-gslb-annotation-failover")
+		err := k8s.RunKubectlE(t, options, "get", "gslbs.k8gb.io", "broken-test-gslb-annotation-failover")
 		require.Error(t, err)
 	})
 

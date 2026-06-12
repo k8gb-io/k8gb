@@ -6,6 +6,7 @@ This directory contains Architectural Decision Records (ADRs) for the k8gb proje
 
 - [ADR-0000: Template](0000-template.md) - Template for new ADRs
 - [ADR-0001: Deprecate Configuration of GSLB resources via annotations](0001-deprecate-configuration-of-gslb-resources-via-annotations.md) - GSLB configuration
+- [ADR-0002: Migrate GSLB API group to vendor-neutral `k8gb.io`](0002-migrate-gslb-api-group-to-vendor-neutral-k8gb-io.md) - API group migration
 
 ## What are ADRs?
 

@@ -4,6 +4,6 @@ dependencies:
   version: 1.45.2
 - name: external-dns
   repository: https://kubernetes-sigs.github.io/external-dns
-  version: 1.20.0
-digest: sha256:01a1f9be406545ddfc98e5db7246b5fa1ccf8e8d406a6e10b90b41f2c7ae0296
-generated: "2026-01-23T17:03:09.819625805Z"
+  version: 1.21.1
+digest: sha256:4fd460c3cd9207e9bdf371a955ad9800cd0928820f395c288eb91e9d9863d0b1
+generated: "2026-04-30T19:05:52.560624482Z"

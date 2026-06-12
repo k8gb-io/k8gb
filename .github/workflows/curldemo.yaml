@@ -12,28 +12,32 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 
 jobs:
   curldemo:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-24.04
     env:
       DOCKER_CLI_EXPERIMENTAL: "enabled"
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
-      - name: Login to Dockerhub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+      - name: Login to GHCR
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: ./deploy/test-apps/curldemo/
           file: ./deploy/test-apps/curldemo/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USER }}/k8gb-demo-curl:latest
+          tags: ghcr.io/k8gb-io/k8gb-demo-curl:latest

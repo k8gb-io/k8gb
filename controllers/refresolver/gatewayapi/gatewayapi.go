@@ -23,7 +23,7 @@ import (
 
 	context "context"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -76,7 +76,7 @@ func GetGateway(route RouteAdapter, k8sClient client.Client) (*gatewayapiv1.Gate
 }
 
 // GetServersFromRoute retrieves the GSLB server configuration from a route resource
-func GetServersFromRoute(route RouteAdapter) ([]*k8gbv1beta1.Server, error) {
+func GetServersFromRoute(route RouteAdapter) ([]*k8gbv1beta1io.Server, error) {
 	hostnames, err := route.GetHostnames()
 	if err != nil {
 		return nil, err
@@ -85,11 +85,11 @@ func GetServersFromRoute(route RouteAdapter) ([]*k8gbv1beta1.Server, error) {
 		return nil, fmt.Errorf("can't find hosts in route %s", route.GetName())
 	}
 
-	servers := []*k8gbv1beta1.Server{}
+	servers := []*k8gbv1beta1io.Server{}
 	for _, hostname := range hostnames {
-		server := &k8gbv1beta1.Server{
+		server := &k8gbv1beta1io.Server{
 			Host:     string(hostname),
-			Services: []*k8gbv1beta1.NamespacedName{},
+			Services: []*k8gbv1beta1io.NamespacedName{},
 		}
 		for _, rule := range route.GetRules() {
 			for _, backendRef := range rule.GetBackendRefs() {
@@ -97,7 +97,7 @@ func GetServersFromRoute(route RouteAdapter) ([]*k8gbv1beta1.Server, error) {
 				if backendRef.Namespace != nil {
 					namespace = string(*backendRef.Namespace)
 				}
-				server.Services = append(server.Services, &k8gbv1beta1.NamespacedName{
+				server.Services = append(server.Services, &k8gbv1beta1io.NamespacedName{
 					Name:      string(backendRef.Name),
 					Namespace: namespace,
 				})
@@ -110,6 +110,11 @@ func GetServersFromRoute(route RouteAdapter) ([]*k8gbv1beta1.Server, error) {
 
 // GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 func GetGslbExposedIPs(gateway *gatewayapiv1.Gateway, gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error) {
+	// fetch the IP addresses by resolving hostnames from an annotation if it exists
+	if hostnames, ok := gslbAnnotations[utils.ExposedHostnamesAnnotation]; ok {
+		return utils.ResolveHostnames(hostnames, parentZoneDNSServers...)
+	}
+
 	// fetch the IP addresses of the reverse proxy from an annotation if it exists
 	if ingressIPsFromAnnotation, ok := gslbAnnotations[utils.ExternalIPsAnnotation]; ok {
 		return utils.ParseIPAddresses(ingressIPsFromAnnotation)

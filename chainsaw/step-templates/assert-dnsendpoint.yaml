@@ -22,7 +22,7 @@ spec:
         EXPECTED_TARGETS=gslb-ns-eu-cloud.example.com,gslb-ns-us-cloud.example.com
         EXPECTED_A_RECORD=A
         EXPECTED_GLUE_NAME=gslb-ns-$GEO_TAG-cloud.example.com
-        EXPECTED_GLUE_TARGETS=$(kubectl get ing -n k8gb init-ingress -ojson | jq -r '[.status.loadBalancer.ingress[].ip] | join(",")')
+        EXPECTED_GLUE_TARGETS=$(kubectl get svc k8gb-coredns -n k8gb -o json | jq -r '[.status.loadBalancer.ingress[].ip] | join(",")')
         
         ACTUAL_NS_RECORD=$(kubectl get dnsendpoint k8gb-ns-extdns-cloud-example-com -n k8gb -o json | jq -r '.spec.endpoints[0].recordType')
         ACTUAL_DNS_NAME=$(kubectl get dnsendpoint k8gb-ns-extdns-cloud-example-com -n k8gb -o json | jq -r '.spec.endpoints[0].dnsName')

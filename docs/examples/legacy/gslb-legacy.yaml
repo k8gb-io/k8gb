@@ -1,0 +1,12 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-gslb
+  namespace: default
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: legacy-gslb
+  strategy:
+    type: roundRobin

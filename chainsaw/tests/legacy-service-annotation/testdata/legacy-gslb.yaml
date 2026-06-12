@@ -1,0 +1,16 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-service-annotation
+  namespace: ($namespace)
+  annotations:
+    k8gb.io/hostname: legacy-service-annotation.cloud.example.com
+spec:
+  resourceRef:
+    apiVersion: v1
+    kind: Service
+    name: frontend-podinfo
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
+    dnsTtlSeconds: 5

@@ -25,6 +25,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/k8gb-io/k8gb/controllers/ipresolver"
+
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
+	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"go.uber.org/mock/gomock"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
@@ -38,16 +45,28 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 	}
 
 	tests := []struct {
-		name          string
-		config        *resolver.Config
-		expectedError bool
-		host          string
-		result        map[string]string
+		name            string
+		config          *resolver.Config
+		expectedError   bool
+		host            string
+		result          map[string]string
+		zoneDelegations *v1beta1.ZoneDelegationList
 	}{
 		{
 			name: "hit cloud.example.com",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
-				ClusterGeoTag: "us",
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"eu"},
 				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
@@ -67,8 +86,19 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com with three clusters",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
-				ClusterGeoTag: "za",
+				ClusterGeoTag:         "za",
+				ExtClustersGeoTagsRaw: []string{"eu", "us"},
 				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
@@ -89,8 +119,19 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com on multiple DNS servers",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
-				ClusterGeoTag: "us",
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"eu"},
 				DelegationZones: []*resolver.DelegationZoneInfo{
 					{
 						ParentZone:       "example.com",
@@ -116,6 +157,16 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "unsupported host",
+			zoneDelegations: &v1beta1.ZoneDelegationList{
+				Items: []v1beta1.ZoneDelegation{
+					{
+						Spec: v1beta1.ZoneDelegationSpec{
+							ParentZone:       "example.com",
+							LoadBalancedZone: "cloud.example.com",
+						},
+					},
+				},
+			},
 			config: &resolver.Config{
 				ClusterGeoTag: "us",
 				DelegationZones: []*resolver.DelegationZoneInfo{
@@ -137,7 +188,16 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ns, err := NewDynamic(test.config).GetExternalClusterNSNamesByHostname(test.host)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			zs := zones.NewMockZoneDelegation(ctrl)
+			ipr := ipresolver.NewMockResolver(ctrl)
+			ipr.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.2"}}, nil).AnyTimes()
+			zd, _ := zones.NewZoneDelegationWrapper(&test.zoneDelegations.Items[0], test.config, ipr).GetDetail(context.TODO())
+			zs.EXPECT().ExtendedZoneDelegation(gomock.Any(), gomock.Any()).Return(zd, nil).AnyTimes()
+			zs.EXPECT().List(gomock.Any()).Return(test.zoneDelegations, nil)
+			ns, err := NewDynamic(test.config, zs).GetExternalClusterNSNamesByHostname(context.TODO(), test.host)
 			if test.expectedError {
 				assert.Error(t, err)
 				return

@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.18.1](https://img.shields.io/badge/Version-v0.18.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.18.1](https://img.shields.io/badge/AppVersion-v0.18.1-informational?style=flat-square)
+![Version: v0.19.0](https://img.shields.io/badge/Version-v0.19.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.19.0](https://img.shields.io/badge/AppVersion-v0.19.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -37,7 +37,7 @@ Kubernetes: `>= 1.21.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://coredns.github.io/helm | coredns | 1.45.2 |
-| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.20.0 |
+| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.21.1 |
 
 #### Tested Environment Configurations:
 
@@ -57,8 +57,8 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | coredns.corefile | object | `{"enabled":true,"reload":{"enabled":true,"interval":"30s","jitter":"15s"}}` | CoreDNS configmap |
 | coredns.corefile.reload | object | `{"enabled":true,"interval":"30s","jitter":"15s"}` | Reload CoreDNS configmap when it changes https://coredns.io/plugins/reload/ |
 | coredns.deployment.skipConfig | bool | `true` | Skip CoreDNS creation and uses the one shipped by k8gb instead |
-| coredns.image.repository | string | `"k8gb-io.gateway.scarf.sh/absaoss/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.3.0"` | image tag |
+| coredns.image.repository | string | `"registry.k8gb.io/k8gb-io/k8s_crd"` | CoreDNS CRD plugin image |
+| coredns.image.tag | string | `"v0.4.0"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` | requests and limits for the coredns container |
 | coredns.resources.requests.cpu | string | `"100m"` |  |
@@ -70,7 +70,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | extdns.domainFilters[0] | string | `"example.com"` |  |
 | extdns.enabled | bool | `false` |  |
 | extdns.interval | string | `"20s"` |  |
-| extdns.labelFilter | string | `"k8gb.absa.oss/dnstype=extdns"` |  |
+| extdns.labelFilter | string | `"k8gb.io/dnstype=extdns"` |  |
 | extdns.logLevel | string | `"debug"` |  |
 | extdns.managedRecordTypes[0] | string | `"A"` |  |
 | extdns.managedRecordTypes[1] | string | `"CNAME"` |  |
@@ -98,8 +98,13 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
 | k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used. |
-| k8gb.imageRepo | string | `"k8gb-io.gateway.scarf.sh/absaoss/k8gb"` | image repository |
+| k8gb.extraVolumeMounts | list | `[{"mountPath":"/etc/dynamic","name":"dynamic-zones"}]` | dynamic zones configmap |
+| k8gb.extraVolumes[0].configMap.name | string | `"k8gb-zone-delegation"` |  |
+| k8gb.extraVolumes[0].configMap.optional | bool | `true` |  |
+| k8gb.extraVolumes[0].name | string | `"dynamic-zones"` |  |
+| k8gb.imageRepo | string | `"registry.k8gb.io/k8gb-io/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
+| k8gb.installLegacyCrds | bool | `true` | whether it should also deploy the legacy k8gb.absa.oss CRD |
 | k8gb.log.format | string | `"simple"` | log format (simple,json) |
 | k8gb.log.level | string | `"info"` | log level (panic,fatal,error,warn,info,debug,trace) |
 | k8gb.metricsAddress | string | `"0.0.0.0:8080"` | Metrics server address |
@@ -128,4 +133,4 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | tracing.samplingRatio | string | `nil` | float representing the ratio of how often the span should be kept/dropped (env var `TRACING_SAMPLING_RATIO`) if not specified, the AlwaysSample will be used which is the same as 1.0. `0.1` would mean that 10% of samples will be kept |
 | tracing.sidecarImage.pullPolicy | string | `"Always"` |  |
 | tracing.sidecarImage.repository | string | `"otel/opentelemetry-collector"` | OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data to somewhere else using exporters (Jaeger for instance) |
-| tracing.sidecarImage.tag | string | `"0.146.1"` |  |
+| tracing.sidecarImage.tag | string | `"0.153.0"` |  |

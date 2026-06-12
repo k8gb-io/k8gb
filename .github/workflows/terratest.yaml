@@ -32,7 +32,7 @@ jobs:
           should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
@@ -46,6 +46,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    strategy:
+      matrix:
+        k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -53,17 +56,17 @@ jobs:
           fetch-depth: 0
 
       - name: Setup golang
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: ./go.mod
 
       - name: Setup helm
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         with:
           version: v3.18.4
 
       - name: Build artifacts
-        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:
           version: v2.12.7
           args: release --clean --skip=publish,validate,sbom,sign --snapshot
@@ -74,21 +77,24 @@ jobs:
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "edgedns"
-          args: -c k3d/edge-dns.yaml
+          # k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/edge-dns.yaml
           k3d-version: ${{ env.K3D_VERSION }}
 
       - name: Create 1st k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb1"
-          args: -c k3d/test-gslb1.yaml
+          # k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb1.yaml
           k3d-version: ${{ env.K3D_VERSION }}
 
       - name: Create 2nd k3s Cluster
         uses: AbsaOSS/k3d-action@4e8b3239042be1dc0aed6c5eb80c13b18200fc79
         with:
           cluster-name: "test-gslb2"
-          args: -c k3d/test-gslb2.yaml
+          # k3d-version: v5.7.4
+          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb2.yaml
           k3d-version: ${{ env.K3D_VERSION }}
 
       - name: K8GB deployment
@@ -111,8 +117,8 @@ jobs:
         if: always()
         uses: ./.github/actions/print-terratest-debug
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: terratest-logs
+          name: terratest-logs-${{ matrix.k8s-version }}
           path: ${{ github.workspace }}/tmp/terratest

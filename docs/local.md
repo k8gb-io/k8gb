@@ -6,7 +6,9 @@
 - [Verify installation](#verify-installation)
 - [Run integration tests](#run-integration-tests)
 - [Cleaning](#cleaning)
+- [AI inference resilience demo](#ai-inference-resilience-demo)
 - [Sample demo](#sample-demo)
+  - [Multi-Service Ingress](#multi-service-ingress)
   - [Round Robin](#round-robin)
   - [Failover](#failover)
 
@@ -49,6 +51,31 @@ For more user-centric targets in that makefile consult `make help`.
 To spin-up a local environment using two k3s clusters and deploy a test application to both clusters, execute the command below:
 ```sh
 make deploy-full-local-setup
+```
+
+By default, local setup also applies a small set of legacy `k8gb.absa.oss/v1beta1` migration demo resources on each local test cluster. The examples reuse workloads from the standard setup and cover referenced Ingresses, embedded Ingress migration, and annotation-sensitive LoadBalancer Service reconciliation. The setup prints legacy/canonical manifests so you can see migration output immediately.
+
+The Service examples share one LoadBalancer Service backed by the existing `multiservice-blue` pods:
+
+- `legacy-service-runtime-demo` remains in legacy runtime mode.
+- `legacy-service-migration-demo` is migrated to `k8gb.io/v1beta1`.
+
+Verify that both paths retain `k8gb.io/hostname` and reconcile a `DNSEndpoint`:
+
+```sh
+kubectl get gslb.k8gb.absa.oss -n test-gslb legacy-service-runtime-demo \
+  -o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}'
+kubectl get dnsendpoint -n test-gslb legacy-service-runtime-demo
+
+kubectl get gslb.k8gb.io -n test-gslb legacy-service-migration-demo \
+  -o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}'
+kubectl get dnsendpoint -n test-gslb legacy-service-migration-demo
+```
+
+If you want to skip this demo output:
+
+```sh
+make deploy-full-local-setup SHOW_LEGACY_MIGRATION_DEMO=false
 ```
 
 ## Verify installation
@@ -114,6 +141,16 @@ Run following command and check if you get two json responses.
 curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H "Host:roundrobin.cloud.example.com"
 ```
 
+The local setup also deploys small multi-service Ingresses backed by two NGINX services and canonical `k8gb.io/v1beta1` GSLBs using both service health policies.
+
+```sh
+curl localhost:80/blue -H "Host:multiservice-all.cloud.example.com"
+curl localhost:80/green -H "Host:multiservice-any.cloud.example.com"
+kubectl --context k3d-test-gslb1 -n test-gslb get gslb \
+  multiservice-gslb-all multiservice-gslb-any \
+  -o custom-columns=NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+```
+
 ## Run integration tests
 
 There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/k8gb-io/k8gb/tree/master/terratest).
@@ -130,14 +167,52 @@ Clean up your local development clusters with
 make destroy-full-local-setup
 ```
 
+## AI inference resilience demo
+
+The local setup can also deploy a lightweight Ollama inference endpoint to demonstrate k8gb failover for AI traffic:
+
+```sh
+make deploy-full-local-setup FULL_LOCAL_SETUP_WITH_AI_DEMO=true
+```
+
+If the local setup is already running:
+
+```sh
+make ai-inference-demo AI_DEMO_ACTION=deploy
+make ai-inference-demo AI_DEMO_ACTION=probe
+make ai-inference-demo AI_DEMO_ACTION=failover
+make ai-inference-demo AI_DEMO_ACTION=probe
+make ai-inference-demo AI_DEMO_ACTION=failback
+```
+
+The demo caches the downloaded model in a PVC, so failback does not re-download the model. If model startup is slow, inspect progress with:
+
+```sh
+make ai-inference-demo AI_DEMO_ACTION=logs
+```
+
+See [AI Inference Resilience Demo](ai-inference-demo.md) for the full local and real-environment flow.
+
 ## Sample demo
+
+### Multi-Service Ingress
+
+`multiservice-all.cloud.example.com` and `multiservice-any.cloud.example.com` both route `/blue` and `/green` to separate Services. The `All` GSLB requires both Services to be healthy, while the `Any` GSLB remains healthy as long as at least one backing Service is healthy.
+
+```sh
+kubectl --context k3d-test-gslb1 -n test-gslb scale deploy multiservice-green --replicas=0
+kubectl --context k3d-test-gslb1 -n test-gslb get gslb \
+  multiservice-gslb-all multiservice-gslb-any \
+  -o custom-columns=NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+kubectl --context k3d-test-gslb1 -n test-gslb scale deploy multiservice-green --replicas=1
+```
 
 ### Round Robin
 
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - roundrobin.cloud.example.com` and depending
 on the region, podinfo will return **us** or **eu**. In the current round robin implementation IP addresses are randomly picked.
-See [Gslb manifest with round robin strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml)
+See [Gslb manifest with round robin strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_roundrobin_ingress.yaml)
 
 Try to run the following command several times and watch the `message` field.
 ```sh
@@ -167,7 +242,7 @@ As expected result you should see podinfo message changing
 Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each
 cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending
 on whether podinfo is running inside the cluster it returns only **eu** or **us**.
-See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_ingress.yaml)
+See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_failover_ingress.yaml)
 
 Switch GLSB to failover mode:
 ```sh

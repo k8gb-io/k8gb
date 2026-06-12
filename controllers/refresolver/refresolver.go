@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"reflect"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapigrpcroute"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapihttproute"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapitcproute"
@@ -38,14 +38,14 @@ import (
 // GslbReferenceResolver resolves references to other kubernetes resources concerning ingress configuration
 type GslbReferenceResolver interface {
 	// GetServers retrieves GSLB the server configuration
-	GetServers() ([]*k8gbv1beta1.Server, error)
+	GetServers() ([]*k8gbv1beta1io.Server, error)
 	// GetGslbExposedIPs retrieves the load balancer IP address of the GSLB
 	GetGslbExposedIPs(gslbAnnotations map[string]string, parentZoneDNSServers utils.DNSList) ([]string, error)
 }
 
 // New creates a new GSLBReferenceResolver
-func New(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (GslbReferenceResolver, error) {
-	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1.ResourceRef{}) {
+func New(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (GslbReferenceResolver, error) {
+	if reflect.DeepEqual(gslb.Spec.ResourceRef, k8gbv1beta1io.ResourceRef{}) {
 		return ingress.NewEmbeddedResolver(gslb, k8sClient)
 	}
 	if gslb.Spec.ResourceRef.Kind == "Ingress" && gslb.Spec.ResourceRef.APIVersion == "networking.k8s.io/v1" {

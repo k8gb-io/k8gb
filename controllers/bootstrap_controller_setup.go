@@ -26,7 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/k8gb-io/k8gb/controllers/logging"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -36,11 +35,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var logger = logging.Logger()
-
 func (r *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		Named("coredns").
+		Named("k8gb-coredns").
 		Watches(
 			&corev1.Service{},
 			handler.EnqueueRequestsFromMapFunc(watcher),

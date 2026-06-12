@@ -27,22 +27,331 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details><summary><strong>Backlog</strong></summary>
+<details open><summary><strong>May 27, 2026 #93</strong></summary>
 
-## Backlog:
+## May 27, 2026 #93
 
-- Community user reporting docker hub rate limiting during k8gb installation - republish to github
-- [https://github.com/k8gb-io/k8gb/issues/1314](https://github.com/k8gb-io/k8gb/issues/1314) - split brain documentation request
+[**Zoom Recording**](https://zoom.us/rec/share/ybn-H0ZS8of1dZ8GL_eQJZ_NTul7AlX3V1qM9iY84wrzEmVfGzDa0Pl8HGnT4lhE.17lIjsT6oYCSkM_X) 
+
+[**On YouTube**](https://youtu.be/lsMCIQtEwDU) 
+
+**Attendees**
+
+- [@kuritka](https://github.com/kuritka)
+- [@ytsarev](https://github.com/ytsarev)
+- [@elohmrow](https://github.com/elohmrow)
+
+**Agenda**
+
+- important change from @kuritka: [improve the handling of Glue A record resolution failures](https://github.com/k8gb-io/k8gb/pull/2350)
+  - instead of `ipresolver` stopping on first failed Glue A record, return all,
+  even those that do not resolve. filter out the valid ones so we always know
+  the max number of IPs for all live clusters. enable proper cleanup of
+  delegation zones.
+- resubmitted to [k0rdent catalog](https://github.com/k0rdent/catalog/pull/1051)
+  - makes it easier for folks using k0rdent to use k8gb in their deploys.
+- community contributions in progress
+  - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98 - needs rebase
+  - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+  - [fix: restore extraServerBlocks as global setting](https://github.com/k8gb-io/k8gb/pull/2121) @angelbarrera92 - stale?
+  - [feat: Add health checking for ingress controllers](https://github.com/k8gb-io/k8gb/pull/2110) @sudhamshk - needs rebase
+- kubecon na submissions
+  - [ai inference](https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md) ... + blog post wip
+  - joint w/ nutanix
+    - implementing active/passive failover for stateful k8s workloads w/k8gb,
+    velero, gitops. 
+  - what talks / blog posts, etc. would you like to see?
+- no incubation update 
+- action items from last time
+  - wip - post about new blog platform
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+
+**(new) Actions**
+
+- create a k0rdent reference platform
+- create a blog post highlighting new zone delegation functionality, extend k8gb documentation once the feature is finished
+- work with [@infbase](https://github.com/infbase) to finalize an "intro to k8gb" video
+- rebase / close stale community contributions
 
 </details>
 
-<details open><summary><strong>March 4, 2026 #87</strong></summary>
+<details><summary><strong>May 13, 2026 #92</strong></summary>
+
+## May 13, 2026 #92
+
+Zoom Recording: https://zoom.us/rec/share/ApaywV96kTNDOCVmRIOPDTtRFlE2FWH7klTkMZHxO_nTJ4tsZAukU6-BhDdSS66t.tSF1Herv18JM46Uu
+
+On YouTube: https://youtu.be/oH-NQAX9yxM 
+
+**Attendees**
+
+- Michal
+- Dinar
+- Yury
+- Bradley
+
+**Agenda**
+
+- **News**
+  - Blog / website follow-up: farhan fixed the blog: https://www.k8gb.io/v0.19.0/blog/ the latest blogs are available on all stable tags
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)** - yury made a mass clean up of PRs and Issues in the main repo
+  - [project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+  - Security / CI
+    - [Switch Harden-Runner from egress-policy: audit to block in CI workflow](https://github.com/k8gb-io/k8gb/issues/2302)
+    - ✅ [Security Alert: Compromised aquasecurity/trivy-action detected in workflow runs](https://github.com/k8gb-io/k8gb/issues/2294) ➡️  closed - [we have fully deprecated Trivy workflows](https://github.com/k8gb-io/k8gb/issues/2294#issuecomment-4435587127).
+  - Governance / community - **same as last time**
+  - Integrations / docs - **same as last time**
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+  - ZoneDelegation work
+    - ✅ [ZoneDelegation (3.7/4) feat: ApplicationDNSEndpoint to ZoneService refactor](https://github.com/k8gb-io/k8gb/pull/2335)
+    - ✅ [ZoneDelegation (3.6/4) feat: chainsaw ZoneDelegation status](https://github.com/k8gb-io/k8gb/pull/2328)
+    - [Dynamic ZoneDelegations](https://github.com/k8gb-io/k8gb/pull/2102)
+  - Testing / CI
+    - ✅ [test(DTR): Testing different K8S versions for DTR (incubation)](https://github.com/k8gb-io/k8gb/pull/2095)
+    - [ci: add crust-gather to collect cluster state on pipeline failure](https://github.com/k8gb-io/k8gb/pull/2310)
+  - Dependencies / renovate
+    - [fix(deps): update kubernetes monorepo to v0.36.0](https://github.com/k8gb-io/k8gb/pull/2332)
+    - ✅ [fix(deps): update all non-major dependencies](https://github.com/k8gb-io/k8gb/pull/2318)
+    - ✅ [chore(deps): update otel/opentelemetry-collector docker tag to v0.150.1](https://github.com/k8gb-io/k8gb/pull/2315)
+    - ✅ [chore(deps): update rancher/k3s docker tag to v1.35.3](https://github.com/k8gb-io/k8gb/pull/2314)
+  - Community contributions
+    - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98
+    - ✖️ [Add k8gb to k0rdent catalog](https://github.com/k8gb-io/k8gb/pull/2281) @aryasoni98 - **closed**
+    - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+    - [fix: restore extraServerBlocks as global setting](https://github.com/k8gb-io/k8gb/pull/2121) @angelbarrera92
+    - [feat: Add health checking for ingress controllers](https://github.com/k8gb-io/k8gb/pull/2110) @sudhamshk
+    - ✖️ [Preflight and docs for localhost:5053/5054 +tcp failures; add DNS LB verification test](https://github.com/k8gb-io/k8gb/pull/2106) @ljluestc - **closed for now**
+- **Community Update**
+  - Incubation
+    - [CNCF incubation application](https://github.com/cncf/toc/issues/1472) status: **same as last time**
+    - Adopter interviews / outreach
+- **Other**
+  - https://github.com/k8gb-io/k8gb/issues/52 - what does a k8gb 1.0 look like?
+- **Action Items**
+  - [ ] Yury: ask about [unmerged incubation tech review](https://github.com/cncf/toc/pull/2029), re-activate ADOPTER
+  questionnaires
+  - [ ] Yury: ping recent community contributors (aryasoni98, piroddi, angelbarrera92, sudhamshk, ljluest, dulaj-me, sjadema) about being ADOPTERs / their use cases
+  - [ ] Bradley: LinkedIn post about [new k8gb blog / post](https://www.k8gb.io/latest/blog/2026/03/22/k8gb-local-setup-beginners-guide/) 
+  - [ ] Bradley: LinkedIn post about this community meeting 
+  - [ ] Michael / Dinar: review [require all services healthy for server health](https://github.com/k8gb-io/k8gb/pull/2342) 
+  - [ ] Dinar / Yury: [Support reading external metrics to assess Service readiness](https://github.com/k8gb-io/k8gb/issues/1745) - let's ping adopters to see
+  if it's a widespread use case. steer design to be based on standard Service+EndpointSlices, avoid external dependency in k8gb reconciliation loop by default                                
+  - [ ] Michal: see if we can [Remove deprecated splitBrainThresholdSeconds](https://github.com/k8gb-io/k8gb/issues/1831) in the next release
+  - [ ] Yury / Michal: Follow up on new community contribution [Allow overriding discovered CoreDNS exposed IPs for bare-metal clusters behind static NAT](https://github.com/k8gb-io/k8gb/issues/2360) ... how does it relate to recent ZoneDelegation work?
+  - [ ] Dinar / Yury: fix [service health calculation](https://github.com/k8gb-io/k8gb/issues/2326)
+    with the strategy that all services should be healthy in multi-service
+    networking object
+  - [ ] ⏳ prune Issues and PRs
+
+</details>
+
+<details><summary><strong>April 29, 2026 #91</strong></summary>
+
+## April 29, 2026 #91
+
+Zoom Recording: https://zoom.us/rec/share/hQfvLFDoczSNj5u8uYGd4yArhFVZUk_83j5Gb4YA_VYrg6qO1ZyxdPpzbX6zJho1.MqVD3DgOqdMMA-FT
+
+On YouTube: https://youtu.be/59B6aTmkgNY
+
+**Attendees**
+
+- Yury
+- Michal
+- Dinar
+
+**Agenda**
+
+- **News**
+  - Blog / website follow-up
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
+  - [project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+  - Security / CI
+    - [Switch Harden-Runner from egress-policy: audit to block in CI workflow](https://github.com/k8gb-io/k8gb/issues/2302)
+    - [Security Alert: Compromised aquasecurity/trivy-action detected in workflow runs](https://github.com/k8gb-io/k8gb/issues/2294)
+  - Governance / community
+    - [Create a Steering Committee](https://github.com/k8gb-io/k8gb/issues/2293)
+    - [Create an official "Contributor" role](https://github.com/k8gb-io/k8gb/issues/2219)
+    - [Are you using K8GB?](https://github.com/k8gb-io/k8gb/issues/2135)
+  - Integrations / docs
+    - [Guided K8gb install mission in KubeStellar Console](https://github.com/k8gb-io/k8gb/issues/2283)
+    - [Add k8gb to k0rdent catalog](https://github.com/k8gb-io/k8gb/issues/2174)
+    - [TLSRoute support in gateway.networking.k8s.io/v1alpha2 vs gateway.networking.k8s.io/v1alpha3 ?](https://github.com/k8gb-io/k8gb/issues/2152)
+    - [Helm publish workflow to only push current release chart](https://github.com/k8gb-io/k8gb/issues/2137)
+    - [extraServerBlocks feature broken after refactoring - location mismatch between schema and template](https://github.com/k8gb-io/k8gb/issues/2120)
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+  - ZoneDelegation work
+    - [ZoneDelegation (3.7/4) feat: ApplicationDNSEndpoint to ZoneService refactor](https://github.com/k8gb-io/k8gb/pull/2335)
+    - [ZoneDelegation (3.6/4) feat: chainsaw ZoneDelegation status](https://github.com/k8gb-io/k8gb/pull/2328)
+    - [Dynamic ZoneDelegations](https://github.com/k8gb-io/k8gb/pull/2102)
+  - Testing / CI
+    - [test(DTR): Testing different K8S versions for DTR (incubation)](https://github.com/k8gb-io/k8gb/pull/2095)
+    - [ci: add crust-gather to collect cluster state on pipeline failure](https://github.com/k8gb-io/k8gb/pull/2310)
+  - Dependencies / renovate
+    - [fix(deps): update kubernetes monorepo to v0.36.0](https://github.com/k8gb-io/k8gb/pull/2332)
+    - [fix(deps): update all non-major dependencies](https://github.com/k8gb-io/k8gb/pull/2318)
+    - [chore(deps): update otel/opentelemetry-collector docker tag to v0.150.1](https://github.com/k8gb-io/k8gb/pull/2315)
+    - [chore(deps): update rancher/k3s docker tag to v1.35.3](https://github.com/k8gb-io/k8gb/pull/2314)
+  - Community contributions
+    - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98
+    - [Add k8gb to k0rdent catalog](https://github.com/k8gb-io/k8gb/pull/2281) @aryasoni98
+    - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+    - [fix: restore extraServerBlocks as global setting](https://github.com/k8gb-io/k8gb/pull/2121) @angelbarrera92
+    - [feat: Add health checking for ingress controllers](https://github.com/k8gb-io/k8gb/pull/2110) @sudhamshk
+    - [Preflight and docs for localhost:5053/5054 +tcp failures; add DNS LB verification test](https://github.com/k8gb-io/k8gb/pull/2106) @ljluestc
+- **Community Update**
+  - Incubation
+    - [CNCF incubation application](https://github.com/cncf/toc/issues/1472) status: Adopter Interviews & Project Discussion
+    - Adopter interviews / outreach
+- **Other**
+  - prune old Issues and PRs?
+- **Action Items**
+  - pruning Issues and PRs
+  - fix service health calculation https://github.com/k8gb-io/k8gb/issues/2326
+    with the strategy that all services should be healthy in multi-service
+    networking object(Dinar, Yury)
+  - https://github.com/k8gb-io/k8gb/issues/1745 - steer design to be based on
+    standard Service+EndpointSlices, avoid external dependency in k8gb
+    reconciliation loop by default(Dinar, Yury)
+
+</details>
+
+<details><summary><strong>April 15, 2026 #90</strong></summary>
+
+## April 15, 2026 #90 The Tax Man Cometh!
+
+Zoom Recording: https://zoom.us/rec/share/RjAVXKCGYWZJ32bJFIyqqtCzCxxmLOK3F_e0KRYeUM5faSZ3PONdaD_uRyq8TaYx.-fn3QMuG9L2Qyz42 
+
+On YouTube: https://youtu.be/N46N19RmQ2w 
+
+**Attendees**
+
+- Farhan
+- Michal
+- Dinar
+- Yury
+- Bradley
+
+**Agenda**
+
+- **News**
+  - [first blog post](https://deploy-preview-2329--k8gb-preview.netlify.app/blog/2026/03/22/k8gb-local-setup-beginners-guide/) 🎉
+- **[Issue Review](https://github.com/k8gb-io/k8gb/issues)**
+  - [project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **[PR Reviews](https://github.com/k8gb-io/k8gb/pulls)**
+  - ZoneDelegation and friends ... are [2323](https://github.com/k8gb-io/k8gb/pull/2323)-[2328](https://github.com/k8gb-io/k8gb/pull/2328) prereqs for [2102](https://github.com/k8gb-io/k8gb/pull/2102)?
+  - ready? [test(DTR): Testing different K8S versions for DTR (incubation)](https://github.com/k8gb-io/k8gb/pull/2095)
+  - renovate stuff
+  - community contributions
+    - [2282](https://github.com/k8gb-io/k8gb/pull/2282), [2281](https://github.com/k8gb-io/k8gb/pull/2281) @aryasoni98
+    - [2224](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+    - [2121](https://github.com/k8gb-io/k8gb/pull/2121) @angelbarrera92
+    - [2110](https://github.com/k8gb-io/k8gb/pull/2110) @sudhamshk
+    - [2106](https://github.com/k8gb-io/k8gb/pull/2106) @ljluestc
+  - prune old things?
+- **Community Update**
+  - no Incubating update
+  - since KubeCon ...
+    - page views +33%
+    - unique visitors +65%
+    - followers +19
+- **Other**
+- **Action Items**
+  - pruning Issues and PRs
+  - who will lead the next community meeting?
+
+</details>
+
+<details><summary><strong>April 1, 2026 #89</strong></summary>
+
+## April 1, 2026 #89
+
+Zoom Recording: https://zoom.us/rec/share/65uyJVFyYDdJGeF4ymPUC_NA99mSCGBiD8lH5FQtZMeWjYNWGSlKHHhKBnCwll23.EDaZ0E2WuBgquspX 
+
+On YouTube: https://youtu.be/PgBJj2tOVww
+
+**Attendees**
+
+- Farhan 
+- Michal
+- Yury
+  
+**Agenda**
+
+- **News**
+  - KubeCon happened last week 🎉
+    - k8gb kiosk: P-12B | 24th Tuesday 15:10 - 19:00 | Hall 5 - Gouda Zone - Project Pavilion 🍻
+    - 2 talks: [Security Review Panel](https://sched.co/2EF6x) and [Building Unified Global Load Balancing for the Edge With k8gb](https://sched.co/2DY3a)
+- **Issue Review**
+  - [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+  - Zone Delegation discussion and demo - Michal
+- **PR Reviews**
+  - https://github.com/k8gb-io/k8gb/pull/2291 - Farhan
+  - https://github.com/k8gb-io/k8gb/pull/2307/ - Farhan
+  - https://github.com/k8gb-io/k8gb/pull/2095 - Farhan
+  - https://github.com/k8gb-io/k8gb/pull/2313 - Michal - ZD for review
+- **Community Update**
+  - Incubation
+    - governance and tech reviews complete, working on ADOPTER interviews
+  - [contribution from Tailscale](https://github.com/k8gb-io/k8gb/pull/2285)
+  - Vanity stats
+    - 305 (140 last 90d) LinkedIn followers 📈
+    - page views up 43% last week, unique visitors up 87%
+    - scarf data - @ytsarev
+    - last month: 1,785 impressions / 64 reactions
+    - 1,161 ⭐
+- **Other**
+  - Trivy incident review https://github.com/k8gb-io/k8gb/issues/2294
+  - https://deathbyclawd.com/?url=k8gb.io we are immortal 
+- **Action Items**
+</details>
+
+<details><summary><strong>March 18, 2026 #88</strong></summary>
+
+## March 18, 2026 #88
+
+Zoom Recording: https://zoom.us/rec/share/zeQ82nsITHnb2vO8dlM4EjS42ldNlPHfDEiMcXIbW75Ql_X1S28aqrCO-leO2erx.lwjr2XFj2EH7G27H 
+
+On YouTube: https://youtu.be/mxJuYXV3p3c
+
+**Attendees**
+
+- Farhan 
+- Dinar
+- Yury
+- Bradley
+
+**Agenda**
+
+- **News**
+  - KubeCon next week 🎉
+    - k8gb kiosk: P-12B | 24th Tuesday 15:10 - 19:00 | Hall 5 - Gouda Zone - Project Pavilion 🍻
+    - 2 talks: [Security Review Panel](https://sched.co/2EF6x) and [Building Unified Global Load Balancing for the Edge With k8gb](https://sched.co/2DY3a)
+- **Issue Review**
+  - [k8gb project board](https://github.com/orgs/k8gb-io/projects/2/views/1)
+- **Community Update**
+  - Incubation
+    - governance and tech reviews complete, working on ADOPTER interviews
+    - heroic efforts on api group change - @ytsarev
+  - [contribution from Tailscale](https://github.com/k8gb-io/k8gb/pull/2285)
+  - Vanity stats
+    - 300 (140 last 90d) LinkedIn followers 📈
+    - page views up 43% last week, unique visitors up 87%
+    - scarf data - @ytsarev
+    - last month: 1,785 impressions / 64 reactions
+    - 1,153 ⭐
+- **Other**
+  - added [MBCP case study](https://github.com/k8gb-io/k8gb/blob/master/ADOPTERS.md#k8gb-adopters) to the website 
+- **Action Items**
+</details>
+
+<details><summary><strong>March 4, 2026 #87</strong></summary>
 
 ## March 4, 2026 #87
 
-Zoom Recording: <update>
+Zoom Recording: https://zoom.us/rec/share/ktKo_zEgfq4YCL_xOeJiCNR5JcCf4WIKQJtLWCstoqnkF0kYI5UExE2e-3Q2YleB.uGEjLTxEfu6VMGPO
 
-On YouTube: <update>
+On YouTube: https://youtu.be/RugISBr1wds
 
 **Attendees**
 
@@ -3482,5 +3791,3 @@ Notes
 Action Items
 
 - jkremser: update the PR with colima workaround so that the svc is deployed iif it’s run together with terratests
-
-

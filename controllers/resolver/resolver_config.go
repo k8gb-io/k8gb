@@ -46,3 +46,29 @@ func (c *Config) HasExtClusterGeoTags() bool {
 	}
 	return len(c.DelegationZones[0].ExtClusterNSNames) > 0
 }
+
+func (c *Config) GetExtClusterNSNames(loadBalancedZone, parentZone string) map[string]string {
+	m := map[string]string{}
+	for _, tag := range c.ExtClustersGeoTagsRaw {
+		if tag == c.ClusterGeoTag {
+			// skip the cluster GeoTag, see: https://github.com/k8gb-io/k8gb/issues/720
+			continue
+		}
+		m[tag] = getNsName(tag, loadBalancedZone, parentZone)
+	}
+	return m
+}
+
+func (c *Config) GetNsName(loadBalancedZone, parentZone string) string {
+	return getNsName(c.ClusterGeoTag, loadBalancedZone, parentZone)
+}
+
+func (c *Config) GetTagsByNSNames(loadBalancedZone, parentZone string) map[string]string {
+	m := c.GetExtClusterNSNames(loadBalancedZone, parentZone)
+	m[c.ClusterGeoTag] = c.GetNsName(loadBalancedZone, parentZone)
+	t := make(map[string]string)
+	for k, v := range m {
+		t[v] = k
+	}
+	return t
+}

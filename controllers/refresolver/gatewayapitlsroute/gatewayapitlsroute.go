@@ -23,7 +23,7 @@ import (
 
 	context "context"
 
-	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
+	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/gatewayapi"
 	"github.com/k8gb-io/k8gb/controllers/refresolver/queryopts"
@@ -43,7 +43,7 @@ type ReferenceResolver struct {
 }
 
 // NewReferenceResolver creates a new reference resolver capable of understanding Gateway API TLSRoute resources (v1alpha2 and v1alpha3)
-func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
+func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	apiVersion := gslb.Spec.ResourceRef.APIVersion
 
 	var tlsRouteAdapter gatewayapi.RouteAdapter
@@ -81,7 +81,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) (*Ref
 }
 
 // getGslbTLSRouteRefV1Alpha2 resolves a Gateway API TLSRoute resource (v1alpha2) referenced by the Gslb spec
-func getGslbTLSRouteRefV1Alpha2(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha2.TLSRoute, error) {
+func getGslbTLSRouteRefV1Alpha2(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha2.TLSRoute, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func getGslbTLSRouteRefV1Alpha2(gslb *k8gbv1beta1.Gslb, k8sClient client.Client)
 }
 
 // getGslbTLSRouteRefV1Alpha3 resolves a Gateway API TLSRoute resource (v1alpha3) referenced by the Gslb spec
-func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha3.TLSRoute, error) {
+func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha3.TLSRoute, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1.Gslb, k8sClient client.Client)
 }
 
 // GetServers retrieves the GSLB server configuration from the TLSRoute resource
-func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1.Server, error) {
+func (rr *ReferenceResolver) GetServers() ([]*k8gbv1beta1io.Server, error) {
 	return gatewayapi.GetServersFromRoute(rr.tlsRoute)
 }
 
