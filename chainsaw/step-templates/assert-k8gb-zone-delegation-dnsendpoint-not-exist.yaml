@@ -1,0 +1,20 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation-dnsendpoint-not-exist
+spec:
+  try:
+    - script:
+        env:
+          - name: DNSENDPOINT_NAME
+            value: ($dnsEndpointName)
+        content: |
+          set -euo pipefail
+
+          if kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n k8gb >/dev/null 2>&1; then
+            echo "DNSEndpoint still exists: k8gb/$DNSENDPOINT_NAME"
+            kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n k8gb -oyaml
+            exit 1
+          fi
+
+          echo "DNSEndpoint does not exist: k8gb/$DNSENDPOINT_NAME"

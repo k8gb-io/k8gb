@@ -1,0 +1,78 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation-dnsendpoint-content
+spec:
+  try:
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: ($dnsEndpointName)
+            namespace: k8gb
+          spec:
+            endpoints:
+              - dnsName: ($loadBalancedZone)
+                recordType: NS
+                recordTTL: 30
+                # Expected NS targets are sorted, see GetNSServerList() in zones package.
+                targets: ($nsTargets)
+
+              - dnsName: ($localNsName)
+                recordType: A
+                recordTTL: 30
+        timeout: 75s
+
+    # Compare local A record targets with k8gb-coredns LoadBalancer IPs.
+    - script:
+        timeout: 75s
+        env:
+          - name: DNSENDPOINT_NAME
+            value: ($dnsEndpointName)
+          - name: LOCAL_NS_NAME
+            value: ($localNsName)
+        content: |
+          set -euo pipefail
+
+          for i in $(seq 1 30); do
+            expected_ips="$(
+              kubectl get svc k8gb-coredns -n k8gb -o json \
+                | jq -r '.status.loadBalancer.ingress[]? | .ip // .hostname' \
+                | sort
+            )"
+
+            actual_ips="$(
+              kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n k8gb -o json \
+                | jq -r --arg localNsName "$LOCAL_NS_NAME" '
+                    .spec.endpoints[]
+                    | select(.dnsName == $localNsName and .recordType == "A")
+                    | .targets[]?
+                  ' \
+                | sort
+            )"
+
+            echo "Expected local IPs from k8gb-coredns service:"
+            printf '%s\n' "$expected_ips"
+
+            echo "Actual local IPs from DNSEndpoint:"
+            printf '%s\n' "$actual_ips"
+
+            if [ -n "$expected_ips" ] && [ "$expected_ips" = "$actual_ips" ]; then
+              echo "Local IP targets match"
+              exit 0
+            fi
+
+            echo "Waiting for DNSEndpoint local IP targets to match k8gb-coredns service..."
+            sleep 2
+          done
+
+          echo "DNSEndpoint local IP targets did not match k8gb-coredns service in time"
+
+          echo "Final k8gb-coredns service:"
+          kubectl get svc k8gb-coredns -n k8gb -oyaml
+
+          echo "Final DNSEndpoint:"
+          kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n k8gb -oyaml
+
+          exit 1

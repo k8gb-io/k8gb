@@ -1,0 +1,20 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation-dnsendpoint-ns-only
+spec:
+  try:
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: ($dnsEndpointName)
+            namespace: k8gb
+          spec:
+            endpoints:
+              - dnsName: ($loadBalancedZone)
+                recordType: NS
+                recordTTL: 30
+                targets: ($nsTargets)
+        timeout: 75s

@@ -1,0 +1,454 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: zone-delegation-lifecycle
+  labels:
+    k8gb.io/name: zd
+
+spec:
+  description: >
+    Verifies the ZoneDelegation lifecycle across multiple clusters. The test first
+    checks that k8gb contains the default ZoneDelegation and that the generated
+    CoreDNS ConfigMap and delegation DNSEndpoint are correctly configured. It then
+    creates an additional ZoneDelegation on one cluster and verifies the same
+    generated resources again, including DNS zone availability. The process is
+    repeated after creating the ZoneDelegation on the second cluster. Finally, the
+    test removes the ZoneDelegations from individual clusters and verifies that
+    the generated delegation resources are updated accordingly during cleanup.
+    
+    (1/5) default run - cloud-example-com.conf exists on both clusters
+    (2/5) apply ZD cloud2-example-com.conf on EU cluster
+    (3/5) apply ZD cloud3-example-com.conf on US cluster
+    (4/5) delete ZD cloud3-example-com.conf on EU cluster
+  steps:
+    # (1/5) default settings with single zone delegation (cloud-example-com.conf)
+    - name: (1/5) Verify k8gb-zone-delegation ConfigMap
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on US
+      cluster: us
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (1/5) Verify k8gb-zone-delegation ConfigMap
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on EU
+      cluster: eu
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+
+    - name: (1/5) Verify ZoneDelegation object on EU
+      description: Verify default ZoneDelegation cloud-example-com.conf contains bounded IPs of itself and external cluster
+      cluster: eu
+      bindings:
+        - name: zoneDelegationName
+          value: cloud-example-com.conf
+        - name: loadBalancedZone
+          value: cloud.example.com
+        - name: parentZone
+          value: example.com
+        - name: dnsZoneNegTTL
+          value: 10
+        - name: doFinalize
+          value: false
+        - name: expectedNsNames
+          value:
+           - gslb-ns-eu-cloud.example.com
+           - gslb-ns-us-cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation.yaml
+
+    - name: (1/5) Verify ZoneDelegation object on US
+      description: Verify default ZoneDelegation cloud-example-com.conf contains bounded IPs of itself and external cluster
+      cluster: us
+      bindings:
+        - name: zoneDelegationName
+          value: cloud-example-com.conf
+        - name: loadBalancedZone
+          value: cloud.example.com
+        - name: parentZone
+          value: example.com
+        - name: dnsZoneNegTTL
+          value: 10
+        - name: doFinalize
+          value: false
+        - name: expectedNsNames
+          value:
+           - gslb-ns-eu-cloud.example.com
+           - gslb-ns-us-cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation.yaml
+
+    - name: (1/5) Verify dnsendpoint object on US
+      description: Verify default delegation DNSEndpoint cloud.example.com contains bounded local IPs and gslb-ns-*-cloud.example.com
+      cluster: us
+      bindings:
+      - name: dnsEndpointName
+        value: k8gb-ns-extdns-cloud-example-com
+      - name: loadBalancedZone
+        value: cloud.example.com
+      - name: localNsName
+        value: gslb-ns-us-cloud.example.com
+      - name: nsTargets
+        value:
+          - gslb-ns-eu-cloud.example.com
+          - gslb-ns-us-cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint.yaml
+
+    - name: (1/5) Verify dnsendpoint object on EU
+      description: Verify default delegation DNSEndpoint cloud.example.com contains bounded local IPs and gslb-ns-*-cloud.example.com
+      cluster: eu
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud-example-com
+        - name: loadBalancedZone
+          value: cloud.example.com
+        - name: localNsName
+          value: gslb-ns-eu-cloud.example.com
+        - name: nsTargets
+          value:
+            - gslb-ns-eu-cloud.example.com
+            - gslb-ns-us-cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint.yaml
+
+      # 2/5 apply new zone delegation (cloud2-example-com.conf) on EU cluster
+    - name: (2/5) Apply new zone delegation on EU cluster
+      cluster: eu
+      try:
+        - apply:
+            file: ./testdata/cloud2-example-com.conf.yaml
+
+    - name: (2/5) Verify k8gb-zone-delegation ConfigMap
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on US
+      cluster: eu
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+            - cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (2/5) Verify k8gb-zone-delegation ConfigMap
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on US
+      cluster: us
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (2/5) Verify ZoneDelegation object on EU
+      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      cluster: eu
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: parentZone
+          value: example.com
+        - name: dnsZoneNegTTL
+          value: 10
+        - name: doFinalize
+          value: true
+        - name: expectedNsNames
+          value:
+            - gslb-ns-eu-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation.yaml
+
+    - name: (2/5) ZoneDelegation object doesn't exist on US
+      description: on US ZoneDelegation not exists
+      cluster: us
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
+
+    - name: (2/5) Verify dnsendpoint object on EU
+      description: Verify default delegation DNSEndpoint cloud.example.com contains bounded local IPs and gslb-ns-*-cloud.example.com
+      cluster: eu
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: localNsName
+          value: gslb-ns-eu-cloud2.example.com
+        - name: nsTargets
+          value:
+            - gslb-ns-eu-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint.yaml
+
+
+    - name: (2/5) DNSEndpoint k8gb-ns-extdns-cloud2-example-com object doesn't exist on US
+      description: Verify k8gb-ns-extdns-cloud2-example-com object doesn't exist on US
+      cluster: us
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint-not-exist.yaml
+
+    - name: (3/5) Apply new zone delegation on US cluster
+      cluster: us
+      try:
+        - apply:
+            file: ./testdata/cloud2-example-com.conf.yaml
+
+    - name: (3/5) Verify k8gb-zone-delegation ConfigMap
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on EU
+      cluster: eu
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+            - cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (3/5) Verify k8gb-zone-delegation ConfigMap
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on US
+      cluster: us
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+            - cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (3/5) Verify ZoneDelegation object on EU
+      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      cluster: eu
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: parentZone
+          value: example.com
+        - name: dnsZoneNegTTL
+          value: 10
+        - name: doFinalize
+          value: true
+        - name: expectedNsNames
+          value:
+            - gslb-ns-eu-cloud2.example.com
+            - gslb-ns-us-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation.yaml
+
+    - name: (3/5) Verify ZoneDelegation object on US
+      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      cluster: us
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: parentZone
+          value: example.com
+        - name: dnsZoneNegTTL
+          value: 10
+        - name: doFinalize
+          value: true
+        - name: expectedNsNames
+          value:
+            - gslb-ns-eu-cloud2.example.com
+            - gslb-ns-us-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation.yaml
+
+    - name: (3/5) Verify dnsendpoint object on EU
+      description: Verify default delegation DNSEndpoint cloud.example.com contains bounded local IPs and gslb-ns-*-cloud.example.com
+      cluster: eu
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: localNsName
+          value: gslb-ns-eu-cloud2.example.com
+        - name: nsTargets
+          value:
+            - gslb-ns-eu-cloud2.example.com
+            - gslb-ns-us-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint.yaml
+
+    - name: (3/5) Verify dnsendpoint object on US
+      description: Verify delegation DNSEndpoint cloud2.example.com contains bounded local IPs and gslb-ns-*-cloud.example.com
+      cluster: us
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: localNsName
+          value: gslb-ns-us-cloud2.example.com
+        - name: nsTargets
+          value:
+            - gslb-ns-eu-cloud2.example.com
+            - gslb-ns-us-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint.yaml
+
+    - name: (4/5) Delete zone delegation on US cluster
+      cluster: us
+      try:
+        - delete:
+            file: ./testdata/cloud2-example-com.conf.yaml
+
+    - name: (4/5) ZoneDelegation object doesn't exist on US
+      description: on US ZoneDelegation not exists
+      cluster: us
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
+
+    - name: (4/5) Verify ZoneDelegation object on EU
+      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      cluster: eu
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: parentZone
+          value: example.com
+        - name: dnsZoneNegTTL
+          value: 10
+        - name: doFinalize
+          value: true
+        - name: expectedNsNames
+          value:
+            - gslb-ns-eu-cloud2.example.com
+
+    - name: (4/5) Verify k8gb-zone-delegation ConfigMap on US
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on US
+      cluster: us
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (4/5) Verify k8gb-zone-delegation ConfigMap on EU
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on US
+      cluster: eu
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+            - cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (4/5) Verify dnsendpoint object on EU
+      description: Verify default delegation DNSEndpoint cloud.example.com contains bounded local IPs and gslb-ns-*-cloud.example.com
+      cluster: eu
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: localNsName
+          value: gslb-ns-eu-cloud2.example.com
+        - name: nsTargets
+          value:
+            - gslb-ns-eu-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint.yaml
+
+    - name: (4/5) Verify dnsendpoint object on US
+      description: Verify default delegation DNSEndpoint cloud.example.com contains bounded local IPs and gslb-ns-*-cloud.example.com
+      cluster: us
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: nsTargets
+          value:
+            - gslb-ns-eu-cloud2.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint-ns-only.yaml
+
+    - name: (5/5) Delete zone delegation on EU cluster
+      cluster: eu
+      try:
+        - delete:
+            file: ./testdata/cloud2-example-com.conf.yaml
+
+    - name: (5/5) ZoneDelegation object doesn't exist on US
+      description: on US ZoneDelegation not exists
+      cluster: us
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
+
+    - name: (5/5) ZoneDelegation object doesn't exist on EU
+      description: on EU ZoneDelegation not exists
+      cluster: eu
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
+
+    - name: (5/5) Verify k8gb-zone-delegation ConfigMap on US
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on US
+      cluster: us
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (5/5) Verify k8gb-zone-delegation ConfigMap on EU
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on EU
+      cluster: eu
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
+
+    - name: (5/5) DNSEndpoint object doesn't exist on EU
+      description: on EU DNSEndpoint not exists
+      cluster: eu
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint-not-exist.yaml
+
+
+    - name: (5/5) DNSEndpoint object doesn't exist on US
+      description: on US DNSEndpoint not exists
+      cluster: us
+      bindings:
+        - name: dnsEndpointName
+          value: k8gb-ns-extdns-cloud2-example-com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint-not-exist.yaml

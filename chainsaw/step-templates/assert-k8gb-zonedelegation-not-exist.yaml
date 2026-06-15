@@ -1,0 +1,20 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation-not-exists
+spec:
+  try:
+    - script:
+        env:
+          - name: ZONE_DELEGATION_NAME
+            value: ($zoneDelegationName)
+        content: |
+          set -euo pipefail
+          
+          if kubectl get zonedelegation "$ZONE_DELEGATION_NAME" >/dev/null 2>&1; then
+            echo "ZoneDelegation still exists: $ZONE_DELEGATION_NAME"
+            kubectl get zonedelegation "$ZONE_DELEGATION_NAME" -oyaml
+            exit 1
+          fi
+          
+          echo "ZoneDelegation does not exist: $ZONE_DELEGATION_NAME"

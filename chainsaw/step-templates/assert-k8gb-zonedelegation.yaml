@@ -1,0 +1,62 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-zone-delegation
+spec:
+  try:
+    - script:
+        env:
+          - name: ZONE_DELEGATION_NAME
+            value: ($zoneDelegationName)
+          - name: EXPECTED_NS_NAMES
+            value: (join(' ', $expectedNsNames))
+        content: |
+          set -euo pipefail
+          
+          for i in $(seq 1 30); do
+            echo "ZoneDelegation status.dnsServers:"
+            kubectl get zonedelegation "$ZONE_DELEGATION_NAME" -o json \
+              | jq '.status.dnsServers'
+          
+            missing="false"
+          
+            for ns_name in $EXPECTED_NS_NAMES; do
+              echo "Checking DNS server: $ns_name"
+          
+              if ! kubectl get zonedelegation "$ZONE_DELEGATION_NAME" -o json \
+                | jq -e --arg nsName "$ns_name" '
+                    (.status.dnsServers // [])
+                    | any(.[]; .name == $nsName and .address != null and .address != "")
+                  ' >/dev/null; then
+                echo "Missing DNS server: $ns_name"
+                missing="true"
+              fi
+            done
+          
+            if [ "$missing" = "false" ]; then
+              echo "All expected DNS servers are present"
+              exit 0
+            fi
+          
+            echo "Waiting for ZoneDelegation status to be updated..."
+            sleep 2
+          done
+          
+          echo "ZoneDelegation status was not updated in time"
+          kubectl get zonedelegation "$ZONE_DELEGATION_NAME" -oyaml
+          exit 1
+
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: ZoneDelegation
+          metadata:
+            name: ($zoneDelegationName)
+            finalizers:
+              - k8gb.io/finalizer
+          spec:
+            dnsZoneNegTTL: ($dnsZoneNegTTL)
+            doFinalize: ($doFinalize)
+            loadBalancedZone: ($loadBalancedZone)
+            parentZone: ($parentZone)
+        timeout: 75s
