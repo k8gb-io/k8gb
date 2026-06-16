@@ -70,17 +70,18 @@ func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneD
 	return nil
 }
 
-func (p *ExternalDNSProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, finalizeZone bool) error {
+func (p *ExternalDNSProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, finalizeZone bool) *FinalizationResult {
 	if finalizeZone {
 		// finalize LoadBalancedZone ( + GluA, SOA and NS records)
 		log.Info().Msgf("Removing delegated zone %s from edge DNS", zoneInfo.LoadBalancedZone)
-		return p.deleteZoneDelegated(p.context, zoneInfo)
+		err := p.deleteZoneDelegated(p.context, zoneInfo)
+		return NewFinalization(err)
 	}
 
 	// finalize GlueA record only
 	log.Info().Msgf("Removing Glue A %s records for delegated zone %s", zoneInfo.ClusterNSName, zoneInfo.LoadBalancedZone)
 	err := p.removeGlueAFromDelegatedZone(p.context, zoneInfo)
-	return err
+	return NewDelayedFinalization(err)
 }
 
 func (p *ExternalDNSProvider) String() string {

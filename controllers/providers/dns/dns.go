@@ -22,11 +22,68 @@ import (
 	"github.com/k8gb-io/k8gb/controllers/zones"
 )
 
+type FinalizeZoneDelegationStatus string
+
+const (
+	// Finalize indicates that the ZoneDelegation can be safely finalized. ZoneDelegation sees itself as the last one.
+	Finalize FinalizeZoneDelegationStatus = "finalize"
+
+	// Delay indicates that finalization must be postponed because another cluster may still depend on this state.
+	// ZoneDelegation doesnt see itself as the last one
+	Delay FinalizeZoneDelegationStatus = "delay"
+
+	// Error indicates that the finalization decision could not be made safely.
+	Error FinalizeZoneDelegationStatus = "error"
+)
+
 type Provider interface {
 	// CreateZoneDelegation handles delegated zone in Edge DNS
 	CreateZoneDelegation(*zones.ExtendedZoneDelegation) error
 	// Finalize gslb in k8gbNamespace; bool argument determines whether only GlueA is removed (false) or whole zone is removed (true)
-	Finalize(*zones.ExtendedZoneDelegation, bool) error
+	Finalize(*zones.ExtendedZoneDelegation, bool) *FinalizationResult
 	// String see: Stringer interface
 	String() string
+}
+
+type FinalizationResult struct {
+	status FinalizeZoneDelegationStatus
+	err    error
+}
+
+func NewFinalization(err error) *FinalizationResult {
+	if err == nil {
+		return &FinalizationResult{status: Finalize, err: nil}
+	}
+	return NewErrorFinalization(err)
+}
+
+func NewDelayedFinalization(err error) *FinalizationResult {
+	if err == nil {
+		return &FinalizationResult{status: Delay, err: nil}
+	}
+	return NewErrorFinalization(err)
+}
+
+func NewErrorFinalization(err error) *FinalizationResult {
+	return &FinalizationResult{status: Error, err: err}
+}
+
+func (f *FinalizationResult) Error() error {
+	return f.err
+}
+
+func (f *FinalizationResult) Status() FinalizeZoneDelegationStatus {
+	return f.status
+}
+
+func (f *FinalizationResult) HasError() bool {
+	return f.Status() == Error
+}
+
+func (f *FinalizationResult) DoFinalization() bool {
+	return f.status == Finalize
+}
+
+func (f *FinalizationResult) PostponeFinalization() bool {
+	return f.status == Delay
 }

@@ -96,7 +96,7 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		if err != nil {
 			return result.RequeueError(err)
 		}
-		return result.Stop()
+		return result.Requeue()
 	}
 
 	err = r.ZoneService.UpdateStatus(ctx, zone)
@@ -136,9 +136,12 @@ func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1.Z
 			return err
 		}
 		removeZone := zoneDetail.IsLastZoneDelegationResource()
-		err = r.DNSProvider.Finalize(zoneDetail, removeZone)
-		if err != nil {
-			return err
+		finalizationResult := r.DNSProvider.Finalize(zoneDetail, removeZone)
+		if finalizationResult.HasError() {
+			return finalizationResult.Error()
+		}
+		if finalizationResult.PostponeFinalization() {
+			return r.ZoneService.UpdateStatus(ctx, zone)
 		}
 	}
 	return r.removeFinalizer(ctx, zone)

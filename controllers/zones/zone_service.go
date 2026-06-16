@@ -302,20 +302,21 @@ func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd 
 	// For the cache to work, the controller needs list/watch permissions for ConfigMaps
 	// across all namespaces, even if it only updates a single ConfigMap.
 	_, err = controllerutil.CreateOrUpdate(ctx, z.client, coreDNSZones, func() error {
-		if coreDNSZones.Data == nil {
-			coreDNSZones.Data = make(map[string]string)
-		}
+		newData := make(map[string]string)
 
 		for _, zone := range list.Items {
-			coreDNSZones.Data[name(zone)] = getCoreDNSData(zone.Spec.LoadBalancedZone)
+			if zone.IsInDeletion() {
+				continue
+			}
+
+			newData[name(zone)] = getCoreDNSData(zone.Spec.LoadBalancedZone)
 		}
 
-		if zd.IsInDeletion() {
-			delete(coreDNSZones.Data, name(*zd))
-			return nil
+		if !zd.IsInDeletion() {
+			newData[name(*zd)] = getCoreDNSData(zd.Spec.LoadBalancedZone)
 		}
 
-		coreDNSZones.Data[name(*zd)] = getCoreDNSData(zd.Spec.LoadBalancedZone)
+		coreDNSZones.Data = newData
 		return nil
 	})
 	if err != nil {

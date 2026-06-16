@@ -22,7 +22,7 @@ spec:
     (4/5) delete ZD cloud3-example-com.conf on EU cluster
   steps:
     # (1/5) default settings with single zone delegation (cloud-example-com.conf)
-    - name: (1/5) Verify k8gb-zone-delegation ConfigMap
+    - name: (1/5) Verify k8gb-zone-delegation ConfigMap US
       description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on US
       cluster: us
       bindings:
@@ -32,7 +32,7 @@ spec:
       use:
         template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
 
-    - name: (1/5) Verify k8gb-zone-delegation ConfigMap
+    - name: (1/5) Verify k8gb-zone-delegation ConfigMap EU
       description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on EU
       cluster: eu
       bindings:
@@ -309,17 +309,40 @@ spec:
     - name: (4/5) Delete zone delegation on US cluster
       cluster: us
       try:
-        - delete:
-            file: ./testdata/cloud2-example-com.conf.yaml
+      - script:
+          content: |
+            kubectl delete -f ./testdata/cloud2-example-com.conf.yaml --wait=false
+            sleep 3
 
-    - name: (4/5) ZoneDelegation object doesn't exist on US
-      description: on US ZoneDelegation not exists
+#    - name: (4/5) ZoneDelegation object doesn't exist on US
+#      description: on US ZoneDelegation not exists
+#      cluster: us
+#      bindings:
+#        - name: zoneDelegationName
+#          value: cloud2-example-com.conf
+#      use:
+#        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
+    - name: (4/5) Verify ZoneDelegation object on US
+      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
       cluster: us
       bindings:
         - name: zoneDelegationName
           value: cloud2-example-com.conf
+        - name: loadBalancedZone
+          value: cloud2.example.com
+        - name: parentZone
+          value: example.com
+        - name: dnsZoneNegTTL
+          value: 10
+        - name: doFinalize
+          value: true
+        - name: expectedNsNames
+          value:
+            - gslb-ns-eu-cloud2.example.com
+            - gslb-ns-us-cloud2.example.com
       use:
-        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
+        template: ../../step-templates/assert-k8gb-zonedelegation.yaml
+
 
     - name: (4/5) Verify ZoneDelegation object on EU
       description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
@@ -396,15 +419,6 @@ spec:
         - delete:
             file: ./testdata/cloud2-example-com.conf.yaml
 
-    - name: (5/5) ZoneDelegation object doesn't exist on US
-      description: on US ZoneDelegation not exists
-      cluster: us
-      bindings:
-        - name: zoneDelegationName
-          value: cloud2-example-com.conf
-      use:
-        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
-
     - name: (5/5) ZoneDelegation object doesn't exist on EU
       description: on EU ZoneDelegation not exists
       cluster: eu
@@ -413,16 +427,6 @@ spec:
           value: cloud2-example-com.conf
       use:
         template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
-
-    - name: (5/5) Verify k8gb-zone-delegation ConfigMap on US
-      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on US
-      cluster: us
-      bindings:
-        - name: zoneDelegationHosts
-          value:
-            - cloud.example.com
-      use:
-        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
 
     - name: (5/5) Verify k8gb-zone-delegation ConfigMap on EU
       description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on EU
@@ -444,6 +448,15 @@ spec:
         template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint-not-exist.yaml
 
 
+    - name: (5/5) ZoneDelegation object doesn't exist on US
+      description: on US ZoneDelegation not exists
+      cluster: us
+      bindings:
+        - name: zoneDelegationName
+          value: cloud2-example-com.conf
+      use:
+        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
+
     - name: (5/5) DNSEndpoint object doesn't exist on US
       description: on US DNSEndpoint not exists
       cluster: us
@@ -452,3 +465,13 @@ spec:
           value: k8gb-ns-extdns-cloud2-example-com
       use:
         template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint-not-exist.yaml
+
+    - name: (5/5) Verify k8gb-zone-delegation ConfigMap on US
+      description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on US
+      cluster: us
+      bindings:
+        - name: zoneDelegationHosts
+          value:
+            - cloud.example.com
+      use:
+        template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
