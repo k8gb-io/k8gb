@@ -6,33 +6,75 @@ metadata:
   name: init
 spec:
   try:
-  - apply:
-      file: ../../testdata/namespace.yaml
-  - script:
-      env:
-      - name: ISTIO_INJECT
-        value: ($istio_inject)
-      content: |
-        kubectl label namespace $NAMESPACE istio-inject=$ISTIO_INJECT --overwrite
-  - apply:
-      file: ../../testdata/podinfo.yaml
-  - apply:
-      file: testdata/gslb.yaml
-  - assert:
-      resource:
-        apiVersion: externaldns.k8s.io/v1alpha1
-        kind: DNSEndpoint
-        metadata:
-          name: ($test.metadata.name)
-          namespace: ($namespace)
-          ownerReferences:
-            (length(@)): 1
-        spec:
-          endpoints:
-          - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
-            recordType: A
-            targets:
-              (length(@)): 2
-          - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
-            recordType: A
-      timeout: 75s
+    - apply:
+        file: ../../testdata/namespace.yaml
+
+    - script:
+        env:
+          - name: ISTIO_INJECT
+            value: ($istio_inject)
+        content: |
+          set -euo pipefail
+
+          kubectl label namespace "$NAMESPACE" istio-inject="$ISTIO_INJECT" --overwrite
+
+    - apply:
+        file: ../../testdata/podinfo.yaml
+
+    - apply:
+        file: testdata/gslb.yaml
+
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: ($test.metadata.name)
+            namespace: ($namespace)
+            ownerReferences:
+              (length(@)): 1
+          spec:
+            endpoints:
+              - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
+                recordType: A
+              - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
+                recordType: A
+        timeout: 75s
+
+    - script:
+        env:
+          - name: DNSENDPOINT_NAME
+            value: ($test.metadata.name)
+          - name: EXPECTED_DNS_NAME
+            value: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
+        content: |
+          set -euo pipefail
+
+          for i in $(seq 1 30); do
+            targets_count=$(
+              kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n "$NAMESPACE" -o json \
+                | jq --arg dnsName "$EXPECTED_DNS_NAME" '
+                    [
+                      .spec.endpoints[]
+                      | select(.dnsName == $dnsName)
+                      | .targets[]?
+                    ] | length
+                  '
+            )
+
+            if [ "$targets_count" -eq 2 ]; then
+              echo "DNSEndpoint has expected targets for $EXPECTED_DNS_NAME"
+              kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n "$NAMESPACE" -o yaml
+              exit 0
+            fi
+
+            echo "Waiting for DNSEndpoint targets for $EXPECTED_DNS_NAME, current count: $targets_count"
+            kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n "$NAMESPACE" -o yaml
+            sleep 5
+          done
+
+          echo "DNSEndpoint did not get expected targets for $EXPECTED_DNS_NAME"
+          kubectl get pod -n "$NAMESPACE" -o wide
+          kubectl get svc -n "$NAMESPACE" -o wide
+          kubectl get dnsendpoint "$DNSENDPOINT_NAME" -n "$NAMESPACE" -o yaml
+          exit 1
