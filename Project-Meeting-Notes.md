@@ -27,7 +27,53 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>May 27, 2026 #93</strong></summary>
+<details open><summary><strong>June 10, 2026 #94</strong></summary>
+
+## June 10, 2026 #94
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+**Agenda**
+
+- news
+  - [community member](https://github.com/PS1c0m) found a [migration issue](https://github.com/k8gb-io/k8gb/issues/2375) - it was a [consequence of the v0.19.0 k8gb.absa.oss → k8gb.io migration work](https://github.com/k8gb-io/k8gb/pull/2203) --> [fixed](https://github.com/k8gb-io/k8gb/pull/2377) thanks! 
+  - added a [blog post](https://www.k8gb.io/latest/blog/2026/05/29/ai-inference-needs-a-global-resilience-layer/) about the new [ai inference demo](https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md)
+  - added to the [k0rdent catalog](https://catalog.k0rdent.io/latest/apps/k8gb/) - this makes it easier for folks using k0rdent to use k8gb in their deploys.
+- kubecon
+  - submitted a couple joint CFPs for KubeCon Salt Lake City in November / [Edge Day](https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/co-located-events/kubernetes-on-edge-day/) and [Inference Day](https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/co-located-events/cloud-native-ai-inference-day/)
+  - joint w/ nutanix
+    - implementing active/passive failover for stateful k8s workloads w/k8gb, velero, gitops. 
+  - what talks / blog posts, etc. would you like to see?
+- community contributions in progress
+  - [TLSRoute support in gateway.networking.k8s.io](https://github.com/k8gb-io/k8gb/pull/2282) @aryasoni98 - needs rebase
+  - [feat: Allow all k8 service types](https://github.com/k8gb-io/k8gb/pull/2224) @piroddi
+- no incubation update
+- stargazer chats 
+  - We spoke with 20 [stargazers](https://github.com/k8gb-io/k8gb/stargazers) this week. Some initial findings on how people are using k8gb:
+    - **tl;dr -** People tend to start out with k8gb by running single-node k3s clusters across commodity providers like hetzner, oci, and aws. They use k8gb to replace cloudflare tunnels at the edge. k8gb is increasingly being evaluated not just as a gslb, but as a k8s-native traffic decision layer that lets organizations regain control from cloud-specific or proprietary global traffic management systems while preserving existing dns and networking investments. This all fits well with the broader sovereign cloud trend. The common thread is cloud neutrality, infrastructure ownership, auditability, and avoiding dependence on a single provider's traffic control plane.  
+  - **current**
+    - **regulated fsi multi-region failover**. Multiple conversations point to the same pattern: multi-region resilience, cloud neutrality, dr testing, and regulatory compliance.
+    - **enterprises with existing proprietary dns authority**. People want k8gb as the k8s-native traffic decision layer while retaining existing dns/gtm, governance, and ownership controls.  
+  - **emerging**
+    - **cloudflare / proprietary glb replacement**. Multiple independent signals (incl. folks telling us they want off f5). Teams with their own ip space, bgp, or edge infrastructure want to reduce dependence on cloudflare and similar managed traffic layers while retaining control of routing and failover.
+    - **datacenter <--> cloud hybrid failover**. People want to treat cloud capacity as an extension of existing infrastructure, with k8gb providing a single traffic layer across both environments.
+  - **future**
+    - **k8s-native IDP networking layer**. Platform engineers are positioning k8gb as the multi-cluster traffic and dns layer inside a broader idp, rather than as a standalone gslb product.
+- **what's your use case?**
+
+**Actions**
+
+- create a k0rdent reference platform
+- create a blog post highlighting new zone delegation functionality, extend k8gb documentation once the feature is finished
+- work with [@infbase](https://github.com/infbase) to finalize an "intro to k8gb" video
+- rebase / close stale community contributions
+
+</details>
+
+<details><summary><strong>May 27, 2026 #93</strong></summary>
 
 ## May 27, 2026 #93
 
