@@ -99,6 +99,12 @@ func TestNew(t *testing.T) {
 			expectedError:                 nil,
 		},
 		{
+			name:                          "referenced gateway API TLSRoute v1",
+			gslbYaml:                      "./testdata/gslb_gatewayapi_tlsroute_v1.yaml",
+			expectedReferenceResolverType: "*gatewayapitlsroute.ReferenceResolver",
+			expectedError:                 nil,
+		},
+		{
 			name:                          "referenced gateway API TLSRoute v1alpha2",
 			gslbYaml:                      "./testdata/gslb_gatewayapi_tlsroute_v1alpha2.yaml",
 			expectedReferenceResolverType: "*gatewayapitlsroute.ReferenceResolver",
@@ -135,6 +141,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1io.Gslb) {
 		utils.FileToGatewayApiHttpRoute("./testdata/gatewayapi_httproute.yaml"),
 		utils.FileToGatewayApiGrpcRoute("./testdata/gatewayapi_grpcroute.yaml"),
 		utils.FileToGatewayApiTlsRoute("./testdata/gatewayapi_tlsroute.yaml"),
+		utils.FileToGatewayApiTlsRouteV1("./testdata/gatewayapi_tlsroute_v1.yaml"),
 		utils.FileToGatewayApiTlsRouteV1Alpha2("./testdata/gatewayapi_tlsroute_v1alpha2.yaml"),
 		utils.FileToGatewayApiTcpRoute("./testdata/gatewayapi_tcproute.yaml"),
 		utils.FileToGatewayApiUdpRoute("./testdata/gatewayapi_udproute.yaml"),
@@ -148,6 +155,7 @@ func getTestContext(gslbFile string) (client.Client, *k8gbv1beta1io.Gslb) {
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.HTTPRoute{}, &gatewayapiv1.HTTPRouteList{})
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.GRPCRoute{}, &gatewayapiv1.GRPCRouteList{})
 	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.Gateway{}, &gatewayapiv1.GatewayList{})
+	s.AddKnownTypes(gatewayapiv1.SchemeGroupVersion, &gatewayapiv1.TLSRoute{}, &gatewayapiv1.TLSRouteList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.TCPRoute{}, &gatewayapiv1alpha2.TCPRouteList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.UDPRoute{}, &gatewayapiv1alpha2.UDPRouteList{})
 	s.AddKnownTypes(gatewayapiv1alpha2.SchemeGroupVersion, &gatewayapiv1alpha2.TLSRoute{}, &gatewayapiv1alpha2.TLSRouteList{})

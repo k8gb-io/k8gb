@@ -312,8 +312,8 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API UDPRoute $(NC)"
 	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_gatewayapi_udproute.yaml)
 
-	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API TLSRoute $(NC)"
-	$(call apply-cr,deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_failover_gatewayapi_tlsroute.yaml)
+	@echo -e "\n$(YELLOW)Deploy GSLB CR failover examples for Gateway API TLSRoute versions $(NC)"
+	$(call apply-cr,deploy/gslb/k8gb.io_v1beta1_gslb_cr_gatewayapi_tlsroute_versions.yaml)
 
 	@echo -e "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps

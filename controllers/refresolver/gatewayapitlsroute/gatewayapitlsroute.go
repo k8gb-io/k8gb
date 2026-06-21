@@ -42,12 +42,23 @@ type ReferenceResolver struct {
 	gateway  *gatewayapiv1.Gateway
 }
 
-// NewReferenceResolver creates a new reference resolver capable of understanding Gateway API TLSRoute resources (v1alpha2 and v1alpha3)
+// NewReferenceResolver creates a new reference resolver capable of understanding Gateway API TLSRoute resources
 func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*ReferenceResolver, error) {
 	apiVersion := gslb.Spec.ResourceRef.APIVersion
 
 	var tlsRouteAdapter gatewayapi.RouteAdapter
-	if apiVersion == "gateway.networking.k8s.io/v1alpha2" {
+	switch apiVersion {
+	case "gateway.networking.k8s.io/v1":
+		tlsRouteList, err := getGslbTLSRouteRefV1(gslb, k8sClient)
+		if err != nil {
+			return nil, err
+		}
+		if len(tlsRouteList) != 1 {
+			return nil, fmt.Errorf("exactly 1 TLSRoute resource expected but %d were found", len(tlsRouteList))
+		}
+		tlsRoute := tlsRouteList[0]
+		tlsRouteAdapter = NewTLSRouteAdapterV1(&tlsRoute)
+	case "gateway.networking.k8s.io/v1alpha2":
 		tlsRouteList, err := getGslbTLSRouteRefV1Alpha2(gslb, k8sClient)
 		if err != nil {
 			return nil, err
@@ -57,7 +68,7 @@ func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*R
 		}
 		tlsRoute := tlsRouteList[0]
 		tlsRouteAdapter = NewTLSRouteAdapterV1Alpha2(&tlsRoute)
-	} else {
+	case "gateway.networking.k8s.io/v1alpha3":
 		tlsRouteList, err := getGslbTLSRouteRefV1Alpha3(gslb, k8sClient)
 		if err != nil {
 			return nil, err
@@ -67,6 +78,8 @@ func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*R
 		}
 		tlsRoute := tlsRouteList[0]
 		tlsRouteAdapter = NewTLSRouteAdapter(&tlsRoute)
+	default:
+		return nil, fmt.Errorf("unsupported TLSRoute API version %q", apiVersion)
 	}
 
 	gateway, err := gatewayapi.GetGateway(tlsRouteAdapter, k8sClient)
@@ -80,47 +93,56 @@ func NewReferenceResolver(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (*R
 	}, nil
 }
 
+// getGslbTLSRouteRefV1 resolves a Gateway API TLSRoute resource (v1) referenced by the Gslb spec
+func getGslbTLSRouteRefV1(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]gatewayapiv1.TLSRoute, error) {
+	tlsRoute := &gatewayapiv1.TLSRoute{}
+	tlsRouteList := &gatewayapiv1.TLSRouteList{}
+	return getGslbTLSRouteRef(
+		gslb,
+		k8sClient,
+		tlsRoute,
+		tlsRouteList,
+		func() gatewayapiv1.TLSRoute { return *tlsRoute },
+		func() []gatewayapiv1.TLSRoute { return tlsRouteList.Items },
+	)
+}
+
 // getGslbTLSRouteRefV1Alpha2 resolves a Gateway API TLSRoute resource (v1alpha2) referenced by the Gslb spec
 func getGslbTLSRouteRefV1Alpha2(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha2.TLSRoute, error) {
-	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	switch query.Mode {
-	case queryopts.QueryModeGet:
-		var tlsRoute = gatewayapiv1alpha2.TLSRoute{}
-		err = k8sClient.Get(context.TODO(), *query.GetKey, &tlsRoute)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				log.Info().
-					Str("gslb", gslb.Name).
-					Str("namespace", gslb.Namespace).
-					Msg("Can't find referenced TLSRoute resource")
-			}
-			return nil, err
-		}
-		return []gatewayapiv1alpha2.TLSRoute{tlsRoute}, nil
-
-	case queryopts.QueryModeList:
-		tlsrouteList := &gatewayapiv1alpha2.TLSRouteList{}
-		err = k8sClient.List(context.TODO(), tlsrouteList, query.ListOpts...)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				log.Info().
-					Str("gslb", gslb.Name).
-					Str("namespace", gslb.Namespace).
-					Msg("Can't find referenced TLSRoute resource")
-			}
-			return nil, err
-		}
-		return tlsrouteList.Items, nil
-	}
-	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
+	tlsRoute := &gatewayapiv1alpha2.TLSRoute{}
+	tlsRouteList := &gatewayapiv1alpha2.TLSRouteList{}
+	return getGslbTLSRouteRef(
+		gslb,
+		k8sClient,
+		tlsRoute,
+		tlsRouteList,
+		func() gatewayapiv1alpha2.TLSRoute { return *tlsRoute },
+		func() []gatewayapiv1alpha2.TLSRoute { return tlsRouteList.Items },
+	)
 }
 
 // getGslbTLSRouteRefV1Alpha3 resolves a Gateway API TLSRoute resource (v1alpha3) referenced by the Gslb spec
 func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) ([]gatewayapiv1alpha3.TLSRoute, error) {
+	tlsRoute := &gatewayapiv1alpha3.TLSRoute{}
+	tlsRouteList := &gatewayapiv1alpha3.TLSRouteList{}
+	return getGslbTLSRouteRef(
+		gslb,
+		k8sClient,
+		tlsRoute,
+		tlsRouteList,
+		func() gatewayapiv1alpha3.TLSRoute { return *tlsRoute },
+		func() []gatewayapiv1alpha3.TLSRoute { return tlsRouteList.Items },
+	)
+}
+
+func getGslbTLSRouteRef[T any](
+	gslb *k8gbv1beta1io.Gslb,
+	k8sClient client.Client,
+	tlsRoute client.Object,
+	tlsRouteList client.ObjectList,
+	getTLSRoute func() T,
+	getTLSRouteItems func() []T,
+) ([]T, error) {
 	query, err := queryopts.Get(gslb.Spec.ResourceRef, gslb.Namespace)
 	if err != nil {
 		return nil, err
@@ -128,8 +150,7 @@ func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1io.Gslb, k8sClient client.Clien
 
 	switch query.Mode {
 	case queryopts.QueryModeGet:
-		var tlsRoute = gatewayapiv1alpha3.TLSRoute{}
-		err = k8sClient.Get(context.TODO(), *query.GetKey, &tlsRoute)
+		err = k8sClient.Get(context.TODO(), *query.GetKey, tlsRoute)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().
@@ -139,11 +160,10 @@ func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1io.Gslb, k8sClient client.Clien
 			}
 			return nil, err
 		}
-		return []gatewayapiv1alpha3.TLSRoute{tlsRoute}, nil
+		return []T{getTLSRoute()}, nil
 
 	case queryopts.QueryModeList:
-		tlsrouteList := &gatewayapiv1alpha3.TLSRouteList{}
-		err = k8sClient.List(context.TODO(), tlsrouteList, query.ListOpts...)
+		err = k8sClient.List(context.TODO(), tlsRouteList, query.ListOpts...)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Info().
@@ -153,7 +173,7 @@ func getGslbTLSRouteRefV1Alpha3(gslb *k8gbv1beta1io.Gslb, k8sClient client.Clien
 			}
 			return nil, err
 		}
-		return tlsrouteList.Items, nil
+		return getTLSRouteItems(), nil
 	}
 	return nil, fmt.Errorf("unknown query mode %v", query.Mode)
 }

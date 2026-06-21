@@ -1,0 +1,106 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gatewayapi-tlsroute-versions
+  namespace: gatewayapi-tlsroute-versions
+spec:
+  gatewayClassName: test
+  listeners:
+  - name: tls
+    protocol: TLS
+    port: 443
+    tls:
+      mode: Passthrough
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: TLSRoute
+metadata:
+  name: gatewayapi-tlsroute-v1
+  namespace: gatewayapi-tlsroute-versions
+spec:
+  parentRefs:
+  - name: gatewayapi-tlsroute-versions
+  hostnames:
+  - gatewayapi-tlsroute-v1.cloud.example.com
+  rules:
+  - backendRefs:
+    - name: frontend-podinfo
+      port: 9898
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: gatewayapi-tlsroute-v1
+  namespace: gatewayapi-tlsroute-versions
+  annotations:
+    k8gb.io/exposed-ip-addresses: 10.0.0.1,10.0.0.2
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: TLSRoute
+    name: gatewayapi-tlsroute-v1
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TLSRoute
+metadata:
+  name: gatewayapi-tlsroute-v1alpha2
+  namespace: gatewayapi-tlsroute-versions
+spec:
+  parentRefs:
+  - name: gatewayapi-tlsroute-versions
+  hostnames:
+  - gatewayapi-tlsroute-v1alpha2.cloud.example.com
+  rules:
+  - backendRefs:
+    - name: frontend-podinfo
+      port: 9898
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: gatewayapi-tlsroute-v1alpha2
+  namespace: gatewayapi-tlsroute-versions
+  annotations:
+    k8gb.io/exposed-ip-addresses: 10.0.0.1,10.0.0.2
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha2
+    kind: TLSRoute
+    name: gatewayapi-tlsroute-v1alpha2
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
+---
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: TLSRoute
+metadata:
+  name: gatewayapi-tlsroute-v1alpha3
+  namespace: gatewayapi-tlsroute-versions
+spec:
+  parentRefs:
+  - name: gatewayapi-tlsroute-versions
+  hostnames:
+  - gatewayapi-tlsroute-v1alpha3.cloud.example.com
+  rules:
+  - backendRefs:
+    - name: frontend-podinfo
+      port: 9898
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: gatewayapi-tlsroute-v1alpha3
+  namespace: gatewayapi-tlsroute-versions
+  annotations:
+    k8gb.io/exposed-ip-addresses: 10.0.0.1,10.0.0.2
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1alpha3
+    kind: TLSRoute
+    name: gatewayapi-tlsroute-v1alpha3
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
