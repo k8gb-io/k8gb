@@ -12,6 +12,12 @@ rules:
       - ""
     resources:
       - configmaps
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
     resourceNames:
       - k8gb-zone-delegation
     verbs:
@@ -19,5 +25,4 @@ rules:
       - update
       - patch
       - delete
-      - create
 {{- end }}
