@@ -221,11 +221,12 @@ func (mr *MockZoneDelegationMockRecorder) UpdateCoreDNSConfiguration(ctx, zd any
 }
 
 // UpdateStatus mocks base method.
-func (m *MockZoneDelegation) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+func (m *MockZoneDelegation) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) (*v1beta1.ZoneDelegation, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateStatus", ctx, zd)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*v1beta1.ZoneDelegation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateStatus indicates an expected call of UpdateStatus.

@@ -99,7 +99,7 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return result.Requeue()
 	}
 
-	err = r.ZoneService.UpdateStatus(ctx, zone)
+	zone, err = r.ZoneService.UpdateStatus(ctx, zone)
 	if err != nil {
 		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
 		return result.RequeueError(err)
@@ -141,7 +141,8 @@ func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1.Z
 			return finalizationResult.Error()
 		}
 		if finalizationResult.PostponeFinalization() {
-			return r.ZoneService.UpdateStatus(ctx, zone)
+			_, err = r.ZoneService.UpdateStatus(ctx, zone)
+			return err
 		}
 	}
 	return r.removeFinalizer(ctx, zone)

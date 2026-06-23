@@ -45,7 +45,7 @@ type ZoneDelegation interface {
 	AvailableIPs(ctx context.Context) (ZoneDelegationIPs, error)
 	HasAvailableIPs(ctx context.Context) bool
 	HasExtClusterGeoTags(ctx context.Context) bool
-	UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error
+	UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) (*v1beta1.ZoneDelegation, error)
 	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error)
 	ResolveAuthoritativeServersFromZoneDelegations(ctx context.Context, host string) (AuthoritativeServers, error)
 	UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error
@@ -156,37 +156,37 @@ func (z *ZoneDelegationImpl) ListAllZoneDelegations(ctx context.Context) (*v1bet
 	return finalList, nil
 }
 
-func (z *ZoneDelegationImpl) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+func (z *ZoneDelegationImpl) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) (*v1beta1.ZoneDelegation, error) {
 	current, err := z.Get(ctx, types.NamespacedName{
 		Name: zd.Name,
 	})
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return fmt.Errorf("zone delegation %s not found", zd.Name)
+			return nil, fmt.Errorf("zone delegation %s not found", zd.Name)
 		}
-		return fmt.Errorf("error getting zone delegation: %w", err)
+		return nil, fmt.Errorf("error getting zone delegation: %w", err)
 	}
 
 	detail, err := NewZoneDelegationWrapper(current, z.config, z.ipresolver).GetDetail(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	desiredStatus, err := z.buildDesiredStatus(ctx, *detail)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if equalStatus(current.Status, desiredStatus) {
-		return nil
+		return current, nil
 	}
 
 	current.Status = desiredStatus
 	if err := z.client.Status().Update(ctx, current); err != nil {
-		return fmt.Errorf("error updating zone delegation status: %w", err)
+		return nil, fmt.Errorf("error updating zone delegation status: %w", err)
 	}
 
-	return nil
+	return current, nil
 }
 
 func equalStatus(a, b v1beta1.ZoneDelegationStatus) bool {
