@@ -30,11 +30,13 @@ func TestGetServers(t *testing.T) {
 	var tests = []struct {
 		name            string
 		tlsRouteFile    string
+		apiVersion      string
 		expectedServers []*k8gbv1beta1io.Server
 	}{
 		{
 			name:         "single hostname and backend; backend without namespace specified",
 			tlsRouteFile: "../testdata/gatewayapi_tlsroute.yaml",
+			apiVersion:   "v1alpha3",
 			expectedServers: []*k8gbv1beta1io.Server{
 				{
 					Host: "gatewayapi-tlsroute.cloud.example.com",
@@ -50,6 +52,7 @@ func TestGetServers(t *testing.T) {
 		{
 			name:         "single hostname and backend; backend with namespace specified",
 			tlsRouteFile: "./testdata/gatewayapi_tlsroute_backend_with_namespace.yaml",
+			apiVersion:   "v1alpha3",
 			expectedServers: []*k8gbv1beta1io.Server{
 				{
 					Host: "gatewayapi-tlsroute.cloud.example.com",
@@ -65,6 +68,7 @@ func TestGetServers(t *testing.T) {
 		{
 			name:         "multiple hostnames",
 			tlsRouteFile: "./testdata/gatewayapi_tlsroute_multiple_hostnames.yaml",
+			apiVersion:   "v1alpha3",
 			expectedServers: []*k8gbv1beta1io.Server{
 				{
 					Host: "gatewayapi-tlsroute1.cloud.example.com",
@@ -105,13 +109,59 @@ func TestGetServers(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:         "v1 TLSRoute - single hostname and backend",
+			tlsRouteFile: "../testdata/gatewayapi_tlsroute_v1.yaml",
+			apiVersion:   "v1",
+			expectedServers: []*k8gbv1beta1io.Server{
+				{
+					Host: "gatewayapi-tlsroute.cloud.example.com",
+					Services: []*k8gbv1beta1io.NamespacedName{
+						{
+							Name:      "gatewayapi-tlsroute-service",
+							Namespace: "test-gslb",
+						},
+					},
+				},
+			},
+		},
+		{
+			name:         "v1alpha2 TLSRoute - single hostname and backend",
+			tlsRouteFile: "../testdata/gatewayapi_tlsroute_v1alpha2.yaml",
+			apiVersion:   "v1alpha2",
+			expectedServers: []*k8gbv1beta1io.Server{
+				{
+					Host: "gatewayapi-tlsroute.cloud.example.com",
+					Services: []*k8gbv1beta1io.NamespacedName{
+						{
+							Name:      "gatewayapi-tlsroute-service",
+							Namespace: "test-gslb",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
-			tlsRoute := utils.FileToGatewayApiTlsRoute(test.tlsRouteFile)
-			resolver := ReferenceResolver{
-				tlsRoute: NewTLSRouteAdapter(tlsRoute),
+			var resolver ReferenceResolver
+			switch test.apiVersion {
+			case "v1":
+				tlsRoute := utils.FileToGatewayApiTlsRouteV1(test.tlsRouteFile)
+				resolver = ReferenceResolver{
+					tlsRoute: NewTLSRouteAdapterV1(tlsRoute),
+				}
+			case "v1alpha2":
+				tlsRoute := utils.FileToGatewayApiTlsRouteV1Alpha2(test.tlsRouteFile)
+				resolver = ReferenceResolver{
+					tlsRoute: NewTLSRouteAdapterV1Alpha2(tlsRoute),
+				}
+			default:
+				tlsRoute := utils.FileToGatewayApiTlsRoute(test.tlsRouteFile)
+				resolver = ReferenceResolver{
+					tlsRoute: NewTLSRouteAdapter(tlsRoute),
+				}
 			}
 
 			// act

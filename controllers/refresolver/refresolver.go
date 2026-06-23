@@ -35,6 +35,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	gatewayAPIVersionV1       = "gateway.networking.k8s.io/v1"
+	gatewayAPIVersionV1Alpha2 = "gateway.networking.k8s.io/v1alpha2"
+	gatewayAPIVersionV1Alpha3 = "gateway.networking.k8s.io/v1alpha3"
+)
+
 // GslbReferenceResolver resolves references to other kubernetes resources concerning ingress configuration
 type GslbReferenceResolver interface {
 	// GetServers retrieves GSLB the server configuration
@@ -60,19 +66,22 @@ func New(gslb *k8gbv1beta1io.Gslb, k8sClient client.Client) (GslbReferenceResolv
 	if gslb.Spec.ResourceRef.Kind == "Service" && gslb.Spec.ResourceRef.APIVersion == "v1" {
 		return lbservice.NewReferenceResolver(gslb, k8sClient)
 	}
-	if gslb.Spec.ResourceRef.Kind == "HTTPRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1" {
+	if gslb.Spec.ResourceRef.Kind == "HTTPRoute" && gslb.Spec.ResourceRef.APIVersion == gatewayAPIVersionV1 {
 		return gatewayapihttproute.NewReferenceResolver(gslb, k8sClient)
 	}
-	if gslb.Spec.ResourceRef.Kind == "GRPCRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1" {
+	if gslb.Spec.ResourceRef.Kind == "GRPCRoute" && gslb.Spec.ResourceRef.APIVersion == gatewayAPIVersionV1 {
 		return gatewayapigrpcroute.NewReferenceResolver(gslb, k8sClient)
 	}
-	if gslb.Spec.ResourceRef.Kind == "TCPRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha2" {
+	if gslb.Spec.ResourceRef.Kind == "TCPRoute" && gslb.Spec.ResourceRef.APIVersion == gatewayAPIVersionV1Alpha2 {
 		return gatewayapitcproute.NewReferenceResolver(gslb, k8sClient)
 	}
-	if gslb.Spec.ResourceRef.Kind == "UDPRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha2" {
+	if gslb.Spec.ResourceRef.Kind == "UDPRoute" && gslb.Spec.ResourceRef.APIVersion == gatewayAPIVersionV1Alpha2 {
 		return gatewayapiudproute.NewReferenceResolver(gslb, k8sClient)
 	}
-	if gslb.Spec.ResourceRef.Kind == "TLSRoute" && gslb.Spec.ResourceRef.APIVersion == "gateway.networking.k8s.io/v1alpha3" {
+	if gslb.Spec.ResourceRef.Kind == "TLSRoute" &&
+		(gslb.Spec.ResourceRef.APIVersion == gatewayAPIVersionV1 ||
+			gslb.Spec.ResourceRef.APIVersion == gatewayAPIVersionV1Alpha2 ||
+			gslb.Spec.ResourceRef.APIVersion == gatewayAPIVersionV1Alpha3) {
 		return gatewayapitlsroute.NewReferenceResolver(gslb, k8sClient)
 	}
 	return nil, fmt.Errorf("APIVersion:%s, Kind:%s not supported", gslb.Spec.ResourceRef.APIVersion, gslb.Spec.ResourceRef.Kind)

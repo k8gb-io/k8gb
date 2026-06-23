@@ -1,0 +1,47 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: gatewayapi-tlsroute-versions
+spec:
+  namespace: gatewayapi-tlsroute-versions
+  steps:
+  - name: reconcile supported Gateway API TLSRoute versions
+    description: verify that GSLBs can resolve Gateway API v1, v1alpha2, and v1alpha3 TLSRoutes
+    cluster: eu
+    try:
+    - apply:
+        file: ../../testdata/namespace.yaml
+    - apply:
+        file: ../../testdata/podinfo.yaml
+    - apply:
+        file: testdata/gslb.yaml
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: gatewayapi-tlsroute-v1
+            namespace: ($namespace)
+            ownerReferences:
+              (length(@)): 1
+        timeout: 75s
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: gatewayapi-tlsroute-v1alpha2
+            namespace: ($namespace)
+            ownerReferences:
+              (length(@)): 1
+        timeout: 75s
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: gatewayapi-tlsroute-v1alpha3
+            namespace: ($namespace)
+            ownerReferences:
+              (length(@)): 1
+        timeout: 75s
