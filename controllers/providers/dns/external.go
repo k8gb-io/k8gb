@@ -92,9 +92,9 @@ func (p *ExternalDNSProvider) deleteZoneDelegated(ctx context.Context, zone *zon
 	delegationDNSEndpoint := &externaldnsApi.DNSEndpoint{}
 	selector := types.NamespacedName{Name: zone.GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
 	if err := p.client.Get(ctx, selector, delegationDNSEndpoint); err != nil {
-		return err
+		return client.IgnoreNotFound(err)
 	}
-	return p.client.Delete(ctx, delegationDNSEndpoint)
+	return client.IgnoreNotFound(p.client.Delete(ctx, delegationDNSEndpoint))
 }
 
 func (p *ExternalDNSProvider) removeGlueAFromDelegatedZone(ctx context.Context, zone *zones.ExtendedZoneDelegation) error {
