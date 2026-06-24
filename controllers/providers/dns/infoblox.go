@@ -109,21 +109,23 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneDele
 	return nil
 }
 
-func (p *InfobloxProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, finalizeZone bool) error {
+func (p *InfobloxProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, finalizeZone bool) *FinalizationResult {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
-		return err
+		return NewErrorFinalization(err)
 	}
 
 	// finalize LoadBalancedZone ( + GluA, SOA and NS records)
 	if finalizeZone {
 		log.Info().Msgf("Removing delegated zone %s from edge DNS", zoneInfo.LoadBalancedZone)
-		return p.deleteZoneDelegated(objMgr, zoneInfo.LoadBalancedZone)
+		err = p.deleteZoneDelegated(objMgr, zoneInfo.LoadBalancedZone)
+		return NewFinalization(err)
 	}
 
 	// finalize GlueA record only
 	log.Info().Msgf("Removing Glue A %s records for delegated zone %s", zoneInfo.ClusterNSName, zoneInfo.LoadBalancedZone)
-	return p.removeGlueAFromDelegatedZone(objMgr, zoneInfo.LoadBalancedZone, zoneInfo.ClusterNSName)
+	err = p.removeGlueAFromDelegatedZone(objMgr, zoneInfo.LoadBalancedZone, zoneInfo.ClusterNSName)
+	return NewFinalization(err)
 }
 
 func (p *InfobloxProvider) String() string {

@@ -1,16 +1,17 @@
 {{- if .Values.k8gb.deployRbac }}
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
 metadata:
   name: k8gb
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-{{ include "chart.labels" . | indent 4  }}
+{{ include "chart.labels" . | nindent 4 }}
 subjects:
-- kind: ServiceAccount
-  name: k8gb
-  namespace: {{ .Release.Namespace }}
+  - kind: ServiceAccount
+    name: k8gb
+    namespace: {{ .Release.Namespace | quote }}
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: k8gb
   apiGroup: rbac.authorization.k8s.io
 {{- end }}

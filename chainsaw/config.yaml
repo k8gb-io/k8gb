@@ -3,6 +3,8 @@ kind: Configuration
 metadata:
   name: custom-config
 spec:
+  timeouts:
+    exec: 75s
   clusters:
     eu:
       kubeconfig: kubeconfig/eu.config

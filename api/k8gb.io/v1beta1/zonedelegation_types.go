@@ -108,3 +108,7 @@ func (l *ZoneDelegationList) ListZones() []string {
 	}
 	return zones
 }
+
+func (z *ZoneDelegation) IsInDeletion() bool {
+	return z.DeletionTimestamp != nil
+}

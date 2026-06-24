@@ -206,12 +206,27 @@ func (mr *MockZoneDelegationMockRecorder) Save(ctx, z any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockZoneDelegation)(nil).Save), ctx, z)
 }
 
-// UpdateStatus mocks base method.
-func (m *MockZoneDelegation) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+// UpdateCoreDNSConfiguration mocks base method.
+func (m *MockZoneDelegation) UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateStatus", ctx, zd)
+	ret := m.ctrl.Call(m, "UpdateCoreDNSConfiguration", ctx, zd)
 	ret0, _ := ret[0].(error)
 	return ret0
+}
+
+// UpdateCoreDNSConfiguration indicates an expected call of UpdateCoreDNSConfiguration.
+func (mr *MockZoneDelegationMockRecorder) UpdateCoreDNSConfiguration(ctx, zd any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCoreDNSConfiguration", reflect.TypeOf((*MockZoneDelegation)(nil).UpdateCoreDNSConfiguration), ctx, zd)
+}
+
+// UpdateStatus mocks base method.
+func (m *MockZoneDelegation) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) (*v1beta1.ZoneDelegation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateStatus", ctx, zd)
+	ret0, _ := ret[0].(*v1beta1.ZoneDelegation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateStatus indicates an expected call of UpdateStatus.

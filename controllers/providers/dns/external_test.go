@@ -23,6 +23,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/controllers/ipresolver"
+	"go.uber.org/mock/gomock"
+
 	"github.com/k8gb-io/k8gb/controllers/zones"
 
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -88,17 +92,31 @@ func TestCreateZoneDelegation(t *testing.T) {
 
 	ctx := context.TODO()
 	var tests = []struct {
-		name          string
-		config        resolver.Config
-		expectedError bool
-		client        client.Client
-		detail        *zones.ExtendedZoneDelegation
+		name           string
+		config         resolver.Config
+		expectedError  bool
+		client         client.Client
+		detail         *zones.ExtendedZoneDelegation
+		zoneDelegation *v1beta1.ZoneDelegation
+		resilved       *ipresolver.Resolved
 	}{
 		{
 			name: "existing cloud.example.com",
 			config: resolver.Config{
-				K8gbNamespace: "k8gb",
-				NSRecordTTL:   60,
+				K8gbNamespace:         "k8gb",
+				NSRecordTTL:           60,
+				ClusterGeoTag:         "eu",
+				ExtClustersGeoTagsRaw: []string{"eu", "us"},
+			},
+			zoneDelegation: &v1beta1.ZoneDelegation{
+				Spec: v1beta1.ZoneDelegationSpec{
+					LoadBalancedZone: "cloud.example.com",
+					ParentZone:       "example.com",
+					DNSZoneNegTTL:    60,
+				},
+			},
+			resilved: &ipresolver.Resolved{
+				IPs: []string{"10.0.0.1", "10.0.0.2"},
 			},
 			detail: &zones.ExtendedZoneDelegation{
 				LoadBalancedZone:       "cloud.example.com",
@@ -119,6 +137,16 @@ func TestCreateZoneDelegation(t *testing.T) {
 				K8gbNamespace: "k8gb",
 				NSRecordTTL:   60,
 			},
+			resilved: &ipresolver.Resolved{
+				IPs: []string{"10.0.0.1", "10.0.0.2"},
+			},
+			zoneDelegation: &v1beta1.ZoneDelegation{
+				Spec: v1beta1.ZoneDelegationSpec{
+					LoadBalancedZone: "cloud.example.com",
+					ParentZone:       "example.com",
+					DNSZoneNegTTL:    60,
+				},
+			},
 			detail: &zones.ExtendedZoneDelegation{
 				LoadBalancedZone:       "cloud.example.com",
 				ParentZone:             "example.com",
@@ -138,8 +166,16 @@ func TestCreateZoneDelegation(t *testing.T) {
 	// assert
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			resolverSvc := ipresolver.NewMockResolver(ctrl)
+			resolverSvc.EXPECT().GetExposedIPs(gomock.Any()).Return(test.resilved, nil)
+			detail, _ := zones.NewZoneDelegationWrapper(test.zoneDelegation, &test.config, resolverSvc).GetDetail(context.TODO())
+
 			externalDNSProvider := NewExternalDNS(ctx, test.client, test.config)
-			err := externalDNSProvider.CreateZoneDelegation(test.detail)
+			err := externalDNSProvider.CreateZoneDelegation(detail)
 			assert.Equal(t, test.expectedError, err != nil)
 		})
 	}
