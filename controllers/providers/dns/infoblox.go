@@ -36,6 +36,8 @@ type InfobloxProvider struct {
 	client InfobloxClient
 }
 
+const infobloxProviderName = "Infoblox"
+
 var m = metrics.Metrics()
 
 func NewInfobloxDNS(config resolver.Config, client InfobloxClient) *InfobloxProvider {
@@ -129,7 +131,7 @@ func (p *InfobloxProvider) Finalize(zoneInfo *zones.ExtendedZoneDelegation, fina
 }
 
 func (p *InfobloxProvider) String() string {
-	return "Infoblox"
+	return infobloxProviderName
 }
 
 func (p *InfobloxProvider) filterOutDelegateTo(delegateTo []ibcl.NameServer, fqdn string) (result []ibcl.NameServer) {

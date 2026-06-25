@@ -65,6 +65,9 @@ linters:
           - dupl
         path: _test\.go
       - linters:
+          - goconst
+        path: _test\.go
+      - linters:
           - gochecknoinits
         path: main.go
       - linters:

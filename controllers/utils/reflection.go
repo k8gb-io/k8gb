@@ -22,7 +22,7 @@ import "reflect"
 
 func GetType(v interface{}) string {
 	t := reflect.TypeOf(v)
-	if t.Kind() == reflect.Ptr {
+	if t.Kind() == reflect.Pointer {
 		return "*" + t.Elem().Name()
 	}
 	return t.Name()

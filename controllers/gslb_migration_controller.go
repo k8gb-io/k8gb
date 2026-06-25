@@ -45,6 +45,7 @@ type LegacyGslbMigrationReconciler struct {
 
 const legacyMigrationFinalizer = "k8gb.io/legacy-migration-protection"
 const migrationRequestLabelKey = "k8gb.io/migration-requested"
+const migrationLabelValue = "true"
 
 func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	legacy := &k8gbv1beta1.Gslb{}
@@ -143,7 +144,7 @@ func (r *LegacyGslbMigrationReconciler) Reconcile(ctx context.Context, req ctrl.
 	if legacy.Labels == nil {
 		legacy.Labels = map[string]string{}
 	}
-	legacy.Labels[migrationLabelKey] = "true"
+	legacy.Labels[migrationLabelKey] = migrationLabelValue
 	if err := r.Patch(ctx, legacy, legacyPatch); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -174,7 +175,7 @@ func hasTrueLabel(labels map[string]string, key string) bool {
 	if labels == nil {
 		return false
 	}
-	return labels[key] == "true"
+	return labels[key] == migrationLabelValue
 }
 
 func shouldReconcileLegacyMigrationUpdate(e event.TypedUpdateEvent[client.Object]) bool {
@@ -319,7 +320,7 @@ func (r *LegacyGslbMigrationReconciler) detachLegacyDNSEndpointOwner(
 		blockOwnerDeletion := true
 		filteredOwners = append(filteredOwners, metav1.OwnerReference{
 			APIVersion:         k8gbv1beta1io.GroupVersion.String(),
-			Kind:               "Gslb",
+			Kind:               gslbKind,
 			Name:               canonical.Name,
 			UID:                canonical.UID,
 			Controller:         &controllerTrue,

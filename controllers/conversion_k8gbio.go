@@ -28,7 +28,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const migrationLabelKey = "k8gb.io/migrated-to-k8gb-io"
+const (
+	gslbKind          = "Gslb"
+	migrationLabelKey = "k8gb.io/migrated-to-k8gb-io"
+)
 
 func convertGslbLegacyToIO(gslb *k8gbv1beta1.Gslb) *k8gbv1beta1io.Gslb {
 	if gslb == nil {
@@ -38,7 +41,7 @@ func convertGslbLegacyToIO(gslb *k8gbv1beta1.Gslb) *k8gbv1beta1io.Gslb {
 	return &k8gbv1beta1io.Gslb{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: k8gbv1beta1io.GroupVersion.String(),
-			Kind:       "Gslb",
+			Kind:       gslbKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        gslb.Name,
@@ -57,7 +60,7 @@ func convertGslbLegacyToIORuntime(gslb *k8gbv1beta1.Gslb) *k8gbv1beta1io.Gslb {
 	return &k8gbv1beta1io.Gslb{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: k8gbv1beta1io.GroupVersion.String(),
-			Kind:       "Gslb",
+			Kind:       gslbKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        gslb.Name,
