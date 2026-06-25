@@ -1,5 +1,15 @@
 k8gb:
   reconcileRequeueSeconds: 10
+
+  extraVolumeMounts:
+    - name: dynamic-zones
+      mountPath: /etc/dynamic
+  extraVolumes:
+    - name: dynamic-zones
+      configMap:
+        name: k8gb-zone-delegation
+        optional: true
+
   dnsZones:
     - dnsZoneNegTTL: 10
       loadBalancedZone: cloud.example.com
