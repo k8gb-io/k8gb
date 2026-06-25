@@ -1,0 +1,11 @@
+apiVersion: example.crossplane.io/v1
+kind: GlobalApp
+metadata:
+  name: gslb-kubecon-china
+spec:
+  region: southeastasia # Shared infrastructure region
+  primaryGeoTag: "cn" # Same primary geo tag for consistent failover
+  namespace: "demo"
+  hostname: "globalapp.cloud.example.com"
+  managementPolicies: ["*"]  # Initial policy (will be overridden)
+  autoApplyRecommendedPolicy: true  # Automatic GSLB-driven failover
