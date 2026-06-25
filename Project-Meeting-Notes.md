@@ -37,6 +37,16 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
+[**Zoom Recording**](https://zoom.us/rec/share/0Z_FVMAPz50fi6Z0iu1L4X1t_WCPjQOpY7caTfqg0z8-sKeB6WDZThw55WEly1vq.AiTG9o65HtPQrQJ5) 
+
+[**On YouTube**](https://youtu.be/WbZH_dbRx4w) 
+
+**Attendees**
+
+- [@kuritka](https://github.com/kuritka)
+- [@ytsarev](https://github.com/ytsarev)
+- [@elohmrow](https://github.com/elohmrow)
+
 **Agenda**
 
 - news
