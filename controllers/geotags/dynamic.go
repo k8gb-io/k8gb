@@ -24,7 +24,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/k8gb-io/k8gb/controllers/zones"
@@ -56,7 +57,7 @@ func (p *Dynamic) GetExternalClusterNSNamesByHostname(ctx context.Context, host 
 	return map[string]string{}, nil
 }
 
-func (p *Dynamic) getExternalClusterNSNamesByHostname(ctx context.Context, delegation *v1beta1.ZoneDelegation) (map[string]string, error) {
+func (p *Dynamic) getExternalClusterNSNamesByHostname(ctx context.Context, delegation *v1beta1io.ZoneDelegation) (map[string]string, error) {
 	var tags []string
 	var err error
 	var parentNameServer *utils.DNSServer

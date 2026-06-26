@@ -25,11 +25,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 
 	"github.com/k8gb-io/k8gb/controllers/zones"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	"go.uber.org/mock/gomock"
 
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -50,14 +51,14 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		expectedError   bool
 		host            string
 		result          map[string]string
-		zoneDelegations *v1beta1.ZoneDelegationList
+		zoneDelegations *v1beta1io.ZoneDelegationList
 	}{
 		{
 			name: "hit cloud.example.com",
-			zoneDelegations: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegations: &v1beta1io.ZoneDelegationList{
+				Items: []v1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: v1beta1io.ZoneDelegationSpec{
 							ParentZone:       "example.com",
 							LoadBalancedZone: "cloud.example.com",
 						},
@@ -86,10 +87,10 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com with three clusters",
-			zoneDelegations: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegations: &v1beta1io.ZoneDelegationList{
+				Items: []v1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: v1beta1io.ZoneDelegationSpec{
 							ParentZone:       "example.com",
 							LoadBalancedZone: "cloud.example.com",
 						},
@@ -119,10 +120,10 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "hit cloud.example.com on multiple DNS servers",
-			zoneDelegations: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegations: &v1beta1io.ZoneDelegationList{
+				Items: []v1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: v1beta1io.ZoneDelegationSpec{
 							ParentZone:       "example.com",
 							LoadBalancedZone: "cloud.example.com",
 						},
@@ -157,10 +158,10 @@ func TestParentDNS_Local_GetExternalClusterNSNamesByHostname(t *testing.T) {
 		},
 		{
 			name: "unsupported host",
-			zoneDelegations: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegations: &v1beta1io.ZoneDelegationList{
+				Items: []v1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: v1beta1io.ZoneDelegationSpec{
 							ParentZone:       "example.com",
 							LoadBalancedZone: "cloud.example.com",
 						},
