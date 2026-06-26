@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	localTargetsPrefix = "localtargets-"
+	localTargetsPrefix = "localtargets."
 	dnsNameMax         = 253
 	dnsLabelMax        = 63
 )
