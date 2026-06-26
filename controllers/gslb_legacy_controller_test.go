@@ -22,8 +22,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
-
 	"github.com/k8gb-io/k8gb/controllers/logging"
 
 	"github.com/k8gb-io/k8gb/controllers/zones"
@@ -230,10 +228,10 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 	}
 	zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true).AnyTimes()
 	zoneService.EXPECT().HasExtClusterGeoTags(gomock.Any()).Return(len(reconciler.Config.ExtClustersGeoTagsRaw) > 0).AnyTimes()
-	zoneService.EXPECT().List(gomock.Any()).Return(&v1beta1.ZoneDelegationList{
-		Items: []v1beta1.ZoneDelegation{
+	zoneService.EXPECT().List(gomock.Any()).Return(&k8gbv1beta1io.ZoneDelegationList{
+		Items: []k8gbv1beta1io.ZoneDelegation{
 			{
-				Spec: v1beta1.ZoneDelegationSpec{
+				Spec: k8gbv1beta1io.ZoneDelegationSpec{
 					LoadBalancedZone: "cloud.example.com",
 					ParentZone:       "example.com",
 				},

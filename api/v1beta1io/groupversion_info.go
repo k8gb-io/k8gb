@@ -36,3 +36,10 @@ var (
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
 )
+
+// Register ZoneDelegation, Gslb types with the runtime scheme so the controller client can use them
+func init() {
+	SchemeBuilder.Register(&ZoneDelegation{}, &ZoneDelegationList{})
+
+	SchemeBuilder.Register(&Gslb{}, &GslbList{})
+}

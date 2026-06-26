@@ -24,14 +24,15 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 )
 
 // ZoneDelegationWrapper extends ZoneDelegation object for properties required by k8gb ekosystem (ApplicationDNSEndpoint etc)
 type ZoneDelegationWrapper struct {
-	zoneDelegation *v1beta1.ZoneDelegation
+	zoneDelegation *v1beta1io.ZoneDelegation
 	config         *resolver.Config
 	ipr            ipresolver.Resolver
 }
@@ -48,7 +49,7 @@ type ExtendedZoneDelegation struct {
 }
 
 func NewZoneDelegationWrapper(
-	zoneDelegation *v1beta1.ZoneDelegation,
+	zoneDelegation *v1beta1io.ZoneDelegation,
 	config *resolver.Config,
 	bootstrap ipresolver.Resolver) *ZoneDelegationWrapper {
 	return &ZoneDelegationWrapper{zoneDelegation: zoneDelegation, config: config, ipr: bootstrap}

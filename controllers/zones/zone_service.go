@@ -24,7 +24,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 
@@ -37,18 +38,18 @@ import (
 )
 
 type ZoneDelegation interface {
-	List(ctx context.Context) (*v1beta1.ZoneDelegationList, error)
-	Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1.ZoneDelegation, error)
-	Save(ctx context.Context, z *v1beta1.ZoneDelegation) error
-	ListConfigZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error)
-	ListAllZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error)
+	List(ctx context.Context) (*v1beta1io.ZoneDelegationList, error)
+	Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1io.ZoneDelegation, error)
+	Save(ctx context.Context, z *v1beta1io.ZoneDelegation) error
+	ListConfigZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error)
+	ListAllZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error)
 	AvailableIPs(ctx context.Context) (ZoneDelegationIPs, error)
 	HasAvailableIPs(ctx context.Context) bool
 	HasExtClusterGeoTags(ctx context.Context) bool
-	UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) (*v1beta1.ZoneDelegation, error)
-	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error)
+	UpdateStatus(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*v1beta1io.ZoneDelegation, error)
+	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*ExtendedZoneDelegation, error)
 	ResolveAuthoritativeServersFromZoneDelegations(ctx context.Context, host string) (AuthoritativeServers, error)
-	UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error
+	UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1io.ZoneDelegation) error
 }
 
 type ZoneDelegationImpl struct {
@@ -66,8 +67,8 @@ func NewZoneDelegationImpl(
 	return &ZoneDelegationImpl{client: client, config: config, apiReader: apiReader, ipresolver: bootstrapSvc}
 }
 
-func (z *ZoneDelegationImpl) List(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
-	list := &v1beta1.ZoneDelegationList{}
+func (z *ZoneDelegationImpl) List(ctx context.Context) (*v1beta1io.ZoneDelegationList, error) {
+	list := &v1beta1io.ZoneDelegationList{}
 	err := z.client.List(ctx, list)
 	if err != nil {
 		return nil, fmt.Errorf("error listing zones: %v", err)
@@ -75,16 +76,16 @@ func (z *ZoneDelegationImpl) List(ctx context.Context) (*v1beta1.ZoneDelegationL
 	return list, nil
 }
 
-func (z *ZoneDelegationImpl) Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1.ZoneDelegation, error) {
-	delegationZone := &v1beta1.ZoneDelegation{}
+func (z *ZoneDelegationImpl) Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1io.ZoneDelegation, error) {
+	delegationZone := &v1beta1io.ZoneDelegation{}
 	err := z.client.Get(ctx, objKey, delegationZone)
 	return delegationZone, err
 }
 
 // Save creates or updates ZoneDelegation, updates apart status.
 // Updates coreDNS configuration.
-func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
-	current := &v1beta1.ZoneDelegation{
+func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1io.ZoneDelegation) error {
+	current := &v1beta1io.ZoneDelegation{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: zd.Name,
 		},
@@ -103,21 +104,21 @@ func (z *ZoneDelegationImpl) Save(ctx context.Context, zd *v1beta1.ZoneDelegatio
 }
 
 // ListConfigZoneDelegations reads internal resolver.Config and gets ZoneDelegationList
-func (z *ZoneDelegationImpl) ListConfigZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+func (z *ZoneDelegationImpl) ListConfigZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error) {
 	ips, err := z.AvailableIPs(ctx)
 	if err != nil {
 		return nil, err
 	}
-	zoneDelegationList := &v1beta1.ZoneDelegationList{}
+	zoneDelegationList := &v1beta1io.ZoneDelegationList{}
 	for _, dzi := range z.config.DelegationZones {
-		zd := v1beta1.ZoneDelegation{}
+		zd := v1beta1io.ZoneDelegation{}
 		zd.Spec.LoadBalancedZone = dzi.LoadBalancedZone
 		zd.Spec.ParentZone = dzi.ParentZone
 		zd.Spec.DNSZoneNegTTL = dzi.NegativeTTL
-		zd.Status.DNSServers = []v1beta1.DNSServer{}
+		zd.Status.DNSServers = []v1beta1io.DNSServer{}
 		for _, ns := range dzi.GetNSServerList() {
 			for _, ip := range ips {
-				zd.Status.DNSServers = append(zd.Status.DNSServers, v1beta1.DNSServer{Name: ns, Address: ip})
+				zd.Status.DNSServers = append(zd.Status.DNSServers, v1beta1io.DNSServer{Name: ns, Address: ip})
 			}
 		}
 		zd.Name = name(zd)
@@ -128,9 +129,9 @@ func (z *ZoneDelegationImpl) ListConfigZoneDelegations(ctx context.Context) (*v1
 
 // ListAllZoneDelegations list existing zone delegations and config zone delegations and merge them.
 // Existing zones has precedence and overrides config ones
-func (z *ZoneDelegationImpl) ListAllZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
-	finalList := &v1beta1.ZoneDelegationList{}
-	finalMap := make(map[string]v1beta1.ZoneDelegation)
+func (z *ZoneDelegationImpl) ListAllZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error) {
+	finalList := &v1beta1io.ZoneDelegationList{}
+	finalMap := make(map[string]v1beta1io.ZoneDelegation)
 
 	cfgList, err := z.ListConfigZoneDelegations(ctx)
 	if err != nil {
@@ -156,7 +157,7 @@ func (z *ZoneDelegationImpl) ListAllZoneDelegations(ctx context.Context) (*v1bet
 	return finalList, nil
 }
 
-func (z *ZoneDelegationImpl) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) (*v1beta1.ZoneDelegation, error) {
+func (z *ZoneDelegationImpl) UpdateStatus(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*v1beta1io.ZoneDelegation, error) {
 	current, err := z.Get(ctx, types.NamespacedName{
 		Name: zd.Name,
 	})
@@ -189,11 +190,11 @@ func (z *ZoneDelegationImpl) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneD
 	return current, nil
 }
 
-func equalStatus(a, b v1beta1.ZoneDelegationStatus) bool {
+func equalStatus(a, b v1beta1io.ZoneDelegationStatus) bool {
 	if len(a.DNSServers) != len(b.DNSServers) {
 		return false
 	}
-	toCountMap := func(servers []v1beta1.DNSServer) map[string]int {
+	toCountMap := func(servers []v1beta1io.DNSServer) map[string]int {
 		m := make(map[string]int, len(servers))
 		for _, s := range servers {
 			key := s.Name + "|" + s.Address
@@ -217,19 +218,19 @@ func equalStatus(a, b v1beta1.ZoneDelegationStatus) bool {
 	return true
 }
 
-func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd ExtendedZoneDelegation) (v1beta1.ZoneDelegationStatus, error) {
-	status := v1beta1.ZoneDelegationStatus{
-		DNSServers: make([]v1beta1.DNSServer, 0),
+func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd ExtendedZoneDelegation) (v1beta1io.ZoneDelegationStatus, error) {
+	status := v1beta1io.ZoneDelegationStatus{
+		DNSServers: make([]v1beta1io.DNSServer, 0),
 	}
 
 	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, exzd.LoadBalancedZone, exzd.ParentZone)
 
 	if err := glueAResults.LocalClusterError(); err != nil {
-		return v1beta1.ZoneDelegationStatus{}, err
+		return v1beta1io.ZoneDelegationStatus{}, err
 	}
 
 	for _, gluea := range glueAResults.FilterResolvedRecords() {
-		status.DNSServers = append(status.DNSServers, v1beta1.DNSServer{
+		status.DNSServers = append(status.DNSServers, v1beta1io.DNSServer{
 			Name:    gluea.Cluster,
 			Address: gluea.IP,
 		})
@@ -277,13 +278,13 @@ func (z *ZoneDelegationImpl) HasExtClusterGeoTags(ctx context.Context) bool {
 	return len(detail.ExtClusterNSNames) > 0
 }
 
-func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error) {
+func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*ExtendedZoneDelegation, error) {
 	return NewZoneDelegationWrapper(zd, z.config, z.ipresolver).GetDetail(ctx)
 }
 
 // UpdateCoreDNSConfiguration creates or updates the k8gb-zone-delegation ConfigMap.
 // It also removes the zone entry when the ZoneDelegation is being deleted.
-func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1io.ZoneDelegation) error {
 	const zoneCM = "k8gb-zone-delegation"
 
 	list, err := z.List(ctx)
@@ -336,6 +337,6 @@ func getCoreDNSData(zone string) string {
 	return fmt.Sprintf(zoneTemplate, zone)
 }
 
-func name(zd v1beta1.ZoneDelegation) string {
+func name(zd v1beta1io.ZoneDelegation) string {
 	return fmt.Sprintf("%s.conf", strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-"))
 }

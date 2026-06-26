@@ -23,7 +23,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	"github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
@@ -288,11 +287,11 @@ func TestFilterServersByDelegationZones(t *testing.T) {
 }
 
 // createTestZonesDelegations creates a DelegationZones for testing
-func createTestZonesDelegations(zones []string) *v1beta1.ZoneDelegationList {
-	zoneDelegations := &v1beta1.ZoneDelegationList{Items: make([]v1beta1.ZoneDelegation, 0, len(zones))}
+func createTestZonesDelegations(zones []string) *v1beta1io.ZoneDelegationList {
+	zoneDelegations := &v1beta1io.ZoneDelegationList{Items: make([]v1beta1io.ZoneDelegation, 0, len(zones))}
 	for _, zone := range zones {
-		zoneDelegations.Items = append(zoneDelegations.Items, v1beta1.ZoneDelegation{
-			Spec: v1beta1.ZoneDelegationSpec{
+		zoneDelegations.Items = append(zoneDelegations.Items, v1beta1io.ZoneDelegation{
+			Spec: v1beta1io.ZoneDelegationSpec{
 				LoadBalancedZone: zone,
 			},
 		})

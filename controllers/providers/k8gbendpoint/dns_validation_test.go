@@ -24,7 +24,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -59,10 +58,10 @@ func TestGetDNSEndpointRejectsInvalidLocalTargetsHost(t *testing.T) {
 	qs := mocks.NewMockDNSQueryService(ctrl)
 	zs := zones.NewMockZoneDelegation(ctrl)
 
-	zs.EXPECT().List(gomock.Any()).Return(&v1beta1.ZoneDelegationList{
-		Items: []v1beta1.ZoneDelegation{
+	zs.EXPECT().List(gomock.Any()).Return(&k8gbv1beta1io.ZoneDelegationList{
+		Items: []k8gbv1beta1io.ZoneDelegation{
 			{
-				Spec: v1beta1.ZoneDelegationSpec{
+				Spec: k8gbv1beta1io.ZoneDelegationSpec{
 					LoadBalancedZone: "cloud.example.com",
 					ParentZone:       "example.com",
 				},
