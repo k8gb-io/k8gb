@@ -576,7 +576,6 @@ func TestConfigurations(t *testing.T) {
 	}
 }
 
-//nolint:goconst
 func TestParseDNSZones(t *testing.T) {
 	str220 := `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1.
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb2.

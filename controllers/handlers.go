@@ -79,7 +79,7 @@ func (g *IngressHandler) Handle(ing client.Object) []reconcile.Request {
 
 func (g *IngressHandler) isOwnedByGSLB(obj client.Object) bool {
 	for _, r := range obj.GetOwnerReferences() {
-		if r.Kind == "Gslb" {
+		if r.Kind == gslbKind {
 			return true
 		}
 	}

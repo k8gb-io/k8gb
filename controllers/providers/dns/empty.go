@@ -28,6 +28,8 @@ type EmptyDNSProvider struct {
 	config resolver.Config
 }
 
+const emptyProviderName = "EMPTY"
+
 func NewEmptyDNS(config resolver.Config) *EmptyDNSProvider {
 	return &EmptyDNSProvider{
 		config: config,
@@ -35,7 +37,7 @@ func NewEmptyDNS(config resolver.Config) *EmptyDNSProvider {
 }
 
 func (p *EmptyDNSProvider) CreateZoneDelegation(_ *zones.ExtendedZoneDelegation) (err error) {
-	log.Info().Msg("EMPTY")
+	log.Info().Msg(emptyProviderName)
 	return nil
 }
 
@@ -44,5 +46,5 @@ func (p *EmptyDNSProvider) Finalize(_ *zones.ExtendedZoneDelegation, _ bool) *Fi
 }
 
 func (p *EmptyDNSProvider) String() string {
-	return "EMPTY"
+	return emptyProviderName
 }

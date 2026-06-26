@@ -71,7 +71,6 @@ func (d *DelegationDNSEndpoint) RemoveEndpoint() error {
 }
 
 func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, error) {
-	const externalDNSTypeCommon = "extdns"
 	ttl := externaldns.TTL(d.config.NSRecordTTL)
 	log.Info().
 		Str("provider", string(d.endpointType)).
@@ -81,7 +80,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      d.extendedZoneDelegation.GetExternalDNSEndpointName(),
 			Namespace: d.config.K8gbNamespace,
-			Labels:    map[string]string{"k8gb.io/dnstype": externalDNSTypeCommon, "k8gb.absa.oss/dnstype": externalDNSTypeCommon},
+			Labels:    map[string]string{dnsTypeAnnotation: externalDNSTypeCommon, legacyDNSTypeAnnotation: externalDNSTypeCommon},
 		},
 		Spec: externaldnsApi.DNSEndpointSpec{
 			Endpoints: []*externaldns.Endpoint{

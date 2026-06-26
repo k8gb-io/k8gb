@@ -36,3 +36,11 @@ const (
 	applicationDNSEndpoint dnsEndpointType = "applicationDNSEndpoint"
 	delegationDNSEndpoint  dnsEndpointType = "delegationDNSEndpoint"
 )
+
+const (
+	dnsTypeAnnotation       = "k8gb.io/dnstype"
+	legacyDNSTypeAnnotation = "k8gb.absa.oss/dnstype"
+	externalDNSTypeCommon   = "extdns"
+	localDNSType            = "local"
+	strategyLabel           = "strategy"
+)
