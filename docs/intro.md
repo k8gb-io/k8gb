@@ -142,6 +142,37 @@ This use case demonstrates that clusters with no healthy Pods should *not* have 
 
 If the Pods in cluster **Y** were to once again become healthy (liveness and readiness probes start passing) then the Ingress node IPs for cluster **Y** would once again be added to the eligible pool of Ingress node IPs.
 
+### 4. Partial deployment - Gslb resource missing from a cluster
+
+This use case documents what happens when a `Gslb` resource is **not** deployed consistently across all clusters. This situation arises during phased rollouts or as a result of misconfiguration, and leads to the affected cluster being silently excluded from global load balancing for that hostname.
+
+#### 4.1 Setup
+
+In this scenario, a multi-cluster environment has:
+
+- Cluster **X**: `Gslb` resource **deployed** for `app.cloud.example.com`
+- Cluster **Y**: `Gslb` resource **not deployed** for `app.cloud.example.com`
+
+#### 4.2 Behavior
+
+When a `Gslb` resource is absent from cluster **Y**:
+
+1. Cluster **Y**'s k8gb controller has no knowledge of `app.cloud.example.com` and publishes no `localtargets-app.cloud.example.com` A records to its local CoreDNS.
+2. Cluster **Y**'s zone delegation (NS + glue records) registered with the edge DNS is unaffected by the missing `Gslb` resource — NS delegation is per-cluster, not per-hostname. However, when Cluster **X** queries Cluster **Y**'s CoreDNS for `localtargets-app.cloud.example.com`, it receives an empty response because no such records exist.
+3. Cluster **X** collects `localtargets-*` records from all known clusters; for Cluster **Y** it receives an empty result, so only Cluster **X**'s own Ingress node IPs are included in the final answer set.
+4. Cluster **X** composes DNS responses containing only its own Ingress node IPs.
+
+Clients receive **consistent** DNS responses — they are always directed to cluster **X** — but cluster **Y** never receives GSLB-managed traffic for this hostname, regardless of its Pod health.
+
+#### 4.3 Outcome
+
+k8gb participation is **opt-in per cluster per hostname**. A cluster that lacks a `Gslb` resource for a given hostname is silently excluded from the GSLB pool for that hostname. The system continues to function through the remaining clusters, but the missing cluster cannot take part in load balancing.
+
+For troubleshooting guidance — common causes of accidental partial deployment and how to detect them — see [Partial deployment troubleshooting](partial-deployment.md).
+
+!!! note "Intentional single-cluster deployment"
+    Deploying a `Gslb` resource in only one cluster is a valid and supported configuration (see [use case 1](#1-basic-single-cluster)). The concern this section addresses is the **unintended** case where an operator expects multi-cluster load balancing but omits the `Gslb` resource from one or more clusters.
+
 ## Load balancing strategies
 
 The following load balancing strategies, as it relates to resolving Ingress node IPs, should be provided as part of the initial implementation:
