@@ -142,6 +142,47 @@ This use case demonstrates that clusters with no healthy Pods should *not* have 
 
 If the Pods in cluster **Y** were to once again become healthy (liveness and readiness probes start passing) then the Ingress node IPs for cluster **Y** would once again be added to the eligible pool of Ingress node IPs.
 
+### 4. Partial deployment - Gslb resource missing from a cluster
+
+This use case documents what happens when a `Gslb` resource is **not** deployed consistently across all clusters. This situation arises during phased rollouts or as a result of misconfiguration, and leads to the affected cluster being silently excluded from global load balancing for that hostname.
+
+#### 4.1 Setup
+
+In this scenario, a multi-cluster environment has:
+
+- Cluster **X**: `Gslb` resource **deployed** for `app.cloud.example.com`
+- Cluster **Y**: `Gslb` resource **not deployed** for `app.cloud.example.com`
+
+#### 4.2 Behavior
+
+When a `Gslb` resource is absent from cluster **Y**:
+
+1. Cluster **Y**'s k8gb controller has no knowledge of `app.cloud.example.com` and publishes no `localtargets-app.cloud.example.com` records to its local CoreDNS.
+2. Cluster **Y** does not register NS delegation records for this hostname with the edge DNS, so the edge DNS cannot delegate queries to cluster **Y**'s CoreDNS for this host.
+3. Cluster **X** discovers (via the edge DNS) only its own NS delegation records for `app.cloud.example.com`. When it queries remote clusters for `localtargets-*` records, it finds none for cluster **Y**.
+4. Cluster **X** composes DNS responses containing only its own Ingress node IPs.
+
+Clients receive **consistent** DNS responses — they are always directed to cluster **X** — but cluster **Y** never receives GSLB-managed traffic for this hostname, regardless of its Pod health.
+
+#### 4.3 Outcome
+
+k8gb participation is **opt-in per cluster per hostname**. A cluster that lacks a `Gslb` resource for a given hostname is silently excluded from the GSLB pool for that hostname. The system continues to function through the remaining clusters, but the missing cluster cannot take part in load balancing.
+
+**Common causes of accidental partial deployment:**
+
+- Incomplete rollout: `Gslb` resources deployed to some clusters but not all
+- Namespace mismatch: `Gslb` resource exists in a different namespace than the one k8gb is watching
+- Typo in `spec.ingress.rules[].host`: the host in the `Gslb` resource does not match the Ingress host exactly
+
+**How to detect partial deployment:**
+
+- Run `kubectl get gslb -A` on each cluster and verify the same hostname appears in every cluster intended to share traffic.
+- Inspect `status.healthyRecords` on the `Gslb` object in clusters that **do** have the resource: if only one cluster's IPs are present, the other cluster is likely missing the `Gslb` resource.
+- Query the edge DNS directly — `dig NS app.cloud.example.com @<edge-dns>` — only clusters that have published NS delegation records will appear in the answer.
+
+!!! note "Intentional single-cluster deployment"
+    Deploying a `Gslb` resource in only one cluster is a valid and supported configuration (see [use case 1](#1-basic-single-cluster)). The concern this section addresses is the **unintended** case where an operator expects multi-cluster load balancing but omits the `Gslb` resource from one or more clusters.
+
 ## Load balancing strategies
 
 The following load balancing strategies, as it relates to resolving Ingress node IPs, should be provided as part of the initial implementation:
