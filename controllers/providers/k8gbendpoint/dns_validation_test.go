@@ -47,6 +47,26 @@ func TestGetLocalTargetsHostRejectsTooLongFirstLabel(t *testing.T) {
 	assert.EqualError(t, err, expectedErr)
 }
 
+func TestGetLocalTargetsHostLegacyRejectsTooLongFirstLabel(t *testing.T) {
+	host := strings.Repeat("a", 51) + ".cloud.example.com"
+	expectedErr := `derived localtargets name "localtargets-` +
+		strings.Repeat("a", 51) +
+		`.cloud.example.com" is invalid: label "localtargets-` +
+		strings.Repeat("a", 51) +
+		`" exceeds 63 characters`
+
+	_, err := getLocalTargetsHostLegacy(host)
+
+	assert.EqualError(t, err, expectedErr)
+}
+
+func TestGetLocalTargetsHostLegacyAcceptsValidHost(t *testing.T) {
+	host := "my-app.cloud.example.com"
+	result, err := getLocalTargetsHostLegacy(host)
+	assert.NoError(t, err)
+	assert.Equal(t, "localtargets-my-app.cloud.example.com", result)
+}
+
 func TestGetDNSEndpointRejectsInvalidLocalTargetsHost(t *testing.T) {
 	logger := zerolog.New(io.Discard).With().Timestamp().Logger()
 	metrics := func(*k8gbv1beta1io.Gslb, bool, k8gbv1beta1io.HealthStatus, []string) {}

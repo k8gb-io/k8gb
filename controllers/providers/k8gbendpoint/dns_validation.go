@@ -24,13 +24,22 @@ import (
 )
 
 const (
-	localTargetsPrefix = "localtargets."
-	dnsNameMax         = 253
-	dnsLabelMax        = 63
+	localTargetsPrefix    = "localtargets."
+	localTargetsPrefixOld = "localtargets-"
+	dnsNameMax            = 253
+	dnsLabelMax           = 63
 )
 
 func getLocalTargetsHost(host string) (string, error) {
 	localTargetsHost := fmt.Sprintf("%s%s", localTargetsPrefix, host)
+	if err := validateDNSName(localTargetsHost); err != nil {
+		return "", fmt.Errorf("derived localtargets name %q is invalid: %w", localTargetsHost, err)
+	}
+	return localTargetsHost, nil
+}
+
+func getLocalTargetsHostLegacy(host string) (string, error) {
+	localTargetsHost := fmt.Sprintf("%s%s", localTargetsPrefixOld, host)
 	if err := validateDNSName(localTargetsHost); err != nil {
 		return "", fmt.Errorf("derived localtargets name %q is invalid: %w", localTargetsHost, err)
 	}
