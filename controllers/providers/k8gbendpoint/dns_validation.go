@@ -24,15 +24,26 @@ import (
 )
 
 const (
-	localTargetsPrefix = "localtargets-"
-	dnsNameMax         = 253
-	dnsLabelMax        = 63
+	localTargetsPrefix    = "localtargets."
+	localTargetsPrefixLegacy = "localtargets-"
+	dnsNameMax            = 253
+	dnsLabelMax           = 63
 )
 
 func getLocalTargetsHost(host string) (string, error) {
 	localTargetsHost := fmt.Sprintf("%s%s", localTargetsPrefix, host)
 	if err := validateDNSName(localTargetsHost); err != nil {
 		return "", fmt.Errorf("derived localtargets name %q is invalid: %w", localTargetsHost, err)
+	}
+	return localTargetsHost, nil
+}
+
+// getLocalTargetsHostLegacy returns the legacy dash-separated localtargets name
+// for backward compatibility during migration from localtargets-<host> to localtargets.<host>.
+func getLocalTargetsHostLegacy(host string) (string, error) {
+	localTargetsHost := fmt.Sprintf("%s%s", localTargetsPrefixLegacy, host)
+	if err := validateDNSName(localTargetsHost); err != nil {
+		return "", fmt.Errorf("legacy derived localtargets name %q is invalid: %w", localTargetsHost, err)
 	}
 	return localTargetsHost, nil
 }
