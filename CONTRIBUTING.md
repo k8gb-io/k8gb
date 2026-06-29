@@ -37,7 +37,7 @@ This document outlines the resources and guidelines necessary to follow by contr
 ## Getting started
 
 - Fork the repository on GitHub
-- See the [local playground guide](local.md) for local dev environment setup
+- See the [local playground guide](docs/local.md) for local dev environment setup
 
 ## Getting help
 
@@ -144,7 +144,7 @@ There is a dedicated make target available for Goland:
 3. Attach debugger of your IDE to port `2345`.
 
 ## Metrics
-More info about k8gb metrics can be found in the [metrics.md](metrics.md) document.
+More info about k8gb metrics can be found in the [metrics.md](docs/metrics.md) document.
 If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the `make deploy-prometheus` command.
 
 The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:

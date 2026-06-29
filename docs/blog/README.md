@@ -92,8 +92,9 @@ authors:
 
 ### Images and Assets
 
-- Place images in `docs/images/blog/` directory
-- Use relative paths: `![Alt text](../../images/blog/my-image.png)`
+- Place shared banner images in `docs/blog/blog-banners/`
+- For post-specific assets, keep them next to the post in `docs/blog/posts/`
+- Use relative paths such as `![Banner](../blog-banners/k8gb-blog-1.png)` or `![Diagram](ai-inf-arch.png)`
 - Optimize images for web (compress, appropriate formats)
 
 ### Code Blocks
@@ -113,8 +114,8 @@ spec:
 ### Internal Links
 
 Link to other documentation:
-- `[Installation Guide](../../tutorials.md)`
-- `[Components](../../components.md)`
+- `[Installation Guide](../tutorials.md)`
+- `[Components](../components.md)`
 
 ### External Links
 
