@@ -422,6 +422,13 @@
                         "minLength": 1
                     }
                 },
+                "edgeDNSExposedIPs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
                 "clusterGeoTag": {
                     "type": "string",
                     "minLength": 1
