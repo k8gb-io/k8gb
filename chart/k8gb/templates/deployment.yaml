@@ -70,6 +70,10 @@ spec:
               value: {{ quote .Values.k8gb.extGslbClustersGeoTags }}
             - name: EDGE_DNS_SERVERS
               value: {{ include "k8gb.edgeDNSServers" . }}
+            {{- if .Values.k8gb.edgeDNSExposedIPs }}
+            - name: EDGE_DNS_EXPOSED_IPS
+              value: {{ join "," .Values.k8gb.edgeDNSExposedIPs | quote }}
+            {{- end }}
             - name: DNS_ZONES
               value: {{ include "k8gb.dnsZonesString" . }}
             - name: RECONCILE_REQUEUE_SECONDS

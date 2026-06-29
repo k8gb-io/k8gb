@@ -393,3 +393,28 @@ func TestResolveLocalIPs(t *testing.T) {
 		})
 	}
 }
+
+// TestEdgeDNSExposedIPsOverride verifies that when EDGE_DNS_EXPOSED_IPS is set, the resolver
+// returns the operator-provided IPs without querying the CoreDNS service/ingress. This is the
+// bare-metal / static-NAT path from https://github.com/k8gb-io/k8gb/issues/2360
+func TestEdgeDNSExposedIPsOverride(t *testing.T) {
+	ctx := context.TODO()
+	overrideIPs := []string{"203.0.113.10", "203.0.113.11"}
+
+	// The client must never be touched: with the override set there is nothing to discover.
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	cl := mocks.NewMockClient(ctrl)
+
+	config := &resolver.Config{
+		K8gbNamespace:      "k8gb",
+		CoreDNSServiceType: corev1.ServiceTypeClusterIP,
+		EdgeDNSExposedIPs:  overrideIPs,
+	}
+
+	bootstrap, err := NewResolver(config, cl, nil).GetExposedIPs(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, overrideIPs, bootstrap.IPs)
+	// String() must be nil-safe when svc/ing are absent.
+	assert.Contains(t, bootstrap.String(), "Operator override")
+}

@@ -51,6 +51,8 @@ type Config struct {
 
 	CoreDNSServiceType corev1.ServiceType `env:"COREDNS_SERVICE_TYPE" required:"" enum:"ClusterIP,LoadBalancer,NodePort,ExternalName" default:"ClusterIP" help:"k8gb requires the cluster IP addresses to operate. If the service type is LoadBalancer, the IP addresses are read from the CoreDNS service otherwise, they are read from the ingress labeled with 'k8gb.io/ip-source=true'."`
 
+	EdgeDNSExposedIPs []string `env:"EDGE_DNS_EXPOSED_IPS" optional:"" validate:"omitempty,unique,dive,ip" help:"cluster-level override of the publicly routable IP addresses this cluster's CoreDNS is exposed on; comma-separated. When set, these IPs are published as the zone-delegation NS glue records instead of the IPs discovered from the CoreDNS service/ingress. Use on bare-metal/colo clusters that sit behind 1:1 static NAT and only see private node IPs. e.g: '203.0.113.10,203.0.113.11'"`
+
 	ExtDNSEnabledRaw bool `env:"EXTDNS_ENABLED" optional:"" default:"false" help:"if true K8gb uses ExternalDNS"`
 
 	MetricsAddress string `env:"METRICS_ADDRESS" optional:"" default:"0.0.0.0:8080" validate:"iphostport" help:"format address:port where address can be empty, IP address, or hostname, e.g: 10.10.0.0:8080"`
