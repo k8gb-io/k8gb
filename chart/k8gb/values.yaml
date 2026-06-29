@@ -30,6 +30,13 @@ k8gb:
   edgeDNSServers:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
+  # -- ( array ) cluster-level override of the publicly routable IP addresses this cluster's CoreDNS is
+  # exposed on. When set, these IPs are published as the zone-delegation NS glue records instead of the IPs
+  # discovered from the CoreDNS service/ingress. Use on bare-metal/colo clusters behind 1:1 static NAT that
+  # only see private node IPs. Leave empty to keep the default auto-discovery behavior.
+  edgeDNSExposedIPs: []
+  # - "203.0.113.10"
+  # - "203.0.113.11"
   # -- Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags
   clusterGeoTag: "eu"
   # -- Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances

@@ -80,3 +80,21 @@ spec:
     app.kubernetes.io/name: coredns
   type: LoadBalancer # <== set service type to LoadBalancer
 ```
+
+## Bare-metal clusters behind static NAT
+
+On bare-metal / colo clusters, the in-cluster LoadBalancer controller (klipper-lb, MetalLB in L2 mode, kube-vip, ...) usually assigns **private node IPs** to the CoreDNS `Service` / `Ingress` status. When the cluster is reachable from the outside only through 1:1 static NAT performed at the network perimeter, the cluster has no awareness of its public IPs. k8gb would then publish the private IPs as the zone-delegation NS glue records (`gslb-ns-<geoTag>-<loadBalancedZone>`) in EdgeDNS, and external resolvers following the delegation would time out.
+
+For this topology, set the cluster-level override `k8gb.edgeDNSExposedIPs` to the publicly routable IPs that NAT to this cluster's CoreDNS. When set, k8gb uses these IPs in place of the discovered `Service` / `Ingress` IPs at the zone-delegation boundary, so the NS glue records published to EdgeDNS reference publicly routable addresses. Auto-discovery is used whenever the value is left empty (the default).
+
+```yaml
+# k8gb helm chart values.yaml example, on the "eu" cluster:
+
+k8gb:
+  clusterGeoTag: "eu"
+  edgeDNSExposedIPs: # <== public IPs that NAT to this cluster's CoreDNS
+    - "203.0.113.10"
+    - "203.0.113.11"
+```
+
+This maps to the `EDGE_DNS_EXPOSED_IPS` environment variable (comma-separated) on the k8gb controller. The override is cluster-wide and applies to every delegated zone served by the cluster. The per-Gslb [`k8gb.io/exposed-ip-addresses`](./exposed-hostnames.md) annotation remains the way to override the application `localtargets-*` / final A records.
