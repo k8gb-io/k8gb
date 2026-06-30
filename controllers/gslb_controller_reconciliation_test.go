@@ -203,7 +203,6 @@ func TestSplitIPsByVersion(t *testing.T) {
 }
 
 func TestFilterServersByDelegationZones(t *testing.T) {
-	log := logging.Logger()
 	tests := []struct {
 		name              string
 		servers           []*v1beta1io.Server
@@ -272,7 +271,7 @@ func TestFilterServersByDelegationZones(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			zoneDelegations := createTestZonesDelegations(test.delegationZones)
 
-			filtered := filterServersByZoneDelegations(log, test.servers, zoneDelegations)
+			filtered := filterServersByZoneDelegations(test.servers, zoneDelegations)
 
 			assert.Equal(t, test.expectedHostCount, len(filtered))
 			if test.expectedHostCount > 0 {
