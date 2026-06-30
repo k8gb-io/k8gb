@@ -22,7 +22,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/zones"
 )
@@ -31,7 +32,7 @@ type GeoTags interface {
 	GetExternalClusterNSNamesByHostname(ctx context.Context, host string) (map[string]string, error)
 }
 
-func getZone(zoneDelegationList *v1beta1.ZoneDelegationList, host string) *v1beta1.ZoneDelegation {
+func getZone(zoneDelegationList *v1beta1io.ZoneDelegationList, host string) *v1beta1io.ZoneDelegation {
 	for _, z := range zoneDelegationList.Items {
 		if strings.Contains(host, z.Spec.ParentZone) {
 			return &z

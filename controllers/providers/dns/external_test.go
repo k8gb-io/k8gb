@@ -23,7 +23,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"go.uber.org/mock/gomock"
 
@@ -97,7 +98,7 @@ func TestCreateZoneDelegation(t *testing.T) {
 		expectedError  bool
 		client         client.Client
 		detail         *zones.ExtendedZoneDelegation
-		zoneDelegation *v1beta1.ZoneDelegation
+		zoneDelegation *v1beta1io.ZoneDelegation
 		resilved       *ipresolver.Resolved
 	}{
 		{
@@ -108,8 +109,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 				ClusterGeoTag:         "eu",
 				ExtClustersGeoTagsRaw: []string{"eu", "us"},
 			},
-			zoneDelegation: &v1beta1.ZoneDelegation{
-				Spec: v1beta1.ZoneDelegationSpec{
+			zoneDelegation: &v1beta1io.ZoneDelegation{
+				Spec: v1beta1io.ZoneDelegationSpec{
 					LoadBalancedZone: "cloud.example.com",
 					ParentZone:       "example.com",
 					DNSZoneNegTTL:    60,
@@ -140,8 +141,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 			resilved: &ipresolver.Resolved{
 				IPs: []string{"10.0.0.1", "10.0.0.2"},
 			},
-			zoneDelegation: &v1beta1.ZoneDelegation{
-				Spec: v1beta1.ZoneDelegationSpec{
+			zoneDelegation: &v1beta1io.ZoneDelegation{
+				Spec: v1beta1io.ZoneDelegationSpec{
 					LoadBalancedZone: "cloud.example.com",
 					ParentZone:       "example.com",
 					DNSZoneNegTTL:    60,

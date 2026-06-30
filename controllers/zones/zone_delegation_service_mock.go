@@ -31,7 +31,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	v1beta1 "github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	gomock "go.uber.org/mock/gomock"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )

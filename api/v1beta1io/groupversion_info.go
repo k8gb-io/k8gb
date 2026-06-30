@@ -1,6 +1,7 @@
 // Package v1beta1io contains API Schema definitions for the k8gb v1beta1 API group
 // +kubebuilder:object:generate=true
 // +groupName=k8gb.io
+// +versionName=v1beta1
 package v1beta1io
 
 /*
@@ -36,3 +37,10 @@ var (
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
 )
+
+// Register ZoneDelegation, Gslb types with the runtime scheme so the controller client can use them
+func init() {
+	SchemeBuilder.Register(&ZoneDelegation{}, &ZoneDelegationList{})
+
+	SchemeBuilder.Register(&Gslb{}, &GslbList{})
+}

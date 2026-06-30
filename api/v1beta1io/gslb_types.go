@@ -152,7 +152,3 @@ const (
 func (p ServiceHealthPolicy) String() string {
 	return string(p)
 }
-
-func init() {
-	SchemeBuilder.Register(&Gslb{}, &GslbList{})
-}

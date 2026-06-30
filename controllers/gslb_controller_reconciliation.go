@@ -25,7 +25,6 @@ import (
 	"net"
 	"reflect"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/providers/k8gbendpoint"
 	"github.com/k8gb-io/k8gb/controllers/providers/metrics"
@@ -278,7 +277,7 @@ func splitIPsByVersion(logger *zerolog.Logger, ips []string) ([]string, []string
 func filterServersByZoneDelegations(
 	logger *zerolog.Logger,
 	servers []*k8gbv1beta1io.Server,
-	zoneDelegations *v1beta1.ZoneDelegationList) []*k8gbv1beta1io.Server {
+	zoneDelegations *k8gbv1beta1io.ZoneDelegationList) []*k8gbv1beta1io.Server {
 	var filtered []*k8gbv1beta1io.Server
 	for _, server := range servers {
 		if zoneDelegations.ContainsZone(server.Host) {
