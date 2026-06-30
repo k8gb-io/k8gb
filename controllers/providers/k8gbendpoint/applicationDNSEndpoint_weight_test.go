@@ -25,7 +25,6 @@ import (
 	"net"
 	"testing"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
@@ -60,7 +59,7 @@ func TestWeight(t *testing.T) {
 		config             *resolver.Config
 		gslb               *k8gbv1beta1io.Gslb
 		expectedLabels     map[string]string
-		zoneDelegationList *v1beta1.ZoneDelegationList
+		zoneDelegationList *k8gbv1beta1io.ZoneDelegationList
 		authServers        zones.AuthoritativeServers
 	}{
 		{
@@ -70,10 +69,10 @@ func TestWeight(t *testing.T) {
 				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: "us", IsLocal: false},
 				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: "za", IsLocal: false},
 			},
-			zoneDelegationList: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegationList: &k8gbv1beta1io.ZoneDelegationList{
+				Items: []k8gbv1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: k8gbv1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
 							ParentZone:       "example.com",
 						},
@@ -124,10 +123,10 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "app eu1-us0-za0 - only current cluster",
-			zoneDelegationList: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegationList: &k8gbv1beta1io.ZoneDelegationList{
+				Items: []k8gbv1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: k8gbv1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
 							ParentZone:       "example.com",
 						},
@@ -183,10 +182,10 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "app eu0-us1-za0 only external cluster",
-			zoneDelegationList: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegationList: &k8gbv1beta1io.ZoneDelegationList{
+				Items: []k8gbv1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: k8gbv1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
 							ParentZone:       "example.com",
 						},
@@ -242,10 +241,10 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "empty weights with external targets",
-			zoneDelegationList: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegationList: &k8gbv1beta1io.ZoneDelegationList{
+				Items: []k8gbv1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: k8gbv1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
 							ParentZone:       "example.com",
 						},
@@ -285,10 +284,10 @@ func TestWeight(t *testing.T) {
 
 		{
 			name: "empty weights without",
-			zoneDelegationList: &v1beta1.ZoneDelegationList{
-				Items: []v1beta1.ZoneDelegation{
+			zoneDelegationList: &k8gbv1beta1io.ZoneDelegationList{
+				Items: []k8gbv1beta1io.ZoneDelegation{
 					{
-						Spec: v1beta1.ZoneDelegationSpec{
+						Spec: k8gbv1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
 							ParentZone:       "example.com",
 						},

@@ -22,7 +22,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
@@ -129,7 +130,7 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	return result.Requeue()
 }
 
-func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1.ZoneDelegation) error {
+func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1io.ZoneDelegation) error {
 	if zone.Spec.DoFinalize {
 		zoneDetail, err := r.ZoneService.ExtendedZoneDelegation(ctx, zone)
 		if err != nil {
@@ -148,7 +149,7 @@ func (r *ZoneDelegationReconciler) finalize(ctx context.Context, zone *v1beta1.Z
 	return r.removeFinalizer(ctx, zone)
 }
 
-func (r *ZoneDelegationReconciler) removeFinalizer(ctx context.Context, zone *v1beta1.ZoneDelegation) error {
+func (r *ZoneDelegationReconciler) removeFinalizer(ctx context.Context, zone *v1beta1io.ZoneDelegation) error {
 	if !controllerutil.ContainsFinalizer(zone, zoneDelegationFinalizer) {
 		return nil
 	}
@@ -162,7 +163,7 @@ func (r *ZoneDelegationReconciler) removeFinalizer(ctx context.Context, zone *v1
 	return nil
 }
 
-func (r *ZoneDelegationReconciler) ensureFinalizer(ctx context.Context, zone *v1beta1.ZoneDelegation) error {
+func (r *ZoneDelegationReconciler) ensureFinalizer(ctx context.Context, zone *v1beta1io.ZoneDelegation) error {
 	if controllerutil.ContainsFinalizer(zone, zoneDelegationFinalizer) {
 		return nil
 	}

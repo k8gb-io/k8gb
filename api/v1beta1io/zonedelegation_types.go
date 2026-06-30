@@ -1,4 +1,4 @@
-package v1beta1
+package v1beta1io
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
