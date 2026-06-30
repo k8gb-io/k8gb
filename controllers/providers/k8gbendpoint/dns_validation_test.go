@@ -36,9 +36,9 @@ import (
 
 func TestGetLocalTargetsHostRejectsTooLongFirstLabel(t *testing.T) {
 	host := strings.Repeat("a", 51) + ".cloud.example.com"
-	expectedErr := `derived localtargets name "localtargets-` +
+	expectedErr := `derived localtargets name "localtargets.` +
 		strings.Repeat("a", 51) +
-		`.cloud.example.com" is invalid: label "localtargets-` +
+		`.cloud.example.com" is invalid: label "localtargets.` +
 		strings.Repeat("a", 51) +
 		`" exceeds 63 characters`
 
