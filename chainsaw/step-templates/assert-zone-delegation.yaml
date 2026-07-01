@@ -56,7 +56,7 @@ spec:
             name: k8gb-zone-delegation
             namespace: k8gb
           data:
-            cloud-example-com.conf: |
+            cloud-example-com: |
               cloud.example.com:5353 {
                 import k8gbplugins
               }
