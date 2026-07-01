@@ -31,8 +31,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	v1beta1 "github.com/k8gb-io/k8gb/api/v1beta1io"
-
+	v1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	gomock "go.uber.org/mock/gomock"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -76,7 +75,7 @@ func (mr *MockZoneDelegationMockRecorder) AvailableIPs(ctx any) *gomock.Call {
 }
 
 // ExtendedZoneDelegation mocks base method.
-func (m *MockZoneDelegation) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1.ZoneDelegation) (*ExtendedZoneDelegation, error) {
+func (m *MockZoneDelegation) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*ExtendedZoneDelegation, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExtendedZoneDelegation", ctx, zd)
 	ret0, _ := ret[0].(*ExtendedZoneDelegation)
@@ -91,10 +90,10 @@ func (mr *MockZoneDelegationMockRecorder) ExtendedZoneDelegation(ctx, zd any) *g
 }
 
 // Get mocks base method.
-func (m *MockZoneDelegation) Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1.ZoneDelegation, error) {
+func (m *MockZoneDelegation) Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1io.ZoneDelegation, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, objKey)
-	ret0, _ := ret[0].(*v1beta1.ZoneDelegation)
+	ret0, _ := ret[0].(*v1beta1io.ZoneDelegation)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -134,10 +133,10 @@ func (mr *MockZoneDelegationMockRecorder) HasExtClusterGeoTags(ctx any) *gomock.
 }
 
 // List mocks base method.
-func (m *MockZoneDelegation) List(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+func (m *MockZoneDelegation) List(ctx context.Context) (*v1beta1io.ZoneDelegationList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx)
-	ret0, _ := ret[0].(*v1beta1.ZoneDelegationList)
+	ret0, _ := ret[0].(*v1beta1io.ZoneDelegationList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -149,10 +148,10 @@ func (mr *MockZoneDelegationMockRecorder) List(ctx any) *gomock.Call {
 }
 
 // ListAllZoneDelegations mocks base method.
-func (m *MockZoneDelegation) ListAllZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+func (m *MockZoneDelegation) ListAllZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAllZoneDelegations", ctx)
-	ret0, _ := ret[0].(*v1beta1.ZoneDelegationList)
+	ret0, _ := ret[0].(*v1beta1io.ZoneDelegationList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -164,10 +163,10 @@ func (mr *MockZoneDelegationMockRecorder) ListAllZoneDelegations(ctx any) *gomoc
 }
 
 // ListConfigZoneDelegations mocks base method.
-func (m *MockZoneDelegation) ListConfigZoneDelegations(ctx context.Context) (*v1beta1.ZoneDelegationList, error) {
+func (m *MockZoneDelegation) ListConfigZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListConfigZoneDelegations", ctx)
-	ret0, _ := ret[0].(*v1beta1.ZoneDelegationList)
+	ret0, _ := ret[0].(*v1beta1io.ZoneDelegationList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -194,7 +193,7 @@ func (mr *MockZoneDelegationMockRecorder) ResolveAuthoritativeServersFromZoneDel
 }
 
 // Save mocks base method.
-func (m *MockZoneDelegation) Save(ctx context.Context, z *v1beta1.ZoneDelegation) error {
+func (m *MockZoneDelegation) Save(ctx context.Context, z *v1beta1io.ZoneDelegation) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Save", ctx, z)
 	ret0, _ := ret[0].(error)
@@ -208,7 +207,7 @@ func (mr *MockZoneDelegationMockRecorder) Save(ctx, z any) *gomock.Call {
 }
 
 // UpdateCoreDNSConfiguration mocks base method.
-func (m *MockZoneDelegation) UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1.ZoneDelegation) error {
+func (m *MockZoneDelegation) UpdateCoreDNSConfiguration(ctx context.Context, zd *v1beta1io.ZoneDelegation) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateCoreDNSConfiguration", ctx, zd)
 	ret0, _ := ret[0].(error)
@@ -222,10 +221,10 @@ func (mr *MockZoneDelegationMockRecorder) UpdateCoreDNSConfiguration(ctx, zd any
 }
 
 // UpdateStatus mocks base method.
-func (m *MockZoneDelegation) UpdateStatus(ctx context.Context, zd *v1beta1.ZoneDelegation) (*v1beta1.ZoneDelegation, error) {
+func (m *MockZoneDelegation) UpdateStatus(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*v1beta1io.ZoneDelegation, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateStatus", ctx, zd)
-	ret0, _ := ret[0].(*v1beta1.ZoneDelegation)
+	ret0, _ := ret[0].(*v1beta1io.ZoneDelegation)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

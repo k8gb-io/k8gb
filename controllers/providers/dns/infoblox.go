@@ -60,7 +60,7 @@ func (p *InfobloxProvider) sanitizeDelegateZone(local, upstream []ibcl.NameServe
 	return final
 }
 
-func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneDelegation) error {
+func (p *InfobloxProvider) SaveZoneDelegation(zoneInfo *zones.ExtendedZoneDelegation) error {
 	objMgr, err := p.client.GetObjectManager()
 	if err != nil {
 		return err
@@ -79,9 +79,11 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneDele
 	if findZone == nil {
 		log.Info().
 			Str("DNSZone", zoneInfo.LoadBalancedZone).
+			Str("zone delegation", zoneInfo.Name()).
 			Msg("Creating delegated zone")
 		log.Debug().
 			Interface("records", delegateTo).
+			Str("zone delegation", zoneInfo.Name()).
 			Msg("Delegated records")
 		_, err = p.createZoneDelegated(objMgr, zoneInfo.LoadBalancedZone, delegateTo)
 		if err != nil {
@@ -97,10 +99,12 @@ func (p *InfobloxProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneDele
 		if !reflect.DeepEqual(findZone.DelegateTo.NameServers, currentList) {
 			log.Info().
 				Interface("records", findZone.DelegateTo).
+				Str("zone delegation", zoneInfo.Name()).
 				Msg("Found delegated zone records")
 			log.Info().
 				Str("DNSZone", zoneInfo.LoadBalancedZone).
 				Interface("serverList", currentList).
+				Str("zone delegation", zoneInfo.Name()).
 				Msg("Updating delegated zone with the server list")
 			_, err = p.updateZoneDelegated(objMgr, findZone.Ref, currentList)
 			if err != nil {
