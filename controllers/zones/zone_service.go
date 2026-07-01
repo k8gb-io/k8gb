@@ -121,7 +121,7 @@ func (z *ZoneDelegationImpl) ListConfigZoneDelegations(ctx context.Context) (*v1
 				zd.Status.DNSServers = append(zd.Status.DNSServers, v1beta1io.DNSServer{Name: ns, Address: ip})
 			}
 		}
-		zd.Name = name(zd)
+		zd.Name = objectName(zd)
 		zoneDelegationList.Items = append(zoneDelegationList.Items, zd)
 	}
 	return zoneDelegationList, nil
@@ -143,11 +143,11 @@ func (z *ZoneDelegationImpl) ListAllZoneDelegations(ctx context.Context) (*v1bet
 	}
 
 	for _, cfg := range cfgList.Items {
-		finalMap[name(cfg)] = cfg
+		finalMap[objectName(cfg)] = cfg
 	}
 
 	for _, current := range currentList.Items {
-		finalMap[name(current)] = current
+		finalMap[objectName(current)] = current
 	}
 
 	for _, final := range finalMap {
@@ -310,11 +310,11 @@ func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd 
 				continue
 			}
 
-			newData[name(zone)] = getCoreDNSData(zone.Spec.LoadBalancedZone)
+			newData[configName(zone)] = getCoreDNSData(zone.Spec.LoadBalancedZone)
 		}
 
 		if !zd.IsInDeletion() {
-			newData[name(*zd)] = getCoreDNSData(zd.Spec.LoadBalancedZone)
+			newData[configName(*zd)] = getCoreDNSData(zd.Spec.LoadBalancedZone)
 		}
 
 		coreDNSZones.Data = newData
@@ -337,6 +337,10 @@ func getCoreDNSData(zone string) string {
 	return fmt.Sprintf(zoneTemplate, zone)
 }
 
-func name(zd v1beta1io.ZoneDelegation) string {
-	return fmt.Sprintf("%s.conf", strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-"))
+func configName(zd v1beta1io.ZoneDelegation) string {
+	return fmt.Sprintf("%s.conf", objectName(zd))
+}
+
+func objectName(zd v1beta1io.ZoneDelegation) string {
+	return strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-")
 }
