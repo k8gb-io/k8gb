@@ -1,7 +1,7 @@
 apiVersion: k8gb.io/v1beta1
 kind: ZoneDelegation
 metadata:
-  name: cloud2-example-com.conf
+  name: cloud2-example-com
 spec:
   dnsZoneNegTTL: 10
   loadBalancedZone: cloud2.example.com
