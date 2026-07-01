@@ -43,7 +43,7 @@ func (r *ReconcileResultHandler) Stop() (ctrl.Result, error) {
 // see default controller limiter: https://danielmangum.com/posts/controller-runtime-client-go-rate-limiting/
 func (r *ReconcileResultHandler) RequeueError(err error) (ctrl.Result, error) {
 	// logging error is handled in caller function
-	return ctrl.Result{}, err
+	return r.delayedResult, err
 }
 
 // Requeue requeue loop after config.ReconcileRequeueSeconds
