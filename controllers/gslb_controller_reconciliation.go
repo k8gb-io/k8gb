@@ -157,7 +157,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	gslb.Status.Servers = filteredServers
 
-	loadBalancerExposedIPs, err := refResolver.GetGslbExposedIPs(gslb.Annotations, r.Config.ParentZoneDNSServers)
+	loadBalancerExposedIPs, err := resolveGslbExposedIPs(r.Config, refResolver, gslb.Annotations)
 	if err != nil {
 		m.IncrementError(gslb)
 		errorMsg := fmt.Sprintf("getting load balancer exposed IPs (%s)", err)
@@ -223,6 +223,35 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// TODO: potentially enhance with smarter reaction to external Event
 	m.IncrementReconciliation(gslb)
 	return result.Requeue()
+}
+
+// resolveGslbExposedIPs returns the application target IPs (localtargets-*/final A
+// records) for a Gslb, honoring the cluster-level EDGE_DNS_EXPOSED_IPS override.
+//
+// Precedence, from highest to lowest:
+//  1. Per-Gslb override annotations (k8gb.io/exposed-hostnames, k8gb.io/exposed-ip-addresses)
+//  2. Cluster-level EDGE_DNS_EXPOSED_IPS override
+//  3. IPs discovered from the CoreDNS service / ingress status
+//
+// The cluster-level override mirrors the NS-glue override applied in ipresolver, so
+// bare-metal / colo clusters behind 1:1 static NAT publish the same publicly routable
+// IPs on both delegation paths. See https://github.com/k8gb-io/k8gb/issues/2360
+func resolveGslbExposedIPs(config *resolver.Config,
+	refResolver refresolver.GslbReferenceResolver, annotations map[string]string) ([]string, error) {
+	if len(config.EdgeDNSExposedIPs) > 0 && !hasExposedIPOverrideAnnotation(annotations) {
+		return config.EdgeDNSExposedIPs, nil
+	}
+	return refResolver.GetGslbExposedIPs(annotations, config.ParentZoneDNSServers)
+}
+
+// hasExposedIPOverrideAnnotation reports whether a Gslb carries a per-Gslb override
+// annotation that must take precedence over the cluster-level EDGE_DNS_EXPOSED_IPS override.
+func hasExposedIPOverrideAnnotation(annotations map[string]string) bool {
+	if _, ok := annotations[utils.ExposedHostnamesAnnotation]; ok {
+		return true
+	}
+	_, ok := annotations[utils.ExternalIPsAnnotation]
+	return ok
 }
 
 // splitIPsByVersion splits a list of IP addresses into IPv4 and IPv6 addresses

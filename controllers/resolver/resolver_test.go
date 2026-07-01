@@ -588,6 +588,14 @@ func TestConfigurations(t *testing.T) {
 				 EDGE_DNS_EXPOSED_IPS=203.0.113.10,203.0.113.10`,
 			expectedError: true,
 		},
+		{
+			name: "invalid configuration with IPv6 edgeDNS exposed IPs override",
+			envvars: `CLUSTER_GEO_TAG=us;
+				 DNS_ZONES=example.com:cloud.example.com:300;
+				 EDGE_DNS_SERVERS=local.test;
+				 EDGE_DNS_EXPOSED_IPS=2001:db8::1`,
+			expectedError: true,
+		},
 	}
 
 	for _, test := range tests {
