@@ -176,7 +176,7 @@ func TestCreateZoneDelegation(t *testing.T) {
 			detail, _ := zones.NewZoneDelegationWrapper(test.zoneDelegation, &test.config, resolverSvc).GetDetail(context.TODO())
 
 			externalDNSProvider := NewExternalDNS(ctx, test.client, test.config)
-			err := externalDNSProvider.CreateZoneDelegation(detail)
+			err := externalDNSProvider.SaveZoneDelegation(detail)
 			assert.Equal(t, test.expectedError, err != nil)
 		})
 	}

@@ -52,7 +52,7 @@ func NewExternalDNS(ctx context.Context, client client.Client, config resolver.C
 	}
 }
 
-func (p *ExternalDNSProvider) CreateZoneDelegation(zoneInfo *zones.ExtendedZoneDelegation) error {
+func (p *ExternalDNSProvider) SaveZoneDelegation(zoneInfo *zones.ExtendedZoneDelegation) error {
 	log.Info().
 		Str("provider", p.String()).
 		Msg("Creating/Updating DNSEndpoint CR")

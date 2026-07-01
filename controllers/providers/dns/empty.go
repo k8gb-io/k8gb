@@ -36,7 +36,7 @@ func NewEmptyDNS(config resolver.Config) *EmptyDNSProvider {
 	}
 }
 
-func (p *EmptyDNSProvider) CreateZoneDelegation(_ *zones.ExtendedZoneDelegation) (err error) {
+func (p *EmptyDNSProvider) SaveZoneDelegation(_ *zones.ExtendedZoneDelegation) (err error) {
 	log.Info().Msg(emptyProviderName)
 	return nil
 }

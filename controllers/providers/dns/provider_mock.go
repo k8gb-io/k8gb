@@ -57,20 +57,6 @@ func (m *MockProvider) EXPECT() *MockProviderMockRecorder {
 	return m.recorder
 }
 
-// CreateZoneDelegation mocks base method.
-func (m *MockProvider) CreateZoneDelegation(arg0 *zones.ExtendedZoneDelegation) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateZoneDelegation", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateZoneDelegation indicates an expected call of CreateZoneDelegation.
-func (mr *MockProviderMockRecorder) CreateZoneDelegation(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateZoneDelegation", reflect.TypeOf((*MockProvider)(nil).CreateZoneDelegation), arg0)
-}
-
 // Finalize mocks base method.
 func (m *MockProvider) Finalize(arg0 *zones.ExtendedZoneDelegation, arg1 bool) *FinalizationResult {
 	m.ctrl.T.Helper()
@@ -83,6 +69,20 @@ func (m *MockProvider) Finalize(arg0 *zones.ExtendedZoneDelegation, arg1 bool) *
 func (mr *MockProviderMockRecorder) Finalize(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalize", reflect.TypeOf((*MockProvider)(nil).Finalize), arg0, arg1)
+}
+
+// SaveZoneDelegation mocks base method.
+func (m *MockProvider) SaveZoneDelegation(arg0 *zones.ExtendedZoneDelegation) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveZoneDelegation", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveZoneDelegation indicates an expected call of SaveZoneDelegation.
+func (mr *MockProviderMockRecorder) SaveZoneDelegation(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveZoneDelegation", reflect.TypeOf((*MockProvider)(nil).SaveZoneDelegation), arg0)
 }
 
 // String mocks base method.
