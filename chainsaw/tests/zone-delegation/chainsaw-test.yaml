@@ -16,13 +16,13 @@ spec:
     test removes the ZoneDelegations from individual clusters and verifies that
     the generated delegation resources are updated accordingly during cleanup.
     
-    (1/5) default run - cloud-example-com.conf exists on both clusters
-    (2/5) apply ZD cloud2-example-com.conf on EU cluster
-    (3/5) apply ZD cloud2-example-com.conf on US cluster
-    (4/5) delete ZD cloud2-example-com.conf on US cluster
-    (5/5) delete ZD cloud2-example-com.conf on EU cluster
+    (1/5) default run - cloud-example-com exists on both clusters
+    (2/5) apply ZD cloud2-example-com on EU cluster
+    (3/5) apply ZD cloud2-example-com on US cluster
+    (4/5) delete ZD cloud2-example-com on US cluster
+    (5/5) delete ZD cloud2-example-com on EU cluster
   steps:
-    # (1/5) default settings with single zone delegation (cloud-example-com.conf)
+    # (1/5) default settings with single zone delegation (cloud-example-com)
     - name: (1/5) Verify k8gb-zone-delegation ConfigMap US
       description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on US
       cluster: us
@@ -45,11 +45,11 @@ spec:
 
 
     - name: (1/5) Verify ZoneDelegation object on EU
-      description: Verify default ZoneDelegation cloud-example-com.conf contains bounded IPs of itself and external cluster
+      description: Verify default ZoneDelegation cloud-example-com contains bounded IPs of itself and external cluster
       cluster: eu
       bindings:
         - name: zoneDelegationName
-          value: cloud-example-com.conf
+          value: cloud-example-com
         - name: loadBalancedZone
           value: cloud.example.com
         - name: parentZone
@@ -66,11 +66,11 @@ spec:
         template: ../../step-templates/assert-k8gb-zonedelegation.yaml
 
     - name: (1/5) Verify ZoneDelegation object on US
-      description: Verify default ZoneDelegation cloud-example-com.conf contains bounded IPs of itself and external cluster
+      description: Verify default ZoneDelegation cloud-example-com contains bounded IPs of itself and external cluster
       cluster: us
       bindings:
         - name: zoneDelegationName
-          value: cloud-example-com.conf
+          value: cloud-example-com
         - name: loadBalancedZone
           value: cloud.example.com
         - name: parentZone
@@ -120,12 +120,12 @@ spec:
       use:
         template: ../../step-templates/assert-k8gb-zone-delegation-dnsendpoint.yaml
 
-      # 2/5 apply new zone delegation (cloud2-example-com.conf) on EU cluster
+      # 2/5 apply new zone delegation (cloud2-example-com) on EU cluster
     - name: (2/5) Apply new zone delegation on EU cluster
       cluster: eu
       try:
         - apply:
-            file: ./testdata/cloud2-example-com.conf.yaml
+            file: ./testdata/cloud2-example-com.yaml
 
     - name: (2/5) Verify k8gb-zone-delegation ConfigMap
       description: Verify k8gb-zone-delegation ConfigMap contaions only one record cloud.example.com:5353 on US
@@ -149,11 +149,11 @@ spec:
         template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
 
     - name: (2/5) Verify ZoneDelegation object on EU
-      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      description: Verify default ZoneDelegation cloud2-example-com contains bounded IPs of itself and external cluster
       cluster: eu
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
         - name: loadBalancedZone
           value: cloud2.example.com
         - name: parentZone
@@ -173,7 +173,7 @@ spec:
       cluster: us
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
       use:
         template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
 
@@ -207,7 +207,7 @@ spec:
       cluster: us
       try:
         - apply:
-            file: ./testdata/cloud2-example-com.conf.yaml
+            file: ./testdata/cloud2-example-com.yaml
 
     - name: (3/5) Verify k8gb-zone-delegation ConfigMap
       description: Verify k8gb-zone-delegation ConfigMap contaions only one record *.example.com:5353 on EU
@@ -232,11 +232,11 @@ spec:
         template: ../../step-templates/assert-k8gb-zone-delegation-cm.yaml
 
     - name: (3/5) Verify ZoneDelegation object on EU
-      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      description: Verify default ZoneDelegation cloud2-example-com contains bounded IPs of itself and external cluster
       cluster: eu
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
         - name: loadBalancedZone
           value: cloud2.example.com
         - name: parentZone
@@ -253,11 +253,11 @@ spec:
         template: ../../step-templates/assert-k8gb-zonedelegation.yaml
 
     - name: (3/5) Verify ZoneDelegation object on US
-      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      description: Verify default ZoneDelegation cloud2-example-com contains bounded IPs of itself and external cluster
       cluster: us
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
         - name: loadBalancedZone
           value: cloud2.example.com
         - name: parentZone
@@ -312,7 +312,7 @@ spec:
       try:
       - script:
           content: |
-            kubectl delete -f ./testdata/cloud2-example-com.conf.yaml --wait=false
+            kubectl delete -f ./testdata/cloud2-example-com.yaml --wait=false
             sleep 3
 
 #    - name: (4/5) ZoneDelegation object doesn't exist on US
@@ -320,15 +320,15 @@ spec:
 #      cluster: us
 #      bindings:
 #        - name: zoneDelegationName
-#          value: cloud2-example-com.conf
+#          value: cloud2-example-com
 #      use:
 #        template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
     - name: (4/5) Verify ZoneDelegation object on US
-      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      description: Verify default ZoneDelegation cloud2-example-com contains bounded IPs of itself and external cluster
       cluster: us
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
         - name: loadBalancedZone
           value: cloud2.example.com
         - name: parentZone
@@ -346,11 +346,11 @@ spec:
 
 
     - name: (4/5) Verify ZoneDelegation object on EU
-      description: Verify default ZoneDelegation cloud2-example-com.conf contains bounded IPs of itself and external cluster
+      description: Verify default ZoneDelegation cloud2-example-com contains bounded IPs of itself and external cluster
       cluster: eu
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
         - name: loadBalancedZone
           value: cloud2.example.com
         - name: parentZone
@@ -418,14 +418,14 @@ spec:
       cluster: eu
       try:
         - delete:
-            file: ./testdata/cloud2-example-com.conf.yaml
+            file: ./testdata/cloud2-example-com.yaml
 
     - name: (5/5) ZoneDelegation object doesn't exist on EU
       description: on EU ZoneDelegation not exists
       cluster: eu
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
       use:
         template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
 
@@ -454,7 +454,7 @@ spec:
       cluster: us
       bindings:
         - name: zoneDelegationName
-          value: cloud2-example-com.conf
+          value: cloud2-example-com
       use:
         template: ../../step-templates/assert-k8gb-zonedelegation-not-exist.yaml
 
