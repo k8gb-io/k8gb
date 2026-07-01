@@ -119,9 +119,15 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting delegation zones (%s)", err))
 	}
-	filteredServers := filterServersByZoneDelegations(r.Logger, servers, list)
+	filteredServers := filterServersByZoneDelegations(servers, list)
 	if len(filteredServers) == 0 {
-		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", list.ListZones()))
+		r.Logger.
+			Info().
+			Str("gslb", gslb.Name).
+			Str("namespace", gslb.Namespace).
+			Strs("server hosts", listHosts(servers)).
+			Msgf("Skipping delegation DNS endpoint update: ZoneDelegation is not present")
+		return result.Requeue()
 	}
 	gslb.Status.Servers = filteredServers
 

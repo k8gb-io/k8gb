@@ -148,10 +148,16 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting delegation zones (%s)", err))
 	}
-	filteredServers := filterServersByZoneDelegations(r.Logger, servers, list)
+	filteredServers := filterServersByZoneDelegations(servers, list)
 
 	if len(filteredServers) == 0 {
-		return result.RequeueError(fmt.Errorf("no hosts match delegated zones %v", list.ListZones()))
+		r.Logger.
+			Info().
+			Str("gslb", gslb.Name).
+			Str("namespace", gslb.Namespace).
+			Strs("server hosts", listHosts(servers)).
+			Msgf("Skipping delegation DNS endpoint update: ZoneDelegation is not present")
+		return result.Requeue()
 	}
 
 	gslb.Status.Servers = filteredServers
@@ -275,19 +281,21 @@ func splitIPsByVersion(logger *zerolog.Logger, ips []string) ([]string, []string
 
 // filterServersByZoneDelegations filters servers to only include those with hosts that match the delegation zones
 func filterServersByZoneDelegations(
-	logger *zerolog.Logger,
 	servers []*k8gbv1beta1io.Server,
 	zoneDelegations *k8gbv1beta1io.ZoneDelegationList) []*k8gbv1beta1io.Server {
 	var filtered []*k8gbv1beta1io.Server
 	for _, server := range servers {
 		if zoneDelegations.ContainsZone(server.Host) {
 			filtered = append(filtered, server)
-		} else {
-			logger.Debug().
-				Str("host", server.Host).
-				Strs("zoneDelegations", zoneDelegations.ListZones()).
-				Msg("Skipping host - does not match any delegated zone")
 		}
 	}
 	return filtered
+}
+
+func listHosts(servers []*k8gbv1beta1io.Server) []string {
+	hosts := []string{}
+	for _, server := range servers {
+		hosts = append(hosts, server.Host)
+	}
+	return hosts
 }
