@@ -21,6 +21,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: chainsaw-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
 env:
   K3D_VERSION: v5.8.3
 
@@ -45,7 +49,7 @@ jobs:
   chainsaw:
     runs-on: ubuntu-24.04
     needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' && !contains(github.event.pull_request.labels.*.name, 'renovate') && !startsWith(github.event.pull_request.head.ref || github.ref_name, 'renovate/') }}
     strategy:
       matrix:
         k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
