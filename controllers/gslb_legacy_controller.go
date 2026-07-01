@@ -119,6 +119,8 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		m.IncrementError(gslb)
 		return result.RequeueError(fmt.Errorf("getting delegation zones (%s)", err))
 	}
+	list = list.ActiveZoneDelegations()
+
 	filteredServers := filterServersByZoneDelegations(servers, list)
 	if len(filteredServers) == 0 {
 		r.Logger.

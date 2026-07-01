@@ -112,3 +112,15 @@ func (l *ZoneDelegationList) ListZones() []string {
 func (z *ZoneDelegation) IsInDeletion() bool {
 	return z.DeletionTimestamp != nil
 }
+
+// ActiveZoneDelegations returns ZoneDelegationList without items in deletion
+func (l *ZoneDelegationList) ActiveZoneDelegations() *ZoneDelegationList {
+	newList := l.DeepCopy()
+	newList.Items = []ZoneDelegation{}
+	for _, z := range l.Items {
+		if !z.IsInDeletion() {
+			newList.Items = append(newList.Items, z)
+		}
+	}
+	return newList
+}
