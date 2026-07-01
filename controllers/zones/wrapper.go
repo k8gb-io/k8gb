@@ -46,6 +46,7 @@ type ExtendedZoneDelegation struct {
 	ExtClusterNSNames map[string]string
 	// TODO: use directly GetExposedIPs(ctx) on places where LocalCoreDNSExposedIPs are required
 	LocalCoreDNSExposedIPs ZoneDelegationIPs
+	name                   string
 }
 
 func NewZoneDelegationWrapper(
@@ -80,6 +81,7 @@ func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ExtendedZoneDel
 	}
 	zoneDetail := &ExtendedZoneDelegation{
 		wrapper:                z,
+		name:                   z.zoneDelegation.Name,
 		LoadBalancedZone:       z.zoneDelegation.Spec.LoadBalancedZone,
 		ParentZone:             z.zoneDelegation.Spec.ParentZone,
 		NegativeTTL:            z.zoneDelegation.Spec.DNSZoneNegTTL,
@@ -132,6 +134,10 @@ func (d *ExtendedZoneDelegation) GetExternalDNSEndpointName() string {
 
 func (d *ExtendedZoneDelegation) GetNSName(tag string) string {
 	return getNsName(tag, d.LoadBalancedZone, d.ParentZone)
+}
+
+func (d *ExtendedZoneDelegation) Name() string {
+	return d.name
 }
 
 func (d *ExtendedZoneDelegation) IsLastZoneDelegationResource() bool {

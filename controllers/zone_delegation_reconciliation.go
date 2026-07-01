@@ -118,9 +118,9 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		Str("ZoneDelegation", zone.Name).
 		Str("Provider", r.DNSProvider.String()).
 		Msg("Calling DNS provider")
-	err = r.DNSProvider.CreateZoneDelegation(exZD)
+	err = r.DNSProvider.SaveZoneDelegation(exZD)
 	if err != nil {
-		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error creating zone delegation")
+		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error create/update zone delegation")
 		return result.RequeueError(err)
 	}
 

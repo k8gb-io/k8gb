@@ -312,7 +312,7 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 			defer ctrl.Finish()
 			client := test.getClient(ctrl)
 			ibx := NewInfobloxDNS(test.config, client)
-			err := ibx.CreateZoneDelegation(test.detail)
+			err := ibx.SaveZoneDelegation(test.detail)
 			if test.expectedError {
 				assert.Error(t, err)
 				return
