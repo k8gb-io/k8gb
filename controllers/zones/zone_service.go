@@ -338,5 +338,5 @@ func getCoreDNSData(zone string) string {
 }
 
 func name(zd v1beta1io.ZoneDelegation) string {
-	return fmt.Sprintf("%s.conf", strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-"))
+	return strings.ReplaceAll(zd.Spec.LoadBalancedZone, ".", "-")
 }

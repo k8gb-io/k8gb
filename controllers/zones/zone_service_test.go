@@ -293,7 +293,7 @@ func TestListAllZones(t *testing.T) {
 			expectedResult: []v1beta1io.ZoneDelegation{
 				{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "cloud-example-com.conf",
+						Name: "cloud-example-com",
 					},
 					Spec: v1beta1io.ZoneDelegationSpec{
 						LoadBalancedZone: "cloud.example.com",
@@ -311,7 +311,7 @@ func TestListAllZones(t *testing.T) {
 				},
 				{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "cloud-example-org.conf",
+						Name: "cloud-example-org",
 					},
 					Spec: v1beta1io.ZoneDelegationSpec{
 						LoadBalancedZone: "cloud.example.org",
@@ -329,7 +329,7 @@ func TestListAllZones(t *testing.T) {
 				},
 				{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "cloud-example-io.conf",
+						Name: "cloud-example-io",
 					},
 					Spec: v1beta1io.ZoneDelegationSpec{
 						LoadBalancedZone: "cloud.example.io",
@@ -351,7 +351,7 @@ func TestListAllZones(t *testing.T) {
 				Items: []v1beta1io.ZoneDelegation{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-com.conf",
+							Name: "cloud-example-com",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
@@ -369,7 +369,7 @@ func TestListAllZones(t *testing.T) {
 					},
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-org.conf",
+							Name: "cloud-example-org",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.org",
@@ -453,7 +453,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 				Items: []v1beta1io.ZoneDelegation{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-com.conf",
+							Name: "cloud-example-com",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
@@ -473,7 +473,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 					},
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-org.conf",
+							Name: "cloud-example-org",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.org",
@@ -509,7 +509,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 				Items: []v1beta1io.ZoneDelegation{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-com.conf",
+							Name: "cloud-example-com",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
@@ -527,7 +527,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 					},
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-org.conf",
+							Name: "cloud-example-org",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.org",
@@ -572,7 +572,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 				Items: []v1beta1io.ZoneDelegation{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-com.conf",
+							Name: "cloud-example-com",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.com",
@@ -585,7 +585,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 					},
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "cloud-example-org.conf",
+							Name: "cloud-example-org",
 						},
 						Spec: v1beta1io.ZoneDelegationSpec{
 							LoadBalancedZone: "cloud.example.org",
