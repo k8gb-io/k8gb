@@ -49,7 +49,7 @@ jobs:
   chainsaw:
     runs-on: ubuntu-24.04
     needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' && !contains(github.event.pull_request.labels.*.name, 'renovate') && !startsWith(github.event.pull_request.head.ref || github.ref_name, 'renovate/') }}
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     strategy:
       matrix:
         k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
