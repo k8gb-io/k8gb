@@ -75,7 +75,7 @@ func (p *Dynamic) getExternalClusterNSNamesByHostname(ctx context.Context, deleg
 	if err != nil {
 		return nsNames, err
 	}
-	parentDNSServer, err := p.extractParentDNSServer(parentNameServer, detail.ParentZone)
+	parentDNSServer, err := ExtractParentDNSServer(parentNameServer, detail.ParentZone)
 	if err != nil {
 		return nsNames, fmt.Errorf("ExternalGeoTags: error extracting parent DNS servers: %w", err)
 	}
@@ -124,16 +124,115 @@ func (p *Dynamic) getExternalTags(edge utils.DNSServer, zone string) ([]string, 
 	return extTags, nil
 }
 
-// dig @edgeDNS parentDomain -p edgePort NS
-// extract first A record from ADDITIONAL SECTION
-func (p *Dynamic) extractParentDNSServer(parentNameServer *utils.DNSServer, parentZone string) (*utils.DNSServer, error) {
+// DiscoverExternalNameServers query extracted parent DNS server for NS records of the loadBalanced zone.
+// In this example, zone is cloud.example.com and edge is 172.18.0.6:1053:
+//
+//	dig @172.18.0.6 -p 1053 cloud.example.com NS +norec
+//
+// Expected response must contain k8gb NS records in the ANSWER SECTION,
+// for example:
+//
+//	;; ANSWER SECTION:
+//	cloud.example.com.        30  IN  NS  gslb-ns-eu-cloud.example.com.
+//	cloud.example.com.        30  IN  NS  gslb-ns-us-cloud.example.com.
+//
+// Geo tags are extracted from NS names matching the k8gb pattern:
+//
+//	gslb-ns-<geoTag>-<zone>
+//
+// Examples:
+//
+//	gslb-ns-eu-cloud.example.com. -> eu
+//	gslb-ns-us-cloud.example.com. -> us
+//
+// The local cluster geo tag is skipped. The returned map contains only external
+// geo tags as keys and their NS names as values.
+func DiscoverExternalNameServers(edge utils.DNSServer, config resolver.Config, zone string) (map[string]string, error) {
+	const prefix = "gslb-ns-"
+	extTags := make(map[string]string)
+
+	m := new(dns.Msg)
+	m.SetQuestion(zone+".", dns.TypeNS)
+	m.RecursionDesired = false // Equivalent to dig +norec
+
+	c := new(dns.Client)
+	r, _, err := c.Exchange(m, edge.String())
+	if err != nil {
+		return extTags, err
+	}
+
+	if r == nil {
+		return extTags, fmt.Errorf("empty DNS response for %s via %s", zone, edge.String())
+	}
+
+	if r.Rcode != dns.RcodeSuccess {
+		return extTags, fmt.Errorf("NS query for %s via %s failed with rcode %s", zone, edge.String(), dns.RcodeToString[r.Rcode])
+	}
+
+	for _, ans := range r.Answer {
+		ns, ok := ans.(*dns.NS)
+		if !ok {
+			continue
+		}
+
+		parts := strings.Split(ns.Ns, prefix)
+		if len(parts) != 2 {
+			continue
+		}
+
+		tag := strings.Split(parts[1], "-")[0]
+		if tag == config.ClusterGeoTag {
+			continue
+		}
+
+		extTags[tag] = ns.Ns
+	}
+
+	return extTags, nil
+}
+
+// ExtractParentDNSServer query parent DNS server for NS records of parent zone (example.com):
+//
+//	dig @localhost -p 1053 example.com NS
+//
+// Expected response must contain NS records for example.com and their glue A records
+// in the ADDITIONAL SECTION, for example:
+//
+//	;; ANSWER SECTION:
+//	example.com.              30  IN  NS  gslb-ns-eu.example.com.
+//	example.com.              30  IN  NS  gslb-ns-us.example.com.
+//
+//	;; ADDITIONAL SECTION:
+//	gslb-ns-eu.example.com.   30  IN  A   172.18.0.6
+//	gslb-ns-us.example.com.   30  IN  A   172.18.0.11
+//
+// The first A record from the ADDITIONAL SECTION is used as the returned DNS
+// server IP. The returned DNSServer keeps the original DNS server port.
+//
+// Example return value:
+//
+//	&utils.DNSServer{
+//	    Host: "172.18.0.6",
+//	    Port: 1053,
+//	}
+func ExtractParentDNSServer(parentNameServer *utils.DNSServer, parentZone string) (*utils.DNSServer, error) {
 	m := new(dns.Msg)
 	m.SetQuestion(parentZone+".", dns.TypeNS)
+
 	c := new(dns.Client)
 	r, _, err := c.Exchange(m, parentNameServer.String())
 	if err != nil {
 		return nil, err
 	}
+
+	if r == nil {
+		return nil, fmt.Errorf("empty DNS response for %s via %s", parentZone, parentNameServer.String())
+	}
+
+	if r.Rcode != dns.RcodeSuccess {
+		return nil, fmt.Errorf("NS query for %s via %s failed with rcode %s", parentZone, parentNameServer.String(), dns.RcodeToString[r.Rcode])
+	}
+
 	for _, ans := range r.Extra {
 		a, ok := ans.(*dns.A)
 		if !ok {
@@ -141,5 +240,6 @@ func (p *Dynamic) extractParentDNSServer(parentNameServer *utils.DNSServer, pare
 		}
 		return &utils.DNSServer{Host: a.A.String(), Port: parentNameServer.Port}, nil
 	}
-	return nil, fmt.Errorf("GeoTags: error extracting parent DNS servers: %w", err)
+
+	return nil, fmt.Errorf("no A record found in additional section for %s via %s", parentZone, parentNameServer.String())
 }

@@ -371,6 +371,18 @@ func TestShouldReconcileLegacyMigrationUpdate(t *testing.T) {
 			ObjectNew: newObj,
 		}))
 	})
+
+	t.Run("reconciles updates while deletion is in progress", func(t *testing.T) {
+		oldObj := base()
+		now := metav1.Now()
+		oldObj.DeletionTimestamp = &now
+		newObj := oldObj.DeepCopy()
+		newObj.Status.GeoTag = "us"
+		require.True(t, shouldReconcileLegacyMigrationUpdate(event.TypedUpdateEvent[client.Object]{
+			ObjectOld: oldObj,
+			ObjectNew: newObj,
+		}))
+	})
 }
 
 func newLegacyMigrationReconciler(t *testing.T, objs ...client.Object) (*LegacyGslbMigrationReconciler, client.Client, *record.FakeRecorder) {
