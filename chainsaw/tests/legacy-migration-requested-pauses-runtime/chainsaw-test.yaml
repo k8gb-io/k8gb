@@ -71,8 +71,8 @@ spec:
           echo "DNSEndpoint ownership is not canonical-only"
           kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
           exit 1
-  - name: retrigger reconcile remains canonical-owned
-    description: repeated reconcile with both labels should not reintroduce legacy ownership
+  - name: repeat migration remains canonical-owned
+    description: repeating migration should not reintroduce legacy ownership
     cluster: eu
     try:
     - script:
@@ -82,11 +82,12 @@ spec:
           value: legacy-requested-pause
         content: |
           LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
-          kubectl annotate gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" migration-recheck-ts="$(date +%s)" --overwrite
+          kubectl label gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" k8gb.io/migrated-to-k8gb-io=false --overwrite
           TMP_JSON=$(mktemp)
           trap 'rm -f "$TMP_JSON"' EXIT
           for i in $(seq 1 30); do
-            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
+            if [ "$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}' 2>/dev/null)" = "true" ] && \
+              kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
               if jq -e --arg name "$NAME" --arg legacy_uid "$LEGACY_UID" '
                 (.metadata.ownerReferences | length) == 1 and
                 .metadata.ownerReferences[0].apiVersion == "k8gb.io/v1beta1" and
@@ -100,7 +101,8 @@ spec:
             fi
             sleep 2
           done
-          echo "DNSEndpoint ownership changed after retrigger"
+          echo "Repeated migration did not restore canonical-only DNSEndpoint ownership"
+          kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o yaml
           kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
           exit 1
   - name: delete legacy object keeps canonical resources
@@ -112,6 +114,15 @@ spec:
         - name: NAME
           value: legacy-requested-pause
         content: |
-          kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=90s
+          if ! kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=60s; then
+            REMAINING=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --ignore-not-found -o name) || exit 1
+            if [ -n "$REMAINING" ]; then
+              echo "Legacy Gslb deletion timed out"
+              kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o yaml
+              kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp
+              exit 1
+            fi
+            echo "Legacy Gslb was deleted at the timeout boundary"
+          fi
           kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE"
           kubectl get dnsendpoint "$NAME" -n "$NAMESPACE"

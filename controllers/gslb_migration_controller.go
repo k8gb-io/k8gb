@@ -183,9 +183,8 @@ func shouldReconcileLegacyMigrationUpdate(e event.TypedUpdateEvent[client.Object
 		return false
 	}
 
-	oldDeleting := e.ObjectOld.GetDeletionTimestamp() != nil
 	newDeleting := e.ObjectNew.GetDeletionTimestamp() != nil
-	if oldDeleting != newDeleting {
+	if newDeleting {
 		return true
 	}
 	if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {
