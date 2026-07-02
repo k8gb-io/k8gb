@@ -115,10 +115,14 @@ spec:
           value: legacy-requested-pause
         content: |
           if ! kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=60s; then
-            echo "Legacy Gslb deletion timed out"
-            kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o yaml || true
-            kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp || true
-            exit 1
+            REMAINING=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --ignore-not-found -o name) || exit 1
+            if [ -n "$REMAINING" ]; then
+              echo "Legacy Gslb deletion timed out"
+              kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o yaml
+              kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp
+              exit 1
+            fi
+            echo "Legacy Gslb was deleted at the timeout boundary"
           fi
           kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE"
           kubectl get dnsendpoint "$NAME" -n "$NAMESPACE"
