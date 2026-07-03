@@ -23,26 +23,24 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
-      - uses: heinrichreimer/github-changelog-generator-action@e60b5a2bd9fcd88dadf6345ff8327863fb8b490f # v2.4
-        with:
-          token: ${{ secrets.CR_TOKEN }}
-          project: k8gb
-          output: CHANGELOG-latest.md
-          pullRequests: true
-          author: true
-          issues: true
-          issuesWoLabels: true
-          prWoLabels: true
-          onlyLastTag: true
-          compareLink: true
-          filterByMilestone: true
-          unreleased: false
-      - name: Prepend the latest changes to CHANGELOG.md
+      - name: Prepend published release notes to CHANGELOG.md
         run: |
-          mv CHANGELOG.md CHANGELOG-old.md
-          cat CHANGELOG-latest.md | sed -e'$d' > CHANGELOG.md
-          cat CHANGELOG-old.md | sed -e'1,2d' >> CHANGELOG.md
-          rm CHANGELOG-old.md CHANGELOG-latest.md
+          release_body=$(jq -r '.release.body // empty' "${GITHUB_EVENT_PATH}")
+          if [[ -z "${release_body//[[:space:]]/}" ]]; then
+            echo "Published release has no release notes" >&2
+            exit 1
+          fi
+
+          release_tag=$(jq -r '.release.tag_name' "${GITHUB_EVENT_PATH}")
+          release_date=$(jq -r '.release.published_at | split("T")[0]' "${GITHUB_EVENT_PATH}")
+          {
+            printf '# Changelog\n\n'
+            printf '## [%s](https://github.com/%s/tree/%s) (%s)\n\n' \
+              "${release_tag}" "${GITHUB_REPOSITORY}" "${release_tag}" "${release_date}"
+            printf '%s\n\n' "${release_body}"
+            sed -n '3,$p' CHANGELOG.md
+          } > CHANGELOG-new.md
+          mv CHANGELOG-new.md CHANGELOG.md
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
