@@ -33,7 +33,7 @@ import (
 const CoreDNSServiceLabelName = "app.kubernetes.io/name"
 const CoreDNSServiceLabelValue = "coredns"
 
-var coreDNSServiceLabel = fmt.Sprintf("%s=%s", CoreDNSServiceLabelName, CoreDNSServiceLabelValue)
+var coreDNSServiceLabel = fmt.Sprintf("%s=%s,app.kubernetes.io/component!=metrics", CoreDNSServiceLabelName, CoreDNSServiceLabelValue)
 
 // CoreDNSService is common wrapper operating on GSLB instance.
 // It uses apimachinery client to call kubernetes API
@@ -61,6 +61,9 @@ func (r *CoreDNSService) GetResource() (*corev1.Service, error) {
 	}
 	if len(serviceList.Items) == 0 {
 		return nil, fmt.Errorf("no coreDNS service was found. Check if CoreDNS is exposed correctly")
+	}
+	if len(serviceList.Items) >= 2 {
+		return nil, fmt.Errorf("multiple coreDNS service was found. Check if CoreDNS is exposed correctly")
 	}
 	coreDNSService := &serviceList.Items[0]
 	return coreDNSService, nil
