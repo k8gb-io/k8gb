@@ -3690,9 +3690,9 @@ The best way to achieve this automatically for local development is to create th
 </code></pre></div>
 When a commit is created in GitHub UI as a result of <a href="https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request#applying-suggested-changes">accepted suggested change</a>, the signature should be manually added to the "optional extended description" field.</p>
 <h3 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h3>
-<p>The <a href="https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md">CHANGELOG</a> is automatically generated from Github PRs and Issues during release.
-Use dedicated <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">keywords</a> in PR message or <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue">manual PR and Issue linking</a> for clean changelog generation.
-Issues and PRs should be also properly tagged with valid project tags ("bug", "enhancement", "wontfix", etc )</p>
+<p>GitHub release notes are automatically generated from merged pull requests during release. Publishing the release triggers a pull request that prepends the same notes to the offline <a href="https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md">CHANGELOG</a>.
+Use dedicated <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">keywords</a> in the pull request description or <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue">link issues manually</a> so resolved issues remain visible from the pull request and release notes.
+Pull requests should also use the appropriate project labels ("bug", "enhancement", "wontfix", etc.) so generated release notes are categorized correctly.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
 <p>If contribution changes the existing APIs or user interface, it must include sufficient documentation explaining the use of the new or updated feature.</p>
 <h2 id="k8gbio-website">k8gb.io website<a class="headerlink" href="#k8gbio-website" title="Permanent link">&para;</a></h2>
@@ -3940,7 +3940,7 @@ as part of the release. These files follows this naming pattern:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 21, 2026 08:22:35 UTC">April 21, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 3, 2026 13:22:12 UTC">July 3, 2026</span>
   </span>
 
     
