@@ -243,9 +243,9 @@ When a commit is created in GitHub UI as a result of [accepted suggested change]
 
 ### Changelog
 
-The [CHANGELOG](https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md) is automatically generated from Github PRs and Issues during release.
-Use dedicated [keywords](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword) in PR message or [manual PR and Issue linking](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue) for clean changelog generation.
-Issues and PRs should be also properly tagged with valid project tags ("bug", "enhancement", "wontfix", etc )
+GitHub release notes are automatically generated from merged pull requests during release. Publishing the release triggers a pull request that prepends the same notes to the offline [CHANGELOG](https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md).
+Use dedicated [keywords](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword) in the pull request description or [link issues manually](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue) so resolved issues remain visible from the pull request and release notes.
+Pull requests should also use the appropriate project labels ("bug", "enhancement", "wontfix", etc.) so generated release notes are categorized correctly.
 
 ## Documentation
 

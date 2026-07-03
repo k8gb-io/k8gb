@@ -18,6 +18,7 @@ jobs:
   release:
     permissions:
       contents: write
+      models: read
       packages: write
     runs-on: ubuntu-24.04
     outputs:
@@ -37,24 +38,55 @@ jobs:
         with:
           fetch-depth: 0
       - name: Get tag
-        run: |
-          previous_tag=$(git tag --sort=v:refname | tail -2 | head -1)
-          echo "previous_tag=${previous_tag}" >> $GITHUB_ENV
-      - uses: heinrichreimer/github-changelog-generator-action@e60b5a2bd9fcd88dadf6345ff8327863fb8b490f # v2.4
         if: ${{ !contains(github.ref_name, 'rc') && github.event_name != 'workflow_dispatch' }}
+        run: |
+          previous_tag=$(git describe --tags --abbrev=0 --first-parent \
+            --match 'v[0-9]*' --exclude '*-*' "${GITHUB_REF_NAME}^")
+          if [[ -z "${previous_tag}" ]]; then
+            echo "Unable to determine the tag preceding ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+          echo "previous_tag=${previous_tag}" >> "${GITHUB_ENV}"
+      - name: Generate release notes
+        if: ${{ !contains(github.ref_name, 'rc') && github.event_name != 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST \
+            "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+            --field tag_name="${GITHUB_REF_NAME}" \
+            --field previous_tag_name="${previous_tag}" \
+            --jq '.body' > changes
+          if [[ ! -s changes ]]; then
+            echo "GitHub generated empty release notes for ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+      - name: Generate AI release summary
+        id: release_summary
+        if: ${{ !contains(github.ref_name, 'rc') && github.event_name != 'workflow_dispatch' }}
+        continue-on-error: true
+        timeout-minutes: 2
+        uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
         with:
-          token: ${{ secrets.CHANGELOG_GH_TOKEN }}
-          project: k8gb
-          sinceTag: ${{ env.previous_tag }}
-          output: changes
-          pullRequests: true
-          author: true
-          issues: true
-          issuesWoLabels: true
-          prWoLabels: true
-          compareLink: true
-          filterByMilestone: true
-          unreleased: true
+          prompt-file: .github/prompts/release-summary.prompt.yml
+          file_input: |
+            release_notes: changes
+      - name: Prepend AI release summary
+        if: ${{ !contains(github.ref_name, 'rc') && github.event_name != 'workflow_dispatch' && steps.release_summary.outcome == 'success' }}
+        env:
+          RELEASE_SUMMARY_FILE: ${{ steps.release_summary.outputs.response-file }}
+        run: |
+          if [[ ! -s "${RELEASE_SUMMARY_FILE}" ]]; then
+            echo "AI generated an empty release summary; using the original release notes" >&2
+            exit 0
+          fi
+          {
+            printf '## Release summary\n\n'
+            cat "${RELEASE_SUMMARY_FILE}"
+            printf '\n\n'
+            cat changes
+          } > changes-with-summary
+          mv changes-with-summary changes
       - name: Install Cosign
         uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
         with:
