@@ -1,5 +1,115 @@
 # Changelog
 
+## [v0.20.0](https://github.com/k8gb-io/k8gb/tree/v0.20.0) (2026-07-03)
+
+## Release summary
+
+  `v0.20.0` delivers end-to-end ZoneDelegation support, covering reconciliation, validation, authoritative DNS resolution, status reporting, and reliable finalization for ExternalDNS and Infoblox. It also adds TLSRoute support and the `k8gb.io/exposed-hostnames` annotation, while improving service health checks, DNS validation, legacy migration cleanup, and reconciliation reliability. New local-failover and AI-inference resilience demos, expanded documentation, unified CRDs, and refreshed dependencies round out the release.
+
+<!-- Release notes generated using configuration in .github/release.yml at v0.20.0 -->
+
+## What's Changed
+### Features, fixes, and maintenance
+* Add phased local failover demo script by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2309
+* Add April 1, 2026 meeting notes by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2316
+* ZoneDelegation (3.1/4) feat: Add ipresolver and zones service by @kuritka in https://github.com/k8gb-io/k8gb/pull/2313
+* Fix: Helm charts publish to OCI registry by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2319
+* ZoneDelegation (3.2/4) feat: k8gb-zone-delegation config map by @kuritka in https://github.com/k8gb-io/k8gb/pull/2322
+* feat: add k8gb.io/exposed-hostnames annotation by @rajsinghtech in https://github.com/k8gb-io/k8gb/pull/2285
+* ZoneDelegation (3.3/4) feat: Create ZoneDelegation reconciliation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2323
+* feat: first blog of k8gb by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2307
+* Fix: update blog category to match with mkdocs.yml by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2329
+* add 2026-04-15 community meeting notes by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2331
+* ZoneDelegation (3.3/4) feat: Remove Bootstrap service by @kuritka in https://github.com/k8gb-io/k8gb/pull/2324
+* feat: master as part of version selector in docs site by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2291
+* ZoneDelegation (3.4/4) feat: Chainsaw tests - existing ZoneDelegation during bootstrap by @kuritka in https://github.com/k8gb-io/k8gb/pull/2325
+* feat: Pipeline doesn't rely on init-ingress but service type LoadBalancer by @kuritka in https://github.com/k8gb-io/k8gb/pull/2333
+* [Enhancement](Contributing.md): Cosign keyless verification guide by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2200
+* feat(docs): splitbrain documentation by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2254
+* ZoneDelegation (3.5/4) feat: ZoneDelegation reconciliation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2327
+* ZoneDelegation (3.7/4) feat: ApplicationDNSEndpoint to ZoneService refactor by @kuritka in https://github.com/k8gb-io/k8gb/pull/2335
+* ZoneDelegation (3.8/4) feat: use ZoneDelegations for authoritative DNS resolution by @kuritka in https://github.com/k8gb-io/k8gb/pull/2338
+* ZoneDelegation (3.6/4) feat: chainsaw ZoneDelegation status by @kuritka in https://github.com/k8gb-io/k8gb/pull/2328
+* ZoneDelegation (3.9/4) feat: add markedForDeletion to ZoneDelegation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2343
+* chore: configure renovate for deploy/edge/deployment.yaml by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2341
+* community-meeting-2026-04-29 by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2347
+* Fixes missed comments in PR #2347 by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2348
+* test(DTR): Testing different K8S versions for DTR (incubation) by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2095
+* feat: Remove dynamicZones from values.yaml by @kuritka in https://github.com/k8gb-io/k8gb/pull/2354
+* Fix: Sync blogs across all versions by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2339
+* add 2026-05-13 community meeting agenda / notes by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2363
+* feat: ZoneDelegation (3.13/4): finalizers logic by @kuritka in https://github.com/k8gb-io/k8gb/pull/2365
+* Add AI inference resilience demo by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2353
+* feat: ZoneDelegation (3.12/4) ZoneDelegation CRD, doFinalize: false as default, Zones validation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2364
+* fix: require all services healthy for server health (#2326) by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2342
+* fix: typos and wrong default INFOBLOX_WAPI_PORT in config.go by @immanuwell in https://github.com/k8gb-io/k8gb/pull/2369
+* feat: ZoneDelegation (3.11/4) ipresolver  returns status per GlueARecord by @kuritka in https://github.com/k8gb-io/k8gb/pull/2350
+* add 2027-05-27 community meeting agenda by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2370
+* feat: Zone delegation (3.15/4) finalization/remove zone delegation for Infoblox by @kuritka in https://github.com/k8gb-io/k8gb/pull/2367
+* add ai inference demo blog post by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2371
+* Fix AI inference blog metadata by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2372
+* fix: fail fast on invalid localtargets DNS labels by @immanuwell in https://github.com/k8gb-io/k8gb/pull/2373
+* fix: repair broken contributor workflows in local deployment helpers by @immanuwell in https://github.com/k8gb-io/k8gb/pull/2376
+* fix: preserve legacy GSLB annotations by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2377
+* WIP add 2026-06-10 community meeting agenda by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2380
+* fest: TLSRoute support in gateway.networking.k8s.io/v1alpha2 vs gatew… by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2282
+* feat: Zone delegation (3.16/4) finalization for ExternalDNS by @kuritka in https://github.com/k8gb-io/k8gb/pull/2386
+* Extending ZoneDelegation documentation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2387
+* add 2026-06-24 community meeting notes by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2391
+* RELEASE: v0.20.0 by @kuritka in https://github.com/k8gb-io/k8gb/pull/2394
+* Bump CoreDNS CRD Plugin to v0.5.0 by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2405
+* feat: unify CRDs by @kuritka in https://github.com/k8gb-io/k8gb/pull/2408
+* fix: Skip GSLB reconciliation when ZoneDelegation is removed by @kuritka in https://github.com/k8gb-io/k8gb/pull/2409
+* feat: not reconcile immediatelly when error occurs by @kuritka in https://github.com/k8gb-io/k8gb/pull/2412
+* refactor: rename CreateZoneDelegation to SaveZoneDelegation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2411
+* feat: remove .conf from ZoneDelegation name by @kuritka in https://github.com/k8gb-io/k8gb/pull/2413
+* fix: make legacy migration cleanup reliable by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2414
+* fix: flaky ip_resolver test by @kuritka in https://github.com/k8gb-io/k8gb/pull/2415
+* ci: run Chainsaw for Renovate PRs by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2416
+* ci: use GitHub-generated release notes by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2417
+### Dependencies
+* fix(deps): update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2308
+* chore(deps): update dependency k8gb-io/k8gb to v0.19.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2306
+* fix(deps): update module sigs.k8s.io/external-dns to v0.21.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2317
+* chore(deps): update dependency go to v1.26.2 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2320
+* chore(deps): update dependency prometheus-community/helm-charts to v29 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2321
+* chore(deps): update azure/setup-helm action to v5 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2311
+* fix(deps): update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2318
+* chore(deps): update otel/opentelemetry-collector docker tag to v0.150.1 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2315
+* Update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2344
+* Update dependency kubernetes-sigs/controller-tools to v0.21.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2355
+* Update module sigs.k8s.io/controller-runtime to v0.24.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2349
+* Update otel/opentelemetry-collector Docker tag to v0.151.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2346
+* Update kyverno/action-install-chainsaw action to v0.2.15 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2356
+* Update go module directive to v1.26.3 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2358
+* Update module github.com/gruntwork-io/terratest to v1 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2359
+* Update rancher/k3s Docker tag to v1.36.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2314
+* Update module sigs.k8s.io/controller-runtime to v0.24.1 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2362
+* Update otel/opentelemetry-collector Docker tag to v0.153.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2361
+* Update update k8s version to v1.36.1 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2368
+* Update fossa-contrib/fossa-action action to v4 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2384
+* Update dependency helm to v4 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2382
+* Update otel/opentelemetry-collector Docker tag to v0.154.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2379
+* Update update golang version by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2374
+* Update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2352
+* Update actions/checkout action to v7 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2388
+* Update rancher/k3s Docker tag to v1.36.2 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2392
+* Update otel/opentelemetry-collector Docker tag to v0.155.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2393
+* Update kubernetes monorepo to v0.36.2 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2332
+* Update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2400
+* Update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2403
+* Update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2410
+
+## New Contributors
+* @rajsinghtech made their first contribution in https://github.com/k8gb-io/k8gb/pull/2285
+* @immanuwell made their first contribution in https://github.com/k8gb-io/k8gb/pull/2369
+* @aryasoni98 made their first contribution in https://github.com/k8gb-io/k8gb/pull/2282
+
+**Full Changelog**: https://github.com/k8gb-io/k8gb/compare/v0.19.0...v0.20.0
+
+:rocket:
+
+
 ## [v0.19.0](https://github.com/k8gb-io/k8gb/tree/v0.19.0) (2026-03-22)
 
 [Full Changelog](https://github.com/k8gb-io/k8gb/compare/v0.18.1...v0.19.0)
