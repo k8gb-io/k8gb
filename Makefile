@@ -625,7 +625,7 @@ mocks:
 	mockgen -package=mocks -destination=controllers/mocks/dns_query_service_mock.go -source=controllers/utils/dns_query_service.go DNSQueryService
 	mockgen -package=mocks -destination=controllers/mocks/refresolver_mock.go -source=controllers/refresolver/refresolver.go GslbRefResolver
 	mockgen -package=dns -destination=controllers/providers/dns/provider_mock.go -source=controllers/providers/dns/dns.go Provider
-	mockgen -package=geotags -destination=controllers/geotags/geotags_mock.go -source=controllers/geotags/geotags.go GeoTags
+	mockgen -package=geotags -destination=controllers/geotags/geotags_mock.go -source=controllers/geotags/types.go Resolver
 	mockgen -package=ipresolver -destination=controllers/ipresolver/ipresolver_mock.go -source=controllers/ipresolver/ipresolver.go Resolver
 	mockgen -package=zones -destination=controllers/zones/zone_delegation_service_mock.go -source=controllers/zones/zone_service.go ZoneDelegationService
 	mockgen	-package=mocks -destination=controllers/mocks/status_client_subresource_mocks.go sigs.k8s.io/controller-runtime/pkg/client SubResourceWriter
