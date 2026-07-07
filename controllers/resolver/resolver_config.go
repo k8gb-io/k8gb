@@ -41,10 +41,7 @@ func (r *Resolver) ResolveOperatorConfig() (cfg *Config, err error) {
 }
 
 func (c *Config) HasExtClusterGeoTags() bool {
-	if len(c.DelegationZones) == 0 {
-		return false
-	}
-	return len(c.DelegationZones[0].ExtClusterNSNames) > 0
+	return len(c.ExtClustersGeoTagsRaw) > 0
 }
 
 func (c *Config) GetExtClusterNSNames(loadBalancedZone, parentZone string) map[string]string {
