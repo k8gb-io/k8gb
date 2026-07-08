@@ -28,7 +28,42 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
 
-<details open><summary><strong>June 24, 2026 #95</strong></summary>
+<details open><summary><strong>July 08, 2026 #96</strong></summary>
+
+## July 08, 2026 #96
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**](https://zoom.us/rec/share/4jydLM_83LuLiqvIIz1QpqSlo2DmUUhK2o8qR4PT3veiQRI8YJEPlLX3CuLME9Bl.6XioloPCzE-xjt0G) 
+
+[**On YouTube**](https://youtu.be/Ds4omZCIkao) 
+
+**Attendees**
+
+- [@itsfarhan](https://github.com/itsfarhan)
+- [@kuritka](https://github.com/kuritka)
+- [@ytsarev](https://github.com/ytsarev)
+- [@elohmrow](https://github.com/elohmrow)
+
+**Agenda**
+
+- Released [v0.20.0](https://github.com/k8gb-io/k8gb/releases/tag/v0.20.0) 🎉 - [LinkedIn post](https://www.linkedin.com/feed/update/urn:li:activity:7479881871854571521/)
+- Lots of KubeCon (and other) prep going on!
+  - ContribFest, Lightning Talk, kiosk submissions all in
+  - KCD Geneva, OSS Summit Europe
+- Incubation updates 📈
+
+**Actions**
+
+- once we are officially incubated, bump to 1.0!
+- move the community meeting to a us-friendly time
+
+</details>
+
+<details><summary><strong>June 24, 2026 #95</strong></summary>
 
 ## June 24, 2026 #95
 
