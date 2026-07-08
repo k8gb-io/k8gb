@@ -37,12 +37,15 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
-[**Zoom Recording**]() 
+[**Zoom Recording**](https://zoom.us/rec/share/4jydLM_83LuLiqvIIz1QpqSlo2DmUUhK2o8qR4PT3veiQRI8YJEPlLX3CuLME9Bl.6XioloPCzE-xjt0G) 
 
-[**On YouTube**]() 
+[**On YouTube**](https://youtu.be/Ds4omZCIkao) 
 
 **Attendees**
 
+- [@itsfarhan](https://github.com/itsfarhan)
+- [@kuritka](https://github.com/kuritka)
+- [@ytsarev](https://github.com/ytsarev)
 - [@elohmrow](https://github.com/elohmrow)
 
 **Agenda**
@@ -54,6 +57,9 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Incubation updates 📈
 
 **Actions**
+
+- once we are officially incubated, bump to 1.0!
+- move the community meeting to a us-friendly time
 
 </details>
 
