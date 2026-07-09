@@ -70,7 +70,10 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	zone, err := r.ZoneService.Get(ctx, req.NamespacedName)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return result.Requeue()
+			r.Logger.Debug().
+				Str("name", req.Name).
+				Msg("ZoneDelegation not found. Ignoring reconcile request")
+			return result.Stop()
 		}
 		r.Logger.Err(err).
 			Str("name", req.Name).
