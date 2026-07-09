@@ -34,7 +34,7 @@ func NewReconcileResultHandler(reconcileAfter int) *ReconcileResultHandler {
 	}
 }
 
-// Stop stops reconciliation loop
+// Stop completes the current reconciliation without scheduling another run.
 func (r *ReconcileResultHandler) Stop() (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
