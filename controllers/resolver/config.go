@@ -31,7 +31,7 @@ import (
 type Config struct {
 	ClusterGeoTag string `env:"CLUSTER_GEO_TAG" required:"" validate:"geotag" help:"ClusterGeoTag to determine specific location"`
 
-	DNSZones string `env:"DNS_ZONES" required:"" help:"pairs of parentZone and loadBalancedZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io"`
+	DNSZones string `env:"DNS_ZONES"  optional:"" help:"pairs of parentZone and loadBalancedZone, eg: DNS_ZONES=example.com:cloud.example.com;example.io:cloud.example.io"`
 
 	ParentZoneDNSServersRaw []string `env:"EDGE_DNS_SERVERS" optional:"" validate:"unique,dive,iphostport" help:"list of parent DNS servers (ipv4 or domain). If port is missing default value 53 is used; e.g: '10.0.0.1,10.20.20.0.1:5053,edge.test:53'"`
 

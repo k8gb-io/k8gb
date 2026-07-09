@@ -799,6 +799,19 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				assert.Error(t, err)
 			},
 		},
+		{
+			name: "empty",
+			config: &Config{
+				DNSZones:              "",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+			},
+			expectedLen: 0,
+			assert: func(_ []*DelegationZoneInfo, err error) {
+				assert.Error(t, err)
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
