@@ -27,6 +27,7 @@ This section provides comprehensive tutorials for deploying and configuring K8GB
 * [Resource References](resource_ref.md)
 * [Address Discovery](address_discovery.md)
 * [Dynamic Geotags](dynamic_geotags.md)
+* [Dynamic Zones](dynamic_zones.md)
 * [Multi-zone Setup](multizone.md)
 * [Exposing DNS](exposing_dns.md)
 
