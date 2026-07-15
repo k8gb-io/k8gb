@@ -28,6 +28,20 @@ The feature introduces a cluster-scoped resource `ZoneDelegation` that contains:
 Pre-configuring zones in anonymous or shared clusters makes CoreDNS authoritative too early, causing `NXDOMAIN` responses.
 `ZoneDelegation` lets applications ship their own zone definitions, enabling dynamic activation.
 
+## Deploying Load-Balanced Zones to a Subset of Clusters
+
+In multi-cluster environments, a load-balanced application does not have to be deployed to every cluster in the k8gb network.
+The `ZoneDelegation` resource should be deployed together with the application to each cluster that participates in serving
+that application's `loadBalancedZone`.
+
+If a cluster does not have a `ZoneDelegation` for a `loadBalancedZone`, k8gb does not configure CoreDNS to serve that zone
+from the cluster. The cluster is therefore excluded from that GSLB zone instead of returning inconsistent DNS responses for
+an application it does not host.
+
+When different applications are deployed to different cluster subsets, give each application or team its own delegated
+sub-zone. For example, deploy `ZoneDelegation` for `app1.gslb.example.com` only in the clusters that host `app1`, and
+deploy `ZoneDelegation` for `app2.gslb.example.com` only in the clusters that host `app2`.
+
 ## Example
 
 ```yaml
