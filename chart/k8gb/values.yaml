@@ -183,6 +183,7 @@ extdns:
     create: true
   sources:
   - crd
+  # Include the parent zone of every ZoneDelegation managed through ExternalDNS.
   domainFilters:
   - "example.com"
   txtPrefix: "k8gb-<GEOTAG>-"
