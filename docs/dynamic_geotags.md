@@ -1,16 +1,12 @@
 # Dynamic GeoTags
 
 _**Note:**
-Dynamic GeoTags currently work only with parent DNS servers running Infoblox (WAPI-based integration).
-Other parent DNS solutions, such as those managed by ExternalDNS, are not supported for dynamic GeoTag discovery.
-If your parent zone is managed by a different DNS provider (e.g., Route53, CoreDNS, or ExternalDNS), you must use the 
-static configuration method and set the `extGslbClustersGeoTags` value explicitly in your `values.yaml`._
-
-
-From v0.15.0, k8gb makes it easier to configure and manage cluster GeoTags.
+Dynamic GeoTags currently work only with parent DNS servers running **Infoblox (WAPI-based integration).**
+Other parent DNS solutions, such as Route53, CoreDNS, or ExternalDNS are not supported for dynamic GeoTag discovery._
 
 ### What is a GeoTag?
-A GeoTag is a short identifier (for example: `eu`, `us`, `za`) that uniquely marks each k8gb cluster’s location or role. GeoTags are essential for k8gb’s global DNS-based routing and failover logic.
+A GeoTag is a short identifier (for example: `eu`, `us`, `za`) that uniquely marks each k8gb cluster’s location or role. 
+GeoTags are essential for k8gb’s global DNS-based routing and failover logic.
 
 ### How to configure GeoTags
 You configure GeoTags directly in your values.yaml (usually when installing or upgrading k8gb via Helm):
@@ -29,11 +25,20 @@ k8gb:
 
 Both values are set in values.yaml and are automatically passed to the k8gb Pod as environment variables by the Helm chart.
 
-## What’s new with Dynamic GeoTags?
+## Dynamic GeoTags
 
 Previously, any change in the list of external clusters (extGslbClustersGeoTags) required you to update and restart all k8gb pods across all clusters, which was inconvenient and error prone especially as the number of clusters grew.
 
 **Dynamic GeoTags** allow k8gb to discover external GeoTags directly from DNS (from NS records on the parent zone), without the need to keep all values manually in sync.
+
+### Example (`values.yaml`):
+```yaml
+k8gb:
+  clusterGeoTag: "eu"
+  # Leaving this value empty enables Dynamic Geotags, where geotags are discovered from NS records in the edge DNS. 
+  # An empty value is supported only with the Infoblox provider
+  extGslbClustersGeoTags:
+```
 
 If the `extGslbClustersGeoTags` value is empty, k8gb will attempt to extract external GeoTags dynamically at runtime.
 
@@ -41,12 +46,6 @@ If the `extGslbClustersGeoTags` value is empty, k8gb will attempt to extract ext
 - You can add or remove clusters without having to update and restart all existing k8gb instances.
 - It’s especially useful for dynamic, cloud-native, or large-scale multi-cluster environments.
 
-### Example (`values.yaml`):
-```yaml
-k8gb:
-  clusterGeoTag: "eu"
-  extGslbClustersGeoTags: ""  # leave empty to enable dynamic discovery
-```
 
 ## Important considerations
 Dynamic GeoTags provide convenience and flexibility, but it’s important to understand their impact on your DNS infrastructure:
