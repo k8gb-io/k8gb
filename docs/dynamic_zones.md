@@ -58,50 +58,22 @@ spec:
 
 ## Setup
 
-Set `k8gb.dynamicZones` to true via helm chart values. This will add a new empty ConfigMap named `dynamic-zones`.
-Every `ZoneDelegation` reconcile loop, `k8gb` will get all ZoneDelegations and create configmap key per `ZoneDelegation` like:
+`ZoneDelegation` resources can be created directly, and k8gb will reconcile them automatically. For backward compatibility, 
+k8gb can also generate `ZoneDelegation` resources from the `dnsZones` configuration in `values.yaml`. Internally, however, 
+k8gb operates only with `ZoneDelegation` resources. The recommended approach is therefore to deploy `ZoneDelegation` 
+resources explicitly together with the applications that require them, rather than defining zones through Helm values. 
 
-```yaml
-apiVersion: v1
-data:
-  test-zone-cloud-example-com.conf: |2-
-    test-zone.cloud.example.com:5353 {
-      import k8gbplugins
-    }
-kind: ConfigMap
-metadata:
-  annotations:
-    meta.helm.sh/release-name: k8gb
-    meta.helm.sh/release-namespace: k8gb
-  labels:
-    app.kubernetes.io/managed-by: Helm
-  name: k8gb-zone-delegation
-```
+When a `ZoneDelegation` is reconciled, k8gb updates the `k8gb-zone-delegation` ConfigMap with the CoreDNS 
+configuration for the delegated `loadBalancedZone`. This ConfigMap is mounted into the k8gb CoreDNS pods and imported 
+by the CoreDNS configuration.
 
-This configmap is mounted into CoreDNS pod and imported with import plugin:
-
-```yaml
-apiVersion: v1
-data:
-  Corefile: |-
-    (k8gbplugins) {
-        errors
-        health
-        reload 30s 15s
-        ready
-        prometheus 0.0.0.0:9153
-        forward . /etc/resolv.conf
-        k8s_crd {
-            filter k8gb.absa.oss/dnstype=local
-            negttl 30
-            loadbalance weight
-        }
-    }
-    static-zone.cloud.example.com:5353 {
-        import k8gbplugins
-    }
-    import ../dynamic/*.conf
-```
+> **Important:** When using the ExternalDNS provider, configure `extdns.domainFilters` explicitly and include every 
+> `parentZone` that ExternalDNS is expected to manage.
+>  ```yaml
+> # Include every parent zone managed by ExternalDNS.
+> domainFilters:
+>    - "example.com"
+>  ```
 
 ## ZoneDelegation Status
 The ZoneDelegation status contains information about all DNS servers participating in zone delegation.
