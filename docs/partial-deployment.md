@@ -1,6 +1,18 @@
-# Partial Deployment Troubleshooting
+# Partial Deployment
 
-This page provides operational guidance for diagnosing and resolving situations where a `Gslb` resource is missing from one or more clusters in a multi-cluster k8gb setup. For a description of how k8gb behaves in this scenario, see [use case 4 in the Getting Started guide](intro.md#4-partial-deployment---gslb-resource-missing-from-a-cluster).
+## What happens when a Gslb resource is missing from a cluster
+
+k8gb participation is opt-in per cluster per hostname. Consider a two-cluster setup where Cluster **X** has a `Gslb` resource for `app.cloud.example.com` and Cluster **Y** does not:
+
+1. Cluster **Y**'s k8gb controller has no knowledge of `app.cloud.example.com` and publishes no `localtargets-app.cloud.example.com` A records to its local CoreDNS.
+2. NS zone delegation is per-cluster, not per-hostname. Cluster **Y**'s zone delegation registered with the edge DNS is unaffected. However, when Cluster **X** queries Cluster **Y**'s CoreDNS for `localtargets-app.cloud.example.com`, it receives an empty response (NOERROR, no A records) because the records were never published.
+3. Cluster **X** collects `localtargets-*` records from all known clusters; for Cluster **Y** it receives an empty result, so only Cluster **X**'s own Ingress node IPs are included in the final answer set.
+
+Clients receive **consistent** DNS responses directed to Cluster **X**, but Cluster **Y** is never included in the GSLB pool for this hostname, regardless of its Pod health.
+
+## Troubleshooting
+
+This section provides guidance for diagnosing situations where a `Gslb` resource is missing from one or more clusters in a multi-cluster k8gb setup.
 
 ## Common Causes
 
