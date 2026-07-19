@@ -1,18 +1,17 @@
-# Partial Deployment
+# Partial Deployment Troubleshooting
 
 ## What happens when a Gslb resource is missing from a cluster
 
-k8gb participation is opt-in per cluster per hostname. Consider a two-cluster setup where Cluster **X** has a `Gslb` resource for `app.cloud.example.com` and Cluster **Y** does not:
+When `ZoneDelegation` is present in cluster **Y** but a `Gslb` resource for `app.cloud.example.com` is absent:
 
-1. Cluster **Y**'s k8gb controller has no knowledge of `app.cloud.example.com` and publishes no `localtargets-app.cloud.example.com` A records to its local CoreDNS.
-2. NS zone delegation is per-cluster, not per-hostname. Cluster **Y**'s zone delegation registered with the edge DNS is unaffected. However, when Cluster **X** queries Cluster **Y**'s CoreDNS for `localtargets-app.cloud.example.com`, it receives an empty response (NOERROR, no A records) because the records were never published.
-3. Cluster **X** collects `localtargets-*` records from all known clusters; for Cluster **Y** it receives an empty result, so only Cluster **X**'s own Ingress node IPs are included in the final answer set.
+1. Cluster **Y** remains authoritative for the configured load-balanced zone because `ZoneDelegation` continues to publish its NS and glue records.
+2. Cluster **Y** does not publish application or `localtargets-*` records for `app.cloud.example.com`.
+3. The edge DNS can still delegate queries for the load-balanced zone to cluster **Y**, even though that cluster lacks records for this application hostname.
+4. Cluster **X** cannot discover healthy application targets from cluster **Y**, so those targets are not included in responses produced by cluster **X**.
 
-Clients receive **consistent** DNS responses directed to Cluster **X**, but Cluster **Y** is never included in the GSLB pool for this hostname, regardless of its Pod health.
+Clients can therefore receive inconsistent DNS responses depending on which authoritative cluster answers the query. A partial `Gslb` deployment should not be treated as a safe way to exclude a cluster.
 
-## Troubleshooting
-
-This section provides guidance for diagnosing situations where a `Gslb` resource is missing from one or more clusters in a multi-cluster k8gb setup.
+Application participation is configured per hostname through `Gslb`, while DNS delegation is configured separately per load-balanced zone through `ZoneDelegation`. Operators should deploy the `Gslb` resource consistently across every delegated cluster expected to serve the hostname.
 
 ## Common Causes
 
@@ -24,33 +23,7 @@ This section provides guidance for diagnosing situations where a `Gslb` resource
 
 ## How to Detect
 
-**1. Verify consistent Gslb coverage across clusters**
-
-Run the following on each cluster and confirm the same hostname appears everywhere you expect multi-cluster load balancing:
-
-```bash
-kubectl get gslb -A
-```
-
-If a hostname is present in Cluster X but absent in Cluster Y, Cluster Y is excluded from the GSLB pool for that hostname.
-
-**2. Inspect healthyRecords on the Gslb object**
-
-On a cluster that *does* have the `Gslb` resource, check whether remote clusters are contributing endpoints:
-
-```bash
-kubectl get gslb <name> -n <namespace> -o jsonpath='{.status.healthyRecords}'
-```
-
-If only one cluster's Ingress IPs appear in `status.healthyRecords`, the other clusters are either unhealthy or missing the `Gslb` resource.
-
-**3. Query the remote cluster's CoreDNS directly**
-
-Confirm that a cluster has published `localtargets-*` records by querying its CoreDNS directly. If no records are returned, the `Gslb` resource is absent or not yet reconciled on that cluster:
-
-```bash
-# Replace <coredns-ip> with the external IP of the target cluster's CoreDNS service
-dig localtargets-app.cloud.example.com @<coredns-ip>
-```
-
-An empty answer section (NOERROR, no A records) confirms that the cluster has no `localtargets-*` records for the hostname.
+- Verify that the expected `ZoneDelegation` exists in every cluster intended to be authoritative for the load-balanced zone.
+- Run `kubectl get gslb -A` in each delegated cluster and confirm that the application hostname is present.
+- Query the edge DNS for the configured load-balanced zone, for example: `dig NS cloud.example.com @<edge-dns>`.
+- Query `app.cloud.example.com` and its generated `localtargets-*` record directly against each authoritative cluster DNS server returned by the NS lookup. Different answers identify an incomplete cluster configuration.

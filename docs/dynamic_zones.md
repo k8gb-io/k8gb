@@ -144,3 +144,7 @@ Static zones configured through `k8gb.dnsZones` remain supported. Dynamic Zones 
 where zones should be activated only when `ZoneDelegation` objects are created. For backward compatibility, `ZoneDelegation`
 objects generated from `k8gb.dnsZones` or the `DNS_ZONES` environment variable have `doFinalize` set to `false` by default.
 This prevents k8gb from deleting delegated zones that were originally configured as static zones.
+
+## See Also
+
+- [Partial Deployment Troubleshooting](partial-deployment.md): what happens when a `Gslb` resource is missing from one or more delegated clusters.
