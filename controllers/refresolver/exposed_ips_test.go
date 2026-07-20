@@ -1,4 +1,4 @@
-package controllers
+package refresolver
 
 /*
 Copyright 2021-2025 The k8gb Contributors.
@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/k8gb-io/k8gb/controllers/mocks"
-	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -34,6 +33,7 @@ func TestResolveGslbExposedIPs(t *testing.T) {
 	overrideIPs := []string{"203.0.113.10", "203.0.113.11"}
 	discoveredIPs := []string{"10.0.0.1"}
 	annotationIPs := []string{"198.51.100.5"}
+	parentServers := utils.DNSList{}
 
 	t.Run("cluster override is used when set and no per-Gslb annotation present", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -41,8 +41,7 @@ func TestResolveGslbExposedIPs(t *testing.T) {
 		// GetGslbExposedIPs must NOT be called when the cluster override wins.
 		refResolver := mocks.NewMockGslbReferenceResolver(ctrl)
 
-		cfg := &resolver.Config{EdgeDNSExposedIPs: overrideIPs}
-		got, err := resolveGslbExposedIPs(cfg, refResolver, map[string]string{})
+		got, err := ResolveGslbExposedIPs(refResolver, map[string]string{}, overrideIPs, parentServers)
 
 		assert.NoError(t, err)
 		assert.Equal(t, overrideIPs, got)
@@ -53,10 +52,9 @@ func TestResolveGslbExposedIPs(t *testing.T) {
 		defer ctrl.Finish()
 		annotations := map[string]string{utils.ExternalIPsAnnotation: "198.51.100.5"}
 		refResolver := mocks.NewMockGslbReferenceResolver(ctrl)
-		refResolver.EXPECT().GetGslbExposedIPs(annotations, gomock.Any()).Return(annotationIPs, nil)
+		refResolver.EXPECT().GetGslbExposedIPs(annotations, parentServers).Return(annotationIPs, nil)
 
-		cfg := &resolver.Config{EdgeDNSExposedIPs: overrideIPs}
-		got, err := resolveGslbExposedIPs(cfg, refResolver, annotations)
+		got, err := ResolveGslbExposedIPs(refResolver, annotations, overrideIPs, parentServers)
 
 		assert.NoError(t, err)
 		assert.Equal(t, annotationIPs, got)
@@ -67,10 +65,9 @@ func TestResolveGslbExposedIPs(t *testing.T) {
 		defer ctrl.Finish()
 		annotations := map[string]string{utils.ExposedHostnamesAnnotation: "app.example.com"}
 		refResolver := mocks.NewMockGslbReferenceResolver(ctrl)
-		refResolver.EXPECT().GetGslbExposedIPs(annotations, gomock.Any()).Return(annotationIPs, nil)
+		refResolver.EXPECT().GetGslbExposedIPs(annotations, parentServers).Return(annotationIPs, nil)
 
-		cfg := &resolver.Config{EdgeDNSExposedIPs: overrideIPs}
-		got, err := resolveGslbExposedIPs(cfg, refResolver, annotations)
+		got, err := ResolveGslbExposedIPs(refResolver, annotations, overrideIPs, parentServers)
 
 		assert.NoError(t, err)
 		assert.Equal(t, annotationIPs, got)
@@ -80,10 +77,9 @@ func TestResolveGslbExposedIPs(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		refResolver := mocks.NewMockGslbReferenceResolver(ctrl)
-		refResolver.EXPECT().GetGslbExposedIPs(gomock.Any(), gomock.Any()).Return(discoveredIPs, nil)
+		refResolver.EXPECT().GetGslbExposedIPs(gomock.Any(), parentServers).Return(discoveredIPs, nil)
 
-		cfg := &resolver.Config{}
-		got, err := resolveGslbExposedIPs(cfg, refResolver, map[string]string{})
+		got, err := ResolveGslbExposedIPs(refResolver, map[string]string{}, nil, parentServers)
 
 		assert.NoError(t, err)
 		assert.Equal(t, discoveredIPs, got)
