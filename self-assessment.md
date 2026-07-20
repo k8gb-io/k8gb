@@ -55,7 +55,7 @@ k8gb is implemented using the Kubernetes operator pattern with a single CRD (Cus
 
 Global enterprises moving to the cloud need a global load balancer to make intelligent routing decisions based on the health and availability of Kubernetes services across multiple clusters and geographic regions. Traditional proprietary software and vendor solutions exist, but these are often expensive, complex, and not cloud native. Many require dedicated hardware appliances and operate outside the Kubernetes ecosystem, creating operational overhead and vendor lock-in.
 
-k8gb addresses these challenges as a vendor-neutral, CNCF (Cloud Native Computing Foundation) Sandbox project. It is designed as a cloud-native Kubernetes Global Load Balancer that operates entirely within the Kubernetes ecosystem. Unlike traditional solutions, k8gb does not require any special software, dedicated hardware, or external management systems - it relies exclusively on open source software (OSS) and CNCF projects, integrating seamlessly with existing Kubernetes workflows such as GitOps, Kustomize, and Helm package management.
+k8gb addresses these challenges as a vendor-neutral, CNCF (Cloud Native Computing Foundation) Incubating project. It is designed as a cloud-native Kubernetes Global Load Balancer that operates entirely within the Kubernetes ecosystem. Unlike traditional solutions, k8gb does not require any special software, dedicated hardware, or external management systems - it relies exclusively on open source software (OSS) and CNCF projects, integrating seamlessly with existing Kubernetes workflows such as GitOps, Kustomize, and Helm package management.
 
 ### Actors
 
