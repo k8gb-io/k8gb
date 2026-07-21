@@ -86,31 +86,28 @@ func TestResolveNSNames(t *testing.T) {
 				{IP: "172.10.10.11", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
 			},
 			arrange: func(qs *mocks.MockDNSQueryService, cl *mocks.MockClient) {
+				// Encode the queried NS name into the returned Msg so ExtractARecords maps each
+				// cluster to its IPs deterministically, independent of the (random) Go map
+				// iteration order over external geo tags in GetClusterGlueAResults.
 				qs.EXPECT().Query(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(name string, _ utils.DNSList) utils.DNSQueryResult {
-						msg := &dns.Msg{}
+					DoAndReturn(func(host string, _ utils.DNSList) utils.DNSQueryResult {
+						msg := new(dns.Msg)
+						msg.SetQuestion(dns.Fqdn(host), dns.TypeA)
+						return utils.DNSQueryResult{Msg: msg, Err: nil, Status: utils.DNSQueryStatusResolved}
+					}).AnyTimes()
+				qs.EXPECT().ExtractARecords(gomock.Any()).
+					DoAndReturn(func(msg *dns.Msg) []string {
+						var name string
+						if len(msg.Question) > 0 {
+							name = msg.Question[0].Name
+						}
 						switch {
 						case strings.Contains(name, "gslb-ns-eu-"):
-							msg.Id = 18
-						case strings.Contains(name, "gslb-ns-za-"):
-							msg.Id = 20
-						}
-						return utils.DNSQueryResult{
-							Msg:    msg,
-							Err:    nil,
-							Status: utils.DNSQueryStatusResolved,
-						}
-					}).AnyTimes()
-				qs.EXPECT().
-					ExtractARecords(gomock.Any()).
-					DoAndReturn(func(msg *dns.Msg) []string {
-						switch msg.Id {
-						case 18:
 							return []string{"172.18.0.1", "172.18.0.2"}
-						case 20:
+						case strings.Contains(name, "gslb-ns-za-"):
 							return []string{"172.20.0.1", "172.20.0.2"}
 						default:
-							return nil
+							return []string{}
 						}
 					}).AnyTimes()
 				svc := coreDNSService.DeepCopy()
@@ -414,4 +411,29 @@ func TestResolveLocalIPs(t *testing.T) {
 			assert.Equal(t, test.hasIngress, bootstrap.HasIngress())
 		})
 	}
+}
+
+// TestEdgeDNSExposedIPsOverride verifies that when EDGE_DNS_EXPOSED_IPS is set, the resolver
+// returns the operator-provided IPs without querying the CoreDNS service/ingress. This is the
+// bare-metal / static-NAT path from https://github.com/k8gb-io/k8gb/issues/2360
+func TestEdgeDNSExposedIPsOverride(t *testing.T) {
+	ctx := context.TODO()
+	overrideIPs := []string{"203.0.113.10", "203.0.113.11"}
+
+	// The client must never be touched: with the override set there is nothing to discover.
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	cl := mocks.NewMockClient(ctrl)
+
+	config := &resolver.Config{
+		K8gbNamespace:      "k8gb",
+		CoreDNSServiceType: corev1.ServiceTypeClusterIP,
+		EdgeDNSExposedIPs:  overrideIPs,
+	}
+
+	bootstrap, err := NewResolver(config, cl, nil).GetExposedIPs(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, overrideIPs, bootstrap.IPs)
+	// String() must be nil-safe when svc/ing are absent.
+	assert.Contains(t, bootstrap.String(), "Operator override")
 }
