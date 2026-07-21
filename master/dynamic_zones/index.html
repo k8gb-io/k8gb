@@ -1152,78 +1152,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#zonedelegation-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ZoneDelegation Status
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#zonedelegation-cleanup-wip" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ZoneDelegation Cleanup (WIP)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ZoneDelegation Cleanup (WIP)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#delayed-finalization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Delayed Finalization
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#infoblox-provider" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Infoblox provider
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#externaldns-provider" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ExternalDNS provider
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#backward-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Backward Compatibility
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2771,78 +2699,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#zonedelegation-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ZoneDelegation Status
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#zonedelegation-cleanup-wip" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ZoneDelegation Cleanup (WIP)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ZoneDelegation Cleanup (WIP)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#delayed-finalization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Delayed Finalization
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#infoblox-provider" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Infoblox provider
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#externaldns-provider" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ExternalDNS provider
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#backward-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Backward Compatibility
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2913,45 +2769,22 @@ deploy <code>ZoneDelegation</code> for <code>app2.gslb.example.com</code> only i
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">doFinalize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>Set <code>k8gb.dynamicZones</code> to true via helm chart values. This will add a new empty ConfigMap named <code>dynamic-zones</code>.
-Every <code>ZoneDelegation</code> reconcile loop, <code>k8gb</code> will get all ZoneDelegations and create configmap key per <code>ZoneDelegation</code> like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">data</span><span class="p">:</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">test-zone-cloud-example-com.conf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|2-</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="no">test-zone.cloud.example.com:5353 {</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="no">import k8gbplugins</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="no">}</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nt">meta.helm.sh/release-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nt">meta.helm.sh/release-namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nt">app.kubernetes.io/managed-by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Helm</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb-zone-delegation</span>
-</code></pre></div>
-<p>This configmap is mounted into CoreDNS pod and imported with import plugin:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">data</span><span class="p">:</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">Corefile</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="no">(k8gbplugins) {</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="no">errors</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="no">health</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="no">reload 30s 15s</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="no">ready</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">        </span><span class="no">prometheus 0.0.0.0:9153</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="no">forward . /etc/resolv.conf</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">        </span><span class="no">k8s_crd {</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">            </span><span class="no">filter k8gb.absa.oss/dnstype=local</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">            </span><span class="no">negttl 30</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">            </span><span class="no">loadbalance weight</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">        </span><span class="no">}</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="no">}</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="no">static-zone.cloud.example.com:5353 {</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">        </span><span class="no">import k8gbplugins</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="no">}</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="no">import ../dynamic/*.conf</span>
-</code></pre></div>
+<p><code>ZoneDelegation</code> resources can be created directly, and k8gb will reconcile them automatically. For backward compatibility, 
+k8gb can also generate <code>ZoneDelegation</code> resources from the <code>dnsZones</code> configuration in <code>values.yaml</code>. Internally, however, 
+k8gb operates only with <code>ZoneDelegation</code> resources. The recommended approach is therefore to deploy <code>ZoneDelegation</code> 
+resources explicitly together with the applications that require them, rather than defining zones through Helm values. </p>
+<p>When a <code>ZoneDelegation</code> is reconciled, k8gb updates the <code>k8gb-zone-delegation</code> ConfigMap with the CoreDNS 
+configuration for the delegated <code>loadBalancedZone</code>. This ConfigMap is mounted into the k8gb CoreDNS pods and imported 
+by the CoreDNS configuration.</p>
+<blockquote>
+<p><strong>Important:</strong> When using the ExternalDNS provider, configure <code>extdns.domainFilters</code> explicitly and include every 
+<code>parentZone</code> that ExternalDNS is expected to manage.
+ ```yaml</p>
+<h1 id="include-every-parent-zone-managed-by-externaldns">Include every parent zone managed by ExternalDNS.<a class="headerlink" href="#include-every-parent-zone-managed-by-externaldns" title="Permanent link">&para;</a></h1>
+<p>domainFilters:
+   - "example.com"
+ ```</p>
+</blockquote>
 <h2 id="zonedelegation-status">ZoneDelegation Status<a class="headerlink" href="#zonedelegation-status" title="Permanent link">&para;</a></h2>
 <p>The ZoneDelegation status contains information about all DNS servers participating in zone delegation.
 It acts as the single source of truth for DNS server IP addresses used by the k8gb controller,
@@ -2959,16 +2792,16 @@ delegation DNSEndpoints when the ExternalDNS provider is enabled, and applicatio
 k8gb reads DNS server IP addresses from this status, which avoids resolving them from edgeDNS
 on every reconciliation. The refresh interval is controlled by the k8gb reconcile interval, configured through
 <code>k8gb.reconcileRequeueSeconds</code> in Helm values or the corresponding <code>RECONCILE_REQUEUE_SECONDS</code> environment variable.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">status</span><span class="p">:</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">dnsServers</span><span class="p">:</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-eu-cloud2.example.com</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.6</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-eu-cloud2.example.com</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.7</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-us-cloud2.example.com</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.11</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-us-cloud2.example.com</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.12</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">status</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">dnsServers</span><span class="p">:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-eu-cloud2.example.com</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.6</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-eu-cloud2.example.com</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.7</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-us-cloud2.example.com</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.11</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gslb-ns-us-cloud2.example.com</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.18.0.12</span>
 </code></pre></div>
 <h2 id="zonedelegation-cleanup-wip">ZoneDelegation Cleanup (WIP)<a class="headerlink" href="#zonedelegation-cleanup-wip" title="Permanent link">&para;</a></h2>
 <p>Use <code>doFinalize: false</code> when k8gb should not modify the parent DNS delegation during deletion; the controller only removes this cluster's local CoreDNS configuration.
@@ -2977,10 +2810,10 @@ Use <code>doFinalize: true</code> when k8gb is allowed to remove the delegated z
 <p>When <code>doFinalize</code> is enabled, deleting a <code>ZoneDelegation</code> may not remove the object immediately. The object can remain in
 a terminating state while the k8gb controller verifies whether the current cluster is the last remaining member of the delegation.
 This prevents premature deletion of the delegated zone from the parent DNS in multi-cluster environments.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">deletionTimestamp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">finalizers</span><span class="p">:</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb.io/finalizer</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">deletionTimestamp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">finalizers</span><span class="p">:</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb.io/finalizer</span>
 </code></pre></div>
 <h3 id="infoblox-provider">Infoblox provider<a class="headerlink" href="#infoblox-provider" title="Permanent link">&para;</a></h3>
 <p>When <code>ZoneDelegation</code> is removed with the Infoblox provider, the delegated zone is deleted only when the last <code>ZoneDelegation</code>
@@ -3020,7 +2853,7 @@ This prevents k8gb from deleting delegated zones that were originally configured
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 15, 2026 22:47:50 UTC">July 15, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 17, 2026 12:03:52 UTC">July 17, 2026</span>
   </span>
 
     
