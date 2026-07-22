@@ -42,6 +42,10 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
+[**Zoom Recording**](https://zoom.us/rec/share/eAKetD9PJipM0UIiV6eB9CzRUdx4Sd7wTn_5bI_u96LocTiOzaOjaFPaVco2FNNh.vDQNXPz1Su7oFJbA)
+
+[**On YouTube**](https://youtu.be/NQrQhqaDn9Q)
+
 **Agenda**
 
 - k8gb is now a CNCF Incubating project! 🎉
