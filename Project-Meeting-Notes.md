@@ -32,6 +32,11 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 ## July 22, 2026 #97
 
+**Attendees**
+
+- [@aryasoni98](https://github.com/aryasoni98)
+- [@ytsarev](https://github.com/ytsarev)
+
 **Backlog**
 
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
