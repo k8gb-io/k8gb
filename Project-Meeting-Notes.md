@@ -28,7 +28,39 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
 
-<details open><summary><strong>July 08, 2026 #96</strong></summary>
+<details open><summary><strong>July 22, 2026 #97</strong></summary>
+
+## July 22, 2026 #97
+
+**Attendees**
+
+- [@aryasoni98](https://github.com/aryasoni98)
+- [@ytsarev](https://github.com/ytsarev)
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**](https://zoom.us/rec/share/eAKetD9PJipM0UIiV6eB9CzRUdx4Sd7wTn_5bI_u96LocTiOzaOjaFPaVco2FNNh.vDQNXPz1Su7oFJbA)
+
+[**On YouTube**](https://youtu.be/NQrQhqaDn9Q)
+
+**Agenda**
+
+- k8gb is now a CNCF Incubating project! 🎉
+  - The [TOC vote passed](https://github.com/cncf/toc/issues/1472#issuecomment-5010971803) with 8 votes in favor and none against.
+  - Thank the adopters, reviewers, contributors, and maintainers who got us here.
+
+**Actions**
+
+- Coordinate next steps with the CNCF Projects team.
+- Plan the v1.0 release and update project branding and communications.
+- Move the community meeting to a US-friendly time.
+
+</details>
+
+<details><summary><strong>July 08, 2026 #96</strong></summary>
 
 ## July 08, 2026 #96
 
