@@ -142,15 +142,6 @@ This use case demonstrates that clusters with no healthy Pods should *not* have 
 
 If the Pods in cluster **Y** were to once again become healthy (liveness and readiness probes start passing) then the Ingress node IPs for cluster **Y** would once again be added to the eligible pool of Ingress node IPs.
 
-### 4. Partial deployment - Gslb resource missing from a cluster
-
-k8gb participation is opt-in per cluster per hostname. When a `Gslb` resource is absent from a cluster, that cluster publishes no `localtargets-*` DNS records for the hostname and is silently excluded from the GSLB pool. The remaining clusters continue to function normally.
-
-For a detailed walkthrough of the DNS mechanics, common causes, and how to detect this situation, see [Partial deployment troubleshooting](partial-deployment.md).
-
-!!! note "Intentional single-cluster deployment"
-    Deploying a `Gslb` resource in only one cluster is a valid and supported configuration (see [use case 1](#1-basic-single-cluster)). The concern this section addresses is the **unintended** case where an operator expects multi-cluster load balancing but omits the `Gslb` resource from one or more clusters.
-
 ## Load balancing strategies
 
 The following load balancing strategies, as it relates to resolving Ingress node IPs, should be provided as part of the initial implementation:
