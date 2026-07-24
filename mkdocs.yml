@@ -44,6 +44,7 @@ nav:
       - Load Balancer: lbservice-integration.md
     - Advanced:
       - Split-Brain Scenarios: splitbrain.md
+      - Partial Deployment Troubleshooting: partial-deployment.md
       - Service Upgrade: service_upgrade.md
       - Migration Acceptance Tests: migration_acceptance.md
       - WRR Caveats: wrr_caveats.md
