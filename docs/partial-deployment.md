@@ -6,7 +6,7 @@ When `ZoneDelegation` is present in cluster **Y** but a `Gslb` resource for `app
 
 1. Cluster **Y** remains authoritative for the configured load-balanced zone because `ZoneDelegation` continues to publish its NS and glue records.
 2. Cluster **Y** does not publish application or `localtargets-*` records for `app.cloud.example.com`.
-3. The edge DNS can still delegate queries for the load-balanced zone to cluster **Y**, even though that cluster lacks records for this application hostname.
+3. The edge DNS continues to delegate queries for the load-balanced zone to cluster **Y** because the NS and glue records published by `ZoneDelegation` are unaffected. Queries for `app.cloud.example.com` that reach cluster **Y**'s CoreDNS receive NXDOMAIN or an empty answer because no records for that hostname were ever published.
 4. Cluster **X** cannot discover healthy application targets from cluster **Y**, so those targets are not included in responses produced by cluster **X**.
 
 Clients can therefore receive inconsistent DNS responses depending on which authoritative cluster answers the query. A partial `Gslb` deployment should not be treated as a safe way to exclude a cluster.
