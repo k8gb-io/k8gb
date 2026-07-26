@@ -28,7 +28,7 @@ import (
 )
 
 // TestResolveGslbExposedIPs verifies the precedence of application target IP resolution:
-// per-Gslb override annotations > cluster-level EDGE_DNS_EXPOSED_IPS override > discovered IPs.
+// per-Gslb override annotations > cluster-level CLUSTER_EXPOSED_IPS override > discovered IPs.
 func TestResolveGslbExposedIPs(t *testing.T) {
 	overrideIPs := []string{"203.0.113.10", "203.0.113.11"}
 	discoveredIPs := []string{"10.0.0.1"}

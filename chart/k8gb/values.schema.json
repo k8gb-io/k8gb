@@ -422,7 +422,7 @@
                         "minLength": 1
                     }
                 },
-                "edgeDNSExposedIPs": {
+                "clusterExposedIPs": {
                     "type": "array",
                     "uniqueItems": true,
                     "items": {

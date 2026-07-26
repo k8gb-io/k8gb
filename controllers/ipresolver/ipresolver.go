@@ -38,7 +38,7 @@ type Resolved struct {
 	IPs    []string
 	Name   string
 	// overridden is true when IPs come from the operator-provided
-	// EDGE_DNS_EXPOSED_IPS override rather than the discovered service/ingress.
+	// CLUSTER_EXPOSED_IPS override rather than the discovered service/ingress.
 	overridden bool
 }
 
@@ -135,7 +135,7 @@ func (b *Resolved) HasIngress() bool {
 
 func (b *Resolved) String() string {
 	if b.overridden {
-		return fmt.Sprintf("Operator override (EDGE_DNS_EXPOSED_IPS) %s", b.IPs)
+		return fmt.Sprintf("Operator override (CLUSTER_EXPOSED_IPS) %s", b.IPs)
 	}
 	if b.HasIngress() {
 		return fmt.Sprintf("Ingress %s/%s %s", b.ing.Namespace, b.ing.Name, b.IPs)
@@ -149,10 +149,10 @@ func readIPs(ctx context.Context, cl client.Client, config *resolver.Config) (*R
 	// in place of the IPs discovered from the CoreDNS service/ingress, so the zone-delegation
 	// NS glue records published to EdgeDNS reference publicly routable addresses.
 	// See https://github.com/k8gb-io/k8gb/issues/2360
-	if len(config.EdgeDNSExposedIPs) > 0 {
+	if len(config.ClusterExposedIPs) > 0 {
 		return &Resolved{
 			source:     config.CoreDNSServiceType,
-			IPs:        config.EdgeDNSExposedIPs,
+			IPs:        config.ClusterExposedIPs,
 			overridden: true,
 		}, nil
 	}

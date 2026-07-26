@@ -413,10 +413,10 @@ func TestResolveLocalIPs(t *testing.T) {
 	}
 }
 
-// TestEdgeDNSExposedIPsOverride verifies that when EDGE_DNS_EXPOSED_IPS is set, the resolver
+// TestClusterExposedIPsOverride verifies that when CLUSTER_EXPOSED_IPS is set, the resolver
 // returns the operator-provided IPs without querying the CoreDNS service/ingress. This is the
 // bare-metal / static-NAT path from https://github.com/k8gb-io/k8gb/issues/2360
-func TestEdgeDNSExposedIPsOverride(t *testing.T) {
+func TestClusterExposedIPsOverride(t *testing.T) {
 	ctx := context.TODO()
 	overrideIPs := []string{"203.0.113.10", "203.0.113.11"}
 
@@ -428,7 +428,7 @@ func TestEdgeDNSExposedIPsOverride(t *testing.T) {
 	config := &resolver.Config{
 		K8gbNamespace:      "k8gb",
 		CoreDNSServiceType: corev1.ServiceTypeClusterIP,
-		EdgeDNSExposedIPs:  overrideIPs,
+		ClusterExposedIPs:  overrideIPs,
 	}
 
 	bootstrap, err := NewResolver(config, cl, nil).GetExposedIPs(ctx)

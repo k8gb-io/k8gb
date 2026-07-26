@@ -132,7 +132,7 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	gslb.Status.Servers = filteredServers
 
 	loadBalancerExposedIPs, err := refresolver.ResolveGslbExposedIPs(
-		refResolver, legacy.Annotations, r.Config.EdgeDNSExposedIPs, r.Config.ParentZoneDNSServers)
+		refResolver, legacy.Annotations, r.Config.ClusterExposedIPs, r.Config.ParentZoneDNSServers)
 	if err != nil {
 		m.IncrementError(gslb)
 		errorMsg := fmt.Sprintf("getting load balancer exposed IPs (%s)", err)

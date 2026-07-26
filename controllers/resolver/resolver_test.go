@@ -554,46 +554,46 @@ func TestConfigurations(t *testing.T) {
 			},
 		},
 		{
-			name: "valid configuration with edgeDNS exposed IPs override",
+			name: "valid configuration with cluster exposed IPs override",
 			envvars: `CLUSTER_GEO_TAG=us;
 				 DNS_ZONES=example.com:cloud.example.com:300;
 				 EDGE_DNS_SERVERS=local.test;
-				 EDGE_DNS_EXPOSED_IPS=203.0.113.10,203.0.113.11`,
+				 CLUSTER_EXPOSED_IPS=203.0.113.10,203.0.113.11`,
 			assert: func(t *testing.T, cfg *Config) {
-				assert.Equal(t, []string{"203.0.113.10", "203.0.113.11"}, cfg.EdgeDNSExposedIPs)
+				assert.Equal(t, []string{"203.0.113.10", "203.0.113.11"}, cfg.ClusterExposedIPs)
 			},
 		},
 		{
-			name: "empty edgeDNS exposed IPs override is valid",
+			name: "empty cluster exposed IPs override is valid",
 			envvars: `CLUSTER_GEO_TAG=us;
 				 DNS_ZONES=example.com:cloud.example.com:300;
 				 EDGE_DNS_SERVERS=local.test`,
 			assert: func(t *testing.T, cfg *Config) {
-				assert.Empty(t, cfg.EdgeDNSExposedIPs)
+				assert.Empty(t, cfg.ClusterExposedIPs)
 			},
 		},
 		{
-			name: "invalid configuration with non-IP edgeDNS exposed IPs override",
+			name: "invalid configuration with non-IP cluster exposed IPs override",
 			envvars: `CLUSTER_GEO_TAG=us;
 				 DNS_ZONES=example.com:cloud.example.com:300;
 				 EDGE_DNS_SERVERS=local.test;
-				 EDGE_DNS_EXPOSED_IPS=203.0.113.10,not-an-ip`,
+				 CLUSTER_EXPOSED_IPS=203.0.113.10,not-an-ip`,
 			expectedError: true,
 		},
 		{
-			name: "invalid configuration with non-unique edgeDNS exposed IPs override",
+			name: "invalid configuration with non-unique cluster exposed IPs override",
 			envvars: `CLUSTER_GEO_TAG=us;
 				 DNS_ZONES=example.com:cloud.example.com:300;
 				 EDGE_DNS_SERVERS=local.test;
-				 EDGE_DNS_EXPOSED_IPS=203.0.113.10,203.0.113.10`,
+				 CLUSTER_EXPOSED_IPS=203.0.113.10,203.0.113.10`,
 			expectedError: true,
 		},
 		{
-			name: "invalid configuration with IPv6 edgeDNS exposed IPs override",
+			name: "invalid configuration with IPv6 cluster exposed IPs override",
 			envvars: `CLUSTER_GEO_TAG=us;
 				 DNS_ZONES=example.com:cloud.example.com:300;
 				 EDGE_DNS_SERVERS=local.test;
-				 EDGE_DNS_EXPOSED_IPS=2001:db8::1`,
+				 CLUSTER_EXPOSED_IPS=2001:db8::1`,
 			expectedError: true,
 		},
 	}
