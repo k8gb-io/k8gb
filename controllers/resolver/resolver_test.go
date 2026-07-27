@@ -765,8 +765,9 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 0,
-			assert: func(_ []*DelegationZoneInfo, err error) {
-				assert.Error(t, err)
+			assert: func(zd []*DelegationZoneInfo, err error) {
+				assert.Empty(t, zd)
+				assert.NoError(t, err)
 			},
 		},
 	}
