@@ -190,7 +190,10 @@ func TestResolveNSNames(t *testing.T) {
 			qs := mocks.NewMockDNSQueryService(ctrl)
 			test.arrange(qs, cl)
 
-			info := NewResolver(test.config, cl, qs).GetClusterGlueAResults(context.TODO(), test.loadBalancedZone, test.parentZone)
+			var extClusterNsNames ClusterNSNames
+			extClusterNsNames = test.config.GetTagsByNSNames(test.loadBalancedZone, test.parentZone)
+			extClusterNsNames = extClusterNsNames.ExtClusterNsNames(test.config)
+			info := NewResolver(test.config, cl, qs).GetClusterGlueAResults(context.TODO(), extClusterNsNames, test.loadBalancedZone, test.parentZone)
 			err := info.LocalClusterError()
 			assert.NoError(t, err)
 			info = info.FilterResolvedRecords().Sort()
