@@ -58,6 +58,8 @@ func TestResolution(t *testing.T) {
 		// dig NS cloud.example.com
 		AddNSRecord("cloud.example.com.", "gslb-ns-us-cloud.example.com.").
 		AddNSRecord("cloud.example.com.", "gslb-ns-eu-cloud.example.com.").
+		AddNSRecord("cloud-complex.example.com.", "gslb-ns-us-test-1-cloud-complex.example.com.").
+		AddNSRecord("cloud-complex.example.com.", "gslb-ns-eu-test-1-cloud-complex.example.com.").
 		Start().
 		RunTestFunc(func() {
 			testResolution(t, parentDNS1)
@@ -131,7 +133,26 @@ func testResolution(t *testing.T, parentDNS utils.DNSServer) {
 				"gslb-ns-us-cloud.example.com": "us",
 			},
 		},
-
+		{
+			name: "dynamic: resolve all clusters - complex names",
+			zone: &v1beta1io.ZoneDelegation{
+				Spec: v1beta1io.ZoneDelegationSpec{
+					LoadBalancedZone: "cloud-complex.example.com",
+					ParentZone:       "example.com",
+				},
+			},
+			config: &resolver.Config{
+				ClusterGeoTag:         "us-test-1",
+				ExtClustersGeoTagsRaw: nil,
+				EdgeDNSType:           resolver.DNSTypeInfoblox,
+				ParentZoneDNSServers:  []utils.DNSServer{parentDNS},
+			},
+			expectedError: false,
+			result: map[string]string{
+				"gslb-ns-eu-test-1-cloud-complex.example.com": "eu-test-1",
+				"gslb-ns-us-test-1-cloud-complex.example.com": "us-test-1",
+			},
+		},
 		{
 			name: "dynamic: inaccessible DNS",
 			zone: &v1beta1io.ZoneDelegation{

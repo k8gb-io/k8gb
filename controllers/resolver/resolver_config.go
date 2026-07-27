@@ -44,6 +44,8 @@ func (c *Config) HasExtClusterGeoTags() bool {
 	return len(c.ExtClustersGeoTagsRaw) > 0
 }
 
+// GetExtClusterNSNames is DEPRECATED, dont use this anymore. Will be replaced by ClusterNSNames (currently in ipresolver)
+// TODO: Refactor
 func (c *Config) GetExtClusterNSNames(loadBalancedZone, parentZone string) map[string]string {
 	m := map[string]string{}
 	for _, tag := range c.ExtClustersGeoTagsRaw {

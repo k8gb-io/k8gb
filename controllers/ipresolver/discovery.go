@@ -22,6 +22,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/resolver"
+
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
 	"github.com/miekg/dns"
@@ -30,6 +34,17 @@ import (
 // ClusterNSNames map of ns name and tag e.g:
 // ["gslb-ns-eu-cloud.example.com": "eu"]
 type ClusterNSNames map[string]string
+
+func (ns ClusterNSNames) ExtClusterNsNames(config *resolver.Config) ClusterNSNames {
+	m := make(map[string]string)
+	for k, v := range ns {
+		if v == config.ClusterGeoTag {
+			continue
+		}
+		m[k] = v
+	}
+	return m
+}
 
 // DiscoverNameServers query extracted parent DNS server for NS records of the loadBalanced zone.
 // In this example, zone is cloud.example.com and edge is 172.18.0.6:1053:
@@ -53,12 +68,11 @@ type ClusterNSNames map[string]string
 //	gslb-ns-us-cloud.example.com. -> us
 //
 // Function discovers all nameservers including local and external
-func DiscoverNameServers(edge *utils.DNSServer, zone string) (ClusterNSNames, error) {
-	const prefix = "gslb-ns-"
+func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation) (ClusterNSNames, error) {
 	tags := make(map[string]string)
 
 	m := new(dns.Msg)
-	m.SetQuestion(zone+".", dns.TypeNS)
+	m.SetQuestion(zone.Spec.LoadBalancedZone+".", dns.TypeNS)
 	m.RecursionDesired = false // Equivalent to dig +norec
 
 	c := new(dns.Client)
@@ -68,25 +82,22 @@ func DiscoverNameServers(edge *utils.DNSServer, zone string) (ClusterNSNames, er
 	}
 
 	if r == nil {
-		return tags, fmt.Errorf("empty DNS response for %s via %s", zone, edge.String())
+		return tags, fmt.Errorf("empty DNS response for %s via %s", zone.Spec.LoadBalancedZone, edge.String())
 	}
 
 	if r.Rcode != dns.RcodeSuccess {
-		return tags, fmt.Errorf("NS query for %s via %s failed with rcode %s", zone, edge.String(), dns.RcodeToString[r.Rcode])
+		return tags, fmt.Errorf("NS query for %s via %s failed with rcode %s", zone.Spec.LoadBalancedZone, edge.String(), dns.RcodeToString[r.Rcode])
 	}
 
-	for _, ans := range r.Answer {
+	for _, ans := range r.Ns {
 		ns, ok := ans.(*dns.NS)
 		if !ok {
 			continue
 		}
-
-		parts := strings.Split(ns.Ns, prefix)
-		if len(parts) != 2 {
+		tag, err := zone.ExtractGeoTagFromGlueA(ns.Ns)
+		if err != nil {
 			continue
 		}
-
-		tag := strings.Split(parts[1], "-")[0]
 		clusterNSName := strings.TrimSuffix(ns.Ns, ".")
 		tags[clusterNSName] = tag
 	}

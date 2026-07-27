@@ -24,6 +24,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/geotags"
+
 	"github.com/k8gb-io/k8gb/api/v1beta1io"
 
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
@@ -223,7 +225,12 @@ func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd Extend
 		DNSServers: make([]v1beta1io.DNSServer, 0),
 	}
 
-	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, exzd.LoadBalancedZone, exzd.ParentZone)
+	geoTags, err := geotags.Provide(z.config).Resolve(exzd.GetZoneDelegation())
+	if err != nil {
+		return status, fmt.Errorf("providing geotags %v", err)
+	}
+	extClusterNsNames := geoTags.ExtClusterNsNames(z.config)
+	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, extClusterNsNames, exzd.LoadBalancedZone, exzd.ParentZone)
 
 	if err := glueAResults.LocalClusterError(); err != nil {
 		return v1beta1io.ZoneDelegationStatus{}, err
