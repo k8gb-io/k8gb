@@ -90,6 +90,9 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	}
 	var dzi []*DelegationZoneInfo
 	zones = strings.TrimSuffix(strings.TrimSuffix(zones, ";"), " ")
+	if len(zones) == 0 {
+		return []*DelegationZoneInfo{}, nil
+	}
 	di, err := getEnvAsArrayOfPairsOrFallback(zones)
 	if err != nil {
 		return dzi, err
