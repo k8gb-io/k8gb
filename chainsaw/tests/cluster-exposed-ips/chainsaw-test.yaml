@@ -14,6 +14,13 @@ spec:
         verify the cluster override reaches NS glue and application records,
         while the per-GSLB annotation remains authoritative for the application
       cluster: eu
+      bindings:
+        - name: hostname
+          value: cluster-exposed-ips.cloud.example.com
+        - name: localHostname
+          value: localtargets-cluster-exposed-ips.cloud.example.com
+        - name: localNsName
+          value: gslb-ns-eu-cloud.example.com
       try:
         - script:
             timeout: 90s
@@ -106,9 +113,9 @@ spec:
               spec:
                 template:
                   spec:
-                    containers:
+                    (containers[?name == 'k8gb']):
                       - name: k8gb
-                        env:
+                        (env[?name == 'CLUSTER_EXPOSED_IPS']):
                           - name: CLUSTER_EXPOSED_IPS
                             value: ($clusterOverrideIP)
             timeout: 15s
@@ -120,9 +127,8 @@ spec:
               metadata:
                 name: cloud-example-com
               status:
-                (length(dnsServers[?name == 'gslb-ns-eu-cloud.example.com'])): 1
-                dnsServers:
-                  - name: gslb-ns-eu-cloud.example.com
+                (dnsServers[?name == $localNsName]):
+                  - name: ($localNsName)
                     address: ($clusterOverrideIP)
             timeout: 75s
 
@@ -134,8 +140,8 @@ spec:
                 name: k8gb-ns-extdns-cloud-example-com
                 namespace: k8gb
               spec:
-                endpoints:
-                  - dnsName: gslb-ns-eu-cloud.example.com
+                (endpoints[?dnsName == $localNsName]):
+                  - dnsName: ($localNsName)
                     recordType: A
                     (length(targets)): 1
                     targets:
@@ -164,14 +170,14 @@ spec:
                 name: cluster-exposed-ips
                 namespace: ($namespace)
               spec:
-                endpoints:
-                  - dnsName: >-
-                      localtargets-cluster-exposed-ips.cloud.example.com
+                (endpoints[?dnsName == $localHostname]):
+                  - dnsName: ($localHostname)
                     recordType: A
                     (length(targets)): 1
                     targets:
                       - ($clusterOverrideIP)
-                  - dnsName: cluster-exposed-ips.cloud.example.com
+                (endpoints[?dnsName == $hostname]):
+                  - dnsName: ($hostname)
                     recordType: A
                     (length(targets)): 1
                     targets:
@@ -207,14 +213,14 @@ spec:
                 name: cluster-exposed-ips
                 namespace: ($namespace)
               spec:
-                endpoints:
-                  - dnsName: >-
-                      localtargets-cluster-exposed-ips.cloud.example.com
+                (endpoints[?dnsName == $localHostname]):
+                  - dnsName: ($localHostname)
                     recordType: A
                     (length(targets)): 1
                     targets:
                       - 198.51.100.20
-                  - dnsName: cluster-exposed-ips.cloud.example.com
+                (endpoints[?dnsName == $hostname]):
+                  - dnsName: ($hostname)
                     recordType: A
                     (length(targets)): 1
                     targets:
@@ -230,8 +236,8 @@ spec:
                 name: k8gb-ns-extdns-cloud-example-com
                 namespace: k8gb
               spec:
-                endpoints:
-                  - dnsName: gslb-ns-eu-cloud.example.com
+                (endpoints[?dnsName == $localNsName]):
+                  - dnsName: ($localNsName)
                     recordType: A
                     (length(targets)): 1
                     targets:
