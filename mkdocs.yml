@@ -5,6 +5,13 @@ repo_url: https://github.com/k8gb-io/k8gb
 repo_name: k8gb-io/k8gb
 edit_uri: edit/master/docs/
 
+exclude_docs: |
+  /blog/README.md
+
+not_in_nav: |
+  /examples/crossplane/globalapp/README.md
+  /examples/gcp/README.md
+
 nav:
   - Documentation:
     - Home: index.md
@@ -32,6 +39,7 @@ nav:
     - Development & Testing:
       - Local Setup: local.md
       - Local with Kuar: local-kuar.md
+      - AI Inference Resilience Demo: ai-inference-demo.md
       - Rollback Process: rollback_procedures.md
     - Monitoring and Observability:
       - Metrics: metrics.md
