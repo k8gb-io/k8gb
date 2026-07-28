@@ -1,5 +1,32 @@
 # Changelog
 
+## [v0.21.0-rc1](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc1) (2026-07-28)
+
+## Changelog
+* d8e74c2f9dfa8bc3f429f4a96f9f7206caa2027d RELEASE: v0.21.0-rc1
+* 21e97472a937f1930a4cb82e9d66d08c555ada7c FIX: GeoTags Discovery
+* 889a4d3e793d50f74f267715d2525076e40c6d68 fix: (ZoneDelegations) allow empty dnsZones
+* 8b7573b78d51c6e93c7cbc8dd7ced38d861f6d74 fix: default CoreDNS endpoint for empty ZoneDelegation
+* 25c8d0a79d40eabf7e84461366c149606eed77c7 docs: add July 22 community meeting agenda (#2438)
+* 107dd9d77fa902b73b540c54d1288e5fcc4e28d4 docs: update v0.20.0 maturity to Incubating (#2437)
+* c83f2c5f322a298457c0bf9f06df03c328d490ab Zonedelegations documentation setup section
+* 9332aee641a5fe77e19297321eb2734dde51c9d5 docs: update CNCF maturity to Incubating (#2436)
+* a74a5c97d0e48bd6a61ba314bbc681f9ce65bed3 [create-pull-request] automated change (#2433)
+* 2746033de058ff00e5e9b19368b2b8efb0253998 chore(deps): update go module directive to v1.26.5 (#2423)
+* dcda44b9cca681876c977e49fc0f4638bc831486 fix(deps): update all non-major dependencies (#2419)
+* a01102a191f468caae044e9c76a93e1e1b8d4c01 ci: avoid cancelled Chainsaw checks (#2429)
+* 42a957cead91c12222d5dd360fd4542584b7e313 docs: clarify dynamic zone cluster participation (#2404)
+* 7d62973f8005638e928008319f37533bb9b6a876 ZoneDelegation: dynamic geotags refactor
+* bc4ec7cfaf91f757d1d8ae30202a969316ce8e24 fix: stop reconciliation when ZoneDelegation not found
+* ad6c5bd2843e8ea1e624aea8d820f3b9082b50cc fix: make DNSZones optional
+* e574ac63c9b1eae15af87e0319e7372a95c737e8 fix: coredns reads metrics local address instead external IP or LB
+* 81e03bcb68fe94387c2dc9e1415861f611c3d8be Add 2026-07-08 community meeting agenda (#2422)
+* 0630e98e5849f4c83facd20f2092a55c54bb9b39 [create-pull-request] automated change (#2420)
+* 2c4853accf7ece32a906bb18bbd4ec2b4e2bbc81 Update dependency k8gb-io/k8gb to v0.20.0 (#2421)
+
+:rocket:
+
+
 ## [v0.20.0](https://github.com/k8gb-io/k8gb/tree/v0.20.0) (2026-07-03)
 
 ## Release summary
