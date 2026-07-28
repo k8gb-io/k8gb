@@ -1,0 +1,315 @@
+---
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: cluster-exposed-ips
+spec:
+  # This test temporarily changes the shared k8gb Deployment. Run it before the
+  # concurrent tests and restore the original configuration in `finally`.
+  concurrent: false
+  namespace: cluster-exposed-ips
+  steps:
+    - name: cluster override and per-GSLB precedence
+      description: >-
+        verify the cluster override reaches NS glue and application records,
+        while the per-GSLB annotation remains authoritative for the application
+      cluster: eu
+      try:
+        - script:
+            timeout: 90s
+            content: |
+              set -eu
+
+              backup_annotation="chainsaw.k8gb.io/original-cluster-exposed-ips"
+              original_override="$(
+                kubectl get deployment k8gb -n k8gb -o json \
+                  | jq -r '
+                      [
+                        .spec.template.spec.containers[]
+                        | select(.name == "k8gb")
+                        | .env[]?
+                        | select(.name == "CLUSTER_EXPOSED_IPS")
+                        | .value
+                      ][0] // "__ABSENT__"
+                    '
+              )"
+              discovered_ips="$(
+                kubectl get service k8gb-coredns -n k8gb -o json \
+                  | jq -r '.status.loadBalancer.ingress[]?.ip // empty' \
+                  | sort -u
+              )"
+              discovered_count="$(
+                printf '%s\n' "$discovered_ips" \
+                  | sed '/^$/d' \
+                  | wc -l \
+                  | tr -d ' '
+              )"
+              override_ip="$(
+                printf '%s\n' "$discovered_ips" \
+                  | sed '/^$/d' \
+                  | head -n 1
+              )"
+
+              if [ "$discovered_count" -lt 2 ] || [ -z "$override_ip" ]; then
+                echo "Expected at least two discovered CoreDNS IPv4 addresses"
+                kubectl get service k8gb-coredns -n k8gb -o yaml
+                exit 1
+              fi
+
+              kubectl annotate deployment k8gb -n k8gb \
+                "$backup_annotation=$original_override" --overwrite >/dev/null
+              kubectl set env deployment/k8gb -n k8gb \
+                CLUSTER_EXPOSED_IPS="$override_ip" >/dev/null
+              kubectl rollout status deployment/k8gb -n k8gb \
+                --timeout=75s >&2
+
+              printf '"%s"\n' "$override_ip"
+            outputs:
+              - name: clusterOverrideIP
+                value: (json_parse($stdout))
+
+        - apply:
+            file: ../../testdata/namespace.yaml
+        - apply:
+            file: ../../testdata/podinfo.yaml
+        - wait:
+            apiVersion: v1
+            kind: Pod
+            name: frontend-podinfo
+            for:
+              condition:
+                name: Ready
+                value: "true"
+        - apply:
+            file: ./testdata/gslb.yaml
+
+        - assert:
+            resource:
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              metadata:
+                name: cluster-exposed-ips
+                namespace: ($namespace)
+              status:
+                loadBalancer:
+                  ingress:
+                    (length(@) > `1`): true
+            timeout: 75s
+
+        - assert:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: k8gb
+                namespace: k8gb
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: k8gb
+                        env:
+                          - name: CLUSTER_EXPOSED_IPS
+                            value: ($clusterOverrideIP)
+            timeout: 15s
+
+        - assert:
+            resource:
+              apiVersion: k8gb.io/v1beta1
+              kind: ZoneDelegation
+              metadata:
+                name: cloud-example-com
+              status:
+                (length(dnsServers[?name == 'gslb-ns-eu-cloud.example.com'])): 1
+                dnsServers:
+                  - name: gslb-ns-eu-cloud.example.com
+                    address: ($clusterOverrideIP)
+            timeout: 75s
+
+        - assert:
+            resource:
+              apiVersion: externaldns.k8s.io/v1alpha1
+              kind: DNSEndpoint
+              metadata:
+                name: k8gb-ns-extdns-cloud-example-com
+                namespace: k8gb
+              spec:
+                endpoints:
+                  - dnsName: gslb-ns-eu-cloud.example.com
+                    recordType: A
+                    (length(targets)): 1
+                    targets:
+                      - ($clusterOverrideIP)
+            timeout: 75s
+
+        - assert:
+            resource:
+              apiVersion: k8gb.io/v1beta1
+              kind: Gslb
+              metadata:
+                name: cluster-exposed-ips
+                namespace: ($namespace)
+              status:
+                loadBalancer:
+                  (length(exposedIps)): 1
+                  exposedIps:
+                    - ($clusterOverrideIP)
+            timeout: 90s
+
+        - assert:
+            resource:
+              apiVersion: externaldns.k8s.io/v1alpha1
+              kind: DNSEndpoint
+              metadata:
+                name: cluster-exposed-ips
+                namespace: ($namespace)
+              spec:
+                endpoints:
+                  - dnsName: >-
+                      localtargets-cluster-exposed-ips.cloud.example.com
+                    recordType: A
+                    (length(targets)): 1
+                    targets:
+                      - ($clusterOverrideIP)
+                  - dnsName: cluster-exposed-ips.cloud.example.com
+                    recordType: A
+                    (length(targets)): 1
+                    targets:
+                      - ($clusterOverrideIP)
+            timeout: 90s
+
+        - script:
+            content: |
+              kubectl annotate gslb.k8gb.io cluster-exposed-ips \
+                -n "$NAMESPACE" \
+                k8gb.io/exposed-ip-addresses=198.51.100.20 \
+                --overwrite
+
+        - assert:
+            resource:
+              apiVersion: k8gb.io/v1beta1
+              kind: Gslb
+              metadata:
+                name: cluster-exposed-ips
+                namespace: ($namespace)
+              status:
+                loadBalancer:
+                  (length(exposedIps)): 1
+                  exposedIps:
+                    - 198.51.100.20
+            timeout: 90s
+
+        - assert:
+            resource:
+              apiVersion: externaldns.k8s.io/v1alpha1
+              kind: DNSEndpoint
+              metadata:
+                name: cluster-exposed-ips
+                namespace: ($namespace)
+              spec:
+                endpoints:
+                  - dnsName: >-
+                      localtargets-cluster-exposed-ips.cloud.example.com
+                    recordType: A
+                    (length(targets)): 1
+                    targets:
+                      - 198.51.100.20
+                  - dnsName: cluster-exposed-ips.cloud.example.com
+                    recordType: A
+                    (length(targets)): 1
+                    targets:
+                      - 198.51.100.20
+            timeout: 90s
+
+        # The per-GSLB annotation must not change the cluster's NS glue.
+        - assert:
+            resource:
+              apiVersion: externaldns.k8s.io/v1alpha1
+              kind: DNSEndpoint
+              metadata:
+                name: k8gb-ns-extdns-cloud-example-com
+                namespace: k8gb
+              spec:
+                endpoints:
+                  - dnsName: gslb-ns-eu-cloud.example.com
+                    recordType: A
+                    (length(targets)): 1
+                    targets:
+                      - ($clusterOverrideIP)
+            timeout: 15s
+
+      finally:
+        - script:
+            timeout: 150s
+            content: |
+              set -eu
+
+              backup_annotation="chainsaw.k8gb.io/original-cluster-exposed-ips"
+              original_override="$(
+                kubectl get deployment k8gb -n k8gb -o json \
+                  | jq -r --arg annotation "$backup_annotation" \
+                      '.metadata.annotations[$annotation] // "__NO_BACKUP__"'
+              )"
+
+              if [ "$original_override" = "__NO_BACKUP__" ]; then
+                echo "No cluster override backup found; nothing to restore"
+                exit 0
+              fi
+
+              if [ "$original_override" = "__ABSENT__" ]; then
+                kubectl set env deployment/k8gb -n k8gb \
+                  CLUSTER_EXPOSED_IPS- >/dev/null
+                expected_ips="$(
+                  kubectl get service k8gb-coredns -n k8gb -o json \
+                    | jq -r '.status.loadBalancer.ingress[]?.ip // empty' \
+                    | sort -u
+                )"
+              else
+                kubectl set env deployment/k8gb -n k8gb \
+                  CLUSTER_EXPOSED_IPS="$original_override" >/dev/null
+                expected_ips="$(
+                  printf '%s' "$original_override" \
+                    | tr ',' '\n' \
+                    | sort -u
+                )"
+              fi
+
+              kubectl annotate deployment k8gb -n k8gb \
+                "$backup_annotation-" >/dev/null
+              kubectl rollout status deployment/k8gb -n k8gb \
+                --timeout=75s
+
+              for _ in $(seq 1 60); do
+                actual_ips="$(
+                  kubectl get dnsendpoint \
+                    k8gb-ns-extdns-cloud-example-com \
+                    -n k8gb -o json \
+                    | jq -r '
+                        .spec.endpoints[]
+                        | select(
+                            .dnsName == "gslb-ns-eu-cloud.example.com"
+                            and .recordType == "A"
+                          )
+                        | .targets[]?
+                      ' \
+                    | sort -u
+                )"
+
+                if [ -n "$expected_ips" ] \
+                  && [ "$actual_ips" = "$expected_ips" ]; then
+                  echo "Original EU NS-glue targets restored"
+                  exit 0
+                fi
+
+                echo "Waiting for original EU NS-glue targets"
+                sleep 2
+              done
+
+              echo "Original EU NS-glue targets were not restored"
+              echo "Expected targets:"
+              printf '%s\n' "$expected_ips"
+              kubectl get deployment k8gb -n k8gb -o yaml
+              kubectl get dnsendpoint \
+                k8gb-ns-extdns-cloud-example-com \
+                -n k8gb -o yaml
+              exit 1
