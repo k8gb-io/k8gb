@@ -2594,27 +2594,26 @@
 
 <h1 id="ai-inference-resilience-demo">AI Inference Resilience Demo<a class="headerlink" href="#ai-inference-resilience-demo" title="Permanent link">&para;</a></h1>
 <p>This demo shows k8gb as a global resilience layer for AI inference endpoints.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>%%{init: {&quot;flowchart&quot;: {&quot;wrappingWidth&quot;: 1000}} }%%
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>flowchart TD
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    client[&quot;client / OpenAI API&quot;]
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    host[&quot;ai-inference.cloud.example.com&quot;]
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    gslb[&quot;k8gb DNS GSLB&lt;br/&gt;failover strategy&quot;]
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    eu[&quot;k3d-test-gslb1&lt;br/&gt;geo: eu&lt;br/&gt;Ingress / Gateway API / Service&lt;br/&gt;Ollama inference backend&lt;br/&gt;backend label: kubernetes&quot;]
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    us[&quot;k3d-test-gslb2&lt;br/&gt;geo: us&lt;br/&gt;Ingress / Gateway API / Service&lt;br/&gt;Ollama inference backend&lt;br/&gt;backend label: provider-fallback&quot;]
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    client --&gt; host
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    host --&gt; gslb
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    gslb --&gt;|primary healthy| eu
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    gslb --&gt;|primary down| us
-</code></pre></div>
+<pre class="mermaid"><code>%%{init: {"flowchart": {"wrappingWidth": 1000}} }%%
+flowchart TD
+    client["client / OpenAI API"]
+    host["ai-inference.cloud.example.com"]
+    gslb["k8gb DNS GSLB&lt;br/&gt;failover strategy"]
+
+    eu["k3d-test-gslb1&lt;br/&gt;geo: eu&lt;br/&gt;Ingress / Gateway API / Service&lt;br/&gt;Ollama inference backend&lt;br/&gt;backend label: kubernetes"]
+    us["k3d-test-gslb2&lt;br/&gt;geo: us&lt;br/&gt;Ingress / Gateway API / Service&lt;br/&gt;Ollama inference backend&lt;br/&gt;backend label: provider-fallback"]
+
+    client --&gt; host
+    host --&gt; gslb
+    gslb --&gt;|primary healthy| eu
+    gslb --&gt;|primary down| us</code></pre>
 <p>The demo runs real local inference by default. It deploys Ollama in each cluster, pulls a small model, creates a region-specific OpenAI-compatible model, and probes the same global hostname during failover and failback.</p>
 <p>The k8gb topology is backend-agnostic. The same diagram applies if the regional inference backend is Ollama, vLLM, KServe, Triton, Ray Serve, a provider proxy, or any OpenAI-compatible gateway. k8gb owns global health-aware DNS routing; the inference server behind the regional <code>Service</code> is replaceable.</p>
 <p>The local demo uses Kubernetes <code>Ingress</code> because the k3d setup already includes nginx ingress and it keeps the demo one-command. Treat that as local demo plumbing. The production-facing pattern is k8gb <code>Gslb</code> plus <code>spec.resourceRef</code>, which can point at <code>Ingress</code>, Gateway API <code>HTTPRoute</code>, LoadBalancer <code>Service</code>, Istio <code>VirtualService</code>, and other supported route resources.</p>
 <h2 id="positioning-with-ai-gateways">Positioning With AI Gateways<a class="headerlink" href="#positioning-with-ai-gateways" title="Permanent link">&para;</a></h2>
 <p>k8gb does not replace Envoy Gateway, Envoy AI Gateway, Istio, KServe, vLLM, Triton, LiteLLM, or other AI inference gateways. Those systems remain responsible for in-region L7 traffic concerns such as authentication, TLS, retries, rate limits, token accounting, request mutation, model routing, provider adapters, canary routing, and telemetry.</p>
 <p>k8gb adds the global resilience layer above them. It publishes a global DNS name and returns healthy regional endpoints according to the configured strategy. A typical production path is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>client -&gt; k8gb global DNS name -&gt; regional gateway or service -&gt; inference backend
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>client -&gt; k8gb global DNS name -&gt; regional gateway or service -&gt; inference backend
 </code></pre></div>
 <p>Use k8gb with the platform gateway that already owns regional traffic:</p>
 <ul>
@@ -2629,29 +2628,29 @@
 <p>That is the useful AI inference angle: not faster tokens, not smarter model routing, and not another AI gateway. k8gb is the global availability layer that keeps an inference hostname reachable when the local serving stack cannot.</p>
 <h2 id="quick-demo">Quick Demo<a class="headerlink" href="#quick-demo" title="Permanent link">&para;</a></h2>
 <p>Deploy the local k3d setup:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">K8GB_LOCAL_VERSION</span><span class="o">=</span><span class="nb">test</span><span class="w"> </span>make<span class="w"> </span>deploy-full-local-setup
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">K8GB_LOCAL_VERSION</span><span class="o">=</span><span class="nb">test</span><span class="w"> </span>make<span class="w"> </span>deploy-full-local-setup
 </code></pre></div>
 <p>Run the full AI inference failover demo:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>make<span class="w"> </span>ai-inference-demo
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>make<span class="w"> </span>ai-inference-demo
 </code></pre></div>
 <p>The script deploys the endpoint to both clusters, probes the global hostname, scales the primary endpoint down, waits for failover to the secondary endpoint, restores the primary, and waits for failback.</p>
 <p>Expected flow:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>eu -&gt; us -&gt; eu
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>eu -&gt; us -&gt; eu
 </code></pre></div>
 <p>Example output:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>content=eu,kubernetes,k8gb
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>content=us,provider-fallback,k8gb
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>content=eu,kubernetes,k8gb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>content=eu,kubernetes,k8gb
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>content=us,provider-fallback,k8gb
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>content=eu,kubernetes,k8gb
 </code></pre></div>
 <p>The default model is <code>qwen2.5:0.5b</code>, wrapped as <code>k8gb-resilient-demo:latest</code>.</p>
 <h2 id="useful-actions">Useful Actions<a class="headerlink" href="#useful-actions" title="Permanent link">&para;</a></h2>
 <p>The demo uses one Make target. Change behavior with <code>AI_DEMO_ACTION</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>status
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failover
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failback
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>logs
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>delete
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>status
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>probe
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failover
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>failback
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>logs
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>make<span class="w"> </span>ai-inference-demo<span class="w"> </span><span class="nv">AI_DEMO_ACTION</span><span class="o">=</span>delete
 </code></pre></div>
 <p>Notes:</p>
 <ul>
@@ -2671,16 +2670,16 @@
 <li>PersistentVolumeClaim: <code>ai-inference-demo-ollama</code></li>
 </ul>
 <p>The global endpoint is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>http://ai-inference.cloud.example.com/v1/chat/completions
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>http://ai-inference.cloud.example.com/v1/chat/completions
 </code></pre></div>
 <h2 id="real-clusters">Real Clusters<a class="headerlink" href="#real-clusters" title="Permanent link">&para;</a></h2>
 <p>Use explicit contexts and a real DNS zone:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">CONTEXTS</span><span class="o">=</span><span class="s2">&quot;prod-eu:eu:kubernetes prod-us:us:provider-fallback&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">PRIMARY_CONTEXT</span><span class="o">=</span>prod-eu<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nv">PROBE_CONTEXT</span><span class="o">=</span>prod-eu<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nv">PRIMARY_GEO_TAG</span><span class="o">=</span>eu<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nv">GSLB_DOMAIN</span><span class="o">=</span>example.com<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>./hack/ai-inference-demo.sh<span class="w"> </span>run
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">CONTEXTS</span><span class="o">=</span><span class="s2">&quot;prod-eu:eu:kubernetes prod-us:us:provider-fallback&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nv">PRIMARY_CONTEXT</span><span class="o">=</span>prod-eu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nv">PROBE_CONTEXT</span><span class="o">=</span>prod-eu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nv">PRIMARY_GEO_TAG</span><span class="o">=</span>eu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nv">GSLB_DOMAIN</span><span class="o">=</span>example.com<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>./hack/ai-inference-demo.sh<span class="w"> </span>run
 </code></pre></div>
 <p>For production, keep the k8gb <code>Gslb</code> and <code>resourceRef</code> pattern and replace the demo route object with the platform standard. Prefer Gateway API <code>HTTPRoute</code> for new HTTP deployments when the cluster has a Gateway implementation. Keep <code>Ingress</code> only where it is already the supported cluster ingress path.</p>
 <h2 id="message">Message<a class="headerlink" href="#message" title="Permanent link">&para;</a></h2>
