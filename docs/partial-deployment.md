@@ -18,12 +18,19 @@ Application participation is configured per hostname through `Gslb`, while DNS d
 | Cause | Description |
 |-------|-------------|
 | **Incomplete rollout** | `Gslb` resources were deployed to some clusters but not all. |
-| **Namespace mismatch** | The `Gslb` resource exists but in a different namespace than k8gb is watching. |
-| **Hostname typo** | The `spec.ingress.rules[].host` value in the `Gslb` resource does not exactly match the Ingress host. |
+| **Wrong Kubernetes context** | The `Gslb` manifest was applied to a different cluster than intended. |
+| **Hostname drift** | `Gslb` deployments use different application hostnames across clusters, for example because of a typo in one cluster's manifest. |
 
 ## How to Detect
 
 - Verify that the expected `ZoneDelegation` exists in every cluster intended to be authoritative for the load-balanced zone.
-- Run `kubectl get gslb -A` in each delegated cluster and confirm that the application hostname is present.
+- Run `kubectl get gslb -A -o wide` in each delegated cluster and confirm that the application hostname appears in the `HOSTS` column.
 - Query the edge DNS for the configured load-balanced zone, for example: `dig NS cloud.example.com @<edge-dns>`.
-- Query `app.cloud.example.com` and its generated `localtargets-*` record directly against each authoritative cluster DNS server returned by the NS lookup. Different answers identify an incomplete cluster configuration.
+- Query both application records directly against every authoritative cluster DNS server returned by the NS lookup:
+
+  ```sh
+  dig A app.cloud.example.com @<authoritative-server>
+  dig A localtargets-app.cloud.example.com @<authoritative-server>
+  ```
+
+  The `localtargets-*` answers normally contain different IP addresses in each cluster because they represent that cluster's local healthy targets. Do not compare these answers for equality. Instead, use the resource check above to confirm that the `Gslb` exists, then investigate an absent application record or an unexpectedly empty `localtargets-*` answer. An empty `localtargets-*` answer can also mean that the local workload is unhealthy.
