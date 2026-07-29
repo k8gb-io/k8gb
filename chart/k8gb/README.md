@@ -95,6 +95,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
 | istio.enabled | bool | `true` | install istio RBAC |
+| k8gb.clusterExposedIPs |  array  | `[]` | cluster-level override of the publicly routable IPv4 addresses this cluster is exposed on. When set, these IPs are published both as the zone-delegation NS glue records and as the application localtargets-*/final A records, in place of the IPs discovered from the CoreDNS service/ingress. Per-Gslb annotations (k8gb.io/exposed-ip-addresses, k8gb.io/exposed-hostnames) take precedence over this override. Each IP must route DNS traffic to CoreDNS and application traffic to the cluster ingress. Use on bare-metal/colo clusters behind 1:1 static NAT that only see private node IPs. If DNS and applications use different public IPs, configure the application IPs with per-Gslb annotations. Leave empty to keep the default auto-discovery behavior. |
 | k8gb.clusterGeoTag | string | `"eu"` | Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |

@@ -80,3 +80,26 @@ spec:
     app.kubernetes.io/name: coredns
   type: LoadBalancer # <== set service type to LoadBalancer
 ```
+
+## Bare-metal clusters behind static NAT
+
+On bare-metal / colo clusters, the in-cluster LoadBalancer controller (klipper-lb, MetalLB in L2 mode, kube-vip, ...) usually assigns **private node IPs** to the CoreDNS `Service` / `Ingress` status. When the cluster is reachable from the outside only through 1:1 static NAT performed at the network perimeter, the cluster has no awareness of its public IPs. k8gb would then publish the private IPs both as the zone-delegation NS glue records (`gslb-ns-<geoTag>-<loadBalancedZone>`) in EdgeDNS and as the per-Gslb `localtargets-*` / final A records, and external resolvers following the delegation would time out.
+
+For this topology, set the cluster-level override `k8gb.clusterExposedIPs` to the publicly routable IPs that NAT to this cluster. When set, k8gb uses these IPs in place of the discovered `Service` / `Ingress` IPs in **both** parts of the resolution chain:
+
+- ZoneDelegation NS glue records published to EdgeDNS, so external resolvers can reach the cluster's authoritative CoreDNS.
+- Application `localtargets-*` / final A records, so clients can reach the applications selected by Gslb.
+
+This design assumes that every configured public IP routes DNS traffic to CoreDNS and application traffic to the cluster ingress, typically through port-based forwarding on the same 1:1 NAT address. If DNS and application traffic use different public IPs, use `k8gb.clusterExposedIPs` for the DNS/CoreDNS addresses and set the application's addresses with per-Gslb `k8gb.io/exposed-ip-addresses` or `k8gb.io/exposed-hostnames` annotations. Only IPv4 addresses are accepted, because both record types publish A records. Auto-discovery is used whenever the value is left empty (the default).
+
+```yaml
+# k8gb helm chart values.yaml example, on the "eu" cluster:
+
+k8gb:
+  clusterGeoTag: "eu"
+  clusterExposedIPs: # <== public IPs that NAT to CoreDNS and the application ingress
+    - "203.0.113.10"
+    - "203.0.113.11"
+```
+
+This maps to the `CLUSTER_EXPOSED_IPS` environment variable (comma-separated) on the k8gb controller. The override is cluster-wide and applies to every delegated zone served by the cluster. The per-Gslb [`k8gb.io/exposed-ip-addresses`](./exposed-hostnames.md) annotation (and `k8gb.io/exposed-hostnames`) still takes precedence over this cluster-level override for the application records of the annotated Gslb, allowing an application to use public endpoints that differ from the cluster's DNS endpoints.
