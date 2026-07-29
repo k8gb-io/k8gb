@@ -11,13 +11,13 @@
       
       
       
-        <link rel="canonical" href="https://k8gb.io/master/deploy_ns1/">
+        <link rel="canonical" href="https://k8gb.io/master/partial-deployment/">
       
       
-        <link rel="prev" href="../deploy_infoblox/">
+        <link rel="prev" href="../splitbrain/">
       
       
-        <link rel="next" href="../deploy_windowsdns/">
+        <link rel="next" href="../service_upgrade/">
       
       
         
@@ -28,7 +28,7 @@
     
     
       
-        <title>NS1 - K8GB - Kubernetes Global Balancer</title>
+        <title>Partial Deployment Troubleshooting - K8GB - Kubernetes Global Balancer</title>
       
     
     
@@ -81,7 +81,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#aws-based-deployment-with-ns1-integration" class="md-skip">
+        <a href="#partial-deployment-troubleshooting" class="md-skip">
           Skip to content
         </a>
       
@@ -532,8 +532,6 @@
                 
   
   
-    
-  
   
   
     
@@ -567,11 +565,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_6" >
         
           
           <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="">
@@ -592,7 +592,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -719,37 +719,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NS1
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../deploy_ns1/" class="md-nav__link">
         
   
   
@@ -765,48 +738,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#reference-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reference setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deploy-k8gb" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Deploy k8gb
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1686,8 +1617,10 @@
                 
   
   
+    
   
   
+  
     
     
       
@@ -1715,13 +1648,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_11" checked>
         
           
           <label class="md-nav__link" for="__nav_1_11" id="__nav_1_11_label" tabindex="">
@@ -1742,7 +1673,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_11_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_11_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_11">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1785,10 +1716,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../partial-deployment/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Partial Deployment Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1804,6 +1762,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-happens-when-a-gslb-resource-is-missing-from-a-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What happens when a Gslb resource is missing from a cluster
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-causes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Causes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-detect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Detect
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2620,10 +2631,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#reference-setup" class="md-nav__link">
+  <a href="#what-happens-when-a-gslb-resource-is-missing-from-a-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reference setup
+        What happens when a Gslb resource is missing from a cluster
       
     </span>
   </a>
@@ -2631,10 +2642,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#deploy-k8gb" class="md-nav__link">
+  <a href="#common-causes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Deploy k8gb
+        Common Causes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-detect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Detect
       
     </span>
   </a>
@@ -2658,7 +2680,7 @@
 
 
   
-    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/deploy_ns1.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/k8gb-io/k8gb/edit/master/docs/partial-deployment.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2666,28 +2688,51 @@
   
 
 
-<h1 id="aws-based-deployment-with-ns1-integration">AWS based deployment with NS1 integration<a class="headerlink" href="#aws-based-deployment-with-ns1-integration" title="Permanent link">&para;</a></h1>
-<p>Here we provide an example of k8gb deployment in AWS context with NS1 as edgeDNS provider</p>
-<h2 id="reference-setup">Reference setup<a class="headerlink" href="#reference-setup" title="Permanent link">&para;</a></h2>
-<p>Two EKS clusters in <code>eu-west-1</code> and <code>us-east-1</code>.</p>
-<p>The EKS setup is identical to <a href="../deploy_route53/">Route53 tutorial</a></p>
-<p>Terraform code for cluster reference setup can be found <a href="https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53">here</a></p>
-<p>For additional configuration options please check <a href="https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/ns1/">External DNS's documentation</a></p>
-<h2 id="deploy-k8gb">Deploy k8gb<a class="headerlink" href="#deploy-k8gb" title="Permanent link">&para;</a></h2>
-<p>Use <code>helm</code> to deploy stable release from Helm repo</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>k8gb<span class="w"> </span>https://www.k8gb.io
+<h1 id="partial-deployment-troubleshooting">Partial Deployment Troubleshooting<a class="headerlink" href="#partial-deployment-troubleshooting" title="Permanent link">&para;</a></h1>
+<h2 id="what-happens-when-a-gslb-resource-is-missing-from-a-cluster">What happens when a Gslb resource is missing from a cluster<a class="headerlink" href="#what-happens-when-a-gslb-resource-is-missing-from-a-cluster" title="Permanent link">&para;</a></h2>
+<p>When <code>ZoneDelegation</code> is present in cluster <strong>Y</strong> but a <code>Gslb</code> resource for <code>app.cloud.example.com</code> is absent:</p>
+<ol>
+<li>Cluster <strong>Y</strong> remains authoritative for the configured load-balanced zone because <code>ZoneDelegation</code> continues to publish its NS and glue records.</li>
+<li>Cluster <strong>Y</strong> does not publish application or <code>localtargets-*</code> records for <code>app.cloud.example.com</code>.</li>
+<li>The edge DNS continues to delegate queries for the load-balanced zone to cluster <strong>Y</strong> because the NS and glue records published by <code>ZoneDelegation</code> are unaffected. Queries for <code>app.cloud.example.com</code> that reach cluster <strong>Y</strong>'s CoreDNS receive NXDOMAIN or an empty answer because no records for that hostname were ever published.</li>
+<li>Cluster <strong>X</strong> cannot discover healthy application targets from cluster <strong>Y</strong>, so those targets are not included in responses produced by cluster <strong>X</strong>.</li>
+</ol>
+<p>Clients can therefore receive inconsistent DNS responses depending on which authoritative cluster answers the query. A partial <code>Gslb</code> deployment should not be treated as a safe way to exclude a cluster.</p>
+<p>Application participation is configured per hostname through <code>Gslb</code>, while DNS delegation is configured separately per load-balanced zone through <code>ZoneDelegation</code>. Operators should deploy the <code>Gslb</code> resource consistently across every delegated cluster expected to serve the hostname.</p>
+<h2 id="common-causes">Common Causes<a class="headerlink" href="#common-causes" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Cause</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Incomplete rollout</strong></td>
+<td><code>Gslb</code> resources were deployed to some clusters but not all.</td>
+</tr>
+<tr>
+<td><strong>Wrong Kubernetes context</strong></td>
+<td>The <code>Gslb</code> manifest was applied to a different cluster than intended.</td>
+</tr>
+<tr>
+<td><strong>Hostname drift</strong></td>
+<td><code>Gslb</code> deployments use different application hostnames across clusters, for example because of a typo in one cluster's manifest.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-to-detect">How to Detect<a class="headerlink" href="#how-to-detect" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Verify that the expected <code>ZoneDelegation</code> exists in every cluster intended to be authoritative for the load-balanced zone.</li>
+<li>Run <code>kubectl get gslb -A -o wide</code> in each delegated cluster and confirm that the application hostname appears in the <code>HOSTS</code> column.</li>
+<li>Query the edge DNS for the configured load-balanced zone, for example: <code>dig NS cloud.example.com @&lt;edge-dns&gt;</code>.</li>
+<li>Query both application records directly against every authoritative cluster DNS server returned by the NS lookup:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dig<span class="w"> </span>A<span class="w"> </span>app.cloud.example.com<span class="w"> </span>@&lt;authoritative-server&gt;
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>dig<span class="w"> </span>A<span class="w"> </span>localtargets-app.cloud.example.com<span class="w"> </span>@&lt;authoritative-server&gt;
 </code></pre></div>
-<p>Example <code>values.yaml</code> configuration files can be found <a href="https://github.com/k8gb-io/k8gb/tree/master/docs/examples/ns1">here</a></p>
-<p>In <code>eu-west-1</code> cluster execute
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>helm<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>upgrade<span class="w"> </span>-i<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--create-namespace<span class="w"> </span>-f<span class="w"> </span>./docs/examples/ns1/k8gb-cluster-ns1-eu-west-1.yaml
-</code></pre></div></p>
-<p>In <code>us-east-1</code> cluster execute
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>helm<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>upgrade<span class="w"> </span>-i<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--create-namespace<span class="w"> </span>-f<span class="w"> </span>./docs/examples/ns1/k8gb-cluster-ns1-us-east-1.yaml
-</code></pre></div></p>
-<p>Create NS1 secret in each cluster</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NS1_APIKEY</span><span class="o">=</span>&lt;ns1-api-key&gt;
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>make<span class="w"> </span>ns1-secret
-</code></pre></div>
+<p>The <code>localtargets-*</code> answers normally contain different IP addresses in each cluster because they represent that cluster's local healthy targets. Do not compare these answers for equality. Instead, use the resource check above to confirm that the <code>Gslb</code> exists, then investigate an absent application record or an unexpectedly empty <code>localtargets-*</code> answer. An empty <code>localtargets-*</code> answer can also mean that the local workload is unhealthy.</p>
 
 
 
@@ -2710,7 +2755,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 31, 2025 15:48:18 UTC">August 31, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 29, 2026 14:18:48 UTC">July 29, 2026</span>
   </span>
 
     
@@ -2720,7 +2765,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 15, 2020 13:19:38 UTC">December 15, 2020</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 29, 2026 14:18:48 UTC">July 29, 2026</span>
   </span>
 
     
