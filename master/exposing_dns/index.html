@@ -1175,6 +1175,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#bare-metal-clusters-behind-static-nat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bare-metal clusters behind static NAT
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2633,6 +2644,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#bare-metal-clusters-behind-static-nat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bare-metal clusters behind static NAT
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2726,6 +2748,23 @@ We're using this approach in our <a href="../deploy_route53/">AWS+Route53</a> re
 <a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">coredns</span>
 <a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span><span class="w"> </span><span class="c1"># &lt;== set service type to LoadBalancer</span>
 </code></pre></div>
+<h2 id="bare-metal-clusters-behind-static-nat">Bare-metal clusters behind static NAT<a class="headerlink" href="#bare-metal-clusters-behind-static-nat" title="Permanent link">&para;</a></h2>
+<p>On bare-metal / colo clusters, the in-cluster LoadBalancer controller (klipper-lb, MetalLB in L2 mode, kube-vip, ...) usually assigns <strong>private node IPs</strong> to the CoreDNS <code>Service</code> / <code>Ingress</code> status. When the cluster is reachable from the outside only through 1:1 static NAT performed at the network perimeter, the cluster has no awareness of its public IPs. k8gb would then publish the private IPs both as the zone-delegation NS glue records (<code>gslb-ns-&lt;geoTag&gt;-&lt;loadBalancedZone&gt;</code>) in EdgeDNS and as the per-Gslb <code>localtargets-*</code> / final A records, and external resolvers following the delegation would time out.</p>
+<p>For this topology, set the cluster-level override <code>k8gb.clusterExposedIPs</code> to the publicly routable IPs that NAT to this cluster. When set, k8gb uses these IPs in place of the discovered <code>Service</code> / <code>Ingress</code> IPs in <strong>both</strong> parts of the resolution chain:</p>
+<ul>
+<li>ZoneDelegation NS glue records published to EdgeDNS, so external resolvers can reach the cluster's authoritative CoreDNS.</li>
+<li>Application <code>localtargets-*</code> / final A records, so clients can reach the applications selected by Gslb.</li>
+</ul>
+<p>This design assumes that every configured public IP routes DNS traffic to CoreDNS and application traffic to the cluster ingress, typically through port-based forwarding on the same 1:1 NAT address. If DNS and application traffic use different public IPs, use <code>k8gb.clusterExposedIPs</code> for the DNS/CoreDNS addresses and set the application's addresses with per-Gslb <code>k8gb.io/exposed-ip-addresses</code> or <code>k8gb.io/exposed-hostnames</code> annotations. Only IPv4 addresses are accepted, because both record types publish A records. Auto-discovery is used whenever the value is left empty (the default).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># k8gb helm chart values.yaml example, on the &quot;eu&quot; cluster:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nt">k8gb</span><span class="p">:</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">clusterGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eu&quot;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">clusterExposedIPs</span><span class="p">:</span><span class="w"> </span><span class="c1"># &lt;== public IPs that NAT to CoreDNS and the application ingress</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;203.0.113.10&quot;</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;203.0.113.11&quot;</span>
+</code></pre></div>
+<p>This maps to the <code>CLUSTER_EXPOSED_IPS</code> environment variable (comma-separated) on the k8gb controller. The override is cluster-wide and applies to every delegated zone served by the cluster. The per-Gslb <a href="../exposed-hostnames/"><code>k8gb.io/exposed-ip-addresses</code></a> annotation (and <code>k8gb.io/exposed-hostnames</code>) still takes precedence over this cluster-level override for the application records of the annotated Gslb, allowing an application to use public endpoints that differ from the cluster's DNS endpoints.</p>
 
 
 
@@ -2748,7 +2787,7 @@ We're using this approach in our <a href="../deploy_route53/">AWS+Route53</a> re
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 2, 2021 08:06:41 UTC">September 2, 2021</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 29, 2026 07:53:37 UTC">July 29, 2026</span>
   </span>
 
     
