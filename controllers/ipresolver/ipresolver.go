@@ -37,12 +37,15 @@ type Resolved struct {
 	ing    *netv1.Ingress
 	IPs    []string
 	Name   string
+	// overridden is true when IPs come from the operator-provided
+	// CLUSTER_EXPOSED_IPS override rather than the discovered service/ingress.
+	overridden bool
 }
 
 type Resolver interface {
 	GetExposedIPs(ctx context.Context) (*Resolved, error)
 
-	GetClusterGlueAResults(ctx context.Context, loadBalancedZone, parentZone string) ClusterGlueAResults
+	GetClusterGlueAResults(ctx context.Context, extClusterNSNames ClusterNSNames, loadBalancedZone, parentZone string) ClusterGlueAResults
 }
 
 type ResolverImpl struct {
@@ -74,11 +77,14 @@ func (b *ResolverImpl) GetExposedIPs(ctx context.Context) (*Resolved, error) {
 // corresponding IP addresses for both external and local clusters.
 // For external clusters, it resolves NS names via DNS queries and extracts A records.
 // For the local cluster, it uses IPs obtained from exposed services (e.g. LoadBalancer)
-func (b *ResolverImpl) GetClusterGlueAResults(ctx context.Context, loadBalancedZone, parentZone string) ClusterGlueAResults {
+func (b *ResolverImpl) GetClusterGlueAResults(
+	ctx context.Context,
+	extClusterNSNames ClusterNSNames,
+	loadBalancedZone,
+	parentZone string) ClusterGlueAResults {
 	gainfo := make([]*GlueAInfo, 0)
-	extClusterNSNames := b.config.GetExtClusterNSNames(loadBalancedZone, parentZone)
 	clusterNSName := b.config.GetNsName(loadBalancedZone, parentZone)
-	for tag, extClusterNSName := range extClusterNSNames {
+	for extClusterNSName, tag := range extClusterNSNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		dnsResult := b.queryService.Query(extClusterNSName, b.config.ParentZoneDNSServers)
 		if dnsResult.Err != nil {
@@ -131,6 +137,9 @@ func (b *Resolved) HasIngress() bool {
 }
 
 func (b *Resolved) String() string {
+	if b.overridden {
+		return fmt.Sprintf("Operator override (CLUSTER_EXPOSED_IPS) %s", b.IPs)
+	}
 	if b.HasIngress() {
 		return fmt.Sprintf("Ingress %s/%s %s", b.ing.Namespace, b.ing.Name, b.IPs)
 	}
@@ -138,6 +147,18 @@ func (b *Resolved) String() string {
 }
 
 func readIPs(ctx context.Context, cl client.Client, config *resolver.Config) (*Resolved, error) {
+	// Cluster-level override for bare-metal / colo clusters behind 1:1 static NAT.
+	// When the operator provides the publicly routable CoreDNS IPs explicitly, use them
+	// in place of the IPs discovered from the CoreDNS service/ingress, so the zone-delegation
+	// NS glue records published to EdgeDNS reference publicly routable addresses.
+	// See https://github.com/k8gb-io/k8gb/issues/2360
+	if len(config.ClusterExposedIPs) > 0 {
+		return &Resolved{
+			source:     config.CoreDNSServiceType,
+			IPs:        config.ClusterExposedIPs,
+			overridden: true,
+		}, nil
+	}
 	var err error
 	boot := &Resolved{source: config.CoreDNSServiceType}
 	if boot.HasIngress() {

@@ -136,6 +136,10 @@ func (d *ExtendedZoneDelegation) GetNSName(tag string) string {
 	return getNsName(tag, d.LoadBalancedZone, d.ParentZone)
 }
 
+func (d *ExtendedZoneDelegation) GetZoneDelegation() *v1beta1io.ZoneDelegation {
+	return d.wrapper.zoneDelegation.DeepCopy()
+}
+
 func (d *ExtendedZoneDelegation) Name() string {
 	return d.name
 }

@@ -34,10 +34,21 @@ k8gb:
   edgeDNSServers:
     # -- use this DNS server as a main resolver to enable cross k8gb DNS based communication
     - "1.1.1.1"
+  # -- ( array ) cluster-level override of the publicly routable IPv4 addresses this cluster is exposed on.
+  # When set, these IPs are published both as the zone-delegation NS glue records and as the application
+  # localtargets-*/final A records, in place of the IPs discovered from the CoreDNS service/ingress. Per-Gslb
+  # annotations (k8gb.io/exposed-ip-addresses, k8gb.io/exposed-hostnames) take precedence over this override.
+  # Each IP must route DNS traffic to CoreDNS and application traffic to the cluster ingress. Use on
+  # bare-metal/colo clusters behind 1:1 static NAT that only see private node IPs. If DNS and applications
+  # use different public IPs, configure the application IPs with per-Gslb annotations. Leave empty to keep
+  # the default auto-discovery behavior.
+  clusterExposedIPs: []
+  # - "203.0.113.10"
+  # - "203.0.113.11"
   # -- Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags
   clusterGeoTag: "eu"
   # -- Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances
-  # If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used.
+  # Leaving this value empty enables Dynamic Geotags, where geotags are discovered from NS records in the edge DNS. An empty value is supported only with the Infoblox provider
   extGslbClustersGeoTags: "eu,us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30

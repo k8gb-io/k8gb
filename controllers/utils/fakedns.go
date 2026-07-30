@@ -227,6 +227,10 @@ func (m *DNSMock) handleReflect(w dns.ResponseWriter, r *dns.Msg) {
 
 	for _, rr := range m.records[question.Qtype] {
 		if rr.Header().Name == question.Name || m.settings.Dump {
+			if rr.Header().Rrtype == dns.TypeNS {
+				msg.Ns = append(msg.Ns, rr)
+				continue
+			}
 			msg.Answer = append(msg.Answer, rr)
 		}
 	}

@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.20.0](https://img.shields.io/badge/Version-v0.20.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.20.0](https://img.shields.io/badge/AppVersion-v0.20.0-informational?style=flat-square)
+![Version: v0.21.0-rc1](https://img.shields.io/badge/Version-v0.21.0--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.21.0-rc1](https://img.shields.io/badge/AppVersion-v0.21.0--rc1-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -95,13 +95,14 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
 | istio.enabled | bool | `true` | install istio RBAC |
+| k8gb.clusterExposedIPs |  array  | `[]` | cluster-level override of the publicly routable IPv4 addresses this cluster is exposed on. When set, these IPs are published both as the zone-delegation NS glue records and as the application localtargets-*/final A records, in place of the IPs discovered from the CoreDNS service/ingress. Per-Gslb annotations (k8gb.io/exposed-ip-addresses, k8gb.io/exposed-hostnames) take precedence over this override. Each IP must route DNS traffic to CoreDNS and application traffic to the cluster ingress. Use on bare-metal/colo clusters behind 1:1 static NAT that only see private node IPs. If DNS and applications use different public IPs, configure the application IPs with per-Gslb annotations. Leave empty to keep the default auto-discovery behavior. |
 | k8gb.clusterGeoTag | string | `"eu"` | Unique geotag for this K8GB instance. This tag identifies the cluster's location or role (e.g., "eu", "us-east", "dc1" or "primary"). This tag should be present in all clusters’ extGslbClustersGeoTags |
 | k8gb.deployCrds | bool | `true` | whether it should also deploy the gslb and dnsendpoints CRDs |
 | k8gb.deployRbac | bool | `true` | whether it should also deploy the service account, cluster role and cluster role binding |
 | k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"extraPlugins":[],"extraServerBlocks":"","geoDataField":"","geoDataFilePath":"","loadBalancedZone":"cloud.example.com","parentZone":"example.com"}]` | array of dns zones controlled by gslb |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
-| k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances If the value remains empty, dynamic geotags extracted from the NS records on the edge DNS will be used. |
+| k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances Leaving this value empty enables Dynamic Geotags, where geotags are discovered from NS records in the edge DNS. An empty value is supported only with the Infoblox provider |
 | k8gb.imageRepo | string | `"registry.k8gb.io/k8gb-io/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.installLegacyCrds | bool | `true` | whether it should also deploy the legacy k8gb.absa.oss CRD |

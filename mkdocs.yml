@@ -52,6 +52,7 @@ nav:
       - Load Balancer: lbservice-integration.md
     - Advanced:
       - Split-Brain Scenarios: splitbrain.md
+      - Partial Deployment Troubleshooting: partial-deployment.md
       - Service Upgrade: service_upgrade.md
       - Migration Acceptance Tests: migration_acceptance.md
       - WRR Caveats: wrr_caveats.md
@@ -95,7 +96,11 @@ theme:
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.highlight:

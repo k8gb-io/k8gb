@@ -58,17 +58,17 @@ func (m *MockResolver) EXPECT() *MockResolverMockRecorder {
 }
 
 // GetClusterGlueAResults mocks base method.
-func (m *MockResolver) GetClusterGlueAResults(ctx context.Context, loadBalancedZone, parentZone string) ClusterGlueAResults {
+func (m *MockResolver) GetClusterGlueAResults(ctx context.Context, extClusterNSNames ClusterNSNames, loadBalancedZone, parentZone string) ClusterGlueAResults {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClusterGlueAResults", ctx, loadBalancedZone, parentZone)
+	ret := m.ctrl.Call(m, "GetClusterGlueAResults", ctx, extClusterNSNames, loadBalancedZone, parentZone)
 	ret0, _ := ret[0].(ClusterGlueAResults)
 	return ret0
 }
 
 // GetClusterGlueAResults indicates an expected call of GetClusterGlueAResults.
-func (mr *MockResolverMockRecorder) GetClusterGlueAResults(ctx, loadBalancedZone, parentZone any) *gomock.Call {
+func (mr *MockResolverMockRecorder) GetClusterGlueAResults(ctx, extClusterNSNames, loadBalancedZone, parentZone any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterGlueAResults", reflect.TypeOf((*MockResolver)(nil).GetClusterGlueAResults), ctx, loadBalancedZone, parentZone)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterGlueAResults", reflect.TypeOf((*MockResolver)(nil).GetClusterGlueAResults), ctx, extClusterNSNames, loadBalancedZone, parentZone)
 }
 
 // GetExposedIPs mocks base method.
