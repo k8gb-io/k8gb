@@ -31,7 +31,7 @@ import (
 	reflect "reflect"
 
 	v1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
-	ipresolver "github.com/k8gb-io/k8gb/controllers/ipresolver"
+	resolver "github.com/k8gb-io/k8gb/controllers/resolver"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -59,10 +59,10 @@ func (m *MockResolver) EXPECT() *MockResolverMockRecorder {
 }
 
 // Resolve mocks base method.
-func (m *MockResolver) Resolve(zone *v1beta1io.ZoneDelegation) (ipresolver.ClusterNSNames, error) {
+func (m *MockResolver) Resolve(zone *v1beta1io.ZoneDelegation) (resolver.ClusterNSNames, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Resolve", zone)
-	ret0, _ := ret[0].(ipresolver.ClusterNSNames)
+	ret0, _ := ret[0].(resolver.ClusterNSNames)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

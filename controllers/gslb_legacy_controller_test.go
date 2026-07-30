@@ -221,7 +221,7 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 					LoadBalancedZone:  "cloud.example.com",
 					ParentZone:        "example.com",
 					ClusterNSName:     "gslb-ns-eu-cloud.example.com",
-					ExtClusterNSNames: map[string]string{},
+					ExtClusterNSNames: resolver.ClusterNSNames{},
 				},
 			},
 		},

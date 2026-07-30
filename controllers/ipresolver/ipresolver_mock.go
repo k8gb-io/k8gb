@@ -31,6 +31,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	resolver "github.com/k8gb-io/k8gb/controllers/resolver"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -58,7 +59,7 @@ func (m *MockResolver) EXPECT() *MockResolverMockRecorder {
 }
 
 // GetClusterGlueAResults mocks base method.
-func (m *MockResolver) GetClusterGlueAResults(ctx context.Context, extClusterNSNames ClusterNSNames, loadBalancedZone, parentZone string) ClusterGlueAResults {
+func (m *MockResolver) GetClusterGlueAResults(ctx context.Context, extClusterNSNames resolver.ClusterNSNames, loadBalancedZone, parentZone string) ClusterGlueAResults {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetClusterGlueAResults", ctx, extClusterNSNames, loadBalancedZone, parentZone)
 	ret0, _ := ret[0].(ClusterGlueAResults)

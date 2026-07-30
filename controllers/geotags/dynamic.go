@@ -35,7 +35,7 @@ func NewDynamicResolver(config *resolver.Config) *DynamicResolver {
 	return &DynamicResolver{config: config}
 }
 
-func (r *DynamicResolver) Resolve(zone *v1beta1io.ZoneDelegation) (ipresolver.ClusterNSNames, error) {
+func (r *DynamicResolver) Resolve(zone *v1beta1io.ZoneDelegation) (resolver.ClusterNSNames, error) {
 	var err error
 	var parentNameServer *utils.DNSServer
 	var found bool
@@ -54,7 +54,7 @@ func (r *DynamicResolver) Resolve(zone *v1beta1io.ZoneDelegation) (ipresolver.Cl
 	}
 
 	// 2.nd dig
-	extClusterNSNames, err := ipresolver.DiscoverNameServers(parentDNSServer, zone)
+	extClusterNSNames, err := ipresolver.DiscoverNameServers(parentDNSServer, zone, r.config.ClusterGeoTag)
 	if err != nil {
 		return extClusterNSNames, fmt.Errorf("ExternalGeoTags: reading geo tags: %w", err)
 	}

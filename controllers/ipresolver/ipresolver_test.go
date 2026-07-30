@@ -24,16 +24,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
+	"github.com/k8gb-io/k8gb/controllers/mocks"
+	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
+	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 
-	"github.com/k8gb-io/k8gb/controllers/mocks"
 	"github.com/miekg/dns"
-	"go.uber.org/mock/gomock"
-
-	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
-
-	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -187,9 +186,9 @@ func TestResolveNSNames(t *testing.T) {
 			qs := mocks.NewMockDNSQueryService(ctrl)
 			test.arrange(qs, cl)
 
-			var extClusterNsNames ClusterNSNames
-			extClusterNsNames = test.config.GetTagsByNSNames(test.loadBalancedZone, test.parentZone)
-			extClusterNsNames = extClusterNsNames.ExtClusterNsNames(test.config)
+			extClusterNsNames := test.config.GetClusterNsNames(&v1beta1io.ZoneDelegation{
+				Spec: v1beta1io.ZoneDelegationSpec{
+					LoadBalancedZone: test.loadBalancedZone, ParentZone: test.parentZone}}).ExtClusterNsNames()
 			info := NewResolver(test.config, cl, qs).GetClusterGlueAResults(context.TODO(), extClusterNsNames, test.loadBalancedZone, test.parentZone)
 			err := info.LocalClusterError()
 			assert.NoError(t, err)
