@@ -125,8 +125,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 				NegativeTTL:            60,
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				ClusterNSName:          "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
-				ExtClusterNSNames: map[string]string{
-					"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
+				ExtClusterNSNames: resolver.ClusterNSNames{
+					"gslb-ns-us-k8gb-test-gslb.cloud.example.com": resolver.NewGeoTag(false, "us"),
 				},
 			},
 			client:        getFakeClientForExistingEndpoint(ctx, getExistingEndpoint("k8gb-ns-extdns-cloud-example-com", "k8gb")),
@@ -154,8 +154,8 @@ func TestCreateZoneDelegation(t *testing.T) {
 				NegativeTTL:            60,
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				ClusterNSName:          "gslb-ns-eu-k8gb-test-gslb.cloud.example.com",
-				ExtClusterNSNames: map[string]string{
-					"us": "gslb-ns-us-k8gb-test-gslb.cloud.example.com",
+				ExtClusterNSNames: resolver.ClusterNSNames{
+					"gslb-ns-us-k8gb-test-gslb.cloud.example.com": resolver.NewGeoTag(false, "us"),
 				},
 			},
 			client:        getFakeClient(ctx, "k8gb", "k8gb-ns-extdns-cloud-example-com"),

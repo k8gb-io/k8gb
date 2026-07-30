@@ -31,21 +31,6 @@ import (
 	"github.com/miekg/dns"
 )
 
-// ClusterNSNames map of ns name and tag e.g:
-// ["gslb-ns-eu-cloud.example.com": "eu"]
-type ClusterNSNames map[string]string
-
-func (ns ClusterNSNames) ExtClusterNsNames(config *resolver.Config) ClusterNSNames {
-	m := make(map[string]string)
-	for k, v := range ns {
-		if v == config.ClusterGeoTag {
-			continue
-		}
-		m[k] = v
-	}
-	return m
-}
-
 // DiscoverNameServers query extracted parent DNS server for NS records of the loadBalanced zone.
 // In this example, zone is cloud.example.com and edge is 172.18.0.6:1053:
 //
@@ -64,12 +49,12 @@ func (ns ClusterNSNames) ExtClusterNsNames(config *resolver.Config) ClusterNSNam
 //
 // Examples:
 //
-//	gslb-ns-eu-cloud.example.com. -> eu
-//	gslb-ns-us-cloud.example.com. -> us
+//	gslb-ns-eu-cloud.example.com. -> resolver.GeoTag{isLocal: true, tag: "eu"}
+//	gslb-ns-us-cloud.example.com. -> resolver.GeoTag{isLocal: false, tag: "us"}
 //
 // Function discovers all nameservers including local and external
-func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation) (ClusterNSNames, error) {
-	tags := make(map[string]string)
+func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation, clusterGeoTag string) (resolver.ClusterNSNames, error) {
+	tags := make(resolver.ClusterNSNames)
 
 	m := new(dns.Msg)
 	m.SetQuestion(zone.Spec.LoadBalancedZone+".", dns.TypeNS)
@@ -99,7 +84,7 @@ func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation) 
 			continue
 		}
 		clusterNSName := strings.TrimSuffix(ns.Ns, ".")
-		tags[clusterNSName] = tag
+		tags[clusterNSName] = resolver.NewGeoTag(tag == clusterGeoTag, tag)
 	}
 
 	return tags, nil

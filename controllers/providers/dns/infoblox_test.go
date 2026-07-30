@@ -50,8 +50,8 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: map[string]string{
-					"us": "gslb-ns-us-cloud.example.com",
+				ExtClusterNSNames: resolver.ClusterNSNames{
+					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
 				},
 			},
 			config: resolver.Config{
@@ -104,9 +104,9 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: map[string]string{
-					"us": "gslb-ns-us-cloud.example.com",
-					"za": "gslb-ns-za-cloud.example.com",
+				ExtClusterNSNames: resolver.ClusterNSNames{
+					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
+					"gslb-ns-za-cloud.example.com": resolver.NewGeoTag(false, "za"),
 				},
 			},
 			config: resolver.Config{
@@ -147,9 +147,9 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: map[string]string{
-					"us": "gslb-ns-us-cloud.example.com",
-					"za": "gslb-ns-za-cloud.example.com",
+				ExtClusterNSNames: resolver.ClusterNSNames{
+					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
+					"gslb-ns-za-cloud.example.com": resolver.NewGeoTag(false, "za"),
 				},
 			},
 			config: resolver.Config{
@@ -219,9 +219,9 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: map[string]string{
-					"us": "gslb-ns-us-cloud.example.com",
-					"za": "gslb-ns-za-cloud.example.com",
+				ExtClusterNSNames: resolver.ClusterNSNames{
+					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
+					"gslb-ns-za-cloud.example.com": resolver.NewGeoTag(false, "za"),
 				},
 			},
 			config: resolver.Config{
@@ -257,8 +257,8 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: map[string]string{
-					"us": "gslb-ns-us-cloud.example.com",
+				ExtClusterNSNames: resolver.ClusterNSNames{
+					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
 				},
 			},
 			config: resolver.Config{

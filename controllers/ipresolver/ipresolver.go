@@ -45,7 +45,7 @@ type Resolved struct {
 type Resolver interface {
 	GetExposedIPs(ctx context.Context) (*Resolved, error)
 
-	GetClusterGlueAResults(ctx context.Context, extClusterNSNames ClusterNSNames, loadBalancedZone, parentZone string) ClusterGlueAResults
+	GetClusterGlueAResults(ctx context.Context, extClusterNSNames resolver.ClusterNSNames, loadBalancedZone, parentZone string) ClusterGlueAResults
 }
 
 type ResolverImpl struct {
@@ -79,7 +79,7 @@ func (b *ResolverImpl) GetExposedIPs(ctx context.Context) (*Resolved, error) {
 // For the local cluster, it uses IPs obtained from exposed services (e.g. LoadBalancer)
 func (b *ResolverImpl) GetClusterGlueAResults(
 	ctx context.Context,
-	extClusterNSNames ClusterNSNames,
+	extClusterNSNames resolver.ClusterNSNames,
 	loadBalancedZone,
 	parentZone string) ClusterGlueAResults {
 	gainfo := make([]*GlueAInfo, 0)
@@ -89,7 +89,7 @@ func (b *ResolverImpl) GetClusterGlueAResults(
 		dnsResult := b.queryService.Query(extClusterNSName, b.config.ParentZoneDNSServers)
 		if dnsResult.Err != nil {
 			gainfo = append(gainfo, &GlueAInfo{
-				GeoTag:  tag,
+				GeoTag:  tag.Name(),
 				IP:      "",
 				Cluster: extClusterNSName,
 				Err:     dnsResult.Err,
@@ -101,7 +101,7 @@ func (b *ResolverImpl) GetClusterGlueAResults(
 		if len(glueARecords) > 0 {
 			for _, glueARecord := range glueARecords {
 				gainfo = append(gainfo, &GlueAInfo{
-					GeoTag:  tag,
+					GeoTag:  tag.Name(),
 					IP:      glueARecord,
 					Cluster: extClusterNSName,
 					Status:  utils.DNSQueryStatusResolved,

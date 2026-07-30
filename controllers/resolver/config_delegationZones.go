@@ -24,6 +24,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/k8gb-io/k8gb/api/v1beta1io"
 )
 
 type DelegationZones []*DelegationZoneInfo
@@ -33,15 +35,8 @@ type DelegationZoneInfo struct {
 	ParentZone        string // example.com
 	NegativeTTL       int
 	ClusterNSName     string
-	ExtClusterNSNames map[string]string
+	ExtClusterNSNames ClusterNSNames
 	IPs               []string
-}
-
-func getNsName(tag, zone, edge string) string {
-	const prefix = "gslb-ns"
-	d := strings.TrimSuffix(zone, "."+edge)
-	domainX := strings.ReplaceAll(d, ".", "-")
-	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edge)
 }
 
 func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
@@ -56,7 +51,7 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	validateRFC1035 := func(zoneInfo *DelegationZoneInfo) error {
 		const dnsNameMax = 253
 		const dnsLabelMax = 63
-		for _, ns := range zoneInfo.GetNSServerList() {
+		for _, ns := range append(zoneInfo.ExtClusterNSNames.GetNSServerList(), zoneInfo.ClusterNSName) {
 			if len(ns) > dnsNameMax {
 				return fmt.Errorf("%s exceeds %v characters limit", ns, dnsNameMax)
 			}
@@ -103,12 +98,18 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 		if err != nil {
 			return dzi, fmt.Errorf("invalid value of delegation zones: %s", zones)
 		}
+		zd := &v1beta1io.ZoneDelegation{
+			Spec: v1beta1io.ZoneDelegationSpec{
+				LoadBalancedZone: inf.loadBalancedZone,
+				ParentZone:       inf.parentZone,
+			},
+		}
 		zoneInfo := &DelegationZoneInfo{
 			LoadBalancedZone:  inf.loadBalancedZone,
 			ParentZone:        inf.parentZone,
 			NegativeTTL:       negTTL,
 			ClusterNSName:     getNsName(config.ClusterGeoTag, inf.loadBalancedZone, inf.parentZone),
-			ExtClusterNSNames: config.GetExtClusterNSNames(inf.loadBalancedZone, inf.parentZone),
+			ExtClusterNSNames: config.GetClusterNsNames(zd).ExtClusterNsNames(),
 		}
 		dzi = append(dzi, zoneInfo)
 	}
@@ -120,16 +121,6 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	}
 
 	return dzi, nil
-}
-
-// GetNSServerList returns a sorted list of all NS servers for the delegation zone
-func (z *DelegationZoneInfo) GetNSServerList() []string {
-	list := []string{z.ClusterNSName}
-	for _, v := range z.ExtClusterNSNames {
-		list = append(list, v)
-	}
-	sort.Strings(list)
-	return list
 }
 
 // GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
@@ -156,14 +147,6 @@ func (z *DelegationZoneInfo) GetSortedIPs() []string {
 
 func (z *DelegationZoneInfo) GetNSName(tag string) string {
 	return getNsName(tag, z.LoadBalancedZone, z.ParentZone)
-}
-
-func (d *DelegationZones) GetExternalClusterNSNamesByHostname(host string) map[string]string {
-	z := d.getZone(host)
-	if z != nil {
-		return z.ExtClusterNSNames
-	}
-	return map[string]string{}
 }
 
 func (d *DelegationZones) ContainsZone(host string) bool {

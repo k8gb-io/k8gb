@@ -118,7 +118,8 @@ func (z *ZoneDelegationImpl) ListConfigZoneDelegations(ctx context.Context) (*v1
 		zd.Spec.ParentZone = dzi.ParentZone
 		zd.Spec.DNSZoneNegTTL = dzi.NegativeTTL
 		zd.Status.DNSServers = []v1beta1io.DNSServer{}
-		for _, ns := range dzi.GetNSServerList() {
+		nsNames := append(dzi.ExtClusterNSNames.GetNSServerList(), dzi.ClusterNSName)
+		for _, ns := range nsNames {
 			for _, ip := range ips {
 				zd.Status.DNSServers = append(zd.Status.DNSServers, v1beta1io.DNSServer{Name: ns, Address: ip})
 			}
@@ -229,7 +230,7 @@ func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd Extend
 	if err != nil {
 		return status, fmt.Errorf("providing geotags %v", err)
 	}
-	extClusterNsNames := geoTags.ExtClusterNsNames(z.config)
+	extClusterNsNames := geoTags.ExtClusterNsNames()
 	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, extClusterNsNames, exzd.LoadBalancedZone, exzd.ParentZone)
 
 	if err := glueAResults.LocalClusterError(); err != nil {

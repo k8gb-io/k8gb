@@ -394,7 +394,7 @@ func TestListAllZones(t *testing.T) {
 						ParentZone:        "example.org",
 						NegativeTTL:       10,
 						ClusterNSName:     "gslb-ns-us-cloud.example.org",
-						ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-cloud.example.org"},
+						ExtClusterNSNames: resolver.ClusterNSNames{"gslb-ns-eu-cloud.example.org": resolver.NewGeoTag(false, "eu")},
 						IPs:               []string{"172.18.0.1", "172.18.0.2"},
 					},
 					&resolver.DelegationZoneInfo{
@@ -402,7 +402,7 @@ func TestListAllZones(t *testing.T) {
 						ParentZone:        "example.io",
 						NegativeTTL:       10,
 						ClusterNSName:     "gslb-ns-us-cloud.example.io",
-						ExtClusterNSNames: map[string]string{"eu": "gslb-ns-eu-cloud.example.io"},
+						ExtClusterNSNames: resolver.ClusterNSNames{"gslb-ns-eu-cloud.example.io": resolver.NewGeoTag(false, "eu")},
 						IPs:               []string{"172.18.0.1", "172.18.0.2"},
 					},
 				},
