@@ -201,18 +201,18 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 
 func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Targets) {
 	targets = NewTargets()
-	authoritativeServers, err := d.zoneService.ResolveAuthoritativeServersFromZoneDelegations(context.TODO(), host)
+	extClusters, err := d.zoneService.ResolveExternalAuthoritativeServers(context.TODO(), host)
 	if err != nil {
 		d.logger.
 			Err(err).
 			Str("host", host).
 			Msg("Failed to resolve authoritative zones")
 	}
-	extClusters := authoritativeServers.GetExternalAuthoritativeServers()
-	for nsName, authServer := range extClusters {
+	for _, authServer := range extClusters {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		d.logger.Info().
-			Str("cluster", nsName).
+			Str("cluster", authServer.GeoTag.Name()).
+			Str("nsName", authServer.NSName).
 			Msg("Adding external Gslb targets from cluster")
 		nameServersToUse := getNSCombinations(d.config.ParentZoneDNSServers, authServer.IP)
 		lHost, err := getLocalTargetsHost(host)
@@ -235,10 +235,11 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 		}
 		clusterTargets := d.queryService.ExtractARecords(dnsResult.Msg)
 		if len(clusterTargets) > 0 {
-			targets[authServer.GeoTag] = &Target{clusterTargets}
+			targets[authServer.GeoTag.Name()] = &Target{clusterTargets}
 			d.logger.Info().
 				Strs("clusterTargets", clusterTargets).
-				Str("cluster", nsName).
+				Str("cluster", authServer.GeoTag.Name()).
+				Str("nsName", authServer.NSName).
 				Msg("Extend Gslb targets by targets from cluster")
 		}
 	}

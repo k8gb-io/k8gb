@@ -65,9 +65,8 @@ func TestWeight(t *testing.T) {
 		{
 			name: "app eu35-us50-za15 - all clusters",
 			authServers: zones.AuthoritativeServers{
-				"gslb-ns-eu-cloud.example.com": zones.AuthoritativeServer{IP: "10.10.0.1", GeoTag: "eu", IsLocal: true},
-				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: "us", IsLocal: false},
-				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: "za", IsLocal: false},
+				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: resolver.NewGeoTag(false, "us")},
+				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: resolver.NewGeoTag(false, "za")},
 			},
 			zoneDelegationList: &k8gbv1beta1io.ZoneDelegationList{
 				Items: []k8gbv1beta1io.ZoneDelegation{
@@ -159,9 +158,8 @@ func TestWeight(t *testing.T) {
 				},
 			},
 			authServers: zones.AuthoritativeServers{
-				"gslb-ns-eu-cloud.example.com": zones.AuthoritativeServer{IP: "10.10.0.1", GeoTag: "eu", IsLocal: true},
-				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: "us", IsLocal: false},
-				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: "za", IsLocal: false},
+				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: resolver.NewGeoTag(false, "us")},
+				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: resolver.NewGeoTag(false, "za")},
 			},
 			mockData: []wrr{
 				{region: "eu", weight: 35, targets: []string{"10.10.0.1", "10.10.0.2"}},
@@ -223,9 +221,8 @@ func TestWeight(t *testing.T) {
 				{region: "za", weight: 15, targets: []string{"10.22.0.1", "10.22.0.2", "10.22.1.1"}},
 			},
 			authServers: zones.AuthoritativeServers{
-				"gslb-ns-eu-cloud.example.com": zones.AuthoritativeServer{IP: "10.10.0.1", GeoTag: "eu", IsLocal: true},
-				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: "us", IsLocal: false},
-				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: "za", IsLocal: false},
+				"gslb-ns-us-cloud.example.com": zones.AuthoritativeServer{IP: "10.0.0.1", GeoTag: resolver.NewGeoTag(false, "us")},
+				"gslb-ns-za-cloud.example.com": zones.AuthoritativeServer{IP: "10.22.0.1", GeoTag: resolver.NewGeoTag(false, "za")},
 			},
 			expectedLabels: map[string]string{
 				"strategy":      resolver.RoundRobinStrategy,
@@ -356,7 +353,7 @@ func TestWeight(t *testing.T) {
 			ipr.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: test.gslb.Status.LoadBalancer.ExposedIPs}, nil).AnyTimes()
 			zd, _ := zones.NewZoneDelegationWrapper(&test.zoneDelegationList.Items[0], test.config, ipr).GetDetail(context.TODO())
 			zs.EXPECT().ExtendedZoneDelegation(gomock.Any(), gomock.Any()).Return(zd, nil).AnyTimes()
-			zs.EXPECT().ResolveAuthoritativeServersFromZoneDelegations(gomock.Any(), gomock.Any()).Return(test.authServers, nil)
+			zs.EXPECT().ResolveExternalAuthoritativeServers(gomock.Any(), gomock.Any()).Return(test.authServers, nil)
 
 			// act
 			ep := NewApplicationDNSEndpoint(context.TODO(), cl, test.config, test.gslb, &logger, qs, zs, metrics)

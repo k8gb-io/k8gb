@@ -238,10 +238,8 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 			},
 		},
 	}, nil).AnyTimes()
-	zoneService.EXPECT().ResolveAuthoritativeServersFromZoneDelegations(context.TODO(), gomock.Any()).Return(
-		zones.AuthoritativeServers{
-			"gslb-ns-eu-cloud.example.com": zones.AuthoritativeServer{IP: "10.10.0.1", GeoTag: "eu", IsLocal: true},
-		}, nil).AnyTimes()
+	zoneService.EXPECT().ResolveExternalAuthoritativeServers(context.TODO(), gomock.Any()).Return(
+		zones.AuthoritativeServers{}, nil).AnyTimes()
 	return reconciler, cl
 }
 

@@ -494,8 +494,16 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 				},
 			},
 			expectedResult: AuthoritativeServers{
-				"gslb-ns-us-cloud.example.com": AuthoritativeServer{IP: "172.20.0.2", GeoTag: "us", IsLocal: false},
-				"gslb-ns-za-cloud.example.com": AuthoritativeServer{IP: "172.22.0.2", GeoTag: "za", IsLocal: false},
+				"gslb-ns-us-cloud.example.com": AuthoritativeServer{
+					NSName: "gslb-ns-us-cloud.example.com",
+					IP:     "172.20.0.2",
+					GeoTag: resolver.NewGeoTag(false, "us"),
+				},
+				"gslb-ns-za-cloud.example.com": AuthoritativeServer{
+					NSName: "gslb-ns-za-cloud.example.com",
+					IP:     "172.22.0.2",
+					GeoTag: resolver.NewGeoTag(false, "za"),
+				},
 			},
 		},
 		{
@@ -546,7 +554,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 				},
 			},
 			expectedError:  true,
-			expectedResult: AuthoritativeServers{},
+			expectedResult: nil,
 		},
 		{
 			name: "resolve authoritative servers without ZD",
@@ -559,7 +567,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 				Items: []v1beta1io.ZoneDelegation{},
 			},
 			expectedError:  true,
-			expectedResult: AuthoritativeServers{},
+			expectedResult: nil,
 		},
 		{
 			name: "resolve authoritative servers when ZD is not ready",
@@ -612,8 +620,8 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 				*obj.(*v1beta1io.ZoneDelegationList) = *test.existingZoneDelegations
 				return nil
 			}).AnyTimes()
-			result, err := NewZoneDelegationImpl(cl, nil, test.config, bt).ResolveAuthoritativeServersFromZoneDelegations(context.TODO(), test.host)
-			assert.Equal(t, test.expectedResult, result.GetExternalAuthoritativeServers())
+			result, err := NewZoneDelegationImpl(cl, nil, test.config, bt).ResolveExternalAuthoritativeServers(context.TODO(), test.host)
+			assert.Equal(t, test.expectedResult, result)
 			if test.expectedError {
 				assert.Error(t, err)
 				return
