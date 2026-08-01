@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	"github.com/k8gb-io/k8gb/api/v1beta1io"
 
 	"github.com/k8gb-io/k8gb/controllers/ipresolver"
@@ -58,17 +60,9 @@ func NewZoneDelegationWrapper(
 func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ExtendedZoneDelegation, error) {
 
 	validateRFC1035 := func(detail *ExtendedZoneDelegation) error {
-		const dnsNameMax = 253
-		const dnsLabelMax = 63
 		for _, ns := range detail.GetNSServerList() {
-			if len(ns) > dnsNameMax {
-				return fmt.Errorf("%s exceeds %v characters limit", ns, dnsNameMax)
-			}
-			labels := strings.Split(ns, ".")
-			for _, l := range labels {
-				if len(l) > dnsLabelMax {
-					return fmt.Errorf("label %s in %s exceeds %v characters limit", l, ns, dnsLabelMax)
-				}
+			if err := utils.ValidateRFC1035(ns); err != nil {
+				return err
 			}
 		}
 		return nil
