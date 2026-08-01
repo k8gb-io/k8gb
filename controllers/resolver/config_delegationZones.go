@@ -25,6 +25,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/k8gb-io/k8gb/controllers/utils"
+
 	"github.com/k8gb-io/k8gb/api/v1beta1io"
 )
 
@@ -49,17 +51,9 @@ func parseDelegationZones(config *Config) ([]*DelegationZoneInfo, error) {
 	zones := config.DNSZones
 
 	validateRFC1035 := func(zoneInfo *DelegationZoneInfo) error {
-		const dnsNameMax = 253
-		const dnsLabelMax = 63
 		for _, ns := range append(zoneInfo.ExtClusterNSNames.GetNSServerList(), zoneInfo.ClusterNSName) {
-			if len(ns) > dnsNameMax {
-				return fmt.Errorf("%s exceeds %v characters limit", ns, dnsNameMax)
-			}
-			labels := strings.Split(ns, ".")
-			for _, l := range labels {
-				if len(l) > dnsLabelMax {
-					return fmt.Errorf("label %s in %s exceeds %v characters limit", l, ns, dnsLabelMax)
-				}
+			if err := utils.ValidateRFC1035(ns); err != nil {
+				return err
 			}
 		}
 		return nil
