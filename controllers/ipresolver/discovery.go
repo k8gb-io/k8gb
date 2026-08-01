@@ -72,7 +72,7 @@ func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation, 
 
 	// NXDOMAIN is valid case when zone doesn't exist yet.
 	if r.Rcode == dns.RcodeNameError {
-		return map[string]string{}, nil
+		return tags, nil
 	}
 
 	if r.Rcode != dns.RcodeSuccess {
