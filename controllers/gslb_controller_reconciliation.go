@@ -156,7 +156,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 			Str("gslb", gslb.Name).
 			Str("namespace", gslb.Namespace).
 			Strs("server hosts", listHosts(servers)).
-			Msgf("Skipping delegation DNS endpoint update: ZoneDelegation is not present")
+			Msgf("Skipping reconciliation: ZoneDelegation is not present or Status is empty")
 		return result.Requeue()
 	}
 
