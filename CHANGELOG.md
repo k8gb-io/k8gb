@@ -1,5 +1,29 @@
 # Changelog
 
+## [v0.21.0-rc2](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc2) (2026-08-01)
+
+## Changelog
+* ed8470d83852a3213b4f4bc796372a89aebb6e45 RELEASE: v0.21.0-rc2
+* c5ba74131ec2b5ad83a1ee1241b5c410331dd090 [create-pull-request] automated change
+* 4abdac04d0021dd93054a6f6c115b39fb7475d82 fix(docs): correct broken internal markdown links
+* 1e5c9a8f6db91733a9d98d3a47af7873dab99683 chore(deps): update otel/opentelemetry-collector docker tag to v0.157.0
+* f6fa472b0e63cbb6fd2db3ed1b398a08d4c4a073 docs: clean up website navigation warnings
+* 17d7b9b343d02b58cd3297ce105d310291f8cd20 refactor: rfc1035 validation moved to utils
+* 0baaa8f6d7e1ba2c0f55b3e4800568f1ee8326f1 feat: bump dependencies
+* 14f20bcfb2be879485ff29f84dbbbc0fa34d6d04 Fix dynmaic tags discovery for new zones
+* 9398f2e8a777276b7ba6967bb0ce358c3c2e5338 fix: clarify reconciliation message
+* 90c39083bea9b0ef3fd87a58b5ddd3d38286e267 feat: refactor ExtClusterNSNames
+* 5c04f0394502196aeb60645a736aa63090bf8e23 docs: document partial Gslb deployment behavior (#2399)
+* b797408aafef4f5721386cbe5b411be74a0cf926 [create-pull-request] automated change
+* a72c3810dd8be4df90e58c489e33e86d0beedf8a dynamic_geotags.md - explain usage (#2432)
+* 234eef7ee212d19b6dbaf551c5c801bf689a5061 feat: override discovered exposed IPs via CLUSTER_EXPOSED_IPS (#2402)
+* 5e14ccf2e67d9e917f4c6ef0f7ffa1f4bd44be20 fix mermaid chart rendering on ai inference demo (#2443)
+* 438c04cf11f1935dde29b7be1ea5f354115d4b62 [create-pull-request] automated change
+* 30d8c7d4be1c74bf259307520ac423bb955dc3fa [create-pull-request] automated change
+
+:rocket:
+
+
 ## [v0.21.0-rc1](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc1) (2026-07-28)
 
 ## Changelog
