@@ -48,10 +48,14 @@ var (
 	defaultEndpoint = new(externaldnsApi.DNSEndpoint)
 	defaultConfig   = resolver.Config{
 		K8gbNamespace: namespace,
-		DelegationZones: resolver.DelegationZones{
-			{
-				LoadBalancedZone: "cloud.example.com",
-				ParentZone:       "example.com",
+		ZoneDelegations: &k8gbv1beta1io.ZoneDelegationList{
+			Items: []k8gbv1beta1io.ZoneDelegation{
+				{
+					Spec: k8gbv1beta1io.ZoneDelegationSpec{
+						LoadBalancedZone: "cloud.example.com",
+						ParentZone:       "example.com",
+					},
+				},
 			},
 		},
 	}

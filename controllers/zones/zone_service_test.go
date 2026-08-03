@@ -84,7 +84,7 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
-				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
+				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
 					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
 					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
 					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
@@ -148,7 +148,7 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
-				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
+				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
 					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
 					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
 					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
@@ -230,7 +230,7 @@ func TestUpdateStatus(t *testing.T) {
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
-				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
+				ips.EXPECT().GetClusterGlueAResults(gomock.Any(), gomock.Any(), gomock.Any()).Return(ipresolver.ClusterGlueAResults{
 					{IP: "172.18.0.1", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
 					{IP: "172.18.0.2", Cluster: "gslb-ns-eu-cloud.example.com", GeoTag: "eu", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: false},
 					{IP: "172.28.0.1", Cluster: "gslb-ns-us-cloud.example.com", GeoTag: "us", Status: utils.DNSQueryStatusResolved, Err: nil, IsLocal: true},
@@ -409,22 +409,24 @@ func TestListAllZones(t *testing.T) {
 				},
 			},
 			config: &resolver.Config{
-				DelegationZones: resolver.DelegationZones{
-					&resolver.DelegationZoneInfo{
-						LoadBalancedZone:  "cloud.example.org",
-						ParentZone:        "example.org",
-						NegativeTTL:       10,
-						ClusterNSName:     "gslb-ns-us-cloud.example.org",
-						ExtClusterNSNames: resolver.ClusterNSNames{"gslb-ns-eu-cloud.example.org": resolver.NewGeoTag(false, "eu")},
-						IPs:               []string{"172.18.0.1", "172.18.0.2"},
-					},
-					&resolver.DelegationZoneInfo{
-						LoadBalancedZone:  "cloud.example.io",
-						ParentZone:        "example.io",
-						NegativeTTL:       10,
-						ClusterNSName:     "gslb-ns-us-cloud.example.io",
-						ExtClusterNSNames: resolver.ClusterNSNames{"gslb-ns-eu-cloud.example.io": resolver.NewGeoTag(false, "eu")},
-						IPs:               []string{"172.18.0.1", "172.18.0.2"},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"us", "eu"},
+				ZoneDelegations: &v1beta1io.ZoneDelegationList{
+					Items: []v1beta1io.ZoneDelegation{
+						{
+							Spec: v1beta1io.ZoneDelegationSpec{
+								LoadBalancedZone: "cloud.example.org",
+								ParentZone:       "example.org",
+								DNSZoneNegTTL:    10,
+							},
+						},
+						{
+							Spec: v1beta1io.ZoneDelegationSpec{
+								LoadBalancedZone: "cloud.example.io",
+								ParentZone:       "example.io",
+								DNSZoneNegTTL:    10,
+							},
+						},
 					},
 				},
 			},

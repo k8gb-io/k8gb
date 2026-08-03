@@ -66,7 +66,7 @@ func (d *DelegationDNSEndpoint) RemoveEndpoint() error {
 		d.client,
 		client.ObjectKey{
 			Namespace: d.config.K8gbNamespace,
-			Name:      d.extendedZoneDelegation.GetExternalDNSEndpointName()},
+			Name:      d.extendedZoneDelegation.GetZoneDelegation().GetExternalDNSEndpointName()},
 		d.logger)
 }
 
@@ -78,7 +78,7 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 
 	NSRecord := &externaldnsApi.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      d.extendedZoneDelegation.GetExternalDNSEndpointName(),
+			Name:      d.extendedZoneDelegation.GetZoneDelegation().GetExternalDNSEndpointName(),
 			Namespace: d.config.K8gbNamespace,
 			Labels:    map[string]string{dnsTypeAnnotation: externalDNSTypeCommon, legacyDNSTypeAnnotation: externalDNSTypeCommon},
 		},

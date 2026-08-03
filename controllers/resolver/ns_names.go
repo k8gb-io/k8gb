@@ -76,7 +76,11 @@ func ExtractGeoTagFromNSName(z *v1beta1io.ZoneDelegation, glueA string) (string,
 	return strings.ReplaceAll(parts[1], suffix, ""), nil
 }
 
-// GetClusterNsNames returns ALL cluster geotags (ClusterGeoTag + ExternalGeoTags)
+func (c *Config) GetClusterNSName(zone v1beta1io.ZoneDelegation) string {
+	return getNsName(c.ClusterGeoTag, zone.Spec.LoadBalancedZone, zone.Spec.ParentZone)
+}
+
+// GetClusterNsNames returns ALL cluster geotags (ClusterGeoTag + ExternalGeoTags) for ZoneDelegation
 func (c *Config) GetClusterNsNames(zone *v1beta1io.ZoneDelegation) ClusterNSNames {
 	clusterNsNames := make(ClusterNSNames)
 	ns := getNsName(c.ClusterGeoTag, zone.Spec.LoadBalancedZone, zone.Spec.ParentZone)
@@ -100,15 +104,6 @@ func (ns ClusterNSNames) ExtClusterNsNames() ClusterNSNames {
 		}
 	}
 	return m
-}
-
-func (ns ClusterNSNames) ClusterGeoTag() GeoTag {
-	for _, v := range ns {
-		if v.IsClusterGeoTag() {
-			return v
-		}
-	}
-	panic("missing ClusterGeoTag")
 }
 
 // GetNSServerList returns a sorted list of all NS servers for the delegation zone
