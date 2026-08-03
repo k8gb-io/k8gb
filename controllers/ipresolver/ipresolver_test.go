@@ -186,10 +186,14 @@ func TestResolveNSNames(t *testing.T) {
 			qs := mocks.NewMockDNSQueryService(ctrl)
 			test.arrange(qs, cl)
 
-			extClusterNsNames := test.config.GetClusterNsNames(&v1beta1io.ZoneDelegation{
+			zd := &v1beta1io.ZoneDelegation{
 				Spec: v1beta1io.ZoneDelegationSpec{
-					LoadBalancedZone: test.loadBalancedZone, ParentZone: test.parentZone}}).ExtClusterNsNames()
-			info := NewResolver(test.config, cl, qs).GetClusterGlueAResults(context.TODO(), extClusterNsNames, test.loadBalancedZone, test.parentZone)
+					LoadBalancedZone: test.loadBalancedZone,
+					ParentZone:       test.parentZone,
+				},
+			}
+			extClusterNsNames := test.config.GetClusterNsNames(zd).ExtClusterNsNames()
+			info := NewResolver(test.config, cl, qs).GetClusterGlueAResults(context.TODO(), extClusterNsNames, test.config.GetClusterNSName(*zd))
 			err := info.LocalClusterError()
 			assert.NoError(t, err)
 			info = info.FilterResolvedRecords().Sort()

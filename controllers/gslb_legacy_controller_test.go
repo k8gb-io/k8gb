@@ -216,12 +216,14 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 		Config: &resolver.Config{
 			ClusterGeoTag:           "eu",
 			ReconcileRequeueSeconds: 1,
-			DelegationZones: resolver.DelegationZones{
-				&resolver.DelegationZoneInfo{
-					LoadBalancedZone:  "cloud.example.com",
-					ParentZone:        "example.com",
-					ClusterNSName:     "gslb-ns-eu-cloud.example.com",
-					ExtClusterNSNames: resolver.ClusterNSNames{},
+			ZoneDelegations: &k8gbv1beta1io.ZoneDelegationList{
+				Items: []k8gbv1beta1io.ZoneDelegation{
+					{
+						Spec: k8gbv1beta1io.ZoneDelegationSpec{
+							LoadBalancedZone: "cloud.example.com",
+							ParentZone:       "example.com",
+						},
+					},
 				},
 			},
 		},

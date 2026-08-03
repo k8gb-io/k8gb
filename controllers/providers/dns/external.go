@@ -90,7 +90,7 @@ func (p *ExternalDNSProvider) String() string {
 
 func (p *ExternalDNSProvider) deleteZoneDelegated(ctx context.Context, zone *zones.ExtendedZoneDelegation) error {
 	delegationDNSEndpoint := &externaldnsApi.DNSEndpoint{}
-	selector := types.NamespacedName{Name: zone.GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
+	selector := types.NamespacedName{Name: zone.GetZoneDelegation().GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
 	if err := p.client.Get(ctx, selector, delegationDNSEndpoint); err != nil {
 		return client.IgnoreNotFound(err)
 	}
@@ -100,7 +100,7 @@ func (p *ExternalDNSProvider) deleteZoneDelegated(ctx context.Context, zone *zon
 func (p *ExternalDNSProvider) removeGlueAFromDelegatedZone(ctx context.Context, zone *zones.ExtendedZoneDelegation) error {
 
 	delegationDNSEndpoint := &externaldnsApi.DNSEndpoint{}
-	selector := types.NamespacedName{Name: zone.GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
+	selector := types.NamespacedName{Name: zone.GetZoneDelegation().GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
 	if err := p.client.Get(ctx, selector, delegationDNSEndpoint); err != nil {
 		return err
 	}
