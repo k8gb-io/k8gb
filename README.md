@@ -137,7 +137,7 @@ k8gb is tested with the following environment options and integration scenarios.
 
 | Type                             | Implementation                                                               |
 |----------------------------------|------------------------------------------------------------------------------|
-| Kubernetes Version               | >= `1.21`                                                                    |
+| Kubernetes Version               | >= `1.32`                                                                    |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud                        |
 | Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller [*](#clarify)                     |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS                  |
