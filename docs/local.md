@@ -42,9 +42,9 @@ For more user-centric targets in that makefile consult `make help`.
 
  - [install **helm3**](https://helm.sh/docs/intro/install/) to deploy k8gb and related test workloads
 
- - [install **k3d**](https://k3d.io/#installation) to run local [k3s](https://k3s.io/) clusters (minimum v5.3.0 version is required)
+ - [install **k3d**](https://k3d.io/) to run local [k3s](https://k3s.io/) clusters (minimum v5.3.0 version is required)
 
- - [install **golangci-lint**](https://golangci-lint.run/usage/install/#local-installation) for code quality checks
+ - [install **golangci-lint**](https://golangci-lint.run/docs/welcome/install/) for code quality checks
 
 ## Running project locally
 

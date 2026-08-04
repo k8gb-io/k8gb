@@ -802,7 +802,7 @@ define debug
 	kubectl apply -f deploy/gslb/test-namespace-ingress.yaml
 	kubectl apply -f ./chart/k8gb/crd/k8gb.io_gslbs.yaml
 	kubectl apply -f ./chart/k8gb/crd/k8gb.absa.oss_gslbs.yaml
-	kubectl apply -f ./deploy/gslb/k8gb.absa.oss_v1beta1_gslb_cr_roundrobin_ingress.yaml
+	kubectl apply -f ./deploy/gslb/k8gb.io_v1beta1_gslb_cr_roundrobin_ingress.yaml
 	dlv $1
 endef
 
@@ -861,6 +861,12 @@ endef
 # Documentation with Mkdocs
 
 .PHONY: docs-list docs-deploy docs-deploy-master docs-deploy-last-3 docs-sync-blog
+
+docs-linkcheck: ## Check documentation links with lychee (requires lychee: https://lychee.cli.rs)
+	lychee --config lychee.toml --root-dir . --exclude-path 'docs/index.md' --exclude-path 'docs/CONTRIBUTING.md' --exclude-path 'docs/crossplane_globalapp.md' README.md CONTRIBUTING.md ADOPTERS.md GOVERNANCE.md DEPENDENCY.md 'docs/**/*.md' 'adr/**/*.md'
+
+docs-build-strict: ## Build the mkdocs site with --strict (fails on nav/link warnings)
+	python3 -m mkdocs build --strict
 
 docs-list: ## List deployed versions
 	mike list
