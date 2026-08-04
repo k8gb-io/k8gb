@@ -13,26 +13,42 @@ The figure below outlines the high-level scenario, with a client consuming an ap
 
 ## Setup Environment
 
-Checkout the [liqo docs](https://docs.liqo.io/en/v0.5.4/examples/global-ingress.html) to get the environment setup script and to get more details.
+Use Liqo **1.x** with current [liqoctl](https://docs.liqo.io/en/latest/installation/liqoctl.html).
+
+Checkout the Liqo [global-ingress example](https://github.com/liqotech/liqo/tree/master/examples/global-ingress)
+(`examples/global-ingress/setup.sh` in the Liqo repository) for the environment setup script and more details.
 It creates the k3d clusters required for the K8GB playground as described in [Local playground for testing and development](local.md) and installs Liqo over them.
+
+After the script finishes, export kubeconfigs (names match the Liqo example clusters):
+
+```bash
+export KUBECONFIG_DNS=$(k3d kubeconfig write edgedns)
+export KUBECONFIG=$(k3d kubeconfig write gslb-eu)
+export KUBECONFIG_US=$(k3d kubeconfig write gslb-us)
+```
 
 ## Peer the clusters
 
-To proceed, first generate a new *peer command* from the *gslb-us* cluster:
+Liqo 1.x peers clusters with a single `liqoctl peer` invocation (the old `liqoctl generate peer-command` flow was removed).
+See [Peer two Clusters](https://docs.liqo.io/en/latest/usage/peer.html).
+
+From the *gslb-eu* consumer cluster, peer to *gslb-us*. The example environments typically expose the Liqo gateway with a `NodePort` service:
 
 ```bash
-PEER_US=$(liqoctl generate peer-command --only-command --kubeconfig $KUBECONFIG_US)
+liqoctl peer --remote-kubeconfig "$KUBECONFIG_US" --gw-server-service-type NodePort
 ```
 
-And then, run the generated command from the *gslb-eu* cluster:
+When the command returns successfully, check the peering status:
 
 ```bash
-echo "$PEER_US" | bash
+kubectl get foreignclusters
+kubectl get node --selector=liqo.io/type=virtual-node
 ```
 
 ## Deploy an application
 
-First, create a hosting namespace in the *gslb-eu* cluster, and offload it to the remote cluster through Liqo.
+First, create a hosting namespace in the *gslb-eu* cluster, and offload it to the remote cluster through Liqo
+([namespace offloading](https://docs.liqo.io/en/latest/usage/namespace-offloading.html)):
 
 ```bash
 kubectl create namespace podinfo
@@ -78,7 +94,7 @@ To this end, create a pod in one of the clusters (it does not matter which one) 
 HOSTNAME="liqo.cloud.example.com"
 K8GB_COREDNS_IP=$(kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers)
 
-kubectl run -it --rm curl --restart=Never --image=curlimages/curl:7.82.0 --command \
+kubectl run -it --rm curl --restart=Never --image=curlimages/curl:8.21.0 --command \
     --overrides "{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"${K8GB_COREDNS_IP}\"]},\"dnsPolicy\":\"None\"}}" \
-    -- curl $HOSTNAME -v
+    -- curl "$HOSTNAME" -v
 ```
