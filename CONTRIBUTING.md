@@ -310,7 +310,7 @@ It will configure `podinfo` to expose geotag as part of an HTTP response.
 To test and/or demonstrate continuous query to GSLB enabled endpoint execute
 
 ```sh
-make demo DEMO_URL=https://failover.test.exampledns.tk
+make demo DEMO_URL=https://failover.cloud.example.com
 ```
 
 The happy path will look like:
@@ -331,7 +331,7 @@ The sources for demo helper images can be found [here](https://github.com/k8gb-i
 
 To enable verbose debug output declare `DEMO_DEBUG=1` like
 ```sh
-make demo DEMO_URL=https://failover.test.exampledns.tk DEMO_DEBUG=1
+make demo DEMO_URL=https://failover.cloud.example.com DEMO_DEBUG=1
 ```
 
 ## Release process

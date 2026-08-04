@@ -81,7 +81,7 @@ podinfo   <none>   *                 80      10m
 
 ## Add k8gb annotations to Ingress object to enable global load balancing
 
-Observer that there are no Gslb resources in the Target clusters
+Observe that there are no Gslb resources in the Target clusters
 
 ```sh
 kubectl --context kind-eu get gslb
