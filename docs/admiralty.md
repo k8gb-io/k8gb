@@ -70,7 +70,7 @@ podinfo-557c458ddb-9nkmx-p7z9r   1/1     Running   0          15s
 Observe that associated Ingress has also followed the Pods to the Target clusters
 
 ```sh
-kubectl --context kind-eu get ing
+kubectl --context kind-us get ing
 NAME      CLASS    HOSTS   ADDRESS   PORTS   AGE
 podinfo   <none>   *                 80      10m
 
