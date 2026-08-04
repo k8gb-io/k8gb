@@ -15,7 +15,15 @@ The figure below outlines the high-level scenario, with a client consuming an ap
 
 The commands below assume k8gb and Liqo 1.x are installed in both clusters. See [Local playground for testing and development](local.md) for k8gb setup and the [Liqo installation guide](https://docs.liqo.io/en/stable/installation/install.html) for Liqo. Use a `liqoctl` version that matches the installed Liqo version.
 
-Export `KUBECONFIG` with the path of the *gslb-eu* cluster's kubeconfig and `KUBECONFIG_US` with the path of the *gslb-us* cluster's kubeconfig. This also selects *gslb-eu* for the subsequent `kubectl` and Helm commands.
+The Liqo [global-ingress example](https://github.com/liqotech/liqo/tree/master/examples/global-ingress) (`examples/global-ingress/setup.sh`) can create the k3d clusters used by the k8gb playground.
+
+After the script finishes, export kubeconfigs (names match the Liqo example clusters):
+
+```bash
+export KUBECONFIG_DNS=$(k3d kubeconfig write edgedns)
+export KUBECONFIG=$(k3d kubeconfig write gslb-eu)
+export KUBECONFIG_US=$(k3d kubeconfig write gslb-us)
+```
 
 ## Peer the clusters
 
@@ -27,9 +35,17 @@ liqoctl peer --kubeconfig "$KUBECONFIG" --remote-kubeconfig "$KUBECONFIG_US"
 
 `liqoctl` needs the kubeconfigs of both clusters: it applies resources on both sides and connects them. See the [Liqo peering docs](https://docs.liqo.io/en/stable/usage/peer.html) for details.
 
+When the command returns successfully, check the peering status:
+
+```bash
+kubectl get foreignclusters
+kubectl get node --selector=liqo.io/type=virtual-node
+```
+
 ## Deploy an application
 
-First, create a hosting namespace in the *gslb-eu* cluster, and offload it to the remote cluster through Liqo.
+First, create a hosting namespace in the *gslb-eu* cluster, and offload it to the remote cluster through Liqo
+([namespace offloading](https://docs.liqo.io/en/latest/usage/namespace-offloading.html)):
 
 ```bash
 kubectl create namespace podinfo
@@ -77,5 +93,5 @@ K8GB_COREDNS_IP=$(kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spe
 
 kubectl run -it --rm curl --restart=Never --image=curlimages/curl:8.21.0 --command \
     --overrides "{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"${K8GB_COREDNS_IP}\"]},\"dnsPolicy\":\"None\"}}" \
-    -- curl $HOSTNAME -v
+    -- curl "$HOSTNAME" -v
 ```
