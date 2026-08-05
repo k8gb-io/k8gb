@@ -28,7 +28,40 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
 
-<details open><summary><strong>July 22, 2026 #97</strong></summary>
+<details open><summary><strong>August 5, 2026 #98</strong></summary>
+
+## August 5, 2026 #98
+
+**Attendees**
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**]()
+
+[**On YouTube**]()
+
+**News**
+
+- Incubating
+  - K8gb Incubation Announcement Blog today!
+  - +14% new LI followers after the announcement! (+10% first week)
+- KubeCon NA
+  - ContribFest, Lightning Talk, Kiosk x3!
+  - Co-located talks notifcation 17 August 🤞
+
+**Agenda**
+
+**Actions**
+
+- Plan the v1.0 release and update project branding and communications.
+- Move the community meeting to a US-friendly time.
+
+</details>
+
+<details><summary><strong>July 22, 2026 #97</strong></summary>
 
 ## July 22, 2026 #97
 
