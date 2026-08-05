@@ -54,6 +54,10 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 **Agenda**
 
+- State of RC releases, update from @k0da  and @kuritka 
+- https://github.com/k8gb-io/k8gb/pull/2490 overview by @kuritka 
+- Docs PRs overview by @aryasoni98 
+
 **Actions**
 
 - Plan the v1.0 release and update project branding and communications.
