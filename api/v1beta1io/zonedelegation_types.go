@@ -130,3 +130,9 @@ func (z *ZoneDelegation) ExtractGeoTagFromGlueA(glueA string) (string, error) {
 	suffix := z.nsSuffix()
 	return strings.ReplaceAll(parts[1], suffix, ""), nil
 }
+
+// GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
+func (z *ZoneDelegation) GetExternalDNSEndpointName() string {
+	var suffix = strings.Trim(strings.ReplaceAll(z.Spec.LoadBalancedZone, ".", "-"), " ")
+	return fmt.Sprintf("k8gb-ns-extdns-%s", suffix)
+}

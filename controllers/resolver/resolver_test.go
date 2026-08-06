@@ -60,7 +60,7 @@ func TestDepResolver(t *testing.T) {
 				assert.Equal(t, "", cfg.Infoblox.Host)
 				assert.Equal(t, SimpleFormat, cfg.Log.Format)
 				assert.Equal(t, zerolog.InfoLevel, cfg.Log.Level)
-				assert.Equal(t, 0, len(cfg.DelegationZones[0].ExtClusterNSNames))
+				assert.Equal(t, 0, len(cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames()))
 				assert.Equal(t, DNSTypeExternal, cfg.EdgeDNSType)
 				assert.Equal(t, "0.0.0.0:8080", cfg.MetricsAddress)
 
@@ -73,7 +73,7 @@ func TestDepResolver(t *testing.T) {
 				assert.Equal(t, "", cfg.Infoblox.Host)
 				assert.Equal(t, SimpleFormat, cfg.Log.Format)
 				assert.Equal(t, zerolog.InfoLevel, cfg.Log.Level)
-				assert.Equal(t, 0, len(cfg.DelegationZones[0].ExtClusterNSNames))
+				assert.Equal(t, 0, len(cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames()))
 				assert.Equal(t, DNSTypeExternal, cfg.EdgeDNSType)
 				assert.Equal(t, "0.0.0.0:8080", cfg.MetricsAddress)
 
@@ -87,7 +87,7 @@ func TestDepResolver(t *testing.T) {
 				assert.Equal(t, "", cfg.Infoblox.Host)
 				assert.Equal(t, SimpleFormat, cfg.Log.Format)
 				assert.Equal(t, zerolog.InfoLevel, cfg.Log.Level)
-				assert.Equal(t, 0, len(cfg.DelegationZones[0].ExtClusterNSNames))
+				assert.Equal(t, 0, len(cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames()))
 				assert.Equal(t, DNSTypeExternal, cfg.EdgeDNSType)
 				assert.Equal(t, "0.0.0.0:8080", cfg.MetricsAddress)
 
@@ -275,7 +275,7 @@ func TestConfigurations(t *testing.T) {
 				assert.Equal(t, "", cfg.Infoblox.Host)
 				assert.Equal(t, SimpleFormat, cfg.Log.Format)
 				assert.Equal(t, zerolog.InfoLevel, cfg.Log.Level)
-				assert.Equal(t, 0, len(cfg.DelegationZones[0].ExtClusterNSNames))
+				assert.Equal(t, 0, len(cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames()))
 				assert.Equal(t, DNSTypeExternal, cfg.EdgeDNSType)
 				assert.Equal(t, "0.0.0.0:8080", cfg.MetricsAddress)
 				assert.Equal(t, 0, len((&Resolver{}).GetDeprecations()))
@@ -300,7 +300,7 @@ func TestConfigurations(t *testing.T) {
 				assert.Equal(t, "", cfg.Infoblox.Host)
 				assert.Equal(t, SimpleFormat, cfg.Log.Format)
 				assert.Equal(t, zerolog.InfoLevel, cfg.Log.Level)
-				assert.True(t, EqualClusterNSNames(m, cfg.DelegationZones[0].ExtClusterNSNames))
+				assert.True(t, EqualClusterNSNames(m, cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames()))
 				assert.True(t, cfg.HasExtClusterGeoTags())
 			},
 		},
@@ -518,9 +518,9 @@ func TestConfigurations(t *testing.T) {
 				 EDGE_DNS_SERVERS=local.test;
 				 EXTDNS_ENABLED=true`,
 			assert: func(t *testing.T, cfg *Config) {
-				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.DelegationZones[0].ClusterNSName)
+				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.GetClusterNSName(cfg.ZoneDelegations.Items[0]))
 				expectedExtClusterGeoTags := ClusterNSNames{"gslb-ns-eu-cloud.example.com": NewGeoTag(false, "eu")}
-				EqualClusterNSNames(expectedExtClusterGeoTags, cfg.DelegationZones[0].ExtClusterNSNames)
+				EqualClusterNSNames(expectedExtClusterGeoTags, cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames())
 			},
 		},
 		{
@@ -531,9 +531,9 @@ func TestConfigurations(t *testing.T) {
 				 EDGE_DNS_SERVERS=local.test;
 				 EXTDNS_ENABLED=true`,
 			assert: func(t *testing.T, cfg *Config) {
-				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.DelegationZones[0].ClusterNSName)
+				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.GetClusterNSName(cfg.ZoneDelegations.Items[0]))
 				expectedExtClusterGeoTags := ClusterNSNames{"gslb-ns-eu-cloud.example.com": NewGeoTag(false, "eu")}
-				EqualClusterNSNames(expectedExtClusterGeoTags, cfg.DelegationZones[0].ExtClusterNSNames)
+				EqualClusterNSNames(expectedExtClusterGeoTags, cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames())
 			},
 		},
 		{
@@ -553,8 +553,9 @@ func TestConfigurations(t *testing.T) {
 				 EDGE_DNS_SERVERS=local.test;
 				 EXTDNS_ENABLED=true`,
 			assert: func(t *testing.T, cfg *Config) {
-				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.DelegationZones[0].ClusterNSName)
-				assert.Equal(t, 0, len(cfg.DelegationZones[0].ExtClusterNSNames))
+				assert.Equal(t, "gslb-ns-us-cloud.example.com", cfg.GetClusterNSName(cfg.ZoneDelegations.Items[0]))
+				assert.Equal(t, 1, len(cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0])))
+				assert.Equal(t, 0, len(cfg.GetClusterNsNames(&cfg.ZoneDelegations.Items[0]).ExtClusterNsNames()))
 			},
 		},
 		{
@@ -629,8 +630,8 @@ bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb2.
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 	str64 := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"
 
-	contains := func(dzi []*DelegationZoneInfo, compare func(info *DelegationZoneInfo) bool) bool {
-		for _, v := range dzi {
+	contains := func(dzi *v1beta1io.ZoneDelegationList, compare func(info v1beta1io.ZoneDelegation) bool) bool {
+		for _, v := range dzi.Items {
 			if compare(v) {
 				return true
 			}
@@ -641,7 +642,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 		name        string
 		expectedLen int
 		config      *Config
-		assert      func(zoneInfo []*DelegationZoneInfo, err error)
+		assert      func(list *v1beta1io.ZoneDelegationList, config *Config, err error)
 	}{
 		{
 			name: "invalid negTTL",
@@ -652,7 +653,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 0,
-			assert: func(_ []*DelegationZoneInfo, err error) {
+			assert: func(_ *v1beta1io.ZoneDelegationList, _ *Config, err error) {
 				assert.Error(t, err)
 			},
 		},
@@ -665,25 +666,25 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
+			assert: func(list *v1beta1io.ZoneDelegationList, config *Config, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
+				assert.True(t, contains(list, func(zd v1beta1io.ZoneDelegation) bool {
+					return zd.Spec.ParentZone == "example.com" && zd.Spec.LoadBalancedZone == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.io" && info.LoadBalancedZone == "cloud.example.io"
+				assert.True(t, contains(list, func(zd v1beta1io.ZoneDelegation) bool {
+					return zd.Spec.ParentZone == "example.io" && zd.Spec.LoadBalancedZone == "cloud.example.io"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ClusterNSName == "gslb-ns-us-cloud.example.com" &&
-						info.ExtClusterNSNames.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.com" &&
-						info.ExtClusterNSNames.GetNSServerList()[1] == "gslb-ns-za-cloud.example.com" &&
-						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-com"
+				assert.True(t, contains(list, func(zd v1beta1io.ZoneDelegation) bool {
+					return config.GetClusterNSName(zd) == "gslb-ns-us-cloud.example.com" &&
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[0] == "gslb-ns-eu-cloud.example.com" &&
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[1] == "gslb-ns-za-cloud.example.com" &&
+						zd.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ClusterNSName == "gslb-ns-us-cloud.example.io" &&
-						info.ExtClusterNSNames.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.io" &&
-						info.ExtClusterNSNames.GetNSServerList()[1] == "gslb-ns-za-cloud.example.io" &&
-						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-io"
+				assert.True(t, contains(list, func(zd v1beta1io.ZoneDelegation) bool {
+					return config.GetClusterNSName(zd) == "gslb-ns-us-cloud.example.io" &&
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[0] == "gslb-ns-eu-cloud.example.io" &&
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[1] == "gslb-ns-za-cloud.example.io" &&
+						zd.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-io"
 				}))
 			},
 		},
@@ -696,27 +697,27 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
+			assert: func(list *v1beta1io.ZoneDelegationList, config *Config, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.com" && info.Spec.LoadBalancedZone == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.LoadBalancedZone == "pair.example.com"
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.com" && info.Spec.LoadBalancedZone == "pair.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ClusterNSName == "gslb-ns-us-cloud.example.com" &&
-						info.ExtClusterNSNames.GetNSServerList()[0] == "gslb-ns-eu-cloud.example.com" &&
+				assert.True(t, contains(list, func(zd v1beta1io.ZoneDelegation) bool {
+					return config.GetClusterNSName(zd) == "gslb-ns-us-cloud.example.com" &&
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[0] == "gslb-ns-eu-cloud.example.com" &&
 						// info.ExtClusterNSNames.GetNSServerList()[1] == "gslb-ns-us-cloud.example.com" &&
-						info.ExtClusterNSNames.GetNSServerList()[1] == "gslb-ns-za-cloud.example.com" &&
-						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-com"
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[1] == "gslb-ns-za-cloud.example.com" &&
+						zd.GetExternalDNSEndpointName() == "k8gb-ns-extdns-cloud-example-com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ClusterNSName == "gslb-ns-us-pair.example.com" &&
-						info.ExtClusterNSNames.GetNSServerList()[0] == "gslb-ns-eu-pair.example.com" &&
+				assert.True(t, contains(list, func(zd v1beta1io.ZoneDelegation) bool {
+					return config.GetClusterNSName(zd) == "gslb-ns-us-pair.example.com" &&
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[0] == "gslb-ns-eu-pair.example.com" &&
 						// info.ExtClusterNSNames.GetNSServerList()[1] == "gslb-ns-us-pair.example.com" &&
-						info.ExtClusterNSNames.GetNSServerList()[1] == "gslb-ns-za-pair.example.com" &&
-						info.GetExternalDNSEndpointName() == "k8gb-ns-extdns-pair-example-com"
+						config.GetClusterNsNames(&zd).ExtClusterNsNames().GetNSServerList()[1] == "gslb-ns-za-pair.example.com" &&
+						zd.GetExternalDNSEndpointName() == "k8gb-ns-extdns-pair-example-com"
 				}))
 			},
 		},
@@ -729,13 +730,13 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
+			assert: func(list *v1beta1io.ZoneDelegationList, _ *Config, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.com" && info.Spec.LoadBalancedZone == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.io" && info.LoadBalancedZone == "cloud.example.io"
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.io" && info.Spec.LoadBalancedZone == "cloud.example.io"
 				}))
 			},
 		},
@@ -748,13 +749,13 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 2,
-			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
+			assert: func(list *v1beta1io.ZoneDelegationList, _ *Config, err error) {
 				assert.NoError(t, err)
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.com" && info.LoadBalancedZone == "cloud.example.com"
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.com" && info.Spec.LoadBalancedZone == "cloud.example.com"
 				}))
-				assert.True(t, contains(zoneInfo, func(info *DelegationZoneInfo) bool {
-					return info.ParentZone == "example.io" && info.LoadBalancedZone == "cloud.example.io"
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.io" && info.Spec.LoadBalancedZone == "cloud.example.io"
 				}))
 			},
 		},
@@ -767,11 +768,11 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 1,
-			assert: func(zoneInfo []*DelegationZoneInfo, err error) {
+			assert: func(list *v1beta1io.ZoneDelegationList, config *Config, err error) {
 				assert.NoError(t, err)
-				assert.True(t, zoneInfo[0].ClusterNSName == "gslb-ns-us-k8gb-test-gslb.cloud.example.com" &&
-					zoneInfo[0].ExtClusterNSNames["gslb-ns-za-k8gb-test-gslb.cloud.example.com"].Name() == "za" &&
-					zoneInfo[0].ExtClusterNSNames["gslb-ns-eu-k8gb-test-gslb.cloud.example.com"].Name() == "eu")
+				assert.True(t, config.GetClusterNSName(list.Items[0]) == "gslb-ns-us-k8gb-test-gslb.cloud.example.com" &&
+					config.GetClusterNsNames(&list.Items[0]).ExtClusterNsNames()["gslb-ns-za-k8gb-test-gslb.cloud.example.com"].Name() == "za" &&
+					config.GetClusterNsNames(&list.Items[0]).ExtClusterNsNames()["gslb-ns-eu-k8gb-test-gslb.cloud.example.com"].Name() == "eu")
 			},
 		},
 
@@ -783,8 +784,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
-			expectedLen: 1,
-			assert: func(_ []*DelegationZoneInfo, err error) {
+			expectedLen: 0,
+			assert: func(_ *v1beta1io.ZoneDelegationList, _ *Config, err error) {
 				assert.Error(t, err)
 			},
 		},
@@ -796,8 +797,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
-			expectedLen: 1,
-			assert: func(_ []*DelegationZoneInfo, err error) {
+			expectedLen: 0,
+			assert: func(_ *v1beta1io.ZoneDelegationList, _ *Config, err error) {
 				assert.Error(t, err)
 			},
 		},
@@ -810,17 +811,17 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
 			},
 			expectedLen: 0,
-			assert: func(zd []*DelegationZoneInfo, err error) {
-				assert.Empty(t, zd)
+			assert: func(zd *v1beta1io.ZoneDelegationList, _ *Config, err error) {
+				assert.Empty(t, zd.Items)
 				assert.NoError(t, err)
 			},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			zoneInfo, err := parseDelegationZones(test.config)
-			test.assert(zoneInfo, err)
-			assert.Equal(t, test.expectedLen, len(zoneInfo))
+			zoneInfo, err := parseZoneDelegations(test.config)
+			test.assert(zoneInfo, test.config, err)
+			assert.Equal(t, test.expectedLen, len(zoneInfo.Items))
 		})
 	}
 }

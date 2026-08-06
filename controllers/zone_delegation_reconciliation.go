@@ -117,7 +117,7 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	// Create/Update zoneDelegation in edge DNS
 	r.Logger.Info().
-		Str("NS record", exZD.GetExternalDNSEndpointName()).
+		Str("NS record", exZD.GetZoneDelegation().GetExternalDNSEndpointName()).
 		Str("ZoneDelegation", zone.Name).
 		Str("Provider", r.DNSProvider.String()).
 		Msg("Calling DNS provider")
