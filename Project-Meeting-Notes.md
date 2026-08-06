@@ -28,7 +28,48 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
 
-<details open><summary><strong>July 22, 2026 #97</strong></summary>
+<details open><summary><strong>August 5, 2026 #98</strong></summary>
+
+## August 5, 2026 #98
+
+**Attendees**
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**](https://zoom.us/rec/share/aTNL6JsakgfJrr_j4Zwe4fSip2TOD8cWHzhHpiJpmEvOElSk9O6g8nBqVKG0M62c.KJdS48quICoubpnu)
+
+[**On YouTube**](https://youtu.be/4P44lmQ-Jss)
+
+**News**
+
+- Incubating
+  - [CNCF Incubation Announcement Blog](https://www.cncf.io/announcements/2026/08/05/k8gb-becomes-a-cncf-incubating-project/) today!
+  - +35% new LI followers after the announcement! (+10% first week, +16% after CNCF blog)
+- KubeCon NA
+  - ContribFest, Lightning Talk, Kiosk x3!
+    - Lightning Talk accepted! 
+      - [_k8gb Is Growing up: Incubating Global Load Balancing for Kubernetes_](https://www.linkedin.com/posts/bradleyandersen_the-countdown-begins-will-you-be-at-kubecon-share-7491065860883738624-n8X1/) 
+      - Nov 9 • 11:31 am-11:36 am
+      - Hyatt Regency | Level 4 | Regency BD
+  - Co-located talks notifcation 17 August 🤞
+
+**Agenda**
+
+- State of RC releases, update from @k0da  and @kuritka 
+- https://github.com/k8gb-io/k8gb/pull/2490 overview by @kuritka 
+- Docs PRs overview by @aryasoni98 
+
+**Actions**
+
+- Plan the v1.0 release and update project branding and communications.
+- Move the community meeting to a US-friendly time.
+
+</details>
+
+<details><summary><strong>July 22, 2026 #97</strong></summary>
 
 ## July 22, 2026 #97
 
