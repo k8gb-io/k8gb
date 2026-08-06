@@ -31,7 +31,7 @@ When adding a new third-party package to K8gb, maintainers must follow these ste
 
 ## Archive/Deprecation
 
-When a third-party package is discontinued, the K8gb maintainers must fensure to replace the package with a suitable alternative.
+When a third-party package is discontinued, the K8gb maintainers must ensure to replace the package with a suitable alternative.
 
 ## Enforcement
 

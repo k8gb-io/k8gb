@@ -55,7 +55,7 @@ cluster, we assume that you switch kubectl context and apply the same command to
 make deploy-test-apps
 ```
 
-* Modify sample [Gslb CR](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53/k8gb/gslb-failover.yaml) to reflect desired `.spec.ingress.rules[0].host` FQDN
+* If needed, change the desired FQDN in the sample Ingress manifest (`.spec.rules[0].host`); the sample [Gslb CR](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53/k8gb/gslb-failover.yaml) references that Ingress via `resourceRef` and does not need to be modified
 
 * Apply Gslb CR to *each* cluster
 
