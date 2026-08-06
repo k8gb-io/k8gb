@@ -8,10 +8,10 @@ K8GB supports the following ingress resources:
 * [Kubernetes LoadBalancer Service](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)
 * [Istio Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
 * Gateway API Resources(available since **v0.17.0**):
-  - [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/)
-  - [GRPCRoute](https://gateway-api.sigs.k8s.io/api-types/grpcroute/)
-  - [TCPRoute](https://gateway-api.sigs.k8s.io/guides/tcp/)
-  - [UDPRoute](https://gateway-api.sigs.k8s.io/reference/1.4/spec/?h=udproute#udproute)
+  - [HTTPRoute](https://gateway-api.sigs.k8s.io/reference/api-types/httproute/)
+  - [GRPCRoute](https://gateway-api.sigs.k8s.io/reference/api-types/grpcroute/)
+  - [TCPRoute](https://gateway-api.sigs.k8s.io/guides/user-guides/tcp/)
+  - [UDPRoute](https://gateway-api.sigs.k8s.io/reference/api-types/udproute/)
   - [TLSRoute](https://gateway-api.sigs.k8s.io/geps/gep-2643/?h=tls#tlsroute-tls-passthrough)
 
 ## 1. Declaration by Name
