@@ -99,7 +99,7 @@ make deploy-k8gb
 
 ### Install demo app
 
-Deploys the sample Podinfo workload with failover GLSB configured using annotations in the Ingress resource [samples](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/demo/).
+Deploys the sample Podinfo workload with failover GSLB. The demo Ingress samples still use the deprecated `k8gb.io/strategy` annotation ([ADR-0001](../adr/0001-deprecate-configuration-of-gslb-resources-via-annotations.md)); for new installs prefer an explicit `Gslb` + `resourceRef` ([Resource References](resource_ref.md)). Samples: [docs/examples/windowsdns/demo/](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/demo/).
 Ensure that the hosts on the samples are correctly updated before execution
 
 ```sh
