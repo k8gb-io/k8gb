@@ -24,7 +24,7 @@ For more user-centric targets in that makefile consult `make help`.
 
 ## Environment prerequisites
 
-- [Install **Go 1.22.3**](https://golang.org/dl/)
+- [Install **Go**](https://golang.org/dl/) — use the version pinned in the repository's `go.mod` (currently `1.26.5`)
 
 - [Install **Git**](https://git-scm.com/downloads)
 
