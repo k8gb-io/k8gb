@@ -13,10 +13,10 @@ This list is sorted in the order that organizations were added to it.
 
 | Organization | Contact | Description of Use |
 | ------------ | ------- | ------------------ |
-  [Absa](https://www.absa.co.za/) | @kuritka | K8GB was created in Absa and had there first production use in cross-regional datacenter context
-[Millennium bcp](https://www.millenniumbcp.pt/) | @infbase | Multicloud and multi-region cloud native load balancing ([CNCF case study](https://www.cncf.io/case-studies/millennium-bcp/))
-[Eficode](https://eficode.com/) | @punasusi | As a cloud-native and devops consulting firm, we have used k8gb in customer engagements
-[Open Systems](https://www.open-systems.com/) | @abaguas | Multi-cluster load balancing in private WAN
-[PagBank](https://pagbank.com/) | @altieresfreitas | Multicloud global load balancing across multiple regions
-[Darede](https://darede.com.br/) | @diego7marques | As a cloud consulting company, we support customers using k8gb
-[envio.dev](https://envio.dev/) | @Piroddi | Provides cross region availability of Envio's high-performance blockchain data engine  
+| [Absa](https://www.absa.co.za/) | @kuritka | K8GB was created in Absa and had its first production use in cross-regional datacenter context |
+| [Millennium bcp](https://www.millenniumbcp.pt/) | @infbase | Multicloud and multi-region cloud native load balancing ([CNCF case study](https://www.cncf.io/case-studies/millennium-bcp/)) |
+| [Eficode](https://eficode.com/) | @punasusi | As a cloud-native and devops consulting firm, we have used k8gb in customer engagements |
+| [Open Systems](https://www.open-systems.com/) | @abaguas | Multi-cluster load balancing in private WAN |
+| [PagBank](https://pagbank.com/) | @altieresfreitas | Multicloud global load balancing across multiple regions |
+| [Darede](https://darede.com.br/) | @diego7marques | As a cloud consulting company, we support customers using k8gb |
+| [envio.dev](https://envio.dev/) | @Piroddi | Provides cross region availability of Envio's high-performance blockchain data engine |
