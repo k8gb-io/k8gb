@@ -47,7 +47,7 @@ k8gb is trying to find a service annotated with `app.kubernetes.io/name=coredns`
 
 CoreDNS can be also exposed for DNS UDP traffic via external load balancer,
 if underlying infrastructure supports that.<br>
-[AWS EKS](https://aws.amazon.com/eks) with [NLB](https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html) and [k3d](https://www.k3d.io) with [ServiceLB](https://rancher.com/docs/k3s/latest/en/networking/#service-load-balancer) are good examples of such an infrastructure proven to work for k8gb deployments.<br>
+[AWS EKS](https://aws.amazon.com/eks) with [NLB](https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html) and [k3d](https://www.k3d.io) with [ServiceLB](https://docs.k3s.io/networking/basic-network-options) are good examples of such an infrastructure proven to work for k8gb deployments.<br>
 We're using this approach in our [AWS+Route53](deploy_route53.md) reference setup with [k8gb helm chart](https://artifacthub.io/packages/helm/k8gb/k8gb) providing out-of-the-box support for external load balancer scenario. CoreDNS service is configured by setting `coredns.serviceType` helm chart value to `LoadBalancer`:
 ```yaml
 # k8gb helm chart values.yaml example:
