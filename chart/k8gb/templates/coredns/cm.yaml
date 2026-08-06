@@ -36,7 +36,7 @@ data:
             {{- end }}
         }
     }
-{{- with .extraServerBlocks -}}
+{{- with .Values.k8gb.coredns.extraServerBlocks -}}
 {{- tpl . $ | nindent 4 }}
 {{- end }}
     import ../dynamic/*.conf
