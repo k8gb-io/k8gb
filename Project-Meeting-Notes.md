@@ -39,17 +39,21 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
-[**Zoom Recording**]()
+[**Zoom Recording**](https://zoom.us/rec/share/aTNL6JsakgfJrr_j4Zwe4fSip2TOD8cWHzhHpiJpmEvOElSk9O6g8nBqVKG0M62c.KJdS48quICoubpnu)
 
-[**On YouTube**]()
+[**On YouTube**](https://youtu.be/4P44lmQ-Jss)
 
 **News**
 
 - Incubating
-  - K8gb Incubation Announcement Blog today!
-  - +14% new LI followers after the announcement! (+10% first week)
+  - [CNCF Incubation Announcement Blog](https://www.cncf.io/announcements/2026/08/05/k8gb-becomes-a-cncf-incubating-project/) today!
+  - +35% new LI followers after the announcement! (+10% first week, +16% after CNCF blog)
 - KubeCon NA
   - ContribFest, Lightning Talk, Kiosk x3!
+    - Lightning Talk accepted! 
+      - [_k8gb Is Growing up: Incubating Global Load Balancing for Kubernetes_](https://www.linkedin.com/posts/bradleyandersen_the-countdown-begins-will-you-be-at-kubecon-share-7491065860883738624-n8X1/) 
+      - Nov 9 • 11:31 am-11:36 am
+      - Hyatt Regency | Level 4 | Regency BD
   - Co-located talks notifcation 17 August 🤞
 
 **Agenda**
