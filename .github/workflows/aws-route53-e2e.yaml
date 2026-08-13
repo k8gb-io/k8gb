@@ -3,7 +3,7 @@ name: AWS Route53 E2E Integration
 on:
   workflow_dispatch:
   pull_request:
-    types: [labeled]
+    types: [opened, synchronize, reopened, labeled]
     paths-ignore:
       - '**.md'
       - '**.svg'
@@ -28,17 +28,17 @@ jobs:
           fetch-depth: 0
 
       - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@12f4deb0206a85e20d56778b4e7a83d3e69f8863 # v1.0.5
+        uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: 1.8.8
+          tofu_version: 1.9.0
 
       - name: Setup golang
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        uses: actions/setup-go@v6
         with:
           go-version-file: ./go.mod
 
       - name: Setup helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        uses: azure/setup-helm@v5
         with:
           version: v4.2.3
 
@@ -47,10 +47,10 @@ jobs:
           wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=v5.8.3 bash
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        uses: aws-actions/configure-aws-credentials@v4.1.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
 
       - name: Run Route53 Integration Test
