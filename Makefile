@@ -700,6 +700,10 @@ chainsaw:
 	cd chainsaw && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) chainsaw test --config ./config.yaml --values ./values.yaml
 	rm -r chainsaw/kubeconfig
 
+.PHONY: test-route53
+test-route53: ## Run AWS Route53 end-to-end integration test harness
+	./dns-provider-test/route53/test.sh
+
 .PHONY: website
 website:
 	@if [ "$(CI)" = "true" ]; then\
