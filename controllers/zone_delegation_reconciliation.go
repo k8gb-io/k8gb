@@ -84,14 +84,14 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	err = r.ensureFinalizer(ctx, zone)
 	if err != nil {
 		r.Logger.Err(err).
-			Str("name", zone.Name).
+			Str("name", req.Name).
 			Msg("Error ensuring finalizer")
 		return result.RequeueError(err)
 	}
 
 	err = r.ZoneService.UpdateCoreDNSConfiguration(ctx, zone)
 	if err != nil {
-		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
+		r.Logger.Err(err).Str("Name", req.Name).Msg("Error updating zone delegation")
 		return result.RequeueError(err)
 	}
 
@@ -105,13 +105,13 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	zone, err = r.ZoneService.UpdateStatus(ctx, zone)
 	if err != nil {
-		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
+		r.Logger.Err(err).Str("Name", req.Name).Msg("Error updating zone delegation")
 		return result.RequeueError(err)
 	}
 
 	exZD, err := r.ZoneService.ExtendedZoneDelegation(ctx, zone)
 	if err != nil {
-		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error getting extended zone delegation")
+		r.Logger.Err(err).Str("Name", req.Name).Msg("Error getting extended zone delegation")
 		return result.RequeueError(err)
 	}
 

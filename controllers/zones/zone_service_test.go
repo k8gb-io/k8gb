@@ -46,6 +46,27 @@ func TestUpdateStatus(t *testing.T) {
 		arrangemocks   func(bs *ipresolver.MockResolver)
 	}{
 		{
+			name:          "invalid rfc1035",
+			expectedError: true,
+			zoneDelegation: &v1beta1io.ZoneDelegation{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test",
+				},
+				Spec: v1beta1io.ZoneDelegationSpec{
+					LoadBalancedZone: "very-long-domain-name.with-foo-and-balh.cloud.example.com",
+					ParentZone:       "example.com",
+				},
+			},
+			config: &resolver.Config{
+				ClusterGeoTag:         "eu-west-dc-1",
+				ExtClustersGeoTagsRaw: []string{"us-west-dc-1", "za-west-dc-1"},
+			},
+			arrangemocks: func(ips *ipresolver.MockResolver) {
+				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
+			},
+			expectedStatus: nil,
+		},
+		{
 			name:          "create status on new ZoneDelegation",
 			expectedError: false,
 			zoneDelegation: &v1beta1io.ZoneDelegation{
