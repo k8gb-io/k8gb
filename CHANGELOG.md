@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.21.0-rc3](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc3) (2026-08-18)
+
+## Changelog
+* 7938fbc41c14dac75822d147dcae606445b66426 RELEASE: v0.21.0-rc3
+* 0bcae4b6c9d0432bf90726a50e46b4f2f86f4d64 feat: ZONE_DELEGATION_RECONCILE_REQUEUE_SECONDS as dedicated value for ZD reconciliation
+* 1bc58d42714aa093fc42d434a061c9a70df0e87c fix: zone delegation reconciliation panics on invalid rfc1035
+* cd6f19e70b5c9c5c1924cfa7df81645640d598ea add 2026-08-05 community meeting notes (#2493)
+* ae6efa182f0b9f26dd3e251002887149719202a5 docs: document why Dynamic GeoTags cannot work with ExternalDNS (#2464)
+* db35f5ffb392f27bb339607df0cb596b7d7d0b4b [create-pull-request] automated change
+* b75ba7160f400dba42726cfb7bee8002825d1362 [create-pull-request] automated change
+
+:rocket:
+
+
 ## [v0.21.0-rc2](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc2) (2026-08-01)
 
 ## Changelog
