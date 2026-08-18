@@ -78,6 +78,10 @@ spec:
               value: {{ include "k8gb.dnsZonesString" . }}
             - name: RECONCILE_REQUEUE_SECONDS
               value: {{ quote .Values.k8gb.reconcileRequeueSeconds }}
+            - name: ZONE_DELEGATION_RECONCILE_REQUEUE_SECONDS
+              value: {{ quote .Values.k8gb.zoneDelegationReconcileRequeueSeconds }}
+            - name: ZONE_DELEGATION_RECOVERY_SECONDS
+              value: {{ quote .Values.k8gb.zoneDelegationRecoverySeconds }}
             - name: NS_RECORD_TTL
               value: {{ quote .Values.k8gb.nsRecordTTL }}
             {{- if .Values.infoblox.enabled }}

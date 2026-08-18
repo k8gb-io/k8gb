@@ -26,11 +26,17 @@ import (
 
 type ReconcileResultHandler struct {
 	delayedResult ctrl.Result
+	errorResult   ctrl.Result
 }
 
-func NewReconcileResultHandler(reconcileAfter int) *ReconcileResultHandler {
+// NewReconcileResultHandler creates reconciler
+// reconcileAfter defines reconciliation heartbeat.
+// reconcileAfterError defines reconciliation recovery after error.
+// e.g: you can reconcile ZoneDelegation very 5 minutes while, you can reconcile after 30sec when error occurs
+func NewReconcileResultHandler(reconcileAfter, reconcileAfterError int) *ReconcileResultHandler {
 	return &ReconcileResultHandler{
 		delayedResult: ctrl.Result{RequeueAfter: time.Second * time.Duration(reconcileAfter)},
+		errorResult:   ctrl.Result{RequeueAfter: time.Second * time.Duration(reconcileAfterError)},
 	}
 }
 
@@ -43,7 +49,7 @@ func (r *ReconcileResultHandler) Stop() (ctrl.Result, error) {
 // see default controller limiter: https://danielmangum.com/posts/controller-runtime-client-go-rate-limiting/
 func (r *ReconcileResultHandler) RequeueError(err error) (ctrl.Result, error) {
 	// logging error is handled in caller function
-	return r.delayedResult, err
+	return r.errorResult, err
 }
 
 // Requeue requeue loop after config.ReconcileRequeueSeconds
@@ -52,6 +58,10 @@ func (r *ReconcileResultHandler) RequeueError(err error) (ctrl.Result, error) {
 // see: https://github.com/operator-framework/operator-sdk/issues/1164
 func (r *ReconcileResultHandler) Requeue() (ctrl.Result, error) {
 	return r.delayedResult, nil
+}
+
+func (r *ReconcileResultHandler) RequeueAfter(seconds int) (ctrl.Result, error) {
+	return ctrl.Result{RequeueAfter: time.Second * time.Duration(seconds)}, nil
 }
 
 func (r *ReconcileResultHandler) RequeueNow() (ctrl.Result, error) {
