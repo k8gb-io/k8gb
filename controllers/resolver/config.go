@@ -43,6 +43,10 @@ type Config struct {
 
 	ReconcileRequeueSeconds int `env:"RECONCILE_REQUEUE_SECONDS" optional:""  default:"30" validate:"min=0" help:"delay between individual reconciliations. If set to 0, reconciliation is only triggered at startup or when the GSLB, Ingress, or DNSEndpoint changes."`
 
+	ZoneDelegationReconcileRequeueSeconds int `env:"ZONE_DELEGATION_RECONCILE_REQUEUE_SECONDS" optional:""  default:"300" validate:"min=0" help:"delay between individual reconciliations. If set to 0, reconciliation is only triggered at startup or when the ZoneDelegation changes."`
+
+	ZoneDelegationRecoverySeconds int `env:"ZONE_DELEGATION_RECOVERY_SECONDS" optional:""  default:"3600" validate:"min=0" help:"delay between individual reconciliations when ZoneDelegation fails. If set to 0, reconciliation is only triggered at startup or when the ZoneDelegation changes."`
+
 	NSRecordTTL int `env:"NS_RECORD_TTL" optional:"" default:"30" validate:"min=1" help:"TTL of the NS and respective glue record used by external DNS."`
 
 	K8gbNamespace string `env:"POD_NAMESPACE" optional:"" default:"k8gb" help:"namespace where k8gb pod is running"`

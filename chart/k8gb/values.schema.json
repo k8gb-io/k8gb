@@ -443,6 +443,14 @@
                     "type": "integer",
                     "minimum": 0
                 },
+                "zoneDelegationReconcileRequeueSeconds": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "zoneDelegationRecoverySeconds": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "nsRecordTTL": {
                     "type": "integer",
                     "minimum": 0

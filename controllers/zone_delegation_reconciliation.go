@@ -56,15 +56,15 @@ const zoneDelegationFinalizer = "k8gb.io/finalizer"
 
 func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var err error
-	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	result := utils.NewReconcileResultHandler(r.Config.ZoneDelegationReconcileRequeueSeconds, r.Config.ZoneDelegationRecoverySeconds)
 	r.Logger.Info().
 		Str("name", req.Name).
 		Msg("Reconciling ZoneDelegation")
 	if !r.ZoneService.HasAvailableIPs(ctx) {
 		r.Logger.Info().
 			Str("name", req.Name).
-			Msg("Waiting for available IPs. Skipping ZoneDelegation reconciliation")
-		return result.Requeue()
+			Msgf("Waiting %v for available IPs. Skipping ZoneDelegation reconciliation", 10)
+		return result.RequeueAfter(10)
 	}
 
 	zone, err := r.ZoneService.Get(ctx, req.NamespacedName)

@@ -53,6 +53,10 @@ k8gb:
   extGslbClustersGeoTags: "eu,us"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
+  # -- ZoneDelegation reconcile time in seconds
+  zoneDelegationReconcileRequeueSeconds: 300
+  # -- ZoneDelegation reconcile recovery time in seconds
+  zoneDelegationRecoverySeconds: 60
   # -- TTL of the NS and respective glue record used by external DNS
   nsRecordTTL: 30
 
