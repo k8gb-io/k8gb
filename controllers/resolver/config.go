@@ -68,6 +68,8 @@ type Config struct {
 
 	OtelExporterOtlpEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" optional:"" default:"localhost:4318" help:"where the traces should be sent to (in case of otel collector deployed on the same pod as sidecar -> localhost:4318). Otel collector itself can be configured via a configmap to send it somewhere else"`
 
+	GlueAPrefix string `env:"GLUEA_PREFIX" optional:"" default:"gslb-ns-" help:"allow to change default 'gslb-ns-' glue A prefix or even remove it by setting empty value"`
+
 	// Infoblox configuration
 	Infoblox Infoblox `embed:""`
 

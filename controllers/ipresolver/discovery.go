@@ -53,7 +53,7 @@ import (
 //	gslb-ns-us-cloud.example.com. -> resolver.GeoTag{isLocal: false, tag: "us"}
 //
 // Function discovers all nameservers including local and external
-func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation, clusterGeoTag string) (resolver.ClusterNSNames, error) {
+func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation, clusterGeoTag string, prefix string) (resolver.ClusterNSNames, error) {
 	tags := make(resolver.ClusterNSNames)
 
 	m := new(dns.Msg)
@@ -84,10 +84,8 @@ func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation, 
 		if !ok {
 			continue
 		}
-		tag, err := zone.ExtractGeoTagFromGlueA(ns.Ns)
-		if err != nil {
-			continue
-		}
+		tag := zone.ExtractGeoTagFromGlueA(ns.Ns, prefix)
+
 		clusterNSName := strings.TrimSuffix(ns.Ns, ".")
 		tags[clusterNSName] = resolver.NewGeoTag(tag == clusterGeoTag, tag)
 	}
