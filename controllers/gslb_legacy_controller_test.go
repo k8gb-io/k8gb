@@ -229,7 +229,6 @@ func newLegacyRuntimeReconciler(t *testing.T, objs ...client.Object) (*LegacyGsl
 		},
 	}
 	zoneService.EXPECT().HasAvailableIPs(gomock.Any()).Return(true).AnyTimes()
-	zoneService.EXPECT().HasExtClusterGeoTags(gomock.Any()).Return(len(reconciler.Config.ExtClustersGeoTagsRaw) > 0).AnyTimes()
 	zoneService.EXPECT().List(gomock.Any()).Return(&k8gbv1beta1io.ZoneDelegationList{
 		Items: []k8gbv1beta1io.ZoneDelegation{
 			{

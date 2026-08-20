@@ -35,12 +35,11 @@ type ZoneDelegationWrapper struct {
 }
 
 type ExtendedZoneDelegation struct {
-	wrapper           *ZoneDelegationWrapper
-	LoadBalancedZone  string
-	ParentZone        string
-	NegativeTTL       int
-	ClusterNSName     string
-	ExtClusterNSNames resolver.ClusterNSNames
+	wrapper          *ZoneDelegationWrapper
+	LoadBalancedZone string
+	ParentZone       string
+	NegativeTTL      int
+	ClusterNSName    string
 	// TODO: use directly GetExposedIPs(ctx) on places where LocalCoreDNSExposedIPs are required
 	LocalCoreDNSExposedIPs ZoneDelegationIPs
 	name                   string
@@ -75,7 +74,6 @@ func (z *ZoneDelegationWrapper) GetDetail(ctx context.Context) (*ExtendedZoneDel
 		ParentZone:             z.zoneDelegation.Spec.ParentZone,
 		NegativeTTL:            z.zoneDelegation.Spec.DNSZoneNegTTL,
 		ClusterNSName:          z.config.GetClusterNSName(*z.zoneDelegation),
-		ExtClusterNSNames:      z.config.GetClusterNsNames(z.zoneDelegation).ExtClusterNsNames(),
 		LocalCoreDNSExposedIPs: ZoneDelegationIPs(ips.IPs),
 	}
 	err = validateRFC1035(z.zoneDelegation)
