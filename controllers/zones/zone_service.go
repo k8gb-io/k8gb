@@ -47,7 +47,6 @@ type ZoneDelegation interface {
 	ListAllZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error)
 	AvailableIPs(ctx context.Context) (ZoneDelegationIPs, error)
 	HasAvailableIPs(ctx context.Context) bool
-	HasExtClusterGeoTags(ctx context.Context) bool
 	UpdateStatus(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*v1beta1io.ZoneDelegation, error)
 	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*ExtendedZoneDelegation, error)
 	ResolveAuthoritativeServersFromZoneDelegations(ctx context.Context, host string) (AuthoritativeServers, error)
@@ -265,21 +264,6 @@ func (z *ZoneDelegationImpl) HasAvailableIPs(ctx context.Context) bool {
 		return false
 	}
 	return len(exposedIPs) != 0
-}
-
-func (z *ZoneDelegationImpl) HasExtClusterGeoTags(ctx context.Context) bool {
-	l, err := z.List(ctx)
-	if err != nil {
-		return false
-	}
-	if len(l.Items) == 0 {
-		return false
-	}
-	detail, err := NewZoneDelegationWrapper(&l.Items[0], z.config, z.ipresolver).GetDetail(ctx)
-	if err != nil {
-		return false
-	}
-	return len(detail.ExtClusterNSNames) > 0
 }
 
 func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*ExtendedZoneDelegation, error) {
