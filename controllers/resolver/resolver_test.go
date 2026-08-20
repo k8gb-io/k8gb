@@ -651,6 +651,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 0,
 			assert: func(_ *v1beta1io.ZoneDelegationList, _ *Config, err error) {
@@ -664,6 +665,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 2,
 			assert: func(list *v1beta1io.ZoneDelegationList, config *Config, err error) {
@@ -695,6 +697,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 2,
 			assert: func(list *v1beta1io.ZoneDelegationList, config *Config, err error) {
@@ -722,12 +725,33 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 			},
 		},
 		{
+			name: "custom prefix",
+			config: &Config{
+				DNSZones:              "example.com:cloud.example.com:30;example.io:cloud.example.io:300;",
+				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "pr-",
+			},
+			expectedLen: 2,
+			assert: func(list *v1beta1io.ZoneDelegationList, _ *Config, err error) {
+				assert.NoError(t, err)
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.com" && info.Spec.LoadBalancedZone == "cloud.example.com"
+				}))
+				assert.True(t, contains(list, func(info v1beta1io.ZoneDelegation) bool {
+					return info.Spec.ParentZone == "example.io" && info.Spec.LoadBalancedZone == "cloud.example.io"
+				}))
+			},
+		},
+		{
 			name: "ends with semicolon",
 			config: &Config{
 				DNSZones:              "example.com:cloud.example.com:30;example.io:cloud.example.io:300;",
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 2,
 			assert: func(list *v1beta1io.ZoneDelegationList, _ *Config, err error) {
@@ -766,6 +790,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 1,
 			assert: func(list *v1beta1io.ZoneDelegationList, config *Config, err error) {
@@ -783,6 +808,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 0,
 			assert: func(_ *v1beta1io.ZoneDelegationList, _ *Config, err error) {
@@ -796,6 +822,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 0,
 			assert: func(_ *v1beta1io.ZoneDelegationList, _ *Config, err error) {
@@ -809,6 +836,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc3.eee`
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "edge.com", Port: 53}},
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"za", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedLen: 0,
 			assert: func(zd *v1beta1io.ZoneDelegationList, _ *Config, err error) {

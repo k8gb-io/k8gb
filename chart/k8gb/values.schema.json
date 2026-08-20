@@ -415,6 +415,10 @@
                         "$ref": "#/definitions/k8gbDnsZone"
                     }
                 },
+                "glueAPrefix": {
+                    "type": "string",
+                    "minLength": 0
+                },
                 "edgeDNSServers": {
                     "type": "array",
                     "items": {

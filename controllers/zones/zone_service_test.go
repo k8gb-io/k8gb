@@ -60,6 +60,7 @@ func TestUpdateStatus(t *testing.T) {
 			config: &resolver.Config{
 				ClusterGeoTag:         "eu-west-dc-1",
 				ExtClustersGeoTagsRaw: []string{"us-west-dc-1", "za-west-dc-1"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
@@ -81,6 +82,7 @@ func TestUpdateStatus(t *testing.T) {
 			config: &resolver.Config{
 				ClusterGeoTag:         "eu",
 				ExtClustersGeoTagsRaw: []string{"us", "za"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
@@ -145,6 +147,7 @@ func TestUpdateStatus(t *testing.T) {
 			config: &resolver.Config{
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"eu", "za"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
@@ -227,6 +230,7 @@ func TestUpdateStatus(t *testing.T) {
 			config: &resolver.Config{
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"eu", "za"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			arrangemocks: func(ips *ipresolver.MockResolver) {
 				ips.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: []string{"172.18.0.1", "172.18.0.2"}}, nil).AnyTimes()
@@ -411,6 +415,7 @@ func TestListAllZones(t *testing.T) {
 			config: &resolver.Config{
 				ClusterGeoTag:         "us",
 				ExtClustersGeoTagsRaw: []string{"us", "eu"},
+				GlueAPrefix:           "gslb-ns-",
 				ZoneDelegations: &v1beta1io.ZoneDelegationList{
 					Items: []v1beta1io.ZoneDelegation{
 						{
@@ -577,6 +582,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 			config: &resolver.Config{
 				ClusterGeoTag:         "eu",
 				ExtClustersGeoTagsRaw: []string{"us", "za"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			existingZoneDelegations: &v1beta1io.ZoneDelegationList{
 				Items: []v1beta1io.ZoneDelegation{},
@@ -590,6 +596,7 @@ func TestResolveAuthoritativeServersFromZoneDelegations(t *testing.T) {
 			config: &resolver.Config{
 				ClusterGeoTag:         "eu",
 				ExtClustersGeoTagsRaw: []string{"us", "za"},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			existingZoneDelegations: &v1beta1io.ZoneDelegationList{
 				Items: []v1beta1io.ZoneDelegation{

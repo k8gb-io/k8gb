@@ -71,7 +71,7 @@ func parseZoneDelegations(config *Config) (*v1beta1io.ZoneDelegationList, error)
 	}
 
 	for _, z := range zds {
-		nsName := getNsName(config.ClusterGeoTag, z.Spec.LoadBalancedZone, z.Spec.ParentZone)
+		nsName := getNsName(config.ClusterGeoTag, z.Spec.LoadBalancedZone, z.Spec.ParentZone, config.GlueAPrefix)
 		if err := utils.ValidateRFC1035(nsName); err != nil {
 			return zdList, err
 		}
