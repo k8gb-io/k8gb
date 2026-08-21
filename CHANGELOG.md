@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.21.0-rc4](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc4) (2026-08-21)
+
+## Changelog
+* 382afeeaedde16fd71bda4fa6dc39babb744543d RELEASE: v0.21.0-rc4
+* 7d668217542f6eeb9d550f7ff823ef5057002301 chore(deps): update actions/setup-go action to v7
+* 9a00b460359ead47346095f35b18550ce96033c1 chore(deps): update otel/opentelemetry-collector docker tag to v0.159.0
+* 93f611913720d4664f08b750daee4ae83378861f refactor: remove extClusterGeoTags from ZD wrapeper
+* 5fdc2bee4da8fe90cca30137324435ac99f08355 feat: Add support of custom glue A prefix
+* 7ff546577effcfc3bc3fe7cabdced899494c92d7 refactor: Replace Delegationzone by ZoneDelegation
+* aa02db2c88b9a7d5d22dabb0f3bdeb9c52605e10 Fix empty CoreDNS readiness
+
+:rocket:
+
+
 ## [v0.21.0-rc2](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc2) (2026-08-01)
 
 ## Changelog
