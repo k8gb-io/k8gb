@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v0.21.0-rc2](https://img.shields.io/badge/Version-v0.21.0--rc2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.21.0-rc2](https://img.shields.io/badge/AppVersion-v0.21.0--rc2-informational?style=flat-square)
+![Version: v0.21.0-rc4](https://img.shields.io/badge/Version-v0.21.0--rc4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.21.0-rc4](https://img.shields.io/badge/AppVersion-v0.21.0--rc4-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -102,7 +102,8 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | k8gb.dnsZones | list | `[{"dnsZoneNegTTL":30,"extraPlugins":[],"extraServerBlocks":"","geoDataField":"","geoDataFilePath":"","loadBalancedZone":"cloud.example.com","parentZone":"example.com"}]` | array of dns zones controlled by gslb |
 | k8gb.edgeDNSServers[0] | string | `"1.1.1.1"` | use this DNS server as a main resolver to enable cross k8gb DNS based communication |
 | k8gb.exposeMetrics | bool | `false` | Exposing metrics |
-| k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances If the value remains empty with Infoblox, dynamic geotags are extracted from NS records on the edge DNS. ExternalDNS-based providers require this value to be set explicitly; see docs/dynamic_geotags.md. |
+| k8gb.extGslbClustersGeoTags | string | `"eu,us"` | Comma-separated list of geotags for external K8GB clusters. These are arbitrary, user-defined identifiers (e.g., "eu,us" or "dc2,dc3") used for coordination between K8GB instances If the value remains empty with Infoblox, dynamic geotags are extracted from NS records on the edge DNS. ExternalDNS-based providers (Route53, Cloudflare, etc.) require this value to be set explicitly; see docs/dynamic_geotags.md. |
+| k8gb.glueAPrefix | string | `"gslb-ns-"` | A string representing what coreDNS glue A records name should be prefixed with Default value 'gslb-ns' is kept for backward compatibility. It results into glueA record name following this pattern: <prefix><tag><converted_zone>.<parentzone> e.g. gslb-ns-eu-cloud.example.com |
 | k8gb.imageRepo | string | `"registry.k8gb.io/k8gb-io/k8gb"` | image repository |
 | k8gb.imageTag |  string  | `nil` | image tag defaults to Chart.AppVersion, see Chart.yaml, but can be overrided with imageTag key |
 | k8gb.installLegacyCrds | bool | `true` | whether it should also deploy the legacy k8gb.absa.oss CRD |
@@ -123,6 +124,8 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | k8gb.serviceMonitor | object | `{"enabled":false}` | enable ServiceMonitor |
 | k8gb.tolerations | list | `[]` | Tolerations to apply to the k8gb operator deployment for example:   tolerations:   - key: foo.bar.com/role     operator: Equal     value: master     effect: NoSchedule |
 | k8gb.validatingAdmissionPolicy | object | `{"enabled":false}` | enable validating admission policies |
+| k8gb.zoneDelegationReconcileRequeueSeconds | int | `300` | ZoneDelegation reconcile time in seconds |
+| k8gb.zoneDelegationRecoverySeconds | int | `60` | ZoneDelegation reconcile recovery time in seconds |
 | openshift.enabled | bool | `false` | Install OpenShift specific RBAC |
 | tracing.deployJaeger | bool | `false` | should the Jaeger be deployed together with the k8gb operator? In case of using another OpenTracing solution, make sure that configmap for OTEL agent has the correct exporters set up (`tracing.otelConfig`). |
 | tracing.enabled | bool | `false` | if the application should be sending the traces to OTLP collector (env var `TRACING_ENABLED`) |
@@ -134,4 +137,4 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | tracing.samplingRatio | string | `nil` | float representing the ratio of how often the span should be kept/dropped (env var `TRACING_SAMPLING_RATIO`) if not specified, the AlwaysSample will be used which is the same as 1.0. `0.1` would mean that 10% of samples will be kept |
 | tracing.sidecarImage.pullPolicy | string | `"Always"` |  |
 | tracing.sidecarImage.repository | string | `"otel/opentelemetry-collector"` | OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data to somewhere else using exporters (Jaeger for instance) |
-| tracing.sidecarImage.tag | string | `"0.157.0"` |  |
+| tracing.sidecarImage.tag | string | `"0.159.0"` |  |
