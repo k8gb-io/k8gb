@@ -7,6 +7,7 @@ edit_uri: edit/master/docs/
 
 exclude_docs: |
   /blog/README.md
+  /examples/crossplane/globalapp/README.md
 
 not_in_nav: |
   /examples/crossplane/globalapp/README.md
@@ -142,3 +143,11 @@ extra:
   version:
     provider: mike
 copyright: © 2025 The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/legal/trademark-usage">Trademark Usage</a> page.
+
+# Allow docs to reference in-repo paths outside docs/ (samples under deploy/).
+# Missing in-docs relative links still warn and fail under --strict.
+validation:
+  links:
+    absolute_links: relative_to_docs
+    unrecognized_links: ignore
+    anchors: warn
