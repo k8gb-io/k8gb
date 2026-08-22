@@ -10,7 +10,7 @@ Here we provide an example of k8gb deployment in Azure environment with Windows 
 
 The reference setup includes two private AKS clusters that can be deployed on two different regions for load balancing or to provide a failover solution.
 
-![GLSB with K8gb on Windows DNS](examples/windowsdns/images/k8gb_solution.png "GLSB with K8gb on Windows DNS")
+![GSLB with K8gb on Windows DNS](examples/windowsdns/images/k8gb_solution.png "GSLB with K8gb on Windows DNS")
 
 The solution design can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/).
 
@@ -99,7 +99,7 @@ make deploy-k8gb
 
 ### Install demo app
 
-Deploys the sample Podinfo workload with failover GLSB configured using annotations in the Ingress resource [samples](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/demo/).
+Deploys the sample Podinfo workload with failover GSLB configured using annotations in the Ingress resource [samples](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/demo/).
 Ensure that the hosts on the samples are correctly updated before execution
 
 ```sh

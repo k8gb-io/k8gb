@@ -244,7 +244,7 @@ cluster has been tagged to serve a different region. In this demo we will hit po
 on whether podinfo is running inside the cluster it returns only **eu** or **us**.
 See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_failover_ingress.yaml)
 
-Switch GLSB to failover mode:
+Switch GSLB to failover mode:
 ```sh
 make init-failover
 ```
@@ -301,7 +301,7 @@ After DNS sync interval is over **eu** will be back
   ...
 }
 ```
-Optionally you can switch GLSB back to round-robin mode
+Optionally you can switch GSLB back to round-robin mode
 ```sh
 make init-round-robin
 ```

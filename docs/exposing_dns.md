@@ -41,7 +41,7 @@ kubectl create -n ingress-nginx cm udp-services --from-literal="53"="k8gb/k8gb-c
 [Local project setup](./local.md) does this patching automatically.
 
 ## CoreDNS service lookup
-k8gb is trying to find a service annotated with `app.kubernetes.io/name=coredns` within the same namespace where controller itself is deployed into. If the service has `Status.LoadBalancer.Ingress[0].Hostname`, k8gb will use the resolved IPs to reach CoreDNS on this cluster.
+k8gb is trying to find a service labelled with `app.kubernetes.io/name=coredns` within the same namespace where controller itself is deployed into. If the service has `Status.LoadBalancer.Ingress[0].Hostname`, k8gb will use the resolved IPs to reach CoreDNS on this cluster.
 
 ## External load balancer
 
