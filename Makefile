@@ -549,7 +549,7 @@ goreleaser:
 
 .PHONY: release-images
 release-images: goreleaser
-	goreleaser release --snapshot --clean --skip=validate,publish,sbom,sign
+	PATH="$$(go env GOPATH)/bin:$$PATH" goreleaser release --snapshot --clean --skip=validate,publish,sbom,sign
 
 # build the docker image
 .PHONY: docker-build
@@ -699,6 +699,10 @@ chainsaw:
 	fi
 	cd chainsaw && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) chainsaw test --config ./config.yaml --values ./values.yaml
 	rm -r chainsaw/kubeconfig
+
+.PHONY: test-route53
+test-route53: ## Run AWS Route53 end-to-end integration test harness
+	go test -v -timeout 15m ./dns-provider-test/route53/...
 
 .PHONY: website
 website:
