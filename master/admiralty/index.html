@@ -1606,10 +1606,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#add-k8gb-annotations-to-ingress-object-to-enable-global-load-balancing" class="md-nav__link">
+  <a href="#enable-global-load-balancing-prefer-an-explicit-gslb" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add k8gb annotations to Ingress object to enable global load balancing
+        Enable global load balancing (prefer an explicit Gslb)
       
     </span>
   </a>
@@ -2727,10 +2727,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#add-k8gb-annotations-to-ingress-object-to-enable-global-load-balancing" class="md-nav__link">
+  <a href="#enable-global-load-balancing-prefer-an-explicit-gslb" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add k8gb annotations to Ingress object to enable global load balancing
+        Enable global load balancing (prefer an explicit Gslb)
       
     </span>
   </a>
@@ -2816,7 +2816,7 @@ global multi-cluster capabilities.</p>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>NAME<span class="w">      </span>CLASS<span class="w">    </span>HOSTS<span class="w">   </span>ADDRESS<span class="w">   </span>PORTS<span class="w">   </span>AGE
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>podinfo<span class="w">   </span>&lt;none&gt;<span class="w">   </span>*<span class="w">                 </span><span class="m">80</span><span class="w">      </span>10m
 </code></pre></div>
-<h2 id="add-k8gb-annotations-to-ingress-object-to-enable-global-load-balancing">Add k8gb annotations to Ingress object to enable global load balancing<a class="headerlink" href="#add-k8gb-annotations-to-ingress-object-to-enable-global-load-balancing" title="Permanent link">&para;</a></h2>
+<h2 id="enable-global-load-balancing-prefer-an-explicit-gslb">Enable global load balancing (prefer an explicit Gslb)<a class="headerlink" href="#enable-global-load-balancing-prefer-an-explicit-gslb" title="Permanent link">&para;</a></h2>
 <p>Observe that there are no Gslb resources in the Target clusters</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>kind-eu<span class="w"> </span>get<span class="w"> </span>gslb
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>No<span class="w"> </span>resources<span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>default<span class="w"> </span>namespace.
@@ -2824,7 +2824,8 @@ global multi-cluster capabilities.</p>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>kubectl<span class="w"> </span>--context<span class="w"> </span>kind-us<span class="w"> </span>get<span class="w"> </span>gslb
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>No<span class="w"> </span>resources<span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>default<span class="w"> </span>namespace.
 </code></pre></div>
-<p>Add k8gb strategy annotation to the Ingress object in the Source cluster</p>
+<p><strong>Preferred:</strong> create an explicit <code>Gslb</code> that <code>resourceRef</code>s the Ingress (see <a href="../resource_ref/">Resource References</a>).</p>
+<p><strong>Legacy / deprecated:</strong> Ingress <code>k8gb.io/strategy</code> annotations still create a Gslb automatically, but this path is deprecated (<a href="https://github.com/k8gb-io/k8gb/blob/master/adr/0001-deprecate-configuration-of-gslb-resources-via-annotations.md">ADR-0001</a>) and will be removed in a future release. For this tutorial's quick demo:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>ing<span class="w"> </span>podinfo<span class="w"> </span>k8gb.io/strategy<span class="o">=</span>roundRobin
 </code></pre></div>
 <p>Observe that Gslb resources were properly created</p>
@@ -2861,7 +2862,7 @@ Gslb CR propagation with Admiralty.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 26, 2026 10:16:53 UTC">August 26, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 26, 2026 14:10:08 UTC">August 26, 2026</span>
   </span>
 
     
