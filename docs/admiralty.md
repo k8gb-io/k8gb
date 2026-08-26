@@ -93,7 +93,7 @@ No resources found in default namespace.
 
 **Preferred:** create an explicit `Gslb` that `resourceRef`s the Ingress (see [Resource References](resource_ref.md)).
 
-**Legacy / deprecated:** Ingress `k8gb.io/strategy` annotations still create a Gslb automatically, but this path is deprecated ([ADR-0001](../adr/0001-deprecate-configuration-of-gslb-resources-via-annotations.md)) and will be removed in a future release. For this tutorial's quick demo:
+**Legacy / deprecated:** Ingress `k8gb.io/strategy` annotations still create a Gslb automatically, but this path is deprecated ([ADR-0001](https://github.com/k8gb-io/k8gb/blob/master/adr/0001-deprecate-configuration-of-gslb-resources-via-annotations.md)) and will be removed in a future release. For this tutorial's quick demo:
 
 ```sh
 kubectl annotate ing podinfo k8gb.io/strategy=roundRobin
