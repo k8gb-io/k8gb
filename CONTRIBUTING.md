@@ -249,7 +249,21 @@ Pull requests should also use the appropriate project labels ("bug", "enhancemen
 
 ## Documentation
 
-If contribution changes the existing APIs or user interface, it must include sufficient documentation explaining the use of the new or updated feature.
+If a contribution changes existing APIs or the user interface, include enough documentation to explain the new or updated feature.
+
+k8gb.io is built from this repository with MkDocs (`mkdocs.yml`). The same
+markdown is also read on GitHub, so link style depends on where the file lives:
+
+- **Repository-root files** (`README.md`, `CONTRIBUTING.md`): use `docs/<page>.md`
+  so GitHub resolves the path. `docs/link_fixer.py` rewrites those hrefs when
+  MkDocs builds the site.
+- **Files under `docs/`**: use same-tree relative links (`local.md`, `../metrics.md`).
+- **Targets outside `docs/`** (for example `adr/`): use a GitHub blob or tree URL.
+- **Symlinked nav pages**: keep paths correct for the real file; `link_fixer.py`
+  rewrites them for the MkDocs path (see `docs/crossplane_globalapp.md`).
+
+`mkdocs build --strict` fails the build if a markdown link does not resolve
+inside the docs tree.
 
 ## k8gb.io website
 
