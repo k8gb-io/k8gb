@@ -2906,12 +2906,12 @@ GeoTags are essential for k8gb’s global DNS-based routing and failover logic.<
 <h3 id="how-to-configure-geotags">How to configure GeoTags<a class="headerlink" href="#how-to-configure-geotags" title="Permanent link">&para;</a></h3>
 <p>You configure GeoTags directly in your values.yaml (usually when installing or upgrading k8gb via Helm):</p>
 <p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">k8gb</span><span class="p">:</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="c1"># Unique GeoTag for this cluster. Common values: &quot;eu&quot;, &quot;us&quot;, &quot;za&quot;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">clusterGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eu&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="c1"># Unique GeoTag for this cluster. Common values: "eu", "us", "za"</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">clusterGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">"eu"</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="c1"># Comma-separated list of GeoTags for all other k8gb clusters in your GSLB network.</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="c1"># Example: &quot;eu,us,za&quot;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">extGslbClustersGeoTags</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eu,us&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="c1"># Example: "eu,us,za"</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">extGslbClustersGeoTags</span><span class="p">:</span><span class="w"> </span><span class="s">"eu,us"</span>
 </code></pre></div>
 - <code>clusterGeoTag</code>: This value must be unique for each cluster. It identifies this k8gb instance.
 - <code>extGslbClustersGeoTags</code>: This is a comma-separated list of all external k8gb clusters’ GeoTags.</p>
@@ -2927,8 +2927,8 @@ GeoTags are essential for k8gb’s global DNS-based routing and failover logic.<
 </ul>
 <h3 id="example-valuesyaml">Example (<code>values.yaml</code>):<a class="headerlink" href="#example-valuesyaml" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">k8gb</span><span class="p">:</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">clusterGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eu&quot;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">extGslbClustersGeoTags</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">  </span><span class="c1"># leave empty to enable dynamic discovery (Infoblox only)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">clusterGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">"eu"</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">extGslbClustersGeoTags</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w">  </span><span class="c1"># leave empty to enable dynamic discovery (Infoblox only)</span>
 </code></pre></div>
 <h2 id="why-externaldns-providers-cannot-use-dynamic-geotags-yet">Why ExternalDNS providers cannot use Dynamic GeoTags yet<a class="headerlink" href="#why-externaldns-providers-cannot-use-dynamic-geotags-yet" title="Permanent link">&para;</a></h2>
 <p>Investigation tracked in <a href="https://github.com/k8gb-io/k8gb/issues/2464">#2464</a>. Summary:</p>

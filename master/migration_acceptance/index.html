@@ -3246,7 +3246,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-ref-non-migrated-failover
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># Expected to fail with NotFound before migration request</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-ref-non-migrated-failover<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;LegacyDeprecated|legacy-ref-non-migrated-failover&#39;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'LegacyDeprecated|legacy-ref-non-migrated-failover'</span>
 </code></pre></div>
 <h3 id="3-request-migration-explicitly">3. Request migration explicitly<a class="headerlink" href="#3-request-migration-explicitly" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-ref-non-migrated-failover<span class="w"> </span><span class="se">\</span>
@@ -3254,11 +3254,11 @@
 </code></pre></div>
 <h3 id="4-verify-migration-completion">4. Verify migration completion<a class="headerlink" href="#4-verify-migration-completion" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}&#39;</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}'</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>gslb.k8gb.absa.oss/legacy-ref-non-migrated-failover<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>--timeout<span class="o">=</span>90s
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>legacy-ref-non-migrated-failover<span class="w"> </span>-o<span class="w"> </span>yaml
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;LegacyMigrated|legacy-ref-non-migrated-failover&#39;</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'LegacyMigrated|legacy-ref-non-migrated-failover'</span>
 </code></pre></div>
 <p>Use the same label operation to migrate any selected legacy object:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>&lt;ns&gt;<span class="w"> </span>&lt;name&gt;<span class="w"> </span>k8gb.io/migration-requested<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite
@@ -3273,7 +3273,7 @@
 <p>Cases requiring this trigger: 1, 2, 3, 4, 6, and 8.</p>
 <h3 id="case-1-legacy-referenced-gslb-migrates-to-canonical">Case 1: Legacy referenced GSLB migrates to canonical<a class="headerlink" href="#case-1-legacy-referenced-gslb-migrates-to-canonical" title="Permanent link">&para;</a></h3>
 <p>Apply legacy referenced GSLB:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE1&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE1'</span>
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="s">apiVersion: networking.k8s.io/v1</span>
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="s">kind: Ingress</span>
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="s">metadata:</span>
@@ -3312,7 +3312,7 @@
 </code></pre></div>
 <p>Validate:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-ref
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-ref<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}&#39;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-ref<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}'</span>
 </code></pre></div>
 <p>Expected:</p>
 <ul>
@@ -3321,7 +3321,7 @@
 </ul>
 <h3 id="case-2-embedded-legacy-gslb-migrates-to-resourceref">Case 2: Embedded legacy GSLB migrates to <code>resourceRef</code><a class="headerlink" href="#case-2-embedded-legacy-gslb-migrates-to-resourceref" title="Permanent link">&para;</a></h3>
 <p>Apply embedded legacy GSLB:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE2&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE2'</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="s">apiVersion: k8gb.absa.oss/v1beta1</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="s">metadata:</span>
@@ -3360,7 +3360,7 @@
 </ul>
 <h3 id="case-3-existing-canonical-object-is-not-overwritten">Case 3: Existing canonical object is not overwritten<a class="headerlink" href="#case-3-existing-canonical-object-is-not-overwritten" title="Permanent link">&para;</a></h3>
 <p>Apply canonical first, then legacy with same name:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE3&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE3'</span>
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="s">apiVersion: k8gb.io/v1beta1</span>
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="s">metadata:</span>
@@ -3393,8 +3393,8 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>existing-canonical<span class="w"> </span>k8gb.io/migration-requested<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite
 </code></pre></div>
 <p>Validate:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>existing-canonical<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.spec.strategy.type}&#39;</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>existing-canonical<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>existing-canonical<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.spec.strategy.type}'</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>existing-canonical<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}'</span>
 </code></pre></div>
 <p>Expected:</p>
 <ul>
@@ -3407,15 +3407,15 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span>k8gb.io/migration-requested<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite
 </code></pre></div>
 <p>Capture ownerRefs before deletion:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.metadata.ownerReferences&#39;</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.finalizers}&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.metadata.ownerReferences'</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.metadata.finalizers}'</span>
 </code></pre></div>
 <p>Delete legacy object:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded
 </code></pre></div>
 <p>Validate:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.metadata.ownerReferences&#39;</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.metadata.ownerReferences'</span>
 <a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="c1"># Expected to fail with NotFound (legacy object should be gone after finalizer cleanup)</span>
 <a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>legacy-embedded<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
 </code></pre></div>
@@ -3427,14 +3427,14 @@
 </ul>
 <h3 id="case-5-already-migrated-legacy-object-is-ignored">Case 5: Already migrated legacy object is ignored<a class="headerlink" href="#case-5-already-migrated-legacy-object-is-ignored" title="Permanent link">&para;</a></h3>
 <p>Apply an already-migrated legacy object:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE5&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE5'</span>
 <a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="s">apiVersion: k8gb.absa.oss/v1beta1</span>
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="s">metadata:</span>
 <a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="s">  name: already-migrated</span>
 <a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="s">  namespace: migration-e2e</span>
 <a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="s">  labels:</span>
-<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="s">    k8gb.io/migrated-to-k8gb-io: &quot;true&quot;</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="s">    k8gb.io/migrated-to-k8gb-io: "true"</span>
 <a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="s">spec:</span>
 <a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="s">  strategy:</span>
 <a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="s">    type: roundRobin</span>
@@ -3447,7 +3447,7 @@
 <p>Validate:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># Expected to fail with NotFound (controller should ignore already-migrated legacy objects)</span>
 <a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>already-migrated<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;LegacyIgnored|already-migrated&#39;</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'LegacyIgnored|already-migrated'</span>
 </code></pre></div>
 <p>Expected:</p>
 <ul>
@@ -3456,7 +3456,7 @@
 </ul>
 <h3 id="case-6-embedded-legacy-migration-succeeds-even-if-ingress-is-missing">Case 6: Embedded legacy migration succeeds even if Ingress is missing<a class="headerlink" href="#case-6-embedded-legacy-migration-succeeds-even-if-ingress-is-missing" title="Permanent link">&para;</a></h3>
 <p>Apply embedded legacy GSLB without creating a matching Ingress resource:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE6&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE6'</span>
 <a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="s">apiVersion: k8gb.absa.oss/v1beta1</span>
 <a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="s">metadata:</span>
@@ -3485,7 +3485,7 @@
 </code></pre></div>
 <p>Validate:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>embedded-no-ingress
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>embedded-no-ingress<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}&#39;</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>embedded-no-ingress<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.metadata.labels.k8gb\.io/migrated-to-k8gb-io}'</span>
 </code></pre></div>
 <p>Expected:</p>
 <ul>
@@ -3494,14 +3494,14 @@
 </ul>
 <h3 id="case-7-already-migrated-embedded-legacy-still-detaches-stale-ingress-ownerref">Case 7: Already-migrated embedded legacy still detaches stale Ingress ownerRef<a class="headerlink" href="#case-7-already-migrated-embedded-legacy-still-detaches-stale-ingress-ownerref" title="Permanent link">&para;</a></h3>
 <p>Apply already-migrated embedded legacy object:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE7&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE7'</span>
 <a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="s">apiVersion: k8gb.absa.oss/v1beta1</span>
 <a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="s">metadata:</span>
 <a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="s">  name: stale-owner</span>
 <a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="s">  namespace: migration-e2e</span>
 <a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="s">  labels:</span>
-<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="s">    k8gb.io/migrated-to-k8gb-io: &quot;true&quot;</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="s">    k8gb.io/migrated-to-k8gb-io: "true"</span>
 <a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="s">spec:</span>
 <a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="s">  ingress:</span>
 <a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="s">    ingressClassName: nginx</span>
@@ -3521,7 +3521,7 @@
 <a id="__codelineno-25-25" name="__codelineno-25-25" href="#__codelineno-25-25"></a><span class="s">EOF_CASE7</span>
 </code></pre></div>
 <p>Create an Ingress with a stale ownerReference to the legacy GSLB UID, then retrigger reconcile:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nv">LEGACY_UID</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>stale-owner<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.uid}&#39;</span><span class="k">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nv">LEGACY_UID</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>stale-owner<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.metadata.uid}'</span><span class="k">)</span>
 <a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>
 <a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF_CASE7_ING</span>
 <a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="s">apiVersion: networking.k8s.io/v1</span>
@@ -3549,10 +3549,10 @@
 <a id="__codelineno-26-26" name="__codelineno-26-26" href="#__codelineno-26-26"></a><span class="s">                  number: 80</span>
 <a id="__codelineno-26-27" name="__codelineno-26-27" href="#__codelineno-26-27"></a><span class="s">EOF_CASE7_ING</span>
 <a id="__codelineno-26-28" name="__codelineno-26-28" href="#__codelineno-26-28"></a>
-<a id="__codelineno-26-29" name="__codelineno-26-29" href="#__codelineno-26-29"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>stale-owner<span class="w"> </span>migration-recheck-ts<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>--overwrite
+<a id="__codelineno-26-29" name="__codelineno-26-29" href="#__codelineno-26-29"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>stale-owner<span class="w"> </span>migration-recheck-ts<span class="o">=</span><span class="s2">"</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span><span class="s2">"</span><span class="w"> </span>--overwrite
 </code></pre></div>
 <p>Validate:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>stale-owner<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.metadata.ownerReferences&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>stale-owner<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.metadata.ownerReferences'</span>
 </code></pre></div>
 <p>Expected:</p>
 <ul>
@@ -3560,7 +3560,7 @@
 </ul>
 <h3 id="case-8-existing-canonical-embedded-legacy-still-performs-owner-cleanup">Case 8: Existing canonical + embedded legacy still performs owner cleanup<a class="headerlink" href="#case-8-existing-canonical-embedded-legacy-still-performs-owner-cleanup" title="Permanent link">&para;</a></h3>
 <p>Create canonical object first:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE8_CANONICAL&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE8_CANONICAL'</span>
 <a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="s">apiVersion: k8gb.io/v1beta1</span>
 <a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="s">metadata:</span>
@@ -3577,7 +3577,7 @@
 <a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a><span class="s">EOF_CASE8_CANONICAL</span>
 </code></pre></div>
 <p>Apply embedded legacy object with same name:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE8_LEGACY&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE8_LEGACY'</span>
 <a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="s">apiVersion: k8gb.absa.oss/v1beta1</span>
 <a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="s">metadata:</span>
@@ -3605,7 +3605,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>k8gb.io/migration-requested<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite
 </code></pre></div>
 <p>Inject stale ownerReference and retrigger reconcile:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nv">LEGACY_UID</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.metadata.uid}&#39;</span><span class="k">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nv">LEGACY_UID</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.metadata.uid}'</span><span class="k">)</span>
 <a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>
 <a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF_CASE8_ING</span>
 <a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="s">apiVersion: networking.k8s.io/v1</span>
@@ -3633,11 +3633,11 @@
 <a id="__codelineno-31-26" name="__codelineno-31-26" href="#__codelineno-31-26"></a><span class="s">                  number: 80</span>
 <a id="__codelineno-31-27" name="__codelineno-31-27" href="#__codelineno-31-27"></a><span class="s">EOF_CASE8_ING</span>
 <a id="__codelineno-31-28" name="__codelineno-31-28" href="#__codelineno-31-28"></a>
-<a id="__codelineno-31-29" name="__codelineno-31-29" href="#__codelineno-31-29"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>migration-recheck-ts<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>--overwrite
+<a id="__codelineno-31-29" name="__codelineno-31-29" href="#__codelineno-31-29"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>migration-recheck-ts<span class="o">=</span><span class="s2">"</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span><span class="s2">"</span><span class="w"> </span>--overwrite
 </code></pre></div>
 <p>Validate:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.spec.strategy.type}&#39;</span>
-<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.metadata.ownerReferences&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.spec.strategy.type}'</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>migration-e2e<span class="w"> </span>canonical-embedded-cleanup<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.metadata.ownerReferences'</span>
 </code></pre></div>
 <p>Expected:</p>
 <ul>
@@ -3646,7 +3646,7 @@
 </ul>
 <h3 id="case-9-deletion-path-does-not-block-when-embedded-ingress-is-absent">Case 9: Deletion path does not block when embedded Ingress is absent<a class="headerlink" href="#case-9-deletion-path-does-not-block-when-embedded-ingress-is-absent" title="Permanent link">&para;</a></h3>
 <p>Apply embedded legacy object:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF_CASE9&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'EOF_CASE9'</span>
 <a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="s">apiVersion: k8gb.absa.oss/v1beta1</span>
 <a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="s">kind: Gslb</span>
 <a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="s">metadata:</span>
@@ -3693,24 +3693,24 @@
 <h3 id="3-validate-migration-outcomes">3. Validate migration outcomes<a class="headerlink" href="#3-validate-migration-outcomes" title="Permanent link">&para;</a></h3>
 <p>Request migration for legacy objects you want to migrate in this wave:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-A<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.items[] | [.metadata.namespace, .metadata.name] | @tsv&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nv">IFS</span><span class="o">=</span><span class="s1">$&#39;\t&#39;</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>ns<span class="w"> </span>name<span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">      </span>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ns</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$name</span><span class="s2">&quot;</span><span class="w"> </span>k8gb.io/migration-requested<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.items[] | [.metadata.namespace, .metadata.name] | @tsv'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nv">IFS</span><span class="o">=</span><span class="s1">$'\t'</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>ns<span class="w"> </span>name<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">      </span>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span><span class="s2">"</span><span class="nv">$ns</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$name</span><span class="s2">"</span><span class="w"> </span>k8gb.io/migration-requested<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite
 <a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="w">    </span><span class="k">done</span>
 </code></pre></div>
 <p>Verify every legacy object has matching canonical object:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-A<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.items[] | [.metadata.namespace, .metadata.name] | @tsv&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nv">IFS</span><span class="o">=</span><span class="s1">$&#39;\t&#39;</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>ns<span class="w"> </span>name<span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="w">      </span>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ns</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$name</span><span class="s2">&quot;</span><span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;MISSING canonical: </span><span class="nv">$ns</span><span class="s2">/</span><span class="nv">$name</span><span class="s2">&quot;</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.items[] | [.metadata.namespace, .metadata.name] | @tsv'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nv">IFS</span><span class="o">=</span><span class="s1">$'\t'</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>ns<span class="w"> </span>name<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="w">      </span>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-n<span class="w"> </span><span class="s2">"</span><span class="nv">$ns</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$name</span><span class="s2">"</span><span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"MISSING canonical: </span><span class="nv">$ns</span><span class="s2">/</span><span class="nv">$name</span><span class="s2">"</span>
 <a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="w">    </span><span class="k">done</span>
 </code></pre></div>
 <p>Verify migration labels:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-A<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.items[] | select(.metadata.labels[&quot;k8gb.io/migrated-to-k8gb-io&quot;] != &quot;true&quot;) | &quot;UNLABELED: \(.metadata.namespace)/\(.metadata.name)&quot;&#39;</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.items[] | select(.metadata.labels["k8gb.io/migrated-to-k8gb-io"] != "true") | "UNLABELED: \(.metadata.namespace)/\(.metadata.name)"'</span>
 </code></pre></div>
 <p>Check migration events:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-A<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;LegacyMigrated|LegacyIgnored&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-A<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'LegacyMigrated|LegacyIgnored'</span>
 </code></pre></div>
 <h3 id="4-validate-deletion-safety-on-a-sampled-embedded-object">4. Validate deletion safety on a sampled embedded object<a class="headerlink" href="#4-validate-deletion-safety-on-a-sampled-embedded-object" title="Permanent link">&para;</a></h3>
 <p>Pick at least one migrated embedded legacy GSLB and delete the legacy object:</p>

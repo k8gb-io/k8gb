@@ -2749,10 +2749,10 @@
 </ul>
 <h2 id="architecture-diagrams">Architecture Diagrams<a class="headerlink" href="#architecture-diagrams" title="Permanent link">&para;</a></h2>
 <h3 id="crossplane-function-health-monitoring-flow">Crossplane Function Health Monitoring Flow<a class="headerlink" href="#crossplane-function-health-monitoring-flow" title="Permanent link">&para;</a></h3>
-<p><img alt="Crossplane Function Health Monitoring" src="/docs/examples/crossplane/globalapp/assets/crossplane-function-health-monitoring.png" /></p>
+<p><img alt="Crossplane Function Health Monitoring" src="assets/crossplane-function-health-monitoring.png" /></p>
 <p>This diagram illustrates how the Crossplane function dynamically monitors GSLB health status and adjusts management policies. The function observes the GSLB resource status and conditionally sets management policies - when active and healthy, it enables full management (<code>managementPolicies: ["*"]</code>), otherwise it switches to observe-only mode (<code>managementPolicies: ["Observe"]</code>).</p>
 <h3 id="activepassive-cluster-management-policies">Active/Passive Cluster Management Policies<a class="headerlink" href="#activepassive-cluster-management-policies" title="Permanent link">&para;</a></h3>
-<p><img alt="Active Passive Cluster Policies" src="/docs/examples/crossplane/globalapp/assets/active-passive-cluster-policies.png" /></p>
+<p><img alt="Active Passive Cluster Policies" src="assets/active-passive-cluster-policies.png" /></p>
 <p>This diagram shows the management policy differences between Active and Passive clusters. The Active cluster (with green checkmark) has full management policies including Create, Delete, Observe, and Update capabilities. The Passive cluster (with red X) is restricted to Observe-only mode, ensuring it monitors health without making changes until it needs to become active during failover.</p>
 <h2 id="conference-presentation">Conference Presentation<a class="headerlink" href="#conference-presentation" title="Permanent link">&para;</a></h2>
 <p>This reference PoC architecture was presented at <strong>KubeCon China in Hong Kong 2025</strong>:</p>
@@ -2810,21 +2810,21 @@
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>providerconfig.kubernetes.crossplane.io/default created
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a># Setup Azure Credentials Secret
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>kubectl create secret generic azure-account-creds -n crossplane-system --from-literal=credentials=&quot;$(cat credentials.json)&quot; --dry-run=client -o yaml | kubectl apply -f -
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a># If you don&#39;t have Azure credentials json file, check Quickstart documentation
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>kubectl create secret generic azure-account-creds -n crossplane-system --from-literal=credentials="$(cat credentials.json)" --dry-run=client -o yaml | kubectl apply -f -
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a># If you don't have Azure credentials json file, check Quickstart documentation
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>at https://marketplace.upbound.io/providers/upbound/provider-family-azure/latest
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a># Apply demo GlobalApp material
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>k apply -f definition.yaml,composition.yaml,functions.yaml
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>compositeresourcedefinition.apiextensions.crossplane.io/globalapps.example.crossplane.io created
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>Warning: CustomResourceDefinition.apiextensions.k8s.io &quot;GlobalApp.example.crossplane.io&quot; not found
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>Warning: CustomResourceDefinition.apiextensions.k8s.io "GlobalApp.example.crossplane.io" not found
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>composition.apiextensions.crossplane.io/global-app created
 <a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>function.pkg.crossplane.io/crossplane-contrib-function-kcl created
 <a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>function.pkg.crossplane.io/crossplane-contrib-function-auto-ready created
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a># Switch context to first k8gb cluster
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>k config use-context k3d-test-gslb1
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Switched to context &quot;k3d-test-gslb1&quot;.
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Switched to context "k3d-test-gslb1".
 <a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a># Repeat all installation steps in identical manner on the first cluster!
 </code></pre></div>
 <h3 id="deploy-examples">Deploy Examples<a class="headerlink" href="#deploy-examples" title="Permanent link">&para;</a></h3>
@@ -2875,7 +2875,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 11, 2026 09:31:30 UTC">March 11, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 26, 2026 06:17:10 UTC">August 26, 2026</span>
   </span>
 
     

@@ -2819,16 +2819,16 @@ Metrics endpoints are exposed via <code>-metrics</code> service in operator name
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># HELP k8gb_gslb_healthy_records Number of healthy records observed by K8GB.</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># TYPE k8gb_gslb_healthy_records gauge</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_healthy_records{name=&quot;test-gslb&quot;,namespace=&quot;test-gslb&quot;} 6</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6</span>
 </code></pre></div>
 <h4 id="ingress_hosts_per_status"><code>ingress_hosts_per_status</code><a class="headerlink" href="#ingress_hosts_per_status" title="Permanent link">&para;</a></h4>
 <p>Number of ingress hosts per status (NotFound, Healthy, Unhealthy), observed by K8GB.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># HELP k8gb_gslb_ingress_hosts_per_status Number of managed hosts observed by K8GB.</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># TYPE k8gb_gslb_ingress_hosts_per_status gauge</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name=&quot;test-gslb&quot;,namespace=&quot;test-gslb&quot;,status=&quot;Healthy&quot;} 1</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name=&quot;test-gslb&quot;,namespace=&quot;test-gslb&quot;,status=&quot;NotFound&quot;} 1</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name=&quot;test-gslb&quot;,namespace=&quot;test-gslb&quot;,status=&quot;Unhealthy&quot;} 2</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Healthy"} 1</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="NotFound"} 1</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2</span>
 </code></pre></div>
 <p>Served on <code>0.0.0.0:8383/metrics</code> endpoint</p>
 <h3 id="custom-resource-specific-metrics">Custom resource specific metrics<a class="headerlink" href="#custom-resource-specific-metrics" title="Permanent link">&para;</a></h3>
@@ -2836,7 +2836,7 @@ Metrics endpoints are exposed via <code>-metrics</code> service in operator name
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># HELP gslb_info Information about the Gslb custom resource.</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># TYPE gslb_info gauge</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="l l-Scalar l-Scalar-Plain">gslb_info{namespace=&quot;test-gslb&quot;,gslb=&quot;test-gslb&quot;} 1</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="l l-Scalar l-Scalar-Plain">gslb_info{namespace="test-gslb",gslb="test-gslb"} 1</span>
 </code></pre></div>
 <p>Served on <code>0.0.0.0:8686/metrics</code> endpoint</p>
 <h2 id="metrics_1">Metrics<a class="headerlink" href="#metrics_1" title="Permanent link">&para;</a></h2>

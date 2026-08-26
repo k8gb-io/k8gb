@@ -2915,10 +2915,10 @@ This makes your Ingress the single source of truth for application routing.</p>
 <li><a href="https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer">Kubernetes LoadBalancer Service</a></li>
 <li><a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">Istio Virtual Service</a></li>
 <li>Gateway API Resources(available since <strong>v0.17.0</strong>):</li>
-<li><a href="https://gateway-api.sigs.k8s.io/api-types/httproute/">HTTPRoute</a></li>
-<li><a href="https://gateway-api.sigs.k8s.io/api-types/grpcroute/">GRPCRoute</a></li>
-<li><a href="https://gateway-api.sigs.k8s.io/guides/tcp/">TCPRoute</a></li>
-<li><a href="https://gateway-api.sigs.k8s.io/reference/1.4/spec/?h=udproute#udproute">UDPRoute</a></li>
+<li><a href="https://gateway-api.sigs.k8s.io/reference/api-types/httproute/">HTTPRoute</a></li>
+<li><a href="https://gateway-api.sigs.k8s.io/reference/api-types/grpcroute/">GRPCRoute</a></li>
+<li><a href="https://gateway-api.sigs.k8s.io/guides/user-guides/tcp/">TCPRoute</a></li>
+<li><a href="https://gateway-api.sigs.k8s.io/reference/api-types/udproute/">UDPRoute</a></li>
 <li><a href="https://gateway-api.sigs.k8s.io/geps/gep-2643/?h=tls#tlsroute-tls-passthrough">TLSRoute</a></li>
 </ul>
 <h2 id="1-declaration-by-name">1. Declaration by Name<a class="headerlink" href="#1-declaration-by-name" title="Permanent link">&para;</a></h2>
@@ -2942,7 +2942,7 @@ This makes your Ingress the single source of truth for application routing.</p>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playground-failover</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playground</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">k8gb.io/hostname</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;myapp.example.com&quot;</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">k8gb.io/hostname</span><span class="p">:</span><span class="w"> </span><span class="s">"myapp.example.com"</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nt">spec</span><span class="p">:</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nt">resourceRef</span><span class="p">:</span>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -3067,7 +3067,7 @@ an error.</p>
 <a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
 <a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failover</span>
 <a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">    </span><span class="nt">dnsTtlSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">    </span><span class="nt">primaryGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eu&quot;</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">    </span><span class="nt">primaryGeoTag</span><span class="p">:</span><span class="w"> </span><span class="s">"eu"</span>
 </code></pre></div>
 <blockquote>
 <p><strong>Note:</strong>
@@ -3096,7 +3096,7 @@ If the Ingress is created automatically by a GSLB resource, in addition to an ow
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 23, 2026 11:08:42 UTC">June 23, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 26, 2026 06:17:10 UTC">August 26, 2026</span>
   </span>
 
     

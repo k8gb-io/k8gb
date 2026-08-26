@@ -2859,8 +2859,8 @@ or any Kubernetes deployment method that is convenient to you.</p>
 <p>Remember to change the zone-related values to point configuration to your own DNS zone.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">k8gb</span><span class="p">:</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">dnsZones</span><span class="p">:</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">parentZone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;k8gb.io&quot;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">loadBalancedZone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloudflare-test.k8gb.io&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">parentZone</span><span class="p">:</span><span class="w"> </span><span class="s">"k8gb.io"</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">loadBalancedZone</span><span class="p">:</span><span class="w"> </span><span class="s">"cloudflare-test.k8gb.io"</span>
 </code></pre></div>
 <h3 id="cloudflare-specific-configuration">Cloudflare-specific configuration<a class="headerlink" href="#cloudflare-specific-configuration" title="Permanent link">&para;</a></h3>
 <p>The example linked above shows how to configure a <code>zone-id-filter</code> and the number of <code>cloudflare-dns-records-per-page</code>.
@@ -2868,10 +2868,10 @@ or any Kubernetes deployment method that is convenient to you.</p>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">extraArgs</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="l l-Scalar l-Scalar-Plain"># -- Cloudflare Zone ID</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">zone-id-filter</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;cdebf92e613133e4bb176a14a9c5b730&quot;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">zone-id-filter</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">"cdebf92e613133e4bb176a14a9c5b730"</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="c1"># -- Configure how many DNS records to fetch per request</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="c1"># see https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/cloudflare.md#throttling</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">cloudflare-dns-records-per-page</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5000&quot;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">cloudflare-dns-records-per-page</span><span class="p">:</span><span class="w"> </span><span class="s">"5000"</span>
 </code></pre></div></p>
 <p>For additional configuration options please refer to <a href="https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/cloudflare/">External DNS's documentation</a></p>
 <p>To find your <code>zoneID</code> follow: https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/</p>
@@ -2918,11 +2918,11 @@ similar to the one below:</p>
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nt">metadata</span><span class="p">:</span>
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
 <a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">k8gb.io/dnstype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">extdns</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">creationTimestamp</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2023-11-12T19:55:20Z&quot;</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">creationTimestamp</span><span class="p">:</span><span class="w"> </span><span class="s">"2023-11-12T19:55:20Z"</span>
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nt">generation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 <a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb-ns-extdns</span>
 <a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">  </span><span class="nt">resourceVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5851&quot;</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">  </span><span class="nt">resourceVersion</span><span class="p">:</span><span class="w"> </span><span class="s">"5851"</span>
 <a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span><span class="nt">uid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5d240eb8-1c19-48c3-bf69-508545f52ea4</span>
 <a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="nt">spec</span><span class="p">:</span>
 <a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">  </span><span class="nt">endpoints</span><span class="p">:</span>
