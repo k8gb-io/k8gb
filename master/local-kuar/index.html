@@ -2708,7 +2708,7 @@
 </code></pre></div>
 <p>This task will deploy Kuar into both clusters and exposes it. It also patches the installed nginx controller to serve the app even if the <code>Host</code> header is not provided in the request. This way you can access the application in your browser under http://localhost:80 for cluster 1 and http://localhost:81 for cluster 2.</p>
 <p>Make sure the app on http://localhost is responding, it may take a minute for the nginx ingress controller to restart with the correct parameters.</p>
-<p>The make target also modified the deployment of the Kuar application to use our core DNS servers. To verify that this was done, one can open the Kuar's file system browser tab and <a href="http://localhost/fs/etc/resolv.conf">open</a> <code>/etc/resolv.conv</code>. It should contain the same IP as cluster-IP assigned to <code>k8gb-coredns</code> service.</p>
+<p>The make target also modified the deployment of the Kuar application to use our core DNS servers. To verify that this was done, one can open the Kuar's file system browser tab and <a href="http://localhost/fs/etc/resolv.conf">open</a> <code>/etc/resolv.conf</code>. It should contain the same IP as cluster-IP assigned to <code>k8gb-coredns</code> service.</p>
 <p>Together with Kuar, we also prepared the failover gslb resource for k8gb. Where the first cluster (geotag = <code>eu</code>) is the primary one.</p>
 <h2 id="simulate-failure">Simulate failure<a class="headerlink" href="#simulate-failure" title="Permanent link">&para;</a></h2>
 <p>Before we do that, we can visit Kuar on <a href="http://localhost:81">cluster 2</a> and verify that hostname <code>kuar.cloud.example.com</code> is correctly resolved IPs corresponding to nodes in the primary cluster - which is the cluster 1. This DNS resolution will work the same way on both clusters, but we will be simulating the failure on cluster 1 soon so the web API will not respond on cluster 1.</p>
@@ -2739,7 +2739,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 19, 2025 20:53:26 UTC">July 19, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 26, 2026 10:16:53 UTC">August 26, 2026</span>
   </span>
 
     
