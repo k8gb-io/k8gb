@@ -55,7 +55,7 @@ In this example, we can use a registered app in Microsoft Entra ID and it's corr
 
 ### Install demo app
 
-Deploys the sample Podinfo workload with failover GSLB configured using annotations in the Ingress resource [samples](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azure/demo/).
+Deploys the sample Podinfo workload with failover GSLB. The demo Ingress samples still use the deprecated `k8gb.io/strategy` annotation ([ADR-0001](https://github.com/k8gb-io/k8gb/blob/master/adr/0001-deprecate-configuration-of-gslb-resources-via-annotations.md)); for new installs prefer an explicit `Gslb` + `resourceRef` ([Resource References](resource_ref.md)). Samples: [docs/examples/azure/demo/](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/azure/demo/).
 Ensure that the hosts on the samples are correctly updated before execution
 
 ```sh
