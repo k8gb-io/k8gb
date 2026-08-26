@@ -202,11 +202,11 @@ func TestSplitIPsByVersion(t *testing.T) {
 	}
 }
 
-func TestFilterServersByDelegationZones(t *testing.T) {
+func TestFilterServersByZoneDelegations(t *testing.T) {
 	tests := []struct {
 		name              string
 		servers           []*v1beta1io.Server
-		delegationZones   []string
+		zoneDelegations   []string
 		expectedHostCount int
 		expectedHosts     []string
 	}{
@@ -216,7 +216,7 @@ func TestFilterServersByDelegationZones(t *testing.T) {
 				{Host: "app.cloud.example.com"},
 				{Host: "api.cloud.example.com"},
 			},
-			delegationZones:   []string{"cloud.example.com"},
+			zoneDelegations:   []string{"cloud.example.com"},
 			expectedHostCount: 2,
 			expectedHosts:     []string{"app.cloud.example.com", "api.cloud.example.com"},
 		},
@@ -226,7 +226,7 @@ func TestFilterServersByDelegationZones(t *testing.T) {
 				{Host: "app.other.com"},
 				{Host: "api.other.com"},
 			},
-			delegationZones:   []string{"cloud.example.com"},
+			zoneDelegations:   []string{"cloud.example.com"},
 			expectedHostCount: 0,
 			expectedHosts:     []string{},
 		},
@@ -237,14 +237,14 @@ func TestFilterServersByDelegationZones(t *testing.T) {
 				{Host: "app.other.com"},
 				{Host: "api.cloud.example.com"},
 			},
-			delegationZones:   []string{"cloud.example.com"},
+			zoneDelegations:   []string{"cloud.example.com"},
 			expectedHostCount: 2,
 			expectedHosts:     []string{"app.cloud.example.com", "api.cloud.example.com"},
 		},
 		{
 			name:              "empty servers list",
 			servers:           []*v1beta1io.Server{},
-			delegationZones:   []string{"cloud.example.com"},
+			zoneDelegations:   []string{"cloud.example.com"},
 			expectedHostCount: 0,
 			expectedHosts:     []string{},
 		},
@@ -255,21 +255,21 @@ func TestFilterServersByDelegationZones(t *testing.T) {
 				{Host: "app.zone2.example.com"},
 				{Host: "app.other.com"},
 			},
-			delegationZones:   []string{"zone1.example.com", "zone2.example.com"},
+			zoneDelegations:   []string{"zone1.example.com", "zone2.example.com"},
 			expectedHostCount: 2,
 			expectedHosts:     []string{"app.zone1.example.com", "app.zone2.example.com"},
 		},
 		{
 			name:              "nil servers list",
 			servers:           nil,
-			delegationZones:   []string{"cloud.example.com"},
+			zoneDelegations:   []string{"cloud.example.com"},
 			expectedHostCount: 0,
 			expectedHosts:     []string{},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			zoneDelegations := createTestZonesDelegations(test.delegationZones)
+			zoneDelegations := createTestZonesDelegations(test.zoneDelegations)
 
 			filtered := filterServersByZoneDelegations(test.servers, zoneDelegations)
 

@@ -25,7 +25,7 @@ import (
 func (r *Resolver) ResolveOperatorConfig() (cfg *Config, err error) {
 	cfg = &Config{}
 	_ = kong.Parse(cfg)
-	cfg.DelegationZones, err = parseDelegationZones(cfg)
+	cfg.ZoneDelegations, err = parseZoneDelegations(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,4 @@ func (r *Resolver) ResolveOperatorConfig() (cfg *Config, err error) {
 
 func (c *Config) HasExtClusterGeoTags() bool {
 	return len(c.ExtClustersGeoTagsRaw) > 0
-}
-
-func (c *Config) GetNsName(loadBalancedZone, parentZone string) string {
-	return getNsName(c.ClusterGeoTag, loadBalancedZone, parentZone)
 }

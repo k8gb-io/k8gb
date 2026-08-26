@@ -118,20 +118,6 @@ func (mr *MockZoneDelegationMockRecorder) HasAvailableIPs(ctx any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasAvailableIPs", reflect.TypeOf((*MockZoneDelegation)(nil).HasAvailableIPs), ctx)
 }
 
-// HasExtClusterGeoTags mocks base method.
-func (m *MockZoneDelegation) HasExtClusterGeoTags(ctx context.Context) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HasExtClusterGeoTags", ctx)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// HasExtClusterGeoTags indicates an expected call of HasExtClusterGeoTags.
-func (mr *MockZoneDelegationMockRecorder) HasExtClusterGeoTags(ctx any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasExtClusterGeoTags", reflect.TypeOf((*MockZoneDelegation)(nil).HasExtClusterGeoTags), ctx)
-}
-
 // List mocks base method.
 func (m *MockZoneDelegation) List(ctx context.Context) (*v1beta1io.ZoneDelegationList, error) {
 	m.ctrl.T.Helper()

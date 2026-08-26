@@ -51,8 +51,16 @@ k8gb:
   # If the value remains empty with Infoblox, dynamic geotags are extracted from NS records on the edge DNS.
   # ExternalDNS-based providers (Route53, Cloudflare, etc.) require this value to be set explicitly; see docs/dynamic_geotags.md.
   extGslbClustersGeoTags: "eu,us"
+  # -- A string representing what coreDNS glue A records name should be prefixed with
+  # Default value 'gslb-ns' is kept for backward compatibility. It results into glueA record name following this
+  # pattern: <prefix><tag><converted_zone>.<parentzone> e.g. gslb-ns-eu-cloud.example.com
+  glueAPrefix: "gslb-ns-"
   # -- Reconcile time in seconds
   reconcileRequeueSeconds: 30
+  # -- ZoneDelegation reconcile time in seconds
+  zoneDelegationReconcileRequeueSeconds: 300
+  # -- ZoneDelegation reconcile recovery time in seconds
+  zoneDelegationRecoverySeconds: 60
   # -- TTL of the NS and respective glue record used by external DNS
   nsRecordTTL: 30
 
@@ -228,7 +236,7 @@ tracing:
     # -- OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data
     # to somewhere else using exporters (Jaeger for instance)
     repository: otel/opentelemetry-collector
-    tag: 0.157.0
+    tag: 0.159.0
     pullPolicy: Always
 
   jaegerImage:

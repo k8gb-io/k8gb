@@ -86,10 +86,7 @@ func (z *ZoneDelegationImpl) ResolveAuthoritativeServersFromZoneDelegations(ctx 
 	}
 	authoritativeServers := make(AuthoritativeServers)
 	for _, dnsServer := range zone.Status.DNSServers {
-		geotag, err := zone.ExtractGeoTagFromGlueA(dnsServer.Name)
-		if err != nil {
-			return nil, err
-		}
+		geotag := zone.ExtractGeoTagFromGlueA(dnsServer.Name, z.config.GlueAPrefix)
 		isLocal := geotag == z.config.ClusterGeoTag
 		authoritativeServers[dnsServer.Name] = AuthoritativeServer{IP: dnsServer.Address, GeoTag: geotag, IsLocal: isLocal}
 	}

@@ -7,6 +7,7 @@ This section provides comprehensive tutorials for deploying and configuring K8GB
 * [General deployment with Infoblox integration](deploy_infoblox.md)
 * [AWS based deployment with Route53 integration](deploy_route53.md)
 * [AWS based deployment with NS1 integration](deploy_ns1.md)
+* [Google Cloud DNS provider](provider_gcp.md)
 * [Using Azure Public DNS provider](deploy_azuredns.md)
 * [Azure based deployment with Windows DNS integration](deploy_windowsdns.md)
 * [General deployment with Cloudflare integration](deploy_cloudflare.md)
@@ -16,6 +17,8 @@ This section provides comprehensive tutorials for deploying and configuring K8GB
 
 * [Local playground for testing and development](local.md)
 * [Local playground with Kuar web app](local-kuar.md)
+* [AI Inference Resilience Demo](ai-inference-demo.md)
+* [Rollback Process](rollback_procedures.md)
 
 ## Monitoring and Observability
 
@@ -26,6 +29,7 @@ This section provides comprehensive tutorials for deploying and configuring K8GB
 
 * [Resource References](resource_ref.md)
 * [Address Discovery](address_discovery.md)
+* [Exposed Hostnames](exposed-hostnames.md)
 * [Dynamic Geotags](dynamic_geotags.md)
 * [Dynamic Zones](dynamic_zones.md)
 * [Multi-zone Setup](multizone.md)
@@ -36,9 +40,14 @@ This section provides comprehensive tutorials for deploying and configuring K8GB
 * [Integration with Admiralty](admiralty.md)
 * [Integration with Liqo](liqo.md)
 * [Integration with Rancher Fleet](rancher.md)
+* [Crossplane Global Control Plane](crossplane_globalapp.md)
+* [LoadBalancer Service Integration](lbservice-integration.md)
 
 ## Advanced Topics
 
 * [Service Upgrade](service_upgrade.md)
+* [Partial Deployment Troubleshooting](partial-deployment.md)
+* [Migration Acceptance Tests](migration_acceptance.md)
+* [Split-Brain Scenarios](splitbrain.md)
 * [WRR Caveats](wrr_caveats.md)
 * [External DNS Proxy](proxy_externaldns.md)

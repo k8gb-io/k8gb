@@ -54,7 +54,7 @@ func (r *DynamicResolver) Resolve(zone *v1beta1io.ZoneDelegation) (resolver.Clus
 	}
 
 	// 2.nd dig
-	extClusterNSNames, err := ipresolver.DiscoverNameServers(parentDNSServer, zone, r.config.ClusterGeoTag)
+	extClusterNSNames, err := ipresolver.DiscoverNameServers(parentDNSServer, zone, r.config.ClusterGeoTag, r.config.GlueAPrefix)
 	if err != nil {
 		return extClusterNSNames, fmt.Errorf("ExternalGeoTags: reading geo tags: %w", err)
 	}
