@@ -114,6 +114,28 @@ func testResolution(t *testing.T, parentDNS utils.DNSServer) {
 			},
 		},
 		{
+			name: "dynamic: externaldns ns-merge resolves peers from parent NS",
+			zone: &v1beta1io.ZoneDelegation{
+				Spec: v1beta1io.ZoneDelegationSpec{
+					LoadBalancedZone: "cloud.example.com",
+					ParentZone:       "example.com",
+				},
+			},
+			config: &resolver.Config{
+				ClusterGeoTag:         "us",
+				ExtClustersGeoTagsRaw: nil,
+				EdgeDNSType:           resolver.DNSTypeExternal,
+				ExtDNSNsMergeEnabled:  true,
+				ParentZoneDNSServers:  []utils.DNSServer{parentDNS},
+				GlueAPrefix:           "gslb-ns-",
+			},
+			expectedError: false,
+			result: resolver.ClusterNSNames{
+				"gslb-ns-eu-cloud.example.com": resolver.NewGeoTag(false, "eu"),
+				"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(true, "us"),
+			},
+		},
+		{
 			name: "dynamic: resolve all clusters",
 			zone: &v1beta1io.ZoneDelegation{
 				Spec: v1beta1io.ZoneDelegationSpec{

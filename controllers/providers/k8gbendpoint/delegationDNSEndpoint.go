@@ -76,6 +76,25 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 		Str("provider", string(d.endpointType)).
 		Msg("Creating/Updating DNSEndpoint CR")
 
+	endpoints := []*externaldns.Endpoint{
+		{
+			DNSName:    d.extendedZoneDelegation.ClusterNSName,
+			RecordTTL:  ttl,
+			RecordType: "A",
+			Targets:    d.extendedZoneDelegation.LocalCoreDNSExposedIPs.Unsorted(),
+		},
+	}
+	// Unique-owner ExternalDNS keeps publishing NS only when the shared-owner
+	// merge path is off. Otherwise it would delete the NS RRset it still owns.
+	if !d.config.ExtDNSNsMergeEnabled {
+		endpoints = append([]*externaldns.Endpoint{{
+			DNSName:    d.extendedZoneDelegation.LoadBalancedZone,
+			RecordTTL:  ttl,
+			RecordType: "NS",
+			Targets:    d.extendedZoneDelegation.GetActiveNSServerList(),
+		}}, endpoints...)
+	}
+
 	NSRecord := &externaldnsApi.DNSEndpoint{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      d.extendedZoneDelegation.GetZoneDelegation().GetExternalDNSEndpointName(),
@@ -83,21 +102,29 @@ func (d *DelegationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, e
 			Labels:    map[string]string{dnsTypeAnnotation: externalDNSTypeCommon, legacyDNSTypeAnnotation: externalDNSTypeCommon},
 		},
 		Spec: externaldnsApi.DNSEndpointSpec{
-			Endpoints: []*externaldns.Endpoint{
-				{
-					DNSName:    d.extendedZoneDelegation.LoadBalancedZone,
-					RecordTTL:  ttl,
-					RecordType: "NS",
-					Targets:    d.extendedZoneDelegation.GetActiveNSServerList(),
-				},
-				{
-					DNSName:    d.extendedZoneDelegation.ClusterNSName,
-					RecordTTL:  ttl,
-					RecordType: "A",
-					Targets:    d.extendedZoneDelegation.LocalCoreDNSExposedIPs.Unsorted(),
-				},
-			},
+			Endpoints: endpoints,
 		},
 	}
 	return NSRecord, nil
+}
+
+// GetNsMergeDNSEndpoint is the shared-owner NS RRset. Every cluster writes
+// union(discovered peers, self) so a common txtOwnerId can extend the set.
+func (d *DelegationDNSEndpoint) GetNsMergeDNSEndpoint() (*externaldnsApi.DNSEndpoint, error) {
+	ttl := externaldns.TTL(d.config.NSRecordTTL)
+	return &externaldnsApi.DNSEndpoint{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      d.extendedZoneDelegation.GetZoneDelegation().GetExternalDNSNsMergeEndpointName(),
+			Namespace: d.config.K8gbNamespace,
+			Labels:    map[string]string{dnsTypeAnnotation: externalDNSTypeNsMerge, legacyDNSTypeAnnotation: externalDNSTypeNsMerge},
+		},
+		Spec: externaldnsApi.DNSEndpointSpec{
+			Endpoints: []*externaldns.Endpoint{{
+				DNSName:    d.extendedZoneDelegation.LoadBalancedZone,
+				RecordTTL:  ttl,
+				RecordType: "NS",
+				Targets:    d.extendedZoneDelegation.GetActiveNSServerList(),
+			}},
+		},
+	}, nil
 }
