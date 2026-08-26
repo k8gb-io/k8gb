@@ -2530,7 +2530,7 @@ automatically configure DNS zone delegation.</p>
 <li>Check test application availability.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>failover.test.k8gb.io<span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>message
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="s2">&quot;message&quot;</span>:<span class="w"> </span><span class="s2">&quot;eu-west-1&quot;</span>,
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="s2">"message"</span>:<span class="w"> </span><span class="s2">"eu-west-1"</span>,
 </code></pre></div>
 <p>Replace <code>failover.test.k8gb.io</code> with the domain you specified in Gslb spec.</p>
 <p>Notice that traffic was routed to <code>eu-west-1</code>.</p>
@@ -2556,7 +2556,7 @@ automatically configure DNS zone delegation.</p>
 <li>Check failover to <code>us-east-1</code></li>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>failover.test.k8gb.io<span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>message
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="s2">&quot;message&quot;</span>:<span class="w"> </span><span class="s2">&quot;us-east-1&quot;</span>,
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="s2">"message"</span>:<span class="w"> </span><span class="s2">"us-east-1"</span>,
 </code></pre></div>
 <p>Notice that traffic is properly failed over to <code>us-east-1</code></p>
 <ul>
