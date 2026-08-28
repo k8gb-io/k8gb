@@ -1,4 +1,5 @@
 k8gb:
+  extGslbClustersGeoTags: "eu,us"
   dnsZones:
     - parentZone: "k8gb.io"
       loadBalancedZone: "cloud.k8gb.io"
@@ -12,11 +13,15 @@ extdns:
     name: aws
   domainFilters:
   - k8gb.io
+  zoneIdFilters:
+  - ZONE_ID_TODO
+  extraArgs:
+  - --zone-id-filter=ZONE_ID_TODO
   env:
   - name: AWS_DEFAULT_REGION
     value: "us-east-1"
   - name: AWS_SHARED_CREDENTIALS_FILE
-    value: .aws/credentials
+    value: "/.aws/credentials"
   extraVolumes:
   - name: aws-credentials
     secret:

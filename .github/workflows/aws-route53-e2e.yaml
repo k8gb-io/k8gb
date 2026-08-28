@@ -1,0 +1,65 @@
+name: AWS Route53 E2E Integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths-ignore:
+      - '**.md'
+      - '**.svg'
+      - '**.drawio'
+      - '.spelling'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aws-route53-e2e-single-run
+  cancel-in-progress: false
+
+jobs:
+  route53-e2e:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'run-aws-e2e')
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: 1.9.0
+
+      - name: Setup golang
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ./go.mod
+
+      - name: Setup helm
+        uses: azure/setup-helm@v5
+        with:
+          version: v4.2.3
+
+      - name: Install k3d
+        run: |
+          wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=v5.8.3 bash
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Run Route53 Integration Test
+        run: make test-route53
+
+      - name: Cleanup on Failure / Completion
+        if: always()
+        run: |
+          cd dns-provider-test/route53/opentofu || true
+          tofu destroy -auto-approve -var="dns_zone_name=k8gb.io" || true
+          cd ../../../ || true
+          make destroy-full-local-setup || true
