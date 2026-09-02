@@ -1,5 +1,7 @@
 k8gb:
   reconcileRequeueSeconds: 10
+  zoneDelegationReconcileRequeueSeconds: 10
+  zoneDelegationRecoverySeconds: 10
 
   extraVolumeMounts:
     - name: dynamic-zones
