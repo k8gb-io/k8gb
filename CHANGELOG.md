@@ -1,5 +1,76 @@
 # Changelog
 
+## [v1.0.0](https://github.com/k8gb-io/k8gb/tree/v1.0.0) (2026-09-02)
+
+<!-- Release notes generated using configuration in .github/release.yml at v1.0.0 -->
+
+## What's Changed
+
+This release marks a major milestone for k8gb as a CNCF Incubating project and reflects the project's maturity.
+
+### Features, fixes, and maintenance
+* Add 2026-07-08 community meeting agenda by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2422
+* fix: coredns reads metrics local address instead external IP or LB by @kuritka in https://github.com/k8gb-io/k8gb/pull/2418
+* fix: make DNSZones optional by @kuritka in https://github.com/k8gb-io/k8gb/pull/2425
+* fix: stop reconciliation when ZoneDelegation not found by @kuritka in https://github.com/k8gb-io/k8gb/pull/2426
+* feat: dynamic geotags refactor for ZoneDelegation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2427
+* docs: clarify dynamic zone cluster participation by @dejoski in https://github.com/k8gb-io/k8gb/pull/2404
+* ci: avoid cancelled Chainsaw checks by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2429
+* docs: update CNCF maturity to Incubating by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2436
+* ZoneDelegation.md - setup section by @kuritka in https://github.com/k8gb-io/k8gb/pull/2431
+* docs: update v0.20.0 maturity to Incubating by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2437
+* docs: add July 22 community meeting agenda by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2438
+* fix: default CoreDNS endpoint for empty ZoneDelegation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2440
+* fix: (ZoneDelegations) allow empty dnsZones by @kuritka in https://github.com/k8gb-io/k8gb/pull/2441
+* Fix: complex geotag discovery by @kuritka in https://github.com/k8gb-io/k8gb/pull/2459
+* RELEASE: v0.21.0-rc1 by @kuritka in https://github.com/k8gb-io/k8gb/pull/2460
+* fix mermaid chart rendering on ai inference demo by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2443
+* feat: override discovered exposed IPs via CLUSTER_EXPOSED_IPS by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2402
+* dynamic_geotags.md - explain usage by @kuritka in https://github.com/k8gb-io/k8gb/pull/2432
+* docs: document partial Gslb deployment behavior by @Goutham-Annem in https://github.com/k8gb-io/k8gb/pull/2399
+* feat: refactor ExtClusterNSNames by @kuritka in https://github.com/k8gb-io/k8gb/pull/2467
+* fix: clarify reconciliation message by @kuritka in https://github.com/k8gb-io/k8gb/pull/2469
+* Fix dynmaic tags discovery for new zones by @k0da in https://github.com/k8gb-io/k8gb/pull/2468
+* feat: bump `go.mod` dependencies by @kuritka in https://github.com/k8gb-io/k8gb/pull/2463
+* refactor: rfc1035 validation moved to utils by @kuritka in https://github.com/k8gb-io/k8gb/pull/2471
+* docs: clean up website navigation warnings by @nightcityblade in https://github.com/k8gb-io/k8gb/pull/2445
+* fix(docs): correct broken internal markdown links by @immanuwell in https://github.com/k8gb-io/k8gb/pull/2383
+* RELEASE: v0.21.0-rc2 by @k0da in https://github.com/k8gb-io/k8gb/pull/2472
+* docs: document why Dynamic GeoTags cannot work with ExternalDNS (#2464) by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2466
+* add 2026-08-05 community meeting notes by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2493
+* fix: zone delegation reconciliation panics on invalid rfc1035 by @kuritka in https://github.com/k8gb-io/k8gb/pull/2497
+* feat: ZONE_DELEGATION_RECONCILE_REQUEUE_SECONDS as dedicated value fo… by @kuritka in https://github.com/k8gb-io/k8gb/pull/2500
+* RELEASE: v0.21.0-rc3 by @k0da in https://github.com/k8gb-io/k8gb/pull/2501
+* Fix empty CoreDNS readiness by @k0da in https://github.com/k8gb-io/k8gb/pull/2503
+* refactor: Replace Delegationzone by ZoneDelegation by @kuritka in https://github.com/k8gb-io/k8gb/pull/2490
+* feat: Add support of custom glue A prefix by @k0da in https://github.com/k8gb-io/k8gb/pull/2505
+* refactor: remove extClusterGeoTags from ZD wrapper by @kuritka in https://github.com/k8gb-io/k8gb/pull/2506
+* RELEASE: v0.21.0-rc4 by @k0da in https://github.com/k8gb-io/k8gb/pull/2508
+* docs: fix broken Gateway API, golangci-lint, and Crossplane image links by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2479
+* docs: fix local.md Gslb sample links via canonical filenames by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2484
+* docs: polish ADOPTERS, tutorials index, typos, and registry notes by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2487
+* docs: resolve ADR-0001 with deferred annotation removal by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2486
+* Bump CoreDNS CRD Plugin to v0.6.0 by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2514
+* RELEASE: v1.0.0 by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2518
+### Dependencies
+* Update dependency k8gb-io/k8gb to v0.20.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2421
+* fix(deps): update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2419
+* chore(deps): update go module directive to v1.26.5 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2423
+* chore(deps): update otel/opentelemetry-collector docker tag to v0.157.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2424
+* chore(deps): update otel/opentelemetry-collector docker tag to v0.159.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2492
+* chore(deps): update actions/setup-go action to v7 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2428
+* chore(deps): update actions/setup-python action to v7 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2435
+
+## New Contributors
+* @dejoski made their first contribution in https://github.com/k8gb-io/k8gb/pull/2404
+* @Goutham-Annem made their first contribution in https://github.com/k8gb-io/k8gb/pull/2399
+* @nightcityblade made their first contribution in https://github.com/k8gb-io/k8gb/pull/2445
+
+**Full Changelog**: https://github.com/k8gb-io/k8gb/compare/v0.20.0...v1.0.0
+
+:rocket:
+
+
 ## [v0.21.0-rc2](https://github.com/k8gb-io/k8gb/tree/v0.21.0-rc2) (2026-08-01)
 
 ## Changelog
