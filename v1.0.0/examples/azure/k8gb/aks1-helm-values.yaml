@@ -1,0 +1,38 @@
+k8gb:
+  # -- dnsZone controlled by gslb
+  dnsZones:
+    - loadBalancedZone: "demo.k8gb-kubeconeu2023.com" # -- dnsZone controlled by gslb
+      parentZone: "k8gb-kubeconeu2023.com" # -- main zone which would contain gslb zone to delegate
+      dnsZoneNegTTL: 300 # -- Negative TTL for SOA record
+  # -- host/ip[:port] format is supported here where port defaults to 53
+  edgeDNSServers:
+    # -- use these DNS server as a main resolver to enable cross k8gb DNS based communication
+    - "1.1.1.1"
+    - "8.8.8.8"
+  # -- used for places where we need to distinguish between different Gslb instances
+  clusterGeoTag: "uksouth"
+  # -- comma-separated list of external gslb geo tags to pair with
+  extGslbClustersGeoTags: "francecentral"
+  # -- Reconcile time in seconds
+  reconcileRequeueSeconds: 10
+
+extdns:
+  enabled: true
+  fullnameOverride: "k8gb-external-dns"
+  provider:
+    name: azure-dns
+  txtPrefix: "k8gb-uksouth-"
+  txtOwnerId: "k8gb-demo.k8gb-kubeconeu2023.com-uksouth"
+  domainFilters:
+    - k8gb-kubeconeu2023.com
+  extraVolumes:
+    - name: azure-config-file
+      secret:
+        secretName: external-dns-secret-azure
+  extraVolumeMounts:
+    - name: azure-config-file
+      mountPath: /etc/kubernetes/
+      readOnly: true
+  extraArgs:
+    azure-resource-group: k8gb-kubeconeu2023
+  interval: "10s"

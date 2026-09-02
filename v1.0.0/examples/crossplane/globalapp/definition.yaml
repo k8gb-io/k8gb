@@ -1,0 +1,118 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: globalapps.example.crossplane.io
+spec:
+  group: example.crossplane.io
+  names:
+    categories:
+    - crossplane
+    kind: GlobalApp
+    plural: globalapps
+  versions:
+  - name: v1
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        description: GlobalApp is the Schema for the GlobalApp API.
+        properties:
+          spec:
+            description: GlobalAppSpec defines the desired state of GlobalApp.
+            type: object
+            properties:
+              region:
+                type: string
+                description: Azure region for resource deployment
+                default: "West US"
+              primaryGeoTag:
+                type: string
+                description: Primary geo tag for GSLB failover strategy
+                default: "eu"
+              namespace:
+                type: string
+                description: Kubernetes namespace for application deployment
+                default: "demo"
+              hostname:
+                type: string
+                description: Hostname for the application ingress
+                default: "globalapp.cloud.example.com"
+              managementPolicies:
+                type: array
+                description: Management policies for infrastructure resources (Active vs Passive control plane)
+                items:
+                  type: string
+                default: ["*"]
+              autoApplyRecommendedPolicy:
+                type: boolean
+                description: Whether to automatically apply the recommended management policy based on GSLB status
+                default: false
+          status:
+            description: GlobalAppStatus defines the observed state of GlobalApp.
+            type: object
+            properties:
+              infrastructure:
+                type: object
+                description: Infrastructure component status
+                properties:
+                  resourceGroup:
+                    type: string
+                    description: Azure resource group status
+                  redis:
+                    type: string
+                    description: Redis cache status
+              application:
+                type: object
+                description: Application component status
+                properties:
+                  podinfo:
+                    type: string
+                    description: Podinfo deployment status
+                  gslb:
+                    type: string
+                    description: GSLB resource creation status
+              gslb:
+                type: object
+                description: GSLB monitoring status
+                properties:
+                  healthy:
+                    type: string
+                    description: GSLB health status across all domains
+                  geoTag:
+                    type: string
+                    description: Geographic tag from observed GSLB status
+                  isActiveCluster:
+                    type: boolean
+                    description: Whether this cluster is currently receiving traffic from GSLB
+                  recommendedPolicy:
+                    type: string
+                    description: Recommended management policy based on GSLB state
+                  policyReason:
+                    type: string
+                    description: Reason for the recommended policy change
+                  debugHealthyRecords:
+                    type: string
+                    description: Debug info showing healthy records from GSLB
+                  debugExposedIps:
+                    type: string
+                    description: Debug info showing exposed IPs from GSLB
+                  autoApplyEnabled:
+                    type: boolean
+                    description: Whether auto-apply is enabled
+                  appliedPolicy:
+                    type: string
+                    description: The policy actually applied to infrastructure resources
+                  autoApplyStatus:
+                    type: string
+                    description: Status message about auto-apply behavior
+        required:
+        - spec
+        type: object
+    served: true
+status:
+  controllers:
+    compositeResourceClaimType:
+      apiVersion: ""
+      kind: ""
+    compositeResourceType:
+      apiVersion: ""
+      kind: ""

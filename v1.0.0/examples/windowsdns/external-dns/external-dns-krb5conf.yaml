@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kerberos-config-volume
+  namespace: k8gb
+data:
+  krb5.conf: |
+    [logging]
+      default = FILE:/var/log/krb5libs.log
+      kdc = FILE:/var/log/krb5kdc.log
+      admin_server = FILE:/var/log/kadmind.log
+
+    [libdefaults]
+      dns_lookup_realm = false
+      ticket_lifetime = 24h
+      renew_lifetime = 7d
+      forwardable = true
+      rdns = false
+      default_ccache_name = KEYRING:persistent:%{uid}
+      default_realm = K8GB.LOCAL
+
+    [realms]
+     K8GB.LOCAL = {
+      kdc = dc.k8gb.local:88
+      admin_server = dc.k8gb.local
+    }
+
+    [domain_realm]
+      k8gb.local = K8GB.LOCAL
+      .k8gb.local = K8GB.LOCAL
