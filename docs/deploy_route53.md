@@ -25,7 +25,9 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 
 Example helm configuration files can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53/k8gb)
 
-Modify them to reflect your `dnsZone`, `edgeDNSZone`, valid `hostedZoneID` and `irsaRole` ARN.
+Modify them to reflect your `k8gb.dnsZones` (`loadBalancedZone` / `parentZone`), valid `hostedZoneID` / IRSA role ARN under `extdns`, and related settings.
+
+> **Legacy note:** older docs used top-level `dnsZone` / `edgeDNSZone`; prefer `dnsZones` (see [Multizone Support](multizone.md)).
 
 Clone k8gb repository and use `helm` with custom values
 
@@ -75,7 +77,7 @@ kubectl -n test-gslb get gslb test-gslb-failover -o yaml
 aws route53 list-resource-record-sets --hosted-zone-id $YOUR_HOSTED_ZONE_ID
 ```
 
-You should see that `gslb-ns-$dnsZone-$geotag` NS and glue A records were created to
+You should see that `gslb-ns-$loadBalancedZone-$geotag` NS and glue A records were created to
 automatically configure DNS zone delegation.
 
 * Check test application availability.
