@@ -140,9 +140,9 @@ k8gb is tested with the following environment options and integration scenarios.
 |----------------------------------|------------------------------------------------------------------------------|
 | Kubernetes Version               | >= `1.21`                                                                    |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud                        |
-| Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller [*](#clarify)                     |
+| Ingress / Gateway                | Gateway API (recommended), Istio, AWS Load Balancer Controller; Ingress NGINX only as legacy [*](#clarify) |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS                  |
-| Ingress Integration Modes        | Kubernetes Ingress (embedded/referenced), Istio (VirtualService + Gateway)   |
+| Ingress Integration Modes        | Gateway API (`HTTPRoute` / related), Kubernetes Ingress (embedded/referenced), Istio (VirtualService + Gateway) |
 | Automated E2E Validation         | Multi-cluster automated E2E testing with Terratest and Chainsaw               |
 
 <a name="clarify"></a>
