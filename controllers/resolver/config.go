@@ -60,6 +60,11 @@ type Config struct {
 
 	ExtDNSEnabledRaw bool `env:"EXTDNS_ENABLED" optional:"" default:"false" help:"if true K8gb uses ExternalDNS"`
 
+	// ExtDNSNsMergeEnabled enables Dynamic GeoTags for ExternalDNS. A second
+	// ExternalDNS instance with a cluster-shared txtOwnerId must watch
+	// DNSEndpoints labeled k8gb.io/dnstype=extdns-ns. See docs/dynamic_geotags.md.
+	ExtDNSNsMergeEnabled bool `env:"EXTDNS_NS_MERGE_ENABLED" optional:"" default:"false" help:"if true k8gb publishes zone-delegation NS records on a shared-owner ExternalDNS path so Dynamic GeoTags can converge"`
+
 	MetricsAddress string `env:"METRICS_ADDRESS" optional:"" default:"0.0.0.0:8080" validate:"iphostport" help:"format address:port where address can be empty, IP address, or hostname, e.g: 10.10.0.0:8080"`
 
 	TracingEnabled bool `env:"TRACING_ENABLED" optional:"" default:"false" help:"decides whether to use a real otlp tracer or a noop one"`
