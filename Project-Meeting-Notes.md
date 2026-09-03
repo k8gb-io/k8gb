@@ -27,8 +27,35 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
+<details open><summary><strong>🎉 September 2, 2026 #100 🎉</strong></summary>
 
-<details open><summary><strong>August 5, 2026 #98</strong></summary>
+## September 2, 2026 #100
+
+**Attendees**
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**]()
+
+[**On YouTube**]()
+
+**News**
+
+**Agenda**
+
+- Release v1.0!!
+
+**Actions**
+
+- Move the community meeting to a US-friendly time.
+- Docs PRs overview by @aryasoni98 
+
+</details>
+
+<details><summary><strong>August 5, 2026 #98</strong></summary>
 
 ## August 5, 2026 #98
 
