@@ -233,6 +233,18 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 				Msg("can't resolve FQDN using nameservers")
 			continue
 		}
+		// Fall back to legacy dash-prefix naming for backward compatibility during migration
+		if len(d.queryService.ExtractARecords(dnsResult.Msg)) == 0 {
+			lHostLegacy, err := getLocalTargetsHostLegacy(host)
+			if err != nil {
+				continue
+			}
+			dnsResultLegacy := d.queryService.Query(lHostLegacy, nameServersToUse)
+			if dnsResultLegacy.Err != nil {
+				continue
+			}
+			dnsResult = dnsResultLegacy
+		}
 		clusterTargets := d.queryService.ExtractARecords(dnsResult.Msg)
 		if len(clusterTargets) > 0 {
 			targets[authServer.GeoTag] = &Target{clusterTargets}

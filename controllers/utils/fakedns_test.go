@@ -109,15 +109,15 @@ func TestFakeDNSBasic(t *testing.T) {
 func TestFakeDNSStress(t *testing.T) {
 	for i := 1; i < 10; i++ {
 		NewFakeDNS(testSettings).
-			AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
-			AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
-			AddARecord("localtargets-roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
-			AddTXTRecord("localtargets-heartbeat-us.cloud.example.com.", "5m").
+			AddARecord("localtargets.roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 3)).
+			AddARecord("localtargets.roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 2)).
+			AddARecord("localtargets.roundrobin.cloud.example.com.", net.IPv4(10, 1, 0, 1)).
+			AddTXTRecord("localtargets.heartbeat-us.cloud.example.com.", "5m").
 			Start().
 			RunTestFunc(func() {
 				t.Log("FakeDNS test: ", i)
 				g := new(dns.Msg)
-				g.SetQuestion("localtargets-roundrobin.cloud.example.com.", dns.TypeA)
+				g.SetQuestion("localtargets.roundrobin.cloud.example.com.", dns.TypeA)
 				// put server under load....
 				for i := 0; i <= 100; i++ {
 					a, err := dns.Exchange(g, fmt.Sprintf("%s:%v", server, port))
