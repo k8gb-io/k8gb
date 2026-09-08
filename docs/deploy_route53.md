@@ -85,7 +85,7 @@ curl -s failover.test.k8gb.io| grep message
   "message": "eu-west-1",
 ```
 
- Replace `failover.test.k8gb.io` with the domain you specified in Gslb spec.
+ Replace `failover.test.k8gb.io` with the domain you specified in the Ingress spec.
 
 Notice that traffic was routed to `eu-west-1`.
 
