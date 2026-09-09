@@ -2726,53 +2726,51 @@ More in detail, this enables improved load balancing and distribution of the ext
 <p>The figure below outlines the high-level scenario, with a client consuming an application from either cluster 1 (e.g., located in EU) or cluster 2 (e.g., located in the US), based on the endpoint returned by the DNS server.</p>
 <p><img alt="Global Ingress Overview" src="../images/gslb-liqo-integration.drawio.svg" /></p>
 <h2 id="setup-environment">Setup Environment<a class="headerlink" href="#setup-environment" title="Permanent link">&para;</a></h2>
-<p>Checkout the <a href="https://docs.liqo.io/en/v0.5.4/examples/global-ingress.html">liqo docs</a> to get the environment setup script and to get more details.
-It creates the k3d clusters required for the K8GB playground as described in <a href="../local/">Local playground for testing and development</a> and installs Liqo over them.</p>
+<p>The commands below assume k8gb and Liqo 1.x are installed in both clusters. See <a href="../local/">Local playground for testing and development</a> for k8gb setup and the <a href="https://docs.liqo.io/en/stable/installation/install.html">Liqo installation guide</a> for Liqo. Use a <code>liqoctl</code> version that matches the installed Liqo version.</p>
+<p>Export <code>KUBECONFIG</code> with the path of the <em>gslb-eu</em> cluster's kubeconfig and <code>KUBECONFIG_US</code> with the path of the <em>gslb-us</em> cluster's kubeconfig. This also selects <em>gslb-eu</em> for the subsequent <code>kubectl</code> and Helm commands.</p>
 <h2 id="peer-the-clusters">Peer the clusters<a class="headerlink" href="#peer-the-clusters" title="Permanent link">&para;</a></h2>
-<p>To proceed, first generate a new <em>peer command</em> from the <em>gslb-us</em> cluster:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">PEER_US</span><span class="o">=</span><span class="k">$(</span>liqoctl<span class="w"> </span>generate<span class="w"> </span>peer-command<span class="w"> </span>--only-command<span class="w"> </span>--kubeconfig<span class="w"> </span><span class="nv">$KUBECONFIG_US</span><span class="k">)</span>
+<p>To proceed, establish a peering from the <em>gslb-eu</em> cluster (consumer) to the <em>gslb-us</em> cluster (provider) with <code>liqoctl peer</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>liqoctl<span class="w"> </span>peer<span class="w"> </span>--kubeconfig<span class="w"> </span><span class="s2">"</span><span class="nv">$KUBECONFIG</span><span class="s2">"</span><span class="w"> </span>--remote-kubeconfig<span class="w"> </span><span class="s2">"</span><span class="nv">$KUBECONFIG_US</span><span class="s2">"</span>
 </code></pre></div>
-<p>And then, run the generated command from the <em>gslb-eu</em> cluster:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$PEER_US</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
-</code></pre></div>
+<p><code>liqoctl</code> needs the kubeconfigs of both clusters: it applies resources on both sides and connects them. See the <a href="https://docs.liqo.io/en/stable/usage/peer.html">Liqo peering docs</a> for details.</p>
 <h2 id="deploy-an-application">Deploy an application<a class="headerlink" href="#deploy-an-application" title="Permanent link">&para;</a></h2>
 <p>First, create a hosting namespace in the <em>gslb-eu</em> cluster, and offload it to the remote cluster through Liqo.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>podinfo
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>liqoctl<span class="w"> </span>offload<span class="w"> </span>namespace<span class="w"> </span>podinfo<span class="w"> </span>--namespace-mapping-strategy<span class="w"> </span>EnforceSameName
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>podinfo
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>liqoctl<span class="w"> </span>offload<span class="w"> </span>namespace<span class="w"> </span>podinfo<span class="w"> </span>--namespace-mapping-strategy<span class="w"> </span>EnforceSameName
 </code></pre></div>
 <p>At this point, it is possible to deploy the <em>podinfo</em> helm chart in the <code>podinfo</code> namespace:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>podinfo<span class="w"> </span>--namespace<span class="w"> </span>podinfo<span class="w"> </span>podinfo/podinfo<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span>-f<span class="w"> </span>https://raw.githubusercontent.com/liqotech/liqo/master/examples/global-ingress/manifests/values/podinfo.yaml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>podinfo<span class="w"> </span>--namespace<span class="w"> </span>podinfo<span class="w"> </span>podinfo/podinfo<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span>-f<span class="w"> </span>https://raw.githubusercontent.com/liqotech/liqo/master/examples/global-ingress/manifests/values/podinfo.yaml
 </code></pre></div>
 <p>This chart creates a <em>Deployment</em> with a <em>custom affinity</em> to ensure that the two frontend replicas are scheduled on different nodes and clusters:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">affinity</span><span class="p">:</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">nodeAffinity</span><span class="p">:</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="nt">nodeSelectorTerms</span><span class="p">:</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchExpressions</span><span class="p">:</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node-role.kubernetes.io/control-plane</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">          </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DoesNotExist</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">labelSelector</span><span class="p">:</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">        </span><span class="nt">matchExpressions</span><span class="p">:</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app.kubernetes.io/name</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">          </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">In</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">          </span><span class="nt">values</span><span class="p">:</span>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">      </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="s">"kubernetes.io/hostname"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">affinity</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">nodeAffinity</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">nodeSelectorTerms</span><span class="p">:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchExpressions</span><span class="p">:</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node-role.kubernetes.io/control-plane</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">          </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DoesNotExist</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">labelSelector</span><span class="p">:</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="nt">matchExpressions</span><span class="p">:</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app.kubernetes.io/name</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">          </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">In</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">          </span><span class="nt">values</span><span class="p">:</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">      </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="s">"kubernetes.io/hostname"</span>
 </code></pre></div>
 <p>Additionally, it creates a <em>Gslb</em> resource configured to distribute the traffic across the different clusters.
 The application is an HTTP service, you can contact it using the <em>curl</em> command.
 Use the <code>-v</code> option to understand which of the nodes is being targeted.</p>
 <p>You need to use the DNS server in order to resolve the hostname to the IP address of the service.
 To this end, create a pod in one of the clusters (it does not matter which one) overriding its DNS configuration.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">HOSTNAME</span><span class="o">=</span><span class="s2">"liqo.cloud.example.com"</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">K8GB_COREDNS_IP</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>k8gb-coredns<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-o<span class="w"> </span>custom-columns<span class="o">=</span><span class="s1">'IP:spec.clusterIP'</span><span class="w"> </span>--no-headers<span class="k">)</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>kubectl<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>curl<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--image<span class="o">=</span>curlimages/curl:7.82.0<span class="w"> </span>--command<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span>--overrides<span class="w"> </span><span class="s2">"{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"</span><span class="si">${</span><span class="nv">K8GB_COREDNS_IP</span><span class="si">}</span><span class="s2">\"]},\"dnsPolicy\":\"None\"}}"</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span>--<span class="w"> </span>curl<span class="w"> </span><span class="nv">$HOSTNAME</span><span class="w"> </span>-v
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nv">HOSTNAME</span><span class="o">=</span><span class="s2">"liqo.cloud.example.com"</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">K8GB_COREDNS_IP</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>k8gb-coredns<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-o<span class="w"> </span>custom-columns<span class="o">=</span><span class="s1">'IP:spec.clusterIP'</span><span class="w"> </span>--no-headers<span class="k">)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>kubectl<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>curl<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--image<span class="o">=</span>curlimages/curl:8.21.0<span class="w"> </span>--command<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span>--overrides<span class="w"> </span><span class="s2">"{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"</span><span class="si">${</span><span class="nv">K8GB_COREDNS_IP</span><span class="si">}</span><span class="s2">\"]},\"dnsPolicy\":\"None\"}}"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span>--<span class="w"> </span>curl<span class="w"> </span><span class="nv">$HOSTNAME</span><span class="w"> </span>-v
 </code></pre></div>
 
 
@@ -2796,7 +2794,7 @@ To this end, create a pod in one of the clusters (it does not matter which one) 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 9, 2026 19:07:07 UTC">January 9, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 9, 2026 08:30:58 UTC">September 9, 2026</span>
   </span>
 
     
