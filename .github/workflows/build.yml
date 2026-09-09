@@ -32,9 +32,7 @@ jobs:
       with:
         egress-policy: block
         allowed-endpoints: |
-          github.com:443
           api.github.com:443
-          objects.githubusercontent.com:443
 
     - id: skip_check
       uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578 # v5.3.2
@@ -51,6 +49,8 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
+      # Harden Runner also drops public UDP/53 in audit mode. Keep this job exempt until
+      # controllers/utils/dns_test.go uses local DNS fixtures; otherwise tests fail or skip.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0

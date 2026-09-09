@@ -24,15 +24,30 @@ jobs:
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
+          # Audit: https://github.com/k8gb-io/k8gb/actions/runs/33623850616
+          # Helm installer/dependencies, k3d image pulls, and chart installation smoke test.
           allowed-endpoints: |
-            github.com:443
             api.github.com:443
+            github.com:443
             objects.githubusercontent.com:443
-            kubernetes-charts.github.io:443
+            raw.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudfront.docker.com:443
+            ghcr.io:443
+            pkg-containers.githubusercontent.com:443
+            get.helm.sh:443
+            coredns.github.io:443
+            kubernetes-sigs.github.io:443
             k8gb.io:443
             www.k8gb.io:443
+            registry.k8gb.io:443
             gcr.io:443
+            k8s.gcr.io:443
             registry.k8s.io:443
+            cdn.registry.k8s.io:443
+            *-docker.pkg.dev:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

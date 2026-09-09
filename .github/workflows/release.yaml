@@ -30,20 +30,33 @@ jobs:
       COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
+          # Audit: https://github.com/k8gb-io/k8gb/actions/runs/33623099190
+          # Installers, Go modules, multi-arch images, SBOM data, signing trust root, and release uploads.
           allowed-endpoints: |
-            github.com:443
             api.github.com:443
+            github.com:443
             objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            go.dev:443
+            dl.google.com:443
             proxy.golang.org:443
+            storage.googleapis.com:443
             sum.golang.org:443
-            sumdb.google.dev:443
-            hub.docker.com:443
-            gcr.io:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudfront.docker.com:443
             ghcr.io:443
-            sigstore.github.io:443
+            pkg-containers.githubusercontent.com:443
+            uploads.github.com:443
+            models.github.ai:443
+            gcr.io:443
+            get.anchore.io:443
+            toolbox-data.anchore.io:443
+            tuf-repo-cdn.sigstore.dev:443
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
@@ -175,14 +188,21 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
+          # Cosign/Syft installers, registry blobs, SBOM data, and signing trust root.
           allowed-endpoints: |
-            github.com:443
             api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
             ghcr.io:443
-            sigstore.github.io:443
+            pkg-containers.githubusercontent.com:443
+            get.anchore.io:443
+            toolbox-data.anchore.io:443
+            tuf-repo-cdn.sigstore.dev:443
 
       - name: Install cosign
         uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # renovate: tag=v3.3.0
@@ -256,12 +276,13 @@ jobs:
       CONTAINER_INFO: "${{ needs.release.outputs.container_info }}"
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
+          # GitHub runner service endpoints are also allowed implicitly by Harden Runner.
           allowed-endpoints: |
-            github.com:443
             api.github.com:443
+            github.com:443
 
       - name: Make summary for the release pipeline
         run: |

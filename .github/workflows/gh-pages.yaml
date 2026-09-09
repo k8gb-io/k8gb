@@ -25,9 +25,13 @@ jobs:
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
+          # Python installer/tool-cache misses, PyPI packages, and git publication.
           allowed-endpoints: |
-            github.com:443
             api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
             pypi.org:443
             files.pythonhosted.org:443
 

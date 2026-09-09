@@ -30,16 +30,20 @@ jobs:
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
+          # Audit: https://github.com/k8gb-io/k8gb/actions/runs/33623974848
+          # Cosign installation, OCI blobs, and keyless signing/verification (including timestamps).
           allowed-endpoints: |
-            github.com:443
             api.github.com:443
+            github.com:443
             objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
             ghcr.io:443
-            sigstore.github.io:443
+            pkg-containers.githubusercontent.com:443
             fulcio.sigstore.dev:443
             rekor.sigstore.dev:443
+            timestamp.sigstore.dev:443
             tuf-repo-cdn.sigstore.dev:443
-            token.actions.githubusercontent.com:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
