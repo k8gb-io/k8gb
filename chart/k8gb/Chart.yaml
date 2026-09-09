@@ -5,7 +5,7 @@ icon: https://www.k8gb.io/images/k8gb-icon-color.svg
 type: application
 version: v1.0.0
 appVersion: v1.0.0
-kubeVersion: ">= 1.21.0-0"
+kubeVersion: ">= 1.32.0-0"
 
 dependencies:
   - name: coredns

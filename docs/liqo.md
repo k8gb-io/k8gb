@@ -13,22 +13,19 @@ The figure below outlines the high-level scenario, with a client consuming an ap
 
 ## Setup Environment
 
-Checkout the [liqo docs](https://docs.liqo.io/en/v0.5.4/examples/global-ingress.html) to get the environment setup script and to get more details.
-It creates the k3d clusters required for the K8GB playground as described in [Local playground for testing and development](local.md) and installs Liqo over them.
+The commands below assume k8gb and Liqo 1.x are installed in both clusters. See [Local playground for testing and development](local.md) for k8gb setup and the [Liqo installation guide](https://docs.liqo.io/en/stable/installation/install.html) for Liqo. Use a `liqoctl` version that matches the installed Liqo version.
+
+Export `KUBECONFIG` with the path of the *gslb-eu* cluster's kubeconfig and `KUBECONFIG_US` with the path of the *gslb-us* cluster's kubeconfig. This also selects *gslb-eu* for the subsequent `kubectl` and Helm commands.
 
 ## Peer the clusters
 
-To proceed, first generate a new *peer command* from the *gslb-us* cluster:
+To proceed, establish a peering from the *gslb-eu* cluster (consumer) to the *gslb-us* cluster (provider) with `liqoctl peer`:
 
 ```bash
-PEER_US=$(liqoctl generate peer-command --only-command --kubeconfig $KUBECONFIG_US)
+liqoctl peer --kubeconfig "$KUBECONFIG" --remote-kubeconfig "$KUBECONFIG_US"
 ```
 
-And then, run the generated command from the *gslb-eu* cluster:
-
-```bash
-echo "$PEER_US" | bash
-```
+`liqoctl` needs the kubeconfigs of both clusters: it applies resources on both sides and connects them. See the [Liqo peering docs](https://docs.liqo.io/en/stable/usage/peer.html) for details.
 
 ## Deploy an application
 
@@ -78,7 +75,7 @@ To this end, create a pod in one of the clusters (it does not matter which one) 
 HOSTNAME="liqo.cloud.example.com"
 K8GB_COREDNS_IP=$(kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers)
 
-kubectl run -it --rm curl --restart=Never --image=curlimages/curl:7.82.0 --command \
+kubectl run -it --rm curl --restart=Never --image=curlimages/curl:8.21.0 --command \
     --overrides "{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"${K8GB_COREDNS_IP}\"]},\"dnsPolicy\":\"None\"}}" \
     -- curl $HOSTNAME -v
 ```

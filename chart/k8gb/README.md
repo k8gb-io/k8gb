@@ -32,18 +32,18 @@ A Helm chart for Kubernetes Global Balancer
 
 ## Requirements
 
-Kubernetes: `>= 1.21.0-0`
+Kubernetes: `>= 1.32.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://coredns.github.io/helm | coredns | 1.46.1 |
+| https://coredns.github.io/helm | coredns | 1.47.0 |
 | https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.21.1 |
 
 #### Tested Environment Configurations:
 
 | Type                             | Implementation                                                |
 |----------------------------------|---------------------------------------------------------------|
-| Kubernetes Version               | >= 1.21                                                       |
+| Kubernetes Version               | `>= 1.32.0-0`                                          |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud         |
 | Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller                    |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS   |

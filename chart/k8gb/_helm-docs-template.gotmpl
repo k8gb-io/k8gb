@@ -27,7 +27,7 @@
 
 | Type                             | Implementation                                                |
 |----------------------------------|---------------------------------------------------------------|
-| Kubernetes Version               | >= 1.21                                                       |
+| Kubernetes Version               | `{{ .KubeVersion }}`                                          |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud         |
 | Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller                    |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS   |
