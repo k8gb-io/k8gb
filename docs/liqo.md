@@ -13,15 +13,16 @@ The figure below outlines the high-level scenario, with a client consuming an ap
 
 ## Setup Environment
 
-Checkout the [liqo docs](https://docs.liqo.io/en/stable/usage/peer.html) to get the environment setup script and to get more details.
-It creates the k3d clusters required for the K8GB playground as described in [Local playground for testing and development](local.md) and installs Liqo over them.
+The commands below assume k8gb and Liqo 1.x are installed in both clusters. See [Local playground for testing and development](local.md) for k8gb setup and the [Liqo installation guide](https://docs.liqo.io/en/stable/installation/install.html) for Liqo. Use a `liqoctl` version that matches the installed Liqo version.
+
+Export `KUBECONFIG` with the path of the *gslb-eu* cluster's kubeconfig and `KUBECONFIG_US` with the path of the *gslb-us* cluster's kubeconfig. This also selects *gslb-eu* for the subsequent `kubectl` and Helm commands.
 
 ## Peer the clusters
 
 To proceed, establish a peering from the *gslb-eu* cluster (consumer) to the *gslb-us* cluster (provider) with `liqoctl peer`:
 
 ```bash
-liqoctl peer --kubeconfig "$KUBECONFIG_EU" --remote-kubeconfig "$KUBECONFIG_US"
+liqoctl peer --kubeconfig "$KUBECONFIG" --remote-kubeconfig "$KUBECONFIG_US"
 ```
 
 `liqoctl` needs the kubeconfigs of both clusters: it applies resources on both sides and connects them. See the [Liqo peering docs](https://docs.liqo.io/en/stable/usage/peer.html) for details.
