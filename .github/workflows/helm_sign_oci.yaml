@@ -32,7 +32,7 @@ jobs:
           egress-policy: block
           # Audit: https://github.com/k8gb-io/k8gb/actions/runs/33623974848
           # Cosign installation, OCI blobs, and keyless signing/verification (including timestamps).
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443

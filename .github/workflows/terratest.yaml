@@ -35,7 +35,7 @@ jobs:
       uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
       with:
         egress-policy: block
-        allowed-endpoints: |
+        allowed-endpoints: >-
           api.github.com:443
 
     - id: skip_check
@@ -58,7 +58,7 @@ jobs:
           egress-policy: block
           # Cluster setup matches the Chainsaw audit; include Go/tool downloads on cache misses.
           # The regional Kubernetes registry redirect uses *-docker.pkg.dev.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443

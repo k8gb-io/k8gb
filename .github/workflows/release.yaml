@@ -35,7 +35,7 @@ jobs:
           egress-policy: block
           # Audit: https://github.com/k8gb-io/k8gb/actions/runs/33623099190
           # Installers, Go modules, multi-arch images, SBOM data, signing trust root, and release uploads.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
@@ -192,7 +192,7 @@ jobs:
         with:
           egress-policy: block
           # Cosign/Syft installers, registry blobs, SBOM data, and signing trust root.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
@@ -280,7 +280,7 @@ jobs:
         with:
           egress-policy: block
           # GitHub runner service endpoints are also allowed implicitly by Harden Runner.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
 

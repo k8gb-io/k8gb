@@ -24,7 +24,7 @@ jobs:
         with:
           egress-policy: block
           # Docker Hub authentication/blobs for the base image and GHCR pushes.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443

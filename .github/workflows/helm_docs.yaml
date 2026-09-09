@@ -21,7 +21,7 @@ jobs:
       with:
         egress-policy: block
         # The helm-docs Docker action image is prepared before job steps; the job pushes a PR.
-        allowed-endpoints: |
+        allowed-endpoints: >-
           api.github.com:443
           github.com:443
 

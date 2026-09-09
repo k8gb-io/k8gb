@@ -25,7 +25,7 @@ jobs:
           egress-policy: block
           # Cluster setup matches the Chainsaw audit; include Go/tool downloads on cache misses.
           # The regional Kubernetes registry redirect uses *-docker.pkg.dev.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443

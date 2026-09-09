@@ -52,7 +52,7 @@ jobs:
       with:
         egress-policy: block
         # Go autobuild and CodeQL downloads/uploads, including an empty module/tool cache.
-        allowed-endpoints: |
+        allowed-endpoints: >-
           api.github.com:443
           github.com:443
           objects.githubusercontent.com:443

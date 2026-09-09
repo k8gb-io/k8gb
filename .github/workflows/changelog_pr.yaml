@@ -20,7 +20,7 @@ jobs:
         with:
           egress-policy: block
           # GitHub release/PR data and CRD documentation indexing.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             doc.crds.dev:443

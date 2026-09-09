@@ -26,7 +26,7 @@ jobs:
         with:
           egress-policy: block
           # Python installer/tool-cache misses, PyPI packages, and git publication.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443

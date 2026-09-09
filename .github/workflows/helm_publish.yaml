@@ -26,7 +26,7 @@ jobs:
           egress-policy: block
           # Audit: https://github.com/k8gb-io/k8gb/actions/runs/33623850616
           # Helm installer/dependencies, k3d image pulls, and chart installation smoke test.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443

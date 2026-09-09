@@ -32,7 +32,7 @@ jobs:
         with:
           egress-policy: block
           # OLM binary download, go env toolchain selection, and Helm chart dependencies.
-          allowed-endpoints: |
+          allowed-endpoints: >-
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
