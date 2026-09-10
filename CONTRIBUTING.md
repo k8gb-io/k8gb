@@ -34,6 +34,8 @@
 k8gb is licensed under [Apache 2 License](https://github.com/k8gb-io/k8gb/blob/master/LICENSE) and accepts contributions via GitHub pull requests.
 This document outlines the resources and guidelines necessary to follow by contributors to the k8gb project.
 
+> **Project policies.** Contributor role development is described in [`CONTRIBUTOR_LADDER.md`](CONTRIBUTOR_LADDER.md). Expectations for AI-assisted contributions are described in [`AI_POLICY.md`](AI_POLICY.md). These documents supplement this guide and do not change its testing, DCO, security, or Maintainer-LGTM requirements.
+
 ## Getting started
 
 - Fork the repository on GitHub
