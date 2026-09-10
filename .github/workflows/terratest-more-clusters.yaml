@@ -19,6 +19,9 @@ jobs:
       matrix:
         k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
     steps:
+      # Keep Terratest exempt: Harden Runner sinkholes localhost DNS lookups
+      # used by Podinfo health probes, preventing the test pods from becoming ready.
+      # Follow-up: https://github.com/k8gb-io/k8gb/issues/2529
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0

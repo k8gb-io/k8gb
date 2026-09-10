@@ -8,6 +8,7 @@ on:
     paths:
       - 'chart/k8gb/values.yaml'
       - 'chart/k8gb/values.schema.json'
+      - '.github/workflows/helm_check-values-schema.yaml'
 permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
 
@@ -19,7 +20,12 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
-          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+          egress-policy: block
+          allowed-endpoints: >-
+            github.com:443
+            api.github.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
 
       - name: 'Checkout'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

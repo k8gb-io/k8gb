@@ -34,7 +34,9 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
       with:
-        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+        egress-policy: block
+        allowed-endpoints: >-
+          api.github.com:443
 
     - id: skip_check
       uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578 # v5.3.2
@@ -47,6 +49,9 @@ jobs:
     needs: skip-check
     if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
     steps:
+      # Keep Terratest exempt: Harden Runner sinkholes localhost DNS lookups
+      # used by Podinfo health probes, preventing the test pods from becoming ready.
+      # Follow-up: https://github.com/k8gb-io/k8gb/issues/2529
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0

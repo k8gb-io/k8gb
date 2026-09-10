@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ github.event.label.name == 'istio' }}
     steps:
+      # Keep Terratest exempt: Harden Runner sinkholes localhost DNS lookups
+      # used by Podinfo health probes, preventing the test pods from becoming ready.
+      # Follow-up: https://github.com/k8gb-io/k8gb/issues/2529
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
