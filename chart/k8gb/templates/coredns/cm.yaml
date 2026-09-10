@@ -8,7 +8,7 @@ metadata:
 {{ include "chart.labels" . | indent 4  }}
 data:
   Corefile: |-
-    . {
+    .:5353 {
       health
       {{- if $.Values.coredns.corefile.reload.enabled }}
       reload {{ $.Values.coredns.corefile.reload.interval }} {{ $.Values.coredns.corefile.reload.jitter }}

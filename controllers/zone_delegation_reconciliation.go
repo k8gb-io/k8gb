@@ -56,15 +56,15 @@ const zoneDelegationFinalizer = "k8gb.io/finalizer"
 
 func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var err error
-	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	result := utils.NewReconcileResultHandler(r.Config.ZoneDelegationReconcileRequeueSeconds, r.Config.ZoneDelegationRecoverySeconds)
 	r.Logger.Info().
 		Str("name", req.Name).
 		Msg("Reconciling ZoneDelegation")
 	if !r.ZoneService.HasAvailableIPs(ctx) {
 		r.Logger.Info().
 			Str("name", req.Name).
-			Msg("Waiting for available IPs. Skipping ZoneDelegation reconciliation")
-		return result.Requeue()
+			Msgf("Waiting %v for available IPs. Skipping ZoneDelegation reconciliation", 10)
+		return result.RequeueAfter(10)
 	}
 
 	zone, err := r.ZoneService.Get(ctx, req.NamespacedName)
@@ -84,14 +84,14 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	err = r.ensureFinalizer(ctx, zone)
 	if err != nil {
 		r.Logger.Err(err).
-			Str("name", zone.Name).
+			Str("name", req.Name).
 			Msg("Error ensuring finalizer")
 		return result.RequeueError(err)
 	}
 
 	err = r.ZoneService.UpdateCoreDNSConfiguration(ctx, zone)
 	if err != nil {
-		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
+		r.Logger.Err(err).Str("Name", req.Name).Msg("Error updating zone delegation")
 		return result.RequeueError(err)
 	}
 
@@ -105,19 +105,19 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	zone, err = r.ZoneService.UpdateStatus(ctx, zone)
 	if err != nil {
-		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error updating zone delegation")
+		r.Logger.Err(err).Str("Name", req.Name).Msg("Error updating zone delegation")
 		return result.RequeueError(err)
 	}
 
 	exZD, err := r.ZoneService.ExtendedZoneDelegation(ctx, zone)
 	if err != nil {
-		r.Logger.Err(err).Str("Name", zone.Name).Msg("Error getting extended zone delegation")
+		r.Logger.Err(err).Str("Name", req.Name).Msg("Error getting extended zone delegation")
 		return result.RequeueError(err)
 	}
 
 	// Create/Update zoneDelegation in edge DNS
 	r.Logger.Info().
-		Str("NS record", exZD.GetExternalDNSEndpointName()).
+		Str("NS record", exZD.GetZoneDelegation().GetExternalDNSEndpointName()).
 		Str("ZoneDelegation", zone.Name).
 		Str("Provider", r.DNSProvider.String()).
 		Msg("Calling DNS provider")

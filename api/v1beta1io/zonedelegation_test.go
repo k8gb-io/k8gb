@@ -31,7 +31,9 @@ func TestExtractGeoTag(t *testing.T) {
 			ParentZone:       "a.b.c.d",
 		},
 	}
-	geotag, err := zd.ExtractGeoTagFromGlueA("gslb-ns-1-test-podinfo-foo-blah-gslb.a.b.c.d")
-	assert.NoError(t, err)
+	geotag := zd.ExtractGeoTagFromGlueA("gslb-ns-1-test-podinfo-foo-blah-gslb.a.b.c.d", "gslb-ns-")
+	assert.Equal(t, "1-test", geotag)
+
+	geotag = zd.ExtractGeoTagFromGlueA("my-1-test-podinfo-foo-blah-gslb.a.b.c.d", "my-")
 	assert.Equal(t, "1-test", geotag)
 }

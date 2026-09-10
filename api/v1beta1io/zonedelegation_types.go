@@ -120,13 +120,22 @@ func (z *ZoneDelegation) nsSuffix() string {
 	return fmt.Sprintf("-%s.%s", domainX, z.Spec.ParentZone)
 }
 
-func (z *ZoneDelegation) ExtractGeoTagFromGlueA(glueA string) (string, error) {
-	const prefix = "gslb-ns-"
+func (z *ZoneDelegation) ExtractGeoTagFromGlueA(glueA string, prefix string) string {
+	const defaultPrefix = "gslb-ns-"
 	glueA = strings.TrimSuffix(glueA, ".")
-	parts := strings.Split(glueA, prefix)
-	if len(parts) != 2 {
-		return "", fmt.Errorf("invalid glue A: %s", glueA)
+	res := strings.TrimPrefix(glueA, prefix)
+	// if local cluster prefix is "custom"
+	// we still need to find external cluster tag which still
+	// pre-custom tag. Note a new Custom tag should be used across cluster memebers
+	if prefix != defaultPrefix {
+		res = strings.TrimPrefix(res, defaultPrefix)
 	}
 	suffix := z.nsSuffix()
-	return strings.ReplaceAll(parts[1], suffix, ""), nil
+	return strings.ReplaceAll(res, suffix, "")
+}
+
+// GetExternalDNSEndpointName returns name of endpoint sitting in k8gb namespace
+func (z *ZoneDelegation) GetExternalDNSEndpointName() string {
+	var suffix = strings.Trim(strings.ReplaceAll(z.Spec.LoadBalancedZone, ".", "-"), " ")
+	return fmt.Sprintf("k8gb-ns-extdns-%s", suffix)
 }

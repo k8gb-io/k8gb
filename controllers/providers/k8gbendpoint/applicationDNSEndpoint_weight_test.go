@@ -352,7 +352,6 @@ func TestWeight(t *testing.T) {
 				func(q *dns.Msg) []string { return utils.NewDNSQueryService().ExtractARecords(q) },
 			).AnyTimes()
 			zs.EXPECT().List(gomock.Any()).Return(test.zoneDelegationList, nil).AnyTimes()
-			zs.EXPECT().HasExtClusterGeoTags(gomock.Any()).Return(len(test.config.ExtClustersGeoTagsRaw) > 0).AnyTimes()
 			ipr.EXPECT().GetExposedIPs(gomock.Any()).Return(&ipresolver.Resolved{IPs: test.gslb.Status.LoadBalancer.ExposedIPs}, nil).AnyTimes()
 			zd, _ := zones.NewZoneDelegationWrapper(&test.zoneDelegationList.Items[0], test.config, ipr).GetDetail(context.TODO())
 			zs.EXPECT().ExtendedZoneDelegation(gomock.Any(), gomock.Any()).Return(zd, nil).AnyTimes()

@@ -95,8 +95,9 @@ func (g *IngressHandler) isK8gbAnnotated(obj client.Object) bool {
 func (g *IngressHandler) createGslbFromIngress(ing client.Object, scheme *runtime.Scheme) *k8gbv1beta1io.Gslb {
 	g.logger.Warn().
 		Str("ingress", ing.GetName()).
-		Msg("Configuration GSLB resources via Ingress annotations is deprecated. " +
-			"This feature will be removed in k8gb v0.17. Please explicitly define a GSLB resource instead")
+		Msg("Configuration GSLB resources via Ingress annotations is deprecated " +
+			"(ADR-0001). Please define an explicit Gslb with spec.resourceRef instead; " +
+			"the annotation path will be removed in a future release")
 
 	strategy := ing.GetAnnotations()[strategyAnnotation]
 	objectKey := client.ObjectKey{Namespace: ing.GetNamespace(), Name: ing.GetName()}

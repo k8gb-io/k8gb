@@ -59,9 +59,7 @@ Create an ADR when making decisions about:
 
 ## Examples
 
-- ADR-0001: Use Go modules for dependency management
-- ADR-0002: Implement controller-runtime pattern for Kubernetes operators
-- ADR-0003: Choose CoreDNS as the DNS provider interface
+See the ADR Index above for real project ADRs (currently ADR-0001 and ADR-0002). Use `0000-template.md` when authoring a new one.
 
 ## References
 

@@ -85,6 +85,7 @@ func testResolution(t *testing.T, parentDNS utils.DNSServer) {
 				ExtClustersGeoTagsRaw: []string{"eu"},
 				EdgeDNSType:           resolver.DNSTypeInfoblox,
 				ParentZoneDNSServers:  []utils.DNSServer{parentDNS},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedError: false,
 			result: resolver.ClusterNSNames{
@@ -105,6 +106,7 @@ func testResolution(t *testing.T, parentDNS utils.DNSServer) {
 				ExtClustersGeoTagsRaw: []string{},
 				EdgeDNSType:           resolver.DNSTypeExternal,
 				ParentZoneDNSServers:  []utils.DNSServer{parentDNS},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedError: false,
 			result: resolver.ClusterNSNames{
@@ -124,6 +126,7 @@ func testResolution(t *testing.T, parentDNS utils.DNSServer) {
 				ExtClustersGeoTagsRaw: nil,
 				EdgeDNSType:           resolver.DNSTypeInfoblox,
 				ParentZoneDNSServers:  []utils.DNSServer{parentDNS},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedError: false,
 			result: resolver.ClusterNSNames{
@@ -144,6 +147,7 @@ func testResolution(t *testing.T, parentDNS utils.DNSServer) {
 				ExtClustersGeoTagsRaw: nil,
 				EdgeDNSType:           resolver.DNSTypeInfoblox,
 				ParentZoneDNSServers:  []utils.DNSServer{parentDNS},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedError: false,
 			result: resolver.ClusterNSNames{
@@ -164,6 +168,7 @@ func testResolution(t *testing.T, parentDNS utils.DNSServer) {
 				ExtClustersGeoTagsRaw: nil,
 				EdgeDNSType:           resolver.DNSTypeInfoblox,
 				ParentZoneDNSServers:  []utils.DNSServer{{Host: "127.0.0.1", Port: 8055}},
+				GlueAPrefix:           "gslb-ns-",
 			},
 			expectedError: true,
 			result:        nil,

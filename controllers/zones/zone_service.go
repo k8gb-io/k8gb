@@ -47,7 +47,6 @@ type ZoneDelegation interface {
 	ListAllZoneDelegations(ctx context.Context) (*v1beta1io.ZoneDelegationList, error)
 	AvailableIPs(ctx context.Context) (ZoneDelegationIPs, error)
 	HasAvailableIPs(ctx context.Context) bool
-	HasExtClusterGeoTags(ctx context.Context) bool
 	UpdateStatus(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*v1beta1io.ZoneDelegation, error)
 	ExtendedZoneDelegation(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*ExtendedZoneDelegation, error)
 	ResolveAuthoritativeServersFromZoneDelegations(ctx context.Context, host string) (AuthoritativeServers, error)
@@ -79,9 +78,9 @@ func (z *ZoneDelegationImpl) List(ctx context.Context) (*v1beta1io.ZoneDelegatio
 }
 
 func (z *ZoneDelegationImpl) Get(ctx context.Context, objKey client.ObjectKey) (*v1beta1io.ZoneDelegation, error) {
-	delegationZone := &v1beta1io.ZoneDelegation{}
-	err := z.client.Get(ctx, objKey, delegationZone)
-	return delegationZone, err
+	zoneDelegation := &v1beta1io.ZoneDelegation{}
+	err := z.client.Get(ctx, objKey, zoneDelegation)
+	return zoneDelegation, err
 }
 
 // Save creates or updates ZoneDelegation, updates apart status.
@@ -112,20 +111,15 @@ func (z *ZoneDelegationImpl) ListConfigZoneDelegations(ctx context.Context) (*v1
 		return nil, err
 	}
 	zoneDelegationList := &v1beta1io.ZoneDelegationList{}
-	for _, dzi := range z.config.DelegationZones {
-		zd := v1beta1io.ZoneDelegation{}
-		zd.Spec.LoadBalancedZone = dzi.LoadBalancedZone
-		zd.Spec.ParentZone = dzi.ParentZone
-		zd.Spec.DNSZoneNegTTL = dzi.NegativeTTL
-		zd.Status.DNSServers = []v1beta1io.DNSServer{}
-		nsNames := append(dzi.ExtClusterNSNames.GetNSServerList(), dzi.ClusterNSName)
-		for _, ns := range nsNames {
+	for _, item := range z.config.ZoneDelegations.Items {
+		newItem := item
+		newItem.Name = objectName(newItem)
+		for _, ns := range z.config.GetClusterNsNames(&newItem).GetNSServerList() {
 			for _, ip := range ips {
-				zd.Status.DNSServers = append(zd.Status.DNSServers, v1beta1io.DNSServer{Name: ns, Address: ip})
+				newItem.Status.DNSServers = append(newItem.Status.DNSServers, v1beta1io.DNSServer{Name: ns, Address: ip})
 			}
 		}
-		zd.Name = objectName(zd)
-		zoneDelegationList.Items = append(zoneDelegationList.Items, zd)
+		zoneDelegationList.Items = append(zoneDelegationList.Items, newItem)
 	}
 	return zoneDelegationList, nil
 }
@@ -231,7 +225,8 @@ func (z *ZoneDelegationImpl) buildDesiredStatus(ctx context.Context, exzd Extend
 		return status, fmt.Errorf("providing geotags %v", err)
 	}
 	extClusterNsNames := geoTags.ExtClusterNsNames()
-	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, extClusterNsNames, exzd.LoadBalancedZone, exzd.ParentZone)
+	clusterNSName := z.config.GetClusterNSName(*exzd.GetZoneDelegation())
+	glueAResults := z.ipresolver.GetClusterGlueAResults(ctx, extClusterNsNames, clusterNSName)
 
 	if err := glueAResults.LocalClusterError(); err != nil {
 		return v1beta1io.ZoneDelegationStatus{}, err
@@ -269,21 +264,6 @@ func (z *ZoneDelegationImpl) HasAvailableIPs(ctx context.Context) bool {
 		return false
 	}
 	return len(exposedIPs) != 0
-}
-
-func (z *ZoneDelegationImpl) HasExtClusterGeoTags(ctx context.Context) bool {
-	l, err := z.List(ctx)
-	if err != nil {
-		return false
-	}
-	if len(l.Items) == 0 {
-		return false
-	}
-	detail, err := NewZoneDelegationWrapper(&l.Items[0], z.config, z.ipresolver).GetDetail(ctx)
-	if err != nil {
-		return false
-	}
-	return len(detail.ExtClusterNSNames) > 0
 }
 
 func (z *ZoneDelegationImpl) ExtendedZoneDelegation(ctx context.Context, zd *v1beta1io.ZoneDelegation) (*ExtendedZoneDelegation, error) {

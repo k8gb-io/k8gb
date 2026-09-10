@@ -50,9 +50,6 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: resolver.ClusterNSNames{
-					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
-				},
 			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
@@ -104,10 +101,6 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: resolver.ClusterNSNames{
-					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
-					"gslb-ns-za-cloud.example.com": resolver.NewGeoTag(false, "za"),
-				},
 			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
@@ -147,10 +140,6 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: resolver.ClusterNSNames{
-					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
-					"gslb-ns-za-cloud.example.com": resolver.NewGeoTag(false, "za"),
-				},
 			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
@@ -219,10 +208,6 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: resolver.ClusterNSNames{
-					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
-					"gslb-ns-za-cloud.example.com": resolver.NewGeoTag(false, "za"),
-				},
 			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",
@@ -257,9 +242,6 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 				ClusterNSName:          "gslb-ns-eu-cloud.example.com",
 				LocalCoreDNSExposedIPs: []string{"10.0.0.1", "10.0.0.2"},
 				NegativeTTL:            30,
-				ExtClusterNSNames: resolver.ClusterNSNames{
-					"gslb-ns-us-cloud.example.com": resolver.NewGeoTag(false, "us"),
-				},
 			},
 			config: resolver.Config{
 				K8gbNamespace: "k8gb",

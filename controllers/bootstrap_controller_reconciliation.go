@@ -53,7 +53,7 @@ type CoreDNSReconciler struct {
 
 func (r *CoreDNSReconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
 	var err error
-	result := utils.NewReconcileResultHandler(0)
+	result := utils.NewReconcileResultHandler(0, 30)
 	r.Logger.Info().Msg("Reconciling CoreDNS delegation")
 
 	ips, err := r.IPResolver.GetExposedIPs(ctx)

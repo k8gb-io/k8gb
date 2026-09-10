@@ -26,8 +26,6 @@ import (
 	"github.com/k8gb-io/k8gb/api/v1beta1io"
 )
 
-const prefix = "gslb-ns"
-
 // GeoTag e.g: us, us-east-1
 type GeoTag struct {
 	isLocal bool
@@ -54,35 +52,23 @@ func (g GeoTag) String() string {
 // ["gslb-ns-eu-cloud.example.com": "eu", "gslb-ns-us-1-cloud.example.com": "us-1"]
 type ClusterNSNames map[string]GeoTag
 
-func getNsName(tag, zone, edge string) string {
+func getNsName(tag, zone, edge, prefix string) string {
 	d := strings.TrimSuffix(zone, "."+edge)
 	domainX := strings.ReplaceAll(d, ".", "-")
-	return fmt.Sprintf("%s-%s-%s.%s", prefix, tag, domainX, edge)
+	return fmt.Sprintf("%s%s-%s.%s", prefix, tag, domainX, edge)
 }
 
-func nsSuffix(z *v1beta1io.ZoneDelegation) string {
-	d := strings.TrimSuffix(z.Spec.LoadBalancedZone, "."+z.Spec.ParentZone)
-	domainX := strings.ReplaceAll(d, ".", "-")
-	return fmt.Sprintf("-%s.%s", domainX, z.Spec.ParentZone)
+func (c *Config) GetClusterNSName(zone v1beta1io.ZoneDelegation) string {
+	return getNsName(c.ClusterGeoTag, zone.Spec.LoadBalancedZone, zone.Spec.ParentZone, c.GlueAPrefix)
 }
 
-func ExtractGeoTagFromNSName(z *v1beta1io.ZoneDelegation, glueA string) (string, error) {
-	glueA = strings.TrimSuffix(glueA, ".")
-	parts := strings.Split(glueA, prefix)
-	if len(parts) != 2 {
-		return "", fmt.Errorf("invalid glue A: %s", glueA)
-	}
-	suffix := nsSuffix(z)
-	return strings.ReplaceAll(parts[1], suffix, ""), nil
-}
-
-// GetClusterNsNames returns ALL cluster geotags (ClusterGeoTag + ExternalGeoTags)
+// GetClusterNsNames returns ALL cluster geotags (ClusterGeoTag + ExternalGeoTags) for ZoneDelegation
 func (c *Config) GetClusterNsNames(zone *v1beta1io.ZoneDelegation) ClusterNSNames {
 	clusterNsNames := make(ClusterNSNames)
-	ns := getNsName(c.ClusterGeoTag, zone.Spec.LoadBalancedZone, zone.Spec.ParentZone)
+	ns := getNsName(c.ClusterGeoTag, zone.Spec.LoadBalancedZone, zone.Spec.ParentZone, c.GlueAPrefix)
 	clusterNsNames[ns] = GeoTag{tag: c.ClusterGeoTag, isLocal: true}
 	for _, geotag := range c.ExtClustersGeoTagsRaw {
-		ns = getNsName(geotag, zone.Spec.LoadBalancedZone, zone.Spec.ParentZone)
+		ns = getNsName(geotag, zone.Spec.LoadBalancedZone, zone.Spec.ParentZone, c.GlueAPrefix)
 		// if ClusterGeoTag is set to US and ExtClusterGeotags is set to [ZA, US, EU].
 		if _, found := clusterNsNames[ns]; found {
 			continue
@@ -100,15 +86,6 @@ func (ns ClusterNSNames) ExtClusterNsNames() ClusterNSNames {
 		}
 	}
 	return m
-}
-
-func (ns ClusterNSNames) ClusterGeoTag() GeoTag {
-	for _, v := range ns {
-		if v.IsClusterGeoTag() {
-			return v
-		}
-	}
-	panic("missing ClusterGeoTag")
 }
 
 // GetNSServerList returns a sorted list of all NS servers for the delegation zone

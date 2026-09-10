@@ -58,7 +58,7 @@ type LegacyGslbReconciler struct {
 
 // Reconcile runs legacy runtime reconciliation only for legacy objects that are not migration requested/migrated yet.
 func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds, r.Config.ReconcileRequeueSeconds)
 
 	// Check that cluster provides available IPs. Without IP's I'm skipping GSLB reconciliation
 	if !r.ZoneService.HasAvailableIPs(ctx) {

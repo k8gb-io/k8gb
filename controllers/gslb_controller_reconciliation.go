@@ -78,7 +78,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	ctx, span := r.Tracer.Start(ctx, "Reconcile")
 	defer span.End()
 
-	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds)
+	result := utils.NewReconcileResultHandler(r.Config.ReconcileRequeueSeconds, r.Config.ReconcileRequeueSeconds)
 	// Check that cluster provides available IPs. Without IP's I'm skipping GSLB reconciliation
 	if !r.ZoneService.HasAvailableIPs(ctx) {
 		r.Logger.Info().

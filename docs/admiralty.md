@@ -70,7 +70,7 @@ podinfo-557c458ddb-9nkmx-p7z9r   1/1     Running   0          15s
 Observe that associated Ingress has also followed the Pods to the Target clusters
 
 ```sh
-kubectl --context kind-eu get ing
+kubectl --context kind-us get ing
 NAME      CLASS    HOSTS   ADDRESS   PORTS   AGE
 podinfo   <none>   *                 80      10m
 
@@ -79,9 +79,9 @@ NAME      CLASS    HOSTS   ADDRESS   PORTS   AGE
 podinfo   <none>   *                 80      10m
 ```
 
-## Add k8gb annotations to Ingress object to enable global load balancing
+## Enable global load balancing (prefer an explicit Gslb)
 
-Observer that there are no Gslb resources in the Target clusters
+Observe that there are no Gslb resources in the Target clusters
 
 ```sh
 kubectl --context kind-eu get gslb
@@ -91,7 +91,9 @@ kubectl --context kind-us get gslb
 No resources found in default namespace.
 ```
 
-Add k8gb strategy annotation to the Ingress object in the Source cluster
+**Preferred:** create an explicit `Gslb` that `resourceRef`s the Ingress (see [Resource References](resource_ref.md)).
+
+**Legacy / deprecated:** Ingress `k8gb.io/strategy` annotations still create a Gslb automatically, but this path is deprecated ([ADR-0001](https://github.com/k8gb-io/k8gb/blob/master/adr/0001-deprecate-configuration-of-gslb-resources-via-annotations.md)) and will be removed in a future release. For this tutorial's quick demo:
 
 ```sh
 kubectl annotate ing podinfo k8gb.io/strategy=roundRobin

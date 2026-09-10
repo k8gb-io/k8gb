@@ -45,7 +45,7 @@ type Resolved struct {
 type Resolver interface {
 	GetExposedIPs(ctx context.Context) (*Resolved, error)
 
-	GetClusterGlueAResults(ctx context.Context, extClusterNSNames resolver.ClusterNSNames, loadBalancedZone, parentZone string) ClusterGlueAResults
+	GetClusterGlueAResults(ctx context.Context, extClusterNSNames resolver.ClusterNSNames, clusterNSName string) ClusterGlueAResults
 }
 
 type ResolverImpl struct {
@@ -80,10 +80,9 @@ func (b *ResolverImpl) GetExposedIPs(ctx context.Context) (*Resolved, error) {
 func (b *ResolverImpl) GetClusterGlueAResults(
 	ctx context.Context,
 	extClusterNSNames resolver.ClusterNSNames,
-	loadBalancedZone,
-	parentZone string) ClusterGlueAResults {
+	clusterNSName string) ClusterGlueAResults {
 	gainfo := make([]*GlueAInfo, 0)
-	clusterNSName := b.config.GetNsName(loadBalancedZone, parentZone)
+
 	for extClusterNSName, tag := range extClusterNSNames {
 		// Use edgeDNSServer for resolution of NS names and fallback to local nameservers
 		dnsResult := b.queryService.Query(extClusterNSName, b.config.ParentZoneDNSServers)

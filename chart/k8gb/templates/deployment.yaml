@@ -68,6 +68,8 @@ spec:
               value: {{ quote .Values.k8gb.clusterGeoTag }}
             - name: EXT_GSLB_CLUSTERS_GEO_TAGS
               value: {{ quote .Values.k8gb.extGslbClustersGeoTags }}
+            - name: GLUEA_PREFIX
+              value: {{ quote .Values.k8gb.glueAPrefix }}
             - name: EDGE_DNS_SERVERS
               value: {{ include "k8gb.edgeDNSServers" . }}
             {{- if .Values.k8gb.clusterExposedIPs }}
@@ -78,6 +80,10 @@ spec:
               value: {{ include "k8gb.dnsZonesString" . }}
             - name: RECONCILE_REQUEUE_SECONDS
               value: {{ quote .Values.k8gb.reconcileRequeueSeconds }}
+            - name: ZONE_DELEGATION_RECONCILE_REQUEUE_SECONDS
+              value: {{ quote .Values.k8gb.zoneDelegationReconcileRequeueSeconds }}
+            - name: ZONE_DELEGATION_RECOVERY_SECONDS
+              value: {{ quote .Values.k8gb.zoneDelegationRecoverySeconds }}
             - name: NS_RECORD_TTL
               value: {{ quote .Values.k8gb.nsRecordTTL }}
             {{- if .Values.infoblox.enabled }}

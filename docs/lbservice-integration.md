@@ -38,7 +38,7 @@ metadata:
   name: my-app-gslb
   namespace: default
   annotations:
-    k8gb.io/hostname: "myapp.example.com"  # Required: Specify your desired hostname
+    k8gb.io/hostname: "myapp.cloud.example.com"  # Required: under loadBalancedZone
 spec:
   resourceRef:
     apiVersion: v1
@@ -110,7 +110,7 @@ kind: Gslb
 metadata:
   name: my-app-gslb-primary
   annotations:
-    k8gb.io/hostname: "myapp.example.com"
+    k8gb.io/hostname: "myapp.cloud.example.com"
 spec:
   resourceRef:
     apiVersion: v1
@@ -128,7 +128,7 @@ kind: Gslb
 metadata:
   name: my-app-gslb-alias
   annotations:
-    k8gb.io/hostname: "www.myapp.example.com"
+    k8gb.io/hostname: "www.myapp.cloud.example.com"
 spec:
   resourceRef:
     apiVersion: v1
@@ -166,13 +166,18 @@ If the hostname doesn't match any configured DNS zones:
 ingress host myapp.example.com does not match delegated zone [cloud.example.com]
 ```
 
+Use a hostname under the zone instead (for example `myapp.cloud.example.com`).
+
 ## Comparison with Other Integrations
 
 | Integration Type | Hostname Source | Configuration |
 |------------------|-----------------|---------------|
 | **Ingress** | `spec.rules[].host` | Automatic |
+| **Gateway API HTTPRoute** | `spec.hostnames[]` (via `resourceRef`) | Automatic |
 | **Istio VirtualService** | `spec.hosts[]` | Automatic |
 | **LoadBalancer Service** | `k8gb.io/hostname` annotation | **Manual** |
+
+Hostnames from every integration type must still fall under a configured `loadBalancedZone` (see [Resource References](resource_ref.md) for Gateway API).
 
 ## Benefits
 

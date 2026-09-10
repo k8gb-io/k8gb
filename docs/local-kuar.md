@@ -22,7 +22,7 @@ This task will deploy Kuar into both clusters and exposes it. It also patches th
 
 Make sure the app on http://localhost is responding, it may take a minute for the nginx ingress controller to restart with the correct parameters.
 
-The make target also modified the deployment of the Kuar application to use our core DNS servers. To verify that this was done, one can open the Kuar's file system browser tab and [open](http://localhost/fs/etc/resolv.conf) `/etc/resolv.conv`. It should contain the same IP as cluster-IP assigned to `k8gb-coredns` service.
+The make target also modified the deployment of the Kuar application to use our core DNS servers. To verify that this was done, one can open the Kuar's file system browser tab and [open](http://localhost/fs/etc/resolv.conf) `/etc/resolv.conf`. It should contain the same IP as cluster-IP assigned to `k8gb-coredns` service.
 
 Together with Kuar, we also prepared the failover gslb resource for k8gb. Where the first cluster (geotag = `eu`) is the primary one.
 

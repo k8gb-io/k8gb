@@ -31,6 +31,7 @@
 [![CLOMonitor](https://img.shields.io/endpoint?url=https://clomonitor.io/api/projects/cncf/k8gb/badge)](https://clomonitor.io/projects/cncf/k8gb)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/k8gb-io/k8gb/badge)](https://securityscorecards.dev/viewer/?uri=github.com/k8gb-io/k8gb)
 
+> **Container images:** the Helm chart default is `registry.k8gb.io/k8gb-io/k8gb` (see `chart/k8gb/values.yaml`). Signed/OCI artifacts are also published to `ghcr.io/k8gb-io/*` (see [CONTRIBUTING.md](CONTRIBUTING.md)). The Docker Hub `absaoss/k8gb` badge above reflects historical pulls.
 
 A Global Service Load Balancing solution with a focus on having cloud native qualities and work natively in a Kubernetes context.
 
@@ -137,7 +138,7 @@ k8gb is tested with the following environment options and integration scenarios.
 
 | Type                             | Implementation                                                               |
 |----------------------------------|------------------------------------------------------------------------------|
-| Kubernetes Version               | >= `1.21`                                                                    |
+| Kubernetes Version               | >= `1.32`                                                                    |
 | Environment                      | Any conformant Kubernetes cluster on-prem or in cloud                        |
 | Ingress Controller               | NGINX, Istio, AWS Load Balancer Controller [*](#clarify)                     |
 | EdgeDNS                          | Infoblox, Route53, NS1, CloudFlare, AzureDNS, GCP Cloud DNS                  |

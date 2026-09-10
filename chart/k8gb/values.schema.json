@@ -415,6 +415,10 @@
                         "$ref": "#/definitions/k8gbDnsZone"
                     }
                 },
+                "glueAPrefix": {
+                    "type": "string",
+                    "minLength": 0
+                },
                 "edgeDNSServers": {
                     "type": "array",
                     "items": {
@@ -440,6 +444,14 @@
                     "minLength": 0
                 },
                 "reconcileRequeueSeconds": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "zoneDelegationReconcileRequeueSeconds": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "zoneDelegationRecoverySeconds": {
                     "type": "integer",
                     "minimum": 0
                 },
