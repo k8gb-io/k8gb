@@ -2,6 +2,10 @@
 
 This section provides comprehensive tutorials for deploying and configuring K8GB with various DNS providers and environments.
 
+> **North-south data plane:** for new installs prefer [Gateway API](resource_ref.md) (k8gb `resourceRef` since v0.17).
+> Many older tutorials still show Kubernetes Ingress / NGINX examples; treat those as legacy — Ingress NGINX was
+> [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/).
+
 ## DNS Provider Integrations
 
 * [General deployment with Infoblox integration](deploy_infoblox.md)

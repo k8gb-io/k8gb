@@ -15,10 +15,26 @@ Feel free to reuse this code fully or partially and adapt for your existing scen
 * EKS custom tags
 * IRSA(IAM Roles for Service Accounts) role reference
 
-## Install Ingress Controller
+## Install a north-south data plane (prefer Gateway API)
+
+For **new** deployments, prefer [Gateway API](https://gateway-api.sigs.k8s.io/) with a maintained
+implementation (for example AWS Gateway API controller / your platform's Gateway). k8gb can
+reference HTTPRoute and related resources via `spec.resourceRef` — see
+[Resource References](resource_ref.md). Local playground samples live under
+`deploy/gslb/*gatewayapi*`.
+
+> **Ingress NGINX status:** the Kubernetes Ingress NGINX project was
+> [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/)
+> ([Steering/SRC statement](https://www.kubernetes.io/blog/2026/01/29/ingress-nginx-statement/)).
+> Do not start new production installs on it. Existing tutorials that still show
+> `ingressClassName: nginx` are legacy examples only.
+
+If you must follow a legacy Ingress-based sample in an existing cluster that already runs
+Ingress NGINX, use a current controller tag (not old 0.x pins), for example:
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.40.2/deploy/static/provider/aws/deploy.yaml
+# Legacy path only — prefer Gateway API for new installs
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/aws/deploy.yaml
 ```
 
 ## Deploy k8gb

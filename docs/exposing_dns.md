@@ -7,7 +7,10 @@ type of load balancer or ingress controller used etc.
 This topic is outside the project's scope, as often the related configuration is shared by cluster services, requires additional permissions, and as result can't be owned by k8gb controller deployment.
 However, we can describe a few examples using common Kubernetes configurations, which have been thoroughly tested in local and production environments.
 
-## Ingress Controller with UDP support (NGINX)
+## Ingress Controller with UDP support (NGINX) — legacy
+
+> **Prefer exposing CoreDNS via `LoadBalancer` / NLB** (see [External load balancer](#external-load-balancer) below) or your platform's Gateway / UDP path.
+> Ingress NGINX was [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/); keep this section only if you already run it.
 
 > *Check [NGINX Ingress controller official documentation](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/) for additional information*
 
