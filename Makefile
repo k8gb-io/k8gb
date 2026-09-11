@@ -862,6 +862,12 @@ endef
 
 .PHONY: docs-list docs-deploy docs-deploy-master docs-deploy-last-3 docs-sync-blog
 
+docs-linkcheck: ## Check documentation links with lychee (requires lychee: https://lychee.cli.rs)
+	lychee --config lychee.toml --root-dir . --exclude-path 'docs/index.md' --exclude-path 'docs/CONTRIBUTING.md' --exclude-path 'docs/crossplane_globalapp.md' README.md CONTRIBUTING.md ADOPTERS.md GOVERNANCE.md DEPENDENCY.md 'docs/**/*.md' 'adr/**/*.md'
+
+docs-build-strict: ## Build the mkdocs site with --strict (fails on nav/link warnings)
+	python3 -m mkdocs build --strict
+
 docs-list: ## List deployed versions
 	mike list
 

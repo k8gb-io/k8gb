@@ -1,0 +1,107 @@
+name: Docs link check
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'adr/**'
+      - 'mkdocs.yml'
+      - 'lychee.toml'
+      - '.github/workflows/docs-linkcheck.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'adr/**'
+      - 'mkdocs.yml'
+      - 'lychee.toml'
+      - '.github/workflows/docs-linkcheck.yml'
+  schedule:
+    # Catch link rot even when docs are not touched in a PR.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    name: lychee
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Restore lychee cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
+
+
+      - name: Verify docs-linked deploy samples exist
+        run: |
+          test -f deploy/gslb/k8gb.io_v1beta1_gslb_cr_roundrobin_ingress.yaml
+          test -f deploy/gslb/k8gb.io_v1beta1_gslb_cr_failover_ingress.yaml
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          args: >-
+            --config lychee.toml
+            --root-dir .
+            --cache
+            --max-cache-age 1d
+            --exclude-path 'docs/index.md'
+            --exclude-path 'docs/CONTRIBUTING.md'
+            --exclude-path 'docs/crossplane_globalapp.md'
+            --exclude localhost
+            --exclude '127\.0\.0\.1'
+            --exclude 'example\.com'
+            README.md
+            CONTRIBUTING.md
+            ADOPTERS.md
+            GOVERNANCE.md
+            DEPENDENCY.md
+            'docs/**/*.md'
+            'adr/**/*.md'
+
+  mkdocs-strict:
+    name: mkdocs build --strict
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.x'
+
+      - name: Install MkDocs
+        run: |
+          pip3 install \
+            mkdocs \
+            mkdocs-material \
+            mkdocs-git-revision-date-localized-plugin \
+            mkdocs-simple-hooks \
+            mike
+
+      - name: Build docs (strict)
+        run: mkdocs build --strict

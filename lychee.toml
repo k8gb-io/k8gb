@@ -1,0 +1,53 @@
+#############################
+### Display               ###
+#############################
+
+no_progress = true
+
+#############################
+### Runtime               ###
+#############################
+
+timeout = 20
+max_retries = 2
+retry_wait_time = 2
+
+#############################
+### Cache                 ###
+#############################
+
+cache = true
+max_cache_age = "1d"
+
+#############################
+### Requests              ###
+#############################
+
+# 403: some doc CDNs (Cloudflare, Medium) block CI user-agents.
+accept = ["200", "206", "403", "429"]
+
+include_fragments = "none"
+
+
+#############################
+### Exclusions            ###
+#############################
+
+# Literal TOML strings: a single \ is preserved (needed for regex dots).
+exclude = [
+    'localhost',
+    '127\.0\.0\.1',
+    'example\.com',
+    'exampledns\.tk',
+    # In-repo deploy/ paths are verified with a dedicated CI step against the PR tree.
+    'github\.com/k8gb-io/k8gb/(tree|blob)/master/deploy',
+]
+
+# Symlinked copies are checked via the canonical root files (README.md, CONTRIBUTING.md).
+exclude_path = [
+    'docs/index\.md',
+    'docs/CONTRIBUTING\.md',
+    'docs/crossplane_globalapp\.md',
+    'CHANGELOG\.md',
+    'Project-Meeting-Notes\.md',
+]
