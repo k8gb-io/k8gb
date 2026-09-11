@@ -667,6 +667,10 @@ test:
 	@echo -e "\n$(YELLOW)Running the unit tests$(NC)"
 	env -u LOG_FORMAT -u LOG_LEVEL -u EXT_GSLB_CLUSTERS_GEO_TAGS -u EDGE_DNS_SERVER go test ./... -coverprofile cover.out
 
+.PHONY: test-chart
+test-chart:
+	./hack/test-chart.sh
+
 .PHONY: test-round-robin
 test-round-robin:
 	@$(call hit-testapp-host, "roundrobin.cloud.example.com")

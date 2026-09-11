@@ -345,6 +345,9 @@
                 "deployRbac": {
                     "type": "boolean"
                 },
+                "coredns": {
+                    "$ref": "#/definitions/k8gbCoredns"
+                },
                 "dynamicZones": {
                     "type": "boolean"
                 },
@@ -570,6 +573,17 @@
             },
             "title": "Log"
         },
+        "k8gbCoredns": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "extraServerBlocks": {
+                    "type": "string",
+                    "description": "Extra CoreDNS server blocks appended to the generated Corefile"
+                }
+            },
+            "title": "k8gb CoreDNS"
+        },
         "k8gbSecurityContext": {
             "type": "object",
             "additionalProperties": false,
@@ -633,9 +647,6 @@
                         "type": "string",
                         "minLength": 1
                     }
-                },
-                "extraServerBlocks": {
-                    "type": "string"
                 }
             },
             "required": [
