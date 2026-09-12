@@ -541,7 +541,7 @@ func (i *Instance) waitForApp(predicate func(instances int) bool, stop bool) (er
 	// second conditions
 	endpointReady := false
 	for n := 0; n < maxRetries/2; n++ {
-		ep, err := i.Resources().GetExternalDNSEndpointByName(i.w.state.gslb.name, i.w.namespace).GetEndpointByName(fmt.Sprintf("localtargets-%s", i.w.state.gslb.host))
+		ep, err := i.Resources().GetExternalDNSEndpointByName(i.w.state.gslb.name, i.w.namespace).GetEndpointByName(fmt.Sprintf("localtargets.%s", i.w.state.gslb.host))
 		if err != nil {
 			if err.Error() == notFoundError {
 				// During startup the local DNSEndpoint can lag behind the app becoming ready,
@@ -607,7 +607,7 @@ func (i *Instance) Dig() []string {
 
 // GetLocalTargets returns instance local targets
 func (i *Instance) GetLocalTargets() []string {
-	dnsName := fmt.Sprintf("localtargets-%s", i.w.state.gslb.host)
+	dnsName := fmt.Sprintf("localtargets.%s", i.w.state.gslb.host)
 	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), dnsName, i.w.settings.digUsingUDP)
 	i.logIfError(err, "GetLocalTargets(), dig: %s", err)
 	return dig

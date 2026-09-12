@@ -34,11 +34,13 @@ import (
 )
 
 func TestGetLocalTargetsHostRejectsTooLongFirstLabel(t *testing.T) {
-	host := strings.Repeat("a", 51) + ".cloud.example.com"
-	expectedErr := `derived localtargets name "localtargets-` +
-		strings.Repeat("a", 51) +
-		`.cloud.example.com" is invalid: label "localtargets-` +
-		strings.Repeat("a", 51) +
+	// With the dot prefix the host is split into labels, so the over-long
+	// label must live in the host portion: 64 'a's exceed the 63-char limit.
+	host := strings.Repeat("a", 64) + ".cloud.example.com"
+	expectedErr := `derived localtargets name "localtargets.` +
+		strings.Repeat("a", 64) +
+		`.cloud.example.com" is invalid: label "` +
+		strings.Repeat("a", 64) +
 		`" exceeds 63 characters`
 
 	_, err := getLocalTargetsHost(host)
@@ -49,7 +51,7 @@ func TestGetLocalTargetsHostRejectsTooLongFirstLabel(t *testing.T) {
 func TestGetDNSEndpointRejectsInvalidLocalTargetsHost(t *testing.T) {
 	logger := zerolog.New(io.Discard).With().Timestamp().Logger()
 	metrics := func(*k8gbv1beta1io.Gslb, bool, k8gbv1beta1io.HealthStatus, []string) {}
-	host := strings.Repeat("a", 51) + ".cloud.example.com"
+	host := strings.Repeat("a", 64) + ".cloud.example.com"
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

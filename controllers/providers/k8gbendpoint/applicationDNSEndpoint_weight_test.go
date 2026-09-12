@@ -339,12 +339,12 @@ func TestWeight(t *testing.T) {
 				ns := fmt.Sprintf("gslb-ns-%s-cloud.example.com", d.region)
 				nsIP := test.authServers[ns].IP
 				for _, v := range d.targets {
-					record := &dns.A{Hdr: dns.RR_Header{Name: dns.Fqdn("localtargets-app.gslb.cloud.example.com"), Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 30},
+					record := &dns.A{Hdr: dns.RR_Header{Name: dns.Fqdn("localtargets.app.gslb.cloud.example.com"), Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 30},
 						A: net.ParseIP(v)}
 					ips = append(ips, record)
 				}
 				qs.EXPECT().
-					Query("localtargets-app.gslb.cloud.example.com", utils.DNSList{utils.DNSServer{Host: nsIP, Port: 53}}).
+					Query("localtargets.app.gslb.cloud.example.com", utils.DNSList{utils.DNSServer{Host: nsIP, Port: 53}}).
 					Return(utils.DNSQueryResult{Msg: &dns.Msg{Answer: ips}, Err: nil, Status: utils.DNSQueryStatusResolved}).
 					AnyTimes()
 			}
