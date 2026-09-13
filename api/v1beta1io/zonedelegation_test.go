@@ -37,3 +37,14 @@ func TestExtractGeoTag(t *testing.T) {
 	geotag = zd.ExtractGeoTagFromGlueA("my-1-test-podinfo-foo-blah-gslb.a.b.c.d", "my-")
 	assert.Equal(t, "1-test", geotag)
 }
+
+func TestGetExternalDNSNsMergeEndpointName(t *testing.T) {
+	zd := ZoneDelegation{
+		Spec: ZoneDelegationSpec{
+			LoadBalancedZone: "cloud.example.com",
+			ParentZone:       "example.com",
+		},
+	}
+	assert.Equal(t, "k8gb-ns-extdns-cloud-example-com", zd.GetExternalDNSEndpointName())
+	assert.Equal(t, "k8gb-ns-extdns-ns-cloud-example-com", zd.GetExternalDNSNsMergeEndpointName())
+}
