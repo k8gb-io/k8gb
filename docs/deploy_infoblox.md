@@ -15,12 +15,16 @@ cp chart/k8gb/values.yaml ~/k8gb/eu-cluster.yaml
 ```
 
 * Modify the example configuration. Important parameters described below:
-  * `dnsZone` - this zone will be delegated to the `edgeDNS` in your environment. E.g. `yourzone.edgedns.com`
-  * `edgeDNSZone` - this zone will be automatically configured by k8gb to delegate to `dnsZone` and will make k8gb controlled nodes act as authoritative server for this zone. E.g. `edgedns.com`
-  * `parentZoneDNSServers` stable DNS servers in your environment that is controlled by edgeDNS provider e.g. Infoblox so k8gb instances will be able to talk to each other through automatically created DNS names
+  * `dnsZones` — array of zones managed by this k8gb deployment (preferred since v0.15). Each entry has:
+    * `loadBalancedZone` — zone controlled by GSLB / delegated to your edge DNS. E.g. `yourzone.edgedns.com`
+    * `parentZone` — parent zone that contains the GSLB zone and where NS/glue records are created. E.g. `edgedns.com`
+  * `edgeDNSServers` — stable DNS servers in your environment controlled by the edge DNS provider (e.g. Infoblox) so k8gb instances can discover each other through automatically created DNS names
   * `clusterGeoTag` to geographically tag your cluster. We are operating `eu` cluster in this example
   * `extGslbClustersGeoTags` contains Geo tag of the cluster(s) to talk with when k8gb is deployed to multiple clusters. Imagine your second cluster is `us` so we tag it accordingly
   * `infoblox.enabled: true` to enable automated zone delegation configuration at edgeDNS provider. You don't need it for local testing and can optionally be skipped. Meanwhile, in this section we will cover a fully operational end-to-end scenario.
+
+> **Legacy note:** the old top-level `dnsZone` / `edgeDNSZone` keys still work via chart helpers (`dnsZone` ≈ `loadBalancedZone`, `edgeDNSZone` ≈ `parentZone`), but new installs should use `dnsZones`. See [Multizone Support](multizone.md).
+
 The other parameters do not need to be modified unless you want to do something special. E.g. to use images from private registry
 
   * Export Infoblox related information in the shell.
