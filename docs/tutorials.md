@@ -2,6 +2,11 @@
 
 This section provides comprehensive tutorials for deploying and configuring K8GB with various DNS providers and environments.
 
+> For new deployments, prefer [Gateway API](resource_ref.md), supported since k8gb v0.17.
+> Examples that specifically use ingress-nginx are legacy: that controller was
+> [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/).
+> Kubernetes Ingress and k8gb's Ingress integration remain supported with maintained controllers.
+
 ## DNS Provider Integrations
 
 * [General deployment with Infoblox integration](deploy_infoblox.md)
