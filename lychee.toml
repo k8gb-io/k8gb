@@ -41,6 +41,8 @@ exclude = [
     'exampledns\.tk',
     # In-repo deploy/ paths are verified with a dedicated CI step against the PR tree.
     'github\.com/k8gb-io/k8gb/(tree|blob)/master/deploy',
+    # admiralty.io presents a netlify.app TLS cert, so lychee fails on SSL.
+    'admiralty\.io',
 ]
 
 # Symlinked copies are checked via the canonical root files (README.md, CONTRIBUTING.md).
