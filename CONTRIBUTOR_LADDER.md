@@ -66,15 +66,9 @@ A candidate will normally have demonstrated sustained and significant contributi
 
 The authoritative list of Maintainer responsibilities remains in [`GOVERNANCE.md`](GOVERNANCE.md). It includes issue triage, pull-request review, releases, architecture and roadmap stewardship, community support, CNCF participation and compliance, and project-infrastructure stewardship.
 
-Under [`CONTRIBUTING.md`](CONTRIBUTING.md), an LGTM from at least one Maintainer listed in `CODEOWNERS` is required for a pull request. Maintainers participate in the votes and decisions defined by `GOVERNANCE.md`, subject to the Project Lead’s stated final-vote role.
+Under [`CONTRIBUTING.md`](CONTRIBUTING.md), a pull request requires an LGTM from at least one Maintainer listed in `CODEOWNERS`. Maintainers participate in project decisions under [`GOVERNANCE.md`](GOVERNANCE.md), including the Project Lead’s stated final-vote role.
 
-Maintainers review pull requests and, **where separately authorized**, merge changes. Repository write, release, package-publishing, security, and administrative access are held only by people who have separately been granted the necessary access. This guide does not assert that every Maintainer has every such permission.
-
-## `CODEOWNERS`, scope, and permissions
-
-Under the current governance, `CODEOWNERS` identifies the project’s Maintainers. A Reviewer designation alone is not a reason to add a person to the current repository-wide `CODEOWNERS` entry, because doing so would designate that person as a Maintainer under `GOVERNANCE.md`.
-
-If the project later adopts scoped ownership, GitHub teams, or additional repository permissions, that work must be considered as a separate governance and access decision. It must define the role record, scope, review or merge effect, access process, and reconciliation with `CODEOWNERS` and the live repository configuration. Nothing in this ladder creates those controls by implication.
+Merge, release, and administrative permissions require separate authorization. Under current governance, adding someone to the repository-wide `CODEOWNERS` entry designates them as a Maintainer; Reviewer recognition alone does not justify an entry. Any future scoped ownership or access model requires a separate governance and access decision.
 
 ## Inactivity, emeritus status, and return
 
