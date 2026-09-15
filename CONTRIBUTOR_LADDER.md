@@ -38,7 +38,7 @@ A **Reviewer** is a Contributor whom Maintainers recognize as a trusted source o
 
 Maintainers should consider sustained, high-quality evidence rather than a fixed numerical threshold. Relevant evidence includes meaningful contributions in the area, technically useful reviews of others’ work, familiarity with the applicable architecture and contribution standards, reliable participation over time, constructive collaboration, and willingness to help newer contributors.
 
-A Maintainer may propose recognition of a Reviewer. Existing Maintainers decide whether to recognize the Reviewer under the project’s established decision-making process, and the project should record the decision and any scope in a public project record. A person may also ask a Maintainer to consider their readiness for this role.
+A Maintainer may nominate a Contributor for Reviewer recognition by opening a GitHub issue titled `Reviewer nomination: @username`, describing the proposed scope and supporting contributions or reviews. The nominee must confirm their willingness to take on the role. Recognition requires approval from at least two existing Maintainers. The final decision and agreed scope must be recorded in the issue before it is closed. A Contributor may also ask a Maintainer to consider their readiness for this role.
 
 ### Responsibilities
 
