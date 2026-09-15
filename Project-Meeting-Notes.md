@@ -27,9 +27,9 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>🎉 September 2, 2026 #100 🎉</strong></summary>
+<details open><summary><strong>September 16, 2026 #101</strong></summary>
 
-## September 2, 2026 #100
+## September 16, 2026 #101
 
 **Attendees**
 
@@ -41,6 +41,37 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 [**Zoom Recording**]()
 
 [**On YouTube**]()
+
+**News**
+
+**Agenda**
+
+- k8gb in the news: [K8gb Hits CNCF Incubating: DNS GSLB for Self-Hosted Clusters Without Route 53](https://bex.co/blog/2026/08/22/k8gb-cncf-incubating-global-load-balancing-self-hosted-clusters)
+- new [contributor ladder and ai policy](https://github.com/k8gb-io/k8gb/pull/2528)
+
+**Actions**
+
+</details>
+
+<details><summary><strong>🎉 September 2, 2026 #100 🎉</strong></summary>
+
+## September 2, 2026 #100
+
+**Attendees**
+
+- [@kuritka](https://github.com/kuritka)
+- [@ytsarev](https://github.com/ytsarev)
+- [@elohmrow](https://github.com/elohmrow)
+- [@k0da](https://github.com/k0da)
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**](https://zoom.us/rec/share/dL0BU1aZIzAZ5D4zpKnmg9v-z6P6QL86KMzZwTrVayQ3VjAaQZ_6Kg3piJsCg9Tt.jVQG7uMuEWscktSk)
+
+[**On YouTube**](https://youtu.be/t38x_kjLcAQ)
 
 **News**
 
