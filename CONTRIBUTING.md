@@ -37,7 +37,7 @@ This document outlines the resources and guidelines necessary to follow by contr
 ## Getting started
 
 - Fork the repository on GitHub
-- See the [local playground guide](docs/local.md) for local dev environment setup
+- See the [local playground guide](https://github.com/k8gb-io/k8gb/blob/master/docs/local.md) for local dev environment setup
 
 ## Getting help
 
@@ -144,7 +144,7 @@ There is a dedicated make target available for Goland:
 3. Attach debugger of your IDE to port `2345`.
 
 ## Metrics
-More info about k8gb metrics can be found in the [metrics.md](docs/metrics.md) document.
+More info about k8gb metrics can be found in the [metrics.md](https://github.com/k8gb-io/k8gb/blob/master/docs/metrics.md) document.
 If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the `make deploy-prometheus` command.
 
 The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:
@@ -250,6 +250,18 @@ Pull requests should also use the appropriate project labels ("bug", "enhancemen
 ## Documentation
 
 If contribution changes the existing APIs or user interface, it must include sufficient documentation explaining the use of the new or updated feature.
+
+Markdown under `docs/` is published via MkDocs (see `mkdocs.yml`). Before opening a docs PR, run the same checks CI runs:
+
+```sh
+# Install once: https://lychee.cli.rs (or `brew install lychee`)
+make docs-linkcheck
+
+# Requires MkDocs + plugins used by .github/workflows/gh-pages.yaml
+make docs-build-strict
+```
+
+`docs-linkcheck` uses [lychee](https://github.com/lycheeverse/lychee) with `lychee.toml`. `docs-build-strict` runs `mkdocs build --strict` so nav orphans and missing relative links fail locally.
 
 ## k8gb.io website
 
