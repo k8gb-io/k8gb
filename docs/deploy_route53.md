@@ -15,22 +15,27 @@ Feel free to reuse this code fully or partially and adapt for your existing scen
 * EKS custom tags
 * IRSA(IAM Roles for Service Accounts) role reference
 
-## Install a north-south data plane (prefer Gateway API)
+## Ingress controller used by this walkthrough
 
-For **new** deployments, prefer [Gateway API](https://gateway-api.sigs.k8s.io/) with a maintained
-implementation (for example AWS Gateway API controller / your platform's Gateway). k8gb can
-reference HTTPRoute and related resources via `spec.resourceRef` — see
-[Resource References](resource_ref.md). Local playground samples live under
+This walkthrough uses ingress-nginx. The application manifests below create an Ingress with
+`ingressClassName: nginx` and a Gslb referencing that Ingress. A Gateway API deployment requires
+corresponding Gateway, HTTPRoute, and Gslb manifests.
+
+For **new** deployments, prefer a maintained [Gateway API](https://gateway-api.sigs.k8s.io/) implementation.
+k8gb supports HTTPRoute and other route resources through `spec.resourceRef` — see
+[Resource References](resource_ref.md). Local playground examples are available under
 `deploy/gslb/*gatewayapi*`.
 
-> **Ingress NGINX status:** the Kubernetes Ingress NGINX project was
+Kubernetes Ingress remains supported with maintained Ingress controllers. The retirement below
+applies specifically to ingress-nginx.
+
+> **ingress-nginx status:** the Kubernetes ingress-nginx project was
 > [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/)
 > ([Steering/SRC statement](https://www.kubernetes.io/blog/2026/01/29/ingress-nginx-statement/)).
 > Do not start new production installs on it. Existing tutorials that still show
 > `ingressClassName: nginx` are legacy examples only.
 
-If you must follow a legacy Ingress-based sample in an existing cluster that already runs
-Ingress NGINX, use a current controller tag (not old 0.x pins), for example:
+The following pinned manifest is retained as a legacy ingress-nginx installation reference:
 
 ```sh
 # Legacy path only — prefer Gateway API for new installs

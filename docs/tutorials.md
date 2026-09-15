@@ -2,9 +2,10 @@
 
 This section provides comprehensive tutorials for deploying and configuring K8GB with various DNS providers and environments.
 
-> **North-south data plane:** for new installs prefer [Gateway API](resource_ref.md) (k8gb `resourceRef` since v0.17).
-> Many older tutorials still show Kubernetes Ingress / NGINX examples; treat those as legacy — Ingress NGINX was
+> For new deployments, prefer [Gateway API](resource_ref.md), supported since k8gb v0.17.
+> Examples that specifically use ingress-nginx are legacy: that controller was
 > [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/).
+> Kubernetes Ingress and k8gb's Ingress integration remain supported with maintained controllers.
 
 ## DNS Provider Integrations
 
