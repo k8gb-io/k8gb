@@ -20,6 +20,8 @@ k8gb follows a [Code of Conduct](CODE_OF_CONDUCT.md), which is aligned with the 
 
 Anyone can contribute to the k8gb project. More about contribution rules and technical aspects can be found in the [CONTRIBUTING](CONTRIBUTING.md) documentation. A great way to contribute is to attend the community meetings. Community meetings take place every other Wednesday from 13:00 CET to 13:30 CET [calendar](https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month). You can join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10).
 
+Contributor role development is described in [`CONTRIBUTOR_LADDER.md`](CONTRIBUTOR_LADDER.md). This guidance does not change Maintainer designation, election, or authority under this document.
+
 ## Maintainers
 
 Maintainers are defined in the [CODEOWNERS](CODEOWNERS) file by their GitHub user handles.
