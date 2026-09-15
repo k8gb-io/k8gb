@@ -29,14 +29,14 @@ kubectl get gslb.k8gb.io -A
 
 ### When this is not safe
 
-If you created `ZoneDelegation` objects (or other v0.20-only CRs) and the older chart/CRDs cannot represent them, delete or migrate those resources **before** downgrading, or restore the control plane from a pre-upgrade backup. Downgrading CRDs under live incompatible instances can leave objects that fail validation.
+Do not delete active `ZoneDelegation` objects just to prepare a downgrade: v0.20 also creates them from `k8gb.dnsZones`, and deletion removes local CoreDNS configuration even with `doFinalize: false`. With `doFinalize: true`, deletion can also withdraw parent DNS delegation. Preserve required zones in the target release's `dnsZones` and validate the DNS handoff and finalizer cleanup before downgrading; otherwise restore from a pre-upgrade backup. Downgrading CRDs under live incompatible instances can leave objects that fail validation.
 
 ## Rolling back across the `k8gb.io` API-group migration (v0.19+)
 
 v0.19 introduced the vendor-neutral canonical API group `k8gb.io/v1beta1` alongside legacy
 `k8gb.absa.oss/v1beta1`. Migration is **one-way** and **label-triggered**. See
 [Controlled legacy migration model](service_upgrade.md#controlled-legacy-migration-model) and
-[ADR-0002](../adr/0002-migrate-gslb-api-group-to-vendor-neutral-k8gb-io.md).
+[ADR-0002](https://github.com/k8gb-io/k8gb/blob/master/adr/0002-migrate-gslb-api-group-to-vendor-neutral-k8gb-io.md).
 
 ### Labels and finalizer
 
