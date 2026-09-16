@@ -59,6 +59,11 @@ nav:
       - External DNS Proxy: proxy_externaldns.md
     - Community:
       - Contributing: CONTRIBUTING.md
+      - Contributor Ladder: CONTRIBUTOR_LADDER.md
+      - AI Contribution Policy: AI_POLICY.md
+      - Governance: GOVERNANCE.md
+      - Code of Conduct: CODE_OF_CONDUCT.md
+      - Security: SECURITY.md
       - Adopters: ADOPTERS.md
   - Blog:
     - blog/index.md
