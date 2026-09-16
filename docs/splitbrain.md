@@ -121,7 +121,7 @@ Lower TTLs mean clients and recursive resolvers stop serving stale answers soone
 
 ### 3. Use static geotags in production
 
-Dynamic geotag discovery (Infoblox only, when `extGslbClustersGeoTags` is empty) queries the edge DNS for NS records on **every reconciliation**. Under network pressure, this can amplify the problem. In production, explicitly set `extGslbClustersGeoTags` to avoid this extra DNS dependency. ExternalDNS-based providers require static geotags; see [Dynamic GeoTags](dynamic_geotags.md).
+Dynamic geotag discovery (when `extGslbClustersGeoTags` is empty) queries the edge DNS for NS records on **every reconciliation**. Under network pressure, this can amplify the problem. In production, explicitly set `extGslbClustersGeoTags` to avoid this extra DNS dependency. ExternalDNS-based providers also need `k8gb.extDNSNsMerge`; see [Dynamic GeoTags](dynamic_geotags.md).
 
 ### 4. Redundant edge DNS
 
