@@ -32,24 +32,19 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 ## September 16, 2026 #101
 
 **Attendees**
-
+- [@ytsarev](https://github.com/ytsarev)
 - [@elohmrow](https://github.com/elohmrow)
+- [@k0da](https://github.com/k0da)
 
 **Backlog**
-
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
-[**Zoom Recording**]()
-
-[**On YouTube**]()
-
-**News**
+[**Zoom Recording**](https://zoom.us/rec/share/TWF7jUYkC1xT_Aa1wP0SZAE3tEFuQ1L30H7zVPHuqRT-JlkWSKQNqKpHEymuIBks.IBAUZI5pN9WnjBpn) | [**On YouTube**](https://youtu.be/Z-_kPeDgVNs)
 
 **Agenda**
-
 - k8gb in the news: [K8gb Hits CNCF Incubating: DNS GSLB for Self-Hosted Clusters Without Route 53](https://bex.co/blog/2026/08/22/k8gb-cncf-incubating-global-load-balancing-self-hosted-clusters)
-- new [contributor ladder and ai policy](https://github.com/k8gb-io/k8gb/pull/2528)
+- new [contributor ladder](https://www.k8gb.io/master/CONTRIBUTOR_LADDER/) and [ai policy](https://www.k8gb.io/master/AI_POLICY/)
 - Community Update - since last meeting:
   - 10 new stargazers
   - 26 new LinkedIn followers
@@ -62,13 +57,17 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
   - [Helm Publish workflow](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml)
 
 **Actions**
-
+- new issues to create:
+  - v1.0.1 with https://github.com/k8gb-io/k8gb/pull/2401 ... first pushs again to that PR to ensure tests ran (GH issue last time)
+  - update contributor ladder to include nominating / approval process to become a contributor ... then test it with [@itsfarhan](https://github.com/itsfarhan)
+  - reach out to https://bex.co/blog/authors/dora - how are they using k8gb, maybe a blog post or joint talk at KubeCon Barcelona
+  - figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF
+  - figure out why [this run](https://github.com/k8gb-io/k8gb/actions/runs/35077432107/job/104733074039) failed
 - [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
 - Move the community meeting to a US-friendly time. 
 - some [old, forgotten actions](#old-actions) 😭 
 
 **Nice-to-Haves**
-
 - Reference platforms: NeoNephos, Sidero, etc.
 
 </details>
