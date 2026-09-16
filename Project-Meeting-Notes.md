@@ -33,6 +33,8 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 **Attendees**
 
+- [@elohmrow](https://github.com/elohmrow)
+
 **Backlog**
 
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
@@ -55,12 +57,19 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
   - most traffic from US, 2nd most from Germany
   - one LinkedIn post got like from someone at FB, who are also appearing in
   page views on Scarf
+- Failing tests
+  - [FOSSA License Scan](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fk8gb-io%2Fk8gb/refs/branch/master/c65d73d7d35568b1584dc3d5d21dd6369497cf25/preview?revisionScanId=121073088)
+  - [Helm Publish workflow](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml)
 
 **Actions**
 
 - [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
 - Move the community meeting to a US-friendly time. 
 - some [old, forgotten actions](#old-actions) 😭 
+
+**Nice-to-Haves**
+
+- Reference platforms: NeoNephos, Sidero, etc.
 
 </details>
 
