@@ -48,8 +48,19 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 - k8gb in the news: [K8gb Hits CNCF Incubating: DNS GSLB for Self-Hosted Clusters Without Route 53](https://bex.co/blog/2026/08/22/k8gb-cncf-incubating-global-load-balancing-self-hosted-clusters)
 - new [contributor ladder and ai policy](https://github.com/k8gb-io/k8gb/pull/2528)
+- Community Update - since last meeting:
+  - 10 new stargazers
+  - 26 new LinkedIn followers
+- Scarf
+  - most traffic from US, 2nd most from Germany
+  - one LinkedIn post got like from someone at FB, who are also appearing in
+  page views on Scarf
 
 **Actions**
+
+- [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
+- Move the community meeting to a US-friendly time. 
+- some [old, forgotten actions](#old-actions) 😭 
 
 </details>
 
@@ -243,7 +254,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
     - **k8s-native IDP networking layer**. Platform engineers are positioning k8gb as the multi-cluster traffic and dns layer inside a broader idp, rather than as a standalone gslb product.
 - **what's your use case?**
 
-**Actions**
+<a id="old-actions"></a>**Actions**
 
 - create a k0rdent reference platform
 - create a blog post highlighting new zone delegation functionality, extend k8gb documentation once the feature is finished
