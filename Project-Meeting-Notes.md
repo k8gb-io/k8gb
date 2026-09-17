@@ -27,20 +27,70 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>🎉 September 2, 2026 #100 🎉</strong></summary>
+<details open><summary><strong>September 16, 2026 #101</strong></summary>
+
+## September 16, 2026 #101
+
+**Attendees**
+- [@ytsarev](https://github.com/ytsarev)
+- [@elohmrow](https://github.com/elohmrow)
+- [@k0da](https://github.com/k0da)
+
+**Backlog**
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**](https://zoom.us/rec/share/TWF7jUYkC1xT_Aa1wP0SZAE3tEFuQ1L30H7zVPHuqRT-JlkWSKQNqKpHEymuIBks.IBAUZI5pN9WnjBpn) | [**On YouTube**](https://youtu.be/Z-_kPeDgVNs)
+
+**Agenda**
+- k8gb in the news: [K8gb Hits CNCF Incubating: DNS GSLB for Self-Hosted Clusters Without Route 53](https://bex.co/blog/2026/08/22/k8gb-cncf-incubating-global-load-balancing-self-hosted-clusters)
+- new [contributor ladder](https://www.k8gb.io/master/CONTRIBUTOR_LADDER/) and [ai policy](https://www.k8gb.io/master/AI_POLICY/)
+- Community Update - since last meeting:
+  - 10 new stargazers
+  - 26 new LinkedIn followers
+- Scarf
+  - most traffic from US, 2nd most from Germany
+  - one LinkedIn post got like from someone at FB, who are also appearing in
+  page views on Scarf
+- Failing tests
+  - [FOSSA License Scan](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fk8gb-io%2Fk8gb/refs/branch/master/c65d73d7d35568b1584dc3d5d21dd6369497cf25/preview?revisionScanId=121073088)
+  - [Helm Publish workflow](https://github.com/k8gb-io/k8gb/actions/workflows/helm_publish.yaml)
+
+**Actions**
+- new issues to create:
+  - v1.0.1 with https://github.com/k8gb-io/k8gb/pull/2401 ... first pushs again to that PR to ensure tests ran (GH issue last time)
+  - update contributor ladder to include nominating / approval process to become a contributor ... then test it with [@itsfarhan](https://github.com/itsfarhan)
+  - reach out to https://bex.co/blog/authors/dora - how are they using k8gb, maybe a blog post or joint talk at KubeCon Barcelona
+  - figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF
+  - figure out why [this run](https://github.com/k8gb-io/k8gb/actions/runs/35077432107/job/104733074039) failed
+- [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
+- Move the community meeting to a US-friendly time. 
+- some [old, forgotten actions](#old-actions) 😭 
+
+**Nice-to-Haves**
+- Reference platforms: NeoNephos, Sidero, etc.
+
+</details>
+
+<details><summary><strong>🎉 September 2, 2026 #100 🎉</strong></summary>
 
 ## September 2, 2026 #100
 
 **Attendees**
+
+- [@kuritka](https://github.com/kuritka)
+- [@ytsarev](https://github.com/ytsarev)
+- [@elohmrow](https://github.com/elohmrow)
+- [@k0da](https://github.com/k0da)
 
 **Backlog**
 
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
-[**Zoom Recording**]()
+[**Zoom Recording**](https://zoom.us/rec/share/dL0BU1aZIzAZ5D4zpKnmg9v-z6P6QL86KMzZwTrVayQ3VjAaQZ_6Kg3piJsCg9Tt.jVQG7uMuEWscktSk)
 
-[**On YouTube**]()
+[**On YouTube**](https://youtu.be/t38x_kjLcAQ)
 
 **News**
 
@@ -212,7 +262,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
     - **k8s-native IDP networking layer**. Platform engineers are positioning k8gb as the multi-cluster traffic and dns layer inside a broader idp, rather than as a standalone gslb product.
 - **what's your use case?**
 
-**Actions**
+<a id="old-actions"></a>**Actions**
 
 - create a k0rdent reference platform
 - create a blog post highlighting new zone delegation functionality, extend k8gb documentation once the feature is finished
