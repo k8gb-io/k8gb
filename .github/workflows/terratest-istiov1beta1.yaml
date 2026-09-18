@@ -13,7 +13,7 @@ env:
 
 jobs:
   terratest-istio:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ github.event.label.name == 'istio' }}
     steps:
       # Keep Terratest exempt: Harden Runner sinkholes localhost DNS lookups
