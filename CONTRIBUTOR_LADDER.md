@@ -30,6 +30,8 @@ Meaningful contributions may include code changes, documentation or website impr
 
 Contributors may participate in public project discussions, propose fixes and improvements, and be invited or assigned to work where repository settings permit. They are expected to explain their submissions, respond constructively to feedback, and respect the project’s quality, security, licensing, and DCO requirements.
 
+A Maintainer may nominate a Contributor by opening a GitHub issue titled `Contributor nomination: @username`, describing the proposed scope and supporting contributions or reviews. Recognition requires approval from at least two existing Maintainers. The final decision must be recorded in the issue before it is closed.
+
 ## Reviewer
 
 A **Reviewer** is a Contributor whom Maintainers recognize as a trusted source of constructive technical or documentation review in an identified area. The recognition may be scoped to an area such as core code, Helm charts, documentation, testing, integrations, or release engineering. It is a community-recognition role under this guide, not a Governance role or a GitHub access grant.
