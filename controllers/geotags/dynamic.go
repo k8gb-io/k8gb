@@ -58,6 +58,15 @@ func (r *DynamicResolver) Resolve(zone *v1beta1io.ZoneDelegation) (resolver.Clus
 	if err != nil {
 		return extClusterNSNames, fmt.Errorf("ExternalGeoTags: reading geo tags: %w", err)
 	}
+	if extClusterNSNames == nil {
+		extClusterNSNames = make(resolver.ClusterNSNames)
+	}
+	// A joining cluster is not in parent NS yet. Always keep the local tag so
+	// the shared-owner NS writer can union self onto the live set.
+	localNS := r.config.GetClusterNSName(*zone)
+	if _, found := extClusterNSNames[localNS]; !found {
+		extClusterNSNames[localNS] = resolver.NewGeoTag(true, r.config.ClusterGeoTag)
+	}
 
 	// caution: This ultimately gets called during every reconciliation. Each call to dig means an interaction
 	return extClusterNSNames, nil
