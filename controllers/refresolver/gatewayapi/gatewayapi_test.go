@@ -23,7 +23,170 @@ import (
 
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
+
+// testRoute is a minimal RouteAdapter exposing only what GetGateway reads
+type testRoute struct {
+	namespace  string
+	parentRefs []gatewayapiv1.ParentReference
+}
+
+func (r testRoute) GetHostnames() ([]gatewayapiv1.Hostname, error) { return nil, nil }
+func (r testRoute) GetName() string                                { return "test-route" }
+func (r testRoute) GetNamespace() string                           { return r.namespace }
+func (r testRoute) GetParentRefs() []gatewayapiv1.ParentReference  { return r.parentRefs }
+func (r testRoute) GetRules() []RouteRule                          { return nil }
+
+func gatewayRef(name, namespace string) gatewayapiv1.ParentReference {
+	ref := gatewayapiv1.ParentReference{Name: gatewayapiv1.ObjectName(name)}
+	if namespace != "" {
+		ns := gatewayapiv1.Namespace(namespace)
+		ref.Namespace = &ns
+	}
+	return ref
+}
+
+func listenerSetRef(name, namespace string) gatewayapiv1.ParentReference {
+	ref := gatewayRef(name, namespace)
+	group := gatewayapiv1.Group(gatewayapiv1.GroupName)
+	kind := gatewayapiv1.Kind("ListenerSet")
+	ref.Group = &group
+	ref.Kind = &kind
+	return ref
+}
+
+func TestGetGateway(t *testing.T) {
+	serviceKind := gatewayapiv1.Kind("Service")
+	serviceRef := gatewayRef("mesh-service", "")
+	serviceRef.Kind = &serviceKind
+
+	lsWithoutGroup := listenerSetRef("tenant", "")
+	lsWithoutGroup.Group = nil
+
+	experimentalLS := listenerSetRef("tenant", "")
+	experimentalGroup := gatewayapiv1.Group("gateway.networking.x-k8s.io")
+	experimentalLS.Group = &experimentalGroup
+
+	shared := types.NamespacedName{Namespace: "gateway-infra", Name: "shared"}
+	local := types.NamespacedName{Namespace: "test-gslb", Name: "gatewayapi-gateway"}
+
+	var tests = []struct {
+		name            string
+		route           testRoute
+		expectedGateway types.NamespacedName
+		expectedError   string
+	}{
+		{
+			name:            "route to Gateway in the same namespace",
+			route:           testRoute{namespace: "test-gslb", parentRefs: []gatewayapiv1.ParentReference{gatewayRef("gatewayapi-gateway", "")}},
+			expectedGateway: local,
+		},
+		{
+			name:            "route to Gateway with explicit namespace",
+			route:           testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{gatewayRef("shared", "gateway-infra")}},
+			expectedGateway: shared,
+		},
+		{
+			name:            "route to ListenerSet to Gateway, all in one namespace",
+			route:           testRoute{namespace: "test-gslb", parentRefs: []gatewayapiv1.ParentReference{listenerSetRef("local", "")}},
+			expectedGateway: local,
+		},
+		{
+			name:            "route and ListenerSet in tenant namespace, Gateway in gateway-infra",
+			route:           testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{listenerSetRef("tenant", "")}},
+			expectedGateway: shared,
+		},
+		{
+			name:            "ListenerSet parentRef without namespace resolves in the ListenerSet namespace",
+			route:           testRoute{namespace: "other", parentRefs: []gatewayapiv1.ParentReference{listenerSetRef("local", "test-gslb")}},
+			expectedGateway: local,
+		},
+		{
+			name:            "ListenerSet parentRef without group",
+			route:           testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{lsWithoutGroup}},
+			expectedGateway: shared,
+		},
+		{
+			name: "two ListenerSets on the same Gateway are deduplicated",
+			route: testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{
+				listenerSetRef("tenant", ""), listenerSetRef("tenant-b", ""),
+			}},
+			expectedGateway: shared,
+		},
+		{
+			name: "ListenerSet and its Gateway directly are deduplicated",
+			route: testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{
+				listenerSetRef("tenant", ""), gatewayRef("shared", "gateway-infra"),
+			}},
+			expectedGateway: shared,
+		},
+		{
+			name: "parentRefs resolving to different Gateways",
+			route: testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{
+				listenerSetRef("tenant", ""), gatewayRef("gatewayapi-gateway", "test-gslb"),
+			}},
+			expectedError: "expected exactly 1 Gateway to be referenced by the route but 2 were found",
+		},
+		{
+			name:          "ListenerSet not found",
+			route:         testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{listenerSetRef("missing", "")}},
+			expectedError: "expected exactly 1 Gateway to be referenced by the route but 0 were found",
+		},
+		{
+			name:          "experimental ListenerSet group is not supported",
+			route:         testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{experimentalLS}},
+			expectedError: "expected exactly 1 Gateway to be referenced by the route but 0 were found",
+		},
+		{
+			name:          "Service parentRef is skipped",
+			route:         testRoute{namespace: "test-gslb", parentRefs: []gatewayapiv1.ParentReference{serviceRef}},
+			expectedError: "expected exactly 1 Gateway to be referenced by the route but 0 were found",
+		},
+		{
+			name: "Service parentRef is skipped when a Gateway is also referenced",
+			route: testRoute{namespace: "test-gslb", parentRefs: []gatewayapiv1.ParentReference{
+				serviceRef, gatewayRef("gatewayapi-gateway", ""),
+			}},
+			expectedGateway: local,
+		},
+		{
+			name:          "Gateway not found",
+			route:         testRoute{namespace: "test-gslb", parentRefs: []gatewayapiv1.ParentReference{gatewayRef("missing", "")}},
+			expectedError: "\"missing\" not found",
+		},
+	}
+
+	objs := []runtime.Object{
+		utils.FileToGatewayApiGateway("../testdata/gatewayapi_gateway.yaml"),
+		utils.FileToGatewayApiGateway("./testdata/gatewayapi_gateway_shared.yaml"),
+		utils.FileToGatewayApiListenerSet("./testdata/gatewayapi_listenerset_tenant.yaml"),
+		utils.FileToGatewayApiListenerSet("./testdata/gatewayapi_listenerset_tenant_b.yaml"),
+		utils.FileToGatewayApiListenerSet("./testdata/gatewayapi_listenerset_same_namespace.yaml"),
+	}
+	s := runtime.NewScheme()
+	require.NoError(t, gatewayapiv1.Install(s))
+	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(objs...).Build()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// act
+			gateway, err := GetGateway(tt.route, cl)
+
+			// assert
+			if tt.expectedError != "" {
+				assert.ErrorContains(t, err, tt.expectedError)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.expectedGateway, types.NamespacedName{Namespace: gateway.Namespace, Name: gateway.Name})
+		})
+	}
+}
 
 func TestGetGslbExposedIPs(t *testing.T) {
 	var tests = []struct {
