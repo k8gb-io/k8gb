@@ -80,13 +80,10 @@ Before deploying K8GB and the demo workload, ensure required configurations on W
     * [External DNS - RFC2126](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md "RFC2136 documentation")
     * A sample values.yaml for K8GB configuration can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/k8gb/).
         * Ensure that the following properties are updated with your values:
-            * dnsZone
-            * edgeDNSZone
-            * parentZoneDNSServers
-            * host - always use FQDN with GSS-TSIG, not IP address
-            * kerberos-username
-            * kerberos-password
-            * kerberos-realm
+            * `k8gb.dnsZones[].loadBalancedZone` / `k8gb.dnsZones[].parentZone` (preferred; replaces legacy `dnsZone` / `edgeDNSZone`)
+            * `k8gb.edgeDNSServers`
+            * `extdns.extraArgs` host — always use FQDN with GSS-TSIG, not IP address (`rfc2136-host`)
+            * `extdns.extraArgs` kerberos-username / kerberos-password / kerberos-realm (`rfc2136-kerberos-*`)
     * At this moment ExternalDNS doesn't provide a way to use secrets as the source for the kerberos-password setting, so you must ensure this is stored in a secure way
 
 ### Install K8gb

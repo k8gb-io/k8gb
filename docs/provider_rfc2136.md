@@ -1,8 +1,10 @@
 # Enabling RFC2136 for ExternalDNS
 
-In order to enable the provider RFC2136 on ExternalDNS, the following `rfc2136.*` [parameters](https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/README.md#values) should be changed in the values.yaml of the K8GB helm chart:
+RFC2136 is configured through the embedded ExternalDNS subchart (`extdns`), not through top-level `rfc2136.*` chart values.
+Set `extdns.provider.name: rfc2136` and pass provider flags under `extdns.extraArgs` (and secrets via `extdns.env` when needed).
+See the chart [values reference](https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/README.md#values) for `extdns.*` and the upstream [external-dns RFC2136 tutorial](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md).
 
-* One authentication method should be enabled on the values:
+* One authentication method should be enabled via `extdns.extraArgs`:
   * Insecure
     * This method doesn't use any authentication and anonymous updates to the DNS records can be executed
   * TSIG
@@ -11,12 +13,12 @@ In order to enable the provider RFC2136 on ExternalDNS, the following `rfc2136.*
     * This method uses GSS-TSIG authentication, which is a variation of the TSIG method, but uses Kerberos for the generation of tokens for authentication and authorization
     * Method used by Active Directory Windows DNS
 
-* GSS-TSIG
-  * kerberos-username
-    * this key should have the value of a Active Directory user account that has permissions for DNS updates
-  * kerberos-password
+* GSS-TSIG (`extdns.extraArgs`)
+  * `rfc2136-kerberos-username`
+    * this key should have the value of an Active Directory user account that has permissions for DNS updates
+  * `rfc2136-kerberos-password`
     * password of the user account that will be used. Be aware that this isn't encrypted and so far ExternalDNS doesn't support adding a Secret reference for this value, so it will be stored in clear text
-  * kerberos-realm
+  * `rfc2136-kerberos-realm`
     * domain that will be used for authentication of the user
 
 # Sample for GSS-TSIG authentication
