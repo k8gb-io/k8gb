@@ -1,8 +1,11 @@
 # GSLB ResourceRef Support
-Starting from v0.15.0, k8gb introduces a much simpler way to link a GSLB resource to an Ingress object in Kubernetes. You no longer need to duplicate the Ingress configuration in your GSLB definition—instead, you can simply reference an existing Ingress. 
+Starting from v0.15.0, k8gb introduces a much simpler way to link a GSLB resource to an Ingress object in Kubernetes. You no longer need to duplicate the Ingress configuration in your GSLB definition—instead, you can simply reference an existing Ingress.
 This makes your Ingress the single source of truth for application routing.
 
-K8GB supports the following ingress resources:
+For **new** deployments, prefer [Gateway API](https://gateway-api.sigs.k8s.io/) resources (supported since v0.17.0). Kubernetes Ingress remains supported; Ingress NGINX itself was
+[retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/) and should not be chosen for greenfield installs.
+
+K8GB supports the following ingress / gateway resources:
 
 * [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 * [Kubernetes LoadBalancer Service](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)

@@ -22,4 +22,5 @@ login:
 .PHONY: k8gb-reference-setup
 k8gb-reference-setup:
 	terraform apply
-	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.40.2/deploy/static/provider/aws/deploy.yaml
+	# Legacy Ingress NGINX path only — prefer Gateway API for new installs (see docs/deploy_route53.md).
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/aws/deploy.yaml
