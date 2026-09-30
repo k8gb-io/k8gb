@@ -35,6 +35,7 @@ import (
 	"github.com/miekg/dns"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
@@ -362,8 +363,15 @@ func TestWeight(t *testing.T) {
 			endpoint, err := ep.GetDNSEndpoint()
 
 			// assert
-			assert.NoError(t, err)
-			assert.Equal(t, test.expectedLabels, map[string]string(endpoint.Spec.Endpoints[1].Labels))
+			require.NoError(t, err)
+			var applicationLabels map[string]string
+			for _, record := range endpoint.Spec.Endpoints {
+				if record.DNSName == "app.gslb.cloud.example.com" {
+					applicationLabels = record.Labels
+					break
+				}
+			}
+			assert.Equal(t, test.expectedLabels, applicationLabels)
 
 		})
 	}

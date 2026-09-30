@@ -37,7 +37,9 @@ spec:
             endpoints:
               - dnsName: (join('', ['localtargets.', $test.metadata.name, '.cloud.example.com']))
                 recordType: A
-              - dnsName: (join('', ['localtargets.', $test.metadata.name, '.cloud.example.com']))
+              - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
+                recordType: A
+              - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
                 recordType: A
         timeout: 75s
 

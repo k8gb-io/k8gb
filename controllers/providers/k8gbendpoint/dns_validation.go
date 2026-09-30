@@ -24,10 +24,10 @@ import (
 )
 
 const (
-	localTargetsPrefix    = "localtargets."
+	localTargetsPrefix       = "localtargets."
 	localTargetsPrefixLegacy = "localtargets-"
-	dnsNameMax            = 253
-	dnsLabelMax           = 63
+	dnsNameMax               = 253
+	dnsLabelMax              = 63
 )
 
 func getLocalTargetsHost(host string) (string, error) {

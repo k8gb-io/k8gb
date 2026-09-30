@@ -112,6 +112,13 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 				DNSName:    localTargetsHost,
 			}
 			gslbHosts = append(gslbHosts, dnsRecord)
+			// Older peers still query the dash-prefixed name during rolling upgrades.
+			// Skip it when the prefix would make the first DNS label too long.
+			if legacyHost, err := getLocalTargetsHostLegacy(host); err == nil {
+				legacyRecord := *dnsRecord
+				legacyRecord.DNSName = legacyHost
+				gslbHosts = append(gslbHosts, &legacyRecord)
+			}
 		}
 
 		// Check if host is alive on external Gslb

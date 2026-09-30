@@ -682,12 +682,12 @@ func (i *Instance) GetStatus(annotation string) (s *InstanceStatus) {
 		s.EndpointLocalTargets = na
 	}
 	s.EndpointGlobalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
-		"custom-columns=SERVICESTATUS:.spec.endpoints[1].dnsName", "--no-headers")
+		fmt.Sprintf("custom-columns=SERVICESTATUS:.spec.endpoints[?(@.dnsName=='%s')].dnsName", i.w.state.gslb.host), "--no-headers")
 	if err != nil {
 		s.EndpointGlobalDNSName = na
 	}
 	s.EndpointGlobalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
-		"custom-columns=SERVICESTATUS:.spec.endpoints[1].targets", "--no-headers")
+		fmt.Sprintf("custom-columns=SERVICESTATUS:.spec.endpoints[?(@.dnsName=='%s')].targets", i.w.state.gslb.host), "--no-headers")
 	if err != nil {
 		s.EndpointGlobalTargets = na
 	}
