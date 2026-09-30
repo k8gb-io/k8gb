@@ -27,7 +27,41 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>September 16, 2026 #101</strong></summary>
+<details open><summary><strong>September 30, 2026 #102</strong></summary>
+
+## September 30, 2026 #102
+
+**Attendees**
+- [@elohmrow](https://github.com/elohmrow)
+
+**Backlog**
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**]() | [**On YouTube**]()
+
+**Agenda**
+
+- CLOMonitor new agentic readiness metric failing: 
+  - https://clomonitor.io/projects/cncf/k8gb#k8gb_agent_readiness --> new issue https://github.com/k8gb-io/k8gb/issues/2539
+- be careful of upcoming ExternalDNS breaking change (v0.22.0): https://lnkd.in/p/e3uZmQQJ
+- new Gateway API contributor: https://github.com/k8gb-io/k8gb/pull/2540
+- introduce CNCF automation for maintainers: https://github.com/k8gb-io/k8gb/pull/2532
+- add requirements for becoming a Contributor: https://github.com/k8gb-io/k8gb/pull/2533
+  - confirm first contributor!: https://github.com/k8gb-io/k8gb/issues/2534 
+
+**Actions**
+- [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
+- Move the community meeting to a US-friendly time. 
+- some [old, forgotten actions](#old-actions) 😭 
+- figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF
+
+**Nice-to-Haves**
+- Reference platforms: NeoNephos, Sidero, etc.
+
+</details>
+
+<details><summary><strong>September 16, 2026 #101</strong></summary>
 
 ## September 16, 2026 #101
 
