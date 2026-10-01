@@ -35,6 +35,8 @@ spec:
               (length(@)): 1
           spec:
             endpoints:
+              - dnsName: (join('', ['localtargets.', $test.metadata.name, '.cloud.example.com']))
+                recordType: A
               - dnsName: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
                 recordType: A
               - dnsName: (join('', [$test.metadata.name, '.cloud.example.com']))
@@ -46,7 +48,7 @@ spec:
           - name: DNSENDPOINT_NAME
             value: ($test.metadata.name)
           - name: EXPECTED_DNS_NAME
-            value: (join('', ['localtargets-', $test.metadata.name, '.cloud.example.com']))
+            value: (join('', ['localtargets.', $test.metadata.name, '.cloud.example.com']))
         content: |
           set -eu pipefail
 

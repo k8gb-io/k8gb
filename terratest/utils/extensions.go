@@ -541,7 +541,7 @@ func (i *Instance) waitForApp(predicate func(instances int) bool, stop bool) (er
 	// second conditions
 	endpointReady := false
 	for n := 0; n < maxRetries/2; n++ {
-		ep, err := i.Resources().GetExternalDNSEndpointByName(i.w.state.gslb.name, i.w.namespace).GetEndpointByName(fmt.Sprintf("localtargets-%s", i.w.state.gslb.host))
+		ep, err := i.Resources().GetExternalDNSEndpointByName(i.w.state.gslb.name, i.w.namespace).GetEndpointByName(fmt.Sprintf("localtargets.%s", i.w.state.gslb.host))
 		if err != nil {
 			if err.Error() == notFoundError {
 				// During startup the local DNSEndpoint can lag behind the app becoming ready,
@@ -607,7 +607,7 @@ func (i *Instance) Dig() []string {
 
 // GetLocalTargets returns instance local targets
 func (i *Instance) GetLocalTargets() []string {
-	dnsName := fmt.Sprintf("localtargets-%s", i.w.state.gslb.host)
+	dnsName := fmt.Sprintf("localtargets.%s", i.w.state.gslb.host)
 	dig, err := dns.Dig("localhost:"+strconv.Itoa(i.w.state.gslb.port), dnsName, i.w.settings.digUsingUDP)
 	i.logIfError(err, "GetLocalTargets(), dig: %s", err)
 	return dig
@@ -682,12 +682,12 @@ func (i *Instance) GetStatus(annotation string) (s *InstanceStatus) {
 		s.EndpointLocalTargets = na
 	}
 	s.EndpointGlobalDNSName, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
-		"custom-columns=SERVICESTATUS:.spec.endpoints[1].dnsName", "--no-headers")
+		fmt.Sprintf("custom-columns=SERVICESTATUS:.spec.endpoints[?(@.dnsName=='%s')].dnsName", i.w.state.gslb.host), "--no-headers")
 	if err != nil {
 		s.EndpointGlobalDNSName = na
 	}
 	s.EndpointGlobalTargets, err = k8s.RunKubectlAndGetOutputE(i.w.t, i.w.k8sOptions, "get", "dnsendpoints.externaldns.k8s.io", "test-gslb", "-o",
-		"custom-columns=SERVICESTATUS:.spec.endpoints[1].targets", "--no-headers")
+		fmt.Sprintf("custom-columns=SERVICESTATUS:.spec.endpoints[?(@.dnsName=='%s')].targets", i.w.state.gslb.host), "--no-headers")
 	if err != nil {
 		s.EndpointGlobalTargets = na
 	}

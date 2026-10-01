@@ -112,6 +112,13 @@ func (d *ApplicationDNSEndpoint) GetDNSEndpoint() (*externaldnsApi.DNSEndpoint, 
 				DNSName:    localTargetsHost,
 			}
 			gslbHosts = append(gslbHosts, dnsRecord)
+			// Older peers still query the dash-prefixed name during rolling upgrades.
+			// Skip it when the prefix would make the first DNS label too long.
+			if legacyHost, err := getLocalTargetsHostLegacy(host); err == nil {
+				legacyRecord := *dnsRecord
+				legacyRecord.DNSName = legacyHost
+				gslbHosts = append(gslbHosts, &legacyRecord)
+			}
 		}
 
 		// Check if host is alive on external Gslb
@@ -232,6 +239,18 @@ func (d *ApplicationDNSEndpoint) GetExternalTargets(host string) (targets Target
 				Err(dnsResult.Err).
 				Msg("can't resolve FQDN using nameservers")
 			continue
+		}
+		// Fall back to legacy dash-prefix naming for backward compatibility during migration
+		if len(d.queryService.ExtractARecords(dnsResult.Msg)) == 0 {
+			lHostLegacy, err := getLocalTargetsHostLegacy(host)
+			if err != nil {
+				continue
+			}
+			dnsResultLegacy := d.queryService.Query(lHostLegacy, nameServersToUse)
+			if dnsResultLegacy.Err != nil {
+				continue
+			}
+			dnsResult = dnsResultLegacy
 		}
 		clusterTargets := d.queryService.ExtractARecords(dnsResult.Msg)
 		if len(clusterTargets) > 0 {
