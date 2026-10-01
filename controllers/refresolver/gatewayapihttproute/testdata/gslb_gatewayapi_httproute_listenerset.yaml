@@ -1,0 +1,13 @@
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: app
+  namespace: tenant
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    name: app
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 30

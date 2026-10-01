@@ -75,6 +75,64 @@ spec:
     name: playground-failover-httproute
 ```
 
+##### Routes attached to a ListenerSet
+A route's `parentRefs` may point at a [ListenerSet](https://gateway-api.sigs.k8s.io/guides/user-guides/listener-set/)
+(`gateway.networking.k8s.io/v1`) instead of a Gateway. k8gb follows the ListenerSet's `spec.parentRef` to the Gateway
+it is attached to and reads that Gateway's addresses, exactly as for a route parented directly to the Gateway.
+This applies to every Gateway API route kind listed above.
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: tenant
+  namespace: tenant
+spec:
+  parentRef:
+    name: shared
+    namespace: gateway-infra
+  listeners:
+    - name: app-443
+      hostname: app.example.com
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: tls-app
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app
+  namespace: tenant
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: tenant
+  hostnames:
+    - app.example.com
+  rules:
+    - backendRefs:
+        - name: app
+          port: 8080
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: app
+  namespace: tenant
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    name: app
+```
+
+A route may reference several ListenerSets, or a ListenerSet and a Gateway, as long as they all resolve to the same
+Gateway. The experimental `XListenerSet` (`gateway.networking.x-k8s.io`) is not supported.
+
 #### GatewayAPI GRPCRoute
 ```yaml
 apiVersion: k8gb.io/v1beta1
