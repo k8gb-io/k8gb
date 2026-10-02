@@ -1,9 +1,9 @@
 dependencies:
 - name: coredns
   repository: https://coredns.github.io/helm
-  version: 1.47.0
+  version: 1.48.2
 - name: external-dns
   repository: https://kubernetes-sigs.github.io/external-dns
-  version: 1.21.1
-digest: sha256:054a7cb51ba128edb1ed88ce2af4b63e80362d92595be692f5f7ce6e10c37e59
-generated: "2026-09-08T07:05:03.933625766Z"
+  version: 1.23.0
+digest: sha256:507a4b91d4e1ede6fc5e1a145920b63d7736a88f3a877e88c0ba5093de33771c
+generated: "2026-10-02T11:12:34.010452624Z"
