@@ -45,6 +45,7 @@ jobs:
           egress-policy: block
           # Audit: https://github.com/k8gb-io/k8gb/actions/runs/34329541730
           # Include Go/tool downloads on cache misses and regional Kubernetes registry redirects.
+          # Istio's chart repository redirects from blob.istio.io to istio-release.r2.istio.io.
           allowed-endpoints: >-
             api.github.com:443
             github.com:443
@@ -73,6 +74,7 @@ jobs:
             kubernetes-sigs.github.io:443
             kubernetes.github.io:443
             blob.istio.io:443
+            istio-release.r2.istio.io:443
             stefanprodan.github.io:443
             k8gb.io:443
             www.k8gb.io:443
