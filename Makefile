@@ -261,7 +261,7 @@ deploy-local-cluster:
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
-	helm repo add --force-update istio https://istio-release.storage.googleapis.com/charts
+	helm repo add --force-update istio https://blob.istio.io/istio-release/charts
 	helm repo update
 	helm upgrade -i istio-base istio/base -n istio-system --version "$(ISTIO_VERSION)"
 

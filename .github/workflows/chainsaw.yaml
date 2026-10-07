@@ -72,7 +72,7 @@ jobs:
             coredns.github.io:443
             kubernetes-sigs.github.io:443
             kubernetes.github.io:443
-            istio-release.storage.googleapis.com:443
+            blob.istio.io:443
             stefanprodan.github.io:443
             k8gb.io:443
             www.k8gb.io:443
