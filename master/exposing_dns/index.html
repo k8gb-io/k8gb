@@ -1143,10 +1143,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ingress-controller-with-udp-support-nginx" class="md-nav__link">
+  <a href="#ingress-controller-with-udp-support-nginx-legacy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ingress Controller with UDP support (NGINX)
+        Ingress Controller with UDP support (NGINX) — legacy
       
     </span>
   </a>
@@ -2822,10 +2822,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ingress-controller-with-udp-support-nginx" class="md-nav__link">
+  <a href="#ingress-controller-with-udp-support-nginx-legacy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ingress Controller with UDP support (NGINX)
+        Ingress Controller with UDP support (NGINX) — legacy
       
     </span>
   </a>
@@ -2896,8 +2896,10 @@
 type of load balancer or ingress controller used etc.
 This topic is outside the project's scope, as often the related configuration is shared by cluster services, requires additional permissions, and as result can't be owned by k8gb controller deployment.
 However, we can describe a few examples using common Kubernetes configurations, which have been thoroughly tested in local and production environments.</p>
-<h2 id="ingress-controller-with-udp-support-nginx">Ingress Controller with UDP support (NGINX)<a class="headerlink" href="#ingress-controller-with-udp-support-nginx" title="Permanent link">&para;</a></h2>
+<h2 id="ingress-controller-with-udp-support-nginx-legacy">Ingress Controller with UDP support (NGINX) — legacy<a class="headerlink" href="#ingress-controller-with-udp-support-nginx-legacy" title="Permanent link">&para;</a></h2>
 <blockquote>
+<p><strong>Prefer exposing CoreDNS via <code>LoadBalancer</code> / NLB</strong> (see <a href="#external-load-balancer">External load balancer</a> below) or your platform's Gateway / UDP path.
+Ingress NGINX was <a href="https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/">retired in March 2026</a>; keep this section only if you already run it.</p>
 <p><em>Check <a href="https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/">NGINX Ingress controller official documentation</a> for additional information</em></p>
 </blockquote>
 <p>In general, an Ingress resource doesn't support TCP or UDP services. In order to let NGINX Ingress controller know that we want to expose UDP port for k8gb CoreDNS service (<code>k8gb-coredns</code>), we need to create or patch <code>udp-services</code> ConfigMap in a namespace where NGINX ingress controller is installed (<code>ingress-nginx</code> by default).
@@ -2997,7 +2999,7 @@ We're using this approach in our <a href="../deploy_route53/">AWS+Route53</a> re
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 26, 2026 10:16:53 UTC">August 26, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2026 22:39:56 UTC">October 7, 2026</span>
   </span>
 
     
