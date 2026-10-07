@@ -1341,6 +1341,106 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#v020x-v019x-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.20.x → v0.19.x Rollback
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.20.x → v0.19.x Rollback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-this-is-safe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When this is safe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-this-is-not-safe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When this is not safe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rolling-back-across-the-k8gbio-api-group-migration-v019" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rolling back across the k8gb.io API-group migration (v0.19+)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rolling back across the k8gb.io API-group migration (v0.19+)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#labels-and-finalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Labels and finalizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-unsupported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is unsupported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-must-leave-v019-after-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you must leave v0.19+ after migration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v018x-v017x-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.18.x → v0.17.x Rollback
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#v0160-v0150-rollback" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2878,6 +2978,106 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#v020x-v019x-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.20.x → v0.19.x Rollback
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.20.x → v0.19.x Rollback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-this-is-safe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When this is safe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-this-is-not-safe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When this is not safe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rolling-back-across-the-k8gbio-api-group-migration-v019" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rolling back across the k8gb.io API-group migration (v0.19+)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rolling back across the k8gb.io API-group migration (v0.19+)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#labels-and-finalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Labels and finalizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-unsupported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is unsupported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-must-leave-v019-after-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you must leave v0.19+ after migration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v018x-v017x-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.18.x → v0.17.x Rollback
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#v0160-v0150-rollback" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2981,6 +3181,10 @@
 
 
 <h1 id="k8gb-rollback-procedures">K8GB Rollback Procedures<a class="headerlink" href="#k8gb-rollback-procedures" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>NOTE: by rollback, we mean downgrading to a previous chart/app version (typically
+<code>helm upgrade --version …</code>), not specifically <code>helm rollback</code>, unless noted.</p>
+</blockquote>
 <h2 id="rollback-compatibility">Rollback Compatibility<a class="headerlink" href="#rollback-compatibility" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2992,6 +3196,24 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>v0.20.x</td>
+<td>v0.19.x</td>
+<td><code>helm upgrade</code></td>
+<td>⚠️ Chart OK if no ZoneDelegation / TLSRoute / new features in use; see <a href="#rolling-back-across-the-k8gbio-api-group-migration-v019">API-group caveats</a></td>
+</tr>
+<tr>
+<td>v0.19.x</td>
+<td>v0.18.x</td>
+<td><code>helm upgrade</code></td>
+<td>❌ Unsupported once objects were migrated to <code>k8gb.io</code> (one-way); restore from backup if you must leave v0.19</td>
+</tr>
+<tr>
+<td>v0.18.x</td>
+<td>v0.17.x</td>
+<td><code>helm upgrade</code></td>
+<td>✅ Usually works (no API-group change); verify CRDs / values</td>
+</tr>
 <tr>
 <td>v0.17.0</td>
 <td>v0.16.0</td>
@@ -3012,24 +3234,104 @@
 </tr>
 </tbody>
 </table>
+<h2 id="v020x-v019x-rollback">v0.20.x → v0.19.x Rollback<a class="headerlink" href="#v020x-v019x-rollback" title="Permanent link">&para;</a></h2>
+<h3 id="when-this-is-safe">When this is safe<a class="headerlink" href="#when-this-is-safe" title="Permanent link">&para;</a></h3>
+<p><code>helm upgrade</code> back to <code>v0.19.x</code> is reasonable when the cluster does <strong>not</strong> depend on features introduced in v0.20 (notably <code>ZoneDelegation</code>, TLSRoute support, and related status/finalizer behavior). Keep your existing Helm values (including <code>dnsZones</code> / <code>edgeDNSServers</code> / <code>extdns</code>).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.19.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>current-values.yaml
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>k8gb
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span>-A
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb.k8gb.io<span class="w"> </span>-A
+</code></pre></div>
+<h3 id="when-this-is-not-safe">When this is not safe<a class="headerlink" href="#when-this-is-not-safe" title="Permanent link">&para;</a></h3>
+<p>Do not delete active <code>ZoneDelegation</code> objects just to prepare a downgrade: v0.20 also creates them from <code>k8gb.dnsZones</code>, and deletion removes local CoreDNS configuration even with <code>doFinalize: false</code>. With <code>doFinalize: true</code>, deletion can also withdraw parent DNS delegation. Preserve required zones in the target release's <code>dnsZones</code> and validate the DNS handoff and finalizer cleanup before downgrading; otherwise restore from a pre-upgrade backup. Downgrading CRDs under live incompatible instances can leave objects that fail validation.</p>
+<h2 id="rolling-back-across-the-k8gbio-api-group-migration-v019">Rolling back across the <code>k8gb.io</code> API-group migration (v0.19+)<a class="headerlink" href="#rolling-back-across-the-k8gbio-api-group-migration-v019" title="Permanent link">&para;</a></h2>
+<p>v0.19 introduced the vendor-neutral canonical API group <code>k8gb.io/v1beta1</code> alongside legacy
+<code>k8gb.absa.oss/v1beta1</code>. Migration is <strong>one-way</strong> and <strong>label-triggered</strong>. See
+<a href="../service_upgrade/#controlled-legacy-migration-model">Controlled legacy migration model</a> and
+<a href="https://github.com/k8gb-io/k8gb/blob/master/adr/0002-migrate-gslb-api-group-to-vendor-neutral-k8gb-io.md">ADR-0002</a>.</p>
+<h3 id="labels-and-finalizer">Labels and finalizer<a class="headerlink" href="#labels-and-finalizer" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Label / finalizer</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k8gb.io/migration-requested=true</code></td>
+<td>Operator requested migration for this legacy object; legacy runtime reconcile pauses for that object</td>
+</tr>
+<tr>
+<td><code>k8gb.io/migrated-to-k8gb-io=true</code></td>
+<td>Migration finished; edit the canonical <code>k8gb.io</code> Gslb going forward</td>
+</tr>
+<tr>
+<td><code>k8gb.io/legacy-migration-protection</code></td>
+<td>Finalizer on the legacy object during/after migration for safe ownerReference cleanup (<code>controllers/gslb_migration_controller.go</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Trigger (for reference — do <strong>not</strong> use this as a rollback step):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span>label<span class="w"> </span>gslb.k8gb.absa.oss<span class="w"> </span>-n<span class="w"> </span>&lt;ns&gt;<span class="w"> </span>&lt;name&gt;<span class="w"> </span>k8gb.io/migration-requested<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite
+</code></pre></div>
+<h3 id="what-is-unsupported">What is unsupported<a class="headerlink" href="#what-is-unsupported" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Rollback guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Still on legacy only (<code>k8gb.absa.oss</code>, no migration labels)</td>
+<td>Downgrade v0.19 → v0.18 may work; verify pods and <code>kubectl get gslb.k8gb.absa.oss -A</code></td>
+</tr>
+<tr>
+<td>Migration requested or completed (<code>migration-requested</code> / <code>migrated-to-k8gb-io</code>)</td>
+<td><strong>Do not</strong> expect a supported in-place rollback to a pre-migration world. Canonical <code>k8gb.io</code> objects and ownership changes are not automatically reversed</td>
+</tr>
+<tr>
+<td>Need pre-migration state</td>
+<td>Restore Gslb/Ingress/DNSEndpoint objects (and CRDs if needed) from a backup taken <strong>before</strong> setting <code>k8gb.io/migration-requested=true</code></td>
+</tr>
+</tbody>
+</table>
+<p>There is no supported “un-migrate” controller path that recreates a writable legacy object from a canonical <code>k8gb.io</code> Gslb.</p>
+<h3 id="if-you-must-leave-v019-after-migration">If you must leave v0.19+ after migration<a class="headerlink" href="#if-you-must-leave-v019-after-migration" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Prefer staying on a v0.19+ release and fixing forward.</li>
+<li>If a downgrade is unavoidable, restore from backup rather than inventing a reverse conversion.</li>
+<li>After restore, confirm which API group your automation applies (<code>k8gb.io</code> vs <code>k8gb.absa.oss</code>) before starting the operator again.</li>
+</ol>
+<h2 id="v018x-v017x-rollback">v0.18.x → v0.17.x Rollback<a class="headerlink" href="#v018x-v017x-rollback" title="Permanent link">&para;</a></h2>
+<p>No API-group migration in this step. Typical path:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>helm<span class="w"> </span>get<span class="w"> </span>values<span class="w"> </span>k8gb<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>&gt;<span class="w"> </span>current-values.yaml
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.17.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>current-values.yaml
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>k8gb
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span>-A
+</code></pre></div>
+<p>If Helm refuses to adopt existing CRDs, see the CRD ownership notes under
+<a href="#v0150-v0140-rollback">v0.15.0+ → v0.14.0</a>.</p>
 <h2 id="v0160-v0150-rollback">v0.16.0+ → v0.15.0 Rollback<a class="headerlink" href="#v0160-v0150-rollback" title="Permanent link">&para;</a></h2>
 <h3 id="issue">Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h3>
 <p>Direct rollback fails due to CoreDNS service configuration changes.</p>
 <p>Note: v0.16.0 introduced zones configuration that breaks rollback to v0.15.0</p>
 <h3 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h3>
 <p>Use values file with v0.15.0 compatible CoreDNS config:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># v015-rollback-values.yaml</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">coredns</span><span class="p">:</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># v0.15.0 compatible CoreDNS configuration</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">servers</span><span class="p">:</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5353</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">servicePort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">plugins</span><span class="p">:</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prometheus</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="nt">parameters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0:9153</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># v015-rollback-values.yaml</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">coredns</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># v0.15.0 compatible CoreDNS configuration</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">servers</span><span class="p">:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5353</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">servicePort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="nt">parameters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0:9153</span>
 </code></pre></div>
 <p><strong>Rollback command:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.15.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>v015-rollback-values.yaml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.15.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>v015-rollback-values.yaml
 </code></pre></div></p>
 <h2 id="v0150-v0140-rollback">v0.15.0+→ v0.14.0 Rollback<a class="headerlink" href="#v0150-v0140-rollback" title="Permanent link">&para;</a></h2>
 <h3 id="issue_1">Issue<a class="headerlink" href="#issue_1" title="Permanent link">&para;</a></h3>
@@ -3040,51 +3342,48 @@ dnsZone + edgeDNSZone → dnsZones array</p>
 <ol>
 <li><strong>Extract current values:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>helm<span class="w"> </span>get<span class="w"> </span>values<span class="w"> </span>k8gb<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>&gt;<span class="w"> </span>new-values.yaml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>helm<span class="w"> </span>get<span class="w"> </span>values<span class="w"> </span>k8gb<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>&gt;<span class="w"> </span>new-values.yaml
 </code></pre></div>
 <ol>
 <li><strong>Convert values to v0.14.0 schema:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># v0.15.0 format</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>k8gb:
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>dnsZones:
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span>-<span class="w"> </span>parentZone:<span class="w"> </span><span class="s2">"example.com"</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span>loadBalancedZone:<span class="w"> </span><span class="s2">"cloud.example.com"</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># v0.14.0 format</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>k8gb:
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span>dnsZone:<span class="w"> </span><span class="s2">"cloud.example.com"</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span>edgeDNSZone:<span class="w"> </span><span class="s2">"example.com"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># v0.15.0 format</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>k8gb:
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span>dnsZones:
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span>-<span class="w"> </span>parentZone:<span class="w"> </span><span class="s2">"example.com"</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">      </span>loadBalancedZone:<span class="w"> </span><span class="s2">"cloud.example.com"</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># v0.14.0 format</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>k8gb:
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span>dnsZone:<span class="w"> </span><span class="s2">"cloud.example.com"</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span>edgeDNSZone:<span class="w"> </span><span class="s2">"example.com"</span>
 </code></pre></div>
 <ol>
 <li><strong>Rollback:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.14.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>new-values.yaml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.14.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>new-values.yaml
 </code></pre></div>
 <ol>
 <li><strong>Verify rollback:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>helm<span class="w"> </span>list<span class="w"> </span>-n<span class="w"> </span>k8gb
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>k8gb
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span>-A
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>helm<span class="w"> </span>list<span class="w"> </span>-n<span class="w"> </span>k8gb
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>k8gb
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span>-A
 </code></pre></div>
 <p>You may also run into CRD ownership conflicts when downgrading/rolling back, because the CRD already exists but Helm can’t “adopt” it. Since CRDs are cluster-scoped, Helm relies on specific annotations/labels to recognize them as part of the release.</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>crd<span class="w"> </span>dnsendpoints.externaldns.k8s.io<span class="w"> </span>meta.helm.sh/release-name<span class="o">=</span>k8gb<span class="w"> </span>--overwrite
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>crd<span class="w"> </span>dnsendpoints.externaldns.k8s.io<span class="w"> </span>meta.helm.sh/release-namespace<span class="o">=</span>k8gb<span class="w"> </span>--overwrite
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>kubectl<span class="w"> </span>label<span class="w"> </span>crd<span class="w"> </span>dnsendpoints.externaldns.k8s.io<span class="w"> </span>app.kubernetes.io/managed-by<span class="o">=</span>Helm<span class="w"> </span>--overwrite
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.14.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>new-values.yaml
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>crd<span class="w"> </span>dnsendpoints.externaldns.k8s.io<span class="w"> </span>meta.helm.sh/release-name<span class="o">=</span>k8gb<span class="w"> </span>--overwrite
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>kubectl<span class="w"> </span>annotate<span class="w"> </span>crd<span class="w"> </span>dnsendpoints.externaldns.k8s.io<span class="w"> </span>meta.helm.sh/release-namespace<span class="o">=</span>k8gb<span class="w"> </span>--overwrite
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>kubectl<span class="w"> </span>label<span class="w"> </span>crd<span class="w"> </span>dnsendpoints.externaldns.k8s.io<span class="w"> </span>app.kubernetes.io/managed-by<span class="o">=</span>Helm<span class="w"> </span>--overwrite
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.14.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>new-values.yaml
 </code></pre></div>
-This method manually sets the necessary Helm annotations and labels on the CRDs to allow Helm to manage them during the rollback.</p>
-<blockquote>
-<p>NOTE: by rollback, we mean downgrading to the previous version, not specific <code>helm rollback</code> functionality 
+This method manually sets the necessary Helm annotations and labels on the CRDs to allow Helm to manage them during the rollback.
 If the chart version changes the CRD schema (or conversion webhook behavior), downgrading can still fail even after adoption, because existing CR instances may not validate against the older schema. In that case you may need to align CRD versions more explicitly (or avoid downgrading CRDs altogether).
 You can use --force, but treat it as a last resort because it may replace resources to apply changes.:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.14.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>new-values.yaml<span class="w"> </span>--force
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>k8gb<span class="w"> </span>k8gb/k8gb<span class="w"> </span>--version<span class="w"> </span>v0.14.0<span class="w"> </span>-n<span class="w"> </span>k8gb<span class="w"> </span>-f<span class="w"> </span>new-values.yaml<span class="w"> </span>--force
 </code></pre></div></p>
-</blockquote>
 
 
 
@@ -3107,7 +3406,7 @@ You can use --force, but treat it as a last resort because it may replace resour
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 9, 2026 19:07:07 UTC">January 9, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2026 22:36:45 UTC">October 7, 2026</span>
   </span>
 
     
