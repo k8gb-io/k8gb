@@ -2936,23 +2936,26 @@ As you can see above we did set special geo tag message in podinfo configuration
 <a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">      </span><span class="nt">http</span><span class="p">:</span>
 <a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
 <a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">          </span><span class="nt">backend</span><span class="p">:</span>
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">            </span><span class="nt">service</span><span class="p">:</span>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span><span class="w"> </span><span class="c1"># This should point to Service name of testing application</span>
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">              </span><span class="nt">port</span><span class="p">:</span>
-<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="nn">---</span>
-<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb.io/v1beta1</span>
-<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gslb</span>
-<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span>
-<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-gslb</span>
-<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="w">  </span><span class="nt">resourceRef</span><span class="p">:</span>
-<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
-<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
-<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">          </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">          </span><span class="nt">backend</span><span class="p">:</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">            </span><span class="nt">service</span><span class="p">:</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span><span class="w"> </span><span class="c1"># This should point to Service name of testing application</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">              </span><span class="nt">port</span><span class="p">:</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="nn">---</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb.io/v1beta1</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gslb</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-gslb</span>
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="w">  </span><span class="nt">resourceRef</span><span class="p">:</span>
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a><span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podinfo</span>
+<a id="__codelineno-9-34" name="__codelineno-9-34" href="#__codelineno-9-34"></a><span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
+<a id="__codelineno-9-35" name="__codelineno-9-35" href="#__codelineno-9-35"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">roundRobin</span>
 </code></pre></div></p>
 </li>
 <li>
@@ -2969,71 +2972,58 @@ As you can see above we did set special geo tag message in podinfo configuration
 </code></pre></div></p>
 </li>
 <li>
-<p>Check Gslb resource status
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>describe<span class="w"> </span>gslb
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>Name:<span class="w">         </span>podinfo
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Namespace:<span class="w">    </span>test-gslb
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>Labels:<span class="w">       </span>&lt;none&gt;
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>Annotations:<span class="w">  </span>API<span class="w"> </span>Version:<span class="w">  </span>k8gb.io/v1beta1
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>Kind:<span class="w">         </span>Gslb
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>Metadata:
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span>Creation<span class="w"> </span>Timestamp:<span class="w">  </span><span class="m">2020</span>-06-24T22:51:09Z
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">  </span>Finalizers:
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span>k8gb.io/finalizer
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">  </span>Generation:<span class="w">        </span><span class="m">1</span>
-<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">  </span>Resource<span class="w"> </span>Version:<span class="w">  </span><span class="m">14197</span>
-<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">  </span>Self<span class="w"> </span>Link:<span class="w">         </span>/apis/k8gb.io/v1beta1/namespaces/test-gslb/gslbs/podinfo
-<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">  </span>UID:<span class="w">               </span>86d4121b-b870-434e-bd4d-fece681116f0
-<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>Spec:
-<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">  </span>Ingress:
-<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">    </span>Rules:
-<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">      </span>Host:<span class="w">  </span>podinfo.cloud.example.com
-<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">      </span>Http:
-<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">        </span>Paths:
-<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">          </span>Backend:
-<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">            </span>Service<span class="w"> </span>Name:<span class="w">  </span>podinfo
-<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">            </span>Service<span class="w"> </span>Port:<span class="w">  </span>http
-<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">          </span>Path:<span class="w">            </span>/
-<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="w">  </span>Strategy:
-<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="w">    </span>Type:<span class="w">  </span>roundRobin
-<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a>Status:
-<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a><span class="w">  </span>Geo<span class="w"> </span>Tag:<span class="w">  </span>us
-<a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a><span class="w">  </span>Healthy<span class="w"> </span>Records:
-<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a><span class="w">    </span>podinfo.cloud.example.com:
-<a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a><span class="w">      </span><span class="m">172</span>.17.0.10
-<a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a><span class="w">      </span><span class="m">172</span>.17.0.7
-<a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a><span class="w">      </span><span class="m">172</span>.17.0.8
-<a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a><span class="w">  </span>Service<span class="w"> </span>Health:
-<a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a><span class="w">    </span>podinfo.cloud.example.com:<span class="w">  </span>Healthy
-<a id="__codelineno-12-36" name="__codelineno-12-36" href="#__codelineno-12-36"></a>Events:<span class="w">                         </span>&lt;none&gt;
+<p>Check Gslb resource status (spec reflects <code>resourceRef</code> + <code>strategy</code>; status is filled by the controller):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span>podinfo<span class="w"> </span>-o<span class="w"> </span>yaml
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>apiVersion:<span class="w"> </span>k8gb.io/v1beta1
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>kind:<span class="w"> </span>Gslb
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>metadata:
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span>name:<span class="w"> </span>podinfo
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span>namespace:<span class="w"> </span>test-gslb
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>spec:
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span>resourceRef:
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span>apiVersion:<span class="w"> </span>networking.k8s.io/v1
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span>kind:<span class="w"> </span>Ingress
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">    </span>matchLabels:
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">      </span>app:<span class="w"> </span>podinfo
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">  </span>strategy:
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">    </span>type:<span class="w"> </span>roundRobin
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>status:
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">  </span>geoTag:<span class="w"> </span>us
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">  </span>healthyRecords:
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">    </span>podinfo.cloud.example.com:
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.10
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.7
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.8
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">  </span>serviceHealth:
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">    </span>podinfo.cloud.example.com:<span class="w"> </span>Healthy
 </code></pre></div></p>
 </li>
 <li>
-<p>In the output above you should see that Gslb detected the <code>Healthy</code> status of underlying <code>podinfo</code> standard Kubernetes Service</p>
+<p>In the output above you should see that Gslb detected the <code>Healthy</code> status of the referenced <code>podinfo</code> Ingress / Service</p>
 </li>
 <li>
 <p>Check that internal k8gb DNS servers are responding accordingly on this cluster</p>
 </li>
 <li>Pick one of the worker nodes to test with
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>k<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>-o<span class="w"> </span>wide
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>NAME<span class="w">                       </span>STATUS<span class="w">   </span>ROLES<span class="w">    </span>AGE<span class="w">   </span>VERSION<span class="w">   </span>INTERNAL-IP<span class="w">   </span>EXTERNAL-IP<span class="w">   </span>OS-IMAGE<span class="w">       </span>KERNEL-VERSION<span class="w">     </span>CONTAINER-RUNTIME
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>test-gslb2-control-plane<span class="w">   </span>Ready<span class="w">    </span>master<span class="w">   </span>53m<span class="w">   </span>v1.17.0<span class="w">   </span><span class="m">172</span>.17.0.9<span class="w">    </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">19</span>.10<span class="w">   </span><span class="m">4</span>.19.76-linuxkit<span class="w">   </span>containerd://1.3.2
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>test-gslb2-worker<span class="w">          </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">   </span>52m<span class="w">   </span>v1.17.0<span class="w">   </span><span class="m">172</span>.17.0.8<span class="w">    </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">19</span>.10<span class="w">   </span><span class="m">4</span>.19.76-linuxkit<span class="w">   </span>containerd://1.3.2
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>test-gslb2-worker2<span class="w">         </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">   </span>52m<span class="w">   </span>v1.17.0<span class="w">   </span><span class="m">172</span>.17.0.7<span class="w">    </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">19</span>.10<span class="w">   </span><span class="m">4</span>.19.76-linuxkit<span class="w">   </span>containerd://1.3.2
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>test-gslb2-worker3<span class="w">         </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">   </span>52m<span class="w">   </span>v1.17.0<span class="w">   </span><span class="m">172</span>.17.0.10<span class="w">   </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">19</span>.10<span class="w">   </span><span class="m">4</span>.19.76-linuxkit<span class="w">   </span>containerd://1.3.2
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>-o<span class="w"> </span>wide
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>NAME<span class="w">                       </span>STATUS<span class="w">   </span>ROLES<span class="w">           </span>AGE<span class="w">   </span>VERSION<span class="w">   </span>INTERNAL-IP<span class="w">   </span>EXTERNAL-IP<span class="w">   </span>OS-IMAGE<span class="w">             </span>KERNEL-VERSION<span class="w">     </span>CONTAINER-RUNTIME
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>test-gslb2-control-plane<span class="w">   </span>Ready<span class="w">    </span>control-plane<span class="w">   </span>53m<span class="w">   </span>v1.29.4<span class="w">   </span><span class="m">172</span>.18.0.9<span class="w">    </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">22</span>.04.4<span class="w"> </span>LTS<span class="w">   </span><span class="m">6</span>.5.0-linuxkit<span class="w">     </span>containerd://1.7.13
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>test-gslb2-worker<span class="w">          </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>52m<span class="w">   </span>v1.29.4<span class="w">   </span><span class="m">172</span>.18.0.8<span class="w">    </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">22</span>.04.4<span class="w"> </span>LTS<span class="w">   </span><span class="m">6</span>.5.0-linuxkit<span class="w">     </span>containerd://1.7.13
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>test-gslb2-worker2<span class="w">         </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>52m<span class="w">   </span>v1.29.4<span class="w">   </span><span class="m">172</span>.18.0.7<span class="w">    </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">22</span>.04.4<span class="w"> </span>LTS<span class="w">   </span><span class="m">6</span>.5.0-linuxkit<span class="w">     </span>containerd://1.7.13
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>test-gslb2-worker3<span class="w">         </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>52m<span class="w">   </span>v1.29.4<span class="w">   </span><span class="m">172</span>.18.0.10<span class="w">   </span>&lt;none&gt;<span class="w">        </span>Ubuntu<span class="w"> </span><span class="m">22</span>.04.4<span class="w"> </span>LTS<span class="w">   </span><span class="m">6</span>.5.0-linuxkit<span class="w">     </span>containerd://1.7.13
 </code></pre></div></li>
 <li>Use <code>dig</code> to make a DNS query to it
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dig<span class="w"> </span>+short<span class="w"> </span>@172.17.0.10<span class="w"> </span>podinfo.cloud.example.com
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="m">172</span>.17.0.8
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="m">172</span>.17.0.10
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="m">172</span>.17.0.7
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dig<span class="w"> </span>+short<span class="w"> </span>@172.18.0.10<span class="w"> </span>podinfo.cloud.example.com
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="m">172</span>.18.0.8
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="m">172</span>.18.0.10
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="m">172</span>.18.0.7
 </code></pre></div></li>
 <li>One of your workers should already return DNS responses constructed by Gslb based on service health information</li>
 <li>If edgeDNS was configured you can query your standard infra DNS directly and it should return the same
     <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>dig<span class="w"> </span>+short<span class="w"> </span>podinfo.cloud.example.com
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="m">172</span>.17.0.8
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="m">172</span>.17.0.10
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="m">172</span>.17.0.7
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="m">172</span>.18.0.8
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="m">172</span>.18.0.10
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="m">172</span>.18.0.7
 </code></pre></div></li>
 <li>
 <p>Now it's time to deploy this application to the first <code>eu</code> cluster. The steps and configuration are exactly the same. Just changing <code>ui.message</code> to <code>eu</code>
@@ -3048,45 +3038,32 @@ As you can see above we did set special geo tag message in podinfo configuration
 </li>
 <li>
 <p>Check the Gslb resource status.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>k<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>describe<span class="w"> </span>gslb<span class="w"> </span>podinfo
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>Name:<span class="w">         </span>podinfo
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>Namespace:<span class="w">    </span>test-gslb
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>Labels:<span class="w">       </span>&lt;none&gt;
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>Annotations:<span class="w">  </span>API<span class="w"> </span>Version:<span class="w">  </span>k8gb.io/v1beta1
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>Kind:<span class="w">         </span>Gslb
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>Metadata:
-<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">  </span>Creation<span class="w"> </span>Timestamp:<span class="w">  </span><span class="m">2020</span>-06-24T23:25:08Z
-<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">  </span>Finalizers:
-<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">    </span>k8gb.io/finalizer
-<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="w">  </span>Generation:<span class="w">        </span><span class="m">1</span>
-<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="w">  </span>Resource<span class="w"> </span>Version:<span class="w">  </span><span class="m">23881</span>
-<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="w">  </span>Self<span class="w"> </span>Link:<span class="w">         </span>/apis/k8gb.io/v1beta1/namespaces/test-gslb/gslbs/podinfo
-<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="w">  </span>UID:<span class="w">               </span>a5ab509b-5ea2-49d6-982e-4129a8410c3e
-<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>Spec:
-<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">  </span>Ingress:
-<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">    </span>Rules:
-<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">      </span>Host:<span class="w">  </span>podinfo.cloud.example.com
-<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">      </span>Http:
-<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">        </span>Paths:
-<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">          </span>Backend:
-<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a><span class="w">            </span>Service<span class="w"> </span>Name:<span class="w">  </span>podinfo
-<a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="w">            </span>Service<span class="w"> </span>Port:<span class="w">  </span>http
-<a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a><span class="w">          </span>Path:<span class="w">            </span>/
-<a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a><span class="w">  </span>Strategy:
-<a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="w">    </span>Type:<span class="w">  </span>roundRobin
-<a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a>Status:
-<a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a><span class="w">  </span>Geo<span class="w"> </span>Tag:<span class="w">  </span>eu
-<a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a><span class="w">  </span>Healthy<span class="w"> </span>Records:
-<a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a><span class="w">    </span>podinfo.cloud.example.com:
-<a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a><span class="w">      </span><span class="m">172</span>.17.0.3
-<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a><span class="w">      </span><span class="m">172</span>.17.0.5
-<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a><span class="w">      </span><span class="m">172</span>.17.0.6
-<a id="__codelineno-18-34" name="__codelineno-18-34" href="#__codelineno-18-34"></a><span class="w">      </span><span class="m">172</span>.17.0.8
-<a id="__codelineno-18-35" name="__codelineno-18-35" href="#__codelineno-18-35"></a><span class="w">      </span><span class="m">172</span>.17.0.10
-<a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a><span class="w">      </span><span class="m">172</span>.17.0.7
-<a id="__codelineno-18-37" name="__codelineno-18-37" href="#__codelineno-18-37"></a><span class="w">  </span>Service<span class="w"> </span>Health:
-<a id="__codelineno-18-38" name="__codelineno-18-38" href="#__codelineno-18-38"></a><span class="w">    </span>podinfo.cloud.example.com:<span class="w">  </span>Healthy
-<a id="__codelineno-18-39" name="__codelineno-18-39" href="#__codelineno-18-39"></a>Events:<span class="w">                         </span>&lt;none&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>test-gslb<span class="w"> </span>get<span class="w"> </span>gslb<span class="w"> </span>podinfo<span class="w"> </span>-o<span class="w"> </span>yaml
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>apiVersion:<span class="w"> </span>k8gb.io/v1beta1
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>kind:<span class="w"> </span>Gslb
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>metadata:
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">  </span>name:<span class="w"> </span>podinfo
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">  </span>namespace:<span class="w"> </span>test-gslb
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>spec:
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">  </span>resourceRef:
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">    </span>apiVersion:<span class="w"> </span>networking.k8s.io/v1
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">    </span>kind:<span class="w"> </span>Ingress
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="w">    </span>matchLabels:
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="w">      </span>app:<span class="w"> </span>podinfo
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="w">  </span>strategy:
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="w">    </span>type:<span class="w"> </span>roundRobin
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>status:
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">  </span>geoTag:<span class="w"> </span>eu
+<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">  </span>healthyRecords:
+<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">    </span>podinfo.cloud.example.com:
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.3
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.5
+<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.6
+<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.8
+<a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.10
+<a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a><span class="w">    </span>-<span class="w"> </span><span class="m">172</span>.18.0.7
+<a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a><span class="w">  </span>serviceHealth:
+<a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="w">    </span>podinfo.cloud.example.com:<span class="w"> </span>Healthy
 </code></pre></div></p>
 </li>
 <li>
@@ -3095,26 +3072,26 @@ As you can see above we did set special geo tag message in podinfo configuration
 <li>
 <p>Now you can check the DNS responses the same way as before.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>dig<span class="w"> </span>+short<span class="w"> </span>podinfo.cloud.example.com
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="m">172</span>.17.0.8
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="m">172</span>.17.0.5
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="m">172</span>.17.0.10
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="m">172</span>.17.0.7
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="m">172</span>.17.0.6
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="m">172</span>.17.0.3
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="m">172</span>.18.0.8
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="m">172</span>.18.0.5
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="m">172</span>.18.0.10
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="m">172</span>.18.0.7
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="m">172</span>.18.0.6
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="m">172</span>.18.0.3
 </code></pre></div></p>
 </li>
 <li>
 <p>And for the final end-to-end test, we can use <code>curl</code> to query the application
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.example.com<span class="p">|</span>grep<span class="w"> </span>message
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.cloud.example.com<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>message
 <a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="s2">"message"</span>:<span class="w"> </span><span class="s2">"eu"</span>,
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.example.com<span class="p">|</span>grep<span class="w"> </span>message
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.cloud.example.com<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>message
 <a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">  </span><span class="s2">"message"</span>:<span class="w"> </span><span class="s2">"us"</span>,
 <a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.example.com<span class="p">|</span>grep<span class="w"> </span>message
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.cloud.example.com<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>message
 <a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">  </span><span class="s2">"message"</span>:<span class="w"> </span><span class="s2">"us"</span>,
 <a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>
-<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.example.com<span class="o">||</span>grep<span class="w"> </span>message
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>curl<span class="w"> </span>-s<span class="w"> </span>podinfo.cloud.example.com<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>message
 <a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="w">  </span><span class="s2">"message"</span>:<span class="w"> </span><span class="s2">"eu"</span>,
 </code></pre></div></p>
 </li>
@@ -3124,7 +3101,7 @@ As you can see above we did set special geo tag message in podinfo configuration
 </ul>
 <p>Hope you enjoyed the ride!</p>
 <p>If anything unclear or is going wrong, feel free to contact us at https://github.com/k8gb-io/k8gb/issues. We will appreciate any feedback/bug report and Pull Requests are welcome.</p>
-<p>For more advanced technical documentation and fully automated local installation steps, see below.</p>
+<p>For more advanced technical documentation and fully automated local installation steps, see <a href="../local/">Local playground for testing and development</a>.</p>
 
 
 
@@ -3147,7 +3124,7 @@ As you can see above we did set special geo tag message in podinfo configuration
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 11, 2026 09:31:30 UTC">March 11, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2026 22:33:39 UTC">October 7, 2026</span>
   </span>
 
     
