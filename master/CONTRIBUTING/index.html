@@ -3937,7 +3937,20 @@ When a commit is created in GitHub UI as a result of <a href="https://docs.githu
 Use dedicated <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">keywords</a> in the pull request description or <a href="https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue">link issues manually</a> so resolved issues remain visible from the pull request and release notes.
 Pull requests should also use the appropriate project labels ("bug", "enhancement", "wontfix", etc.) so generated release notes are categorized correctly.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
-<p>If contribution changes the existing APIs or user interface, it must include sufficient documentation explaining the use of the new or updated feature.</p>
+<p>If a contribution changes existing APIs or the user interface, include enough documentation to explain the new or updated feature.</p>
+<p>k8gb.io is built from this repository with MkDocs (<code>mkdocs.yml</code>). The same
+markdown is also read on GitHub, so link style depends on where the file lives:</p>
+<ul>
+<li><strong>Repository-root files</strong> (<code>README.md</code>, <code>CONTRIBUTING.md</code>): use <code>docs/&lt;page&gt;.md</code>
+  so GitHub resolves the path. <code>docs/link_fixer.py</code> rewrites those hrefs when
+  MkDocs builds the site.</li>
+<li><strong>Files under <code>docs/</code></strong>: use same-tree relative links (<code>local.md</code>, <code>../metrics.md</code>).</li>
+<li><strong>Targets outside <code>docs/</code></strong> (for example <code>adr/</code>): use a GitHub blob or tree URL.</li>
+<li><strong>Symlinked nav pages</strong>: keep paths correct for the real file; <code>link_fixer.py</code>
+  rewrites them for the MkDocs path (see <code>docs/crossplane_globalapp.md</code>).</li>
+</ul>
+<p><code>mkdocs build --strict</code> fails the build if a markdown link does not resolve
+inside the docs tree.</p>
 <h2 id="k8gbio-website">k8gb.io website<a class="headerlink" href="#k8gbio-website" title="Permanent link">&para;</a></h2>
 <p>k8gb.io website is a Jekyll-based static website generated from project markdown documentation and hosted by GitHub Pages.
 <code>gh-pages</code> branch contains the website source, including configuration, website layout, and styling.
@@ -4183,7 +4196,7 @@ as part of the release. These files follows this naming pattern:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 16, 2026 09:05:36 UTC">September 16, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2026 22:41:38 UTC">October 7, 2026</span>
   </span>
 
     
