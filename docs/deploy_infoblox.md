@@ -100,6 +100,7 @@ spec:
       http:
         paths:
         - path: /
+          pathType: Prefix
           backend:
             service:
               name: podinfo # This should point to Service name of testing application
@@ -117,6 +118,8 @@ spec:
     kind: Ingress
     matchLabels:
       app: podinfo
+  strategy:
+    type: roundRobin
 ```
 
 * And apply the resource in the target app namespace
@@ -132,72 +135,59 @@ NAME      AGE
 podinfo   39s
 ```
 
-* Check Gslb resource status
+* Check Gslb resource status (spec reflects `resourceRef` + `strategy`; status is filled by the controller):
 ```sh
-kubectl -n test-gslb describe gslb
-Name:         podinfo
-Namespace:    test-gslb
-Labels:       <none>
-Annotations:  API Version:  k8gb.io/v1beta1
-Kind:         Gslb
-Metadata:
-  Creation Timestamp:  2020-06-24T22:51:09Z
-  Finalizers:
-    k8gb.io/finalizer
-  Generation:        1
-  Resource Version:  14197
-  Self Link:         /apis/k8gb.io/v1beta1/namespaces/test-gslb/gslbs/podinfo
-  UID:               86d4121b-b870-434e-bd4d-fece681116f0
-Spec:
-  Ingress:
-    Rules:
-      Host:  podinfo.cloud.example.com
-      Http:
-        Paths:
-          Backend:
-            Service Name:  podinfo
-            Service Port:  http
-          Path:            /
-  Strategy:
-    Type:  roundRobin
-Status:
-  Geo Tag:  us
-  Healthy Records:
+kubectl -n test-gslb get gslb podinfo -o yaml
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: podinfo
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: podinfo
+  strategy:
+    type: roundRobin
+status:
+  geoTag: us
+  healthyRecords:
     podinfo.cloud.example.com:
-      172.17.0.10
-      172.17.0.7
-      172.17.0.8
-  Service Health:
-    podinfo.cloud.example.com:  Healthy
-Events:                         <none>
+    - 172.18.0.10
+    - 172.18.0.7
+    - 172.18.0.8
+  serviceHealth:
+    podinfo.cloud.example.com: Healthy
 ```
 
-* In the output above you should see that Gslb detected the `Healthy` status of underlying `podinfo` standard Kubernetes Service
+* In the output above you should see that Gslb detected the `Healthy` status of the referenced `podinfo` Ingress / Service
 
 * Check that internal k8gb DNS servers are responding accordingly on this cluster
   * Pick one of the worker nodes to test with
     ```sh
-    k get nodes -o wide
-    NAME                       STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE       KERNEL-VERSION     CONTAINER-RUNTIME
-    test-gslb2-control-plane   Ready    master   53m   v1.17.0   172.17.0.9    <none>        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.2
-    test-gslb2-worker          Ready    <none>   52m   v1.17.0   172.17.0.8    <none>        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.2
-    test-gslb2-worker2         Ready    <none>   52m   v1.17.0   172.17.0.7    <none>        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.2
-    test-gslb2-worker3         Ready    <none>   52m   v1.17.0   172.17.0.10   <none>        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.2
+    kubectl get nodes -o wide
+    NAME                       STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+    test-gslb2-control-plane   Ready    control-plane   53m   v1.29.4   172.18.0.9    <none>        Ubuntu 22.04.4 LTS   6.5.0-linuxkit     containerd://1.7.13
+    test-gslb2-worker          Ready    <none>          52m   v1.29.4   172.18.0.8    <none>        Ubuntu 22.04.4 LTS   6.5.0-linuxkit     containerd://1.7.13
+    test-gslb2-worker2         Ready    <none>          52m   v1.29.4   172.18.0.7    <none>        Ubuntu 22.04.4 LTS   6.5.0-linuxkit     containerd://1.7.13
+    test-gslb2-worker3         Ready    <none>          52m   v1.29.4   172.18.0.10   <none>        Ubuntu 22.04.4 LTS   6.5.0-linuxkit     containerd://1.7.13
     ```
   * Use `dig` to make a DNS query to it
     ```sh
-    dig +short @172.17.0.10 podinfo.cloud.example.com
-    172.17.0.8
-    172.17.0.10
-    172.17.0.7
+    dig +short @172.18.0.10 podinfo.cloud.example.com
+    172.18.0.8
+    172.18.0.10
+    172.18.0.7
     ```
   * One of your workers should already return DNS responses constructed by Gslb based on service health information
   * If edgeDNS was configured you can query your standard infra DNS directly and it should return the same
     ```sh
     dig +short podinfo.cloud.example.com
-    172.17.0.8
-    172.17.0.10
-    172.17.0.7
+    172.18.0.8
+    172.18.0.10
+    172.18.0.7
     ```
 * Now it's time to deploy this application to the first `eu` cluster. The steps and configuration are exactly the same. Just changing `ui.message` to `eu`
 ```sh
@@ -212,45 +202,32 @@ kubectl -n test-gslb apply -f podinfogslb.yaml
 
 * Check the Gslb resource status.
 ```sh
-k -n test-gslb describe gslb podinfo
-Name:         podinfo
-Namespace:    test-gslb
-Labels:       <none>
-Annotations:  API Version:  k8gb.io/v1beta1
-Kind:         Gslb
-Metadata:
-  Creation Timestamp:  2020-06-24T23:25:08Z
-  Finalizers:
-    k8gb.io/finalizer
-  Generation:        1
-  Resource Version:  23881
-  Self Link:         /apis/k8gb.io/v1beta1/namespaces/test-gslb/gslbs/podinfo
-  UID:               a5ab509b-5ea2-49d6-982e-4129a8410c3e
-Spec:
-  Ingress:
-    Rules:
-      Host:  podinfo.cloud.example.com
-      Http:
-        Paths:
-          Backend:
-            Service Name:  podinfo
-            Service Port:  http
-          Path:            /
-  Strategy:
-    Type:  roundRobin
-Status:
-  Geo Tag:  eu
-  Healthy Records:
+kubectl -n test-gslb get gslb podinfo -o yaml
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: podinfo
+  namespace: test-gslb
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    matchLabels:
+      app: podinfo
+  strategy:
+    type: roundRobin
+status:
+  geoTag: eu
+  healthyRecords:
     podinfo.cloud.example.com:
-      172.17.0.3
-      172.17.0.5
-      172.17.0.6
-      172.17.0.8
-      172.17.0.10
-      172.17.0.7
-  Service Health:
-    podinfo.cloud.example.com:  Healthy
-Events:                         <none>
+    - 172.18.0.3
+    - 172.18.0.5
+    - 172.18.0.6
+    - 172.18.0.8
+    - 172.18.0.10
+    - 172.18.0.7
+  serviceHealth:
+    podinfo.cloud.example.com: Healthy
 ```
 
 * Ideally you should already see that `Healthy Records` of `podinfo.cloud.example.com` return the records from __both__ of the clusters. Otherwise, give it a couple of minutes to sync up.
@@ -258,26 +235,26 @@ Events:                         <none>
 * Now you can check the DNS responses the same way as before.
 ```sh
 dig +short podinfo.cloud.example.com
-172.17.0.8
-172.17.0.5
-172.17.0.10
-172.17.0.7
-172.17.0.6
-172.17.0.3
+172.18.0.8
+172.18.0.5
+172.18.0.10
+172.18.0.7
+172.18.0.6
+172.18.0.3
 ```
 
 * And for the final end-to-end test, we can use `curl` to query the application
 ```sh
-curl -s podinfo.example.com|grep message
+curl -s podinfo.cloud.example.com | grep message
   "message": "eu",
 
-curl -s podinfo.example.com|grep message
+curl -s podinfo.cloud.example.com | grep message
   "message": "us",
 
-curl -s podinfo.example.com|grep message
+curl -s podinfo.cloud.example.com | grep message
   "message": "us",
 
-curl -s podinfo.example.com||grep message
+curl -s podinfo.cloud.example.com | grep message
   "message": "eu",
 ```
 
@@ -287,4 +264,4 @@ Hope you enjoyed the ride!
 
 If anything unclear or is going wrong, feel free to contact us at https://github.com/k8gb-io/k8gb/issues. We will appreciate any feedback/bug report and Pull Requests are welcome.
 
-For more advanced technical documentation and fully automated local installation steps, see below.
+For more advanced technical documentation and fully automated local installation steps, see [Local playground for testing and development](local.md).
