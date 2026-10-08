@@ -137,6 +137,7 @@ jobs:
 
 
       - name: K8GB deployment
+        timeout-minutes: 20
         run: |
           make deploy-test-version list-running-pods
           echo "Cluster 1 (eu):"

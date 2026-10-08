@@ -95,9 +95,11 @@ jobs:
           k3d-version: ${{ env.K3D_VERSION }}
 
       - name: K8GB deploy stable version
+        timeout-minutes: 20
         run: make deploy-stable-version list-running-pods
 
       - name: K8GB deploy test version
+        timeout-minutes: 20
         run: make deploy-test-version list-running-pods
 
       - name: Run Terratest

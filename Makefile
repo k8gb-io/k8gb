@@ -195,9 +195,22 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 	$(call deploy-edgedns)
 	@echo -e "\n$(YELLOW)import k8gb docker image to all $(CLUSTERS_NUMBER) clusters$(NC)"
 
-	@for c in $(CLUSTER_IDS); do \
-		echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
-		k3d image import --mode=direct $(REPO):$(SEMVER)-$(ARCH) -c $(CLUSTER_NAME)$$c || exit $$? ;\
+	@timeout=$$(command -v timeout || command -v gtimeout) || { \
+		echo "GNU timeout is required (macOS: brew install coreutils)" >&2 ;\
+		exit 1 ;\
+	} ;\
+	for c in $(CLUSTER_IDS); do \
+		for attempt in 1 2 3; do \
+			echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c: image import attempt $$attempt/3$(NC)" ;\
+			if "$$timeout" --kill-after=10s 2m k3d image import --mode=direct $(REPO):$(SEMVER)-$(ARCH) -c $(CLUSTER_NAME)$$c; then \
+				break ;\
+			else \
+				status=$$? ;\
+			fi ;\
+			echo "Image import failed or timed out (exit $$status)" >&2 ;\
+			if [ "$$attempt" -eq 3 ]; then exit $$status; fi ;\
+			sleep 5 ;\
+		done ;\
 	done
 
 	@for c in $(CLUSTER_IDS); do \
