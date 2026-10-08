@@ -187,7 +187,7 @@ deploy-gcp-local-setup: ## Deploy local setup with GCP Cloud DNS (requires GCP_P
 deploy-stable-version:
 	$(call deploy-edgedns)
 	@for c in $(CLUSTER_IDS); do \
-		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c ;\
+		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c || exit $$? ;\
 	done
 
 .PHONY: deploy-test-version
@@ -197,11 +197,11 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 
 	@for c in $(CLUSTER_IDS); do \
 		echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
-		k3d image import $(REPO):$(SEMVER)-$(ARCH) -c $(CLUSTER_NAME)$$c ;\
+		k3d image import --mode=direct $(REPO):$(SEMVER)-$(ARCH) -c $(CLUSTER_NAME)$$c || exit $$? ;\
 	done
 
 	@for c in $(CLUSTER_IDS); do \
-		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-$(ARCH) CHART='./chart/k8gb' ;\
+		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-$(ARCH) CHART='./chart/k8gb' || exit $$? ;\
 	done
 
 .PHONY: list-running-pods
