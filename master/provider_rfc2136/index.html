@@ -2758,9 +2758,11 @@
 
 
 <h1 id="enabling-rfc2136-for-externaldns">Enabling RFC2136 for ExternalDNS<a class="headerlink" href="#enabling-rfc2136-for-externaldns" title="Permanent link">&para;</a></h1>
-<p>In order to enable the provider RFC2136 on ExternalDNS, the following <code>rfc2136.*</code> <a href="https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/README.md#values">parameters</a> should be changed in the values.yaml of the K8GB helm chart:</p>
+<p>RFC2136 is configured through the embedded ExternalDNS subchart (<code>extdns</code>), not through top-level <code>rfc2136.*</code> chart values.
+Set <code>extdns.provider.name: rfc2136</code> and pass provider flags under <code>extdns.extraArgs</code> (and secrets via <code>extdns.env</code> when needed).
+See the chart <a href="https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/README.md#values">values reference</a> for <code>extdns.*</code> and the upstream <a href="https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md">external-dns RFC2136 tutorial</a>.</p>
 <ul>
-<li>One authentication method should be enabled on the values:</li>
+<li>One authentication method should be enabled via <code>extdns.extraArgs</code>:</li>
 <li>Insecure<ul>
 <li>This method doesn't use any authentication and anonymous updates to the DNS records can be executed</li>
 </ul>
@@ -2777,17 +2779,17 @@
 </ul>
 </li>
 <li>
-<p>GSS-TSIG</p>
+<p>GSS-TSIG (<code>extdns.extraArgs</code>)</p>
 </li>
-<li>kerberos-username<ul>
-<li>this key should have the value of a Active Directory user account that has permissions for DNS updates</li>
+<li><code>rfc2136-kerberos-username</code><ul>
+<li>this key should have the value of an Active Directory user account that has permissions for DNS updates</li>
 </ul>
 </li>
-<li>kerberos-password<ul>
+<li><code>rfc2136-kerberos-password</code><ul>
 <li>password of the user account that will be used. Be aware that this isn't encrypted and so far ExternalDNS doesn't support adding a Secret reference for this value, so it will be stored in clear text</li>
 </ul>
 </li>
-<li>kerberos-realm<ul>
+<li><code>rfc2136-kerberos-realm</code><ul>
 <li>domain that will be used for authentication of the user</li>
 </ul>
 </li>
@@ -2839,7 +2841,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 1, 2025 16:08:39 UTC">September 1, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 9, 2026 09:29:24 UTC">October 9, 2026</span>
   </span>
 
     

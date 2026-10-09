@@ -2864,7 +2864,7 @@
 <p>Previously, k8gb could only manage a single DNS zone per deployment. If you needed to handle multiple zones (for example, for several domains or environments), you had to deploy several instances of k8gb, each in a separate namespace, and carefully coordinate their configuration. This approach was difficult to manage and prone to errors, especially with Helm charts and CRDs.</p>
 <p>To simplify things, k8gb now supports defining multiple zones directly in your configuration.</p>
 <h3 id="how-to-configure-multiple-zones">How to configure multiple zones<a class="headerlink" href="#how-to-configure-multiple-zones" title="Permanent link">&para;</a></h3>
-<p>The new configuration uses the dnsZones field (in your values.yaml or Helm values), where you can define a list of zones to be managed by a single k8gb deployment.</p>
+<p>The configuration uses the <code>k8gb.dnsZones</code> field (in your values.yaml or Helm values), where you can define a list of zones to be managed by a single k8gb deployment.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">k8gb</span><span class="p">:</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">dnsZones</span><span class="p">:</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">parentZone</span><span class="p">:</span><span class="w"> </span><span class="s">"example.com"</span><span class="w">             </span><span class="c1"># The parent zone which delegates to the GSLB zone (previously edgeDNSZone)</span>
@@ -2881,7 +2881,7 @@
 <p><strong>Note:</strong>The field names have also changed for clarity:
  - <code>edgeDNSZone</code> is now called <code>parentZone</code>
  - <code>dnsZone</code> is now called <code>loadBalancedZone</code></p>
-<p>For backward compatibility, the dnsZone and edgeDNSZone fields are allowed; otherwise, the dnsZones array is used. For valid values, use either dnsZone and edgeDNSZone or dnsZones.We recommend switching to the new syntax for all new deployments.</p>
+<p>The current chart requires <code>k8gb.dnsZones</code>. The legacy <code>k8gb.dnsZone</code> and <code>k8gb.edgeDNSZone</code> keys are no longer supported; migrate them to <code>loadBalancedZone</code> and <code>parentZone</code> entries in the array.</p>
 </blockquote>
 
 
@@ -2905,7 +2905,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 29, 2025 13:21:18 UTC">May 29, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 9, 2026 09:29:24 UTC">October 9, 2026</span>
   </span>
 
     

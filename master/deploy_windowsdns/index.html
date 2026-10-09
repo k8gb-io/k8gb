@@ -3138,13 +3138,10 @@
 <li><a href="https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md" title="RFC2136 documentation">External DNS - RFC2126</a></li>
 <li>A sample values.yaml for K8GB configuration can be found <a href="https://github.com/k8gb-io/k8gb/tree/master/docs/examples/windowsdns/k8gb/">here</a>.<ul>
 <li>Ensure that the following properties are updated with your values:<ul>
-<li>dnsZone</li>
-<li>edgeDNSZone</li>
-<li>parentZoneDNSServers</li>
-<li>host - always use FQDN with GSS-TSIG, not IP address</li>
-<li>kerberos-username</li>
-<li>kerberos-password</li>
-<li>kerberos-realm</li>
+<li><code>k8gb.dnsZones[].loadBalancedZone</code> / <code>k8gb.dnsZones[].parentZone</code> (preferred; replaces legacy <code>dnsZone</code> / <code>edgeDNSZone</code>)</li>
+<li><code>k8gb.edgeDNSServers</code></li>
+<li><code>extdns.extraArgs</code> host — always use FQDN with GSS-TSIG, not IP address (<code>rfc2136-host</code>)</li>
+<li><code>extdns.extraArgs</code> kerberos-username / kerberos-password / kerberos-realm (<code>rfc2136-kerberos-*</code>)</li>
 </ul>
 </li>
 </ul>
@@ -3190,7 +3187,7 @@ Ensure that the hosts on the samples are correctly updated before execution</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 26, 2026 14:10:08 UTC">August 26, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 9, 2026 09:29:24 UTC">October 9, 2026</span>
   </span>
 
     

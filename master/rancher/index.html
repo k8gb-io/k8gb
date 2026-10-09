@@ -2825,11 +2825,39 @@
 
 
 <h1 id="integration-with-rancher-fleet">Integration with Rancher Fleet<a class="headerlink" href="#integration-with-rancher-fleet" title="Permanent link">&para;</a></h1>
-<p>The K8gb has been modified to be easily deployed using <a href="https://fleet.rancher.io/">Rancher Fleet</a>. All you need to supply is a 
-<a href="https://fleet.rancher.io/ref-fleet-yaml">fleet.yaml</a> file  and possibly expose the labels on your cluster.</p>
+<p>The K8gb has been modified to be easily deployed using <a href="https://fleet.rancher.io/">Rancher Fleet</a>. All you need to supply is a
+<a href="https://fleet.rancher.io/ref-fleet-yaml">fleet.yaml</a> file and possibly expose the labels on your cluster.</p>
 <h2 id="deploy-k8gb-to-target-clusters">Deploy k8gb to Target clusters<a class="headerlink" href="#deploy-k8gb-to-target-clusters" title="Permanent link">&para;</a></h2>
-<p>The following shows the rancher application that will be installed on the target cluster.  The values <code>k8gb-dnsZone</code>, 
-<code>k8gb-clusterGeoTag</code>, <code>k8gb-extGslbClustersGeoTags</code> will be taken from the labels that are set on the cluster.</p>
+<p>The following shows the Rancher/Fleet application that will be installed on the target cluster. Cluster-specific values are
+taken from labels set on each Fleet cluster:</p>
+<table>
+<thead>
+<tr>
+<th>Cluster label</th>
+<th>Helm value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k8gb-dnsZone</code></td>
+<td><code>k8gb.dnsZones[].loadBalancedZone</code></td>
+<td>GSLB / load-balanced zone for that cluster</td>
+</tr>
+<tr>
+<td><code>k8gb-clusterGeoTag</code></td>
+<td><code>k8gb.clusterGeoTag</code></td>
+<td>Geo tag of this cluster</td>
+</tr>
+<tr>
+<td><code>k8gb-extGslbClustersGeoTags</code></td>
+<td><code>k8gb.extGslbClustersGeoTags</code></td>
+<td>Comma-separated geo tags of peer clusters</td>
+</tr>
+</tbody>
+</table>
+<p><code>parentZone</code> is usually shared across clusters (hardcoded below). Use <code>edgeDNSServers</code> for resolvers that can answer
+the parent zone — that is the only supported chart key for this purpose.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># fleet.yaml</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">defaultNamespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">kustomize</span><span class="p">:</span>
@@ -2839,14 +2867,14 @@
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nt">helm</span><span class="p">:</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://www.k8gb.io</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">chart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.11.4</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.20.0</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="nt">releaseName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="nt">values</span><span class="p">:</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="nt">k8gb</span><span class="p">:</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">      </span><span class="nt">dnsZones</span><span class="p">:</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">parentZone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cloud.example.com</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">parentZone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">          </span><span class="nt">loadBalancedZone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global.fleet.clusterLabels.k8gb-dnsZone</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">      </span><span class="nt">parentZoneDNSServers</span><span class="p">:</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">      </span><span class="nt">edgeDNSServers</span><span class="p">:</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"1.2.3.4"</span>
 <a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"5.6.7.8"</span>
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">      </span><span class="nt">clusterGeoTag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global.fleet.clusterLabels.k8gb-clusterGeoTag</span>
@@ -2876,7 +2904,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 15, 2025 12:07:20 UTC">May 15, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 9, 2026 09:29:24 UTC">October 9, 2026</span>
   </span>
 
     

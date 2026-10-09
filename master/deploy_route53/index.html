@@ -2925,7 +2925,10 @@ Do not start new production installs on it. Existing tutorials that still show
 </code></pre></div>
 <h2 id="deploy-k8gb">Deploy k8gb<a class="headerlink" href="#deploy-k8gb" title="Permanent link">&para;</a></h2>
 <p>Example helm configuration files can be found <a href="https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53/k8gb">here</a></p>
-<p>Modify them to reflect your <code>dnsZone</code>, <code>edgeDNSZone</code>, valid <code>hostedZoneID</code> and <code>irsaRole</code> ARN.</p>
+<p>Modify the example files to set <code>k8gb.dnsZones</code> (<code>loadBalancedZone</code> / <code>parentZone</code>), <code>k8gb.edgeDNSServers</code> (an array), <code>extdns.domainFilters</code> (the parent zones), and the IRSA role ARN in <code>extdns.serviceAccount.annotations["eks.amazonaws.com/role-arn"]</code>. To restrict ExternalDNS to a particular hosted zone ID, set <code>extdns.extraArgs.zone-id-filter</code>.</p>
+<blockquote>
+<p><strong>Migration note:</strong> the current chart requires <code>k8gb.dnsZones</code>; the legacy <code>k8gb.dnsZone</code> / <code>k8gb.edgeDNSZone</code> keys are no longer supported. See <a href="../multizone/">Multizone Support</a>.</p>
+</blockquote>
 <p>Clone k8gb repository and use <code>helm</code> with custom values</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/k8gb-io/k8gb.git
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>k8gb
@@ -2968,7 +2971,7 @@ cluster, we assume that you switch kubectl context and apply the same command to
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>aws<span class="w"> </span>route53<span class="w"> </span>list-resource-record-sets<span class="w"> </span>--hosted-zone-id<span class="w"> </span><span class="nv">$YOUR_HOSTED_ZONE_ID</span>
 </code></pre></div>
-<p>You should see that <code>gslb-ns-$dnsZone-$geotag</code> NS and glue A records were created to
+<p>You should see that <code>gslb-ns-$loadBalancedZone-$geotag</code> NS and glue A records were created to
 automatically configure DNS zone delegation.</p>
 <ul>
 <li>Check test application availability.</li>
@@ -3031,7 +3034,7 @@ over the clusters in active-active mode.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2026 22:39:56 UTC">October 7, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 9, 2026 09:29:24 UTC">October 9, 2026</span>
   </span>
 
     

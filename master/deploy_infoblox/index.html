@@ -2841,15 +2841,21 @@
 <li>
 <p>Modify the example configuration. Important parameters described below:</p>
 </li>
-<li><code>dnsZone</code> - this zone will be delegated to the <code>edgeDNS</code> in your environment. E.g. <code>yourzone.edgedns.com</code></li>
-<li><code>edgeDNSZone</code> - this zone will be automatically configured by k8gb to delegate to <code>dnsZone</code> and will make k8gb controlled nodes act as authoritative server for this zone. E.g. <code>edgedns.com</code></li>
-<li><code>parentZoneDNSServers</code> stable DNS servers in your environment that is controlled by edgeDNS provider e.g. Infoblox so k8gb instances will be able to talk to each other through automatically created DNS names</li>
+<li><code>k8gb.dnsZones</code> — array of zones managed by this k8gb deployment (available since v0.15). Each entry has:<ul>
+<li><code>loadBalancedZone</code> — zone controlled by GSLB / delegated to your edge DNS. E.g. <code>yourzone.edgedns.com</code></li>
+<li><code>parentZone</code> — parent zone that contains the GSLB zone and where NS/glue records are created. E.g. <code>edgedns.com</code></li>
+</ul>
+</li>
+<li><code>edgeDNSServers</code> — stable DNS servers in your environment controlled by the edge DNS provider (e.g. Infoblox) so k8gb instances can discover each other through automatically created DNS names</li>
 <li><code>clusterGeoTag</code> to geographically tag your cluster. We are operating <code>eu</code> cluster in this example</li>
 <li><code>extGslbClustersGeoTags</code> contains Geo tag of the cluster(s) to talk with when k8gb is deployed to multiple clusters. Imagine your second cluster is <code>us</code> so we tag it accordingly</li>
-<li>
-<p><code>infoblox.enabled: true</code> to enable automated zone delegation configuration at edgeDNS provider. You don't need it for local testing and can optionally be skipped. Meanwhile, in this section we will cover a fully operational end-to-end scenario.
-The other parameters do not need to be modified unless you want to do something special. E.g. to use images from private registry</p>
-</li>
+<li><code>infoblox.enabled: true</code> to enable automated zone delegation configuration at edgeDNS provider. You don't need it for local testing and can optionally be skipped. Meanwhile, in this section we will cover a fully operational end-to-end scenario.</li>
+</ul>
+<blockquote>
+<p><strong>Migration note:</strong> use <code>k8gb.dnsZones</code> with <code>loadBalancedZone</code> and <code>parentZone</code> in the current chart. The legacy <code>k8gb.dnsZone</code> / <code>k8gb.edgeDNSZone</code> keys are no longer supported. See <a href="../multizone/">Multizone Support</a> for the array syntax.</p>
+</blockquote>
+<p>The other parameters do not need to be modified unless you want to do something special. E.g. to use images from private registry</p>
+<ul>
 <li>
 <p>Export Infoblox related information in the shell.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">WAPI_USERNAME</span><span class="o">=</span>&lt;WAPI_USERNAME&gt;
@@ -3124,7 +3130,7 @@ As you can see above we did set special geo tag message in podinfo configuration
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 7, 2026 22:33:39 UTC">October 7, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 9, 2026 09:29:24 UTC">October 9, 2026</span>
   </span>
 
     
