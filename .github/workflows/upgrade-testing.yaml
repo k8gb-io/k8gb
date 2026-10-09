@@ -95,6 +95,10 @@ jobs:
       - name: Verify Harden Runner initialization
         run: bash hack/verify-harden-runner.sh
 
+      - name: Fetch upstream release tags on forks
+        if: github.repository != 'k8gb-io/k8gb'
+        run: git fetch https://github.com/k8gb-io/k8gb.git 'refs/tags/*:refs/tags/*'
+
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
          go-version-file: ./go.mod
