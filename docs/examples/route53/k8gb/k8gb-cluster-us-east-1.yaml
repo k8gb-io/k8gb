@@ -13,6 +13,8 @@ extdns:
   txtOwnerId: "k8gb-Z<zone-id>-us-east-1"
   provider:
     name: aws
+  domainFilters:
+    - k8gb.io
   env:
   - name: AWS_DEFAULT_REGION
     value: "us-east-1"
