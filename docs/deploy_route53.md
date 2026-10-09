@@ -25,9 +25,9 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 
 Example helm configuration files can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53/k8gb)
 
-Modify them to reflect your `k8gb.dnsZones` (`loadBalancedZone` / `parentZone`), valid `hostedZoneID` / IRSA role ARN under `extdns`, and related settings.
+Modify the example files to set `k8gb.dnsZones` (`loadBalancedZone` / `parentZone`), `k8gb.edgeDNSServers` (an array), `extdns.domainFilters` (the parent zones), and the IRSA role ARN in `extdns.serviceAccount.annotations["eks.amazonaws.com/role-arn"]`. To restrict ExternalDNS to a particular hosted zone ID, set `extdns.extraArgs.zone-id-filter`.
 
-> **Legacy note:** older docs used top-level `dnsZone` / `edgeDNSZone`; prefer `dnsZones` (see [Multizone Support](multizone.md)).
+> **Migration note:** the current chart requires `k8gb.dnsZones`; the legacy `k8gb.dnsZone` / `k8gb.edgeDNSZone` keys are no longer supported. See [Multizone Support](multizone.md).
 
 Clone k8gb repository and use `helm` with custom values
 

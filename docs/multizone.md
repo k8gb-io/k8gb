@@ -7,7 +7,7 @@ Previously, k8gb could only manage a single DNS zone per deployment. If you need
 To simplify things, k8gb now supports defining multiple zones directly in your configuration.
 
 ### How to configure multiple zones
-The new configuration uses the dnsZones field (in your values.yaml or Helm values), where you can define a list of zones to be managed by a single k8gb deployment.
+The configuration uses the `k8gb.dnsZones` field (in your values.yaml or Helm values), where you can define a list of zones to be managed by a single k8gb deployment.
 
 ```yaml
 k8gb:
@@ -26,4 +26,4 @@ k8gb:
 >  - `edgeDNSZone` is now called `parentZone`
 >  - `dnsZone` is now called `loadBalancedZone`
 >
-> For backward compatibility, the dnsZone and edgeDNSZone fields are allowed; otherwise, the dnsZones array is used. For valid values, use either dnsZone and edgeDNSZone or dnsZones.We recommend switching to the new syntax for all new deployments.
+> The current chart requires `k8gb.dnsZones`. The legacy `k8gb.dnsZone` and `k8gb.edgeDNSZone` keys are no longer supported; migrate them to `loadBalancedZone` and `parentZone` entries in the array.
