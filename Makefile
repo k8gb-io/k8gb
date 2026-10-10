@@ -57,13 +57,13 @@ LOG_FORMAT ?= simple
 LOG_LEVEL ?= debug
 CONTROLLER_GEN_VERSION ?= v0.22.0
 GOLIC_VERSION ?= v0.7.2
-GOLANGCI_VERSION ?= v2.13.2
+GOLANGCI_VERSION ?= v2.14.0
 GRAFANA_VERSION ?= 10.5.15
-GATEWAY_API_VERSION ?= v1.6.2
-ISTIO_VERSION ?= v1.30.4
+GATEWAY_API_VERSION ?= v1.6.3
+ISTIO_VERSION ?= v1.31.1
 NGINX_INGRESS_VERSION ?= 4.15.1
 PODINFO_VERSION ?= 6.15.0
-PROMETHEUS_VERSION ?= 29.27.2
+PROMETHEUS_VERSION ?= 29.36.0
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -187,7 +187,7 @@ deploy-gcp-local-setup: ## Deploy local setup with GCP Cloud DNS (requires GCP_P
 deploy-stable-version:
 	$(call deploy-edgedns)
 	@for c in $(CLUSTER_IDS); do \
-		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c ;\
+		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c || exit $$? ;\
 	done
 
 .PHONY: deploy-test-version
@@ -195,13 +195,26 @@ deploy-test-version: ## Upgrade k8gb to the test version on existing clusters
 	$(call deploy-edgedns)
 	@echo -e "\n$(YELLOW)import k8gb docker image to all $(CLUSTERS_NUMBER) clusters$(NC)"
 
-	@for c in $(CLUSTER_IDS); do \
-		echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c:$(NC)" ;\
-		k3d image import $(REPO):$(SEMVER)-$(ARCH) -c $(CLUSTER_NAME)$$c ;\
+	@timeout=$$(command -v timeout || command -v gtimeout) || { \
+		echo "GNU timeout is required (macOS: brew install coreutils)" >&2 ;\
+		exit 1 ;\
+	} ;\
+	for c in $(CLUSTER_IDS); do \
+		for attempt in 1 2 3; do \
+			echo -e "\n$(CYAN)$(CLUSTER_NAME)$$c: image import attempt $$attempt/3$(NC)" ;\
+			if "$$timeout" --kill-after=10s 2m k3d image import --mode=direct $(REPO):$(SEMVER)-$(ARCH) -c $(CLUSTER_NAME)$$c; then \
+				break ;\
+			else \
+				status=$$? ;\
+			fi ;\
+			echo "Image import failed or timed out (exit $$status)" >&2 ;\
+			if [ "$$attempt" -eq 3 ]; then exit $$status; fi ;\
+			sleep 5 ;\
+		done ;\
 	done
 
 	@for c in $(CLUSTER_IDS); do \
-		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-$(ARCH) CHART='./chart/k8gb' ;\
+		$(MAKE) deploy-local-cluster CLUSTER_ID=$$c VERSION=$(SEMVER)-$(ARCH) CHART='./chart/k8gb' || exit $$? ;\
 	done
 
 .PHONY: list-running-pods
@@ -261,7 +274,7 @@ deploy-local-cluster:
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
-	helm repo add --force-update istio https://istio-release.storage.googleapis.com/charts
+	helm repo add --force-update istio https://blob.istio.io/istio-release/charts
 	helm repo update
 	helm upgrade -i istio-base istio/base -n istio-system --version "$(ISTIO_VERSION)"
 

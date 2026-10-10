@@ -40,11 +40,12 @@ jobs:
         k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@351661ca32ac09a36dc5ee2d536e3128f2a3c8ed # v2.22.0
         with:
           egress-policy: block
           # Audit: https://github.com/k8gb-io/k8gb/actions/runs/34329541730
           # Include Go/tool downloads on cache misses and regional Kubernetes registry redirects.
+          # Istio's chart repository redirects from blob.istio.io to istio-release.r2.istio.io.
           allowed-endpoints: >-
             api.github.com:443
             github.com:443
@@ -72,7 +73,8 @@ jobs:
             coredns.github.io:443
             kubernetes-sigs.github.io:443
             kubernetes.github.io:443
-            istio-release.storage.googleapis.com:443
+            blob.istio.io:443
+            istio-release.r2.istio.io:443
             stefanprodan.github.io:443
             k8gb.io:443
             www.k8gb.io:443
@@ -98,12 +100,12 @@ jobs:
       - name: Setup helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          version: v4.2.4
+          version: v4.3.0
 
       - name: Build artifacts
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
-          version: v2.12.7
+          version: v2.18.2
           args: release --clean --skip=publish,validate,sbom,sign --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -135,6 +137,7 @@ jobs:
 
 
       - name: K8GB deployment
+        timeout-minutes: 20
         run: |
           make deploy-test-version list-running-pods
           echo "Cluster 1 (eu):"
@@ -149,7 +152,7 @@ jobs:
         if: always()
         uses: ./.github/actions/print-chainsaw-debug
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: chainsaw-logs-${{ matrix.k8s-version }}
