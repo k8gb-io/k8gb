@@ -21,7 +21,7 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     env:
       OCI_REPO: oci://ghcr.io/k8gb-io/charts
