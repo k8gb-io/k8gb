@@ -79,18 +79,39 @@ func DiscoverNameServers(edge *utils.DNSServer, zone *v1beta1io.ZoneDelegation, 
 		return tags, fmt.Errorf("NS query for %s via %s failed with rcode %s", zone.Spec.LoadBalancedZone, edge.String(), dns.RcodeToString[r.Rcode])
 	}
 
-	for _, ans := range r.Ns {
-		ns, ok := ans.(*dns.NS)
+	// Cloud DNS parents typically return delegation NS in ANSWER.
+	// Infoblox / zone-cut referrals return them in AUTHORITY. Read both.
+	return collectNSFromMsg(r, zone, clusterGeoTag, prefix), nil
+}
+
+// collectNSFromMsg extracts k8gb glue NS targets from ANSWER and AUTHORITY.
+func collectNSFromMsg(r *dns.Msg, zone *v1beta1io.ZoneDelegation, clusterGeoTag, prefix string) resolver.ClusterNSNames {
+	tags := make(resolver.ClusterNSNames)
+	if r == nil {
+		return tags
+	}
+	for _, rr := range append(append([]dns.RR{}, r.Answer...), r.Ns...) {
+		ns, ok := rr.(*dns.NS)
 		if !ok {
 			continue
 		}
-		tag := zone.ExtractGeoTagFromGlueA(ns.Ns, prefix)
-
 		clusterNSName := strings.TrimSuffix(ns.Ns, ".")
+		if !isK8gbGlueNSName(clusterNSName, prefix, zone) {
+			continue
+		}
+		tag := zone.ExtractGeoTagFromGlueA(clusterNSName, prefix)
 		tags[clusterNSName] = resolver.NewGeoTag(tag == clusterGeoTag, tag)
 	}
+	return tags
+}
 
-	return tags, nil
+func isK8gbGlueNSName(name, prefix string, zone *v1beta1io.ZoneDelegation) bool {
+	if !strings.HasPrefix(name, prefix) {
+		return false
+	}
+	tag := zone.ExtractGeoTagFromGlueA(name, prefix)
+	// GeoTags are [A-Za-z0-9-]+. A leftover FQDN means the suffix did not match.
+	return tag != "" && !strings.Contains(tag, ".")
 }
 
 // ExtractParentDNSServer query parent DNS server for NS records of parent zone (example.com):

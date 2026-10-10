@@ -132,6 +132,10 @@ spec:
             - name: EXTDNS_ENABLED
               value: "true"
             {{- end }}
+            {{- if and .Values.extdns.enabled .Values.k8gb.extDNSNsMerge }}
+            - name: EXTDNS_NS_MERGE_ENABLED
+              value: "true"
+            {{- end }}
             {{- if .Values.tracing.enabled }}
               {{- with .Values.tracing }}
             - name: TRACING_ENABLED
