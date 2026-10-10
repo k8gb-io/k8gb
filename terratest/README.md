@@ -124,6 +124,54 @@ func TestCommonFramework(t *testing.T) {
 }
 ```
 
+### Podinfo localhost probes and Harden Runner
+
+[Issue #2529](https://github.com/k8gb-io/k8gb/issues/2529) was caused by the
+resolver in Podinfo 5.1.1, built with Go 1.15 on Alpine without
+`/etc/nsswitch.conf`. That resolver tries DNS before `/etc/hosts`. A probe for
+`localhost:9898` therefore reaches cluster CoreDNS, Docker's upstream DNS, and
+Harden Runner. The agent returns a positive sinkhole answer for unlisted domains,
+so the resolver does not fall back to the pod's loopback entry.
+
+[Go 1.16 fixed the lookup order](https://github.com/golang/go/issues/35305).
+[Podinfo 5.2.0 uses Go 1.16](https://github.com/stefanprodan/podinfo/blob/5.2.0/Dockerfile),
+so both Terratest installation paths and the playground image use that version.
+The chart's `localhost` exec probes and the DNS/failover assertions remain intact.
+Do not allowlist `localhost`: the agent tries to resolve allowed domains using
+public DNS during initialization, which caused the rollback documented in the issue.
+
+To reproduce the old failure and check the fix, install Docker, k3d v5.8.3,
+kubectl, and Helm, then run from the repository root:
+
+```sh
+bash hack/test-podinfo-localhost.sh
+# Repeat for the other Kubernetes versions in the Terratest matrix:
+bash hack/test-podinfo-localhost.sh v1.32.11-k3s1
+bash hack/test-podinfo-localhost.sh v1.33.7-k3s1
+```
+
+The script creates and removes a disposable cluster with an isolated kubeconfig.
+Its CoreDNS returns `192.0.2.1` for `localhost`, modeling the agent's positive
+sinkhole answer without contacting the real sinkhole. It checks that Podinfo
+5.1.1 can reach its loopback endpoint but fails the hostname probe, then verifies
+that 5.2.0 passes both unchanged probes while DNS still returns the sinkhole.
+This isolates the resolver regression; it does not run Harden Runner itself.
+
+All four Terratest workflows also support `workflow_dispatch`. Manual runs of
+Terratest and the n-cluster variant exercise their full Kubernetes matrix;
+Upgrade Testing and the Istio v1beta1 variant retain their configured k3d versions.
+Before merging a hardening change, run all four on GitHub-hosted Ubuntu 24.04 and
+inspect the Harden Runner logs as well as the test results.
+
+`hack/verify-harden-runner.sh` runs after checkout and again after the workload,
+including on failure. It requires an initialized, running agent with no rollback,
+runner and container reject rules, and a sinkholed answer for the deliberately
+unlisted `example.com`. It also checks that GitHub HTTPS works while an unlisted
+HTTP connection is refused. These deliberate denials are expected in the security report.
+The checks follow the community agent shipped by the pinned Harden Runner action;
+review them when updating the action or changing agent tiers. Run their isolated
+failure-case checks with `bash hack/test-verify-harden-runner.sh`.
+
 ### Troubleshoot
 In my experience, most of the bugs come from not upgrading the local clusters. Consider running `make reset upgrade-candidate` 
 before you start writing a test. The framework is still under development and there may be some 

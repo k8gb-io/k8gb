@@ -1,6 +1,7 @@
 name: Upgrade Testing
 
 on:
+  workflow_dispatch:
   push:
     paths-ignore:
       - '**.md'
@@ -47,14 +48,56 @@ jobs:
   upgrade-testing:
     runs-on: ubuntu-24.04
     needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    if: ${{ needs.skip-check.outputs.should_skip != 'true' && !contains(github.event.pull_request.labels.*.name, 'renovate') }}
     steps:
-      # Keep Terratest exempt: Harden Runner sinkholes localhost DNS lookups
-      # used by Podinfo health probes, preventing the test pods from becoming ready.
-      # Follow-up: https://github.com/k8gb-io/k8gb/issues/2529
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: block
+          # Dependency endpoints audited by the Chainsaw workload.
+          # Include Go/tool downloads on cache misses and regional Kubernetes registry redirects.
+          allowed-endpoints: >-
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            go.dev:443
+            dl.google.com:443
+            proxy.golang.org:443
+            storage.googleapis.com:443
+            sum.golang.org:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudfront.docker.com:443
+            ghcr.io:443
+            pkg-containers.githubusercontent.com:443
+            gcr.io:443
+            k8s.gcr.io:443
+            registry.k8s.io:443
+            cdn.registry.k8s.io:443
+            *-docker.pkg.dev:443
+            registry.istio.io:443
+            registry.k8gb.io:443
+            get.helm.sh:443
+            coredns.github.io:443
+            kubernetes-sigs.github.io:443
+            kubernetes.github.io:443
+            istio-release.storage.googleapis.com:443
+            stefanprodan.github.io:443
+            k8gb.io:443
+            www.k8gb.io:443
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Verify Harden Runner initialization
+        run: bash hack/verify-harden-runner.sh
+
+      - name: Fetch upstream release tags on forks
+        if: github.repository != 'k8gb-io/k8gb'
+        run: git fetch https://github.com/k8gb-io/k8gb.git 'refs/tags/*:refs/tags/*'
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
@@ -108,6 +151,10 @@ jobs:
           set -o pipefail
           make terratest | tee ${{ github.workspace }}/tmp/terratest/all.log
           echo "::endgroup::"
+
+      - name: Verify Harden Runner enforcement after tests
+        if: always()
+        run: bash hack/verify-harden-runner.sh
 
       - name: Print debug info
         if: always()
