@@ -772,7 +772,7 @@ func (r *Resources) GetExternalDNSEndpointByName(name, namespace string) DNSEndp
 
 func (i *Instance) logIfError(err error, message string, args ...any) {
 	if err != nil {
-		i.w.t.Logf(message, args)
+		i.w.t.Logf(message, args...)
 	}
 }
 
