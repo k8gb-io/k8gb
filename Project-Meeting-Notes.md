@@ -27,7 +27,49 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>September 30, 2026 #102</strong></summary>
+<details open><summary><strong>October 14, 2026 #103</strong></summary>
+
+## October 14, 2026 #103
+
+**Attendees**
+- [@ytsarev](https://github.com/ytsarev)
+
+**Backlog**
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**]() | [**On YouTube**]()
+
+**Agenda**
+
+- News
+  - Congrats to [@itsfarhan](https://github.com/itsfarhan) for becoming k8gb's first official `Contributor` on our new ladder: https://github.com/k8gb-io/k8gb/issues/2534 🎉
+  - k8gb featured in [KubeCon China keynote](https://youtu.be/sE7w96iH_L0?t=405i) 🔥
+- Talks / Events
+  - KubeCon NA: submitted for `:all-the-things:`: Lightning Talk, Contribfest, Maintainer Track, Co-located, Main Track ... k8gb is everywhere!
+  - EU Sovereign Cloud Days: [Who Controls the Failover? Sovereign Global Traffic Management with Kubernetes](https://www.sovereign-cloud-days.eu/en/event/sovereign-cloud-days-2026-1/track/who-controls-the-failover-sovereign-global-traffic-management-with-kubernetes-63)
+  - Participating in [Security Slam 2026](https://securityslam.com/slam26/participating-projects)
+    - thanks [@aryasoni98](https://github.com/aryasoni98) and [@itsfarhan](https://github.com/itsfarhan)!!
+- [FAUN.dev review](https://faun.dev/toolbox/k8gb/review/)
+- Community Contributions
+  - https://github.com/k8gb-io/k8gb/pull/2513
+- Other
+  - CLOMonitor new agentic readiness metric failing: 
+    - https://clomonitor.io/projects/cncf/k8gb#k8gb_agent_readiness --> new `good first` issue https://github.com/k8gb-io/k8gb/issues/2539
+  - be careful of upcoming ExternalDNS breaking change (v0.22.0): https://lnkd.in/p/e3uZmQQJ
+
+**Actions**
+- [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
+- Move the community meeting to a US-friendly time. 
+- some [old, forgotten actions](#old-actions) 😭 
+- figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF
+
+**Nice-to-Haves**
+- Reference platforms: [NeoNephos](https://github.com/k8gb-io/k8gb/issues/2535), [KEDA](https://github.com/k8gb-io/k8gb/issues/2536), Sidero, etc.
+
+</details>
+
+<details><summary><strong>September 30, 2026 #102</strong></summary>
 
 ## September 30, 2026 #102
 
