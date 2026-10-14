@@ -32,6 +32,8 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 ## October 14, 2026 #103
 
 **Attendees**
+- [@itsfarhan](https://github.com/itsfarhan)
+- [@k0da](https://github.com/k0da)
 - [@ytsarev](https://github.com/ytsarev)
 
 **Backlog**
@@ -60,13 +62,17 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 **Actions**
 - [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
-- Move the community meeting to a US-friendly time. 
+- Move the community meeting to a US-friendly time. - Nice idea by @k0da to make bi-weekly rotation between EU and US friendly slots  
 - some [old, forgotten actions](#old-actions) 😭 
-- figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF
+- figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF - FOSSA looks green now
+- https://github.com/k8gb-io/k8gb/actions/runs/38555953119/job/115825003921 - scorecard workflow/job to fix in master
+- k8gb 1.1 release to include latest security fixes
+- https://github.com/k8gb-io/coredns-crd-plugin security release first to include into 1.1
+- figure out how to run the same scanner as artifact hub before the release https://artifacthub.io/packages/helm/k8gb/k8gb?modal=security-report to catch issues early
 
 **Nice-to-Haves**
 - Reference platforms: [NeoNephos](https://github.com/k8gb-io/k8gb/issues/2535), [KEDA](https://github.com/k8gb-io/k8gb/issues/2536), Sidero, etc.
-
+- KEDA+k8gb integration talk submitted to Sovereign Days togethere with Jirka [@jkremser](https://github.com/jkremser)
 </details>
 
 <details><summary><strong>September 30, 2026 #102</strong></summary>
