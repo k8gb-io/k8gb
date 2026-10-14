@@ -443,6 +443,9 @@
                     "type": "string",
                     "minLength": 0
                 },
+                "extDNSNsMerge": {
+                    "type": "boolean"
+                },
                 "reconcileRequeueSeconds": {
                     "type": "integer",
                     "minimum": 0

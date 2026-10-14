@@ -1,8 +1,9 @@
 # Dynamic GeoTags
 
 _**Note:**
-Dynamic GeoTags discovery currently works only with Infoblox. ExternalDNS based providers are not supported
-because their TXT ownership model prevents reliable GeoTag discovery across clusters._
+Dynamic GeoTags work with Infoblox out of the box. ExternalDNS providers need
+`k8gb.extDNSNsMerge` plus a second ExternalDNS instance that shares `txtOwnerId`
+across clusters; see below._
 
 ### What is a GeoTag?
 A GeoTag is a short identifier (for example: `eu`, `us`, `za`) that uniquely marks each k8gb cluster’s location or role. 
@@ -31,7 +32,7 @@ Previously, any change in the list of external clusters (extGslbClustersGeoTags)
 
 **Dynamic GeoTags** allow k8gb to discover external GeoTags directly from DNS (from NS records on the parent zone), without the need to keep all values manually in sync.
 
-If the `extGslbClustersGeoTags` value is empty, k8gb will attempt to extract external GeoTags dynamically at runtime **when the Infoblox provider is enabled**.
+If the `extGslbClustersGeoTags` value is empty, k8gb extracts external GeoTags at runtime when Infoblox is enabled, or when ExternalDNS NS-merge is enabled (`k8gb.extDNSNsMerge`).
 
 - This reduces manual configuration and operational overhead.
 - You can add or remove clusters without having to update and restart all existing k8gb instances.
@@ -41,14 +42,15 @@ If the `extGslbClustersGeoTags` value is empty, k8gb will attempt to extract ext
 ```yaml
 k8gb:
   clusterGeoTag: "eu"
-  extGslbClustersGeoTags: ""  # leave empty to enable dynamic discovery (Infoblox only)
+  extGslbClustersGeoTags: ""  # leave empty to enable dynamic discovery
+  extDNSNsMerge: true         # required for ExternalDNS-based providers
 ```
 
-## Why ExternalDNS providers cannot use Dynamic GeoTags yet
+## ExternalDNS Dynamic GeoTags
 
-Investigation tracked in [#2464](https://github.com/k8gb-io/k8gb/issues/2464). Summary:
+Investigation tracked in [#2464](https://github.com/k8gb-io/k8gb/issues/2464).
 
-### How static GeoTags work with ExternalDNS today
+### How static GeoTags work with ExternalDNS
 
 Each cluster embeds ExternalDNS with a unique `txtOwnerId` (for example `k8gb-eu`, `k8gb-us`). Zone delegation is published as a `DNSEndpoint` that contains:
 
@@ -61,31 +63,61 @@ Because every cluster is configured with the full static peer list, the cluster 
 
 The in-tree Infoblox provider does a WAPI read-modify-write on the delegated zone: it keeps remote NS targets, replaces its own glue, and writes the union back. There is no per-cluster TXT ownership model, so every cluster can safely extend the NS set. Dynamic discovery then reads that merged NS set from DNS.
 
-### Why enabling Dynamic GeoTags for ExternalDNS deadlocks
+### Why a unique-owner ExternalDNS deadlocks
 
-If `extGslbClustersGeoTags` is empty:
+If `extGslbClustersGeoTags` is empty and every ExternalDNS instance has its own `txtOwnerId`:
 
 1. Cluster `eu` starts alone and publishes NS targets `[gslb-ns-eu-...]`. Its ExternalDNS instance owns that NS RRset.
 2. Cluster `us` joins and can publish its glue A (`gslb-ns-us-...`) under its own owner id.
 3. Cluster `us` cannot append `gslb-ns-us-...` to the shared NS RRset owned by `k8gb-eu`.
 4. Cluster `eu`’s next dynamic dig still only sees `[eu]`, so it never learns about `us`.
 
-Result: peer discovery never converges. This is an ExternalDNS multi-owner limitation, not a missing dig in k8gb.
+Related upstream attempt: [kubernetes-sigs/external-dns#5619](https://github.com/kubernetes-sigs/external-dns/pull/5619) (`merge-strategy: merge-targets`) — closed without merge (design hold on deletes/updates / multi-ownership).
 
-Related upstream attempt: [kubernetes-sigs/external-dns#5619](https://github.com/kubernetes-sigs/external-dns/pull/5619) (`merge-strategy: merge-targets`) — closed without merge (design hold on deletes/updates / multi-ownership). Also noted in [#1967](https://github.com/k8gb-io/k8gb/issues/1967).
+### Workaround: shared-owner NS ExternalDNS
 
-### What would unblock ExternalDNS support
+k8gb can publish the NS RRset on a **separate** `DNSEndpoint` labeled `k8gb.io/dnstype=extdns-ns`. A second ExternalDNS instance, with the **same** `txtOwnerId` on every cluster, watches only that label and applies `union(live parent NS, this cluster)`. Glue A records stay on the unique-owner instance (`k8gb.io/dnstype=extdns`), so one cluster cannot delete another cluster’s glue.
 
-Dynamic GeoTags for ExternalDNS-backed providers become feasible only when ExternalDNS (or an equivalent coordination layer) can merge NS targets across distinct `txtOwnerId` values, including correct delete semantics when the last owner removes its target. Until then:
+Enable it on every cluster:
 
-- Use Infoblox for Dynamic GeoTags, or
-- Keep `extGslbClustersGeoTags` explicitly set for Route53, Cloudflare, Azure DNS, GCP Cloud DNS, RFC2136, and other ExternalDNS providers.
+```yaml
+k8gb:
+  clusterGeoTag: "eu"
+  extGslbClustersGeoTags: ""
+  extDNSNsMerge: true
+extdns:
+  enabled: true
+  txtOwnerId: "k8gb-eu"          # unique per cluster (glue A)
+  txtPrefix: "k8gb-eu-"
+  labelFilter: "k8gb.io/dnstype=extdns"
+```
 
-Secondary readiness items once multi-owner merge exists:
+Deploy a second ExternalDNS (same provider credentials, same `domainFilters`) on **every** cluster:
 
-- Each cluster should publish only its own NS target (plus local glue A) and rely on ExternalDNS merge for the union.
-- NS discovery must accept records from both ANSWER and AUTHORITY sections (referral responses from cloud DNS parents).
-- k8gb should refresh local `DNSEndpoint` objects when parent DNS changes (reverse sync).
+```yaml
+# extra ExternalDNS — values must be identical across clusters except image/resources
+txtOwnerId: "k8gb-ns"            # shared; must NOT include the cluster geotag
+txtPrefix: "k8gb-ns-"
+labelFilter: "k8gb.io/dnstype=extdns-ns"
+managedRecordTypes: ["NS"]
+policy: sync
+sources: ["crd"]
+```
+
+k8gb then:
+
+- Discovers peers from parent NS (ANSWER and AUTHORITY sections).
+- Always unions the local geotag so a joiner can extend the set.
+- Writes the union to the `extdns-ns` endpoint.
+- Leaves glue A on the unique-owner endpoint.
+
+On non-last finalize, k8gb removes this cluster from the shared NS targets but does **not** delete the NS endpoint (so the departing ExternalDNS does not wipe the whole RRset). The last cluster deletes both endpoints.
+
+#### Migration from static ExternalDNS geotags
+
+The existing unique-owner instance already owns the NS RRset. Enabling `extDNSNsMerge` moves NS off that endpoint, so unique-owner ExternalDNS deletes the old NS (and its ownership TXT). The shared-owner instance then creates NS. Expect a short gap (one ExternalDNS interval, often ~20s). Schedule this during a maintenance window, or keep static `extGslbClustersGeoTags` until you can accept that gap.
+
+If you do not run the second ExternalDNS, leave `extDNSNsMerge` false and keep `extGslbClustersGeoTags` explicit.
 
 ## Important considerations
 Dynamic GeoTags provide convenience and flexibility, but it’s important to understand their impact on your DNS infrastructure:
@@ -110,4 +142,4 @@ If dynamic GeoTags are not suitable for your environment, you can switch back to
  - Dynamic GeoTags simplify configuration but come with extra DNS queries per GSLB. 
  - For most environments, this is not an issue. 
  - For very large-scale or highly sensitive environments, use the mitigations above to prevent DNS overload.
- - For ExternalDNS-based edge DNS, Dynamic GeoTags are not supported; set `extGslbClustersGeoTags` explicitly.
+ - For ExternalDNS-based edge DNS, enable `k8gb.extDNSNsMerge` and a shared-owner NS ExternalDNS, or set `extGslbClustersGeoTags` explicitly.

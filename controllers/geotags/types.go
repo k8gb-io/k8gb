@@ -30,19 +30,22 @@ type Resolver interface {
 
 // Provide selects the GeoTag resolver.
 //
-// Dynamic discovery (empty extGslbClustersGeoTags) is Infoblox-only. Infoblox's
-// in-tree provider can read-modify-write zone delegation and merge NS targets
-// from every cluster. ExternalDNS cannot: each cluster uses a distinct
-// txtOwnerId, so the shared load-balanced-zone NS RRset is owned by a single
-// ExternalDNS instance. A newly joined cluster can publish its glue A record
-// but cannot append its NS target to that owned RRset, so peer discovery via
-// NS never converges. See docs/dynamic_geotags.md and
+// Dynamic discovery (empty extGslbClustersGeoTags) works with Infoblox and
+// with ExternalDNS when ExtDNSNsMergeEnabled is set. Infoblox's in-tree
+// provider read-modify-writes zone delegation and merges NS targets from
+// every cluster. ExternalDNS needs a second instance with a cluster-shared
+// txtOwnerId watching k8gb.io/dnstype=extdns-ns so joining clusters can
+// extend the shared NS RRset. Without that path, unique per-cluster
+// txtOwnerId values leave the NS RRset single-writer and peer discovery
+// never converges. See docs/dynamic_geotags.md and
 // https://github.com/k8gb-io/k8gb/issues/2464.
 func Provide(config *resolver.Config) Resolver {
 	switch config.EdgeDNSType {
 	case resolver.DNSTypeExternal:
-		// Always static until ExternalDNS supports multi-owner NS target merge.
-		return NewStaticDNSResolver(config)
+		if config.HasExtClusterGeoTags() || !config.ExtDNSNsMergeEnabled {
+			return NewStaticDNSResolver(config)
+		}
+		return NewDynamicResolver(config)
 	case resolver.DNSTypeInfoblox:
 		if config.HasExtClusterGeoTags() {
 			return NewStaticDNSResolver(config)

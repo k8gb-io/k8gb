@@ -10,6 +10,9 @@
 {{- fail (printf "Validation failed: extdns.txtOwnerId (%s) does not contain the expected geo tag (%s)" .Values.extdns.txtOwnerId .Values.k8gb.clusterGeoTag) -}}
 {{- end -}}
 {{- end -}}
+{{- if and .Values.k8gb.extDNSNsMerge (not .Values.extdns.enabled) -}}
+{{- fail "Validation failed: k8gb.extDNSNsMerge requires extdns.enabled" -}}
+{{- end -}}
 {{- end -}}
 
 # Validates that the zones in k8gb.dnsZones match the zones in extdns.domainFilters
