@@ -44,6 +44,8 @@ For more user-centric targets in that makefile consult `make help`.
 
  - [install **k3d**](https://k3d.io/#installation) to run local [k3s](https://k3s.io/) clusters (minimum v5.3.0 version is required)
 
+ - Install **GNU coreutils** for `timeout`, used to bound image imports. It is included in most Linux distributions; on macOS, run `brew install coreutils` to provide `gtimeout`.
+
  - [install **golangci-lint**](https://golangci-lint.run/docs/welcome/install/) for code quality checks
 
 ## Running project locally
