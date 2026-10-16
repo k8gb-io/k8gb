@@ -2,5 +2,5 @@ replicaCount: 1
 
 image:
   repository: stefanprodan/podinfo
-  tag: 5.1.1
+  # Use the chart's default image tag so its arguments match the binary.
   pullPolicy: IfNotPresent

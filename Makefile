@@ -138,6 +138,7 @@ check: license lint test ## Check project integrity
 clean-test-apps:
 	kubectl delete --ignore-not-found -f deploy/test-apps
 	helm -n test-gslb uninstall frontend
+	$(MAKE) clean-listenerset-examples
 
 # see: https://dev4devs.com/2019/05/04/operator-framework-how-to-debug-golang-operator-projects/
 .PHONY: debug-idea
@@ -329,6 +330,8 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 	@echo -e "\n$(YELLOW)Deploy GSLB CR failover examples for Gateway API TLSRoute versions $(NC)"
 	$(call apply-cr,deploy/gslb/k8gb.io_v1beta1_gslb_cr_gatewayapi_tlsroute_versions.yaml)
 
+	$(MAKE) deploy-listenerset-examples
+
 	@echo -e "\n$(YELLOW)Deploy podinfo $(NC)"
 	kubectl apply -f deploy/test-apps
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
@@ -350,6 +353,18 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 		--set image.repository="$(PODINFO_IMAGE_REPO)" \
 		podinfo/podinfo \
 		--version $(PODINFO_VERSION)
+
+.PHONY: deploy-listenerset-examples
+deploy-listenerset-examples: ## Deploy standalone ListenerSet examples in the current context
+	@echo -e "\n$(YELLOW)Deploy GSLB CR for Gateway API ListenerSets $(NC)"
+	$(call apply-cr,deploy/gslb/k8gb.io_v1beta1_gslb_cr_gatewayapi_listenerset_same_namespace.yaml)
+	$(call apply-cr,deploy/gslb/k8gb.io_v1beta1_gslb_cr_gatewayapi_listenerset_shared_gateway.yaml)
+
+.PHONY: clean-listenerset-examples
+clean-listenerset-examples: ## Remove ListenerSet examples and their namespaces from the current context
+	kubectl delete --ignore-not-found \
+		-f deploy/gslb/k8gb.io_v1beta1_gslb_cr_gatewayapi_listenerset_same_namespace.yaml \
+		-f deploy/gslb/k8gb.io_v1beta1_gslb_cr_gatewayapi_listenerset_shared_gateway.yaml
 
 .PHONY: deploy-legacy-migration-cases
 deploy-legacy-migration-cases: ## Apply legacy migration demo resources for local setup
@@ -687,6 +702,12 @@ test-round-robin:
 .PHONY: test-failover
 test-failover:
 	@$(call hit-testapp-host, "failover.cloud.example.com")
+
+.PHONY: test-listenerset
+test-listenerset: ## Send HTTP requests through the same-namespace and both shared-Gateway ListenerSet ports
+	@$(call hit-testapp-host, "http://local-listenerset.$(GSLB_DOMAIN):38081")
+	@$(call hit-testapp-host, "http://shared-listenerset.$(GSLB_DOMAIN):38083")
+	@$(call hit-testapp-host, "http://shared-listenerset.$(GSLB_DOMAIN):38084")
 
 # executes terratests
 .PHONY: terratest
