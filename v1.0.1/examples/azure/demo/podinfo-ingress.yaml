@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    k8gb.io/strategy: failover
+    k8gb.io/primary-geotag: francecentral
+    kubernetes.io/ingress.class: nginx
+  labels:
+    app: podinfo
+  name: podinfo-ingress
+  namespace: podinfo
+spec:
+  rules:
+  - host: podinfo.demo.k8gb-kubeconeu2023.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: podinfo
+            port:
+              name: http
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - podinfo.demo.k8gb-kubeconeu2023.com

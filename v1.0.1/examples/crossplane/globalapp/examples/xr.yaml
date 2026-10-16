@@ -1,0 +1,11 @@
+apiVersion: example.crossplane.io/v1
+kind: GlobalApp
+metadata:
+  name: example-gslb-yury
+spec:
+  region: "West Europe"
+  primaryGeoTag: "eu"
+  namespace: "demo"
+  hostname: "globalapp.cloud.example.com"
+  managementPolicies: ["*"]  # Initial policy
+  autoApplyRecommendedPolicy: false  # Manual mode
