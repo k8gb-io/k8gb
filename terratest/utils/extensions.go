@@ -296,7 +296,7 @@ func (w *Workflow) Start() (*Instance, error) {
 		shell.RunCommand(w.t, helmRepoUpdate)
 		helmOptions := helm.Options{
 			KubectlOptions: w.k8sOptions,
-			Version:        "5.1.1",
+			Version:        "5.2.0",
 			SetValues:      map[string]string{"ui.message": w.state.testApp.message},
 		}
 		helm.Install(w.t, &helmOptions, "podinfo/podinfo", "frontend")
