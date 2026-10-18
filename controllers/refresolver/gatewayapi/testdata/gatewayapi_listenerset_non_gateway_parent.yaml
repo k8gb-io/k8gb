@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: non-gateway-parent
+  namespace: tenant
+spec:
+  parentRef:
+    group: networking.istio.io
+    kind: Gateway
+    name: shared
+    namespace: gateway-infra
+  listeners:
+  - name: app-443
+    hostname: app.example.com
+    port: 443
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: tls-app
