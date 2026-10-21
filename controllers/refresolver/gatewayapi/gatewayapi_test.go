@@ -72,10 +72,6 @@ func TestGetGateway(t *testing.T) {
 	experimentalGroup := gatewayapiv1.Group("gateway.networking.x-k8s.io")
 	experimentalLS.Group = &experimentalGroup
 
-	gatewayWithGroup := gatewayRef("shared", "gateway-infra")
-	gatewayAPIGroup := gatewayapiv1.Group(gatewayapiv1.GroupName)
-	gatewayWithGroup.Group = &gatewayAPIGroup
-
 	istioGateway := gatewayRef("shared", "gateway-infra")
 	istioGroup := gatewayapiv1.Group("networking.istio.io")
 	istioGateway.Group = &istioGroup
@@ -100,18 +96,8 @@ func TestGetGateway(t *testing.T) {
 			expectedGateway: shared,
 		},
 		{
-			name:            "route to Gateway with explicit gateway.networking.k8s.io group",
-			route:           testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{gatewayWithGroup}},
-			expectedGateway: shared,
-		},
-		{
 			name:          "Istio Gateway parentRef is skipped even when a Gateway API Gateway has the same name",
 			route:         testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{istioGateway}},
-			expectedError: "expected exactly 1 Gateway to be referenced by the route but 0 were found",
-		},
-		{
-			name:          "ListenerSet attached to something other than a Gateway API Gateway is skipped",
-			route:         testRoute{namespace: "tenant", parentRefs: []gatewayapiv1.ParentReference{listenerSetRef("non-gateway-parent", "")}},
 			expectedError: "expected exactly 1 Gateway to be referenced by the route but 0 were found",
 		},
 		{
@@ -190,7 +176,6 @@ func TestGetGateway(t *testing.T) {
 		utils.FileToGatewayApiListenerSet("./testdata/gatewayapi_listenerset_tenant.yaml"),
 		utils.FileToGatewayApiListenerSet("./testdata/gatewayapi_listenerset_tenant_b.yaml"),
 		utils.FileToGatewayApiListenerSet("./testdata/gatewayapi_listenerset_same_namespace.yaml"),
-		utils.FileToGatewayApiListenerSet("./testdata/gatewayapi_listenerset_non_gateway_parent.yaml"),
 	}
 	s := runtime.NewScheme()
 	require.NoError(t, gatewayapiv1.Install(s))

@@ -35,12 +35,6 @@ import (
 
 var log = logging.Logger()
 
-// kinds of parent references k8gb follows
-const (
-	gatewayKind     = "Gateway"
-	listenerSetKind = "ListenerSet"
-)
-
 // parentRef is a parent reference with the Gateway API defaults applied to its optional fields
 type parentRef struct {
 	Group     string
@@ -55,7 +49,7 @@ func normalizeParentRef(group *gatewayapiv1.Group, kind *gatewayapiv1.Kind, name
 	name gatewayapiv1.ObjectName, defaultNamespace string) parentRef {
 	ref := parentRef{
 		Group:     gatewayapiv1.GroupName,
-		Kind:      gatewayKind,
+		Kind:      "Gateway", //nolint:goconst // Gateway API kind names read clearer inline
 		Namespace: defaultNamespace,
 		Name:      string(name),
 	}
@@ -71,42 +65,41 @@ func normalizeParentRef(group *gatewayapiv1.Group, kind *gatewayapiv1.Kind, name
 	return ref
 }
 
-func (r parentRef) namespacedName() types.NamespacedName {
-	return types.NamespacedName{Namespace: r.Namespace, Name: r.Name}
-}
-
 // GetGateway retrieves the gateway referenced by a route resource.
 // Parent references to a ListenerSet are followed to the Gateway the ListenerSet is attached to.
 func GetGateway(route RouteAdapter, k8sClient client.Client) (*gatewayapiv1.Gateway, error) {
 	var gateways []types.NamespacedName
-	for _, p := range route.GetParentRefs() {
-		ref := normalizeParentRef(p.Group, p.Kind, p.Namespace, p.Name, route.GetNamespace())
+	for _, parentRef := range route.GetParentRefs() {
+		parent := normalizeParentRef(parentRef.Group, parentRef.Kind, parentRef.Namespace, parentRef.Name, route.GetNamespace())
+		ref := types.NamespacedName{
+			Namespace: parent.Namespace,
+			Name:      parent.Name,
+		}
 
-		var gatewayRef types.NamespacedName
 		switch {
-		case ref.Group == gatewayapiv1.GroupName && ref.Kind == gatewayKind:
-			gatewayRef = ref.namespacedName()
-		case ref.Group == gatewayapiv1.GroupName && ref.Kind == listenerSetKind:
-			listenerSetGateway, found, err := getListenerSetGateway(ref.namespacedName(), k8sClient)
+		case parent.Group == gatewayapiv1.GroupName && parent.Kind == "Gateway":
+			// ref already points at the Gateway
+		case parent.Group == gatewayapiv1.GroupName && parent.Kind == "ListenerSet":
+			gatewayRef, found, err := getListenerSetGateway(ref, k8sClient)
 			if err != nil {
 				return nil, err
 			}
 			if !found {
 				continue
 			}
-			gatewayRef = listenerSetGateway
+			ref = gatewayRef
 		default:
 			log.Warn().
 				Str("route", route.GetName()).
 				Str("namespace", route.GetNamespace()).
-				Str("parentRef", ref.Name).
-				Msgf("Only Gateway and ListenerSet parent references are supported, got %s in group %q", ref.Kind, ref.Group)
+				Str("parentRef", string(parentRef.Name)).
+				Msgf("Only Gateway and ListenerSet parent references are supported, got %s/%s", parent.Group, parent.Kind)
 			continue
 		}
 
 		// several parentRefs (e.g. ListenerSets) may lead to the same Gateway
-		if !slices.Contains(gateways, gatewayRef) {
-			gateways = append(gateways, gatewayRef)
+		if !slices.Contains(gateways, ref) {
+			gateways = append(gateways, ref)
 		}
 	}
 
@@ -144,17 +137,17 @@ func getListenerSetGateway(listenerSetRef types.NamespacedName, k8sClient client
 		return types.NamespacedName{}, false, err
 	}
 
-	p := listenerSet.Spec.ParentRef
-	parent := normalizeParentRef(p.Group, p.Kind, p.Namespace, p.Name, listenerSet.Namespace)
-	if parent.Group != gatewayapiv1.GroupName || parent.Kind != gatewayKind {
+	parentRef := listenerSet.Spec.ParentRef
+	parent := normalizeParentRef(parentRef.Group, parentRef.Kind, parentRef.Namespace, parentRef.Name, listenerSet.Namespace)
+	if parent.Group != gatewayapiv1.GroupName || parent.Kind != "Gateway" {
 		log.Warn().
 			Str("listenerSet", listenerSet.Name).
 			Str("namespace", listenerSet.Namespace).
-			Str("parentRef", parent.Name).
-			Msgf("Only Gateway parent references are supported on a ListenerSet, got %s in group %q", parent.Kind, parent.Group)
+			Str("parentRef", string(parentRef.Name)).
+			Msg("Only Gateway parent references are supported on a ListenerSet")
 		return types.NamespacedName{}, false, nil
 	}
-	return parent.namespacedName(), true, nil
+	return types.NamespacedName{Namespace: parent.Namespace, Name: parent.Name}, true, nil
 }
 
 // GetServersFromRoute retrieves the GSLB server configuration from a route resource
