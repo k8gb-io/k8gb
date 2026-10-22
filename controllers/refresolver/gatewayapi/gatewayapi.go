@@ -43,26 +43,25 @@ type parentRef struct {
 	Name      string
 }
 
-// normalizeParentRef applies the Gateway API defaults to the optional fields of a parent reference:
+// normalizeRouteParentRef applies the Gateway API defaults to the optional fields of a parent reference:
 // group gateway.networking.k8s.io, kind Gateway and the namespace of the referring object
-func normalizeParentRef(group *gatewayapiv1.Group, kind *gatewayapiv1.Kind, namespace *gatewayapiv1.Namespace,
-	name gatewayapiv1.ObjectName, defaultNamespace string) parentRef {
-	ref := parentRef{
+func normalizeRouteParentRef(ref gatewayapiv1.ParentReference, defaultNamespace string) parentRef {
+	parent := parentRef{
 		Group:     gatewayapiv1.GroupName,
 		Kind:      "Gateway", //nolint:goconst // Gateway API kind names read clearer inline
 		Namespace: defaultNamespace,
-		Name:      string(name),
+		Name:      string(ref.Name),
 	}
-	if group != nil {
-		ref.Group = string(*group)
+	if ref.Group != nil {
+		parent.Group = string(*ref.Group)
 	}
-	if kind != nil {
-		ref.Kind = string(*kind)
+	if ref.Kind != nil {
+		parent.Kind = string(*ref.Kind)
 	}
-	if namespace != nil {
-		ref.Namespace = string(*namespace)
+	if ref.Namespace != nil {
+		parent.Namespace = string(*ref.Namespace)
 	}
-	return ref
+	return parent
 }
 
 // GetGateway retrieves the gateway referenced by a route resource.
@@ -70,7 +69,7 @@ func normalizeParentRef(group *gatewayapiv1.Group, kind *gatewayapiv1.Kind, name
 func GetGateway(route RouteAdapter, k8sClient client.Client) (*gatewayapiv1.Gateway, error) {
 	var gateways []types.NamespacedName
 	for _, parentRef := range route.GetParentRefs() {
-		parent := normalizeParentRef(parentRef.Group, parentRef.Kind, parentRef.Namespace, parentRef.Name, route.GetNamespace())
+		parent := normalizeRouteParentRef(parentRef, route.GetNamespace())
 		ref := types.NamespacedName{
 			Namespace: parent.Namespace,
 			Name:      parent.Name,
@@ -138,7 +137,12 @@ func getListenerSetGateway(listenerSetRef types.NamespacedName, k8sClient client
 	}
 
 	parentRef := listenerSet.Spec.ParentRef
-	parent := normalizeParentRef(parentRef.Group, parentRef.Kind, parentRef.Namespace, parentRef.Name, listenerSet.Namespace)
+	parent := normalizeRouteParentRef(gatewayapiv1.ParentReference{
+		Group:     parentRef.Group,
+		Kind:      parentRef.Kind,
+		Namespace: parentRef.Namespace,
+		Name:      parentRef.Name,
+	}, listenerSet.Namespace)
 	if parent.Group != gatewayapiv1.GroupName || parent.Kind != "Gateway" {
 		log.Warn().
 			Str("listenerSet", listenerSet.Name).
