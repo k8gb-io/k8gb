@@ -23,3 +23,7 @@ The standard response time from k8gb project maintainers for a vulnerability rep
 Once k8gb project maintainers have confirmed the relevance of the report, a [draft security advisory](https://github.com/k8gb-io/k8gb/security/advisories) will be created on Github. Please provide Github username to k8gb project maintainers if you wish to be invited to participate in advisory discussions. You can also request to be updated about advisory discussions directly via email.
 
 If the vulnerability is accepted, you'll be informed about the determined timeline for developing a patch, public disclosure, and patch release. You are expected to participate in the discussion of the timeline and respect the agreed dates for public disclosure.
+
+## Published Advisories
+
+Once a vulnerability is publicly disclosed, its advisory is published on the repository's [security advisories page](https://github.com/k8gb-io/k8gb/security/advisories).
