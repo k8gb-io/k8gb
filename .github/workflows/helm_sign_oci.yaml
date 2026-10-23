@@ -11,6 +11,11 @@ on:
         description: 'Release tag to sign (e.g., v0.16.0)'
         required: false
         type: string
+      all:
+        description: 'Push and sign all historical charts (backfill)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -48,7 +53,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ inputs.tag || github.event.workflow_run.head_sha || github.ref }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22
@@ -62,11 +67,66 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
           echo ${{ secrets.GITHUB_TOKEN }} | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
           git fetch origin gh-pages
-          git checkout origin/gh-pages -- charts/
+          git checkout origin/gh-pages -- charts/ index.yaml
           ls -la charts/
           OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
+          OCI_BASE="${OCI_REPO#oci://}"
+
+          CHARTS_TO_PUSH=()
+          if [ "${{ inputs.all }}" = "true" ]; then
+            echo "Backfill mode enabled: pushing all charts found in gh-pages"
+            for c in charts/k8gb-*.tgz; do
+              if [ -f "$c" ]; then
+                CHARTS_TO_PUSH+=("$c")
+              fi
+            done
+          else
+            TARGET_VERSION="${{ inputs.tag }}"
+            if [ -z "$TARGET_VERSION" ] && [ -n "${{ github.event.workflow_run.head_branch }}" ] && [ "${{ github.event.workflow_run.head_branch }}" != "master" ] && [ "${{ github.event.workflow_run.head_branch }}" != "main" ]; then
+              TARGET_VERSION="${{ github.event.workflow_run.head_branch }}"
+            fi
+            if [ -z "$TARGET_VERSION" ] && [ -f "chart/k8gb/Chart.yaml" ]; then
+              TARGET_VERSION=$(awk '/^version:/ {print $2}' chart/k8gb/Chart.yaml | tr -d '"'\')
+            fi
+            if [ -z "$TARGET_VERSION" ] || [ "$TARGET_VERSION" = "v0.0.0" ]; then
+              TARGET_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            fi
+
+            # Fallback to the latest chart from index.yaml on gh-pages if TARGET_VERSION is still empty
+            if [ -z "$TARGET_VERSION" ] && [ -f "index.yaml" ]; then
+              LATEST_INDEX_CHART=$(awk '/^[[:space:]]*- charts\/k8gb-/ {print $2; exit}' index.yaml)
+              if [ -n "$LATEST_INDEX_CHART" ]; then
+                TARGET_VERSION=$(basename "$LATEST_INDEX_CHART" .tgz | sed 's/^k8gb-//')
+                echo "Resolved target version from index.yaml: $TARGET_VERSION"
+              fi
+            fi
+
+            echo "Target release version: ${TARGET_VERSION:-unknown}"
+
+            CLEAN_VERSION="${TARGET_VERSION#v}"
+            CHART_FILE=""
+            if [ -n "$TARGET_VERSION" ]; then
+              if [ -f "charts/k8gb-${TARGET_VERSION}.tgz" ]; then
+                CHART_FILE="charts/k8gb-${TARGET_VERSION}.tgz"
+              elif [ -f "charts/k8gb-v${CLEAN_VERSION}.tgz" ]; then
+                CHART_FILE="charts/k8gb-v${CLEAN_VERSION}.tgz"
+              elif [ -f "charts/k8gb-${CLEAN_VERSION}.tgz" ]; then
+                CHART_FILE="charts/k8gb-${CLEAN_VERSION}.tgz"
+              fi
+            fi
+
+            if [ -z "$CHART_FILE" ] || [ ! -f "$CHART_FILE" ]; then
+              echo "Error: Chart for version '$TARGET_VERSION' not found in charts/ directory on gh-pages branch" >&2
+              ls -la charts/
+              exit 1
+            fi
+
+            echo "Selected chart to push and sign: $CHART_FILE"
+            CHARTS_TO_PUSH+=("$CHART_FILE")
+          fi
+
           SIGNED_CHARTS=()
-          for chart in charts/k8gb-*.tgz; do
+          for chart in "${CHARTS_TO_PUSH[@]}"; do
             if [ -f "$chart" ]; then
               echo "Pushing chart: $chart"
               PUSH_OUTPUT=$(helm push "$chart" "$OCI_REPO" 2>&1 | tee /dev/stderr)
@@ -76,19 +136,25 @@ jobs:
                 DIGEST=$(echo "$PUSH_OUTPUT" | grep -oE 'sha256:[a-f0-9]{64}' | head -1)
                 
                 if [ -n "$DIGEST" ]; then
-                  CHART_REF="ghcr.io/k8gb-io/charts/k8gb@${DIGEST}"
+                  CHART_REF="${OCI_BASE}/k8gb@${DIGEST}"
                   echo "Signing with digest: $CHART_REF"
                 else
                   # Fallback to tag-based signing
                   CHART_NAME=$(basename "$chart" .tgz)
-                  CHART_VERSION=$(echo "$CHART_NAME" | sed 's/k8gb-//')
-                  CHART_REF="ghcr.io/k8gb-io/charts/k8gb:${CHART_VERSION}"
+                  CHART_VERSION=$(echo "$CHART_NAME" | sed 's/^k8gb-//')
+                  CHART_REF="${OCI_BASE}/k8gb:${CHART_VERSION}"
                   echo "No digest found, signing with tag: $CHART_REF"
                 fi
                 
-                cosign sign --yes "$CHART_REF" && SIGNED_CHARTS+=("$CHART_REF")
+                if cosign sign --yes "$CHART_REF"; then
+                  SIGNED_CHARTS+=("$CHART_REF")
+                else
+                  echo "Failed to sign $CHART_REF" >&2
+                  exit 1
+                fi
               else
-                echo "Failed to push $chart"
+                echo "Failed to push $chart" >&2
+                exit 1
               fi
             fi
           done
@@ -101,10 +167,11 @@ jobs:
             for chart_ref in "${SIGNED_CHARTS[@]}"; do
               echo "Verifying: $chart_ref"
               cosign verify "$chart_ref" \
-                --certificate-identity "https://github.com/k8gb-io/k8gb/.github/workflows/helm_sign_oci.yaml@${{ github.ref }}" \
+                --certificate-identity "https://github.com/${{ github.repository }}/.github/workflows/helm_sign_oci.yaml@${{ github.ref }}" \
                 --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
             done
             echo "All signatures verified!"
           else
-            echo "No charts were signed in this run"
+            echo "Error: No charts were signed in this run" >&2
+            exit 1
           fi
