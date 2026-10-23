@@ -139,3 +139,10 @@ func (z *ZoneDelegation) GetExternalDNSEndpointName() string {
 	var suffix = strings.Trim(strings.ReplaceAll(z.Spec.LoadBalancedZone, ".", "-"), " ")
 	return fmt.Sprintf("k8gb-ns-extdns-%s", suffix)
 }
+
+// GetExternalDNSNsMergeEndpointName is the shared-owner NS DNSEndpoint used
+// when ExtDNSNsMergeEnabled is set. Glue A stays on GetExternalDNSEndpointName.
+func (z *ZoneDelegation) GetExternalDNSNsMergeEndpointName() string {
+	var suffix = strings.Trim(strings.ReplaceAll(z.Spec.LoadBalancedZone, ".", "-"), " ")
+	return fmt.Sprintf("k8gb-ns-extdns-ns-%s", suffix)
+}
