@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-26.04
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     env:
-      OCI_REPO: oci://ghcr.io/k8gb-io/charts
+      OCI_REPO: oci://ghcr.io/${{ github.repository_owner }}/charts
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          ref: ${{ inputs.tag || github.event.workflow_run.head_sha || github.ref }}
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22
@@ -63,17 +63,20 @@ jobs:
       - name: Push to OCI Registry and sign with Cosign
         env:
           COSIGN_EXPERIMENTAL: 1
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_ALL: ${{ inputs.all }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
           echo ${{ secrets.GITHUB_TOKEN }} | cosign login ghcr.io -u ${{ github.actor }} --password-stdin
           git fetch origin gh-pages
-          git checkout origin/gh-pages -- charts/ index.yaml
+          git checkout origin/gh-pages -- charts/
           ls -la charts/
-          OCI_REPO="${OCI_REPO:-oci://ghcr.io/k8gb-io/charts}"
+          OCI_REPO="${OCI_REPO:-oci://ghcr.io/${{ github.repository_owner }}/charts}"
           OCI_BASE="${OCI_REPO#oci://}"
 
           CHARTS_TO_PUSH=()
-          if [ "${{ inputs.all }}" = "true" ]; then
+          if [ "$INPUT_ALL" = "true" ]; then
             echo "Backfill mode enabled: pushing all charts found in gh-pages"
             for c in charts/k8gb-*.tgz; do
               if [ -f "$c" ]; then
@@ -81,38 +84,34 @@ jobs:
               fi
             done
           else
-            TARGET_VERSION="${{ inputs.tag }}"
-            if [ -z "$TARGET_VERSION" ] && [ -n "${{ github.event.workflow_run.head_branch }}" ] && [ "${{ github.event.workflow_run.head_branch }}" != "master" ] && [ "${{ github.event.workflow_run.head_branch }}" != "main" ]; then
-              TARGET_VERSION="${{ github.event.workflow_run.head_branch }}"
+            TARGET_VERSION="$INPUT_TAG"
+            if [ -z "$TARGET_VERSION" ] && [ -n "$WORKFLOW_RUN_HEAD_BRANCH" ] && [ "$WORKFLOW_RUN_HEAD_BRANCH" != "master" ] && [ "$WORKFLOW_RUN_HEAD_BRANCH" != "main" ]; then
+              TARGET_VERSION="$WORKFLOW_RUN_HEAD_BRANCH"
             fi
             if [ -z "$TARGET_VERSION" ] && [ -f "chart/k8gb/Chart.yaml" ]; then
               TARGET_VERSION=$(awk '/^version:/ {print $2}' chart/k8gb/Chart.yaml | tr -d '"'\')
             fi
-            if [ -z "$TARGET_VERSION" ] || [ "$TARGET_VERSION" = "v0.0.0" ]; then
-              TARGET_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+            if [ -z "$TARGET_VERSION" ]; then
+              echo "Error: Could not resolve target release version from inputs.tag, workflow_run.head_branch, or chart/k8gb/Chart.yaml" >&2
+              exit 1
             fi
 
-            # Fallback to the latest chart from index.yaml on gh-pages if TARGET_VERSION is still empty
-            if [ -z "$TARGET_VERSION" ] && [ -f "index.yaml" ]; then
-              LATEST_INDEX_CHART=$(awk '/^[[:space:]]*- charts\/k8gb-/ {print $2; exit}' index.yaml)
-              if [ -n "$LATEST_INDEX_CHART" ]; then
-                TARGET_VERSION=$(basename "$LATEST_INDEX_CHART" .tgz | sed 's/^k8gb-//')
-                echo "Resolved target version from index.yaml: $TARGET_VERSION"
-              fi
+            if [[ ! "$TARGET_VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$ ]]; then
+              echo "Error: Target version '$TARGET_VERSION' does not match expected semver format (e.g. v0.16.0 or v0.15.0-rc1)" >&2
+              exit 1
             fi
 
-            echo "Target release version: ${TARGET_VERSION:-unknown}"
+            echo "Target release version: $TARGET_VERSION"
 
             CLEAN_VERSION="${TARGET_VERSION#v}"
             CHART_FILE=""
-            if [ -n "$TARGET_VERSION" ]; then
-              if [ -f "charts/k8gb-${TARGET_VERSION}.tgz" ]; then
-                CHART_FILE="charts/k8gb-${TARGET_VERSION}.tgz"
-              elif [ -f "charts/k8gb-v${CLEAN_VERSION}.tgz" ]; then
-                CHART_FILE="charts/k8gb-v${CLEAN_VERSION}.tgz"
-              elif [ -f "charts/k8gb-${CLEAN_VERSION}.tgz" ]; then
-                CHART_FILE="charts/k8gb-${CLEAN_VERSION}.tgz"
-              fi
+            if [ -f "charts/k8gb-${TARGET_VERSION}.tgz" ]; then
+              CHART_FILE="charts/k8gb-${TARGET_VERSION}.tgz"
+            elif [ -f "charts/k8gb-v${CLEAN_VERSION}.tgz" ]; then
+              CHART_FILE="charts/k8gb-v${CLEAN_VERSION}.tgz"
+            elif [ -f "charts/k8gb-${CLEAN_VERSION}.tgz" ]; then
+              CHART_FILE="charts/k8gb-${CLEAN_VERSION}.tgz"
             fi
 
             if [ -z "$CHART_FILE" ] || [ ! -f "$CHART_FILE" ]; then
