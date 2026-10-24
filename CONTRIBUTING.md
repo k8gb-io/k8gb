@@ -4,6 +4,7 @@
 - [Getting started](#getting-started)
 - [Getting help](#getting-help)
 - [Reporting issues](#reporting-issues)
+- [Escalating to the CRA steward](#escalating-to-the-cra-steward)
 - [Contribution flow](#contribution-flow)
 - [Local setup](#local-setup)
   - [Deploy k8gb locally](#deploy-k8gb-locally)
@@ -53,6 +54,17 @@ Another great way to get help is to attend the community meetings. Community mee
 
 Reporting bugs is one of the best ways to contribute.
 Feel free to open an issue describing your problem or question.
+
+## Escalating to the CRA steward
+
+k8gb is supported under the Linux Foundation CRA stewardship framework, as stated in [SECURITY.md](SECURITY.md).
+Maintainers escalate two kinds of event to the Linux Foundation steward at [steward@linuxfoundation.org](mailto:steward@linuxfoundation.org):
+
+- **Actively exploited vulnerabilities:** a vulnerability where the project has reliable evidence that a malicious actor has exploited it.
+- **Severe incidents:** a security compromise of the project's own IT infrastructure.
+
+Ordinary vulnerabilities with no evidence of exploitation are not escalation events and follow the process in [SECURITY.md](SECURITY.md).
+Remediation never waits on the decision to escalate.
 
 ## Contribution flow
 
