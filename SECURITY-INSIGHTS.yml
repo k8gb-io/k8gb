@@ -1,79 +1,168 @@
 header:
-  schema-version: 1.0.0
-  expiration-date: '2024-12-31T23:23:59.000Z'
-  last-updated: '2023-10-26'
-  last-reviewed: '2022-10-26'
-  commit-hash: d01f1a8e2c9918c15b8e640f9be86a4c0be46c9d
-  project-url: https://github.com/k8gb-io/k8gb
-  project-release: '1.0.1'
-  changelog: https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md
-  license: https://github.com/k8gb-io/k8gb/blob/master/LICENSE.md
+  schema-version: 2.2.0
+  last-updated: '2026-10-23'
+  last-reviewed: '2026-10-23'
+  url: https://raw.githubusercontent.com/k8gb-io/k8gb/master/SECURITY-INSIGHTS.yml
 
-project-lifecycle:
-  status: active
+project:
+  name: k8gb
+  homepage: https://www.k8gb.io
   roadmap: https://github.com/orgs/k8gb-io/projects/2/views/2
-  bug-fixes-only: false
-  core-maintainers:
-  - https://github.com/jkremser
-  - https://github.com/k0da
-  - https://github.com/kuritka
-  - https://github.com/ytsarev
-  - https://github.com/somaritane
-  release-cycle: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#release-process
-  release-process: |
-      Fully automated & pull-request based
-
-contribution-policy:
-  accepts-pull-requests: true
-  accepts-automated-pull-requests: true
-  automated-tools-list:
-  - automated-tool: renovate
-    action: allowed
-    path:
-    - .github/workflows
-    - go.mod
-    - go.sum
-    - Dockerfile
-    - chart/k8gb/values.yaml
-  contributing-policy: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md
-  code-of-conduct: https://github.com/k8gb-io/k8gb/blob/master/CODE_OF_CONDUCT.md
-
-documentation:
-  - https://www.k8gb.io/docs/
-
-distribution-points:
-  - https://github.com/k8gb-io/k8gb/releases
-  - https://github.com/orgs/k8gb-io/packages/container/package/k8gb
-
-security-artifacts:
-  self-assessment:
-    self-assessment-created: true
-    evidence-url:
-    - https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md
+  administrators:
+    - name: Yury Tsarev
+      affiliation: 0ttl
+      social: https://github.com/ytsarev
+      primary: true
+    - name: Dinar Valeev
+      affiliation: Absa Group Ltd
+      social: https://github.com/k0da
+      primary: false
+    - name: Michal Kuritka
+      affiliation: Absa Group Ltd
+      social: https://github.com/kuritka
+      primary: false
+  repositories:
+    - name: k8gb
+      url: https://github.com/k8gb-io/k8gb
+      comment: The k8gb controller, Helm chart, documentation and website.
+    - name: coredns-crd-plugin
+      url: https://github.com/k8gb-io/coredns-crd-plugin
+      comment: |
+        CoreDNS plugin that serves DNS records from DNSEndpoint resources. Its
+        k8s_crd image is the CoreDNS deployed by the k8gb Helm chart.
+  vulnerability-reporting:
+    reports-accepted: true
+    bug-bounty-available: false
+    policy: https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md
+    contact:
+      name: k8gb maintainers
+      email: cncf-k8gb-maintainers@lists.cncf.io
+      primary: true
     comment: |
-      Created on 2023-10-31
+      Report suspected vulnerabilities by email to the k8gb maintainers list,
+      or privately through GitHub with the "Report a vulnerability" button on
+      the repository's Security tab. SECURITY.md lists what to include in a
+      report and how reports are handled. Confirmed vulnerabilities are
+      coordinated in a draft GitHub security advisory.
+  documentation:
+    quickstart-guide: https://www.k8gb.io/local/
+    detailed-guide: https://www.k8gb.io/tutorials/
+    code-of-conduct: https://github.com/k8gb-io/k8gb/blob/master/CODE_OF_CONDUCT.md
+    release-process: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#release-process
+    signature-verification: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#verification-instructions
 
-security-contacts:
-- type: email
-  value: cncf-k8gb-maintainers@lists.cncf.io
-  primary: true
-- type: email
-  value: yury@upbound.io
-  primary: false
-
-vulnerability-reporting:
-  accepts-vulnerability-reports: true
-  email-contact: cncf-k8gb-maintainers@lists.cncf.io
-  security-policy: https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md
-  bug-bounty-available: false
-
-dependencies:
-  third-party-packages: true
-  dependencies-lists:
-  - https://github.com/k8gb-io/k8gb/blob/master/go.mod
-  env-dependencies-policy:
-    policy-url: https://github.com/k8gb-io/k8gb/blob/main/DEPENDENCY.md
-  sbom:
-  - sbom-file: https://github.com/k8gb-io/k8gb/releases/download/v1.0.1/k8gb_1.0.1_linux_amd64.tar.gz.sbom.json
-    sbom-format: SPDX
-    sbom-url: https://github.com/k8gb-io/k8gb/releases/
+repository:
+  url: https://github.com/k8gb-io/k8gb
+  status: active
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  bug-fixes-only: false
+  core-team:
+    - name: Yury Tsarev
+      affiliation: 0ttl
+      social: https://github.com/ytsarev
+      primary: true
+    - name: Donovan Muller
+      affiliation: Capitec
+      social: https://github.com/donovanmuller
+      primary: false
+    - name: Dinar Valeev
+      affiliation: Absa Group Ltd
+      social: https://github.com/k0da
+      primary: false
+    - name: Michal Kuritka
+      affiliation: Absa Group Ltd
+      social: https://github.com/kuritka
+      primary: false
+    - name: Jirka Kremser
+      affiliation: Kedify
+      social: https://github.com/jkremser
+      primary: false
+    - name: André Águas
+      affiliation: Open Systems
+      social: https://github.com/abaguas
+      primary: false
+    - name: Bradley Andersen
+      affiliation: 0ttl
+      social: https://github.com/elohmrow
+      primary: false
+  license:
+    url: https://github.com/k8gb-io/k8gb/blob/master/LICENSE
+    expression: Apache-2.0
+  documentation:
+    contributing-guide: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md
+    review-policy: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#contribution-flow
+    dependency-management-policy: https://github.com/k8gb-io/k8gb/blob/master/DEPENDENCY.md
+    governance: https://github.com/k8gb-io/k8gb/blob/master/GOVERNANCE.md
+    security-policy: https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md
+  release:
+    automated-pipeline: true
+    distribution-points:
+      - uri: https://github.com/k8gb-io/k8gb/releases
+        comment: Release binaries, checksums, SBOMs and SLSA provenance.
+      - uri: https://github.com/k8gb-io/k8gb/pkgs/container/k8gb
+        comment: |
+          Signed container images, published to ghcr.io/k8gb-io/k8gb. The Helm
+          chart pulls them through registry.k8gb.io, which serves the same
+          images.
+      - uri: https://www.k8gb.io
+        comment: Helm chart repository, added with "helm repo add k8gb https://www.k8gb.io"
+      - uri: https://github.com/k8gb-io/k8gb/pkgs/container/charts%2Fk8gb
+        comment: Signed Helm chart in OCI format at oci://ghcr.io/k8gb-io/charts/k8gb.
+    changelog: https://github.com/k8gb-io/k8gb/blob/master/CHANGELOG.md
+    attestations:
+      - name: SLSA provenance
+        location: https://github.com/k8gb-io/k8gb/releases/latest
+        predicate-uri: https://slsa.dev/provenance/v0.2
+        comment: |
+          Attached to each release as multiple.intoto.jsonl, generated by
+          slsa-framework/slsa-github-generator. See the verification
+          instructions in CONTRIBUTING.md.
+      - name: SBOM
+        location: https://github.com/k8gb-io/k8gb/releases/latest
+        predicate-uri: https://spdx.github.io/spdx-spec/v2.2.2/
+        comment: |
+          SPDX SBOM for each release archive, generated by Syft and attached
+          to the release as k8gb_<version>_<os>_<arch>.tar.gz.sbom.json with
+          a cosign signature.
+  security:
+    assessments:
+      self:
+        name: k8gb security self-assessment
+        evidence: https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md
+        date: '2025-12-04'
+        comment: |
+          Self-assessment following the CNCF TAG Security and Compliance
+          template. A copy was added to the CNCF TOC repository in
+          cncf/toc#1977, merged on 2025-12-04.
+    tools:
+      - name: CodeQL
+        type: SAST
+        rulesets:
+          - default
+        integration:
+          adhoc: true
+          ci: true
+          release: false
+        results:
+          ci:
+            name: CodeQL workflow runs
+            location: https://github.com/k8gb-io/k8gb/actions/workflows/codeql-analysis.yml
+            predicate-uri: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
+        comment: |
+          Runs on pull requests and pushes to master that change Go code, and
+          weekly on a schedule. Results go to GitHub code scanning.
+      - name: OpenSSF Scorecard
+        type: other
+        rulesets:
+          - default
+        integration:
+          adhoc: true
+          ci: true
+          release: false
+        results:
+          adhoc:
+            name: Published Scorecard results
+            location: https://scorecard.dev/viewer/?uri=github.com/k8gb-io/k8gb
+            predicate-uri: https://github.com/ossf/scorecard
+        comment: Runs on pushes to master, on branch protection changes, and weekly.
