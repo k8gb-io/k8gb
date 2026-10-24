@@ -40,7 +40,7 @@ jobs:
         k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: block
           # Audit: https://github.com/k8gb-io/k8gb/actions/runs/34329541730
@@ -100,12 +100,12 @@ jobs:
       - name: Setup helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          version: v4.3.0
+          version: v4.3.1
 
       - name: Build artifacts
         uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
-          version: v2.18.3
+          version: v2.19.0
           args: release --clean --skip=publish,validate,sbom,sign --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
