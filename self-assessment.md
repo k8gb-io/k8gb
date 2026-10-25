@@ -2,7 +2,9 @@
 
 Security reviewers: Yury Tsarev, Jirka Kremser
 
-This document provides a self-assessment of the k8gb project following the guidelines outlined by the CNCF TAG Security and Compliance group. The purpose is to evaluate k8gb’s current security posture and alignment with best practices, ensuring that it is suitable for adoption at a CNCF incubation level.
+Last reviewed: 2026-10-25. This revision follows the [OpenSSF security self-assessment template](https://security-assessments.openssf.org/self-assessment/template/self-assessment/) and corrects details that have changed since the 2025 version. It is a draft until the maintainers confirm it, and open questions are marked `TODO(maintainer)`.
+
+This document provides a self-assessment of the k8gb project following the guidelines outlined by the CNCF TAG Security and Compliance group and the OpenSSF. The purpose is to evaluate k8gb’s current security posture and alignment with best practices, ensuring that it is suitable for adoption at a CNCF incubation level.
 
 ## Table of Contents
 
@@ -20,10 +22,12 @@ This document provides a self-assessment of the k8gb project following the guide
 * [Project compliance](#project-compliance)
   * [Future state](#future-state)
 * [Secure development practices](#secure-development-practices)
-  * [Deployment pipeline](#deployment-pipeline)
+  * [Development pipeline](#development-pipeline)
   * [Communication channels](#communication-channels)
+  * [Ecosystem](#ecosystem)
 * [Security issue resolution](#security-issue-resolution)
   * [Responsible disclosure practice](#responsible-disclosure-practice)
+  * [Vulnerability response process](#vulnerability-response-process)
   * [Incident response](#incident-response)
 * [Appendix](#appendix)
 
@@ -32,10 +36,11 @@ This document provides a self-assessment of the k8gb project following the guide
 ### Security links
 |   |  |
 | - | - |
+| Assessment Stage | Incomplete. This revision is a draft pending maintainer review. |
 | Software | https://github.com/k8gb-io/k8gb  |
 | Security Provider | No, k8gb is not a security provider. It relies on Kubernetes' built-in security mechanisms (e.g., RBAC, network policies) and does not implement standalone security features. |
 | Languages | Golang |
-| SBOM | https://github.com/k8gb-io/k8gb/releases/download/v0.14.0/k8gb_0.14.0_linux_amd64.tar.gz.sbom.json |
+| SBOM | SPDX SBOMs are attached to every release, for example https://github.com/k8gb-io/k8gb/releases/download/v1.0.1/k8gb_1.0.1_linux_amd64.tar.gz.sbom.json |
 | Security Insights | https://github.com/k8gb-io/k8gb/blob/master/SECURITY-INSIGHTS.yml |
 | Security File | https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md |
 | Cosign pub-key | https://github.com/k8gb-io/k8gb/blob/master/cosign.pub |
@@ -44,8 +49,8 @@ This document provides a self-assessment of the k8gb project following the guide
 ### Intended use
 
 To increase the software supply chain security, we encourage our users to consume k8gb container images with Kyverno's admission webhook
-([/policy](https://kyverno.io/docs/writing-policies/verify-images/sigstore/#verifying-image-signatures)) that will ensure that
-images are signed and nobody had tempered with them. Our public key that can be used to verify this is in the root or our repository.
+([/policy](https://kyverno.io/docs/policy-types/cluster-policy/verify-images/sigstore/)) that will ensure that
+images are signed and nobody has tampered with them. The public key that can be used to verify this is in the root of our repository.
 
 ## Overview
 
@@ -69,11 +74,14 @@ The individual parts of k8gb that interact to provide the desired functionality.
   - Isolation: runs as its own Pod
 - k8gb Controller
   - Role: Coordinates logic according to the GSLB (Global Server Load Balancing) strategy.
-  - Isolation: runs as its own Pod
+  - Isolation: runs as its own Pod, under a ServiceAccount bound to a ClusterRole that is defined in `chart/k8gb/templates/cluster_role.yaml`
+- Peer k8gb clusters
+  - Role: Each cluster in a GSLB setup runs its own k8gb, and the clusters learn each other's healthy endpoints over DNS.
+  - Isolation: separate clusters, connected only through DNS traffic between their CoreDNS instances and the edge DNS
 
 ### Actions
 
-The steps that k8gb performs in order to provide the desired functionality. See https://www.k8gb.io/docs/images/k8gb-components.svg. 
+The steps that k8gb performs in order to provide the desired functionality. See https://www.k8gb.io/images/k8gb-components.svg. 
 
 - CoreDNS
   - Functionality:
@@ -83,8 +91,10 @@ The steps that k8gb performs in order to provide the desired functionality. See 
     - Reads data from DNSEndpoint CR to update an external DNS provider (e.g., Route53).
 - k8gb Controller
   - Functionality:
-    - Watches all namespaces for `Gslb` custom resources.
+    - Watches all namespaces for `Gslb` custom resources, and resolves the networking resource each one references through `spec.resourceRef` (Ingress, Service, Gateway API routes or Istio VirtualService).
+    - Reads local endpoint health from ready EndpointSlices.
     - Creates DNSEndpoint CR (Custom Resource) populated with information from `Gslb` Ingress status (application FQDN - Fully Qualified Domain Name and active IP addresses, which are used for dynamic A record composition).
+    - Queries the CoreDNS instances of the peer clusters for their `localtargets` records to learn which endpoints are healthy there, and merges them into the records it serves according to the GSLB strategy.
     - Creates DNSEndpoint to configure DNS (Domain Name System) zone delegation in an external DNS provider.
 
 ### Goals
@@ -97,28 +107,24 @@ Ensure all k8gb releases are signed and verified to guarantee authenticity and i
 
 #### Minimal Attack Surface
 
-k8gb is designed with a minimal attack surface by exposing only the necessary ports for GSLB (Global Server Load Balancing) operations. Specifically, only DNS ports (53/tcp and 53/udp) are exposed for DNS resolution services. This approach significantly reduces the attack surface compared to traditional load balancing solutions that typically require multiple ports for:
-- Management interfaces (often HTTP/HTTPS on various ports)
-- Health check endpoints
-- Administrative APIs
-- Monitoring and telemetry interfaces
+k8gb is designed with a minimal attack surface. The only port meant for traffic from outside the cluster is DNS (53/tcp and 53/udp) on the CoreDNS Service, which is `ClusterIP` by default and exposed by the operator as needed (see [Exposing DNS](https://www.k8gb.io/exposing_dns/)). k8gb has no management interface or administrative API, and it does not proxy application traffic.
 
-By operating exclusively through DNS, k8gb eliminates these additional attack vectors while maintaining full functionality.
+Inside the cluster, the components also serve plain HTTP endpoints without authentication:
+- the k8gb controller serves Prometheus metrics on port 8080
+- CoreDNS serves Prometheus metrics on port 9153, and health and readiness checks on ports 8080 and 8181
+- optional OpenTelemetry tracing, off by default, adds an OTLP collector
+
+The chart does not ship a NetworkPolicy, so restricting access to these ports is up to the operator.
 
 #### Secure Deployment Practices
 
 k8gb implements comprehensive secure deployment practices through multiple layers:
 
-**Secure Defaults**: All k8gb components are configured with security-first defaults, including:
-- Minimal required permissions through restrictive RBAC (Role-Based Access Control) policies
-- Non-root container execution with read-only root filesystems where possible
-- Resource limits and security contexts to prevent privilege escalation
+**Secure Defaults**: The k8gb controller container runs as a non-root user (UID 1000) with a read-only root filesystem, privilege escalation disabled, and resource requests and limits set. Its image is based on `gcr.io/distroless/static:nonroot`. CoreDNS and ExternalDNS are deployed from their upstream Helm charts, so their security contexts come from those charts' defaults.
 
-**Documentation and Guidance**: Extensive documentation provides users with:
-- Security hardening guidelines for production deployments
-- Best practices for credential management and secret handling
-- Network security recommendations for multi-cluster deployments
-- Integration patterns with security tools like Pod Security Standards and network policies
+**RBAC**: The controller's ClusterRole covers what GSLB needs across namespaces. It reads Services, EndpointSlices, ConfigMaps, Gateway API routes and Istio resources, and it manages Ingresses, DNSEndpoints and the k8gb custom resources. These permissions are cluster-wide because `Gslb` resources can live in any namespace. TODO(maintainer): confirm whether any of these rules can be narrowed.
+
+**Documentation and Guidance**: The DNS provider guides explain how to give ExternalDNS or k8gb its provider credentials, for example IRSA for Route53, Workload Identity for Google Cloud DNS, and Kubernetes Secrets for most other providers. TODO(maintainer): k8gb has no dedicated production hardening guide yet, covering for example NetworkPolicy and Pod Security Standards. Decide whether to add one.
 
 **Kubernetes-Native Security**: k8gb leverages Kubernetes built-in security mechanisms rather than implementing custom security layers, ensuring compatibility with existing security policies and reducing complexity.
 
@@ -155,9 +161,11 @@ This document provides the CNCF TAG Security and Compliance with an initial unde
 | Component | Applicability | Description of Importance |
 | --------- | ------------- | ------------------------- |
 | DNS-Based Traffic Management| `Critical`| k8gb uses DNS for global load balancing and failover, ensuring that traffic is routed to healthy clusters without passing through k8gb itself. This design minimizes the attack surface compared to traditional proxy-based load balancers and reduces the risk of traffic interception or manipulation versus solutions that handle application traffic directly. |
-| Minimal Port Exposure | `Critical` | k8gb exposes only essential ports (53/tcp and 53/udp) for DNS operations, significantly reducing the attack surface compared to traditional load balancers that require multiple ports for management interfaces, health checks, and traffic handling, thereby limiting potential entry points for attackers. |
-| Integration with Kubernetes RBAC | `Critical` | k8gb relies on Kubernetes Role-Based Access Control (RBAC) to enforce authorization, ensuring that only authorized users can configure or modify k8gb resources. |
-| Kubernetes Secrets for Sensitive Data | `Security Relevant` | k8gb uses Kubernetes secrets to store sensitive information, such as credentials and certificates, ensuring that this data is encrypted at rest and accessible only to authorized components. |
+| Minimal Port Exposure | `Critical` | Only DNS (53/tcp and 53/udp) is meant to be reachable from outside the cluster, and there is no management interface or administrative API. In-cluster metrics and health endpoints are plain HTTP, so operators should restrict them (see [Minimal Attack Surface](#minimal-attack-surface)). |
+| Integration with Kubernetes RBAC | `Critical` | k8gb relies on Kubernetes Role-Based Access Control (RBAC) to enforce authorization. Anyone who can create `Gslb`, `ZoneDelegation` or k8gb-labelled `DNSEndpoint` resources can influence the DNS answers k8gb serves, so those permissions should be granted deliberately. |
+| Cross-cluster health over DNS | `Critical` | Each k8gb cluster learns which endpoints are healthy in its peers by querying their CoreDNS over plain DNS. The DNS path between clusters and the edge resolvers is therefore part of the trusted environment. |
+| Kubernetes Secrets for Sensitive Data | `Security Relevant` | DNS provider credentials are kept in Kubernetes Secrets or supplied through workload identity, and access is controlled by Kubernetes RBAC. Encryption at rest depends on how the cluster is configured. k8gb does not configure it. |
+| Release signing and provenance | `Security Relevant` | Release binaries, archives, checksums, SBOMs and container images are signed with cosign using the project key in [`cosign.pub`](https://github.com/k8gb-io/k8gb/blob/master/cosign.pub). Helm charts in the OCI registry are signed keyless, and SLSA provenance is generated for binaries and images. See [Signed releases](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#signed-releases). |
 | Secure Default Configurations | `Security Relevant` | k8gb provides secure default configurations to help users deploy the project in a way that aligns with Kubernetes security best practices, reducing the risk of misconfiguration compared to complex traditional load balancing solutions that often require extensive manual security hardening. |
 
 ## Project compliance
@@ -174,17 +182,22 @@ k8gb maintains strong compliance with several industry standards and frameworks:
 - Build process isolation and non-falsifiable provenance are implemented
 - Both container images and release binaries have complete SLSA provenance chains
 
-**OpenSSF Scorecard Compliance**:
-- k8gb maintains a strong OpenSSF Scorecard score with continuous monitoring via automated pipelines
-- Implements security best practices including dependency management, vulnerability scanning, and security policy enforcement
+**OpenSSF Scorecard**:
+- The Scorecard workflow runs on pushes to `master` and weekly, and publishes its results to [scorecard.dev](https://scorecard.dev/viewer/?uri=github.com/k8gb-io/k8gb)
+
+**OpenSSF Best Practices**:
+- k8gb holds the [OpenSSF Best Practices](https://www.bestpractices.dev/projects/4866) passing badge
+
+**OpenSSF OSPS Baseline**:
+- k8gb is working toward OSPS Baseline Level 2 as part of the Fall 2026 Security Slam, tracked in [#2563](https://github.com/k8gb-io/k8gb/issues/2563)
 
 **Container Security Standards**:
-- All container images are signed with Cosign using keyless signing
+- Container images are signed with cosign using the project key in `cosign.pub`. Helm charts in the OCI registry are signed keyless through GitHub OIDC.
 - Software Bill of Materials (SBOM) generation for all releases
-- Multi-architecture container builds with attestation
+- Multi-architecture container builds with an SBOM attestation and SLSA provenance
 
 **Current Compliance Status**:
-k8gb has achieved strong compliance across multiple security frameworks without pursuing formal certification, as this aligns with the open-source nature of the project while providing enterprise users with the security assurance they require for production deployments.
+k8gb does not hold formal certifications. The items above are self-reported, and each one links to results that can be checked independently.
 
 ## Secure development practices
 
@@ -194,7 +207,7 @@ k8gb is committed to maintaining a secure software development lifecycle (SDLC) 
 
 In order to secure the SDLC from development to deployment, the following measures are in place. Please consult the roadmap for information about how this list is growing.
 
-- Branch protection on the default (`master`) branch:
+- Branch protection on the default (`master`) branch. TODO(maintainer): confirm these rules are still current. The public history includes some unsigned commits pushed without a pull request, so check whether "Require signed commits" and the pull request rule also apply to administrators.
   - Require signed commits
   - Require a pull request before merging
     - Require approvals: 1
@@ -205,20 +218,24 @@ In order to secure the SDLC from development to deployment, the following measur
   - Require status checks to pass before merging
     - Require branches to be up to date before merging
 
+- Contributions:
+  - Every commit needs a Developer Certificate of Origin (DCO) sign-off, enforced by the DCO GitHub app
+  - Pull requests need an approval from a maintainer listed in `CODEOWNERS` (see [CONTRIBUTING.md](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#contribution-flow))
+
 - CI/CD Pipeline:
   - Use GitHub Actions for continuous integration and deployment (CI/CD)
+  - Workflows run `step-security/harden-runner` with egress blocking, and most third-party actions are pinned to commit SHAs. The SLSA generator has to be referenced by tag.
   - Include comprehensive testing and quality assurance to catch issues early:
     - **Code Quality**: golangci-lint pipeline for code quality and potential security issues
     - **Quality Monitoring**: Go Report Card integration (https://goreportcard.com/report/github.com/k8gb-io/k8gb)
-    - **Kubernetes Best Practices**: KubeLinter pipeline for Kubernetes configuration validation
     - **Functional Testing**: Terratest and Chainsaw end-to-end testing pipelines for functionality validation
   - **Security-Focused Scanning and Analysis**:
     - **Static Security Analysis**: CodeQL pipeline for vulnerability detection and security issue identification
     - **Security Posture Assessment**: OpenSSF Scorecard pipeline for continuous security best practices monitoring
 
 - Release Process:
-  - **Automated Release Pipeline**: Fully automated process to eliminate human error and ensure consistency
-  - **Cryptographic Signing**: All releases signed using Cosign with keyless signing for authenticity and integrity
+  - **Automated Release Pipeline**: A version bump pull request triggers tagging and the release workflow, and a maintainer publishes the resulting draft release (see [Release process](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#release-process))
+  - **Cryptographic Signing**: Release binaries, archives, checksums, SBOMs and container images are signed with cosign using the project key in `cosign.pub`. Helm charts in the OCI registry are signed keyless.
   - **SLSA Level 3 Compliance**: Generate provenance attestations using official SLSA framework for supply chain security
   - **Software Bill of Materials (SBOM)**: Comprehensive SBOM generation for transparency and vulnerability tracking
 
@@ -227,6 +244,10 @@ In order to secure the SDLC from development to deployment, the following measur
   - FOSSA scan pipeline
 
 ### Communication channels
+
+- Internal: maintainers talk through the maintainers mailing list (cncf-k8gb-maintainers@lists.cncf.io), the `#k8gb` CNCF Slack channel, and the community meetings. TODO(maintainer): add any private maintainer channel if one is used.
+- Inbound: users reach the team through GitHub issues and discussions, the `#k8gb` Slack channel, and the community meetings. Security reports go through the private channels in [SECURITY.md](https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md).
+- Outbound: releases are announced through GitHub releases and their notes, the [k8gb.io blog](https://www.k8gb.io/blog/), LinkedIn and X.
 
 |   |  |
 | - | - |
@@ -238,26 +259,35 @@ In order to secure the SDLC from development to deployment, the following measur
 | Community meetings | https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=week |
 | | |
 
+### Ecosystem
+
+k8gb works with the networking resources teams already run. A `Gslb` can point at a Kubernetes Ingress, a Service, a Gateway API route or an Istio VirtualService. k8gb serves DNS through CoreDNS and its own CRD plugin ([coredns-crd-plugin](https://github.com/k8gb-io/coredns-crd-plugin)), and it delegates zones through ExternalDNS or directly to Infoblox. The supported edge DNS providers are Route53, Azure DNS, Google Cloud DNS, Infoblox, NS1, Windows DNS, Cloudflare and RFC2136 servers such as BIND. Organizations using k8gb are listed in [ADOPTERS.md](https://github.com/k8gb-io/k8gb/blob/master/ADOPTERS.md).
+
 ## Security issue resolution
 
 The k8gb security policy is maintained in the https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md file.
 
 ### Responsible disclosure practice
 
-The k8gb project accepts vulnerability reports as outlined in the security policy https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#reporting-a-vulnerability.
+The k8gb project accepts vulnerability reports as outlined in the security policy https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#reporting-a-vulnerability. Reports can be sent privately by email to the maintainers list or through GitHub private vulnerability reporting on the repository's Security tab. k8gb is supported under the Linux Foundation CRA stewardship framework, and reports of actively exploited vulnerabilities are escalated to the LF steward.
+
+### Vulnerability response process
+
+The maintainers respond to reports, with a standard response time of less than 14 days. Once a report is confirmed, they open a draft GitHub security advisory, agree a timeline for the fix and disclosure with the reporter, and publish the advisory on the [security advisories page](https://github.com/k8gb-io/k8gb/security/advisories) once the fix is released. TODO(maintainer): name who triages incoming reports, for example the repository administrators.
 
 ### Incident response
 
-The k8gb incident response process is outline in the security policy https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#review-process.
+The k8gb incident response process is outlined in the security policy https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#review-process. Actively exploited vulnerabilities and security compromises of the project's own infrastructure are escalated to the Linux Foundation steward at steward@linuxfoundation.org, as described in [CONTRIBUTING.md](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#escalating-to-the-cra-steward). TODO(maintainer): describe how a compromised release or signing key would be handled, for example key rotation and re-signing.
 
 ## Appendix
 - Known Issues Over Time
   - Known issues are currently tracked in the project roadmap.
-  - k8gb has not had any reported security vulnerabilities to date. All known issues and bugs are tracked in the project's GitHub Issues and are addressed promptly by the maintainers.
-  - The project has a strong track record of catching issues during code review and automated testing, with no critical vulnerabilities discovered post-release.
+  - No security advisories have been published to date. Published advisories are listed on the [security advisories page](https://github.com/k8gb-io/k8gb/security/advisories), and other known issues and bugs are tracked in GitHub Issues.
 - OpenSSF Best Practices
-  - [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/k8gb-io/k8gb/badge)](https://securityscorecards.dev/viewer/?uri=github.com/k8gb-io/k8gb)
+  - [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/4866/badge)](https://www.bestpractices.dev/projects/4866)
+  - [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/k8gb-io/k8gb/badge)](https://scorecard.dev/viewer/?uri=github.com/k8gb-io/k8gb)
 - Case Studies
+  - Multicloud load balancing at Millennium bcp, described in the [CNCF case study](https://www.cncf.io/case-studies/millennium-bcp/).
   - Disaster Recovery for Financial Services
     A financial services company leverages k8gb for disaster recovery, ensuring that critical applications remain available even during data center failures. The k8gb failover mechanism automatically redirects traffic to backup clusters, maintaining business continuity. More in this KubeCon presentation: https://www.youtube.com/watch?v=U46hlF0Z3xs
 - Related Projects / Vendors
