@@ -71,3 +71,6 @@ trivy-*.html
 .trivy/
 # worktrees
 .worktrees/
+
+# lychee link-checker cache
+.lycheecache
