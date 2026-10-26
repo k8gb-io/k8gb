@@ -44,7 +44,7 @@ Below is the list of a maintainer's general responsibilities in addition to thos
 
 ## Project Lead
 
-The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The Project Lead for 2025-2026 is @ytsarev, as listed in our [CODEOWNERS](CODEOWNERS) file. @ytsarev was voted Project Lead for 2025-2026 through the election in https://github.com/k8gb-io/k8gb/issues/2210. 
+The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The Project Lead for 2025-2026 is @ytsarev. @ytsarev was voted Project Lead for 2025-2026 through the election in https://github.com/k8gb-io/k8gb/issues/2210. 
 
 ## Conflict Resolutions
 
