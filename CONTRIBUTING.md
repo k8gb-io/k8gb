@@ -96,7 +96,7 @@ Following is a rough outline for the contributor's workflow:
 ## Building from source
 
 k8gb is written in Go. The Go version and all library dependencies are pinned in [`go.mod`](https://github.com/k8gb-io/k8gb/blob/master/go.mod), and [`DEPENDENCY.md`](https://github.com/k8gb-io/k8gb/blob/master/DEPENDENCY.md) describes how dependencies are managed.
-The tools needed to build and test locally (Go, Git, Docker, kubectl, Helm and k3d) are listed in the [environment prerequisites](docs/local.md#environment-prerequisites) of the local playground guide.
+The tools needed to build and test locally (Go, yq v4, Git, Docker, kubectl, Helm and k3d) are listed in the [environment prerequisites](docs/local.md#environment-prerequisites) of the local playground guide.
 
 From the repository root:
 

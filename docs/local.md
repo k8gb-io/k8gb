@@ -26,6 +26,8 @@ For more user-centric targets in that makefile consult `make help`.
 
 - [Install **Go**](https://go.dev/dl/) — use the version pinned in [`go.mod`](https://github.com/k8gb-io/k8gb/blob/master/go.mod) (CI uses `go-version-file: ./go.mod`)
 
+- [Install **yq v4**](https://github.com/mikefarah/yq) (Mike Farah's implementation), required by `make test` to generate CRD manifests.
+
 - [Install **Git**](https://git-scm.com/downloads)
 
 - [Install **Docker**](https://docs.docker.com/get-docker/)
