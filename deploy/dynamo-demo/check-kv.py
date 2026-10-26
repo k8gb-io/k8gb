@@ -1,4 +1,4 @@
-"""Check local Dynamo KV placement with two simulated workers, via its HTTP API."""
+"""Check local Dynamo KV placement with two real CPU workers, via its HTTP API."""
 
 import json
 import time
@@ -15,6 +15,7 @@ def request(content, worker=None, query_only=False):
         "messages": [{"role": "user", "content": content}],
         "max_tokens": 1,
         "stream": True,
+        "stream_options": {"include_usage": True},
         "nvext": {
             "extra_fields": ["worker_id"],
             "annotations": ["query_instance_id:"] if query_only else [],
@@ -28,7 +29,8 @@ def request(content, worker=None, query_only=False):
         BASE + "/v1/chat/completions", json.dumps(payload).encode(), headers
     )
     selected = None
-    with urllib.request.urlopen(req, timeout=30) as response:
+    cached_tokens = None
+    with urllib.request.urlopen(req, timeout=180) as response:
         for line in response:
             if not line.startswith(b"data:"):
                 continue
@@ -40,9 +42,11 @@ def request(content, worker=None, query_only=False):
                 raise RuntimeError(chunk)
             ids = chunk.get("nvext", {}).get("worker_id", {})
             selected = ids.get("decode_worker_id") or ids.get("prefill_worker_id") or selected
+            details = (chunk.get("usage") or {}).get("prompt_tokens_details") or {}
+            cached_tokens = details.get("cached_tokens", cached_tokens)
     if selected is None:
         raise RuntimeError("Dynamo returned no worker identity")
-    return selected
+    return selected, cached_tokens
 
 
 def main():
@@ -57,17 +61,17 @@ def main():
 
     # Warm a different, long prefix on each worker. Only warm-up is pinned.
     nonce = uuid.uuid4().hex
-    prefixes = [f"{label}-{nonce} " * 128 for label in ("alpha", "bravo")]
+    prefixes = [f"{label}-{nonce} " * 64 for label in ("alpha", "bravo")]
     for prefix, worker in zip(prefixes, workers):
-        actual = request(prefix, worker=worker)
+        actual, _ = request(prefix, worker=worker)
         if actual != worker:
             raise RuntimeError(f"Warm-up pin ignored: expected {worker}, got {actual}")
 
-    deadline = time.monotonic() + 30
+    deadline = time.monotonic() + 60
     while True:
         # Query-only requests cannot accidentally warm the wrong worker while
         # waiting for asynchronous KV events. No affinity headers are supplied.
-        selected = [request(prefix, query_only=True) for prefix in prefixes]
+        selected = [request(prefix, query_only=True)[0] for prefix in prefixes]
         if selected == workers:
             break
         if time.monotonic() >= deadline:
@@ -75,11 +79,14 @@ def main():
         time.sleep(0.5)
 
     for label, prefix, worker in zip(("alpha", "bravo"), prefixes, workers):
-        actual = request(prefix)
-        if actual != worker:
-            raise RuntimeError(f"Unpinned {label} request selected {actual}, expected {worker}")
-        print(f"prefix={label} warm_worker={worker} unpinned_worker={actual}", flush=True)
-    print("PASS: local KV-aware placement with simulated cache state; no cross-DC routing.")
+        for _ in range(3):
+            actual, cached_tokens = request(prefix)
+            if actual != worker:
+                raise RuntimeError(f"Unpinned {label} request selected {actual}, expected {worker}")
+            if not cached_tokens:
+                raise RuntimeError(f"Unpinned {label} request reported no cached prompt tokens")
+        print(f"prefix={label} warm_worker={worker} unpinned_worker={actual} cached_tokens={cached_tokens}", flush=True)
+    print("PASS: local KV-aware placement with real CPU inference; no cross-DC routing.")
 
 
 if __name__ == "__main__":

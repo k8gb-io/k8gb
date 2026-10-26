@@ -195,9 +195,9 @@ make ai-inference-demo AI_DEMO_ACTION=logs
 
 See [AI Inference Resilience Demo](ai-inference-demo.md) for the full local and real-environment flow.
 
-For an opt-in NVIDIA Dynamo CPU simulation with regional KV-aware routing, see
-[Dynamo and k8gb](dynamo-demo.md). It reuses this local setup and is installed only
-by explicitly applying its example manifest.
+For an opt-in NVIDIA Dynamo CPU inference example with operator-managed DGDs
+and regional KV-aware routing, see [Dynamo and k8gb](dynamo-demo.md). It reuses
+this local setup; follow its image-build and operator-installation steps first.
 
 ## Sample demo
 
