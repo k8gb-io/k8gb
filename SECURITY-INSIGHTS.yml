@@ -182,4 +182,4 @@ repository:
         comment: |
           Scans the repository against the OSPS Baseline at Maturity Level 2
           weekly and on demand, and publishes the signed result to grc.store
-          (see .github/workflows/publish-results.yml).
+          (see .github/workflows/publish-to-grc-store.yml).
