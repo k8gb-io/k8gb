@@ -27,7 +27,41 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>October 14, 2026 #103</strong></summary>
+<details open><summary><strong>October 28, 2026 #104</strong></summary>
+
+## October 28, 2026 #104
+
+**Attendees**
+- [@elohmrow](https://github.com/elohmrow)
+
+**Backlog**
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**]() | [**On YouTube**]()
+
+**Agenda**
+
+- News
+  - [@itsfarhan](https://github.com/itsfarhan) is working hard on the [Security Slam Fall 2026: OSPS Baseline L2 work plan](https://github.com/k8gb-io/k8gb/issues/2563) ... let's help! Badges earned so far:
+    - [Cleaner, Chronicler and CRA Readiness](https://securityslam.com/slam26/participating-projects)
+- Community Contributions
+  - [@higgsboson1710](https://github.com/higgsboson1710) --> [docs: add AGENTS.md for CLOMonitor Agent Readiness](https://github.com/k8gb-io/k8gb/pull/2564)
+  - [@michalcukierman](https://github.com/michalcukierman) --> [fix: allow local delegation withdrawal while peers remain](https://github.com/k8gb-io/k8gb/pull/2560) and [fix: resolve application A records at the zone apex](https://github.com/k8gb-io/coredns-crd-plugin/pull/170)
+  - [k8gb-ui](https://github.com/steemax/k8gb-ui)
+- Other
+  - [external-dns has a new CRD](https://github.com/kubernetes-sigs/external-dns/blob/2abb229c77453b29273345443e636d2cc2d78103/config/crd/standard/dnsendpoints.externaldns.k8s.io.yaml)
+  - [PRs since last time](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aclosed+closed%3A%3E%40today-2w) 
+  - [Add opt-in NVIDIA Dynamo routing and failover demo](https://github.com/k8gb-io/k8gb/pull/2579)
+- KubeCon
+
+**Actions**
+
+**Nice-to-Haves**
+
+</details>
+
+<details><summary><strong>October 14, 2026 #103</strong></summary>
 
 ## October 14, 2026 #103
 
@@ -40,7 +74,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
-[**Zoom Recording**]() | [**On YouTube**]()
+[**Zoom Recording**](https://zoom.us/rec/share/bd8p3FWC4nvlsTtVFmQ1xed0cGWfq6cVjoiDkKjXgsl52uksETDNdT8ubt3etjQ_.e9XOx0FfFBmx3Vga) | [**On YouTube**](https://youtu.be/NtmiDRpjPT0)
 
 **Agenda**
 
