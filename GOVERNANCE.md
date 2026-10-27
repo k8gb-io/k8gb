@@ -42,6 +42,16 @@ Below is the list of a maintainer's general responsibilities in addition to thos
 - Ensures compliance with CNCF guidelines
 - Owns project infrastructure
 
+## Access to Project Resources
+
+The project's infrastructure is the [k8gb-io/k8gb](https://github.com/k8gb-io/k8gb) GitHub repository and its GitHub Actions workflows, which build, sign and publish releases.
+Maintainers hold one of two [GitHub repository roles](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/repository-roles-for-an-organization):
+
+- **Admin:** @k0da, @kuritka and @ytsarev. Full access to the repository, including its security settings and destructive actions such as deleting it.
+- **Maintain:** @donovanmuller, @jkremser, @abaguas and @elohmrow. They can manage most of the repository, but not its security settings or destructive actions.
+
+Both roles can merge pull requests and can create, update and delete the GitHub Actions secrets that the release workflows use, such as the cosign signing key described in [Signed releases](CONTRIBUTING.md#signed-releases).
+
 ## Project Lead
 
 The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The Project Lead for 2025-2026 is @ytsarev, as listed in our [CODEOWNERS](CODEOWNERS) file. @ytsarev was voted Project Lead for 2025-2026 through the election in https://github.com/k8gb-io/k8gb/issues/2210. 
