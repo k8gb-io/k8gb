@@ -1429,67 +1429,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#general-metrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        General metrics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="General metrics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#healthy_records" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        healthy_records
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ingress_hosts_per_status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ingress_hosts_per_status
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#custom-resource-specific-metrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Custom resource specific metrics
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metrics_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Metrics
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#opentracing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2850,67 +2789,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#general-metrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        General metrics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="General metrics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#healthy_records" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        healthy_records
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ingress_hosts_per_status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ingress_hosts_per_status
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#custom-resource-specific-metrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Custom resource specific metrics
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metrics_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Metrics
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#opentracing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2947,50 +2825,28 @@
 
 
 <h1 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h1>
-<p>K8GB generates <a href="https://prometheus.io/">Prometheus</a>-compatible metrics.
-Metrics endpoints are exposed via <code>-metrics</code> service in operator namespace and can be scraped by 3rd party tools:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nn">...</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http-metrics</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8383</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8383</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-metrics</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8686</span>
+<p>K8GB exposes <a href="https://prometheus.io/">Prometheus</a>-compatible metrics from the operator process on
+<code>k8gb.metricsAddress</code> (default <code>0.0.0.0:8080</code>, path <code>/metrics</code>).</p>
+<p>When <code>k8gb.exposeMetrics</code> or <code>k8gb.serviceMonitor.enabled</code> is set, the chart creates a
+ClusterIP Service named <code>k8gb-metrics</code> with a single port <code>metrics</code> derived from
+<code>k8gb.metricsAddress</code> (port <code>8080</code> by default):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8gb-metrics</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metrics</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8686</span>
 </code></pre></div>
-<p>Metrics can be also automatically discovered and monitored by <a href="https://github.com/coreos/prometheus-operator">Prometheus Operator</a> via automatically generated <a href="https://github.com/coreos/prometheus-operator#customresourcedefinitions">ServiceMonitor</a> CRDs , in case if <a href="https://github.com/coreos/prometheus-operator">Prometheus Operator</a>  is deployed into the cluster.</p>
-<h3 id="general-metrics">General metrics<a class="headerlink" href="#general-metrics" title="Permanent link">&para;</a></h3>
-<p><a href="https://book.kubebuilder.io/reference/metrics.html">controller-runtime</a> standard metrics, extended with K8GB operator-specific metrics listed below:</p>
-<h4 id="healthy_records"><code>healthy_records</code><a class="headerlink" href="#healthy_records" title="Permanent link">&para;</a></h4>
-<p>Number of healthy records observed by K8GB.</p>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># HELP k8gb_gslb_healthy_records Number of healthy records observed by K8GB.</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># TYPE k8gb_gslb_healthy_records gauge</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_healthy_records{name="test-gslb",namespace="test-gslb"} 6</span>
-</code></pre></div>
-<h4 id="ingress_hosts_per_status"><code>ingress_hosts_per_status</code><a class="headerlink" href="#ingress_hosts_per_status" title="Permanent link">&para;</a></h4>
-<p>Number of ingress hosts per status (NotFound, Healthy, Unhealthy), observed by K8GB.</p>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># HELP k8gb_gslb_ingress_hosts_per_status Number of managed hosts observed by K8GB.</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># TYPE k8gb_gslb_ingress_hosts_per_status gauge</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Healthy"} 1</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="NotFound"} 1</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="l l-Scalar l-Scalar-Plain">k8gb_gslb_ingress_hosts_per_status{name="test-gslb",namespace="test-gslb",status="Unhealthy"} 2</span>
-</code></pre></div>
-<p>Served on <code>0.0.0.0:8383/metrics</code> endpoint</p>
-<h3 id="custom-resource-specific-metrics">Custom resource specific metrics<a class="headerlink" href="#custom-resource-specific-metrics" title="Permanent link">&para;</a></h3>
-<p>Info metrics, automatically exposed by operator based on the number of the current instances of an operator's custom resources in the cluster.</p>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># HELP gslb_info Information about the Gslb custom resource.</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># TYPE gslb_info gauge</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="l l-Scalar l-Scalar-Plain">gslb_info{namespace="test-gslb",gslb="test-gslb"} 1</span>
-</code></pre></div>
-<p>Served on <code>0.0.0.0:8686/metrics</code> endpoint</p>
-<h2 id="metrics_1">Metrics<a class="headerlink" href="#metrics_1" title="Permanent link">&para;</a></h2>
-<p>The k8gb exposes several metrics to help you monitor the health and behavior.</p>
+<p>With <code>k8gb.serviceMonitor.enabled: true</code>, the chart also installs a
+<a href="https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor">ServiceMonitor</a> that scrapes the <code>metrics</code> port when
+<a href="https://github.com/prometheus-operator/prometheus-operator">Prometheus Operator</a> is present in the cluster.</p>
+<p>In addition to <a href="https://book.kubebuilder.io/reference/metrics.html">controller-runtime</a> standard metrics, k8gb
+registers the following application metrics
+(<code>controllers/providers/metrics/prometheus.go</code>):</p>
 <table>
 <thead>
 <tr>
@@ -3117,7 +2973,7 @@ Metrics endpoints are exposed via <code>-metrics</code> service in operator name
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="February 3, 2026 22:45:43 UTC">February 3, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 27, 2026 09:39:35 UTC">October 27, 2026</span>
   </span>
 
     
