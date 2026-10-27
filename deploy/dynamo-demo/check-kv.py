@@ -59,9 +59,10 @@ def main():
     if len(workers) != 2:
         raise RuntimeError(f"Expected two local workers, found {workers}")
 
-    # Warm a different, long prefix on each worker. Only warm-up is pinned.
+    # Warm distinct multi-block prefixes without a large CPU prefill.
+    # Only warm-up is pinned.
     nonce = uuid.uuid4().hex
-    prefixes = [f"{label}-{nonce} " * 64 for label in ("alpha", "bravo")]
+    prefixes = [f"{label}-{nonce} " * 16 for label in ("alpha", "bravo")]
     for prefix, worker in zip(prefixes, workers):
         actual, _ = request(prefix, worker=worker)
         if actual != worker:

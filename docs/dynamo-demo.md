@@ -52,8 +52,10 @@ including nginx ingress, k8gb and BIND9/EdgeDNS.
 
 Run the commands from the repository root. You need Docker, k3d, kubectl and
 Helm 3, plus the [local setup prerequisites](local.md#environment-prerequisites).
-Reserve at least 8 CPUs and 32 GiB of Docker VM memory for both regional stacks
-and the playground. Each of the four workers requests 4 GiB and can use up to
+Use at least 8 CPUs; 32 GiB of Docker VM memory is recommended for both regional
+stacks and the playground. The checks below also passed with 24 GiB, but that
+leaves little headroom for longer prompts or concurrent requests.
+Each of the four workers requests 4 GiB and can use up to
 6 GiB, including vLLM process overhead and a 512 MiB KV cache. CPU inference and
 the first model download take longer than the previous simulation; use the
 model-length and concurrency limits in the manifest.
@@ -224,9 +226,10 @@ kubectl --context k3d-test-gslb2 -n dynamo-demo exec -i deployment/dynamo-demo-f
   python3 - < deploy/dynamo-demo/check-kv.py
 ```
 
-The test warms a different long prefix on each of two workers, then checks that
-three requests per prefix **without worker pins or session-affinity headers**
-select the respective warm worker and report positive cached-prompt-token counts.
+The test warms a distinct prefix spanning multiple cache blocks on each worker,
+then checks that three requests per prefix **without worker pins or
+session-affinity headers** select the respective warm worker and report positive
+cached-prompt-token counts.
 Query-only probes wait for cache-state propagation without warming the wrong
 worker. Expect two matching worker IDs, cached-token counts and a `PASS` line per cluster.
 This verifies local routing over real vLLM KV-cache events, not cross-DC cache reuse.
@@ -305,12 +308,12 @@ Cuckoo-filter index.
 
 | Integration capability | Status in this demo | Scope and remaining work |
 | --- | --- | --- |
-| Regional DNS failover and failback | Acceptance scenario | k8gb changes the regional entry addresses when the primary serving endpoint becomes unavailable and recovers |
-| KV-aware worker selection within a region | CPU inference profile | Dynamo's local KV router selects vLLM workers holding warmed prefixes; verify with `check-kv.py` |
+| Regional DNS failover and failback | Validated with two local clusters | k8gb changes the regional entry addresses when the primary frontend becomes unavailable and recovers; real inference succeeds in the selected region |
+| KV-aware worker selection within a region | Validated in both regions | Dynamo's local KV router selects vLLM workers holding warmed prefixes; `check-kv.py` verifies worker identity and positive cached-token counts |
 | Cache visibility across regions | Planned | Deploy the upstream experimental [DC KV Relay](https://github.com/ai-dynamo/dynamo/blob/ee0120922eef6278a25fe94ad491f02aa8aa038e/docs/fern/pages/developer-guide/knowledge-base/modular-components/router/multi-dc-kv-routing.md) and connect its summaries to the upstream [Cuckoo-filter index](https://github.com/ai-dynamo/dynamo/blob/ee0120922eef6278a25fe94ad491f02aa8aa038e/lib/kv-router/src/indexer/cuckoo/README.md); neither is integrated here |
 | KV-aware request routing between regions | Planned; integration required | Connect cache lookup, region selection and request forwarding. The existing upstream [Global Router](https://github.com/ai-dynamo/dynamo/tree/ee0120922eef6278a25fe94ad491f02aa8aa038e/components/src/dynamo/global_router) selects configured pools using prompt length, latency targets and priority, without the relay's cache summaries |
 | Whole-region failure and WAN partition handling | Planned | Verify DNS entry failover and Dynamo's request-routing fallback independently, including stale remote cache state |
-| Real inference and cache-reuse performance | CPU inference implemented; performance comparison pending | Qwen weights are loaded by vLLM; measure actual cache reuse and time to first token separately |
+| Real inference and cache-reuse performance | CPU inference and cache reuse validated; performance comparison pending | Qwen weights are loaded by vLLM; measure the latency benefit and time to first token separately |
 
 The CKF producer packs four 16-bit fingerprints per bucket and publishes a snapshot
 followed by sequenced, absolute bucket updates. Consumers recover gaps from a new
@@ -367,19 +370,25 @@ DNS infrastructure, and leave the default local setup and core installation unch
 
 ## Validation scope
 
-Validated the operator-managed CPU profile on Linux ARM64 in a local kind
-cluster with Kubernetes 1.30.13, Dynamo operator/runtime 1.6.0 and vLLM 0.30.0:
+Validated the two-cluster walkthrough on Linux ARM64 in Colima on macOS, with
+8 CPUs, 24 GiB of VM memory, k3s v1.36.2-k3s1, k8gb v1.0.0, Dynamo
+operator/runtime 1.6.0 and vLLM 0.30.0:
 
-- The DGD reaches Ready with one frontend and two real CPU workers.
-- Non-streaming and streaming chat completions return generated text.
-- The KV-placement check selects both warmed workers without affinity headers
-  and reports positive cached-token counts on repeated requests.
-- Setting the frontend DGD replica count to zero withdraws its Service endpoints.
-  Restoring it serves chat completions again without restarting either worker.
+- Both DGDs reach Ready, each with one frontend and two real Qwen CPU workers.
+- Non-streaming and streaming chat completions through the global hostname
+  return generated text from the primary region.
+- In both regions, the KV-placement check selects the respective warmed worker
+  without affinity headers and reports positive cached-token counts.
+- Stopping the primary frontend changes both the client-visible ingress address
+  and the delegated BIND9 answer to the secondary. Non-streaming and streaming
+  inference then succeed there.
+- Restoring the primary returns HTTP traffic and BIND9 answers to that region.
+  All four workers retain their pod identities and restart counts throughout
+  the successful acceptance run.
 
-The x86-64 image base is published upstream but this profile has not been run on
-x86-64. The original simulation's two-cluster DNS results do not validate the
-new CPU profile: repeat the k3d DNS failover/failback acceptance steps above.
-This validation does not establish inference performance or a recovery-time SLO.
+The operator-managed CPU profile was also validated in a single Linux ARM64
+kind cluster with Kubernetes 1.30.13. The x86-64 image base is published upstream
+but this profile has not been run on x86-64. These checks do not establish
+inference performance or a recovery-time SLO.
 
 Cross-DC CKF routing, whole-region failure and WAN partitions remain future work.
