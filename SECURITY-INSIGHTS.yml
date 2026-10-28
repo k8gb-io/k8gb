@@ -1,7 +1,7 @@
 header:
   schema-version: 2.2.0
-  last-updated: '2026-10-23'
-  last-reviewed: '2026-10-23'
+  last-updated: '2026-10-25'
+  last-reviewed: '2026-10-25'
   url: https://raw.githubusercontent.com/k8gb-io/k8gb/master/SECURITY-INSIGHTS.yml
 
 project:
@@ -166,3 +166,20 @@ repository:
             location: https://scorecard.dev/viewer/?uri=github.com/k8gb-io/k8gb
             predicate-uri: https://github.com/ossf/scorecard
         comment: Runs on pushes to master, on branch protection changes, and weekly.
+      - name: OSPS Baseline Scanner
+        type: other
+        rulesets:
+          - osps-baseline
+        integration:
+          adhoc: true
+          ci: false
+          release: false
+        results:
+          adhoc:
+            name: OSPS Baseline evaluation
+            location: https://grc.store/targets/k8gb-io/k8gb
+            predicate-uri: https://github.com/revanite-io/pvtr-publish-results
+        comment: |
+          Scans the repository against the OSPS Baseline at Maturity Level 2
+          weekly and on demand, and publishes the signed result to grc.store
+          (see .github/workflows/publish-to-grc-store.yml).
