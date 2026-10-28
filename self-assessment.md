@@ -54,7 +54,7 @@ images are signed and nobody has tampered with them. The public key that can be 
 
 ## Overview
 
-k8gb is implemented using the Kubernetes operator pattern with a single CRD (Custom Resource Definition) to enable Global Load Balancing. k8gb provides independent GSLB (Global Server Load Balancing) capability to any Ingress or Service without a dedicated management cluster, instead relying on timeproof DNS (Domain Name System). k8gb has no single point of failure, and uses Kubernetes native application health checks (such as liveness and readiness probes) to update DNS records to aid in load balancing decisions.
+k8gb is implemented using the Kubernetes operator pattern, with a `Gslb` CRD (Custom Resource Definition) to enable Global Load Balancing and a `ZoneDelegation` CRD for dynamic zones. k8gb provides independent GSLB (Global Server Load Balancing) capability to any Ingress or Service without a dedicated management cluster, instead relying on timeproof DNS (Domain Name System). k8gb has no single point of failure, and uses Kubernetes native application health checks (such as liveness and readiness probes) to update DNS records to aid in load balancing decisions.
 
 ### Background
 
