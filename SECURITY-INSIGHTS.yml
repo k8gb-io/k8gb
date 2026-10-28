@@ -1,7 +1,7 @@
 header:
   schema-version: 2.2.0
-  last-updated: '2026-10-25'
-  last-reviewed: '2026-10-25'
+  last-updated: '2026-10-29'
+  last-reviewed: '2026-10-29'
   url: https://raw.githubusercontent.com/k8gb-io/k8gb/master/SECURITY-INSIGHTS.yml
 
 project:
@@ -47,6 +47,7 @@ project:
   documentation:
     quickstart-guide: https://www.k8gb.io/local/
     detailed-guide: https://www.k8gb.io/tutorials/
+    design: https://github.com/k8gb-io/k8gb/blob/master/ARCHITECTURE.md
     code-of-conduct: https://github.com/k8gb-io/k8gb/blob/master/CODE_OF_CONDUCT.md
     release-process: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#release-process
     signature-verification: https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#verification-instructions
