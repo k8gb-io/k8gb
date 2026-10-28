@@ -45,9 +45,12 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - <u>News</u>
   - [@itsfarhan](https://github.com/itsfarhan) is working hard on the [Security Slam Fall 2026: OSPS Baseline L2 work plan](https://github.com/k8gb-io/k8gb/issues/2563) ... let's help! Badges earned so far:
     - [Cleaner, Chronicler and CRA Readiness](https://securityslam.com/slam26/participating-projects)
+    - Next up: Inspector Badge - work started here [Update self-assessment.md to the OpenSSF self-assessment template](https://github.com/k8gb-io/k8gb/pull/2574)
   - Yury gave a greate talk at Sovereign Cloud Days last week: [Who Controls the Failover? Sovereign Global Traffic Management with Kubernetes](https://www.sovereign-cloud-days.eu/en/event/sovereign-cloud-days-2026-1/track/who-controls-the-failover-sovereign-global-traffic-management-with-kubernetes-63) ... arguing that a truly “sovereign” cloud also controls its own failover, and showing how k8gb can switch traffic between Kubernetes clusters using DNS without depending on any one cloud provider. Timely, given Google's recent "power event" ;)
 - <u>Community Contributions</u>
-  - [@higgsboson1710](https://github.com/higgsboson1710) --> [docs: add AGENTS.md for CLOMonitor Agent Readiness](https://github.com/k8gb-io/k8gb/pull/2564) ... fixes new "CLO Monitor - Agent Readiness" report
+  - CLO Monitor - Agent Readiness report
+    - [@higgsboson1710](https://github.com/higgsboson1710) --> [docs: add AGENTS.md for CLOMonitor Agent Readiness](https://github.com/k8gb-io/k8gb/pull/2564)
+    - [@itsfarhan](https://github.com/itsfarhan) --> [docs: publish llms.txt and Markdown pages for agent readiness](https://github.com/k8gb-io/k8gb/pull/2569)
   - [@michalcukierman](https://github.com/michalcukierman) ... these relate to per-application zone delegation
     - [fix: allow local delegation withdrawal while peers remain](https://github.com/k8gb-io/k8gb/pull/2560) ... fixes a bug in k8gb where a cluster leaving a dynamic zone could have its ZoneDelegation held in a terminating state by peers that were still serving the zone, which blocked it from rejoining under the same name. With the fix, the cluster can withdraw on its own once the parent DNS confirms its NS and glue records are gone.
     - [fix: resolve application A records at the zone apex](https://github.com/k8gb-io/coredns-crd-plugin/pull/170) ... fixes the CoreDNS plugin returning empty answers to A queries for a zone’s apex, which broke per-application delegation where the app hostname is itself the delegated zone (e.g. project.edge.example.com). Those queries now resolve to the app’s healthy IP addresses.
