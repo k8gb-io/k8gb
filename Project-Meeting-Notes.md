@@ -40,7 +40,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
-[**Zoom Recording**]() | [**On YouTube**]()
+[**Zoom Recording**](https://zoom.us/rec/share/CIAvF_a5PcTM_wIiqHHStqIkRw1dahXiapG-dCQ37qc_P__o9E5CiUPLpeB_87N0.FwGqkRzJYEstJT-S) | [**On YouTube**](https://youtu.be/RkXa8utL6Q0)
 
 **Agenda**
 
