@@ -6,6 +6,7 @@
 - [Reporting issues](#reporting-issues)
 - [Escalating to the CRA steward](#escalating-to-the-cra-steward)
 - [Contribution flow](#contribution-flow)
+- [Building from source](#building-from-source)
 - [Local setup](#local-setup)
   - [Deploy k8gb locally](#deploy-k8gb-locally)
   - [Upgrade k8gb to local candidate](#upgrade-k8gb-to-local-candidate)
@@ -53,7 +54,19 @@ Another great way to get help is to attend the community meetings. Community mee
 ## Reporting issues
 
 Reporting bugs is one of the best ways to contribute.
-Feel free to open an issue describing your problem or question.
+Before opening an issue, search the [existing issues](https://github.com/k8gb-io/k8gb/issues) to see whether the problem has already been reported.
+If it hasn't, [open a new issue](https://github.com/k8gb-io/k8gb/issues/new) and include:
+
+- the k8gb version (Helm chart and app version)
+- the Kubernetes version and distribution, and how many clusters are involved
+- the DNS provider, for example Route53, Infoblox or Cloudflare
+- the `Gslb` resource and Helm values involved, with any secrets removed
+- the k8gb controller logs, for example `kubectl logs -n <namespace> -l name=k8gb`
+- the steps to reproduce, what you expected to happen, and what happened instead
+
+Questions are welcome too, as an issue or in the channels listed under [Getting help](#getting-help).
+
+Please don't report security vulnerabilities in public issues. Follow [SECURITY.md](SECURITY.md) instead.
 
 ## Escalating to the CRA steward
 
@@ -79,6 +92,18 @@ Following is a rough outline for the contributor's workflow:
 - Submit a pull request to k8gb-io/k8gb GitHub repository.
 - Resolve review comments.
 - PR must receive an "LGTM" approval from at least one maintainer listed in the `CODEOWNERS` file.
+
+## Building from source
+
+k8gb is written in Go. The Go version and all library dependencies are pinned in [`go.mod`](https://github.com/k8gb-io/k8gb/blob/master/go.mod), and [`DEPENDENCY.md`](https://github.com/k8gb-io/k8gb/blob/master/DEPENDENCY.md) describes how dependencies are managed.
+The tools needed to build and test locally (Go, yq v4, Git, Docker, kubectl, Helm and k3d) are listed in the [environment prerequisites](docs/local.md#environment-prerequisites) of the local playground guide.
+
+From the repository root:
+
+- `make test` generates code and CRD manifests and runs the unit tests.
+- `make lint` installs the pinned golangci-lint version and runs it.
+- `make release-images` builds the k8gb binaries and container image locally with GoReleaser, as a snapshot that publishes nothing.
+- `make upgrade-candidate` builds an image from your working tree and deploys it to the local test clusters, see [Local setup](#local-setup).
 
 ## Local setup
 
