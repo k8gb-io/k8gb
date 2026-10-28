@@ -2481,7 +2481,9 @@ ______________________________________________________________________
 
 ## Environment prerequisites
 
-- [Install **Go**](https://go.dev/dl/) — use the version pinned in [`go.mod`](https://github.com/k8gb-io/k8gb/blob/master/go.mod) (currently `1.27.1`; CI uses `go-version-file: ./go.mod`)
+- [Install **Go**](https://go.dev/dl/) — use the version pinned in [`go.mod`](https://github.com/k8gb-io/k8gb/blob/master/go.mod) (CI uses `go-version-file: ./go.mod`)
+
+- [Install **yq v4**](https://github.com/mikefarah/yq) (Mike Farah's implementation), required by `make test` to generate CRD manifests.
 
 - [Install **Git**](https://git-scm.com/downloads)
 
@@ -4794,6 +4796,7 @@ The `HTTPS_PROXY` environment variable should contain the address of the proxy. 
 - [Reporting issues](#reporting-issues)
 - [Escalating to the CRA steward](#escalating-to-the-cra-steward)
 - [Contribution flow](#contribution-flow)
+- [Building from source](#building-from-source)
 - [Local setup](#local-setup)
 - [Deploy k8gb locally](#deploy-k8gb-locally)
 - [Upgrade k8gb to local candidate](#upgrade-k8gb-to-local-candidate)
@@ -4827,7 +4830,7 @@ k8gb is licensed under [Apache 2 License](https://github.com/k8gb-io/k8gb/blob/m
 ## Getting started
 
 - Fork the repository on GitHub
-- See the [local playground guide](https://www.k8gb.io/latest/CONTRIBUTING/docs/local.md) for local dev environment setup
+- See the [local playground guide](https://www.k8gb.io/latest/local/index.md) for local dev environment setup
 
 ## Getting help
 
@@ -4837,7 +4840,18 @@ Another great way to get help is to attend the community meetings. Community mee
 
 ## Reporting issues
 
-Reporting bugs is one of the best ways to contribute. Feel free to open an issue describing your problem or question.
+Reporting bugs is one of the best ways to contribute. Before opening an issue, search the [existing issues](https://github.com/k8gb-io/k8gb/issues) to see whether the problem has already been reported. If it hasn't, [open a new issue](https://github.com/k8gb-io/k8gb/issues/new) and include:
+
+- the k8gb version (Helm chart and app version)
+- the Kubernetes version and distribution, and how many clusters are involved
+- the DNS provider, for example Route53, Infoblox or Cloudflare
+- the `Gslb` resource and Helm values involved, with any secrets removed
+- the k8gb controller logs, for example `kubectl logs -n <namespace> -l name=k8gb`
+- the steps to reproduce, what you expected to happen, and what happened instead
+
+Questions are welcome too, as an issue or in the channels listed under [Getting help](#getting-help).
+
+Please don't report security vulnerabilities in public issues. Follow [SECURITY.md](https://www.k8gb.io/latest/SECURITY/index.md) instead.
 
 ## Escalating to the CRA steward
 
@@ -4861,6 +4875,17 @@ Following is a rough outline for the contributor's workflow:
 - Submit a pull request to k8gb-io/k8gb GitHub repository.
 - Resolve review comments.
 - PR must receive an "LGTM" approval from at least one maintainer listed in the `CODEOWNERS` file.
+
+## Building from source
+
+k8gb is written in Go. The Go version and all library dependencies are pinned in [`go.mod`](https://github.com/k8gb-io/k8gb/blob/master/go.mod), and [`DEPENDENCY.md`](https://github.com/k8gb-io/k8gb/blob/master/DEPENDENCY.md) describes how dependencies are managed. The tools needed to build and test locally (Go, yq v4, Git, Docker, kubectl, Helm and k3d) are listed in the [environment prerequisites](https://www.k8gb.io/latest/local/#environment-prerequisites) of the local playground guide.
+
+From the repository root:
+
+- `make test` generates code and CRD manifests and runs the unit tests.
+- `make lint` installs the pinned golangci-lint version and runs it.
+- `make release-images` builds the k8gb binaries and container image locally with GoReleaser, as a snapshot that publishes nothing.
+- `make upgrade-candidate` builds an image from your working tree and deploys it to the local test clusters, see [Local setup](#local-setup).
 
 ## Local setup
 
@@ -4945,7 +4970,7 @@ make terratest
 
 ## Metrics
 
-More info about k8gb metrics can be found in the [metrics.md](https://www.k8gb.io/latest/CONTRIBUTING/docs/metrics.md) document. If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the `make deploy-prometheus` command.
+More info about k8gb metrics can be found in the [metrics.md](https://www.k8gb.io/latest/metrics/index.md) document. If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the `make deploy-prometheus` command.
 
 The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:
 

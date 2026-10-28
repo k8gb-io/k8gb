@@ -2085,6 +2085,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#building-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building from source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#local-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3305,6 +3316,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#building-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building from source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#local-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3754,6 +3776,7 @@
 <li><a href="#reporting-issues">Reporting issues</a></li>
 <li><a href="#escalating-to-the-cra-steward">Escalating to the CRA steward</a></li>
 <li><a href="#contribution-flow">Contribution flow</a></li>
+<li><a href="#building-from-source">Building from source</a></li>
 <li><a href="#local-setup">Local setup</a></li>
 <li><a href="#deploy-k8gb-locally">Deploy k8gb locally</a></li>
 <li><a href="#upgrade-k8gb-to-local-candidate">Upgrade k8gb to local candidate</a></li>
@@ -3790,7 +3813,7 @@ This document outlines the resources and guidelines necessary to follow by contr
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Fork the repository on GitHub</li>
-<li>See the <a href="docs/local.md">local playground guide</a> for local dev environment setup</li>
+<li>See the <a href="../local/">local playground guide</a> for local dev environment setup</li>
 </ul>
 <h2 id="getting-help">Getting help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
 <p>Feel free to ask for help and join the discussions at <a href="https://github.com/k8gb-io/k8gb/discussions">k8gb community discussions forum</a>.
@@ -3799,7 +3822,18 @@ and we can also actively monitoring <a href="https://kubernetes.slack.com/archiv
 <p>Another great way to get help is to attend the community meetings. Community meetings take place every other Wednesday from 13:00 CET to 13:30 CET <a href="https://zoom-lfx.platform.linuxfoundation.org/meetings/k8gb?view=month">calendar</a>. You can join the <a href="https://zoom-lfx.platform.linuxfoundation.org/meeting/92572060749?password=645f8346-1952-44fa-bd9b-45208260fc10">Zoom Meeting</a>.</p>
 <h2 id="reporting-issues">Reporting issues<a class="headerlink" href="#reporting-issues" title="Permanent link">&para;</a></h2>
 <p>Reporting bugs is one of the best ways to contribute.
-Feel free to open an issue describing your problem or question.</p>
+Before opening an issue, search the <a href="https://github.com/k8gb-io/k8gb/issues">existing issues</a> to see whether the problem has already been reported.
+If it hasn't, <a href="https://github.com/k8gb-io/k8gb/issues/new">open a new issue</a> and include:</p>
+<ul>
+<li>the k8gb version (Helm chart and app version)</li>
+<li>the Kubernetes version and distribution, and how many clusters are involved</li>
+<li>the DNS provider, for example Route53, Infoblox or Cloudflare</li>
+<li>the <code>Gslb</code> resource and Helm values involved, with any secrets removed</li>
+<li>the k8gb controller logs, for example <code>kubectl logs -n &lt;namespace&gt; -l name=k8gb</code></li>
+<li>the steps to reproduce, what you expected to happen, and what happened instead</li>
+</ul>
+<p>Questions are welcome too, as an issue or in the channels listed under <a href="#getting-help">Getting help</a>.</p>
+<p>Please don't report security vulnerabilities in public issues. Follow <a href="../SECURITY/">SECURITY.md</a> instead.</p>
 <h2 id="escalating-to-the-cra-steward">Escalating to the CRA steward<a class="headerlink" href="#escalating-to-the-cra-steward" title="Permanent link">&para;</a></h2>
 <p>k8gb is supported under the Linux Foundation CRA stewardship framework, as stated in <a href="../SECURITY/">SECURITY.md</a>.
 Maintainers escalate two kinds of event to the Linux Foundation steward at <a href="mailto:steward@linuxfoundation.org">steward@linuxfoundation.org</a>:</p>
@@ -3821,6 +3855,16 @@ Remediation never waits on the decision to escalate.</p>
 <li>Submit a pull request to k8gb-io/k8gb GitHub repository.</li>
 <li>Resolve review comments.</li>
 <li>PR must receive an "LGTM" approval from at least one maintainer listed in the <code>CODEOWNERS</code> file.</li>
+</ul>
+<h2 id="building-from-source">Building from source<a class="headerlink" href="#building-from-source" title="Permanent link">&para;</a></h2>
+<p>k8gb is written in Go. The Go version and all library dependencies are pinned in <a href="https://github.com/k8gb-io/k8gb/blob/master/go.mod"><code>go.mod</code></a>, and <a href="https://github.com/k8gb-io/k8gb/blob/master/DEPENDENCY.md"><code>DEPENDENCY.md</code></a> describes how dependencies are managed.
+The tools needed to build and test locally (Go, yq v4, Git, Docker, kubectl, Helm and k3d) are listed in the <a href="../local/#environment-prerequisites">environment prerequisites</a> of the local playground guide.</p>
+<p>From the repository root:</p>
+<ul>
+<li><code>make test</code> generates code and CRD manifests and runs the unit tests.</li>
+<li><code>make lint</code> installs the pinned golangci-lint version and runs it.</li>
+<li><code>make release-images</code> builds the k8gb binaries and container image locally with GoReleaser, as a snapshot that publishes nothing.</li>
+<li><code>make upgrade-candidate</code> builds an image from your working tree and deploys it to the local test clusters, see <a href="#local-setup">Local setup</a>.</li>
 </ul>
 <h2 id="local-setup">Local setup<a class="headerlink" href="#local-setup" title="Permanent link">&para;</a></h2>
 <h3 id="deploy-k8gb-locally">Deploy k8gb locally<a class="headerlink" href="#deploy-k8gb-locally" title="Permanent link">&para;</a></h3>
@@ -3891,7 +3935,7 @@ There is a dedicated make target available for Goland:</p>
 </li>
 </ol>
 <h2 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h2>
-<p>More info about k8gb metrics can be found in the <a href="docs/metrics.md">metrics.md</a> document.
+<p>More info about k8gb metrics can be found in the <a href="../metrics/">metrics.md</a> document.
 If you need to check and query the k8gb metrics locally, you can install a Prometheus in the local clusters using the <code>make deploy-prometheus</code> command.</p>
 <p>The deployed Prometheus scrapes metrics from the dedicated k8gb operator endpoint and makes them accessible via Prometheus web UI:</p>
 <ul>
@@ -4228,7 +4272,7 @@ as part of the release. These files follows this naming pattern:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 24, 2026 19:42:30 UTC">October 24, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 28, 2026 15:39:03 UTC">October 28, 2026</span>
   </span>
 
     
