@@ -1,0 +1,323 @@
+# Local playground for testing and development
+
+- [Environment prerequisites](#environment-prerequisites)
+- [Running project locally](#running-project-locally)
+- [Verify installation](#verify-installation)
+- [Run integration tests](#run-integration-tests)
+- [Cleaning](#cleaning)
+- [AI inference resilience demo](#ai-inference-resilience-demo)
+- [Sample demo](#sample-demo)
+- [Multi-Service Ingress](#multi-service-ingress)
+- [Round Robin](#round-robin)
+- [Failover](#failover)
+
+______________________________________________________________________
+
+**NOTE**
+
+This tutorial relies on some makefile targets, to be able to fully understand what's happening under the covers, check the Makefile [source code](https://github.com/k8gb-io/k8gb/blob/master/Makefile). Or you may want to run a target first with `-n` switch that will print what it is going to do (example: `make -n test-round-robin`). For more user-centric targets in that makefile consult `make help`.
+
+______________________________________________________________________
+
+## Environment prerequisites
+
+- [Install **Go**](https://go.dev/dl/) — use the version pinned in [`go.mod`](https://github.com/k8gb-io/k8gb/blob/master/go.mod) (currently `1.27.1`; CI uses `go-version-file: ./go.mod`)
+
+- [Install **Git**](https://git-scm.com/downloads)
+
+- [Install **Docker**](https://docs.docker.com/get-docker/)
+
+  > Ensure you are able to push/pull from your docker registry
+
+> To run multiple clusters, reserve 8GB of memory\*
+>
+> *\* above screenshot is provided for **Docker for Mac**, options for other Docker distributions may vary*
+
+- [install **kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to operate k8s clusters
+- [install **helm3**](https://helm.sh/docs/intro/install/) to deploy k8gb and related test workloads
+- [install **k3d**](https://k3d.io/#installation) to run local [k3s](https://k3s.io/) clusters (minimum v5.3.0 version is required)
+- Install **GNU coreutils** for `timeout`, used to bound image imports. It is included in most Linux distributions; on macOS, run `brew install coreutils` to provide `gtimeout`.
+- [install **golangci-lint**](https://golangci-lint.run/docs/welcome/install/) for code quality checks
+
+## Running project locally
+
+To spin-up a local environment using two k3s clusters and deploy a test application to both clusters, execute the command below:
+
+```
+make deploy-full-local-setup
+```
+
+By default, local setup also applies a small set of legacy `k8gb.absa.oss/v1beta1` migration demo resources on each local test cluster. The examples reuse workloads from the standard setup and cover referenced Ingresses, embedded Ingress migration, and annotation-sensitive LoadBalancer Service reconciliation. The setup prints legacy/canonical manifests so you can see migration output immediately.
+
+The Service examples share one LoadBalancer Service backed by the existing `multiservice-blue` pods:
+
+- `legacy-service-runtime-demo` remains in legacy runtime mode.
+- `legacy-service-migration-demo` is migrated to `k8gb.io/v1beta1`.
+
+Verify that both paths retain `k8gb.io/hostname` and reconcile a `DNSEndpoint`:
+
+```
+kubectl get gslb.k8gb.absa.oss -n test-gslb legacy-service-runtime-demo \
+  -o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}'
+kubectl get dnsendpoint -n test-gslb legacy-service-runtime-demo
+
+kubectl get gslb.k8gb.io -n test-gslb legacy-service-migration-demo \
+  -o jsonpath='{.metadata.annotations.k8gb\.io/hostname}{" / "}{.status.hosts}{"\n"}'
+kubectl get dnsendpoint -n test-gslb legacy-service-migration-demo
+```
+
+If you want to skip this demo output:
+
+```
+make deploy-full-local-setup SHOW_LEGACY_MIGRATION_DEMO=false
+```
+
+## Verify installation
+
+If local setup runs well, check if clusters are correctly installed
+
+```
+kubectl cluster-info --context k3d-edgedns && kubectl cluster-info --context k3d-test-gslb1 && kubectl cluster-info --context k3d-test-gslb2
+```
+
+Cluster [test-gslb1](https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb1.yaml) is exposing external DNS on default port `:5053` while [test-gslb2](https://github.com/k8gb-io/k8gb/tree/master/k3d/test-gslb2.yaml) on port `:5054`.
+
+Cluster [edgedns](https://github.com/k8gb-io/k8gb/tree/master/k3d/edge-dns.yaml) runs BIND and acts as EdgeDNS holding Delegated Zone for out test setup and answers on port `:1053`.
+
+```
+dig @localhost -p 1053 roundrobin.cloud.example.com +short +tcp
+```
+
+Should return ***two A records*** from both clusters (IP addresses and order may differ):
+
+```
+172.20.0.2
+172.20.0.5
+172.20.0.4
+172.20.0.6
+```
+
+You can verify that correct IP addresses of all the nodes in both clusters were populated:
+
+```
+for c in k3d-test-gslb{1,2}; do kubectl get no -ocustom-columns="NAME:.metadata.name,IP:status.addresses[0].address" --context $c; done
+```
+
+Returns a result similar to:
+
+```
+NAME                      IP
+k3d-test-gslb1-agent-0    172.20.0.2
+k3d-test-gslb1-server-0   172.20.0.4
+NAME                      IP
+k3d-test-gslb2-server-0   172.20.0.6
+k3d-test-gslb2-agent-0    172.20.0.5
+```
+
+Or you can ask specific CoreDNS instance for its local targets:
+
+```
+dig -p 5053 @localhost localtargets-roundrobin.cloud.example.com && \
+dig -p 5054 @localhost localtargets-roundrobin.cloud.example.com
+```
+
+As expected result you should see **two A records** divided between both clusters.
+
+```
+...
+...
+;; ANSWER SECTION:
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.4
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.2
+...
+...
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.5
+localtargets-roundrobin.cloud.example.com. 30 IN A 172.20.0.6
+```
+
+Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top. Run following command and check if you get two json responses.
+
+```
+curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H "Host:roundrobin.cloud.example.com"
+```
+
+The local setup also deploys small multi-service Ingresses backed by two NGINX services and canonical `k8gb.io/v1beta1` GSLBs using both service health policies.
+
+```
+curl localhost:80/blue -H "Host:multiservice-all.cloud.example.com"
+curl localhost:80/green -H "Host:multiservice-any.cloud.example.com"
+kubectl --context k3d-test-gslb1 -n test-gslb get gslb \
+  multiservice-gslb-all multiservice-gslb-any \
+  -o custom-columns=NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+```
+
+## Run integration tests
+
+There is wide range of scenarios which **GSLB** provides and all of them are covered within [tests](https://github.com/k8gb-io/k8gb/tree/master/terratest). To check whether everything is running properly execute [terratest](https://terratest.gruntwork.io/) :
+
+```
+make terratest
+```
+
+## Cleaning
+
+Clean up your local development clusters with
+
+```
+make destroy-full-local-setup
+```
+
+## AI inference resilience demo
+
+The local setup can also deploy a lightweight Ollama inference endpoint to demonstrate k8gb failover for AI traffic:
+
+```
+make deploy-full-local-setup FULL_LOCAL_SETUP_WITH_AI_DEMO=true
+```
+
+If the local setup is already running:
+
+```
+make ai-inference-demo AI_DEMO_ACTION=deploy
+make ai-inference-demo AI_DEMO_ACTION=probe
+make ai-inference-demo AI_DEMO_ACTION=failover
+make ai-inference-demo AI_DEMO_ACTION=probe
+make ai-inference-demo AI_DEMO_ACTION=failback
+```
+
+The demo caches the downloaded model in a PVC, so failback does not re-download the model. If model startup is slow, inspect progress with:
+
+```
+make ai-inference-demo AI_DEMO_ACTION=logs
+```
+
+See [AI Inference Resilience Demo](https://www.k8gb.io/latest/ai-inference-demo/index.md) for the full local and real-environment flow.
+
+## Sample demo
+
+### Multi-Service Ingress
+
+`multiservice-all.cloud.example.com` and `multiservice-any.cloud.example.com` both route `/blue` and `/green` to separate Services. The `All` GSLB requires both Services to be healthy, while the `Any` GSLB remains healthy as long as at least one backing Service is healthy.
+
+```
+kubectl --context k3d-test-gslb1 -n test-gslb scale deploy multiservice-green --replicas=0
+kubectl --context k3d-test-gslb1 -n test-gslb get gslb \
+  multiservice-gslb-all multiservice-gslb-any \
+  -o custom-columns=NAME:.metadata.name,POLICY:.spec.serviceHealthPolicy,HEALTH:.status.serviceHealth
+kubectl --context k3d-test-gslb1 -n test-gslb scale deploy multiservice-green --replicas=1
+```
+
+### Round Robin
+
+Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top, where each cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - roundrobin.cloud.example.com` and depending on the region, podinfo will return **us** or **eu**. In the current round robin implementation IP addresses are randomly picked. See [Gslb manifest with round robin strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_roundrobin_ingress.yaml)
+
+Try to run the following command several times and watch the `message` field.
+
+```
+make test-round-robin
+```
+
+As expected result you should see podinfo message changing
+
+```
+{
+  "hostname": "frontend-podinfo-856bb46677-8p45m",
+  ...
+  "message": "us",
+  ...
+}
+```
+
+```
+{
+  "hostname": "frontend-podinfo-856bb46677-8p45m",
+  ...
+  "message": "eu",
+  ...
+}
+```
+
+### Failover
+
+Both clusters have [podinfo](https://github.com/stefanprodan/podinfo) installed on the top where each cluster has been tagged to serve a different region. In this demo we will hit podinfo by `wget -qO - failover.cloud.example.com` and depending on whether podinfo is running inside the cluster it returns only **eu** or **us**. See [Gslb manifest with failover strategy](https://github.com/k8gb-io/k8gb/tree/master/deploy/gslb/k8gb.io_v1beta1_gslb_cr_failover_ingress.yaml)
+
+Switch GSLB to failover mode:
+
+```
+make init-failover
+```
+
+Now both clusters are running in failover mode and podinfo is running on both of them. Run several times command below and watch `message` field.
+
+```
+make test-failover
+```
+
+You will see only **eu** podinfo is responsive:
+
+```
+{
+  "hostname": "frontend-podinfo-856bb46677-8p45m",
+  ...
+  "message": "eu",
+  ...
+}
+```
+
+Stop podinfo on **current (eu)** cluster:
+
+```
+make stop-test-app
+```
+
+Several times hit application again
+
+```
+make test-failover
+```
+
+As expected result you should see only podinfo from **second cluster (us)** is responding:
+
+```
+{
+  "hostname": "frontend-podinfo-856bb46677-v5nll",
+  ...
+  "message": "us",
+  ...
+}
+```
+
+It might happen that podinfo will be unavailable for a while due to [DNS sync interval](https://github.com/k8gb-io/k8gb/pull/81) and default k8gb DNS TTL of 30 seconds
+
+```
+wget: server returned error: HTTP/1.1 503 Service Temporarily Unavailable
+```
+
+Start podinfo again on **current (eu)** cluster:
+
+```
+make start-test-app
+```
+
+and hit several times hit podinfo:
+
+```
+make test-failover
+```
+
+After DNS sync interval is over **eu** will be back
+
+```
+{
+  "hostname": "frontend-podinfo-6945c9ddd7-xksrc",
+  ...
+  "message": "eu",
+  ...
+}
+```
+
+Optionally you can switch GSLB back to round-robin mode
+
+```
+make init-round-robin
+```

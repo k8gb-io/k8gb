@@ -1,0 +1,90 @@
+# Integration with Liqo
+
+You can provide powerful global multi-cluster capabilities by combining k8gb and [liqo.io](https://docs.liqo.io).
+
+In this tutorial, you will learn how to leverage Liqo and K8GB to deploy and expose a multi-cluster application through a *global ingress*. More in detail, this enables improved load balancing and distribution of the external traffic towards the application replicated across multiple clusters.
+
+Liqo will globally schedule workloads and provide east-west connectivity, while K8GB will globally balance user traffic providing north-south connectivity over the multi-cluster and/or multi-provider environment.
+
+The figure below outlines the high-level scenario, with a client consuming an application from either cluster 1 (e.g., located in EU) or cluster 2 (e.g., located in the US), based on the endpoint returned by the DNS server.
+
+## Setup Environment
+
+The commands below assume k8gb and Liqo 1.x are installed in both clusters. See [Local playground for testing and development](https://www.k8gb.io/latest/local/index.md) for k8gb setup and the [Liqo installation guide](https://docs.liqo.io/en/stable/installation/install.html) for Liqo. Use a `liqoctl` version that matches the installed Liqo version.
+
+The Liqo [global-ingress example](https://github.com/liqotech/liqo/tree/master/examples/global-ingress) (`examples/global-ingress/setup.sh`) can create the k3d clusters used by the k8gb playground.
+
+After the script finishes, export kubeconfigs (names match the Liqo example clusters):
+
+```
+export KUBECONFIG_DNS=$(k3d kubeconfig write edgedns)
+export KUBECONFIG=$(k3d kubeconfig write gslb-eu)
+export KUBECONFIG_US=$(k3d kubeconfig write gslb-us)
+```
+
+## Peer the clusters
+
+To proceed, establish a peering from the *gslb-eu* cluster (consumer) to the *gslb-us* cluster (provider) with `liqoctl peer`:
+
+```
+liqoctl peer --kubeconfig "$KUBECONFIG" --remote-kubeconfig "$KUBECONFIG_US"
+```
+
+`liqoctl` needs the kubeconfigs of both clusters: it applies resources on both sides and connects them. See the [Liqo peering docs](https://docs.liqo.io/en/stable/usage/peer.html) for details.
+
+When the command returns successfully, check the peering status:
+
+```
+kubectl get foreignclusters
+kubectl get node --selector=liqo.io/type=virtual-node
+```
+
+## Deploy an application
+
+First, create a hosting namespace in the *gslb-eu* cluster, and offload it to the remote cluster through Liqo ([namespace offloading](https://docs.liqo.io/en/latest/usage/namespace-offloading.html)):
+
+```
+kubectl create namespace podinfo
+liqoctl offload namespace podinfo --namespace-mapping-strategy EnforceSameName
+```
+
+At this point, it is possible to deploy the *podinfo* helm chart in the `podinfo` namespace:
+
+```
+helm upgrade --install podinfo --namespace podinfo podinfo/podinfo \
+    -f https://raw.githubusercontent.com/liqotech/liqo/master/examples/global-ingress/manifests/values/podinfo.yaml
+```
+
+This chart creates a *Deployment* with a *custom affinity* to ensure that the two frontend replicas are scheduled on different nodes and clusters:
+
+```
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node-role.kubernetes.io/control-plane
+          operator: DoesNotExist
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+          - podinfo
+      topologyKey: "kubernetes.io/hostname"
+```
+
+Additionally, it creates a *Gslb* resource configured to distribute the traffic across the different clusters. The application is an HTTP service, you can contact it using the *curl* command. Use the `-v` option to understand which of the nodes is being targeted.
+
+You need to use the DNS server in order to resolve the hostname to the IP address of the service. To this end, create a pod in one of the clusters (it does not matter which one) overriding its DNS configuration.
+
+```
+HOSTNAME="liqo.cloud.example.com"
+K8GB_COREDNS_IP=$(kubectl get svc k8gb-coredns -n k8gb -o custom-columns='IP:spec.clusterIP' --no-headers)
+
+kubectl run -it --rm curl --restart=Never --image=curlimages/curl:8.21.0 --command \
+    --overrides "{\"spec\":{\"dnsConfig\":{\"nameservers\":[\"${K8GB_COREDNS_IP}\"]},\"dnsPolicy\":\"None\"}}" \
+    -- curl "$HOSTNAME" -v
+```

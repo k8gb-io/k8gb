@@ -1,0 +1,74 @@
+# K8GB - Kubernetes Global Balancer
+
+> Cloud native global load balancing solution for Kubernetes
+
+k8gb is a cloud native Global Server Load Balancing (GSLB) solution for Kubernetes. It is a Kubernetes operator that reconciles Gslb resources, updates DNS through ExternalDNS and DNS provider integrations, and serves authoritative answers through an embedded CoreDNS instance, so one hostname resolves to healthy clusters across regions.
+
+## Documentation
+
+- [Home](https://www.k8gb.io/latest/index.md)
+- [Getting Started](https://www.k8gb.io/latest/intro/index.md)
+- [Installation & Configuration](https://www.k8gb.io/latest/tutorials/index.md)
+- [Components](https://www.k8gb.io/latest/components/index.md)
+- [Load Balancing Strategy](https://www.k8gb.io/latest/strategy/index.md)
+
+## DNS Providers
+
+- [AWS Route53](https://www.k8gb.io/latest/deploy_route53/index.md)
+- [Azure DNS](https://www.k8gb.io/latest/deploy_azuredns/index.md)
+- [Google Cloud DNS](https://www.k8gb.io/latest/provider_gcp/index.md)
+- [Infoblox](https://www.k8gb.io/latest/deploy_infoblox/index.md)
+- [NS1](https://www.k8gb.io/latest/deploy_ns1/index.md)
+- [Windows DNS](https://www.k8gb.io/latest/deploy_windowsdns/index.md)
+- [Cloudflare](https://www.k8gb.io/latest/deploy_cloudflare/index.md)
+- [RFC2136/Bind9](https://www.k8gb.io/latest/provider_rfc2136/index.md)
+
+## Configuration
+
+- [Resource References](https://www.k8gb.io/latest/resource_ref/index.md)
+- [Address Discovery](https://www.k8gb.io/latest/address_discovery/index.md)
+- [Exposed Hostnames](https://www.k8gb.io/latest/exposed-hostnames/index.md)
+- [Dynamic Geotags](https://www.k8gb.io/latest/dynamic_geotags/index.md)
+- [Dynamic Zones](https://www.k8gb.io/latest/dynamic_zones/index.md)
+- [Multi-zone Setup](https://www.k8gb.io/latest/multizone/index.md)
+- [Exposing DNS](https://www.k8gb.io/latest/exposing_dns/index.md)
+
+## Development and Testing
+
+- [Local Setup](https://www.k8gb.io/latest/local/index.md)
+- [Local with Kuar](https://www.k8gb.io/latest/local-kuar/index.md)
+- [AI Inference Resilience Demo](https://www.k8gb.io/latest/ai-inference-demo/index.md)
+- [Rollback Process](https://www.k8gb.io/latest/rollback_procedures/index.md)
+
+## Monitoring and Observability
+
+- [Metrics](https://www.k8gb.io/latest/metrics/index.md)
+- [Traces](https://www.k8gb.io/latest/traces/index.md)
+
+## Platform Integrations
+
+- [Admiralty](https://www.k8gb.io/latest/admiralty/index.md)
+- [Liqo](https://www.k8gb.io/latest/liqo/index.md)
+- [Rancher](https://www.k8gb.io/latest/rancher/index.md)
+- [Crossplane Global Control Plane](https://www.k8gb.io/latest/crossplane_globalapp/index.md)
+- [Load Balancer](https://www.k8gb.io/latest/lbservice-integration/index.md)
+
+## Advanced
+
+- [Split-Brain Scenarios](https://www.k8gb.io/latest/splitbrain/index.md)
+- [Partial Deployment Troubleshooting](https://www.k8gb.io/latest/partial-deployment/index.md)
+- [Service Upgrade](https://www.k8gb.io/latest/service_upgrade/index.md)
+- [Migration Acceptance Tests](https://www.k8gb.io/latest/migration_acceptance/index.md)
+- [WRR Caveats](https://www.k8gb.io/latest/wrr_caveats/index.md)
+- [External DNS Proxy](https://www.k8gb.io/latest/proxy_externaldns/index.md)
+
+## Community
+
+- [Contributing](https://www.k8gb.io/latest/CONTRIBUTING/index.md)
+- [Contributor Ladder](https://www.k8gb.io/latest/CONTRIBUTOR_LADDER/index.md)
+- [AI Contribution Policy](https://www.k8gb.io/latest/AI_POLICY/index.md)
+- [Governance](https://www.k8gb.io/latest/GOVERNANCE/index.md)
+- [Code of Conduct](https://www.k8gb.io/latest/CODE_OF_CONDUCT/index.md)
+- [Security](https://www.k8gb.io/latest/SECURITY/index.md)
+- [Adopters](https://www.k8gb.io/latest/ADOPTERS/index.md)
+

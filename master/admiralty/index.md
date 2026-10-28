@@ -1,0 +1,115 @@
+# Integration with Admiralty
+
+Combination of k8gb and admiralty.io provides powerful global multi-cluster capabilities.
+
+Admiralty will globally schedule. And k8gb will globally balance.
+
+This tutorial covers local end-to-end integration quick start of two projects.
+
+## Deploy Admiralty
+
+Just follow https://admiralty.io/docs/quick_start
+
+## Deploy k8gb to Target clusters
+
+```
+helm repo add k8gb https://www.k8gb.io
+
+kubectl --context kind-eu create ns k8gb
+helm --kube-context kind-eu --namespace k8gb upgrade --install k8gb k8gb/k8gb --set k8gb.clusterGeoTag=eu --set k8gb.extGslbClustersGeoTags=us
+
+kubectl --context kind-us create ns k8gb
+helm --kube-context kind-us --namespace k8gb upgrade --install k8gb k8gb/k8gb --set k8gb.clusterGeoTag=us --set k8gb.extGslbClustersGeoTags=eu
+```
+
+It will install k8gb instances to both Target clusters.
+
+Notice the GeoTag configuration.
+
+## Create sample workloads on the source cluster
+
+```
+helm --kube-context kind-cd upgrade --install podinfo podinfo/podinfo --set replicaCount=2 --set ingress.enabled=true
+```
+
+## Add pod annotations to enable multi-cluster scheduling
+
+Edit `podinfo` Deployment to add Admiralty `multicluster.admiralty.io/elect` scheduling Annotation to Pod spec template
+
+```
+kubectl edit deploy podinfo
+```
+
+The Pod template spec part should look similar to
+
+```
+...
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "9898"
+        prometheus.io/scrape: "true"
+        multicluster.admiralty.io/elect: ""
+      creationTimestamp: null
+...
+```
+
+Observe that pods were scheduled to Target cluster the application of Annotation patch.
+
+```
+kubectl --context kind-us get pod
+NAME                             READY   STATUS    RESTARTS   AGE
+podinfo-557c458ddb-9qpjf-l29w6   1/1     Running   0          11s
+
+kubectl --context kind-eu get pod
+NAME                             READY   STATUS    RESTARTS   AGE
+podinfo-557c458ddb-9nkmx-p7z9r   1/1     Running   0          15s
+```
+
+Observe that associated Ingress has also followed the Pods to the Target clusters
+
+```
+kubectl --context kind-us get ing
+NAME      CLASS    HOSTS   ADDRESS   PORTS   AGE
+podinfo   <none>   *                 80      10m
+
+kubectl --context kind-eu get ing
+NAME      CLASS    HOSTS   ADDRESS   PORTS   AGE
+podinfo   <none>   *                 80      10m
+```
+
+## Enable global load balancing (prefer an explicit Gslb)
+
+Observe that there are no Gslb resources in the Target clusters
+
+```
+kubectl --context kind-eu get gslb
+No resources found in default namespace.
+
+kubectl --context kind-us get gslb
+No resources found in default namespace.
+```
+
+**Preferred:** create an explicit `Gslb` that `resourceRef`s the Ingress (see [Resource References](https://www.k8gb.io/latest/resource_ref/index.md)).
+
+**Legacy / deprecated:** Ingress `k8gb.io/strategy` annotations still create a Gslb automatically, but this path is deprecated ([ADR-0001](https://github.com/k8gb-io/k8gb/blob/master/adr/0001-deprecate-configuration-of-gslb-resources-via-annotations.md)) and will be removed in a future release. For this tutorial's quick demo:
+
+```
+kubectl annotate ing podinfo k8gb.io/strategy=roundRobin
+```
+
+Observe that Gslb resources were properly created
+
+```
+kubectl --context kind-eu get gslb
+NAME      AGE
+podinfo   102s
+
+kubectl --context kind-us get gslb
+NAME      AGE
+podinfo   69s
+```
+
+Note: it's not a real working k8gb setup but just a way to demonstrate multi-cluster Gslb CR propagation with Admiralty.
+
+Please refer to https://www.k8gb.io/ documentation to create fully working real-life Gslb setup.

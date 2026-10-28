@@ -1,0 +1,136 @@
+# AWS based deployment with Route53 integration
+
+Here we provide an example of k8gb deployment in AWS context with Route53 as edgeDNS provider.
+
+## Reference Setup
+
+Two EKS clusters in `eu-west-1` and `us-east-1`.
+
+Terraform code for cluster reference setup can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53)
+
+Feel free to reuse this code fully or partially and adapt for your existing scenario custom configuration like
+
+- Existing VPC names
+- Existing Public/private subnets tags
+- EKS custom tags
+- IRSA(IAM Roles for Service Accounts) role reference
+
+## Ingress controller used by this walkthrough
+
+This walkthrough uses ingress-nginx. The application manifests below create an Ingress with `ingressClassName: nginx` and a Gslb referencing that Ingress. A Gateway API deployment requires corresponding Gateway, HTTPRoute, and Gslb manifests.
+
+For **new** deployments, prefer a maintained [Gateway API](https://gateway-api.sigs.k8s.io/) implementation. k8gb supports HTTPRoute and other route resources through `spec.resourceRef` — see [Resource References](https://www.k8gb.io/latest/resource_ref/index.md). Local playground examples are available under `deploy/gslb/*gatewayapi*`.
+
+Kubernetes Ingress remains supported with maintained Ingress controllers. The retirement below applies specifically to ingress-nginx.
+
+> **ingress-nginx status:** the Kubernetes ingress-nginx project was [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/) ([Steering/SRC statement](https://www.kubernetes.io/blog/2026/01/29/ingress-nginx-statement/)). Do not start new production installs on it. Existing tutorials that still show `ingressClassName: nginx` are legacy examples only.
+
+The following pinned manifest is retained as a legacy ingress-nginx installation reference:
+
+```
+# Legacy path only — prefer Gateway API for new installs
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/aws/deploy.yaml
+```
+
+## Deploy k8gb
+
+Example helm configuration files can be found [here](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53/k8gb)
+
+Modify the example files to set `k8gb.dnsZones` (`loadBalancedZone` / `parentZone`), `k8gb.edgeDNSServers` (an array), `extdns.domainFilters` (the parent zones), and the IRSA role ARN in `extdns.serviceAccount.annotations["eks.amazonaws.com/role-arn"]`. To restrict ExternalDNS to a particular hosted zone ID, set `extdns.extraArgs.zone-id-filter`.
+
+> **Migration note:** the current chart requires `k8gb.dnsZones`; the legacy `k8gb.dnsZone` / `k8gb.edgeDNSZone` keys are no longer supported. See [Multizone Support](https://www.k8gb.io/latest/multizone/index.md).
+
+Clone k8gb repository and use `helm` with custom values
+
+```
+git clone https://github.com/k8gb-io/k8gb.git
+cd k8gb
+
+helm repo add k8gb https://www.k8gb.io
+helm repo update
+
+
+#switch kubectl context to eu-west-1
+helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/route53/k8gb/k8gb-cluster-eu-west-1.yaml
+
+#switch kubectl context to us-east-1
+helm -n k8gb upgrade -i k8gb k8gb/k8gb --create-namespace -f ./docs/examples/route53/k8gb/k8gb-cluster-us-east-1.yaml
+```
+
+## Test
+
+*Note*: here and for all occurrences below whenever we speak about application to *each* cluster, we assume that you switch kubectl context and apply the same command to all clusters.
+
+- Deploy test application to *each* cluster.
+
+```
+make deploy-test-apps
+```
+
+- If needed, change the desired FQDN in the sample Ingress manifest (`.spec.rules[0].host`); the sample [Gslb CR](https://github.com/k8gb-io/k8gb/tree/master/docs/examples/route53/k8gb/gslb-failover.yaml) references that Ingress via `resourceRef` and does not need to be modified
+- Apply Gslb CR to *each* cluster
+
+```
+kubectl apply -f ./docs/examples/route53/k8gb/gslb-failover.yaml
+```
+
+- Check Gslb status.
+
+```
+kubectl -n test-gslb get gslb test-gslb-failover -o yaml
+```
+
+- Check route53 entries.
+
+```
+aws route53 list-resource-record-sets --hosted-zone-id $YOUR_HOSTED_ZONE_ID
+```
+
+You should see that `gslb-ns-$loadBalancedZone-$geotag` NS and glue A records were created to automatically configure DNS zone delegation.
+
+- Check test application availability.
+
+```
+curl -s failover.test.k8gb.io| grep message
+  "message": "eu-west-1",
+```
+
+Replace `failover.test.k8gb.io` with the domain you specified in the Ingress spec.
+
+Notice that traffic was routed to `eu-west-1`.
+
+- Emulate the failure in `eu-west-1`
+
+```
+kubectl -n test-gslb scale deploy frontend-podinfo --replicas=0
+```
+
+- Observe Gslb status change.
+
+```
+kubectl -n test-gslb get gslb test-gslb-failover -o yaml | grep status -A6
+status:
+  geoTag: us-east-1
+  healthyRecords:
+    failover.test.k8gb.io:
+    - 35.168.91.100
+  serviceHealth:
+    failover.test.k8gb.io: Healthy
+```
+
+IP in healthyRecords should change to the IP address of NLB in `us-east-1`
+
+- Check failover to `us-east-1`
+
+```
+curl -s failover.test.k8gb.io| grep message
+  "message": "us-east-1",
+```
+
+Notice that traffic is properly failed over to `us-east-1`
+
+- Experiment
+
+Now you can scale `eu-west-1` back and observe that traffic is routed back to the primary cluster.
+
+In addition, you can test `roundRobin` load balancing strategy, which is spreading the traffic over the clusters in active-active mode.

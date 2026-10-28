@@ -1,0 +1,106 @@
+# Exposing DNS UDP traffic for k8gb
+
+In order for k8gb to function properly, associated CoreDNS service deployed with k8gb needs to be exposed for external DNS UDP traffic on cluster worker nodes.
+
+Actual ways to achieve this depend on many factors, such as underlying infrastructure (cloud, on-prem, managed vs bare-metal setup), means to expose CoreDNS service (ClusterIP, LoadBalancer), type of load balancer or ingress controller used etc. This topic is outside the project's scope, as often the related configuration is shared by cluster services, requires additional permissions, and as result can't be owned by k8gb controller deployment. However, we can describe a few examples using common Kubernetes configurations, which have been thoroughly tested in local and production environments.
+
+## Ingress Controller with UDP support (NGINX) — legacy
+
+> **Prefer exposing CoreDNS via `LoadBalancer` / NLB** (see [External load balancer](#external-load-balancer) below) or your platform's Gateway / UDP path. Ingress NGINX was [retired in March 2026](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/); keep this section only if you already run it.
+>
+> *Check [NGINX Ingress controller official documentation](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/) for additional information*
+
+In general, an Ingress resource doesn't support TCP or UDP services. In order to let NGINX Ingress controller know that we want to expose UDP port for k8gb CoreDNS service (`k8gb-coredns`), we need to create or patch `udp-services` ConfigMap in a namespace where NGINX ingress controller is installed (`ingress-nginx` by default). Its `data` section would contain UDP 53 port mapping for CoreDNS service deployed with k8gb chart release.
+
+> *Associated CoreDNS service can be found in the same namespace where k8gb chart release is deployed. Service name is prefixed with chart release name.*
+
+Example `udp-services` ConfigMap manifest:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: udp-services
+  namespace: ingress-nginx
+data:
+  53: "k8gb/k8gb-coredns:53"  # <== "<K8GB_DEPLOYMENT_NAMESPACE>/<K8GB_CHART_RELEASE>-coredns"
+```
+
+It can be also created or patched by running `kubectl` one-liner:
+
+```
+# Patch the existing `udp-services` ConfigMap in NGINX Ingress controller namespace:
+
+kubectl patch -n ingress-nginx -p '{"data":{"53":"k8gb/k8gb-coredns:53"}}' --type=merge cm/udp-services
+
+# Or create `udp-services` ConfigMap if it doesn't exist, e.g.:
+
+kubectl create -n ingress-nginx cm udp-services --from-literal="53"="k8gb/k8gb-coredns:53"
+```
+
+[Local project setup](https://www.k8gb.io/latest/local/index.md) does this patching automatically.
+
+## CoreDNS service lookup
+
+k8gb is trying to find a service labeled with `app.kubernetes.io/name=coredns` within the same namespace where controller itself is deployed into. If the service has `Status.LoadBalancer.Ingress[0].Hostname`, k8gb will use the resolved IPs to reach CoreDNS on this cluster.
+
+## External load balancer
+
+CoreDNS can be also exposed for DNS UDP traffic via external load balancer, if underlying infrastructure supports that.\
+[AWS EKS](https://aws.amazon.com/eks) with [NLB](https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html) and [k3d](https://www.k3d.io) with [ServiceLB](https://rancher.com/docs/k3s/latest/en/networking/#service-load-balancer) are good examples of such an infrastructure proven to work for k8gb deployments.\
+We're using this approach in our [AWS+Route53](https://www.k8gb.io/latest/deploy_route53/index.md) reference setup with [k8gb helm chart](https://artifacthub.io/packages/helm/k8gb/k8gb) providing out-of-the-box support for external load balancer scenario. CoreDNS service is configured by setting `coredns.serviceType` helm chart value to `LoadBalancer`:
+
+```
+# k8gb helm chart values.yaml example:
+
+coredns:
+  ...
+  serviceType: LoadBalancer # <== expose UDP DNS traffic via external load balancer
+  service:
+    annotations:
+       service.beta.kubernetes.io/aws-load-balancer-type: nlb
+```
+
+In general, resulting `Service` resource configuration for k8gb CoreDNS looks like:
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb # <== tell AWS to use NLB load balancer
+  name: k8gb-coredns
+  namespace: k8gb
+spec:
+  ports:
+  - name: udp-53 # specify DNS UDP port (53)
+    port: 53
+    protocol: UDP
+  selector:
+    app.kubernetes.io/instance: k8gb
+    app.kubernetes.io/name: coredns
+  type: LoadBalancer # <== set service type to LoadBalancer
+```
+
+## Bare-metal clusters behind static NAT
+
+On bare-metal / colo clusters, the in-cluster LoadBalancer controller (klipper-lb, MetalLB in L2 mode, kube-vip, ...) usually assigns **private node IPs** to the CoreDNS `Service` / `Ingress` status. When the cluster is reachable from the outside only through 1:1 static NAT performed at the network perimeter, the cluster has no awareness of its public IPs. k8gb would then publish the private IPs both as the zone-delegation NS glue records (`gslb-ns-<geoTag>-<loadBalancedZone>`) in EdgeDNS and as the per-Gslb `localtargets-*` / final A records, and external resolvers following the delegation would time out.
+
+For this topology, set the cluster-level override `k8gb.clusterExposedIPs` to the publicly routable IPs that NAT to this cluster. When set, k8gb uses these IPs in place of the discovered `Service` / `Ingress` IPs in **both** parts of the resolution chain:
+
+- ZoneDelegation NS glue records published to EdgeDNS, so external resolvers can reach the cluster's authoritative CoreDNS.
+- Application `localtargets-*` / final A records, so clients can reach the applications selected by Gslb.
+
+This design assumes that every configured public IP routes DNS traffic to CoreDNS and application traffic to the cluster ingress, typically through port-based forwarding on the same 1:1 NAT address. If DNS and application traffic use different public IPs, use `k8gb.clusterExposedIPs` for the DNS/CoreDNS addresses and set the application's addresses with per-Gslb `k8gb.io/exposed-ip-addresses` or `k8gb.io/exposed-hostnames` annotations. Only IPv4 addresses are accepted, because both record types publish A records. Auto-discovery is used whenever the value is left empty (the default).
+
+```
+# k8gb helm chart values.yaml example, on the "eu" cluster:
+
+k8gb:
+  clusterGeoTag: "eu"
+  clusterExposedIPs: # <== public IPs that NAT to CoreDNS and the application ingress
+    - "203.0.113.10"
+    - "203.0.113.11"
+```
+
+This maps to the `CLUSTER_EXPOSED_IPS` environment variable (comma-separated) on the k8gb controller. The override is cluster-wide and applies to every delegated zone served by the cluster. The per-Gslb [`k8gb.io/exposed-ip-addresses`](https://www.k8gb.io/latest/exposed-hostnames/index.md) annotation (and `k8gb.io/exposed-hostnames`) still takes precedence over this cluster-level override for the application records of the annotated Gslb, allowing an application to use public endpoints that differ from the cluster's DNS endpoints.
