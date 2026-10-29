@@ -9,21 +9,32 @@ has a longer cached prefix. Model KV tensors stay in the selected region.
 ```mermaid
 flowchart TD
     Client[Client]
-    DNS["k8gb DNS<br/>Healthy entry selection"]
-    Entry["EU entry router<br/>Cross-region cache selection"]
-    Frontend["US Dynamo frontend<br/>Local worker selection"]
-    Worker["US Qwen worker<br/>Warmed KV cache"]
-    EURelay[EU Relay]
-    USRelay[US Relay]
+
+    subgraph Global["GLOBAL ENTRY — k8gb"]
+        DNS["dynamo.cloud.example.com<br/>Healthy entry selection<br/>DNS failover and failback"]
+    end
 
     Client -. DNS lookup .-> DNS
-    DNS -. EU entry address .-> Client
+    DNS -. Healthy entry address .-> Client
+
+    Entry["EU entry router<br/>Select serving region"]
+    Frontend["US Dynamo frontend<br/>Select local worker"]
+    Worker["US Qwen worker<br/>Warmed KV cache"]
+
     Client -->|HTTP request| Entry
-    EURelay -. Cache hints / readiness via gRPC .-> Entry
-    USRelay -. Cache hints / readiness via gRPC .-> Entry
-    Entry -->|Forward to US| Frontend
+    Entry -->|Forward to warm US region| Frontend
     Frontend -->|Inference| Worker
+
+    EURelay[EU Relay]
+    USRelay[US Relay]
+    EURelay -. Cache hints / readiness .-> Entry
+    USRelay -. Cache hints / readiness .-> Entry
+
+    style Global fill:#eef6ff,stroke:#0969da,stroke-width:3px,color:#0a3069
+    style DNS fill:#ddf4ff,stroke:#0969da,stroke-width:2px,color:#0a3069
 ```
+
+**k8gb keeps the global hostname available; Dynamo routes each request toward reusable cache.**
 
 Solid arrows show the inference request path; dashed arrows show DNS and Relay
 metadata. This example enters through EU and reuses a warmed cache in US.
