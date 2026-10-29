@@ -77,11 +77,11 @@ The individual parts of k8gb that interact to provide the desired functionality.
   - Isolation: runs as its own Pod, under a ServiceAccount bound to a ClusterRole that is defined in `chart/k8gb/templates/cluster_role.yaml`
 - Peer k8gb clusters
   - Role: Each cluster in a GSLB setup runs its own k8gb, and the clusters learn each other's healthy endpoints over DNS.
-  - Isolation: separate clusters, connected only through DNS traffic between their CoreDNS instances and the edge DNS
+  - Isolation: separate Kubernetes clusters; k8gb controllers discover peer endpoints by querying peer CoreDNS instances and edge DNS resolvers over DNS.
 
 ### Actions
 
-The steps that k8gb performs in order to provide the desired functionality. See https://www.k8gb.io/images/k8gb-components.svg. 
+The steps that k8gb performs in order to provide the desired functionality. See https://www.k8gb.io/images/k8gb-components.svg.
 
 - CoreDNS
   - Functionality:
@@ -120,11 +120,11 @@ The chart does not ship a NetworkPolicy, so restricting access to these ports is
 
 k8gb implements comprehensive secure deployment practices through multiple layers:
 
-**Secure Defaults**: The k8gb controller container runs as a non-root user (UID 1000) with a read-only root filesystem, privilege escalation disabled, and resource requests and limits set. Its image is based on `gcr.io/distroless/static:nonroot`. CoreDNS and ExternalDNS are deployed from their upstream Helm charts, so their security contexts come from those charts' defaults.
+**Secure Defaults**: The k8gb controller container runs as a non-root user (UID 1000) with a read-only root filesystem, privilege escalation disabled, and resource requests and limits set. Its image is based on `gcr.io/distroless/static:nonroot`. CoreDNS and ExternalDNS use their upstream Helm charts' security defaults together with overrides in the k8gb chart and operator-supplied values. For example, the k8gb chart overrides CoreDNS's added capabilities with an empty list.
 
-**RBAC**: The controller's ClusterRole covers what GSLB needs across namespaces. It reads Services, EndpointSlices, ConfigMaps, Gateway API routes and Istio resources, and it manages Ingresses, DNSEndpoints and the k8gb custom resources. These permissions are cluster-wide because `Gslb` resources can live in any namespace. TODO(maintainer): confirm whether any of these rules can be narrowed.
+**RBAC**: The controller uses a ClusterRole for cross-namespace reconciliation and cluster-scoped `ZoneDelegation` resources. It reads Services, EndpointSlices, ConfigMaps, Gateway API routes and Istio resources. The current rules grant wildcard resources and verbs for `k8gb.io` and `k8gb.absa.oss`, and wildcard verbs for Ingresses and DNSEndpoints. A separate Role permits ConfigMap creation in the installation namespace and get/update/patch/delete on `k8gb-zone-delegation`. Replacing wildcard permissions with explicit resources and verbs is a candidate for further hardening, with validation of legacy reconciliation, migration, status updates and finalizers. Reducing cluster-wide ConfigMap list/watch access also requires changing the controller's cache configuration. These improvements are tracked in [#2587](https://github.com/k8gb-io/k8gb/issues/2587).
 
-**Documentation and Guidance**: The DNS provider guides explain how to give ExternalDNS or k8gb its provider credentials, for example IRSA for Route53, Workload Identity for Google Cloud DNS, and Kubernetes Secrets for most other providers. TODO(maintainer): k8gb has no dedicated production hardening guide yet, covering for example NetworkPolicy and Pod Security Standards. Decide whether to add one.
+**Documentation and Guidance**: The DNS provider guides explain how to give ExternalDNS or k8gb its provider credentials, for example IRSA for Route53, Workload Identity for Google Cloud DNS, and Kubernetes Secrets for most other providers. k8gb does not yet have a dedicated production hardening guide. A guide covering NetworkPolicy, Pod Security Standards, DNS-authoring permissions, credential handling and artifact verification is tracked in [#2587](https://github.com/k8gb-io/k8gb/issues/2587).
 
 **Kubernetes-Native Security**: k8gb leverages Kubernetes built-in security mechanisms rather than implementing custom security layers, ensuring compatibility with existing security policies and reducing complexity.
 
@@ -162,7 +162,7 @@ This document provides the CNCF TAG Security and Compliance with an initial unde
 | --------- | ------------- | ------------------------- |
 | DNS-Based Traffic Management| `Critical`| k8gb uses DNS for global load balancing and failover, ensuring that traffic is routed to healthy clusters without passing through k8gb itself. This design minimizes the attack surface compared to traditional proxy-based load balancers and reduces the risk of traffic interception or manipulation versus solutions that handle application traffic directly. |
 | Minimal Port Exposure | `Critical` | Only DNS (53/tcp and 53/udp) is meant to be reachable from outside the cluster, and there is no management interface or administrative API. In-cluster metrics and health endpoints are plain HTTP, so operators should restrict them (see [Minimal Attack Surface](#minimal-attack-surface)). |
-| Integration with Kubernetes RBAC | `Critical` | k8gb relies on Kubernetes Role-Based Access Control (RBAC) to enforce authorization. Anyone who can create `Gslb`, `ZoneDelegation` or k8gb-labelled `DNSEndpoint` resources can influence the DNS answers k8gb serves, so those permissions should be granted deliberately. |
+| Integration with Kubernetes RBAC | `Critical` | k8gb relies on Kubernetes Role-Based Access Control (RBAC) to enforce authorization. Creating or modifying `Gslb`, `ZoneDelegation` or k8gb-labelled `DNSEndpoint` resources can influence DNS answers. The deprecated Ingress annotation interface also allows Ingresses with `k8gb.io/strategy` to create or update Gslbs through the controller. Changes to networking resources referenced by an existing Gslb can affect its DNS records too. Operators should account for these paths when granting write permissions; restricting direct CRD writes alone does not cover all DNS-authoring paths. |
 | Cross-cluster health over DNS | `Critical` | Each k8gb cluster learns which endpoints are healthy in its peers by querying their CoreDNS over plain DNS. The DNS path between clusters and the edge resolvers is therefore part of the trusted environment. |
 | Kubernetes Secrets for Sensitive Data | `Security Relevant` | DNS provider credentials are kept in Kubernetes Secrets or supplied through workload identity, and access is controlled by Kubernetes RBAC. Encryption at rest depends on how the cluster is configured. k8gb does not configure it. |
 | Release signing and provenance | `Security Relevant` | Release binaries, archives, checksums, SBOMs and container images are signed with cosign using the project key in [`cosign.pub`](https://github.com/k8gb-io/k8gb/blob/master/cosign.pub). Helm charts in the OCI registry are signed keyless, and SLSA provenance is generated for binaries and images. See [Signed releases](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#signed-releases). |
@@ -210,13 +210,15 @@ In order to secure the SDLC from development to deployment, the following measur
 - Branch protection on the default (`master`) branch. TODO(maintainer): confirm these rules are still current. The public history includes some unsigned commits pushed without a pull request, so check whether "Require signed commits" and the pull request rule also apply to administrators.
   - Require signed commits
   - Require a pull request before merging
-    - Require approvals: 1
-    - Dismiss stale pull request approvals when new commits are pushed
-    - Require review from Code Owners
-    - Require approval of the most recent reviewable push
-    - Require conversation resolution before merging
-  - Require status checks to pass before merging
-    - Require branches to be up to date before merging
+- Branch protection on the default (`master`) branch, verified on 2026-10-29:
+  - Require a pull request with at least one approval
+  - Dismiss stale approvals when new commits are pushed
+  - Enforce the configured protection on administrators
+  - Require linear history
+  - Disable force pushes and branch deletion
+  - Signed commits, Code Owner reviews, approval of the most recent reviewable push, and conversation resolution are not required
+  - The required-status-check configuration has `strict: true`, but its `contexts` and `checks` lists are empty; no CI checks are currently named as required
+  - No additional branch rulesets apply to `master`
 
 - Contributions:
   - Every commit needs a Developer Certificate of Origin (DCO) sign-off, enforced by the DCO GitHub app
@@ -224,7 +226,7 @@ In order to secure the SDLC from development to deployment, the following measur
 
 - CI/CD Pipeline:
   - Use GitHub Actions for continuous integration and deployment (CI/CD)
-  - Workflows run `step-security/harden-runner` with egress blocking, and most third-party actions are pinned to commit SHAs. The SLSA generator has to be referenced by tag.
+  - Selected CI/CD jobs run `step-security/harden-runner` with egress blocking. Coverage is not universal: the `go-inspect` job in `build.yml` is explicitly exempt, and `scorecard.yml` does not configure Harden Runner. Most third-party actions are pinned to commit SHAs; the SLSA generator workflows are referenced by version tags.
   - Include comprehensive testing and quality assurance to catch issues early:
     - **Code Quality**: golangci-lint pipeline for code quality and potential security issues
     - **Quality Monitoring**: Go Report Card integration (https://goreportcard.com/report/github.com/k8gb-io/k8gb)
@@ -245,7 +247,7 @@ In order to secure the SDLC from development to deployment, the following measur
 
 ### Communication channels
 
-- Internal: maintainers talk through the maintainers mailing list (cncf-k8gb-maintainers@lists.cncf.io), the `#k8gb` CNCF Slack channel, and the community meetings. TODO(maintainer): add any private maintainer channel if one is used.
+- Internal: maintainers coordinate through the private `#k8gb-maintainers` channel in CNCF Slack and the maintainers mailing list (cncf-k8gb-maintainers@lists.cncf.io). General project discussions also take place in the public `#k8gb` CNCF Slack channel and community meetings.
 - Inbound: users reach the team through GitHub issues and discussions, the `#k8gb` Slack channel, and the community meetings. Security reports go through the private channels in [SECURITY.md](https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md).
 - Outbound: releases are announced through GitHub releases and their notes, the [k8gb.io blog](https://www.k8gb.io/blog/), LinkedIn and X.
 
@@ -273,11 +275,13 @@ The k8gb project accepts vulnerability reports as outlined in the security polic
 
 ### Vulnerability response process
 
-The maintainers respond to reports, with a standard response time of less than 14 days. Once a report is confirmed, they open a draft GitHub security advisory, agree a timeline for the fix and disclosure with the reporter, and publish the advisory on the [security advisories page](https://github.com/k8gb-io/k8gb/security/advisories) once the fix is released. TODO(maintainer): name who triages incoming reports, for example the repository administrators.
+The k8gb maintainer group is responsible for triaging and responding to vulnerability reports, with a standard response time of less than 14 days. The repository administrators are @ytsarev, @k0da and @kuritka, as recorded in `SECURITY-INSIGHTS.yml`. Once a report is confirmed, maintainers open a draft GitHub security advisory, agree a timeline for the fix and disclosure with the reporter, and publish the advisory on the [security advisories page](https://github.com/k8gb-io/k8gb/security/advisories) once the fix is released.
 
 ### Incident response
 
-The k8gb incident response process is outlined in the security policy https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#review-process. Actively exploited vulnerabilities and security compromises of the project's own infrastructure are escalated to the Linux Foundation steward at steward@linuxfoundation.org, as described in [CONTRIBUTING.md](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#escalating-to-the-cra-steward). TODO(maintainer): describe how a compromised release or signing key would be handled, for example key rotation and re-signing.
+The k8gb incident response process is outlined in [SECURITY.md](https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#review-process). Actively exploited vulnerabilities and security compromises of the project's own infrastructure are escalated to the Linux Foundation steward at steward@linuxfoundation.org, as described in [CONTRIBUTING.md](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#escalating-to-the-cra-steward). Remediation does not wait for the escalation decision.
+
+[Signed releases](https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md#signed-releases) documents generating a replacement cosign key pair and updating `COSIGN_PRIVATE_KEY`, `COSIGN_PUBLIC_KEY`, `COSIGN_PASSWORD` and `cosign.pub`. A complete compromised-release or signing-key response runbook is not yet documented. It should cover suspending affected publishing, investigating affected credentials and artifacts, restoring a trusted build environment, rotating compromised credentials, publishing verified replacement artifacts, and notifying users which artifacts and keys must no longer be trusted. Suspect artifacts must be investigated or rebuilt from trusted inputs before signing them again. Keyless OCI chart signing requires separate consideration of the GitHub workflow and OIDC identity.
 
 ## Appendix
 - Known Issues Over Time
