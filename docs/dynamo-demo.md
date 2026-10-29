@@ -341,27 +341,49 @@ custom CPU image; the standard Dynamo GPU runtime image is not interchangeable.
 
 ## Next steps for k8gb + Dynamo
 
-These are proposed increments beyond the baseline and optional prototype. Keep additional components
-in opt-in manifests under `deploy/dynamo-demo/`, reuse the existing clusters and
-DNS infrastructure, and leave the default local setup and core installation unchanged.
+Prioritize replacing the custom Python prototype with upstream Dynamo components.
+Keep the working prototype as the reference until its replacement passes the same
+acceptance checks. k8gb continues to select a healthy entry through DNS; Dynamo
+makes the per-request pool and worker decisions. Keep the integration opt-in under
+`deploy/dynamo-demo/`, reusing the existing clusters and DNS infrastructure.
 
-1. **Harden cache visibility between regions.** Extend the prototype's Relay
-   recovery checks to cache eviction, delayed publications, multiple workers and
-   runtime upgrades. Keep model, tokenizer, hash and block semantics compatible;
-   stale or incompatible summaries must remain ineligible.
-2. **Extend cross-region request routing.** Reuse an upstream consumer/router
-   integration when available. Add backend load and measured WAN latency to the
-   prototype's cache/locality heuristic, then validate more models and serving
-   topologies. k8gb continues to select a healthy entry region through DNS; the
-   request-routing layer makes the per-request cache decision.
-3. **Extend failure testing.** Go beyond Relay, frontend and entry shutdowns to
-   whole-cluster failures and asymmetric WAN partitions. Verify request-routing
-   fallback and DNS entry failover independently, and ensure each region can
-   serve locally while stale remote cache information is excluded.
-   Record selected regions/workers, HTTP outcomes and recovery times, including
+1. **Track upstream routing and packaging.** Follow the
+   [CKF consumer](https://github.com/ai-dynamo/dynamo/pull/15298),
+   [router entrypoint](https://github.com/ai-dynamo/dynamo/pull/15338) and
+   [CPU router image build](https://github.com/ai-dynamo/dynamo/pull/15341).
+   As reviewed on 2026-10-29, these are draft PRs: the linked HTTP router selects
+   by load, and the image PR provides a build recipe without publishing an image.
+   Require request-prefix CKF selection for plain-text chat before replacing this
+   demo's router. The later
+   [token-ID routing experiment](https://github.com/ai-dynamo/dynamo/pull/15459)
+   and [load/session-affinity work](https://github.com/ai-dynamo/dynamo/pull/17524)
+   cover different request or placement semantics. Evaluate a pinned upstream
+   revision by its capabilities; a 1.7 version label alone is insufficient.
+2. **Prove equivalent behavior before switching.** Repeat the
+   [cache-reuse check](dynamo-global-router.md#prove-forwarding-and-cache-reuse)
+   with real Qwen: warm US, enter through EU, and verify US selection and positive
+   cached-token counts without session or worker pinning. Verify streaming,
+   Relay/frontend failure and recovery, exclusion of stale or incompatible hints,
+   and continued local inference when remote state is unavailable. Then repeat
+   [DNS entry failover and failback](dynamo-global-router.md#demonstrate-dns-entry-failover).
+   Entry readiness must reflect serving availability so k8gb can withdraw an
+   unavailable entry.
+3. **Remove custom routing code after acceptance.** Prefer a published upstream
+   router image when available; verify CPU/ARM64 support and compatibility with
+   the regional runtime and Relay protocol. The router image does not replace the
+   separate Qwen CPU worker image. Retire the custom HTTP router, CKF parser and
+   Relay consumer once the replacement passes, retaining manifests, configuration
+   and the manual walkthrough. Reuse upstream load and latency policies as they
+   become available.
+4. **Extend resilience coverage.** Test cache eviction, delayed publications,
+   multiple workers and runtime upgrades, followed by whole-cluster failures and
+   asymmetric WAN partitions. Preserve compatible model, tokenizer, hash and block
+   semantics. Verify request-routing fallback and DNS entry failover independently;
+   record regions/workers, HTTP outcomes and recovery times, including
    [split-brain behavior](splitbrain.md).
-4. **Measure the benefit.** Compare cache-aware routing with load-only placement
-   using actual cache reuse and time to first token, including WAN overhead. CPU
+5. **Measure the benefit.** Compare cache-aware routing with load-only placement
+   using actual cache reuse, time to first token and router overhead under WAN
+   latency. Measure performance before optimizing the Python prototype. CPU
    timings from this small demo do not predict GPU deployment performance.
 
 ## Validation scope
