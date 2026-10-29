@@ -56,7 +56,7 @@ Reviewer recognition grants no automatic GitHub permission. If a separate access
 
 ## Maintainer
 
-A **Maintainer** is the project governance role defined by GitHub handles in [`CODEOWNERS`](https://www.k8gb.io/latest/CODEOWNERS). Maintainers are responsible for the project’s technical direction, health, governance, and sustainability as described in [`GOVERNANCE.md`](https://www.k8gb.io/latest/GOVERNANCE/index.md).
+A **Maintainer** is the project governance role defined by GitHub handles in [`CODEOWNERS`](https://github.com/k8gb-io/k8gb/blob/master/CODEOWNERS). Maintainers are responsible for the project’s technical direction, health, governance, and sustainability as described in [`GOVERNANCE.md`](https://www.k8gb.io/latest/GOVERNANCE/index.md).
 
 ### Appointment
 

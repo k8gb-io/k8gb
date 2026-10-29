@@ -24,7 +24,7 @@ Contributor role development is described in [`CONTRIBUTOR_LADDER.md`](https://w
 
 ## Maintainers
 
-Maintainers are defined in the [CODEOWNERS](https://www.k8gb.io/latest/CODEOWNERS) file by their GitHub user handles. To elect a new maintainer, an existing maintainer must open a GitHub issue in the project repository nominating the candidate. The issue must remain open for at least 14 days to allow for public feedback and a formal vote by existing maintainers. New maintainers are elected by a supermajority of votes of existing maintainers. If a maintainer is no longer able to perform their duties, they should volunteer to be moved to emeritus status. Maintainers can be also removed from the active maintainers list by a supermajority of votes of existing maintainers.
+Maintainers are defined in the [CODEOWNERS](https://github.com/k8gb-io/k8gb/blob/master/CODEOWNERS) file by their GitHub user handles. To elect a new maintainer, an existing maintainer must open a GitHub issue in the project repository nominating the candidate. The issue must remain open for at least 14 days to allow for public feedback and a formal vote by existing maintainers. New maintainers are elected by a supermajority of votes of existing maintainers. If a maintainer is no longer able to perform their duties, they should volunteer to be moved to emeritus status. Maintainers can be also removed from the active maintainers list by a supermajority of votes of existing maintainers.
 
 Below is the list of a maintainer's general responsibilities in addition to those defined for project contributors:
 
@@ -50,7 +50,7 @@ Both roles can merge pull requests and can create, update and delete the GitHub 
 
 ## Project Lead
 
-The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The Project Lead for 2025-2026 is @ytsarev, as listed in our [CODEOWNERS](https://www.k8gb.io/latest/CODEOWNERS) file. @ytsarev was voted Project Lead for 2025-2026 through the election in https://github.com/k8gb-io/k8gb/issues/2210.
+The Project Lead is a project maintainer with the final vote on project decisions. The Project Lead is elected from the pool of current Maintainers by a simple majority vote. The election occurs annually or whenever the position becomes vacant. The Project Lead for 2025-2026 is @ytsarev, as listed in our [CODEOWNERS](https://github.com/k8gb-io/k8gb/blob/master/CODEOWNERS) file. @ytsarev was voted Project Lead for 2025-2026 through the election in https://github.com/k8gb-io/k8gb/issues/2210.
 
 ## Conflict Resolutions
 
