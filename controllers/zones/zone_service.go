@@ -287,9 +287,10 @@ func (z *ZoneDelegationImpl) UpdateCoreDNSConfiguration(ctx context.Context, zd 
 		},
 	}
 
-	// The controller-runtime client uses a cache for ConfigMap objects.
-	// For the cache to work, the controller needs list/watch permissions for ConfigMaps
-	// across all namespaces, even if it only updates a single ConfigMap.
+	// controller-runtime builds an informer cache for all ConfigMap objects seen by the
+	// client. The cache requires cluster-wide list/watch on ConfigMaps (granted in the
+	// ClusterRole), even though the controller only mutates the single k8gb-zone-delegation
+	// ConfigMap in the k8gb namespace (mutating access is restricted via the namespace Role).
 	_, err = controllerutil.CreateOrUpdate(ctx, z.client, coreDNSZones, func() error {
 		newData := make(map[string]string)
 
