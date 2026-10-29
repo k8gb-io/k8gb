@@ -6,12 +6,27 @@ uses Dynamo KV Relay cache hints to choose a regional Dynamo frontend, which
 then selects a local worker. A request can enter EU and execute in US when US
 has a longer cached prefix. Model KV tensors stay in the selected region.
 
-```text
-client -> k8gb DNS -> EU HTTP entry -> US Dynamo frontend -> US Qwen worker
-                          |                    ^
-                          +-- US Relay (gRPC)--+  cache hints / readiness
-                          +-- EU Relay (gRPC)      cache hints / readiness
+```mermaid
+flowchart TD
+    Client[Client]
+    DNS["k8gb DNS<br/>Healthy entry selection"]
+    Entry["EU entry router<br/>Cross-region cache selection"]
+    Frontend["US Dynamo frontend<br/>Local worker selection"]
+    Worker["US Qwen worker<br/>Warmed KV cache"]
+    EURelay[EU Relay]
+    USRelay[US Relay]
+
+    Client -. DNS lookup .-> DNS
+    DNS -. EU entry address .-> Client
+    Client -->|HTTP request| Entry
+    EURelay -. Cache hints / readiness via gRPC .-> Entry
+    USRelay -. Cache hints / readiness via gRPC .-> Entry
+    Entry -->|Forward to US| Frontend
+    Frontend -->|Inference| Worker
 ```
+
+Solid arrows show the inference request path; dashed arrows show DNS and Relay
+metadata. This example enters through EU and reuses a warmed cache in US.
 
 The implementation lives in `deploy/dynamo-demo/federation`. It is a standalone
 prototype, separate from `python -m dynamo.global_router`. It does not change
