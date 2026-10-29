@@ -41,6 +41,7 @@ nav:
       - Local with Kuar: local-kuar.md
       - AI Inference Resilience Demo: ai-inference-demo.md
       - NVIDIA Dynamo Demo: dynamo-demo.md
+      - Experimental Dynamo Global Router: dynamo-global-router.md
       - Rollback Process: rollback_procedures.md
     - Monitoring and Observability:
       - Metrics: metrics.md

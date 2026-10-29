@@ -391,4 +391,6 @@ kind cluster with Kubernetes 1.30.13. The x86-64 image base is published upstrea
 but this profile has not been run on x86-64. These checks do not establish
 inference performance or a recovery-time SLO.
 
-Cross-DC CKF routing, whole-region failure and WAN partitions remain future work.
+An opt-in [cross-region KV routing prototype](dynamo-global-router.md) adds a
+nightly Relay consumer and HTTP entry router. Whole-region failure and production
+WAN behavior need separate validation.

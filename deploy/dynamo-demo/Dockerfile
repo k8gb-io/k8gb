@@ -16,12 +16,15 @@
 
 # Keep the upstream CPU engine; ai-dynamo[vllm] would install CUDA dependencies.
 ARG TARGETARCH
-FROM vllm/vllm-openai-cpu:v0.30.0-x86_64@sha256:0fd700a207f4f4f0cc9c87fb425b5fa2aafa420c9affca904e2fd44920cbf5a7 AS cpu-amd64
-FROM vllm/vllm-openai-cpu:v0.30.0-arm64@sha256:09e656588c2dc572240cb62a22f75681dc640a99c61537bbd55e9eb1dc3d4fbc AS cpu-arm64
+ARG CPU_AMD64_IMAGE=vllm/vllm-openai-cpu:v0.30.0-x86_64@sha256:0fd700a207f4f4f0cc9c87fb425b5fa2aafa420c9affca904e2fd44920cbf5a7
+ARG CPU_ARM64_IMAGE=vllm/vllm-openai-cpu:v0.30.0-arm64@sha256:09e656588c2dc572240cb62a22f75681dc640a99c61537bbd55e9eb1dc3d4fbc
+FROM ${CPU_AMD64_IMAGE} AS cpu-amd64
+FROM ${CPU_ARM64_IMAGE} AS cpu-arm64
 FROM cpu-${TARGETARCH}
 
+ARG DYNAMO_VERSION=1.6.0
 RUN python3 -m pip install --no-cache-dir \
-      ai-dynamo==1.6.0 uvloop==0.22.1 blake3==1.0.9
+      ai-dynamo==${DYNAMO_VERSION} uvloop==0.22.1 blake3==1.0.9
 
 ENV HF_HOME=/tmp/huggingface \
     VLLM_NO_USAGE_STATS=1 \

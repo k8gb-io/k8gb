@@ -1,0 +1,14 @@
+model: Qwen/Qwen3-0.6B
+tokenizer_path: /opt/model
+local_region: eu
+block_size: 32
+freshness_seconds: 5
+remote_penalty_tokens: 32
+request_timeout_seconds: 180
+regions:
+- name: eu
+  frontend: http://dynamo-demo-frontend.federation-eu.svc:8000
+  relay: dynamo-relay.federation-eu.svc:50051
+- name: us
+  frontend: http://dynamo-demo-frontend.federation-us.svc:8000
+  relay: dynamo-relay.federation-us.svc:50051
