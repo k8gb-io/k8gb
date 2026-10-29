@@ -59,24 +59,64 @@ rules:
     - 'watch'
 - apiGroups:
   - k8gb.io
-  - k8gb.absa.oss
   resources:
-  - '*'
   - gslbs
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - k8gb.io
+  resources:
+  - gslbs/status
+  verbs:
+  - get
+  - update
+  - patch
+# Legacy API group kept for migration path (k8gb.absa.oss -> k8gb.io).
+- apiGroups:
+  - k8gb.absa.oss
+  resources:
+  - gslbs
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - k8gb.absa.oss
+  resources:
+  - gslbs/status
+  verbs:
+  - update
 - apiGroups:
   - networking.k8s.io
   resources:
   - ingresses
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
 - apiGroups:
   - externaldns.k8s.io
   resources:
   - dnsendpoints
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
 - apiGroups:
   - ""
   resources:
