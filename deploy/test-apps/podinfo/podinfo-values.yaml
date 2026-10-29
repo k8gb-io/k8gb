@@ -2,5 +2,6 @@ replicaCount: 1
 
 image:
   repository: stefanprodan/podinfo
-  tag: 5.1.1
+  # Go 1.16 resolves localhost from /etc/hosts before DNS (golang/go#35305).
+  tag: 5.2.0
   pullPolicy: IfNotPresent
