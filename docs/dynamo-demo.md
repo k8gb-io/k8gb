@@ -301,17 +301,18 @@ The review used Dynamo main
 on 2026-10-25; the image uses release
 [`1.6.0 / 701da25292ec`](https://github.com/ai-dynamo/dynamo/tree/701da25292ecca8f64d770cc0b17d389200019a1).
 
-**Statuses below describe this k8gb example.** Upstream code availability does
-not mean a component is deployed or tested here. The demo uses Dynamo's frontend
-and local KV router; it does not deploy the Global Router, DC KV Relay or
-Cuckoo-filter index.
+**Statuses below describe the k8gb integration.** This baseline profile uses
+Dynamo's frontend and local KV router. The optional
+[cross-region prototype](dynamo-global-router.md) adds a real DC KV Relay and a
+custom HTTP entry consuming its Cuckoo-filter summaries. Neither profile deploys
+the upstream `dynamo.global_router` component.
 
 | Integration capability | Status in this demo | Scope and remaining work |
 | --- | --- | --- |
 | Regional DNS failover and failback | Validated with two local clusters | k8gb changes the regional entry addresses when the primary frontend becomes unavailable and recovers; real inference succeeds in the selected region |
 | KV-aware worker selection within a region | Validated in both regions | Dynamo's local KV router selects vLLM workers holding warmed prefixes; `check-kv.py` verifies worker identity and positive cached-token counts |
-| Cache visibility across regions | Planned | Deploy the upstream experimental [DC KV Relay](https://github.com/ai-dynamo/dynamo/blob/ee0120922eef6278a25fe94ad491f02aa8aa038e/docs/fern/pages/developer-guide/knowledge-base/modular-components/router/multi-dc-kv-routing.md) and connect its summaries to the upstream [Cuckoo-filter index](https://github.com/ai-dynamo/dynamo/blob/ee0120922eef6278a25fe94ad491f02aa8aa038e/lib/kv-router/src/indexer/cuckoo/README.md); neither is integrated here |
-| KV-aware request routing between regions | Planned; integration required | Connect cache lookup, region selection and request forwarding. The existing upstream [Global Router](https://github.com/ai-dynamo/dynamo/tree/ee0120922eef6278a25fe94ad491f02aa8aa038e/components/src/dynamo/global_router) selects configured pools using prompt length, latency targets and priority, without the relay's cache summaries |
+| Cache visibility across regions | Optional prototype | A nightly Dynamo Relay publishes CKF summaries to the [federation consumer](dynamo-global-router.md); snapshots, producer identity and freshness gate eligibility |
+| KV-aware request routing between regions | Optional prototype | A custom HTTP entry selects a regional frontend from cache hints and readiness; that frontend retains local worker selection. The upstream Global Router is not used |
 | Whole-region failure and WAN partition handling | Planned | Verify DNS entry failover and Dynamo's request-routing fallback independently, including stale remote cache state |
 | Real inference and cache-reuse performance | CPU inference and cache reuse validated; performance comparison pending | Qwen weights are loaded by vLLM; measure the latency benefit and time to first token separately |
 
@@ -327,7 +328,8 @@ discovery needs DynamoWorkerMetadata CRDs, EndpointSlices and RBAC within one
 Kubernetes namespace. Direct ZMQ avoids NATS. The WAN listener is plaintext gRPC;
 protected exposure requires an external TLS/mTLS proxy. Pool identity, compatible
 hash/block semantics, stream freshness and serving-ingress resolution still need
-explicit integration.
+explicit integration; the optional prototype supplies these for its pinned,
+single-model CPU profile.
 
 The [multi-DC routing proposal](https://github.com/ai-dynamo/dynamo/issues/11225)
 and [session-placement proposal](https://github.com/ai-dynamo/dynamo/issues/11403)
@@ -339,29 +341,23 @@ custom CPU image; the standard Dynamo GPU runtime image is not interchangeable.
 
 ## Next steps for k8gb + Dynamo
 
-These are proposed increments beyond the current demo. Keep additional components
+These are proposed increments beyond the baseline and optional prototype. Keep additional components
 in opt-in manifests under `deploy/dynamo-demo/`, reuse the existing clusters and
 DNS infrastructure, and leave the default local setup and core installation unchanged.
 
-1. **Share cache visibility between regions.** Select an upstream version with
-   compatible relay bindings and vLLM worker event/recovery endpoints, then deploy
-   a relay in each cluster and connect a CKF consumer. Use distinct regional pool
-   identities with compatible token hashing and block sizes. Success means warming
-   a prefix in region B makes B appear in the consumer's prefix lookup, and relay
-   restart or stream loss retires stale pool state until a fresh snapshot arrives.
-2. **Connect cache lookup to cross-region request routing.** Reuse an upstream
-   consumer/router integration when available; otherwise prototype the missing
-   request-routing component separately from k8gb. Combine cache hints with
-   readiness, load and WAN latency, map eligible pools to regional frontends, and
-   define streaming, cancellation and safe retry behavior. The acceptance scenario
-   is: warm a prefix in B, enter through A, and observe the request reaching B's
-   warm worker. k8gb continues to select a healthy entry region through DNS;
-   Dynamo's request-routing layer makes the per-request cache decision.
-3. **Test the two failure boundaries independently.** With entry region A healthy,
-   make destination B unavailable and verify the request router's fallback policy.
-   Then take entry region A offline and verify k8gb DNS failover for new connections
-   after DNS convergence. Finally, interrupt the WAN connection and verify each
-   region can serve locally while stale remote cache information is excluded.
+1. **Harden cache visibility between regions.** Extend the prototype's Relay
+   recovery checks to cache eviction, delayed publications, multiple workers and
+   runtime upgrades. Keep model, tokenizer, hash and block semantics compatible;
+   stale or incompatible summaries must remain ineligible.
+2. **Extend cross-region request routing.** Reuse an upstream consumer/router
+   integration when available. Add backend load and measured WAN latency to the
+   prototype's cache/locality heuristic, then validate more models and serving
+   topologies. k8gb continues to select a healthy entry region through DNS; the
+   request-routing layer makes the per-request cache decision.
+3. **Extend failure testing.** Go beyond Relay, frontend and entry shutdowns to
+   whole-cluster failures and asymmetric WAN partitions. Verify request-routing
+   fallback and DNS entry failover independently, and ensure each region can
+   serve locally while stale remote cache information is excluded.
    Record selected regions/workers, HTTP outcomes and recovery times, including
    [split-brain behavior](splitbrain.md).
 4. **Measure the benefit.** Compare cache-aware routing with load-only placement

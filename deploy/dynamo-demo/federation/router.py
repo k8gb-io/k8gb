@@ -244,7 +244,9 @@ async def chat(request):
                     headers=headers,
                     timeout=aiohttp.ClientTimeout(total=router.config.request_timeout_seconds, sock_connect=2),
                 )
-            except aiohttp.ClientConnectorError:
+            except (aiohttp.ClientConnectorError, aiohttp.ConnectionTimeoutError):
+                # These failures happen before sending the request. Read/header
+                # timeouts below remain ambiguous and must never be replayed.
                 region.unavailable_until = time.monotonic() + router.config.freshness_seconds
                 excluded.add(region.name)
                 continue

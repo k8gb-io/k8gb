@@ -45,6 +45,33 @@ async def next_message(stream, timeout):
     return value
 
 
+def supported_readiness(entry):
+    """Unknown dependencies quarantine the whole topology entry, not one member."""
+    known_roles = {
+        pb.WORKER_ROLE_PREFILL,
+        pb.WORKER_ROLE_DECODE,
+        pb.WORKER_ROLE_ENCODE,
+        pb.WORKER_ROLE_AGGREGATED,
+        pb.WORKER_ROLE_LEGACY,
+    }
+    known_states = {
+        pb.SERVING_READINESS_STATE_UNKNOWN,
+        pb.SERVING_READINESS_STATE_UNAVAILABLE,
+        pb.SERVING_READINESS_STATE_READY,
+    }
+    role_sets = [entry.present_roles, entry.missing_roles, entry.duplicate_role_endpoints]
+    role_sets.extend(member.roles for member in entry.members)
+    role_sets.extend(adapter.missing_roles for adapter in entry.adapters)
+    return (
+        entry.state in known_states
+        and bool(entry.members)
+        and all(member.roles for member in entry.members)
+        and all(set(roles) <= known_roles and len(roles) == len(set(roles)) for roles in role_sets)
+        and set(entry.duplicate_role_endpoints) <= {pb.WORKER_ROLE_PREFILL, pb.WORKER_ROLE_DECODE}
+        and all(adapter.state in known_states for adapter in entry.adapters)
+    )
+
+
 @dataclass
 class Pool:
     descriptor: object
@@ -78,8 +105,15 @@ class Pool:
         targets = set()
         names = set()
         for registration in descriptor.registrations:
-            if registration.target.WhichOneof("target") != "base":
+            target = registration.target.WhichOneof("target")
+            if target is None:
+                # An unset oneof can be a future target variant unknown to this
+                # schema. It invalidates this pool even beside a supported base.
+                raise InvalidPublication("missing or unknown model target")
+            if target != "base":
                 continue
+            if not registration.target.base.base_model:
+                raise InvalidPublication("empty base model target")
             if model == registration.canonical_model_id or model in registration.aliases:
                 targets.add(registration.target.base.base_model)
                 names.add(registration.canonical_model_id)
@@ -265,7 +299,12 @@ class RelayConsumer:
                     revision = update.revision
                     ready = set()
                     for entry in update.entries:
-                        if entry.state != 2 or set(entry.present_roles) != {4} or entry.missing_roles:
+                        if (
+                            not supported_readiness(entry)
+                            or entry.state != 2
+                            or set(entry.present_roles) != {4}
+                            or entry.missing_roles
+                        ):
                             continue
                         for member in entry.members:
                             if member.HasField("pool_id") and set(member.roles) == {4}:

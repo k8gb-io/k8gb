@@ -7,6 +7,7 @@ import asyncio
 import struct
 import time
 from contextlib import asynccontextmanager
+from unittest.mock import patch
 
 import aiohttp
 import grpc
@@ -16,7 +17,7 @@ import relay_pb2_grpc as rpc
 import xxhash
 from aiohttp import web
 from aiohttp.test_utils import TestServer
-from ckf import ALT_DOMAIN, HEADER, Format, Replica, sequence_hashes
+from ckf import ALT_DOMAIN, HEADER, Format, InvalidPublication, Replica, sequence_hashes
 from relay_client import MARKER, Pool, Region, RelayConsumer, dc_identity
 from router import ROUTER, Config, Router, create_app, validate_payload
 
@@ -411,3 +412,114 @@ async def test_real_grpc_producer_replacement_and_disconnect_invalidate_cache():
         consumer.cancel()
         await asyncio.gather(consumer, return_exceptions=True)
         await server.stop(0)
+
+
+@pytest.mark.asyncio
+async def test_connection_timeout_before_send_falls_back():
+    calls = []
+
+    async def handler(request):
+        calls.append(request.url.host)
+        return web.json_response({"ok": True})
+
+    async with origin(handler) as eu, origin(handler) as us:
+        app = create_app(config(eu, us), Tokenizer(), consume_relays=False)
+        async with TestServer(app) as server, aiohttp.ClientSession() as client:
+            await setup_router(app)
+            original = aiohttp.TCPConnector.connect
+
+            async def timed_out_connect(self, request, *args, **kwargs):
+                if str(request.url).startswith(us + "/v1/chat/completions"):
+                    # aiohttp converts a connector timeout into ConnectionTimeoutError,
+                    # before it has a connection on which to send this request.
+                    raise TimeoutError
+                return await original(self, request, *args, **kwargs)
+
+            with patch.object(aiohttp.TCPConnector, "connect", timed_out_connect):
+                async with client.post(
+                    server.make_url("/v1/chat/completions"),
+                    json={"model": MODEL, "messages": [{"role": "user", "content": "hello"}]},
+                ) as response:
+                    body = await response.text()
+                    assert response.status == 200, (response.status, body, calls)
+                    assert response.headers["X-Dynamo-Selected-Region"] == "eu"
+
+
+@pytest.mark.parametrize("unknown_variant", [False, True])
+def test_unknown_model_target_quarantines_pool(unknown_variant):
+    value = descriptor()
+    registration = value.registrations.add(canonical_model_id="future-model")
+    if unknown_variant:
+        registration.target.ParseFromString(b"\x1a\x00")  # Future oneof field 3.
+    with pytest.raises(InvalidPublication):
+        Pool.from_descriptor(value, "us", MODEL, 32)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("dependency", ["member_role", "adapter_state", "adapter_role"])
+async def test_unknown_readiness_dependency_quarantines_entry(dependency):
+    region = Region("us", "http://unused", "localhost:1", MODEL, 32, 5)
+    pool = add_pool(region)
+    identity = pb.RelayIdentity(drt_instance_id=1, relay_incarnation=2)
+    update = pb.ServingReadinessUpdate(
+        protocol_version=1,
+        contract_marker=MARKER,
+        relay=identity,
+        revision=1,
+        entries=[
+            pb.TopologyEntry(
+                namespace="dynamo",
+                canonical_model_id=MODEL,
+                state=2,
+                present_roles=[4],
+                members=[
+                    pb.TopologyMember(
+                        endpoint=pool.descriptor.serving_endpoint,
+                        pool_id=pool.descriptor.producer.pool_id,
+                        roles=[4],
+                    ),
+                    pb.TopologyMember(
+                        endpoint=pb.DynamoEndpointId(namespace="dynamo", component="future", endpoint="generate"),
+                        roles=[99],
+                    ),
+                ],
+            )
+        ],
+    )
+    if dependency != "member_role":
+        del update.entries[0].members[1:]
+        adapter = update.entries[0].adapters.add(canonical_model_id="future-adapter", state=2)
+        if dependency == "adapter_state":
+            adapter.state = 99
+        else:
+            adapter.missing_roles.append(99)
+
+    class Stream:
+        sent = False
+
+        async def read(self):
+            if not self.sent:
+                self.sent = True
+                return update
+            await asyncio.Event().wait()
+
+        def cancel(self):
+            pass
+
+    class Stub:
+        def SubscribeServingReadiness(self, request):
+            return Stream()
+
+    region.ready_models.clear()
+    region.readiness_updated = 0
+    task = asyncio.create_task(RelayConsumer(region).watch_readiness(Stub(), (1, 2)))
+    try:
+        for _ in range(100):
+            if region.readiness_updated:
+                break
+            await asyncio.sleep(0.01)
+        assert region.readiness_updated
+        assert region.eligible_pools() == []
+    finally:
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)

@@ -44,10 +44,11 @@ pinned Qwen chat template as the regional frontend before hashing tokens.
 
 ## Build
 
-Run from the k8gb repository root. Use Python 3.12 for the helper tools:
+Run from the k8gb repository root. Use Python 3.12 or 3.13 for the helper tools
+(the entry image uses Python 3.12):
 
 ```sh
-python3.12 -m venv /tmp/k8gb-federation-venv
+python3.13 -m venv /tmp/k8gb-federation-venv
 . /tmp/k8gb-federation-venv/bin/activate
 pip install -r deploy/dynamo-demo/federation/requirements.txt
 python -m grpc_tools.protoc -I deploy/dynamo-demo/federation \
@@ -64,13 +65,25 @@ docker build -t k8gb-dynamo-global-router:prototype deploy/dynamo-demo/federatio
 ```
 
 The second image packages only the HTTP entry, tokenizer and gRPC consumer.
-Import both images into both playground clusters, or publish them to your
-registry and adjust `CPU_IMAGE` / `ROUTER_IMAGE` in `federation/render.py`.
+Import both images into both playground clusters:
+
+```sh
+k3d image import k8gb-dynamo-cpu:1.7.0.dev20261026 k8gb-dynamo-global-router:prototype -c test-gslb1
+k3d image import k8gb-dynamo-cpu:1.7.0.dev20261026 k8gb-dynamo-global-router:prototype -c test-gslb2
+```
+
+For other clusters, publish them to your registry and adjust `CPU_IMAGE` /
+`ROUTER_IMAGE` in `federation/render.py`.
 
 ## Two clusters with k8gb
 
 Start with the two k3d playground clusters and Dynamo operator installation
-from the baseline demo. Save one router configuration per region, following
+from the baseline demo. Allow space for CPU images on every k3d node; a 120 GiB
+Docker VM disk provides room for the builds, imports and model files. Disk
+pressure can garbage-collect unused imported images and prevent replacement
+pods from starting.
+
+Save one router configuration per region, following
 `federation/config.example.yaml`. That example's service names work for two
 namespaces in one cluster. For two clusters, use addresses reachable from pods
 in both clusters:
@@ -96,6 +109,27 @@ The `--with-gslb` profile exposes Relay on NodePort 30551 and the direct regiona
 frontend on NodePort 30800; it routes the existing Ingress to the new HTTP entry.
 These ports must be free in the demo clusters.
 
+Find the nodes' `INTERNAL-IP` addresses with:
+
+```sh
+kubectl --context k3d-test-gslb1 get nodes -o wide
+kubectl --context k3d-test-gslb2 get nodes -o wide
+```
+
+When upgrading a running baseline demo, stop its frontend and workers before
+applying the new profile to avoid loading old and new models simultaneously:
+
+```sh
+for context in k3d-test-gslb1 k3d-test-gslb2; do
+  kubectl --context "$context" -n dynamo-demo patch dgd dynamo-demo --type=json \
+    -p '[{"op":"test","path":"/spec/components/0/name","value":"Frontend"},{"op":"test","path":"/spec/components/1/name","value":"worker"},{"op":"replace","path":"/spec/components/0/replicas","value":0},{"op":"replace","path":"/spec/components/1/replicas","value":0}]'
+  kubectl --context "$context" -n dynamo-demo wait --for=delete pod \
+    -l nvidia.com/dynamo-graph-deployment-name=dynamo-demo --timeout=180s
+done
+```
+
+Render and apply the regional profiles:
+
 ```sh
 python deploy/dynamo-demo/federation/render.py \
   --config /tmp/federation-eu.yaml --with-gslb > /tmp/federation-eu-resources.yaml
@@ -103,6 +137,13 @@ python deploy/dynamo-demo/federation/render.py \
   --config /tmp/federation-us.yaml --with-gslb > /tmp/federation-us-resources.yaml
 kubectl --context k3d-test-gslb1 apply -f /tmp/federation-eu-resources.yaml
 kubectl --context k3d-test-gslb2 apply -f /tmp/federation-us-resources.yaml
+
+for context in k3d-test-gslb1 k3d-test-gslb2; do
+  kubectl --context "$context" -n dynamo-demo wait \
+    dgd/dynamo-demo --for=condition=Ready --timeout=1200s
+  kubectl --context "$context" -n dynamo-demo rollout status \
+    deployment/dynamo-global-router --timeout=300s
+done
 ```
 
 This intentionally upgrades the demo DGD's runtime and changes its Ingress
@@ -150,14 +191,47 @@ The check warms a long prefix directly in US, waits for a fresh remote CKF
 match of at least 512 tokens, sends the same request through EU, and asserts
 `X-Dynamo-Selected-Region: us` plus positive
 `usage.prompt_tokens_details.cached_tokens`. It also checks SSE reaches
-`data: [DONE]`. Use a fresh prefix or cold EU worker for repeat demonstrations;
-once both regions have the same prefix, the locality penalty prefers EU.
+`data: [DONE]`. Each run generates a fresh prefix so previously warmed EU caches
+do not affect the demonstration.
 
 For a frontend failure, set the US Frontend's `replicas` to zero in its DGD.
 The entry health poll should remove US and serve new requests locally. For a
 metadata outage, scale the US `dynamo-relay` Deployment to zero: its hints must
 become ineligible immediately on stream closure, or within five seconds for
 a silent connection loss. Restore the replica counts after testing.
+
+## Demonstrate DNS entry failover
+
+Create the client pod and use the global-hostname curl command from
+[step 2 of the baseline guide](dynamo-demo.md#2-send-a-request-through-the-global-hostname).
+Add `-D -` to curl to see `X-Dynamo-Entry-Region` and
+`X-Dynamo-Selected-Region`: the entry region follows DNS, while the selected
+region follows the request's cache hints. Initially the entry should be `eu`.
+
+Stop the EU entry:
+
+```sh
+kubectl --context k3d-test-gslb1 -n dynamo-demo scale \
+  deployment/dynamo-global-router --replicas=0
+dig @127.0.0.1 -p 1053 dynamo.cloud.example.com +short +tcp
+```
+
+Repeat curl and dig until the response has `X-Dynamo-Entry-Region: us` and
+BIND9 returns secondary ingress addresses. Temporary HTTP errors are possible
+during convergence. Repeat curl with `"stream":true` to verify streaming too.
+
+Restore the entry and wait for rollout:
+
+```sh
+kubectl --context k3d-test-gslb1 -n dynamo-demo scale \
+  deployment/dynamo-global-router --replicas=1
+kubectl --context k3d-test-gslb1 -n dynamo-demo rollout status \
+  deployment/dynamo-global-router --timeout=300s
+```
+
+Repeat curl and dig until the entry header and DNS addresses return to EU.
+Restore the entry even if you stop the walkthrough early. This tests entry
+failure; existing streams are not migrated and DNS caches affect recovery time.
 
 ## Routing and failure behavior
 
@@ -194,10 +268,34 @@ python -m pytest -q deploy/dynamo-demo/federation/test_router.py
 
 Tests include CBI1 corruption and partial snapshots, stale hints/readiness,
 incompatible domains, local autonomy, real gRPC producer replacement, and real
-HTTP SSE forwarding, connection failure fallback and no replay after partial
-responses.
+HTTP SSE forwarding, connection failure/timeout fallback, unsupported model
+targets and readiness dependencies, and no replay after partial responses.
 
 ## Measured prototype validation
+
+### Two k3d clusters
+
+On 2026-10-29, the NodePort/Ingress/Gslb profile passed acceptance in the existing
+two-cluster playground on ARM64 Colima: k3s v1.36.2-k3s1, k8gb v1.0.0,
+Dynamo operator 1.6.0, runtime 1.7.0.dev20261026 and vLLM CPU 0.31.0.
+The VM had 8 CPUs, 24 GiB RAM and a 120 GiB disk, with one real Qwen worker per
+region. Both clusters share that VM; this does not measure WAN behavior.
+
+| Check | Observed result |
+| --- | --- |
+| Warm US, enter EU | US selected from a 992-token CKF match; EU match was zero |
+| Forwarded inference and SSE | Same US worker as warm-up; generated `hello`, with 992 cached tokens out of 1014 prompt tokens |
+| Stop and restart US Relay | US hints withdrawn, EU served locally, then a fresh snapshot restored remote routing |
+| Stop and restore US frontend | US excluded while EU continued inference; remote routing recovered afterwards |
+| Global hostname | DNS selected the EU entry, which forwarded the warmed request to US |
+| Stop EU entry | HTTP entry and delegated BIND9 addresses moved to US; regular and streaming inference succeeded |
+| Restore EU entry | HTTP entry and BIND9 addresses returned to EU; the warmed request still executed in US |
+| Worker continuity | Both worker pod identities and restart counts remained unchanged during the successful run |
+
+The regression suite passes 25 cases, including connection-establishment timeout
+fallback and rejection of unknown model targets and readiness dependencies.
+
+### Initial single-cluster validation
 
 On 2026-10-27, this profile was exercised in an isolated Linux ARM64 Kind cluster
 (Kubernetes 1.30.13), with two separate Kubernetes namespaces representing EU
@@ -221,8 +319,7 @@ in the baseline guide.
 
 The partition affected only the EU entry pod's traffic to the two US service
 addresses. It did not simulate host loss, inter-datacenter latency, asymmetric
-routing in both directions, or a whole-region failure. Four-worker execution,
-x86-64 inference and DNS failover of the new HTTP entry still need a separate
-two-cluster acceptance run. The two-cluster NodePort/Ingress/Gslb profile is
-provided for that run; its regional-origin Service selector was checked against
-the operator-created frontend endpoints.
+routing in both directions, or a whole-region failure. Four-worker execution
+of this nightly profile, x86-64 inference and production WAN behavior remain
+unvalidated. The two-cluster run above adds entry DNS failover and failback;
+it does not establish a recovery-time SLO.

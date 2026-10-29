@@ -6,6 +6,7 @@
 import argparse
 import json
 import time
+import uuid
 from urllib.request import Request, urlopen
 
 MODEL = "Qwen/Qwen3-0.6B"
@@ -17,7 +18,8 @@ def payload():
         "messages": [
             {
                 "role": "system",
-                "content": ("This is a routing demonstration. Preserve this shared prefix in the KV cache. " * 64),
+                "content": f"Run {uuid.uuid4().hex}. "
+                + "This is a routing demonstration. Preserve this shared prefix in the KV cache. " * 64,
             },
             {"role": "user", "content": "Reply with exactly: hello"},
         ],
