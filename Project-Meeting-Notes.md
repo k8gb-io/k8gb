@@ -27,7 +27,63 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>October 14, 2026 #103</strong></summary>
+<details open><summary><strong>October 28, 2026 #104</strong></summary>
+
+## October 28, 2026 #104
+
+**Attendees**
+- [@itsfarhan](https://github.com/itsfarhan)
+- [@infbase](https://github.com/infbase)
+- [@elohmrow](https://github.com/elohmrow)
+
+**Backlog**
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**](https://zoom.us/rec/share/CIAvF_a5PcTM_wIiqHHStqIkRw1dahXiapG-dCQ37qc_P__o9E5CiUPLpeB_87N0.FwGqkRzJYEstJT-S) | [**On YouTube**](https://youtu.be/RkXa8utL6Q0)
+
+**Agenda**
+
+- <u>News</u>
+  - [@itsfarhan](https://github.com/itsfarhan) is working hard on the [Security Slam Fall 2026: OSPS Baseline L2 work plan](https://github.com/k8gb-io/k8gb/issues/2563) ... let's help! Badges earned so far:
+    - [Cleaner, Chronicler and CRA Readiness](https://securityslam.com/slam26/participating-projects)
+    - Next up: Inspector Badge - work started here [Update self-assessment.md to the OpenSSF self-assessment template](https://github.com/k8gb-io/k8gb/pull/2574)
+  - Yury gave a great talk at Sovereign Cloud Days last week: [Who Controls the Failover? Sovereign Global Traffic Management with Kubernetes](https://www.sovereign-cloud-days.eu/en/event/sovereign-cloud-days-2026-1/track/who-controls-the-failover-sovereign-global-traffic-management-with-kubernetes-63) ... arguing that a truly “sovereign” cloud also controls its own failover, and showing how k8gb can switch traffic between Kubernetes clusters using DNS without depending on any one cloud provider. Timely, given Google's recent "power event" ;) [Here are the slides](https://drive.google.com/file/d/1XAC71NuRYxLEdvfOJgAQFmKvMDb_sOfs/view?usp=sharing)
+- <u>Community Contributions</u>
+  - CLO Monitor - Agent Readiness report
+    - [@higgsboson1710](https://github.com/higgsboson1710) --> [docs: add AGENTS.md for CLOMonitor Agent Readiness](https://github.com/k8gb-io/k8gb/pull/2564)
+    - [@itsfarhan](https://github.com/itsfarhan) --> [docs: publish llms.txt and Markdown pages for agent readiness](https://github.com/k8gb-io/k8gb/pull/2569)
+  - [@michalcukierman](https://github.com/michalcukierman) ... these relate to per-application zone delegation
+    - [fix: allow local delegation withdrawal while peers remain](https://github.com/k8gb-io/k8gb/pull/2560) ... fixes a bug in k8gb where a cluster leaving a dynamic zone could have its ZoneDelegation held in a terminating state by peers that were still serving the zone, which blocked it from rejoining under the same name. With the fix, the cluster can withdraw on its own once the parent DNS confirms its NS and glue records are gone.
+    - [fix: resolve application A records at the zone apex](https://github.com/k8gb-io/coredns-crd-plugin/pull/170) ... fixes the CoreDNS plugin returning empty answers to A queries for a zone’s apex, which broke per-application delegation where the app hostname is itself the delegated zone (e.g. project.edge.example.com). Those queries now resolve to the app’s healthy IP addresses.
+  - [k8gb-ui](https://github.com/steemax/k8gb-ui) ... a web console for viewing and managing k8gb Gslb resources across several Kubernetes clusters from one place
+- <u>Other</u>
+  - [external-dns has a new CRD](https://github.com/kubernetes-sigs/external-dns/blob/2abb229c77453b29273345443e636d2cc2d78103/config/crd/standard/dnsendpoints.externaldns.k8s.io.yaml) ... https://github.com/kubernetes-sigs/external-dns/pull/5372 ... these are meant to [allow finer grained control over endpoint.DNSEndpoint custom resource](https://github.com/kubernetes-sigs/external-dns/issues/4575)
+  - [Add opt-in NVIDIA Dynamo routing and failover demo](https://github.com/k8gb-io/k8gb/pull/2579) ... this is a follow-on / companion demo to our earlier [AI Inference Resilience Demo](https://github.com/k8gb-io/k8gb/blob/master/docs/ai-inference-demo.md) ... adds an optional demo showing k8gb failing over AI inference traffic between two regions: each region runs a small Qwen model on NVIDIA Dynamo, and when the primary region’s frontend goes down, DNS sends requests to the other one.
+  - [PRs since last time](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aclosed+closed%3A%3E%40today-2w) 
+- <u>KubeCon</u>
+  - [Lightning Talk](https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/program/schedule/?id=1289881)
+  - Booth
+    - Tuesday 3:00 PM – 7:00 PM, Wednesday 1:55 PM – 5:00 PM, Thursday 12:25 PM – 2:00 PM
+    - Kiosk Number: P-8B
+    - Location: Solutions Showcase | Level 1 | Hall 5
+
+**Actions**
+- [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
+- some [old, forgotten actions](#old-actions) 😭 
+- figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF - FOSSA looks green now
+- https://github.com/k8gb-io/k8gb/actions/runs/38555953119/job/115825003921 - scorecard workflow/job to fix in master
+- k8gb 1.1 release to include latest security fixes
+- https://github.com/k8gb-io/coredns-crd-plugin security release first to include into 1.1
+- figure out how to run the same scanner as artifact hub before the release https://artifacthub.io/packages/helm/k8gb/k8gb?modal=security-report to catch issues early
+
+**Nice-to-Haves**
+- Reference platforms: [NeoNephos](https://github.com/k8gb-io/k8gb/issues/2535), [KEDA](https://github.com/k8gb-io/k8gb/issues/2536), Sidero, etc.
+- KEDA+k8gb integration talk submitted to Sovereign Days together with Jirka [@jkremser](https://github.com/jkremser)
+
+</details>
+
+<details><summary><strong>October 14, 2026 #103</strong></summary>
 
 ## October 14, 2026 #103
 
@@ -40,7 +96,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - [Issue Review](https://github.com/k8gb-io/k8gb/issues)
 - [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
 
-[**Zoom Recording**]() | [**On YouTube**]()
+[**Zoom Recording**](https://zoom.us/rec/share/bd8p3FWC4nvlsTtVFmQ1xed0cGWfq6cVjoiDkKjXgsl52uksETDNdT8ubt3etjQ_.e9XOx0FfFBmx3Vga) | [**On YouTube**](https://youtu.be/NtmiDRpjPT0)
 
 **Agenda**
 
@@ -72,7 +128,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 **Nice-to-Haves**
 - Reference platforms: [NeoNephos](https://github.com/k8gb-io/k8gb/issues/2535), [KEDA](https://github.com/k8gb-io/k8gb/issues/2536), Sidero, etc.
-- KEDA+k8gb integration talk submitted to Sovereign Days togethere with Jirka [@jkremser](https://github.com/jkremser)
+- KEDA+k8gb integration talk submitted to Sovereign Days together with Jirka [@jkremser](https://github.com/jkremser)
 </details>
 
 <details><summary><strong>September 30, 2026 #102</strong></summary>
