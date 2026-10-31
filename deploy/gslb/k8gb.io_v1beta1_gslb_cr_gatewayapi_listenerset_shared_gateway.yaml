@@ -1,0 +1,165 @@
+# Two tenant ListenerSets resolve to the same Gateway in another namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: listenerset-infra
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: listenerset-tenant
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-options
+  namespace: listenerset-infra
+data:
+  # Avoid competing with other Istio Gateways for k3s ServiceLB host port 15021.
+  service: |
+    spec:
+      ports:
+      - "$patch": delete
+        port: 15021
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: shared
+  namespace: listenerset-infra
+spec:
+  gatewayClassName: istio
+  infrastructure:
+    parametersRef:
+      group: ""
+      kind: ConfigMap
+      name: gateway-options
+  allowedListeners:
+    namespaces:
+      from: Selector
+      selector:
+        matchLabels:
+          kubernetes.io/metadata.name: listenerset-tenant
+  # Application listeners are delegated to the tenant's ListenerSets.
+  listeners:
+    - name: base
+      protocol: HTTP
+      port: 38082
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: http
+  namespace: listenerset-tenant
+spec:
+  parentRef:
+    name: shared
+    namespace: listenerset-infra
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 38083
+      hostname: shared-listenerset.cloud.example.com
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: http-alt
+  namespace: listenerset-tenant
+spec:
+  parentRef:
+    name: shared
+    namespace: listenerset-infra
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 38084
+      hostname: shared-listenerset.cloud.example.com
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+  namespace: listenerset-tenant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: podinfo
+  template:
+    metadata:
+      labels:
+        app: podinfo
+    spec:
+      containers:
+        - name: podinfo
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: podinfo
+  namespace: listenerset-tenant
+spec:
+  selector:
+    app: podinfo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app
+  namespace: listenerset-tenant
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: http
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: http-alt
+  hostnames:
+    - shared-listenerset.cloud.example.com
+  rules:
+    - backendRefs:
+        - name: podinfo
+          port: 8080
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: app
+  namespace: listenerset-tenant
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    name: app
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
