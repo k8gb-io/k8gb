@@ -2,8 +2,8 @@ name: Terratest for n clusters
 
 on:
   pull_request:
-    types:
-      - labeled
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ env:
 jobs:
   terratest-n-clusters:
     runs-on: ubuntu-26.04
-    if: ${{ github.event.label.name == 'heavy-tests' }}
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') }}
     strategy:
       matrix:
         k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
@@ -98,3 +98,18 @@ jobs:
         with:
           name: terratest-logs-${{ matrix.k8s-version }}
           path: ${{ github.workspace }}/tmp/terratest
+
+  required:
+    name: CI / Multi-cluster
+    if: ${{ always() }}
+    needs: [terratest-n-clusters]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+      - name: Reject failed or cancelled jobs
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
