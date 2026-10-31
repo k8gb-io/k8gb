@@ -2,7 +2,7 @@
 
 The default branch's [active ruleset](https://github.com/k8gb-io/k8gb/rules/26274974)
 is the authoritative record of merge requirements. The desired configuration
-including CI gates is tracked in [master-ruleset.json](../.github/master-ruleset.json).
+including CI gates is tracked in [master-ruleset.json](master-ruleset.json).
 
 Each pull-request workflow reports a stable `CI / …` check. Its final job uses
 `always()`, depends on all other jobs in that workflow, and fails if any dependency
