@@ -462,9 +462,6 @@
                 "log": {
                     "$ref": "#/definitions/k8gbLog"
                 },
-                "splitBrainCheck": {
-                    "type": "boolean"
-                },
                 "metricsAddress": {
                     "type": "string",
                     "minLength": 1
