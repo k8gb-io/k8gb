@@ -151,6 +151,16 @@ jobs:
           args: release --clean ${{ (!contains(github.ref_name, 'rc') && github.event_name != 'workflow_dispatch') && '--release-notes=changes' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Images have been pushed, but the GitHub release is still a draft.
+      # A failed check must be resolved before publishing the draft release.
+      - name: Verify released operator image contents on both architectures
+        run: |
+          version=$(jq -r .version dist/metadata.json)
+          image="ghcr.io/k8gb-io/k8gb:v${version}"
+          for arch in amd64 arm64; do
+            docker pull --platform "linux/${arch}" "$image"
+            bash hack/verify-image.sh "$image" "linux/${arch}"
+          done
       - name: Get container info
         id: container_info
         run: |
