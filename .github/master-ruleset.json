@@ -41,11 +41,11 @@
             "integration_id": 1861
           },
           {
-            "context": "CI / Go",
+            "context": "Inspect packages",
             "integration_id": 15368
           },
           {
-            "context": "CI / FOSSA",
+            "context": "build",
             "integration_id": 15368
           },
           {
@@ -57,19 +57,19 @@
             "integration_id": 15368
           },
           {
-            "context": "CI / Upgrade",
+            "context": "upgrade-testing",
             "integration_id": 15368
           },
           {
-            "context": "CI / CodeQL",
+            "context": "Analyze (go)",
             "integration_id": 15368
           },
           {
-            "context": "CI / Helm schema",
+            "context": "Check values.yaml and its schema in PR",
             "integration_id": 15368
           },
           {
-            "context": "CI / Istio",
+            "context": "terratest-istio",
             "integration_id": 15368
           },
           {

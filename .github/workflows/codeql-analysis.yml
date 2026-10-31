@@ -14,9 +14,6 @@ name: "CodeQL"
 on:
   push:
     branches: [ master ]
-    paths:
-       - '**.go'
-       - '.github/workflows/codeql-analysis.yml'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ master ]
@@ -93,18 +90,3 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
-
-  required:
-    name: CI / CodeQL
-    if: ${{ always() }}
-    needs: [analyze]
-    runs-on: ubuntu-latest
-    permissions: {}
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: block
-      - name: Reject failed or cancelled jobs
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
-        run: exit 1

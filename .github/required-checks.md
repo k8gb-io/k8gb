@@ -2,38 +2,38 @@
 
 The default branch's [active ruleset](https://github.com/k8gb-io/k8gb/rules/26274974)
 is the authoritative record of merge requirements. The desired configuration
-including CI gates is tracked in [master-ruleset.json](master-ruleset.json).
+including CI requirements is tracked in [master-ruleset.json](master-ruleset.json).
 
-Each pull-request workflow reports a stable `CI / …` check. Its final job uses
-`always()`, depends on all other jobs in that workflow, and fails if any dependency
-failed or was cancelled. It accepts intentional skips. This covers every matrix
-entry without putting Kubernetes versions into the required check names.
+Normal CI runs on every pull request, including documentation changes. There are
+no path filters or change-detection jobs. Branch push runs are limited to `master`
+to avoid duplicating PR runs. Chainsaw also runs on tag pushes, and CodeQL runs
+weekly.
 
-Path filtering happens inside the workflow through the pinned
-`fkirc/skip-duplicate-actions` action. It can reuse successful checks from the
-commit history when only ignored files changed. The workflow itself still runs
-on every pull request, so documentation changes receive a completed gate rather
-than an indefinitely pending check. CodeQL runs on every pull request so that
-its separate security-results check is always available too.
+Most existing job checks are required directly. Only Terratest, Chainsaw, and
+multi-cluster testing have final gates, so Kubernetes versions do not appear in
+the required check names. Each gate uses `always()`, depends on its matrix job,
+and fails if that job failed or was cancelled. It accepts intentional skips.
+CodeQL's fixed Go analysis job and its separate security-results check are both
+required.
 
 | Required check | What it covers |
 | --- | --- |
 | `DCO` | Commit sign-offs, reported by the DCO GitHub App |
-| `CI / Go` | Change detection, lint, license headers, and Go tests |
-| `CI / FOSSA` | Change detection and license scanning |
-| `CI / Terratest` | Change detection and the selected Kubernetes test matrix |
-| `CI / Chainsaw` | Change detection and the selected Kubernetes test matrix |
-| `CI / Upgrade` | Change detection and upgrade testing |
-| `CI / CodeQL` | CodeQL analysis job completion |
+| `Inspect packages` | Lint, license headers, and Go tests |
+| `build` | FOSSA license scanning |
+| `CI / Terratest` | The selected Kubernetes test matrix |
+| `CI / Chainsaw` | The selected Kubernetes test matrix |
+| `upgrade-testing` | Upgrade testing |
+| `Analyze (go)` | CodeQL analysis job completion |
 | `CodeQL` | Security results reported by the GitHub code scanning app |
-| `CI / Helm schema` | Change detection and Helm values/schema validation |
-| `CI / Istio` | Istio tests when the `istio` label is present |
+| `Check values.yaml and its schema in PR` | Helm values/schema validation |
+| `terratest-istio` | Istio tests when the `istio` label is present |
 | `CI / Multi-cluster` | Multi-cluster tests when the `heavy-tests` label is present |
 
 The existing `renovate` label exclusions for Terratest and upgrade testing remain
 in place. Label-selected Istio and multi-cluster tests rerun on subsequent commits,
-not only when a label is first applied. The gate jobs have no token permissions
-and do not check out or run repository code.
+not only when a label is first applied. The three gate jobs have no token
+permissions and do not check out or run repository code.
 
 ## Rollout
 
@@ -42,7 +42,7 @@ and do not check out or run repository code.
    an up-to-date branch, linear history, and protection against force pushes and
    deletion. There are no bypass actors.
 2. Compare the live ruleset with the tracked configuration, preserving any
-   intervening administrator changes. Then enable the CI gates:
+   intervening administrator changes. Then enable the additional required checks:
 
    ```sh
    gh api repos/k8gb-io/k8gb/rulesets/26274974 \
@@ -50,7 +50,7 @@ and do not check out or run repository code.
    gh api repos/k8gb-io/k8gb/rules/branches/master
    ```
 
-3. Update existing PR branches from `master` so they report the new gates. Keep
+3. Update existing PR branches from `master` so they report all required checks. Keep
    the classic branch protection rule during verification; both sets of rules
    apply. The `gh-pages` rule is managed separately.
 4. Publish a new OSPS Baseline result:

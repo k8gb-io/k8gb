@@ -1,11 +1,7 @@
 name: Golang lint, golic and test
 on:
   push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+    branches: [master]
   pull_request:
     branches:
       - master
@@ -13,36 +9,12 @@ permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
 
 jobs:
-  skip-check:
-    name: Detect changes (Go)
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: block
-          allowed-endpoints: >-
-            api.github.com:443
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578 # v5.3.2
-        with:
-          skip_after_successful_duplicate: 'true'
-          do_not_skip: '["workflow_dispatch", "schedule"]'
-          paths_ignore: '["**/*.md", "**/*.svg", "**/*.drawio", ".spelling"]'
-
   go-inspect:
     permissions:
       contents: read  # for actions/checkout to fetch code
       pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
     name: Inspect packages
     runs-on: ubuntu-26.04
-    needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
       # Harden Runner also drops public UDP/53 in audit mode. Keep this job exempt until
       # controllers/utils/dns_test.go uses local DNS fixtures; otherwise tests fail or skip.
@@ -63,18 +35,3 @@ jobs:
           golic inject --dry -x -t apache2
       - name: go test
         run: go test ./...
-
-  required:
-    name: CI / Go
-    if: ${{ always() }}
-    needs: [skip-check, go-inspect]
-    runs-on: ubuntu-latest
-    permissions: {}
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: block
-      - name: Reject failed or cancelled jobs
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
-        run: exit 1

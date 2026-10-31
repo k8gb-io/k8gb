@@ -88,18 +88,3 @@ jobs:
         with:
           name: terratest-logs
           path: ${{ github.workspace }}/tmp/terratest
-
-  required:
-    name: CI / Istio
-    if: ${{ always() }}
-    needs: [terratest-istio]
-    runs-on: ubuntu-latest
-    permissions: {}
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: block
-      - name: Reject failed or cancelled jobs
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
-        run: exit 1

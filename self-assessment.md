@@ -215,7 +215,7 @@ In order to secure the SDLC from development to deployment, the following measur
   - Disable force pushes and branch deletion
   - Signed commits, Code Owner reviews, approval of the most recent reviewable push, and conversation resolution are not required
   - The [active master ruleset](https://github.com/k8gb-io/k8gb/rules/26274974) requires the DCO app's check and an up-to-date branch, with no bypass actors
-  - Stable CI gates and their activation procedure are documented in [Required pull-request checks](.github/required-checks.md); the live ruleset records which checks are enforced
+  - Required CI checks and their activation procedure are documented in [Required pull-request checks](.github/required-checks.md); the live ruleset records which checks are enforced
   - The classic branch protection rule remains in place alongside the ruleset during rollout
 
 - Contributions:
