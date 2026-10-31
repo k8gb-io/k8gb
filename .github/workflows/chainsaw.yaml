@@ -6,22 +6,12 @@ on:
       - master
     tags:
       - '**'
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
   pull_request:
     branches:
       - master
     # The specific activity types are listed here to include "labeled" and "unlabeled"
     # (which are not included by default for the "pull_request" trigger).
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
 permissions:
   contents: read
 
@@ -157,3 +147,18 @@ jobs:
         with:
           name: chainsaw-logs-${{ matrix.k8s-version }}
           path: ${{ github.workspace }}/tmp/chainsaw
+
+  required:
+    name: CI / Chainsaw
+    if: ${{ always() }}
+    needs: [chainsaw]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+      - name: Reject failed or cancelled jobs
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1

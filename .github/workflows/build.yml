@@ -1,53 +1,20 @@
 name: Golang lint, golic and test
 on:
   push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+    branches: [master]
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
 permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
 
 jobs:
-  skip-check:
-    permissions:
-      actions: write  # for fkirc/skip-duplicate-actions to skip or stop workflow runs
-      contents: read  # for fkirc/skip-duplicate-actions to read and compare commits
-    runs-on: ubuntu-latest
-    name: Skip the job?
-    outputs:
-          should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-      with:
-        egress-policy: block
-        allowed-endpoints: >-
-          api.github.com:443
-
-    - id: skip_check
-      uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578 # v5.3.2
-      with:
-        skip_after_successful_duplicate: 'true'
-        do_not_skip: '["workflow_dispatch", "schedule"]'
-
   go-inspect:
     permissions:
       contents: read  # for actions/checkout to fetch code
       pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
     name: Inspect packages
     runs-on: ubuntu-26.04
-    needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     steps:
       # Harden Runner also drops public UDP/53 in audit mode. Keep this job exempt until
       # controllers/utils/dns_test.go uses local DNS fixtures; otherwise tests fail or skip.

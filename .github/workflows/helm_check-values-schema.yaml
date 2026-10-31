@@ -5,10 +5,6 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - 'chart/k8gb/values.yaml'
-      - 'chart/k8gb/values.schema.json'
-      - '.github/workflows/helm_check-values-schema.yaml'
 permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
 

@@ -2,22 +2,13 @@ name: Terratest
 
 on:
   push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+    branches: [master]
   pull_request:
     branches:
       - master
     # The specific activity types are listed here to include "labeled" and "unlabeled"
     # (which are not included by default for the "pull_request" trigger).
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
 permissions:
   contents: read
 
@@ -25,37 +16,9 @@ env:
   K3D_VERSION: v5.8.3
 
 jobs:
-  skip-check:
-    runs-on: ubuntu-latest
-    name: Skip the job?
-    outputs:
-          should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-      with:
-        egress-policy: block
-        allowed-endpoints: >-
-          api.github.com:443
-
-    - id: skip_check
-      uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578 # v5.3.2
-      with:
-        skip_after_successful_duplicate: 'true'
-        do_not_skip: '["workflow_dispatch", "schedule"]'
-
   terratest:
     runs-on: ubuntu-26.04
-    needs: skip-check
-    if: >-
-      ${{
-        !contains(github.event.pull_request.labels.*.name, 'renovate') &&
-        (
-          needs.skip-check.outputs.should_skip != 'true' ||
-          (github.event.action == 'labeled' && github.event.label.name == 'heavy-tests') ||
-          (github.event.action == 'unlabeled' && github.event.label.name == 'renovate')
-        )
-      }}
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'renovate') }}
     strategy:
       matrix:
         k8s-version: ${{ contains(github.event.pull_request.labels.*.name, 'heavy-tests') && fromJSON('["v1.32.11-k3s1","v1.33.7-k3s1","v1.34.3-k3s1"]') || fromJSON('["v1.34.3-k3s1"]') }}
@@ -136,3 +99,18 @@ jobs:
         with:
           name: terratest-logs-${{ matrix.k8s-version }}
           path: ${{ github.workspace }}/tmp/terratest
+
+  required:
+    name: CI / Terratest
+    if: ${{ always() }}
+    needs: [terratest]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: block
+      - name: Reject failed or cancelled jobs
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1

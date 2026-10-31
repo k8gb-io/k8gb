@@ -2,19 +2,10 @@ name: FOSSA License Scanning
 
 on:
   push:
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
+    branches: [master]
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '**.md'
-      - '**.svg'
-      - '**.drawio'
-      - '.spelling'
 permissions:
   contents: read
 

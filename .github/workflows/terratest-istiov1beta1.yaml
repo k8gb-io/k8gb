@@ -2,8 +2,8 @@ name: Terratest for istio's v1beta1 API version
 
 on:
   pull_request:
-    types:
-      - labeled
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ env:
 jobs:
   terratest-istio:
     runs-on: ubuntu-26.04
-    if: ${{ github.event.label.name == 'istio' }}
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'istio') }}
     steps:
       # Keep Terratest exempt: Harden Runner sinkholes localhost DNS lookups
       # used by Podinfo health probes, preventing the test pods from becoming ready.

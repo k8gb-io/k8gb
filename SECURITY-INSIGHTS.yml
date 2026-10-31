@@ -152,8 +152,9 @@ repository:
             location: https://github.com/k8gb-io/k8gb/actions/workflows/codeql-analysis.yml
             predicate-uri: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
         comment: |
-          Runs on pull requests and pushes to master that change Go code, and
-          weekly on a schedule. Results go to GitHub code scanning.
+          Runs on every pull request, on pushes to master, and weekly. Reports
+          the Go analysis job check and separate security results through
+          GitHub code scanning.
       - name: OpenSSF Scorecard
         type: other
         rulesets:
@@ -185,3 +186,6 @@ repository:
           Scans the repository against the OSPS Baseline at Maturity Level 2
           weekly and on demand, and publishes the signed result to grc.store
           (see .github/workflows/publish-to-grc-store.yml).
+          Manual-review evidence for privileged workflows, external interfaces,
+          self-assessment coverage, and advisory publication is recorded at
+          https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#osps-baseline-review-evidence.

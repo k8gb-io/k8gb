@@ -1,0 +1,89 @@
+{
+  "name": "master protection",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [],
+  "conditions": {
+    "ref_name": {
+      "include": [
+        "refs/heads/master"
+      ],
+      "exclude": []
+    }
+  },
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "required_linear_history"
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_approving_review_count": 1,
+        "required_review_thread_resolution": false,
+        "require_extra_approval_for_unattributed_changes": false
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "required_status_checks": [
+          {
+            "context": "DCO",
+            "integration_id": 1861
+          },
+          {
+            "context": "Inspect packages",
+            "integration_id": 15368
+          },
+          {
+            "context": "build",
+            "integration_id": 15368
+          },
+          {
+            "context": "CI / Terratest",
+            "integration_id": 15368
+          },
+          {
+            "context": "CI / Chainsaw",
+            "integration_id": 15368
+          },
+          {
+            "context": "upgrade-testing",
+            "integration_id": 15368
+          },
+          {
+            "context": "Analyze (go)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Check values.yaml and its schema in PR",
+            "integration_id": 15368
+          },
+          {
+            "context": "terratest-istio",
+            "integration_id": 15368
+          },
+          {
+            "context": "CI / Multi-cluster",
+            "integration_id": 15368
+          },
+          {
+            "context": "CodeQL",
+            "integration_id": 57789
+          }
+        ],
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": false
+      }
+    }
+  ]
+}
