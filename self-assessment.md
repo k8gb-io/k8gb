@@ -2,7 +2,7 @@
 
 Security reviewers: Yury Tsarev, Jirka Kremser
 
-Last reviewed: 2026-10-25. This revision follows the [OpenSSF security self-assessment template](https://security-assessments.openssf.org/self-assessment/template/self-assessment/) and corrects details that have changed since the 2025 version. It is a draft until the maintainers confirm it, and open questions are marked `TODO(maintainer)`.
+Last reviewed: 2026-10-31. This revision follows the [OpenSSF security self-assessment template](https://security-assessments.openssf.org/self-assessment/template/self-assessment/) and corrects details that have changed since the 2025 version. Remaining hardening opportunities and documentation gaps are described in the relevant sections.
 
 This document provides a self-assessment of the k8gb project following the guidelines outlined by the CNCF TAG Security and Compliance group and the OpenSSF. The purpose is to evaluate k8gb’s current security posture and alignment with best practices, ensuring that it is suitable for adoption at a CNCF incubation level.
 
@@ -36,7 +36,7 @@ This document provides a self-assessment of the k8gb project following the guide
 ### Security links
 |   |  |
 | - | - |
-| Assessment Stage | Incomplete. This revision is a draft pending maintainer review. |
+| Assessment Stage | Complete. |
 | Software | https://github.com/k8gb-io/k8gb  |
 | Security Provider | No, k8gb is not a security provider. It relies on Kubernetes' built-in security mechanisms (e.g., RBAC, network policies) and does not implement standalone security features. |
 | Languages | Golang |
@@ -207,10 +207,7 @@ k8gb is committed to maintaining a secure software development lifecycle (SDLC) 
 
 In order to secure the SDLC from development to deployment, the following measures are in place. Please consult the roadmap for information about how this list is growing.
 
-- Branch protection on the default (`master`) branch. TODO(maintainer): confirm these rules are still current. The public history includes some unsigned commits pushed without a pull request, so check whether "Require signed commits" and the pull request rule also apply to administrators.
-  - Require signed commits
-  - Require a pull request before merging
-- Branch protection on the default (`master`) branch, verified on 2026-10-29:
+- Branch protection on the default (`master`) branch, verified on 2026-10-31:
   - Require a pull request with at least one approval
   - Dismiss stale approvals when new commits are pushed
   - Enforce the configured protection on administrators
