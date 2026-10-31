@@ -27,31 +27,7 @@ permissions:  # added using https://github.com/step-security/secure-workflows
   contents: read
 
 jobs:
-  skip-check:
-    name: Detect changes (CodeQL)
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: block
-          allowed-endpoints: >-
-            api.github.com:443
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578 # v5.3.2
-        with:
-          skip_after_successful_duplicate: 'true'
-          do_not_skip: '["workflow_dispatch", "schedule"]'
-          paths: '["**/*.go", "go.mod", "go.sum", ".github/workflows/codeql-analysis.yml"]'
-
   analyze:
-    needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }}
     permissions:
       actions: read  # for github/codeql-action/init to get workflow details
       contents: read  # for actions/checkout to fetch code
@@ -121,7 +97,7 @@ jobs:
   required:
     name: CI / CodeQL
     if: ${{ always() }}
-    needs: [skip-check, analyze]
+    needs: [analyze]
     runs-on: ubuntu-latest
     permissions: {}
     steps:

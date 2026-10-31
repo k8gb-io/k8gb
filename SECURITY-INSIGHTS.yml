@@ -152,9 +152,9 @@ repository:
             location: https://github.com/k8gb-io/k8gb/actions/workflows/codeql-analysis.yml
             predicate-uri: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
         comment: |
-          Reports a CI gate on every pull request, with analysis selected for
-          Go code, dependency, or workflow changes. Also runs on pushes to
-          master that change Go code and weekly. Results go to GitHub code scanning.
+          Runs on every pull request, on pushes to master that change Go code,
+          and weekly. Reports both a CI gate and security results through
+          GitHub code scanning.
       - name: OpenSSF Scorecard
         type: other
         rulesets:

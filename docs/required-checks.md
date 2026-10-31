@@ -13,7 +13,8 @@ Path filtering happens inside the workflow through the pinned
 `fkirc/skip-duplicate-actions` action. It can reuse successful checks from the
 commit history when only ignored files changed. The workflow itself still runs
 on every pull request, so documentation changes receive a completed gate rather
-than an indefinitely pending check. CodeQL also checks Go dependency changes.
+than an indefinitely pending check. CodeQL runs on every pull request so that
+its separate security-results check is always available too.
 
 | Required check | What it covers |
 | --- | --- |
@@ -23,7 +24,8 @@ than an indefinitely pending check. CodeQL also checks Go dependency changes.
 | `CI / Terratest` | Change detection and the selected Kubernetes test matrix |
 | `CI / Chainsaw` | Change detection and the selected Kubernetes test matrix |
 | `CI / Upgrade` | Change detection and upgrade testing |
-| `CI / CodeQL` | Change detection and CodeQL analysis |
+| `CI / CodeQL` | CodeQL analysis job completion |
+| `CodeQL` | Security results reported by the GitHub code scanning app |
 | `CI / Helm schema` | Change detection and Helm values/schema validation |
 | `CI / Istio` | Istio tests when the `istio` label is present |
 | `CI / Multi-cluster` | Multi-cluster tests when the `heavy-tests` label is present |

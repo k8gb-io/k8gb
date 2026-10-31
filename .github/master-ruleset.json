@@ -75,6 +75,10 @@
           {
             "context": "CI / Multi-cluster",
             "integration_id": 15368
+          },
+          {
+            "context": "CodeQL",
+            "integration_id": 57789
           }
         ],
         "strict_required_status_checks_policy": true,
