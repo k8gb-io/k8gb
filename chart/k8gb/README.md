@@ -73,6 +73,8 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | coredns.serviceType | string | `"ClusterIP"` | If the value is LoadBalancer, the IP addresses of the cluster will be loaded from the CoreDNS service; otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true". |
 | extdns.domainFilters[0] | string | `"example.com"` |  |
 | extdns.enabled | bool | `false` |  |
+| extdns.image.repository | string | `"registry.k8s.io/external-dns/external-dns"` | ExternalDNS image, tracked independently of the upstream Helm chart version |
+| extdns.image.tag | string | `"v0.24.0"` | ExternalDNS version built with the Go security fixes (see docs/tls-artifact-verification.md) |
 | extdns.interval | string | `"20s"` |  |
 | extdns.labelFilter | string | `"k8gb.io/dnstype=extdns"` |  |
 | extdns.logLevel | string | `"debug"` |  |

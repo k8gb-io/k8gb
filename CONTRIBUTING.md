@@ -389,6 +389,9 @@ make demo DEMO_URL=https://failover.cloud.example.com DEMO_DEBUG=1
 
 ## Release process
 
+Before publishing, follow the [TLS artifact verification checklist](docs/tls-artifact-verification.md)
+for the operator and ExternalDNS images, including both supported architectures.
+
 * Bump the version in `Chart.yaml`, see [example PR](https://github.com/k8gb-io/k8gb/pull/749). Make sure the
 commit message starts with `RELEASE:`.
 * In addition, bump the version in `chart/k8gb/README.md` to reflect correct version tags in artifacthub after

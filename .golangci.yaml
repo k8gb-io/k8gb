@@ -30,6 +30,8 @@ linters:
         main:
           allow:
             - $gostd
+            # depguard's prefix lookup can shadow $gostd's "go" with "go.uber.org".
+            - go/version
             - istio.io/client-go
             - k8s.io/apimachinery
             - k8s.io/client-go
