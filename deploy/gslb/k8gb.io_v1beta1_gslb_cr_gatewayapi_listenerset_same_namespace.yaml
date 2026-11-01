@@ -1,0 +1,136 @@
+# A complete HTTPRoute -> ListenerSet -> Gateway example in one namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: listenerset-local
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-options
+  namespace: listenerset-local
+data:
+  # Avoid competing with other Istio Gateways for k3s ServiceLB host port 15021.
+  service: |
+    spec:
+      ports:
+      - "$patch": delete
+        port: 15021
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+  namespace: listenerset-local
+spec:
+  gatewayClassName: istio
+  infrastructure:
+    parametersRef:
+      group: ""
+      kind: ConfigMap
+      name: gateway-options
+  allowedListeners:
+    namespaces:
+      from: Same
+  # Gateway API requires a base listener; the app uses the ListenerSet below.
+  listeners:
+    - name: base
+      protocol: HTTP
+      port: 38080
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: http
+  namespace: listenerset-local
+spec:
+  parentRef:
+    name: gateway
+    # Omitting namespace resolves the Gateway in this ListenerSet's namespace.
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 38081
+      hostname: local-listenerset.cloud.example.com
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+  namespace: listenerset-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: podinfo
+  template:
+    metadata:
+      labels:
+        app: podinfo
+    spec:
+      containers:
+        - name: podinfo
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: podinfo
+  namespace: listenerset-local
+spec:
+  selector:
+    app: podinfo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app
+  namespace: listenerset-local
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: http
+  hostnames:
+    - local-listenerset.cloud.example.com
+  rules:
+    - backendRefs:
+        - name: podinfo
+          port: 8080
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: app
+  namespace: listenerset-local
+spec:
+  resourceRef:
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    name: app
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5

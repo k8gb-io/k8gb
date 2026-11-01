@@ -1,6 +1,6 @@
 # k8gb
 
-![Version: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.0.0](https://img.shields.io/badge/AppVersion-v1.0.0-informational?style=flat-square)
+![Version: v1.0.1](https://img.shields.io/badge/Version-v1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.0.1](https://img.shields.io/badge/AppVersion-v1.0.1-informational?style=flat-square)
 
 A Helm chart for Kubernetes Global Balancer
 
@@ -36,7 +36,7 @@ Kubernetes: `>= 1.32.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://coredns.github.io/helm | coredns | 1.48.2 |
+| https://coredns.github.io/helm | coredns | 1.49.0 |
 | https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.23.0 |
 
 #### Tested Environment Configurations:
@@ -62,7 +62,7 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | coredns.extraVolumes[0].configMap.optional | bool | `true` |  |
 | coredns.extraVolumes[0].name | string | `"dynamic-zones"` |  |
 | coredns.image.repository | string | `"registry.k8gb.io/k8gb-io/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.6.0"` | image tag |
+| coredns.image.tag | string | `"v0.7.0"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` | requests and limits for the coredns container |
 | coredns.resources.requests.cpu | string | `"100m"` |  |
@@ -137,4 +137,4 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | tracing.samplingRatio | string | `nil` | float representing the ratio of how often the span should be kept/dropped (env var `TRACING_SAMPLING_RATIO`) if not specified, the AlwaysSample will be used which is the same as 1.0. `0.1` would mean that 10% of samples will be kept |
 | tracing.sidecarImage.pullPolicy | string | `"Always"` |  |
 | tracing.sidecarImage.repository | string | `"otel/opentelemetry-collector"` | OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data to somewhere else using exporters (Jaeger for instance) |
-| tracing.sidecarImage.tag | string | `"0.162.0"` |  |
+| tracing.sidecarImage.tag | string | `"0.164.0"` |  |

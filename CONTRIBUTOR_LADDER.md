@@ -30,7 +30,7 @@ Meaningful contributions may include code changes, documentation or website impr
 
 Contributors may participate in public project discussions, propose fixes and improvements, and be invited or assigned to work where repository settings permit. They are expected to explain their submissions, respond constructively to feedback, and respect the project’s quality, security, licensing, and DCO requirements.
 
-A Maintainer may nominate a Contributor by opening a GitHub issue titled `Contributor nomination: @username`, describing the proposed scope and supporting contributions or reviews. Recognition requires approval from at least two existing Maintainers. The final decision must be recorded in the issue before it is closed.
+A Maintainer may nominate a Contributor by opening a GitHub issue titled `Contributor nomination: @username`, describing the proposed scope and supporting contributions or reviews. Recognition requires approval from at least two existing Maintainers. The final decision must be recorded in the issue before it is closed. Once approved, the Contributor is added to [`MEMBERS.md`](MEMBERS.md) via pull request, linking the nomination issue.
 
 ## Reviewer
 
@@ -40,7 +40,7 @@ A **Reviewer** is a Contributor whom Maintainers recognize as a trusted source o
 
 Maintainers should consider sustained, high-quality evidence rather than a fixed numerical threshold. Relevant evidence includes meaningful contributions in the area, technically useful reviews of others’ work, familiarity with the applicable architecture and contribution standards, reliable participation over time, constructive collaboration, and willingness to help newer contributors.
 
-A Maintainer may nominate a Contributor for Reviewer recognition by opening a GitHub issue titled `Reviewer nomination: @username`, describing the proposed scope and supporting contributions or reviews. The nominee must confirm their willingness to take on the role. Recognition requires approval from at least two existing Maintainers. The final decision and agreed scope must be recorded in the issue before it is closed. A Contributor may also ask a Maintainer to consider their readiness for this role.
+A Maintainer may nominate a Contributor for Reviewer recognition by opening a GitHub issue titled `Reviewer nomination: @username`, describing the proposed scope and supporting contributions or reviews. The nominee must confirm their willingness to take on the role. Recognition requires approval from at least two existing Maintainers. The final decision and agreed scope must be recorded in the issue before it is closed. Once approved, the Reviewer is added to [`MEMBERS.md`](MEMBERS.md) with their scope via pull request, linking the nomination issue. A Contributor may also ask a Maintainer to consider their readiness for this role.
 
 ### Responsibilities
 
@@ -56,7 +56,7 @@ Reviewer recognition grants no automatic GitHub permission. If a separate access
 
 ## Maintainer
 
-A **Maintainer** is the project governance role defined by GitHub handles in [`CODEOWNERS`](CODEOWNERS). Maintainers are responsible for the project’s technical direction, health, governance, and sustainability as described in [`GOVERNANCE.md`](GOVERNANCE.md).
+A **Maintainer** is the project governance role defined by GitHub handles in [`CODEOWNERS`](https://github.com/k8gb-io/k8gb/blob/master/CODEOWNERS). Maintainers are responsible for the project’s technical direction, health, governance, and sustainability as described in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ### Appointment
 

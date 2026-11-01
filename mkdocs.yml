@@ -60,6 +60,7 @@ nav:
     - Community:
       - Contributing: CONTRIBUTING.md
       - Contributor Ladder: CONTRIBUTOR_LADDER.md
+      - Members: MEMBERS.md
       - AI Contribution Policy: AI_POLICY.md
       - Governance: GOVERNANCE.md
       - Code of Conduct: CODE_OF_CONDUCT.md
@@ -136,6 +137,70 @@ plugins:
       pagination_per_page: 10
       post_readtime: true
       post_readtime_words_per_minute: 200
+  - llmstxt:
+      # llms.txt links point at the released docs, which is where CLOMonitor's
+      # Agent Readiness checks look (https://www.k8gb.io/latest/).
+      base_url: https://www.k8gb.io/latest/
+      full_output: llms-full.txt
+      markdown_description: >-
+        k8gb is a cloud native Global Server Load Balancing (GSLB) solution for
+        Kubernetes. It is a Kubernetes operator that reconciles Gslb resources,
+        updates DNS through ExternalDNS and DNS provider integrations, and serves
+        authoritative answers through an embedded CoreDNS instance, so one
+        hostname resolves to healthy clusters across regions.
+      sections:
+        Documentation:
+          - index.md
+          - intro.md
+          - tutorials.md
+          - components.md
+          - strategy.md
+        DNS Providers:
+          - deploy_route53.md
+          - deploy_azuredns.md
+          - provider_gcp.md
+          - deploy_infoblox.md
+          - deploy_ns1.md
+          - deploy_windowsdns.md
+          - deploy_cloudflare.md
+          - provider_rfc2136.md
+        Configuration:
+          - resource_ref.md
+          - address_discovery.md
+          - exposed-hostnames.md
+          - dynamic_geotags.md
+          - dynamic_zones.md
+          - multizone.md
+          - exposing_dns.md
+        Development and Testing:
+          - local.md
+          - local-kuar.md
+          - ai-inference-demo.md
+          - rollback_procedures.md
+        Monitoring and Observability:
+          - metrics.md
+          - traces.md
+        Platform Integrations:
+          - admiralty.md
+          - liqo.md
+          - rancher.md
+          - crossplane_globalapp.md
+          - lbservice-integration.md
+        Advanced:
+          - splitbrain.md
+          - partial-deployment.md
+          - service_upgrade.md
+          - migration_acceptance.md
+          - wrr_caveats.md
+          - proxy_externaldns.md
+        Community:
+          - CONTRIBUTING.md
+          - CONTRIBUTOR_LADDER.md
+          - AI_POLICY.md
+          - GOVERNANCE.md
+          - CODE_OF_CONDUCT.md
+          - SECURITY.md
+          - ADOPTERS.md
   - git-revision-date-localized:
       enable_creation_date: true
   - mkdocs-simple-hooks:

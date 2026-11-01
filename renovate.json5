@@ -6,6 +6,9 @@
   "ignoreDeps": [
     "github.com/infobloxopen/infoblox-go-client",
     "zricethezav/gitleaks-action",
+    // grc.store accepts results only when publish.yml is called by its v1 tag,
+    // so it must not be pinned to a digest (see publish-to-grc-store.yml).
+    "revanite-io/pvtr-publish-results",
   ],
   "ignorePaths": [
     ".github/workflows/release.yaml",
@@ -26,13 +29,6 @@
       "matchCurrentVersion": "!/^v?0/",
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
-    },
-    {
-        "matchPackageNames": [
-        "k8gb-io/k8gb",
-      ],
-      "groupName": "update SECURITY-INSIGHTS.yml",
-      "groupSlug": "update-security-insights"
     },
     {
         "matchPackageNames": [
@@ -57,25 +53,6 @@
     },
   ],
   "regexManagers": [
-    {
-      "fileMatch": ["^SECURITY-INSIGHTS.yml$"],
-      "datasourceTemplate": "github-releases",
-      "depNameTemplate": "k8gb-io/k8gb",
-      "extractVersionTemplate": "^v?(?<version>.*)['\"]?$",
-      "matchStrings": [
-        "\\s*project-release: ['\"]?v?(?<currentValue>[^'\"]+)['\"]?",
-      ],
-    },
-    {
-      "fileMatch": ["^SECURITY-INSIGHTS.yml$"],
-      "datasourceTemplate": "github-releases",
-      "depNameTemplate": "k8gb-io/k8gb",
-      "extractVersionTemplate": "^v?(?<version>.*)$",
-      "matchStrings": [
-        "\\s*- sbom-file: ['\"]?(.+)\\/download\\/v(?<currentValue>.+)\\/(.+)['\"]?",
-      ],
-      "autoReplaceStringTemplate": "\n  - sbom-file: https://github.com/{{{depName}}}/releases/download/v{{{newValue}}}/k8gb_{{{newValue}}}_linux_amd64.tar.gz.sbom.json"
-    },
     // update the files in k3d/ with the up-to-date k8s version
     {
       "fileMatch": ["^k3d/.*y[a]?ml.*$"],

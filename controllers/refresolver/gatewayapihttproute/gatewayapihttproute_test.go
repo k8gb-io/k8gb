@@ -24,6 +24,10 @@ import (
 	k8gbv1beta1io "github.com/k8gb-io/k8gb/api/v1beta1io"
 	"github.com/k8gb-io/k8gb/controllers/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
 func TestGetServers(t *testing.T) {
@@ -122,4 +126,25 @@ func TestGetServers(t *testing.T) {
 			assert.Equal(t, test.expectedServers, servers)
 		})
 	}
+}
+
+func TestHTTPRouteParentedToListenerSet(t *testing.T) {
+	// arrange
+	s := runtime.NewScheme()
+	require.NoError(t, gatewayapiv1.Install(s))
+	cl := fake.NewClientBuilder().WithScheme(s).WithRuntimeObjects(
+		utils.FileToGatewayApiHttpRoute("./testdata/gatewayapi_httproute_listenerset.yaml"),
+		utils.FileToGatewayApiListenerSet("../gatewayapi/testdata/gatewayapi_listenerset_tenant.yaml"),
+		utils.FileToGatewayApiGateway("../gatewayapi/testdata/gatewayapi_gateway_shared.yaml"),
+	).Build()
+	gslb := utils.FileToGSLB("./testdata/gslb_gatewayapi_httproute_listenerset.yaml")
+
+	// act
+	resolver, err := NewReferenceResolver(gslb, cl)
+	require.NoError(t, err)
+	IPs, err := resolver.GetGslbExposedIPs(map[string]string{}, utils.DNSList{})
+
+	// assert
+	require.NoError(t, err)
+	assert.Equal(t, []string{"10.0.0.10"}, IPs)
 }

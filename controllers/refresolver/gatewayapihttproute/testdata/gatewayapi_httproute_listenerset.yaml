@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app
+  namespace: tenant
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: ListenerSet
+    name: tenant
+  hostnames:
+  - app.example.com
+  rules:
+  - backendRefs:
+    - name: app
+      port: 8080

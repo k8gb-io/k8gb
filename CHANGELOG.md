@@ -1,5 +1,57 @@
 # Changelog
 
+## [v1.0.1](https://github.com/k8gb-io/k8gb/tree/v1.0.1) (2026-10-16)
+
+<!-- Release notes generated using configuration in .github/release.yml at v1.0.1 -->
+
+## What's Changed
+### Features, fixes, and maintenance
+* docs: keep README badges together by @ytsarev in https://github.com/k8gb-io/k8gb/pull/2522
+* docs: fix typos, GLSB -> GSLB, and stale Route53 instructions by @HYPERVAPOR in https://github.com/k8gb-io/k8gb/pull/2478
+* docs: align documented K8s, Go and Liqo versions with CI and go.mod by @HYPERVAPOR in https://github.com/k8gb-io/k8gb/pull/2477
+* ci: switch Harden-Runner from audit to block mode in all workflows by @itsfarhan in https://github.com/k8gb-io/k8gb/pull/2340
+* WIP: 2026-09-02 community meeting notes by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2517
+* add contributor ladder and ai policy by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2528
+* add 2026-09-16 community meeting notes by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2531
+* add requirements for becoming a Contributor by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2533
+* fix(dns): use dot separator for localtargets prefix with backward compatibility by @AruneshDwivedi in https://github.com/k8gb-io/k8gb/pull/2401
+* docs: fix Infoblox tutorial Ingress and stale samples by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2480
+* docs: extend rollback procedures through v0.20 and API migration by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2483
+* docs: align Kubernetes, Go, and Liqo versions with CI reality by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2485
+* docs: note ingress-nginx retirement and steer to Gateway API by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2489
+* docs: document dual-context MkDocs linking in CONTRIBUTING by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2512
+* add 2026-09-30 community meeting notes by @elohmrow in https://github.com/k8gb-io/k8gb/pull/2541
+* docs: replace removed Helm keys with current chart values by @aryasoni98 in https://github.com/k8gb-io/k8gb/pull/2482
+* fix: correct malformed if condition to properly skip terratest for re… by @Ayanali-313 in https://github.com/k8gb-io/k8gb/pull/2513
+* Release: v1.0.1 by @k0da in https://github.com/k8gb-io/k8gb/pull/2551
+### Dependencies
+* chore(deps): update dependency k8gb-io/k8gb to v1 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2520
+* fix(deps): update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2434
+* fix(deps): update module sigs.k8s.io/external-dns to v0.22.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2504
+* fix(deps): update module sigs.k8s.io/controller-runtime to v0.25.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2524
+* chore(deps): update dependency kubernetes-sigs/controller-tools to v0.22.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2519
+* chore(deps): update go module directive to v1.27.1 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2496
+* fix(deps): update module sigs.k8s.io/controller-runtime to v0.25.1 - autoclosed by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2530
+* fix(deps): update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2525
+* fix(deps): update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2546
+* fix(deps): update module sigs.k8s.io/external-dns to v0.23.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2537
+* chore(deps): update otel/opentelemetry-collector docker tag to v0.162.0 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2521
+* chore(deps): update dependency ubuntu to v26 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2538
+* chore(deps): update go module directive to v1.27.2 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2543
+* fix(deps): update module sigs.k8s.io/controller-runtime to v0.25.2 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2542
+* fix(deps): update kubernetes monorepo to v0.37.1 by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2507
+* chore(deps): update all non-major dependencies by @renovate[bot] in https://github.com/k8gb-io/k8gb/pull/2548
+
+## New Contributors
+* @HYPERVAPOR made their first contribution in https://github.com/k8gb-io/k8gb/pull/2478
+* @AruneshDwivedi made their first contribution in https://github.com/k8gb-io/k8gb/pull/2401
+* @Ayanali-313 made their first contribution in https://github.com/k8gb-io/k8gb/pull/2513
+
+**Full Changelog**: https://github.com/k8gb-io/k8gb/compare/v1.0.0...v1.0.1
+
+:rocket:
+
+
 ## [v1.0.0](https://github.com/k8gb-io/k8gb/tree/v1.0.0) (2026-09-02)
 
 <!-- Release notes generated using configuration in .github/release.yml at v1.0.0 -->

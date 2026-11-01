@@ -1,6 +1,7 @@
 [build]
-  command = "pip install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks mike && mkdocs build"
+  command = "pip install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-simple-hooks mike mkdocs-llmstxt==0.5.1 && mkdocs build"
   publish = "site/"
 
 [build.environment]
-  PYTHON_VERSION = "3.8"
+  # mkdocs-llmstxt needs Python 3.11 or newer.
+  PYTHON_VERSION = "3.12"

@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: shared
+  namespace: gateway-infra
+spec:
+  gatewayClassName: example
+  allowedListeners:
+    namespaces:
+      from: All
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+status:
+  addresses:
+  - type: IPAddress
+    value: 10.0.0.10

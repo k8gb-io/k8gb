@@ -88,6 +88,7 @@ rules:
   - gateway.networking.k8s.io
   resources:
   - gateways
+  - listenersets
   - httproutes
   - grpcroutes
   - tcproutes
