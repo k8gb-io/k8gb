@@ -3,3 +3,17 @@
 Run a single test:
 
 `chainsaw test --config ./config.yaml --values ./values.yaml --test-dir ./tests/<testname>`
+
+`make chainsaw` saves the console log and a JUnit step report in the repository's
+`tmp/chainsaw/` directory.
+On a failed step, the global catch handler saves resource YAML, events, and
+controller logs from both clusters there before test cleanup. Resource YAML
+includes owner references, deletion timestamps, and finalizers. Collection runs
+without enabling runner debug logging. The CI workflow uploads this directory.
+
+Repeat the migration handoff test (from this directory) to check for timing issues:
+
+```sh
+chainsaw test --config ./config.yaml --values ./values.yaml \
+  --test-dir ./tests/legacy-migration-dnsendpoint-handoff --repeat-count 20
+```

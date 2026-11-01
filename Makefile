@@ -723,7 +723,7 @@ terratest: # Run terratest suite
 # executes chainsaw e2e tests
 .PHONY: chainsaw
 chainsaw:
-	mkdir -p chainsaw/kubeconfig
+	mkdir -p chainsaw/kubeconfig tmp/chainsaw
 	k3d kubeconfig get test-gslb1 > chainsaw/kubeconfig/eu.config
 	k3d kubeconfig get test-gslb2 > chainsaw/kubeconfig/us.config
 	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
@@ -731,8 +731,11 @@ chainsaw:
 		echo -e "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
 		exit 1;\
 	fi
-	cd chainsaw && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) chainsaw test --config ./config.yaml --values ./values.yaml
-	rm -r chainsaw/kubeconfig
+	@trap 'rm -rf chainsaw/kubeconfig' EXIT; \
+		set -o pipefail; \
+		(cd chainsaw && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) chainsaw test --config ./config.yaml --values ./values.yaml \
+			--report-format JUNIT-STEP --report-path ../tmp/chainsaw \
+			2>&1) | tee tmp/chainsaw/chainsaw.log
 
 .PHONY: website
 website:

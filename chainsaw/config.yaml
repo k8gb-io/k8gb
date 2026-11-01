@@ -5,6 +5,11 @@ metadata:
 spec:
   timeouts:
     exec: 75s
+  error:
+    catch:
+    - script:
+        content: bash ../../../hack/collect-chainsaw-debug.sh "$NAMESPACE"
+        timeout: 75s
   clusters:
     eu:
       kubeconfig: kubeconfig/eu.config
