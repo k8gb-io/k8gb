@@ -136,7 +136,11 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb2
 
       - name: Run Chainsaw
-        run: make chainsaw
+        env:
+          CHAINSAW_ARTIFACTS_DIR: ${{ github.workspace }}/tmp/chainsaw
+        run: |
+          mkdir -p "$CHAINSAW_ARTIFACTS_DIR"
+          make chainsaw
 
       - name: Print debug info
         if: always()
