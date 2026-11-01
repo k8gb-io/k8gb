@@ -50,6 +50,21 @@ Kubernetes: `>= 1.32.0-0`
 
 Note: k8gb is architected to run on top of any compliant Kubernetes cluster and Ingress controller. The table above lists solutions where we have tested and verified k8gb installation.
 
+## ExternalDNS upgrades
+
+The optional embedded ExternalDNS deployment uses `extdns.image.repository` and
+`extdns.image.tag`, independently of the upstream Helm chart's application version.
+Review `k8gb.imageTag` and `extdns.image.tag` overrides when upgrading, including
+values retained by `helm upgrade --reuse-values`, and confirm the running images
+after rollout. Upgrade independently managed ExternalDNS deployments separately,
+preserving provider configuration and TXT ownership settings.
+
+ExternalDNS v0.24.0 works with the existing DNSEndpoint CRDs. Adopting its stricter
+schemas is a separate migration; review the
+[upstream release notes](https://github.com/kubernetes-sigs/external-dns/releases/tag/v0.24.0)
+first. Security remediation and release verification are tracked in
+[#2592](https://github.com/k8gb-io/k8gb/issues/2592).
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -73,6 +88,8 @@ Note: k8gb is architected to run on top of any compliant Kubernetes cluster and 
 | coredns.serviceType | string | `"ClusterIP"` | If the value is LoadBalancer, the IP addresses of the cluster will be loaded from the CoreDNS service; otherwise, they will be loaded from the first ingress marked with the label "k8gb.io/ip-source=true". |
 | extdns.domainFilters[0] | string | `"example.com"` |  |
 | extdns.enabled | bool | `false` |  |
+| extdns.image.repository | string | `"registry.k8s.io/external-dns/external-dns"` | ExternalDNS image, tracked independently of the upstream Helm chart version |
+| extdns.image.tag | string | `"v0.24.0"` | ExternalDNS image tag |
 | extdns.interval | string | `"20s"` |  |
 | extdns.labelFilter | string | `"k8gb.io/dnstype=extdns"` |  |
 | extdns.logLevel | string | `"debug"` |  |

@@ -191,6 +191,11 @@ infoblox:
 
 extdns:
   enabled: false
+  image:
+    # -- ExternalDNS image, tracked independently of the upstream Helm chart version
+    repository: registry.k8s.io/external-dns/external-dns
+    # -- ExternalDNS image tag
+    tag: v0.24.0
   interval: 20s
   labelFilter: "k8gb.io/dnstype=extdns"
   logLevel: debug
