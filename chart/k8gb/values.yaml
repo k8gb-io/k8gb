@@ -194,7 +194,7 @@ extdns:
   image:
     # -- ExternalDNS image, tracked independently of the upstream Helm chart version
     repository: registry.k8s.io/external-dns/external-dns
-    # -- ExternalDNS version built with the Go security fixes (see docs/tls-artifact-verification.md)
+    # -- ExternalDNS image tag
     tag: v0.24.0
   interval: 20s
   labelFilter: "k8gb.io/dnstype=extdns"
