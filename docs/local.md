@@ -145,7 +145,7 @@ Run following command and check if you get two json responses.
 curl localhost:80 -H "Host:roundrobin.cloud.example.com" && curl localhost:81 -H "Host:roundrobin.cloud.example.com"
 ```
 
-The local setup also deploys small multi-service Ingresses backed by two NGINX services and canonical `k8gb.io/v1beta1` GSLBs using both service health policies.
+The local setup also deploys small multi-service Ingresses backed by two services and canonical `k8gb.io/v1beta1` GSLBs using both service health policies.
 
 ```sh
 curl localhost:80/blue -H "Host:multiservice-all.cloud.example.com"

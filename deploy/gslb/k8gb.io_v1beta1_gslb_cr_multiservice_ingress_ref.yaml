@@ -4,7 +4,7 @@ metadata:
   name: multiservice-gslb-all
   namespace: test-gslb
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: multiservice-all.cloud.example.com
     http:
@@ -45,7 +45,7 @@ metadata:
   name: multiservice-gslb-any
   namespace: test-gslb
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: multiservice-any.cloud.example.com
     http:

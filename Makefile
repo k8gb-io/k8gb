@@ -61,7 +61,7 @@ GOLANGCI_VERSION ?= v2.15.0
 GRAFANA_VERSION ?= 10.5.15
 GATEWAY_API_VERSION ?= v1.7.0
 ISTIO_VERSION ?= v1.31.3
-NGINX_INGRESS_VERSION ?= 4.15.1
+TRAEFIK_VERSION ?= 36.3.0
 PODINFO_VERSION ?= 6.17.0
 PROMETHEUS_VERSION ?= 29.40.3
 POD_NAMESPACE ?= k8gb
@@ -107,7 +107,7 @@ STABLE_VERSION := "stable"
 # default bundle image tag
 BUNDLE_IMG ?= controller-bundle:$(VERSION)
 
-NGINX_INGRESS_VALUES_PATH ?= deploy/ingress/nginx-ingress-values.yaml
+TRAEFIK_INGRESS_VALUES_PATH ?= deploy/ingress/traefik-ingress-values.yaml
 ISTIO_INGRESS_VALUES_PATH ?= deploy/ingress/istio-ingress-values.yaml
 
 # options for 'bundle-build'
@@ -247,11 +247,11 @@ deploy-local-cluster:
 	@echo -e "\n$(YELLOW)Create namespace $(NC)"
 	kubectl create namespace k8gb --dry-run=client -o yaml | kubectl apply -f -
 
-	@echo -e "\n$(YELLOW)Deploy Ingress $(NC)"
-	helm repo add --force-update nginx-stable https://kubernetes.github.io/ingress-nginx
+	@echo -e "\n$(YELLOW)Deploy Traefik Ingress Controller $(NC)"
+	helm repo add --force-update traefik https://traefik.github.io/charts
 	helm repo update
-	helm -n k8gb upgrade -i nginx-ingress nginx-stable/ingress-nginx \
-		--version "$(NGINX_INGRESS_VERSION)" -f $(NGINX_INGRESS_VALUES_PATH)
+	helm -n k8gb upgrade -i traefik traefik/traefik \
+		--version "$(TRAEFIK_VERSION)" -f $(TRAEFIK_INGRESS_VALUES_PATH)
 
 	@echo -e "\n$(YELLOW)Deploy GSLB operator from $(VERSION) $(NC)"
 	$(MAKE) deploy-k8gb-with-helm
@@ -337,7 +337,7 @@ deploy-test-apps: ## Deploy Podinfo (example app) and Apply Gslb Custom Resource
 	helm repo add podinfo https://stefanprodan.github.io/podinfo
 	@echo -e "\n$(YELLOW)Deploy podinfo for Ingress $(NC)"
 	helm upgrade --install frontend --namespace test-gslb -f deploy/test-apps/podinfo/podinfo-values.yaml \
-		--set ui.message="Ingress NGINX: `$(call get-cluster-geo-tag)`" \
+		--set ui.message="Ingress Traefik: `$(call get-cluster-geo-tag)`" \
 		--set image.repository="$(PODINFO_IMAGE_REPO)" \
 		podinfo/podinfo \
 		--version $(PODINFO_VERSION)
@@ -802,9 +802,9 @@ define demo-host
 	"`$(K8GB_COREDNS_IP)`" $1
 endef
 
-# waits for NGINX, GSLB are ready
+# waits for Traefik ingress controller to be ready
 define wait-for-ingress
-	kubectl -n k8gb wait --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx --timeout=600s
+	kubectl -n k8gb wait --for=condition=Ready pod -l app.kubernetes.io/name=traefik --timeout=600s
 endef
 
 define generate

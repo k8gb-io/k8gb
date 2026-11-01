@@ -8,7 +8,7 @@ image: docker.io/rancher/k3s:v1.36.2-k3s1
 agents: 1
 network: k3d-action-bridge-network
 ports:
-  # Nginx Ingress Controller - HTTP
+  # Traefik Ingress Controller - HTTP
   - port: 80:80
     nodeFilters:
       - agent:0:direct
@@ -20,7 +20,7 @@ ports:
   - port: 8080:8080
     nodeFilters:
       - loadbalancer
-  # Nginx Ingress Controller - HTTPS
+  # Traefik Ingress Controller - HTTPS
   - port: 443:443
     nodeFilters:
       - agent:0:direct
