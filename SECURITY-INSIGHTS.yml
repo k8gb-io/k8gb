@@ -1,7 +1,7 @@
 header:
   schema-version: 2.2.0
-  last-updated: '2026-10-29'
-  last-reviewed: '2026-10-29'
+  last-updated: '2026-10-31'
+  last-reviewed: '2026-10-31'
   url: https://raw.githubusercontent.com/k8gb-io/k8gb/master/SECURITY-INSIGHTS.yml
 
 project:
@@ -131,11 +131,12 @@ repository:
       self:
         name: k8gb security self-assessment
         evidence: https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md
-        date: '2025-12-04'
+        date: '2026-10-31'
         comment: |
-          Self-assessment following the CNCF TAG Security and Compliance
-          template. A copy was added to the CNCF TOC repository in
-          cncf/toc#1977, merged on 2025-12-04.
+          Self-assessment following the OpenSSF security self-assessment
+          template, reviewed by the maintainers in k8gb#2574. An earlier
+          version, based on the CNCF TAG Security and Compliance template,
+          was added to the CNCF TOC repository in cncf/toc#1977.
     tools:
       - name: CodeQL
         type: SAST
