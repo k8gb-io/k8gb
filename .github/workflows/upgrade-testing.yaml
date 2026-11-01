@@ -47,7 +47,14 @@ jobs:
   upgrade-testing:
     runs-on: ubuntu-26.04
     needs: skip-check
-    if: ${{ needs.skip-check.outputs.should_skip != 'true' }} && !contains( github.event.pull_request.labels.*.name, 'renovate')
+    if: >-
+      ${{
+        !contains(github.event.pull_request.labels.*.name, 'renovate') &&
+        (
+          needs.skip-check.outputs.should_skip != 'true' ||
+          (github.event.action == 'unlabeled' && github.event.label.name == 'renovate')
+        )
+      }}
     steps:
       # Keep Terratest exempt: Harden Runner sinkholes localhost DNS lookups
       # used by Podinfo health probes, preventing the test pods from becoming ready.
