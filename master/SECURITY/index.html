@@ -2232,6 +2232,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#osps-baseline-review-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OSPS Baseline review evidence
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OSPS Baseline review evidence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#privileged-release-workflows-osps-br-0103" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Privileged release workflows (OSPS-BR-01.03)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-interfaces-osps-sa-0201" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External interfaces (OSPS-SA-02.01)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-self-assessment-osps-sa-0301" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security self-assessment (OSPS-SA-03.01)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vulnerability-publication-osps-vm-0401" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vulnerability publication (OSPS-VM-04.01)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2873,6 +2934,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#osps-baseline-review-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OSPS Baseline review evidence
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OSPS Baseline review evidence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#privileged-release-workflows-osps-br-0103" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Privileged release workflows (OSPS-BR-01.03)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-interfaces-osps-sa-0201" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External interfaces (OSPS-SA-02.01)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-self-assessment-osps-sa-0301" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security self-assessment (OSPS-SA-03.01)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vulnerability-publication-osps-vm-0401" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vulnerability publication (OSPS-VM-04.01)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2915,6 +3037,76 @@
 <p>If the vulnerability is accepted, you'll be informed about the determined timeline for developing a patch, public disclosure, and patch release. You are expected to participate in the discussion of the timeline and respect the agreed dates for public disclosure.</p>
 <h2 id="published-advisories">Published Advisories<a class="headerlink" href="#published-advisories" title="Permanent link">&para;</a></h2>
 <p>Once a vulnerability is publicly disclosed, its advisory is published on the repository's <a href="https://github.com/k8gb-io/k8gb/security/advisories">security advisories page</a>.</p>
+<h2 id="osps-baseline-review-evidence">OSPS Baseline review evidence<a class="headerlink" href="#osps-baseline-review-evidence" title="Permanent link">&para;</a></h2>
+<p>The <a href="https://grc.store/targets/k8gb-io/k8gb">published Level 2 results</a> include
+controls that need human review. The following evidence accompanies the automated
+results; it does not constitute an independent security audit or a badge award.</p>
+<h3 id="privileged-release-workflows-osps-br-0103">Privileged release workflows (OSPS-BR-01.03)<a class="headerlink" href="#privileged-release-workflows-osps-br-0103" title="Permanent link">&para;</a></h3>
+<p>The privileged-context finding in the 2026-10-31 scan concerns
+<a href="https://github.com/k8gb-io/k8gb/blob/master/.github/workflows/helm_sign_oci.yaml">helm_sign_oci.yaml</a>. Its automatic trigger
+follows a successful <code>Helm Publish</code> workflow; it also permits manual dispatch.
+<a href="https://github.com/k8gb-io/k8gb/blob/master/.github/workflows/helm_publish.yaml">Helm Publish</a> runs on published releases or
+manual dispatch, with no pull-request trigger. The signing workflow uses a GitHub
+hosted runner, checks out <code>inputs.tag || github.ref</code>, and does not select a pull
+request head or the triggering workflow's head SHA. Manual tag selection and
+release publishing are trusted maintainer actions.</p>
+<p>The signing job has <code>contents: read</code>, <code>packages: write</code>, and <code>id-token: write</code>.
+It fetches chart archives from this repository's <code>gh-pages</code> branch, pushes them to
+GHCR, and signs them with GitHub OIDC. It does not restore an Actions cache or
+download artifacts from a pull-request workflow. Writers to <code>gh-pages</code>, release
+publishing credentials, and the pinned third-party actions are part of this trust
+boundary. The job uses Harden Runner with an outbound endpoint allowlist.</p>
+<p>Changes to the workflow triggers, checkout references, chart sources, caching, or
+runner type require this evidence to be revisited. Release signing improvements
+are tracked separately in <a href="https://github.com/k8gb-io/k8gb/pull/2568">#2568</a>.</p>
+<h3 id="external-interfaces-osps-sa-0201">External interfaces (OSPS-SA-02.01)<a class="headerlink" href="#external-interfaces-osps-sa-0201" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Documentation and contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kubernetes configuration and watched resources</td>
+<td><a href="https://github.com/k8gb-io/k8gb/tree/master/api">API types</a>, <a href="https://github.com/k8gb-io/k8gb/tree/master/chart/k8gb/crd">CRD schemas</a>, <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/resource_ref.md">resource references</a>, and <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/dynamic_zones.md">dynamic zones</a></td>
+</tr>
+<tr>
+<td>DNS clients and inter-cluster health discovery</td>
+<td><a href="https://github.com/k8gb-io/k8gb/blob/master/docs/components.md">Component data flows</a>, <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/exposing_dns.md">DNS exposure</a>, <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/strategy.md">strategies</a>, and <a href="https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md#actors">trust boundaries</a></td>
+</tr>
+<tr>
+<td>Edge DNS providers and credentials</td>
+<td><a href="https://github.com/k8gb-io/k8gb/blob/master/docs/tutorials.md">Provider guides</a>, including <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/deploy_route53.md">Route53</a>, <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/provider_gcp.md">Google Cloud DNS</a>, and <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/deploy_infoblox.md">Infoblox</a></td>
+</tr>
+<tr>
+<td>Metrics, health endpoints, and optional tracing</td>
+<td><a href="https://github.com/k8gb-io/k8gb/blob/master/docs/metrics.md">Metrics</a>, <a href="https://github.com/k8gb-io/k8gb/blob/master/docs/traces.md">tracing</a>, and <a href="https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md#minimal-attack-surface">ports and access assumptions</a></td>
+</tr>
+<tr>
+<td>Installation and runtime configuration</td>
+<td><a href="https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/README.md">Helm chart documentation</a> and <a href="https://github.com/k8gb-io/k8gb/blob/master/chart/k8gb/values.schema.json">values schema</a></td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="https://github.com/k8gb-io/k8gb/blob/master/ARCHITECTURE.md">architecture map</a> connects these interfaces to the code.
+k8gb configures DNS and does not proxy application traffic; the referenced
+Ingress, Service, Gateway API route, or Istio resource handles application traffic.</p>
+<h3 id="security-self-assessment-osps-sa-0301">Security self-assessment (OSPS-SA-03.01)<a class="headerlink" href="#security-self-assessment-osps-sa-0301" title="Permanent link">&para;</a></h3>
+<p>The <a href="https://github.com/k8gb-io/k8gb/blob/master/self-assessment.md">self-assessment</a>, reviewed in
+<a href="https://github.com/k8gb-io/k8gb/pull/2574">#2574</a>, covers intended use, components,
+actors and actions, trust boundaries, security goals and non-goals, development
+practices, and vulnerability response. It records deployment and RBAC hardening
+gaps, tracked in <a href="https://github.com/k8gb-io/k8gb/issues/2587">#2587</a>. The
+<a href="https://github.com/k8gb-io/k8gb/blob/master/SECURITY-INSIGHTS.yml">Security Insights assessment entry</a> links this evidence
+and records its review date.</p>
+<h3 id="vulnerability-publication-osps-vm-0401">Vulnerability publication (OSPS-VM-04.01)<a class="headerlink" href="#vulnerability-publication-osps-vm-0401" title="Permanent link">&para;</a></h3>
+<p>The public disclosure destination is the
+<a href="https://github.com/k8gb-io/k8gb/security/advisories">GitHub security advisories page</a>,
+as specified in <a href="#published-advisories">Published Advisories</a>. The 2026-10-31 scan
+found no published advisories, so it could not infer this practice from advisory
+history. Private reporting and coordinated disclosure follow the process above.</p>
 
 
 
@@ -2937,7 +3129,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 24, 2026 19:42:30 UTC">October 24, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 1, 2026 12:48:27 UTC">November 1, 2026</span>
   </span>
 
     
