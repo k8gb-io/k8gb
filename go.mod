@@ -3,7 +3,7 @@ module github.com/k8gb-io/k8gb
 go 1.27.3
 
 require (
-	github.com/alecthomas/kong v1.16.1
+	github.com/alecthomas/kong v1.17.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.4
 	github.com/go-playground/validator/v10 v10.30.5
