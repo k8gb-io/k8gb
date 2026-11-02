@@ -10,6 +10,9 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 
 jobs:
   build-helm-doc:
+    permissions:
+      contents: write  # for peter-evans/create-pull-request to create branch
+      pull-requests: write  # for peter-evans/create-pull-request to create a PR
     name: Update Helm Doc
     runs-on: ubuntu-latest
     steps:
@@ -24,8 +27,6 @@ jobs:
 
     - name: Checkout Code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
     - name: Generate docs for helm chart - chart/k8gb/README.md
       uses: docker://jnorwood/helm-docs@sha256:7e562b49ab6b1dbc50c3da8f2dd6ffa8a5c6bba327b1c6335cc15ce29267979c
       with:
@@ -38,6 +39,4 @@ jobs:
         delete-branch: true
         base: master
         signoff: true
-        # Independent of the repository's GITHUB_TOKEN PR-creation setting.
-        token: ${{ secrets.CHANGELOG_GH_TOKEN }}
-        add-paths: chart/k8gb/README.md
+        token: ${{ secrets.GITHUB_TOKEN }}

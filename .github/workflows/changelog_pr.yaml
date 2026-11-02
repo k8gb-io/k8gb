@@ -10,6 +10,9 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 
 jobs:
   chanagelog-pr:
+    permissions:
+      contents: write  # for peter-evans/create-pull-request to create branch
+      pull-requests: write  # for peter-evans/create-pull-request to create a PR
     runs-on: ubuntu-26.04
     steps:
       - name: Harden Runner
@@ -25,7 +28,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          persist-credentials: false
       - name: Prepend published release notes to CHANGELOG.md
         run: |
           release_body=$(jq -r '.release.body // empty' "${GITHUB_EVENT_PATH}")
@@ -52,9 +54,7 @@ jobs:
           delete-branch: true
           base: master
           signoff: true
-          # Independent of the repository's GITHUB_TOKEN PR-creation setting.
-          token: ${{ secrets.CHANGELOG_GH_TOKEN }}
-          add-paths: CHANGELOG.md
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Send http get to doc.crds.dev to index a new version
         run: |
