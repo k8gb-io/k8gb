@@ -110,19 +110,37 @@ spec:
     cluster: eu
     try:
     - script:
-        env:
-        - name: NAME
-          value: legacy-requested-pause
-        content: |
-          if ! kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=60s; then
-            REMAINING=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --ignore-not-found -o name) || exit 1
-            if [ -n "$REMAINING" ]; then
-              echo "Legacy Gslb deletion timed out"
-              kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o yaml
-              kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp
-              exit 1
-            fi
-            echo "Legacy Gslb was deleted at the timeout boundary"
-          fi
-          kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE"
-          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE"
+        content: kubectl get gslb.k8gb.io legacy-requested-pause -n "$NAMESPACE" -o jsonpath='{.metadata.uid}'
+        outputs:
+        - name: canonicalUID
+          value: ($stdout)
+    - script:
+        content: kubectl get dnsendpoint legacy-requested-pause -n "$NAMESPACE" -o jsonpath='{.metadata.uid}'
+        outputs:
+        - name: endpointUID
+          value: ($stdout)
+    - delete:
+        ref:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          name: legacy-requested-pause
+        timeout: 90s
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-requested-pause
+            namespace: ($namespace)
+            uid: ($canonicalUID)
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: legacy-requested-pause
+            namespace: ($namespace)
+            uid: ($endpointUID)
+            ownerReferences:
+              (length(@)): 1
+              (length([?apiVersion == 'k8gb.io/v1beta1' && kind == 'Gslb' && uid == $canonicalUID])): 1

@@ -12,9 +12,11 @@ both clusters to `chainsaw.log` before test cleanup. Resource YAML includes owne
 references, deletion timestamps, and finalizers. Collection runs without enabling
 runner debug logging. The CI workflow uploads this directory.
 
-Repeat the migration handoff test (from this directory) to check for timing issues:
+Repeat both legacy migration tests (from this directory) to check for timing issues:
 
 ```sh
 chainsaw test --config ./config.yaml --values ./values.yaml \
-  --test-dir ./tests/legacy-migration-dnsendpoint-handoff --repeat-count 20
+  --test-dir ./tests/legacy-migration-dnsendpoint-handoff \
+  --test-dir ./tests/legacy-migration-requested-pauses-runtime \
+  --parallel 2 --repeat-count 20
 ```
