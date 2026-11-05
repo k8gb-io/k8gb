@@ -12,3 +12,61 @@ spec:
     us:
       kubeconfig: kubeconfig/us.config
       context: k3d-test-gslb2
+  # Runs before cleanup whenever a step fails, in every test. When CHAINSAW_ARTIFACTS_DIR
+  # is set (CI), the state is saved there for upload; otherwise it is printed to the log.
+  error:
+    catch:
+    - description: save test namespace state and k8gb logs from the eu cluster
+      script:
+        cluster: eu
+        timeout: 60s
+        env:
+        - name: CLUSTER
+          value: eu
+        content: |
+          dir="${CHAINSAW_ARTIFACTS_DIR:-}"
+          if [ -n "$dir" ]; then
+            dir="$dir/$NAMESPACE/$CLUSTER"
+            mkdir -p "$dir"
+          fi
+          save() {
+            file="$1"
+            shift
+            if [ -n "$dir" ]; then
+              "$@" >"$dir/$file" 2>&1 || true
+            else
+              echo "=== $CLUSTER: $file"
+              "$@" 2>&1 || true
+            fi
+          }
+          save resources.yaml kubectl get gslbs.k8gb.io,gslbs.k8gb.absa.oss,dnsendpoints,ingresses -n "$NAMESPACE" -o yaml
+          save events.txt kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp
+          save zonedelegations.yaml kubectl get zonedelegations -o yaml
+          save k8gb.log kubectl logs -n k8gb -l name=k8gb --tail=-1 --timestamps
+    - description: save test namespace state and k8gb logs from the us cluster
+      script:
+        cluster: us
+        timeout: 60s
+        env:
+        - name: CLUSTER
+          value: us
+        content: |
+          dir="${CHAINSAW_ARTIFACTS_DIR:-}"
+          if [ -n "$dir" ]; then
+            dir="$dir/$NAMESPACE/$CLUSTER"
+            mkdir -p "$dir"
+          fi
+          save() {
+            file="$1"
+            shift
+            if [ -n "$dir" ]; then
+              "$@" >"$dir/$file" 2>&1 || true
+            else
+              echo "=== $CLUSTER: $file"
+              "$@" 2>&1 || true
+            fi
+          }
+          save resources.yaml kubectl get gslbs.k8gb.io,gslbs.k8gb.absa.oss,dnsendpoints,ingresses -n "$NAMESPACE" -o yaml
+          save events.txt kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp
+          save zonedelegations.yaml kubectl get zonedelegations -o yaml
+          save k8gb.log kubectl logs -n k8gb -l name=k8gb --tail=-1 --timestamps
