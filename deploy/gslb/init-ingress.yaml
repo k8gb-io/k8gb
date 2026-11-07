@@ -9,7 +9,7 @@ metadata:
   name: init-ingress
   namespace: k8gb
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
     - host: init.cloud.example.com
       http:

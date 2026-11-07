@@ -4,7 +4,7 @@ metadata:
   name: failover-ingress
   namespace: test-gslb
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: failover.cloud.example.com
     http:

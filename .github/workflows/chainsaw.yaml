@@ -66,6 +66,7 @@ jobs:
             blob.istio.io:443
             istio-release.r2.istio.io:443
             stefanprodan.github.io:443
+            traefik.github.io:443
             k8gb.io:443
             www.k8gb.io:443
 
