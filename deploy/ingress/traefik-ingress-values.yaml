@@ -55,6 +55,12 @@ providers:
     publishedService:
       enabled: false
 
+# Traefik in hostNetwork mode does not create a LoadBalancer Service.
+# Direct Traefik to copy the external IPs from the k8gb-coredns LoadBalancer service
+# into all Ingress resources' status.loadBalancer.ingress, allowing k8gb to discover them.
+additionalArguments:
+  - "--providers.kubernetesingress.ingressendpoint.publishedservice=k8gb/k8gb-coredns"
+
 # Register an IngressClass named "traefik" as the cluster default.
 ingressClass:
   enabled: true
