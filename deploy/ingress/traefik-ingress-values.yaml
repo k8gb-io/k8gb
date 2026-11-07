@@ -34,12 +34,17 @@ ingressRoute:
     enabled: false
 
 # Expose HTTP on port 80 and HTTPS on port 443.
+# When hostNetwork is enabled, containerPort and hostPort must match.
+# Internal traefik port (dashboard/ping) is set to 9000 to avoid collision with Istio on port 8080.
 ports:
+  traefik:
+    port: 9000
+    hostPort: 9000
   web:
-    port: 8000
+    port: 80
     hostPort: 80
   websecure:
-    port: 8443
+    port: 443
     hostPort: 443
   metrics:
     expose:
