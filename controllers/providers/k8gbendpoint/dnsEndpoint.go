@@ -41,6 +41,7 @@ const (
 	dnsTypeAnnotation       = "k8gb.io/dnstype"
 	legacyDNSTypeAnnotation = "k8gb.absa.oss/dnstype"
 	externalDNSTypeCommon   = "extdns"
+	externalDNSTypeNsMerge  = "extdns-ns"
 	localDNSType            = "local"
 	strategyLabel           = "strategy"
 )
