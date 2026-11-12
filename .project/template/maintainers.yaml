@@ -1,0 +1,18 @@
+# Maintainer roster for k8gb
+# Documentation: https://github.com/cncf/automation/tree/main/utilities/dot-project
+
+
+#  Maintainers: Please connect your GitHub handle to your LFID on openprofile.dev to enable automatic access to CNCF resources. The system will use your primary email address for setup.
+maintainers:
+  - project_id: "k8gb"
+    org: "k8gb-io"
+    teams:
+      - name: "project-maintainers"
+        members:
+          - donovanmuller
+          - k0da
+          - kuritka
+          - ytsarev
+          - jkremser
+          - abaguas
+          - elohmrow
