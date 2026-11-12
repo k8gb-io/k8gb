@@ -16,8 +16,8 @@ jobs:
     name: Inspect packages
     runs-on: ubuntu-26.04
     steps:
-      # Harden Runner also drops public UDP/53 in audit mode. Keep this job exempt until
-      # controllers/utils/dns_test.go uses local DNS fixtures; otherwise tests fail or skip.
+      # Harden Runner also drops public UDP/53 in audit mode. Keep this job exempt:
+      # the integration-tagged public DNS tests below still need public network access.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -35,3 +35,7 @@ jobs:
           golic inject --dry -x -t apache2
       - name: go test
         run: go test ./...
+      - name: Public DNS integration tests
+        run: >-
+          go test -count=1 -tags=integration -timeout=5m ./controllers/utils
+          -run '^(TestValidDigFQDNWithDot|TestValidDig|TestOneValidEdgeDNSInTheList|TestMultipleValidEdgeDNSInTheList)$'
