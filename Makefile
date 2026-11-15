@@ -271,7 +271,11 @@ deploy-local-cluster:
 	@echo "CoreDNS service is ready with IPs: $$(kubectl get svc k8gb-coredns -n k8gb -o jsonpath='{.status.loadBalancer.ingress[*].ip}' 2>/dev/null)"
 
 	@echo -e "\n$(YELLOW)Install Gateway API CRDs $(NC)"
-	kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/experimental-install.yaml
+	kubectl delete validatingadmissionpolicy safe-upgrades.gateway.networking.k8s.io --ignore-not-found || true
+	kubectl delete validatingadmissionpolicybinding safe-upgrades.gateway.networking.k8s.io --ignore-not-found || true
+	curl -sL https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/experimental-install.yaml | \
+		awk '/^---/ { if (doc !~ /safe-upgrades\.gateway\.networking\.k8s\.io/ && doc != "") printf "%s", doc; doc = $$0 "\n"; next } { doc = doc $$0 "\n" } END { if (doc !~ /safe-upgrades\.gateway\.networking\.k8s\.io/ && doc != "") printf "%s", doc }' | \
+		kubectl apply --server-side --force-conflicts -f -
 
 	@echo -e "\n$(YELLOW)Install Istio CRDs $(NC)"
 	kubectl create namespace istio-system --dry-run=client -o yaml | kubectl apply -f -
