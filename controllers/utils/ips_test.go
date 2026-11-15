@@ -67,6 +67,24 @@ func TestParseIPAddresses(t *testing.T) {
 			[]string{},
 			true,
 		},
+		{
+			"multiple valid IP addresses with whitespace after comma",
+			"10.0.0.1, 10.0.0.2",
+			[]string{"10.0.0.1", "10.0.0.2"},
+			false,
+		},
+		{
+			"multiple valid IP addresses with leading and trailing whitespace",
+			"  10.0.0.1 ,  10.0.0.2  ",
+			[]string{"10.0.0.1", "10.0.0.2"},
+			false,
+		},
+		{
+			"single valid IP address with whitespace",
+			"  10.0.0.1  ",
+			[]string{"10.0.0.1"},
+			false,
+		},
 	}
 
 	// Run each test case
