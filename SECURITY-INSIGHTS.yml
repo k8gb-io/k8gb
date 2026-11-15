@@ -1,6 +1,6 @@
 header:
   schema-version: 2.2.0
-  last-updated: '2026-10-31'
+  last-updated: '2026-11-03'
   last-reviewed: '2026-10-31'
   url: https://raw.githubusercontent.com/k8gb-io/k8gb/master/SECURITY-INSIGHTS.yml
 
@@ -175,17 +175,17 @@ repository:
           - osps-baseline
         integration:
           adhoc: true
-          ci: false
+          ci: true
           release: false
         results:
-          adhoc:
-            name: OSPS Baseline evaluation
-            location: https://grc.store/targets/k8gb-io/k8gb
+          ci:
+            name: OSPS Baseline workflow runs
+            location: https://github.com/k8gb-io/k8gb/actions/workflows/publish-to-grc-store.yml
             predicate-uri: https://github.com/revanite-io/pvtr-publish-results
         comment: |
           Scans the repository against the OSPS Baseline at Maturity Level 2
-          weekly and on demand, and publishes the signed result to grc.store
-          (see .github/workflows/publish-to-grc-store.yml).
+          weekly and on demand, and publishes each signed result to
+          https://grc.store/targets/k8gb-io/k8gb.
           Manual-review evidence for privileged workflows, external interfaces,
           self-assessment coverage, and advisory publication is recorded at
           https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md#osps-baseline-review-evidence.
