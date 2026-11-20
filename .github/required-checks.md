@@ -35,6 +35,9 @@ in place. Label-selected Istio and multi-cluster tests rerun on subsequent commi
 not only when a label is first applied. The three gate jobs have no token
 permissions and do not check out or run repository code.
 
+Repository token defaults and secret protection are tracked separately in
+[security-settings.md](security-settings.md).
+
 ## Rollout
 
 1. Merge the workflow changes after maintainer review and successful CI. The
