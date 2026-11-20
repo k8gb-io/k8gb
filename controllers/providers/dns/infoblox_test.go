@@ -303,3 +303,90 @@ func TestCreateZoneDelegationInfoblox(t *testing.T) {
 		})
 	}
 }
+
+// The Infoblox client reports a missing object as *ibclient.NotFoundError,
+// which is not a Kubernetes API error.
+func TestSaveZoneDelegationInfobloxZoneLookup(t *testing.T) {
+	detail := &zones.ExtendedZoneDelegation{
+		ParentZone:             "example.com",
+		LoadBalancedZone:       "cloud.example.com",
+		ClusterNSName:          "gslb-ns-eu-cloud.example.com",
+		LocalCoreDNSExposedIPs: []string{"10.0.0.1"},
+	}
+	tests := []struct {
+		name          string
+		lookupErr     error
+		expectCreate  bool
+		expectedError bool
+	}{
+		{name: "zone not found creates it", lookupErr: ibclient.NewNotFoundError("not found"), expectCreate: true},
+		{name: "lookup error is returned and zone is not created", lookupErr: fmt.Errorf("WAPI request error: 401"), expectedError: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mgr := mocks.NewMockIBObjectManager(ctrl)
+			client := mocks.NewMockInfobloxClient(ctrl)
+			client.EXPECT().GetObjectManager().Return(mgr, nil).AnyTimes()
+			mgr.EXPECT().GetZoneDelegated("cloud.example.com").Return(nil, test.lookupErr).Times(1)
+			if test.expectCreate {
+				mgr.EXPECT().CreateZoneDelegated(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&ibclient.ZoneDelegated{}, nil).Times(1)
+			}
+			err := NewInfobloxDNS(resolver.Config{NSRecordTTL: 30}, client).SaveZoneDelegation(detail)
+			if test.expectedError {
+				assert.ErrorContains(t, err, "401")
+				return
+			}
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestFinalizeInfobloxZoneAlreadyAbsent(t *testing.T) {
+	detail := &zones.ExtendedZoneDelegation{
+		ParentZone:       "example.com",
+		LoadBalancedZone: "cloud.example.com",
+		ClusterNSName:    "gslb-ns-eu-cloud.example.com",
+	}
+	tests := []struct {
+		name         string
+		finalizeZone bool
+		expectLookup func(*mocks.MockIBObjectManager)
+	}{
+		{
+			name:         "zone removal, zone not found",
+			finalizeZone: true,
+			expectLookup: func(mgr *mocks.MockIBObjectManager) {
+				mgr.EXPECT().GetZoneDelegated("cloud.example.com").Return(nil, ibclient.NewNotFoundError("not found")).Times(1)
+			},
+		},
+		{
+			name:         "zone removal, zone disappears before delete",
+			finalizeZone: true,
+			expectLookup: func(mgr *mocks.MockIBObjectManager) {
+				mgr.EXPECT().GetZoneDelegated("cloud.example.com").Return(&ibclient.ZoneDelegated{Ref: "zone_delegated/abc"}, nil).Times(1)
+				mgr.EXPECT().DeleteZoneDelegated("zone_delegated/abc").Return("", ibclient.NewNotFoundError("not found")).Times(1)
+			},
+		},
+		{
+			name:         "glue removal, zone not found",
+			finalizeZone: false,
+			expectLookup: func(mgr *mocks.MockIBObjectManager) {
+				mgr.EXPECT().GetZoneDelegated("cloud.example.com").Return(nil, ibclient.NewNotFoundError("not found")).Times(1)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mgr := mocks.NewMockIBObjectManager(ctrl)
+			client := mocks.NewMockInfobloxClient(ctrl)
+			client.EXPECT().GetObjectManager().Return(mgr, nil).AnyTimes()
+			test.expectLookup(mgr)
+			result := NewInfobloxDNS(resolver.Config{NSRecordTTL: 30}, client).Finalize(detail, test.finalizeZone)
+			assert.NoError(t, result.Error())
+			assert.True(t, result.DoFinalization())
+		})
+	}
+}
