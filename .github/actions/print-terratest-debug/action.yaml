@@ -31,6 +31,11 @@ runs:
     - name: Terratest Logs
       shell: bash
       run: |
+        if [[ ! -f "${{ github.workspace }}/tmp/terratest/all.log" ]]; then
+          echo "No Terratest log found; tests may not have run. Skipping log parsing."
+          exit 0
+        fi
+
         echo "::group::Parsing the logs"
         curl --location --silent --fail --show-error -o terratest_log_parser https://github.com/gruntwork-io/terratest/releases/download/v0.38.8/terratest_log_parser_linux_amd64
         chmod +x terratest_log_parser

@@ -19,7 +19,8 @@ options:
     disableLoadbalancer: true
   k3s:
     extraArgs:
-      - arg: --disable=traefik,servicelb,metrics-server,local-storage
+      # The Makefile installs the Gateway API CRDs used by the tests.
+      - arg: --disable=traefik,gateway-api-crd,servicelb,metrics-server,local-storage
         nodeFilters:
           - server:*
 registries:
