@@ -110,19 +110,32 @@ spec:
     cluster: eu
     try:
     - script:
+        # Longer than the 90s polling budget below, so Chainsaw never kills the script mid-loop.
+        timeout: 100s
         env:
         - name: NAME
           value: legacy-requested-pause
         content: |
-          if ! kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=60s; then
-            REMAINING=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --ignore-not-found -o name) || exit 1
-            if [ -n "$REMAINING" ]; then
-              echo "Legacy Gslb deletion timed out"
+          set -eu
+          kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=false
+          start=$(date +%s)
+          while :; do
+            elapsed=$(( $(date +%s) - start ))
+            if ! state=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --ignore-not-found \
+                -o jsonpath='{.metadata.deletionTimestamp} {.metadata.finalizers}'); then
+              echo "${elapsed}s: could not read the legacy Gslb, retrying"
+            elif [ -z "$state" ]; then
+              echo "Legacy Gslb deleted after ${elapsed}s"
+              break
+            else
+              echo "${elapsed}s: legacy Gslb still present (deletionTimestamp finalizers): $state"
+            fi
+            if [ "$elapsed" -ge 90 ]; then
+              echo "Legacy Gslb was not deleted within 90s"
               kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o yaml
-              kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp
               exit 1
             fi
-            echo "Legacy Gslb was deleted at the timeout boundary"
-          fi
+            sleep 2
+          done
           kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE"
           kubectl get dnsendpoint "$NAME" -n "$NAMESPACE"
