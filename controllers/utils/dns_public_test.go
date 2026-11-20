@@ -32,6 +32,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	defaultFqdn = "google.com"
+)
+
 func TestValidDigFQDNWithDot(t *testing.T) {
 	// arrange
 	if !connected() {

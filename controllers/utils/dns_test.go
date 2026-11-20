@@ -25,10 +25,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	defaultFqdn = "google.com"
-)
-
 var defaultEdgeDNSServer = DNSServer{
 	Host: "8.8.8.8",
 	Port: 53,
@@ -89,7 +85,7 @@ func TestNoValidEdgeDNSInTheList(t *testing.T) {
 		{Host: "8.8.8.8", Port: 153}, // wrong
 		{Host: "8.8.4.4", Port: 253}, // wrong
 	}
-	fqdn := defaultFqdn
+	fqdn := "example.test"
 	// act
 	result, err := Dig(fqdn, 8, parentZoneDNSServers...)
 	// assert
@@ -104,7 +100,7 @@ func TestEmptyEdgeDNSInTheList(t *testing.T) {
 		{Host: "8.8.8.8", Port: 53}, // ok
 		{Host: "8.8.4.4", Port: 53}, // ok
 	}
-	fqdn := defaultFqdn
+	fqdn := "example.test"
 	// act
 	result, err := Dig(fqdn, 8, parentZoneDNSServers...)
 	// assert
