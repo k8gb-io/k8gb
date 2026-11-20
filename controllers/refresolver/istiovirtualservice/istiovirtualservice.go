@@ -123,9 +123,12 @@ func getGateway(virtualService *istio.VirtualService, k8sClient client.Client) (
 	if len(ingressGateways) != 1 {
 		return nil, fmt.Errorf("expected exactly 1 Gateway to be referenced by the VirtualService but %d were found", len(ingressGateways))
 	}
-	gatewayRef := strings.Split(ingressGateways[0], "/")
-	gatewayNamespace := gatewayRef[0]
-	gatewayName := gatewayRef[1]
+	// A gateway is referenced as <namespace>/<name>. Without a namespace qualifier Istio
+	// resolves it in the namespace of the VirtualService.
+	gatewayNamespace, gatewayName, qualified := strings.Cut(ingressGateways[0], "/")
+	if !qualified {
+		gatewayNamespace, gatewayName = virtualService.Namespace, ingressGateways[0]
+	}
 
 	gateway := &istio.Gateway{}
 	err := k8sClient.Get(context.TODO(), types.NamespacedName{
