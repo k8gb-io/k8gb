@@ -1,0 +1,53 @@
+# .project metadata for k8gb
+# Documentation: https://github.com/cncf/automation/tree/main/utilities/dot-project
+#
+
+schema_version: "1.0.0"
+slug: "k8gb"                                                                    # REQUIRED: lowercase identifier (a-z, 0-9, hyphens)
+name: "k8gb"                                                                    # REQUIRED: display name
+description: "k8gb is a cloud-native Global Service Load Balancing solution"    # REQUIRED: one-line project description
+type: "project"                                                                 # REQUIRED: project, platform, specification, etc.
+project_lead: "ytsarev"                                                         # Optional: single lead — plain string
+slack_channels:                                                                 # Optional: one or more CNCF Slack channels
+  - name: "#k8gb"                                                               # REQUIRED per entry: must start with "#"
+    workspace: "cncf"                                                           # Optional: Slack workspace identifier
+    link: "https://cloud-native.slack.com/archives/C021P656HGB"                 # Optional: channel/invite URL
+    primary: true                                                               # Optional: mark the main channel for end-users
+
+maturity_log:                                                                   # REQUIRED: at least one entry
+  - phase: "incubating"                                                         # sandbox, incubating, graduated, archived
+    date: "2026-07-18T00:00:00Z"
+    issue: "https://github.com/cncf/toc/issues/1472"
+
+repositories:                                                                   # REQUIRED: at least one repository URL
+  - "https://github.com/k8gb-io/k8gb"
+
+website: "https://www.k8gb.io/"
+
+adopters:                                                                       # Optional: link to adopters list
+  path: "https://github.com/k8gb-io/k8gb/blob/master/ADOPTERS.md"
+
+security:                                                                       # Recommended
+  policy:
+    path: "https://github.com/k8gb-io/k8gb/blob/master/SECURITY.md"
+  contact:
+    advisory_url: "https://github.com/k8gb-io/k8gb/security/advisories"
+
+governance:                                                                     # Recommended
+  contributing:
+    path: "https://github.com/k8gb-io/k8gb/blob/master/CONTRIBUTING.md"
+  code_of_conduct:
+    path: "https://github.com/k8gb-io/k8gb/blob/master/CODE_OF_CONDUCT.md"
+
+legal:                                                                          # Recommended
+  license:
+    path: "https://github.com/k8gb-io/k8gb/blob/master/LICENSE"
+  identity_type:
+    has_dco: true
+    has_cla: false
+    dco_url:
+      path: "https://developercertificate.org/"
+
+documentation:                  # Optional
+  readme:
+    path: "https://github.com/k8gb-io/k8gb/blob/master/README.md"
