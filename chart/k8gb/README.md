@@ -77,7 +77,7 @@ first. Security remediation and release verification are tracked in
 | coredns.extraVolumes[0].configMap.optional | bool | `true` |  |
 | coredns.extraVolumes[0].name | string | `"dynamic-zones"` |  |
 | coredns.image.repository | string | `"registry.k8gb.io/k8gb-io/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.7.0"` | image tag |
+| coredns.image.tag | string | `"v0.8.0"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` | requests and limits for the coredns container |
 | coredns.resources.requests.cpu | string | `"100m"` |  |
