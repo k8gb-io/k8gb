@@ -107,7 +107,7 @@ first. Security remediation and release verification are tracked in
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
 | infoblox.gridHost | string | `"10.0.0.1"` | WAPI address |
 | infoblox.httpPoolConnections | int | `10` | Size of connections pool |
-| infoblox.httpRequestTimeout | int | `20` | Request Timeout in secconds |
+| infoblox.httpRequestTimeout | int | `20` | Request Timeout in seconds |
 | infoblox.sslVerify | bool | `true` | use SSL |
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
