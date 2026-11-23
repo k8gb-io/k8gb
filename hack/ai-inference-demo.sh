@@ -330,7 +330,7 @@ probe_demo() {
 
   local expected_context=${1:-}
   local stop_after_success=${2:-false}
-  local dns_ip expected_remote_ips
+  local dns_ip expected_remote_ips=""
   dns_ip="$(coredns_ip "$PROBE_CONTEXT")"
   [[ -n "$dns_ip" ]] || die "Could not find k8gb CoreDNS service IP in $PROBE_CONTEXT"
   if [[ -n "$expected_context" ]]; then
