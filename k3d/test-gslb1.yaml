@@ -48,7 +48,8 @@ options:
           - agent:*
           - server:*
     extraArgs:
-      - arg: --disable=traefik,metrics-server,local-storage
+      # The Makefile installs the Gateway API CRDs used by the tests.
+      - arg: --disable=traefik,gateway-api-crd,metrics-server,local-storage
         nodeFilters:
           - server:*
 registries:
