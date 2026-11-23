@@ -1,6 +1,6 @@
 module github.com/k8gb-io/k8gb
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/alecthomas/kong v1.17.0
@@ -23,7 +23,7 @@ require (
 	k8s.io/api v0.37.2
 	k8s.io/apimachinery v0.37.2
 	k8s.io/client-go v0.37.2
-	sigs.k8s.io/controller-runtime v0.25.2
+	sigs.k8s.io/controller-runtime v0.25.3
 	sigs.k8s.io/external-dns v0.24.0
 	sigs.k8s.io/gateway-api v1.7.0
 )

@@ -29,14 +29,14 @@ jobs:
          find . -name "*.yaml" -exec sed -i 's/networking\.istio\.io\/v1/networking.istio.io\/v1beta1/g' {} +
 
       - name: Setup Golang
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: ./go.mod
 
       - name: Build artifacts
         uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
-          version: v2.20.2
+          version: v2.20.3
           args: release --clean --skip=publish,validate,sbom,sign --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
