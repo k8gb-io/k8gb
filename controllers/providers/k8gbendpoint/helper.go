@@ -100,25 +100,19 @@ func removeEndpoint(ctx context.Context, client client.Client, endpointKey clien
 }
 
 func getNSCombinations(original []utils.DNSServer, hostToUse string) utils.DNSList {
-	portToUse := original[0].Port
-	nameServerToUse := []utils.DNSServer{
-		{
-			Host: hostToUse,
-			Port: portToUse,
-		},
-	}
-	defaultPortAdded := false
+	nameServerToUse := utils.DNSList{}
+	seenPorts := make(map[int]bool)
 	for _, s := range original {
-		if s.Port != 53 {
-			nameServerToUse = append(nameServerToUse, utils.DNSServer{
-				Host: hostToUse,
-				Port: s.Port,
-			})
-		} else {
-			defaultPortAdded = true
+		if seenPorts[s.Port] {
+			continue
 		}
+		seenPorts[s.Port] = true
+		nameServerToUse = append(nameServerToUse, utils.DNSServer{
+			Host: hostToUse,
+			Port: s.Port,
+		})
 	}
-	if !defaultPortAdded {
+	if !seenPorts[53] {
 		nameServerToUse = append(nameServerToUse, utils.DNSServer{
 			Host: hostToUse,
 			Port: 53,
