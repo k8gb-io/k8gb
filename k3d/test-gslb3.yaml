@@ -4,7 +4,7 @@ metadata:
   name: test-gslb3
 # Used by renovate
 # repo: rancher/k3s
-image: docker.io/rancher/k3s:v1.36.2-k3s1
+image: docker.io/rancher/k3s:v1.37.2-k3s1
 agents: 1
 network: k3d-action-bridge-network
 ports:
@@ -39,7 +39,8 @@ ports:
 options:
   k3s:
     extraArgs:
-      - arg: --disable=traefik,metrics-server,local-storage
+      # The Makefile installs the Gateway API CRDs used by the tests.
+      - arg: --disable=traefik,gateway-api-crd,metrics-server,local-storage
         nodeFilters:
           - server:*
 registries:

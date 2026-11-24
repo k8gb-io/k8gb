@@ -126,7 +126,7 @@ func (z *ZoneDelegation) ExtractGeoTagFromGlueA(glueA string, prefix string) str
 	res := strings.TrimPrefix(glueA, prefix)
 	// if local cluster prefix is "custom"
 	// we still need to find external cluster tag which still
-	// pre-custom tag. Note a new Custom tag should be used across cluster memebers
+	// pre-custom tag. Note a new Custom tag should be used across cluster members
 	if prefix != defaultPrefix {
 		res = strings.TrimPrefix(res, defaultPrefix)
 	}
