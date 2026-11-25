@@ -85,6 +85,7 @@ When we entered incubation, our roadmap named expanding the ecosystem integratio
 - **[NeoNephos](https://github.com/k8gb-io/k8gb/issues/2535):** Global traffic management as part of sovereign cloud infrastructure.
 - **[KEDA](https://github.com/k8gb-io/k8gb/issues/2536):** Event-driven scaling and cost-effective multi-region high availability. Jiri Kremser, a KEDA maintainer, is building it, following up on the KCD Porto talk [Highly Available, Barely Running](https://kcd-porto-2026.sessionize.com/session/1300190).
 - **[NVIDIA Dynamo](https://github.com/k8gb-io/k8gb/pull/2579):** Global routing and regional failover for AI inference workloads.
+- **[Zero-Traffic Region Upgrades with GitOps](https://github.com/k8gb-io/k8gb/issues/2618):** GitOps-driven reference architecture that uses k8gb to safely drain traffic from a Kubernetes cluster region, apply disruptive platform upgrades (such as Kubernetes, ingress, or CNI updates) while the region receives zero traffic, verify its health, and restore traffic before repeating the process for the next region. 
 
 Community members are building all three, and each one shows how k8gb works with other open-source projects to solve a real infrastructure problem.
 
