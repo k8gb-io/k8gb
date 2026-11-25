@@ -33,7 +33,9 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 
 **Attendees**
 
-- [@elohmrow](https://github.com/elohmrow)
+- Dinar
+- Yury
+- Bradley
 
 **Backlog**
 
@@ -72,6 +74,7 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
   - [NeoNephos](https://github.com/k8gb-io/k8gb/issues/2535)
   - [KEDA](https://github.com/k8gb-io/k8gb/issues/2536)
   - [Add opt-in NVIDIA Dynamo routing and failover demo](https://github.com/k8gb-io/k8gb/pull/2579)
+  - [Zero-Traffic Region Upgrades with GitOps](https://github.com/k8gb-io/k8gb/issues/2618)
 
 **Actions**
 
