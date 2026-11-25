@@ -1,0 +1,224 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dynamo-demo
+---
+apiVersion: nvidia.com/v1beta1
+kind: DynamoGraphDeployment
+metadata:
+  name: dynamo-demo
+  namespace: dynamo-demo
+  annotations:
+    nvidia.com/dynamo-discovery-backend: kubernetes
+spec:
+  backendFramework: vllm
+  env:
+  - name: DYN_REQUEST_PLANE
+    value: tcp
+  - name: DYN_EVENT_PLANE
+    value: zmq
+  - name: DYN_RUNTIME_NUM_WORKER_THREADS
+    value: '2'
+  - name: DYN_RUNTIME_MAX_BLOCKING_THREADS
+    value: '8'
+  - name: DYN_COMPUTE_THREADS
+    value: '2'
+  components:
+  - name: Frontend
+    type: frontend
+    replicas: 1
+    podTemplate:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+        containers:
+        - name: main
+          image: k8gb-dynamo-cpu:1.6.0
+          imagePullPolicy: IfNotPresent
+          command:
+          - python3
+          - -m
+          - dynamo.frontend
+          args:
+          - --http-port
+          - '8000'
+          - --router-mode
+          - kv
+          readinessProbe:
+            httpGet:
+              path: /v1/models/Qwen/Qwen3-0.6B/ready
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: '1'
+              memory: 768Mi
+          volumeMounts:
+          - name: model
+            mountPath: /opt/model
+            readOnly: true
+          env:
+          - name: HF_HUB_OFFLINE
+            value: '1'
+        initContainers:
+        - name: model
+          image: k8gb-dynamo-cpu:1.6.0
+          imagePullPolicy: IfNotPresent
+          command:
+          - hf
+          - download
+          args:
+          - Qwen/Qwen3-0.6B
+          - config.json
+          - generation_config.json
+          - tokenizer.json
+          - tokenizer_config.json
+          - --revision
+          - c1899de289a04d12100db370d81485cdf75e47ca
+          - --local-dir
+          - /opt/model
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: '1'
+              memory: 512Mi
+          volumeMounts:
+          - name: model
+            mountPath: /opt/model
+          env:
+          - name: HF_HUB_DISABLE_XET
+            value: '1'
+        volumes:
+        - name: model
+          emptyDir: {}
+  - name: worker
+    type: worker
+    replicas: 2
+    sharedMemorySize: 512Mi
+    podTemplate:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+        containers:
+        - name: main
+          image: k8gb-dynamo-cpu:1.6.0
+          imagePullPolicy: IfNotPresent
+          command:
+          - python3
+          - -m
+          - dynamo.vllm
+          args:
+          - --model
+          - /opt/model
+          - --served-model-name
+          - Qwen/Qwen3-0.6B
+          - --dtype
+          - float16
+          - --max-model-len
+          - '4096'
+          - --max-num-seqs
+          - '2'
+          - --max-num-batched-tokens
+          - '1024'
+          - --block-size
+          - '32'
+          - --enable-prefix-caching
+          - --kv-events-config
+          - '{"enable_kv_cache_events":true,"publisher":"zmq","endpoint":"tcp://*:20080"}'
+          - --enforce-eager
+          - --kv-cache-memory-bytes
+          - '536870912'
+          env:
+          - name: VLLM_CPU_OMP_THREADS_BIND
+            value: nobind
+          - name: OMP_NUM_THREADS
+            value: '2'
+          - name: HF_HUB_OFFLINE
+            value: '1'
+          - name: DYN_HEALTH_CHECK_REQUEST_TIMEOUT
+            value: '120'
+          resources:
+            requests:
+              cpu: '1'
+              memory: 4Gi
+            limits:
+              cpu: '2'
+              memory: 6Gi
+          volumeMounts:
+          - name: model
+            mountPath: /opt/model
+            readOnly: true
+        initContainers:
+        - name: model
+          image: k8gb-dynamo-cpu:1.6.0
+          imagePullPolicy: IfNotPresent
+          command:
+          - hf
+          - download
+          args:
+          - Qwen/Qwen3-0.6B
+          - --revision
+          - c1899de289a04d12100db370d81485cdf75e47ca
+          - --local-dir
+          - /opt/model
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: '1'
+              memory: 512Mi
+          volumeMounts:
+          - name: model
+            mountPath: /opt/model
+          env:
+          - name: HF_HUB_DISABLE_XET
+            value: '1'
+        volumes:
+        - name: model
+          emptyDir: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dynamo-demo
+  namespace: dynamo-demo
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: dynamo.cloud.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: dynamo-demo-frontend
+            port:
+              name: http
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: dynamo-demo
+  namespace: dynamo-demo
+spec:
+  resourceRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: dynamo-demo
+  strategy:
+    type: failover
+    primaryGeoTag: eu
