@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"net"
 	"strings"
+
+	"github.com/rs/zerolog"
 )
 
 // ParseIPAddresses parse a comma separated string of ip addresses into a list of net.IP
@@ -36,4 +38,25 @@ func ParseIPAddresses(ipsStr string) ([]string, error) {
 	}
 
 	return IPs, nil
+}
+
+// SplitIPsByVersion splits a list of IP addresses into IPv4 and IPv6 addresses.
+// Strings that are not valid IP addresses are skipped with a warning.
+func SplitIPsByVersion(logger *zerolog.Logger, ips []string) ([]string, []string) {
+	ipv4Addresses := []string{}
+	ipv6Addresses := []string{}
+	for _, ip := range ips {
+		parsedIP := net.ParseIP(ip)
+		if parsedIP == nil {
+			logger.Warn().Str("ip", ip).Msg("Invalid IP address")
+			continue
+		}
+		if parsedIP.To4() == nil {
+			// cannot be parsed as IPv4, must be IPv6
+			ipv6Addresses = append(ipv6Addresses, ip)
+		} else {
+			ipv4Addresses = append(ipv4Addresses, ip)
+		}
+	}
+	return ipv4Addresses, ipv6Addresses
 }

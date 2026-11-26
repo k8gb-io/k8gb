@@ -139,7 +139,7 @@ func (r *LegacyGslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		r.Recorder.Event(legacy, corev1.EventTypeWarning, "ExposedIPResolutionError", errorMsg)
 		return result.RequeueError(errors.New(errorMsg))
 	}
-	lbIPv4Addresses, _ := splitIPsByVersion(r.Logger, loadBalancerExposedIPs)
+	lbIPv4Addresses, _ := utils.SplitIPsByVersion(r.Logger, loadBalancerExposedIPs)
 	gslb.Status.LoadBalancer.ExposedIPs = lbIPv4Addresses
 
 	serviceHealth, err := calculateServiceHealth(ctx, r.Client, gslb)

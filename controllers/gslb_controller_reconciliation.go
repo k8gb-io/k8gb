@@ -22,7 +22,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
 	"reflect"
 
 	"github.com/k8gb-io/k8gb/controllers/providers/dns"
@@ -170,7 +169,7 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		r.Recorder.Event(gslb, corev1.EventTypeWarning, "ExposedIPResolutionError", errorMsg)
 		return result.RequeueError(errors.New(errorMsg))
 	}
-	lbIpv4Addresses, _ := splitIPsByVersion(r.Logger, loadBalancerExposedIPs)
+	lbIpv4Addresses, _ := utils.SplitIPsByVersion(r.Logger, loadBalancerExposedIPs)
 	gslb.Status.LoadBalancer.ExposedIPs = lbIpv4Addresses
 
 	r.Logger.Debug().
@@ -229,26 +228,6 @@ func (r *GslbReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// TODO: potentially enhance with smarter reaction to external Event
 	m.IncrementReconciliation(gslb)
 	return result.Requeue()
-}
-
-// splitIPsByVersion splits a list of IP addresses into IPv4 and IPv6 addresses
-func splitIPsByVersion(logger *zerolog.Logger, ips []string) ([]string, []string) {
-	ipv4Addresses := []string{}
-	ipv6Addresses := []string{}
-	for _, ip := range ips {
-		parsedIP := net.ParseIP(ip)
-		if parsedIP == nil {
-			logger.Warn().Str("ip", ip).Msg("Invalid IP address")
-			continue
-		}
-		if parsedIP.To4() == nil {
-			// cannot be parsed as IPv4, must be IPv6
-			ipv6Addresses = append(ipv6Addresses, ip)
-		} else {
-			ipv4Addresses = append(ipv4Addresses, ip)
-		}
-	}
-	return ipv4Addresses, ipv6Addresses
 }
 
 // filterServersByZoneDelegations filters servers to only include those with hosts that match the delegation zones
