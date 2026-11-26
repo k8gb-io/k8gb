@@ -59,6 +59,7 @@ taskfile.yaml
 
 # chainsaw local test run
 chainsaw/kubeconfig/
+tmp/chainsaw/
 
 mkdocs-env/
 site/
