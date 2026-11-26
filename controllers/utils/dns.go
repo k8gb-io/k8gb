@@ -59,8 +59,9 @@ func (l DNSList) Random() (*DNSServer, bool) {
 	return &l[randomIndex], true
 }
 
-// Dig returns a list of IP addresses for a given FQDN by using the dns servers from parentZoneDNSServers
-// dns servers are tried one by one from the parentZoneDNSServers and if there is a non-error response it is returned and the rest is not tried
+// Dig returns IP addresses for fqdn using the configured DNS servers in order.
+// Transport errors and SERVFAIL responses try the next server; other responses
+// are terminal, including NXDOMAIN and NOERROR without answers.
 func Dig(fqdn string, maxRecursion int, parentZoneDNSServers ...DNSServer) (ips []string, err error) {
 	if maxRecursion < 0 {
 		return nil, fmt.Errorf("maximum recursion limit reached")
@@ -152,10 +153,14 @@ func ResolveHostnames(hostnamesStr string, parentZoneDNSServers ...DNSServer) ([
 	return IPs, nil
 }
 
+// Exchange tries each configured server once, in order, on transport errors or SERVFAIL.
+// All other DNS responses are terminal. If the list is exhausted, the last SERVFAIL
+// is returned with a nil error when available; otherwise the transport error is returned.
 func Exchange(m *dns.Msg, parentZoneDNSServers []DNSServer) (msg *dns.Msg, err error) {
 	if len(parentZoneDNSServers) == 0 {
 		return nil, fmt.Errorf("empty parentZoneDNSServers, provide at least one")
 	}
+	var lastSERVFAIL *dns.Msg
 	for _, ns := range parentZoneDNSServers {
 		if ns.Host == "" {
 			return nil, fmt.Errorf("empty edgeDNSServer.Host in the list")
@@ -164,7 +169,14 @@ func Exchange(m *dns.Msg, parentZoneDNSServers []DNSServer) (msg *dns.Msg, err e
 		if err != nil {
 			continue
 		}
+		if msg.Rcode == dns.RcodeServerFailure {
+			lastSERVFAIL = msg
+			continue
+		}
 		return
+	}
+	if lastSERVFAIL != nil {
+		return lastSERVFAIL, nil
 	}
 	return nil, fmt.Errorf("exchange error: all dns servers were tried and none of them were able to resolve, err: %w", err)
 }

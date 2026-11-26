@@ -36,8 +36,8 @@ Kubernetes: `>= 1.32.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://coredns.github.io/helm | coredns | 1.49.0 |
-| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.23.0 |
+| https://coredns.github.io/helm | coredns | 1.50.8 |
+| https://kubernetes-sigs.github.io/external-dns | extdns(external-dns) | 1.24.0 |
 
 #### Tested Environment Configurations:
 
@@ -77,7 +77,7 @@ first. Security remediation and release verification are tracked in
 | coredns.extraVolumes[0].configMap.optional | bool | `true` |  |
 | coredns.extraVolumes[0].name | string | `"dynamic-zones"` |  |
 | coredns.image.repository | string | `"registry.k8gb.io/k8gb-io/k8s_crd"` | CoreDNS CRD plugin image |
-| coredns.image.tag | string | `"v0.7.0"` | image tag |
+| coredns.image.tag | string | `"v0.8.0"` | image tag |
 | coredns.isClusterService | bool | `false` | service: refer to https://www.k8gb.io/docs/service_upgrade.html for upgrading CoreDNS service steps |
 | coredns.resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` | requests and limits for the coredns container |
 | coredns.resources.requests.cpu | string | `"100m"` |  |
@@ -107,7 +107,7 @@ first. Security remediation and release verification are tracked in
 | infoblox.enabled | bool | `false` | infoblox provider enabled |
 | infoblox.gridHost | string | `"10.0.0.1"` | WAPI address |
 | infoblox.httpPoolConnections | int | `10` | Size of connections pool |
-| infoblox.httpRequestTimeout | int | `20` | Request Timeout in secconds |
+| infoblox.httpRequestTimeout | int | `20` | Request Timeout in seconds |
 | infoblox.sslVerify | bool | `true` | use SSL |
 | infoblox.wapiPort | int | `443` | WAPI port |
 | infoblox.wapiVersion | string | `"2.3.1"` | WAPI version |
