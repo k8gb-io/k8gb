@@ -182,7 +182,7 @@ infoblox:
   wapiPort: 443
   # -- use SSL
   sslVerify: true
-  # -- Request Timeout in secconds
+  # -- Request Timeout in seconds
   httpRequestTimeout: 20
   # -- Size of connections pool
   httpPoolConnections: 10
