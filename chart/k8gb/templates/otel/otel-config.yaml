@@ -22,7 +22,6 @@ data:
           insecure: true
         retry_on_failure:
           enabled: true
-      logging:
     service:
       pipelines:
         traces:
