@@ -37,3 +37,50 @@ func TestExtractGeoTag(t *testing.T) {
 	geotag = zd.ExtractGeoTagFromGlueA("my-1-test-podinfo-foo-blah-gslb.a.b.c.d", "my-")
 	assert.Equal(t, "1-test", geotag)
 }
+
+func newZoneDelegationList(zones ...string) *ZoneDelegationList {
+	l := &ZoneDelegationList{}
+	for _, z := range zones {
+		l.Items = append(l.Items, ZoneDelegation{Spec: ZoneDelegationSpec{LoadBalancedZone: z, ParentZone: "example.com"}})
+	}
+	return l
+}
+
+func TestZoneDelegationListContainsZone(t *testing.T) {
+	tests := []struct {
+		name     string
+		zones    []string
+		host     string
+		expected bool
+	}{
+		{"host is a subdomain of the zone", []string{"cloud.example.com"}, "app.cloud.example.com", true},
+		{"host is nested below the zone", []string{"cloud.example.com"}, "a.b.cloud.example.com", true},
+		{"host equals the zone", []string{"cloud.example.com"}, "cloud.example.com", true},
+		{"host in a different zone", []string{"cloud.example.com"}, "app.other.example.com", false},
+		{"zone name is only the tail of a label", []string{"cloud.example.com"}, "app.notcloud.example.com", false},
+		{"zone name is only a prefix of the host", []string{"cloud.example.com"}, "cloud.example.com.evil.org", false},
+		{"zone name appears in the middle of the host", []string{"cloud.example.com"}, "app.cloud.example.com.evil.org", false},
+		{"one of several zones matches", []string{"lb.example.com", "gslb.example.com"}, "app.gslb.example.com", true},
+		{"no zones", nil, "app.cloud.example.com", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, newZoneDelegationList(tt.zones...).ContainsZone(tt.host))
+		})
+	}
+}
+
+func TestZoneDelegationListFindZone(t *testing.T) {
+	l := newZoneDelegationList("lb.example.com", "gslb.example.com")
+
+	found, zone := l.FindZone("app.gslb.example.com")
+	assert.True(t, found)
+	assert.Equal(t, "gslb.example.com", zone.Spec.LoadBalancedZone)
+
+	found, zone = l.FindZone("app.lb.example.com")
+	assert.True(t, found)
+	assert.Equal(t, "lb.example.com", zone.Spec.LoadBalancedZone)
+
+	found, _ = l.FindZone("app.notlb.example.com")
+	assert.False(t, found)
+}

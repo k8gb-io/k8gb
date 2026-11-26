@@ -84,9 +84,15 @@ type ZoneDelegationList struct {
 	Items           []ZoneDelegation `json:"items"`
 }
 
+// containsHost reports whether host is the load balanced zone itself or one of its subdomains.
+// The names are compared label by label, so "app.notcloud.example.com" does not belong to "cloud.example.com".
+func (z *ZoneDelegation) containsHost(host string) bool {
+	return host == z.Spec.LoadBalancedZone || strings.HasSuffix(host, "."+z.Spec.LoadBalancedZone)
+}
+
 func (l *ZoneDelegationList) ContainsZone(host string) bool {
-	for _, z := range l.Items {
-		if strings.Contains(host, z.Spec.LoadBalancedZone) {
+	for i := range l.Items {
+		if l.Items[i].containsHost(host) {
 			return true
 		}
 	}
@@ -94,9 +100,9 @@ func (l *ZoneDelegationList) ContainsZone(host string) bool {
 }
 
 func (l *ZoneDelegationList) FindZone(host string) (bool, ZoneDelegation) {
-	for _, z := range l.Items {
-		if strings.Contains(host, z.Spec.LoadBalancedZone) {
-			return true, z
+	for i := range l.Items {
+		if l.Items[i].containsHost(host) {
+			return true, l.Items[i]
 		}
 	}
 	return false, ZoneDelegation{}
