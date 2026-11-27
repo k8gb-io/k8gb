@@ -71,6 +71,8 @@ var m = metrics.Metrics()
 
 // +kubebuilder:rbac:groups=k8gb.io,resources=gslbs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=k8gb.io,resources=gslbs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=k8gb.io;k8gb.absa.oss,resources=gslbs/finalizers,verbs=update
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses/finalizers,verbs=update
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile runs main reconciliation loop
