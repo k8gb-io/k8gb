@@ -27,10 +27,11 @@ import (
 // ParseIPAddresses parse a comma separated string of ip addresses into a list of net.IP
 func ParseIPAddresses(ipsStr string) ([]string, error) {
 	IPs := []string{}
-	for _, ipStr := range strings.Split(ipsStr, ",") {
+	for _, rawIPStr := range strings.Split(ipsStr, ",") {
+		ipStr := strings.TrimSpace(rawIPStr)
 		ipAddr := net.ParseIP(ipStr)
 		if ipAddr == nil {
-			return []string{}, fmt.Errorf("invalid IP address: %s", ipStr)
+			return []string{}, fmt.Errorf("invalid IP address: %s", rawIPStr)
 		}
 		IPs = append(IPs, ipAddr.String())
 	}
