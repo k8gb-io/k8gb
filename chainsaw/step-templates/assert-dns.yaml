@@ -6,9 +6,9 @@ metadata:
   name: assert-dns
 spec:
   try:
-  - sleep: 
-      duration: 40s # reconcile requeue seconds + coreDNS
   - script:
+      # Longer than the polling budget below; the config's exec default is 75s.
+      timeout: 3m
       env:
       - name: NAME
         value: ($test.metadata.name)
@@ -17,13 +17,34 @@ spec:
       - name: DNS_PORT_US
         value: ($values.dns_port_us)
       content: |
-        EXPECTED=$(kubectl get dnsendpoint $NAME -n $NAMESPACE -o json | jq -r --arg dnsName "localtargets.$NAME.cloud.example.com" '.spec.endpoints[] | select(.dnsName == $dnsName).targets | join(",")')
-        ACTUAL_EU=$(dig @localhost -p $DNS_PORT_EU "$NAME.cloud.example.com" +short | paste -sd, -)
+        # Poll until both clusters answer with the step cluster's local targets.
+        # A single check after a fixed sleep failed under full-suite load, when
+        # the other cluster had not picked up the targets yet (#2653).
+        query() {
+          dig @localhost -p "$1" "$NAME.cloud.example.com" +short +time=2 +tries=1 | grep -v '^;;' | paste -sd, -
+        }
+        sorted() {
+          echo "$1" | tr ',' '\n' | sort | tr '\n' ','
+        }
 
-        EXPECTED_SORTED=$(echo "$EXPECTED" | tr ',' '\n' | sort | tr '\n' ',')
-        ACTUAL_EU_SORTED=$(echo "$ACTUAL_EU" | tr ',' '\n' | sort | tr '\n' ',')
-        [ "$EXPECTED_SORTED" = "$ACTUAL_EU_SORTED" ] || { echo "EU expected targets '$EXPECTED_SORTED' but found '$ACTUAL_EU_SORTED'"; exit 1; }
+        deadline=$(( $(date +%s) + 150 ))
+        while :; do
+          EXPECTED=$(kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json 2>/dev/null | jq -r --arg dnsName "localtargets.$NAME.cloud.example.com" '(.spec.endpoints // [])[] | select(.dnsName == $dnsName).targets | join(",")')
+          EXPECTED_SORTED=$(sorted "$EXPECTED")
+          ACTUAL_EU_SORTED=$(sorted "$(query "$DNS_PORT_EU")")
+          ACTUAL_US_SORTED=$(sorted "$(query "$DNS_PORT_US")")
 
-        ACTUAL_US=$(dig @localhost -p $DNS_PORT_US "$NAME.cloud.example.com" +short | paste -sd, -)
-        ACTUAL_US_SORTED=$(echo "$ACTUAL_US" | tr ',' '\n' | sort | tr '\n' ',')
-        [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ] || { echo "US expected targets '$EXPECTED_SORTED' but found '$ACTUAL_US_SORTED'"; exit 1; }
+          # An empty expected list means the step cluster has no ready local
+          # targets yet, so it never counts as a match.
+          if [ "$EXPECTED_SORTED" != "," ] && [ "$EXPECTED_SORTED" = "$ACTUAL_EU_SORTED" ] && [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ]; then
+            exit 0
+          fi
+
+          if [ "$(date +%s)" -ge "$deadline" ]; then
+            [ "$EXPECTED_SORTED" != "," ] || echo "DNSEndpoint $NAME has no local targets yet"
+            [ "$EXPECTED_SORTED" = "$ACTUAL_EU_SORTED" ] || echo "EU expected targets '$EXPECTED_SORTED' but found '$ACTUAL_EU_SORTED'"
+            [ "$EXPECTED_SORTED" = "$ACTUAL_US_SORTED" ] || echo "US expected targets '$EXPECTED_SORTED' but found '$ACTUAL_US_SORTED'"
+            exit 1
+          fi
+          sleep 5
+        done
