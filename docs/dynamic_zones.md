@@ -101,9 +101,9 @@ Use `doFinalize: false` when k8gb should not modify the parent DNS delegation du
 Use `doFinalize: true` when k8gb is allowed to remove the delegated zone from the parent DNS during cleanup.
 
 ### Delayed Finalization
-When `doFinalize` is enabled, deleting a `ZoneDelegation` may not remove the object immediately. The object can remain in
-a terminating state while the k8gb controller verifies whether the current cluster is the last remaining member of the delegation.
-This prevents premature deletion of the delegated zone from the parent DNS in multi-cluster environments.
+When `doFinalize` is enabled, deleting a `ZoneDelegation` may not remove the object immediately.
+The finalizer remains until the provider's cleanup requirements are satisfied. With ExternalDNS,
+local withdrawal can finish while other clusters continue serving the zone.
 
 ```yaml
 metadata:
@@ -117,13 +117,33 @@ When `ZoneDelegation` is removed with the Infoblox provider, the delegated zone 
 object is removed. The zone is deleted directly by the Infoblox provider, which is part of k8gb.
 
 ### ExternalDNS provider
-When `ZoneDelegation` is removed with the ExternalDNS provider, delegation `DNSEndpoint` objects must not be deleted immediately.
-Instead, deleting a `ZoneDelegation` removes the current cluster target from the delegation `DNSEndpoint` and removes the
-zone configuration from the `k8gb-zone-delegation` ConfigMap. The `ZoneDelegation` object then remains blocked by its finalizer.
-The last remaining `ZoneDelegation` object no longer has information about any other participating clusters, so it can be finalized and deleted.
-The remaining `ZoneDelegation` objects are finalized automatically after they lose information about the last cluster.
-Together with the `ZoneDelegation` objects, the delegation `DNSEndpoint` objects are deleted as well. This allows the ExternalDNS provider
-to remove the delegated zone from the parent DNS.
+Deleting a `ZoneDelegation` removes its local CoreDNS zone configuration and removes only
+that cluster's NS target and glue A record from its delegation `DNSEndpoint`.
+Because ExternalDNS publishes changes asynchronously, k8gb retains the finalizer until every
+parent authority discovered through the configured DNS servers confirms that the local NS target
+and glue A record are absent. Configured servers may be recursive resolvers; k8gb discovers the
+parent zone NS records and resolves their IPv4/IPv6 addresses before querying those authorities
+without recursion, using reachable addresses for each nameserver. A configured server answering authoritatively for the parent is queried directly.
+Only a parent delegation response or an authoritative negative response with the parent SOA
+can confirm withdrawal. Empty nonauthoritative replies and DNS errors postpone cleanup. Other clusters can continue serving the zone, and their presence
+does not prevent the local `ZoneDelegation` from being deleted and subsequently recreated.
+
+The delegation `DNSEndpoint` retains peer NS targets while those peers remain active. It is
+marked with `k8gb.io/withdrawn-zone-delegation` and `k8gb.io/withdrawn-parent-zone` so cleanup
+continues independently of the deleted `ZoneDelegation`, including after controller restarts.
+Deferred cleanup discovers the saved parent's current authorities and queries peer glue without
+recursion. It deletes the retained endpoint only when every authority confirms peer glue absence
+with an authoritative negative answer carrying the parent SOA. Cached recursive negatives, empty
+nonauthoritative replies, and referrals do not prove absence; cleanup retains the endpoint and retries.
+ExternalDNS can then remove its remaining delegation records. Recreating the delegation reuses
+the endpoint and clears both cleanup markers.
+
+Endpoints marked by an older version without `k8gb.io/withdrawn-parent-zone` are retained safely.
+To resume their deferred cleanup, add that annotation with the original `ZoneDelegation.spec.parentZone`
+value, or recreate the delegation so its next withdrawal persists the parent automatically.
+
+The last participating cluster still requests deletion of its whole delegation `DNSEndpoint`.
+Delegations with `doFinalize: false` retain their existing behavior.
 
 ## Backward Compatibility
 Static zones configured through `k8gb.dnsZones` remain supported. Dynamic Zones are an additional mechanism for environments

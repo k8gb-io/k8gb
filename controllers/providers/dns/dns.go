@@ -25,11 +25,10 @@ import (
 type FinalizeZoneDelegationStatus string
 
 const (
-	// Finalize indicates that the ZoneDelegation can be safely finalized. ZoneDelegation sees itself as the last one.
+	// Finalize indicates that the requested local or whole-zone cleanup has completed.
 	Finalize FinalizeZoneDelegationStatus = "finalize"
 
-	// Delay indicates that finalization must be postponed because another cluster may still depend on this state.
-	// ZoneDelegation doesnt see itself as the last one
+	// Delay indicates that finalization must be postponed until DNS cleanup completes.
 	Delay FinalizeZoneDelegationStatus = "delay"
 
 	// Error indicates that the finalization decision could not be made safely.
@@ -43,6 +42,12 @@ type Provider interface {
 	Finalize(*zones.ExtendedZoneDelegation, bool) *FinalizationResult
 	// String see: Stringer interface
 	String() string
+}
+
+// WithdrawnDelegationCleaner continues shared DNS cleanup after the local
+// ZoneDelegation has been deleted. True means that cleanup is still pending.
+type WithdrawnDelegationCleaner interface {
+	CleanupWithdrawnDelegation(string) (bool, error)
 }
 
 type FinalizationResult struct {

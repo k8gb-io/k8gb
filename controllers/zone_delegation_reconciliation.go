@@ -70,6 +70,15 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	zone, err := r.ZoneService.Get(ctx, req.NamespacedName)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			if cleaner, ok := r.DNSProvider.(dns.WithdrawnDelegationCleaner); ok {
+				pending, err := cleaner.CleanupWithdrawnDelegation(req.Name)
+				if err != nil {
+					return result.RequeueError(err)
+				}
+				if pending {
+					return result.RequeueAfter(max(1, r.Config.ZoneDelegationReconcileRequeueSeconds))
+				}
+			}
 			r.Logger.Debug().
 				Str("name", req.Name).
 				Msg("ZoneDelegation not found. Ignoring reconcile request")
@@ -100,7 +109,9 @@ func (r *ZoneDelegationReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		if err != nil {
 			return result.RequeueError(err)
 		}
-		return result.Requeue()
+		// DNS publication does not generate Kubernetes events. Keep polling even
+		// when periodic reconciliation of active delegations is disabled.
+		return result.RequeueAfter(max(1, r.Config.ZoneDelegationReconcileRequeueSeconds))
 	}
 
 	zone, err = r.ZoneService.UpdateStatus(ctx, zone)
