@@ -67,6 +67,15 @@ func (p *ExternalDNSProvider) SaveZoneDelegation(zoneInfo *zones.ExtendedZoneDel
 	if err != nil {
 		return fmt.Errorf("failed to save delegationDNSEndpoint %v", err)
 	}
+	if p.config.ExtDNSNsMergeEnabled {
+		nsEp, nsErr := dze.GetNsMergeDNSEndpoint()
+		if nsErr != nil {
+			return fmt.Errorf("failed to create ns-merge DNSEndpoint %v", nsErr)
+		}
+		if err = dze.SaveDNSEndpoint(nsEp); err != nil {
+			return fmt.Errorf("failed to save ns-merge DNSEndpoint %v", err)
+		}
+	}
 	return nil
 }
 
@@ -89,8 +98,18 @@ func (p *ExternalDNSProvider) String() string {
 }
 
 func (p *ExternalDNSProvider) deleteZoneDelegated(ctx context.Context, zone *zones.ExtendedZoneDelegation) error {
+	if err := p.deleteDelegationEndpoint(ctx, zone.GetZoneDelegation().GetExternalDNSEndpointName()); err != nil {
+		return err
+	}
+	if p.config.ExtDNSNsMergeEnabled {
+		return p.deleteDelegationEndpoint(ctx, zone.GetZoneDelegation().GetExternalDNSNsMergeEndpointName())
+	}
+	return nil
+}
+
+func (p *ExternalDNSProvider) deleteDelegationEndpoint(ctx context.Context, name string) error {
 	delegationDNSEndpoint := &externaldnsApi.DNSEndpoint{}
-	selector := types.NamespacedName{Name: zone.GetZoneDelegation().GetExternalDNSEndpointName(), Namespace: p.config.K8gbNamespace}
+	selector := types.NamespacedName{Name: name, Namespace: p.config.K8gbNamespace}
 	if err := p.client.Get(ctx, selector, delegationDNSEndpoint); err != nil {
 		return client.IgnoreNotFound(err)
 	}
@@ -144,6 +163,47 @@ func (p *ExternalDNSProvider) removeGlueAFromDelegatedZone(ctx context.Context, 
 
 		return nil
 
+	})
+	if err != nil {
+		return err
+	}
+	if p.config.ExtDNSNsMergeEnabled {
+		return p.removeNSTargetFromMergeEndpoint(ctx, zone)
+	}
+	return nil
+}
+
+func (p *ExternalDNSProvider) removeNSTargetFromMergeEndpoint(ctx context.Context, zone *zones.ExtendedZoneDelegation) error {
+	nsEndpoint := &externaldnsApi.DNSEndpoint{}
+	selector := types.NamespacedName{Name: zone.GetZoneDelegation().GetExternalDNSNsMergeEndpointName(), Namespace: p.config.K8gbNamespace}
+	if err := p.client.Get(ctx, selector, nsEndpoint); err != nil {
+		return client.IgnoreNotFound(err)
+	}
+	_, err := controllerutil.CreateOrPatch(ctx, p.client, nsEndpoint, func() error {
+		glueAName := zone.ClusterNSName
+		delegatedZone := zone.LoadBalancedZone
+		endpoints := make([]*externaldns.Endpoint, 0, len(nsEndpoint.Spec.Endpoints))
+		for _, ep := range nsEndpoint.Spec.Endpoints {
+			if ep == nil {
+				continue
+			}
+			if ep.DNSName == delegatedZone && ep.RecordType == "NS" {
+				var newTargetList []string
+				for _, target := range ep.Targets {
+					if target == glueAName {
+						continue
+					}
+					newTargetList = append(newTargetList, target)
+				}
+				ep.Targets = newTargetList
+				if len(newTargetList) == 0 {
+					continue
+				}
+			}
+			endpoints = append(endpoints, ep)
+		}
+		nsEndpoint.Spec.Endpoints = endpoints
+		return nil
 	})
 	return err
 }
