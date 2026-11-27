@@ -18,9 +18,9 @@ Again, you can verify that everything is up and running by following [the steps 
 make deploy-kuar-app
 ```
 
-This task will deploy Kuar into both clusters and exposes it. It also patches the installed nginx controller to serve the app even if the `Host` header is not provided in the request. This way you can access the application in your browser under http://localhost:80 for cluster 1 and http://localhost:81 for cluster 2.
+This task will deploy Kuar into both clusters and exposes it via the Traefik ingress controller. You can access the application in your browser under http://localhost:80 for cluster 1 and http://localhost:81 for cluster 2.
 
-Make sure the app on http://localhost is responding, it may take a minute for the nginx ingress controller to restart with the correct parameters.
+Make sure the app on http://localhost is responding, it may take a moment for the Traefik ingress controller to pick up the new Ingress route.
 
 The make target also modified the deployment of the Kuar application to use our core DNS servers. To verify that this was done, one can open the Kuar's file system browser tab and [open](http://localhost/fs/etc/resolv.conf) `/etc/resolv.conf`. It should contain the same IP as cluster-IP assigned to `k8gb-coredns` service.
 

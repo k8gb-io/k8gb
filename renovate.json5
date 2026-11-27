@@ -92,16 +92,16 @@
       ],
       "autoReplaceStringTemplate": "CONTROLLER_GEN_VERSION ?= v{{{newValue}}}"
     },
-    // update NGINX ingress version in Makefile
+    // update Traefik ingress version in Makefile
     {
       "fileMatch": ["^Makefile$"],
       "datasourceTemplate": "github-releases",
-      "depNameTemplate": "kubernetes/ingress-nginx",
-      "extractVersionTemplate": "^helm-chart-(?<version>.*)$",
+      "depNameTemplate": "traefik/traefik-helm-chart",
+      "extractVersionTemplate": "^traefik-(?<version>.*)$",
       "matchStrings": [
-        "NGINX_INGRESS_VERSION \\?= (?<currentValue>.*)",
+        "TRAEFIK_VERSION \\?= (?<currentValue>.*)",
       ],
-      "autoReplaceStringTemplate": "NGINX_INGRESS_VERSION ?= {{{newValue}}}"
+      "autoReplaceStringTemplate": "TRAEFIK_VERSION ?= {{{newValue}}}"
     },
     // update Grafana version in Makefile
     {

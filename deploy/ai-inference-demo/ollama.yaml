@@ -161,7 +161,7 @@ metadata:
     ai.k8gb.io/region: __AI_DEMO_REGION__
     ai.k8gb.io/backend: __AI_DEMO_BACKEND__
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: ai-inference.__GSLB_DOMAIN__
     http:

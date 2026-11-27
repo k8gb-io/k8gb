@@ -4,7 +4,7 @@ metadata:
   name: roundrobin-ingress
   namespace: test-gslb
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: notfound.cloud.example.com
     http:
