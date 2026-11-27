@@ -22,14 +22,11 @@ import (
 	"fmt"
 	"net"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/miekg/dns"
 )
-
-const periodDelay = 100 * time.Millisecond
 
 type FakeDNSSettings struct {
 	FakeDNSPort     int
@@ -40,14 +37,12 @@ type FakeDNSSettings struct {
 
 // DNSMock acts as DNS server but returns mock values
 type DNSMock struct {
-	// readinessProbe is the channel that is released when the dns server starts listening
-	readinessProbe chan interface{}
-	livenessProbe  chan interface{}
-	settings       FakeDNSSettings
-	records        map[uint16][]dns.RR
-	extraRecords   map[string][]dns.RR
-	server         *dns.Server
-	err            error
+	serveErr     chan error
+	settings     FakeDNSSettings
+	records      map[uint16][]dns.RR
+	extraRecords map[string][]dns.RR
+	server       *dns.Server
+	err          error
 }
 
 type Result struct {
@@ -56,31 +51,36 @@ type Result struct {
 
 func NewFakeDNS(settings FakeDNSSettings) *DNSMock {
 	return &DNSMock{
-		settings:       settings,
-		readinessProbe: make(chan interface{}),
-		livenessProbe:  make(chan interface{}),
-		records:        make(map[uint16][]dns.RR),
-		extraRecords:   make(map[string][]dns.RR),
-		server:         &dns.Server{Addr: fmt.Sprintf("[::]:%v", settings.FakeDNSPort), Net: "udp", TsigSecret: nil, ReusePort: false},
+		// serveErr receives the result of listen once the dns server stops
+		serveErr:     make(chan error, 1),
+		settings:     settings,
+		records:      make(map[uint16][]dns.RR),
+		extraRecords: make(map[string][]dns.RR),
+		server:       &dns.Server{Addr: fmt.Sprintf("[::]:%v", settings.FakeDNSPort), Net: "udp", TsigSecret: nil, ReusePort: false},
 	}
 }
 
 func (m *DNSMock) Start() *DNSMock {
-	go m.startReadinessProbe()
+	started := make(chan struct{})
+	m.server.NotifyStartedFunc = func() { close(started) }
 	go func() {
-		m.err = m.listen()
+		m.serveErr <- m.listen()
 	}()
-	<-m.readinessProbe
-	fmt.Printf("FakeDNS listening on port %v \n", m.settings.FakeDNSPort)
+	select {
+	case <-started:
+		fmt.Printf("FakeDNS listening on port %v \n", m.settings.FakeDNSPort)
+	case m.err = <-m.serveErr:
+	}
 	return m
 }
 
 func (m *DNSMock) RunTestFunc(f func()) *Result {
 	if m.err == nil {
 		f()
-		go m.startLivenessProbe()
 		m.err = m.server.Shutdown()
-		<-m.livenessProbe
+		if m.err == nil {
+			m.err = <-m.serveErr
+		}
 	}
 	return &Result{
 		Error: m.err,
@@ -163,42 +163,6 @@ func (m *DNSMock) listen() (err error) {
 		}
 	}
 	return
-}
-
-func (m *DNSMock) hit() (err error) {
-	g := new(dns.Msg)
-	host := fmt.Sprintf("localhost:%v", m.settings.FakeDNSPort)
-	g.SetQuestion(m.settings.DNSZoneFQDN, dns.TypeA)
-	_, err = dns.Exchange(g, host)
-	return
-}
-
-func (m *DNSMock) startReadinessProbe() {
-	defer close(m.readinessProbe)
-	var err error
-	for i := 0; i < 5; i++ {
-		err = m.hit()
-		if err != nil {
-			time.Sleep(periodDelay)
-			continue
-		}
-		return
-	}
-	m.err = fmt.Errorf("readiness probe %s (%s)", err, m.err)
-}
-
-// liveness probe will be closed when the FakeDNS is not responding
-func (m *DNSMock) startLivenessProbe() {
-	defer close(m.livenessProbe)
-	var err error
-	for i := 0; i < 5; i++ {
-		err = m.hit()
-		if err != nil {
-			return
-		}
-		time.Sleep(periodDelay)
-	}
-	m.err = fmt.Errorf("liveness probe %s (%s)", err, m.err)
 }
 
 func (m *DNSMock) serve() <-chan error {
