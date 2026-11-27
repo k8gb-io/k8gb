@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k8gb-io/k8gb/controllers/logging"
 	"github.com/k8gb-io/k8gb/controllers/providers/assistant"
 	"github.com/k8gb-io/k8gb/controllers/resolver"
 	"github.com/k8gb-io/k8gb/controllers/utils"
@@ -30,6 +31,8 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var log = logging.Logger()
 
 type Resolved struct {
 	source corev1.ServiceType
@@ -163,9 +166,18 @@ func readIPs(ctx context.Context, cl client.Client, config *resolver.Config) (*R
 	if boot.HasIngress() {
 		ingresAssistant := assistant.NewIngressAssistant(ctx, cl)
 		boot.IPs, boot.ing, err = ingresAssistant.GetExposedIPs()
+	} else {
+		coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(ctx, cl, *config)
+		boot.IPs, boot.svc, err = coreDNSAssistant.GetExposedIPs()
+	}
+	if err != nil {
 		return boot, err
 	}
-	coreDNSAssistant := assistant.NewCoreDNSServiceAssistant(ctx, cl, *config)
-	boot.IPs, boot.svc, err = coreDNSAssistant.GetExposedIPs()
-	return boot, err
+	// The IPs are published as NS glue A records, which can only carry IPv4 addresses.
+	var ipv6 []string
+	boot.IPs, ipv6 = utils.SplitIPsByVersion(log, boot.IPs)
+	if len(ipv6) > 0 {
+		log.Debug().Strs("ips", ipv6).Msg("Ignoring IPv6 addresses of CoreDNS, A records support IPv4 only")
+	}
+	return boot, nil
 }
