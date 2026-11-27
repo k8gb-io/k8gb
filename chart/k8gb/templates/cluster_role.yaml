@@ -113,6 +113,13 @@ rules:
   - update
   - patch
   - delete
+# Annotated Ingresses own generated Gslbs with blockOwnerDeletion=true.
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/finalizers
+  verbs:
+  - update
 - apiGroups:
   - externaldns.k8s.io
   resources:
@@ -154,12 +161,6 @@ rules:
   - routes/custom-host
   verbs:
   - create
-  - update
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses/finalizers
-  verbs:
   - update
 {{- end }}
 {{- if .Values.istio.enabled }}

@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rbac-annotated
+  namespace: ($namespace)
+  annotations:
+    k8gb.io/strategy: roundRobin
+    k8gb.io/dns-ttl-seconds: "5"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: rbac-annotated.cloud.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-podinfo
+            port:
+              name: http

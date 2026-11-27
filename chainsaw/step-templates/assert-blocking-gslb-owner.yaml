@@ -1,0 +1,61 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: StepTemplate
+metadata:
+  name: assert-blocking-gslb-owner
+spec:
+  try:
+  - script:
+      env:
+      - name: OWNER_API_VERSION
+        value: ($owner_api_version)
+      - name: NAME
+        value: ($test.metadata.name)
+      content: |
+        set -eu
+        GROUP=${OWNER_API_VERSION%/*}
+        kubectl get "gslb.$GROUP" "$NAME" -n "$NAMESPACE" -o json
+      outputs:
+      - name: owner
+        value: (json_parse($stdout))
+  - assert:
+      resource:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: ($test.metadata.name)
+          namespace: ($namespace)
+          (length(ownerReferences)): 1
+          ownerReferences:
+          - apiVersion: ($owner_api_version)
+            kind: Gslb
+            name: ($test.metadata.name)
+            uid: ($owner.metadata.uid)
+            controller: true
+            blockOwnerDeletion: true
+      timeout: 75s
+  - assert:
+      resource:
+        apiVersion: externaldns.k8s.io/v1alpha1
+        kind: DNSEndpoint
+        metadata:
+          name: ($test.metadata.name)
+          namespace: ($namespace)
+          (length(ownerReferences)): 1
+          ownerReferences:
+          - apiVersion: ($owner_api_version)
+            kind: Gslb
+            name: ($test.metadata.name)
+            uid: ($owner.metadata.uid)
+            controller: true
+            blockOwnerDeletion: true
+      timeout: 75s
+  - assert:
+      resource:
+        apiVersion: ($owner_api_version)
+        kind: Gslb
+        metadata:
+          name: ($test.metadata.name)
+          namespace: ($namespace)
+        status:
+          (geoTag != null && geoTag != ''): true
+      timeout: 75s

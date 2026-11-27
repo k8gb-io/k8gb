@@ -10,12 +10,34 @@ spec:
     cluster: eu
     use:
       template: ../../step-templates/namespace.yaml
-  - name: migrate legacy embedded
-    description: apply legacy embedded object and verify canonical migration
+  - name: create legacy embedded
+    description: let the legacy controller create the owned Ingress and DNSEndpoint
     cluster: eu
     try:
     - apply:
         file: ./testdata/legacy-embedded.yaml
+  - name: assert legacy ownership
+    cluster: eu
+    bindings:
+    - name: owner_api_version
+      value: k8gb.absa.oss/v1beta1
+    use:
+      template: ../../step-templates/assert-blocking-gslb-owner.yaml
+  - name: request migration
+    description: detach the existing legacy Ingress and transfer the existing DNSEndpoint
+    cluster: eu
+    try:
+    - script:
+        content: |
+          set -eu
+          kubectl get ingress/legacy-migration-embedded dnsendpoint/legacy-migration-embedded -n "$NAMESPACE" -o json |
+            jq '{ingress: (.items[] | select(.kind == "Ingress")), endpoint: (.items[] | select(.kind == "DNSEndpoint"))}'
+        outputs:
+        - name: before
+          value: (json_parse($stdout))
+    - script:
+        content: |
+          kubectl label gslb.k8gb.absa.oss legacy-migration-embedded -n "$NAMESPACE" k8gb.io/migration-requested=true
     - assert:
         resource:
           apiVersion: k8gb.io/v1beta1
@@ -38,22 +60,45 @@ spec:
             namespace: ($namespace)
             labels:
               k8gb.io/migrated-to-k8gb-io: "true"
+            finalizers:
+            - k8gb.io/legacy-migration-protection
         timeout: 45s
     - script:
         content: |
           kubectl get gslb.k8gb.io legacy-migration-embedded -n "$NAMESPACE" -o json | \
             jq -e '(((.spec.ingress // {}) | keys | length) == 0) and .spec.resourceRef.name == "legacy-migration-embedded"' >/dev/null
+    - assert:
+        resource:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: legacy-migration-embedded
+            namespace: ($namespace)
+            uid: ($before.ingress.metadata.uid)
+            (length(ownerReferences || `[]`)): 0
+        timeout: 45s
     - script:
-        env:
-        - name: NAME
-          value: legacy-migration-embedded
-        content: |
-          kubectl get ingress "$NAME" -n "$NAMESPACE" -o json | \
-            jq -e --arg name "$NAME" '
-              ([.metadata.ownerReferences[]? |
-                select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .name == $name)]
-              | length) == 0
-            ' >/dev/null
+        content: kubectl get gslb.k8gb.io legacy-migration-embedded -n "$NAMESPACE" -o json
+        outputs:
+        - name: canonical
+          value: (json_parse($stdout))
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: legacy-migration-embedded
+            namespace: ($namespace)
+            uid: ($before.endpoint.metadata.uid)
+            (length(ownerReferences)): 1
+            ownerReferences:
+            - apiVersion: k8gb.io/v1beta1
+              kind: Gslb
+              name: legacy-migration-embedded
+              uid: ($canonical.metadata.uid)
+              controller: true
+              blockOwnerDeletion: true
+        timeout: 45s
   - name: delete legacy object
     description: deleting legacy object must not delete ingress
     cluster: eu

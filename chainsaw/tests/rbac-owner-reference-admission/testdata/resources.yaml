@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: restricted
+  namespace: ($namespace)
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: restricted
+  namespace: ($namespace)
+rules:
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: restricted
+  namespace: ($namespace)
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: restricted
+subjects:
+- kind: ServiceAccount
+  name: restricted
+  namespace: ($namespace)
+---
+apiVersion: k8gb.io/v1beta1
+kind: Gslb
+metadata:
+  name: rbac-owner-reference-admission
+  namespace: ($namespace)
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+    - host: rbac-owner-reference-admission.cloud.example.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: frontend-podinfo
+              port:
+                name: http
+  strategy:
+    type: roundRobin
+    dnsTtlSeconds: 5
