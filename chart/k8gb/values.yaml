@@ -182,7 +182,7 @@ infoblox:
   wapiPort: 443
   # -- use SSL
   sslVerify: true
-  # -- Request Timeout in secconds
+  # -- Request Timeout in seconds
   httpRequestTimeout: 20
   # -- Size of connections pool
   httpPoolConnections: 10
@@ -241,7 +241,7 @@ tracing:
     # -- OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data
     # to somewhere else using exporters (Jaeger for instance)
     repository: otel/opentelemetry-collector
-    tag: 0.164.0
+    tag: 0.166.0
     pullPolicy: Always
 
   jaegerImage:
