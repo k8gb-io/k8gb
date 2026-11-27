@@ -5,6 +5,76 @@ metadata:
 spec:
   timeouts:
     exec: 75s
+  error:
+    catch:
+    - get:
+        cluster: eu
+        apiVersion: k8gb.absa.oss/v1beta1
+        kind: Gslb
+        format: yaml
+        timeout: 10s
+    - get:
+        cluster: eu
+        apiVersion: k8gb.io/v1beta1
+        kind: Gslb
+        format: yaml
+        timeout: 10s
+    - get:
+        cluster: eu
+        apiVersion: externaldns.k8s.io/v1alpha1
+        kind: DNSEndpoint
+        format: yaml
+        timeout: 10s
+    - get:
+        cluster: eu
+        apiVersion: k8gb.io/v1beta1
+        kind: ZoneDelegation
+        format: yaml
+        timeout: 10s
+    - events:
+        cluster: eu
+        format: yaml
+        timeout: 10s
+    - podLogs:
+        cluster: eu
+        namespace: k8gb
+        selector: name=k8gb
+        tail: 1000
+        timeout: 10s
+    - get:
+        cluster: us
+        apiVersion: k8gb.absa.oss/v1beta1
+        kind: Gslb
+        format: yaml
+        timeout: 10s
+    - get:
+        cluster: us
+        apiVersion: k8gb.io/v1beta1
+        kind: Gslb
+        format: yaml
+        timeout: 10s
+    - get:
+        cluster: us
+        apiVersion: externaldns.k8s.io/v1alpha1
+        kind: DNSEndpoint
+        format: yaml
+        timeout: 10s
+    - get:
+        cluster: us
+        apiVersion: k8gb.io/v1beta1
+        kind: ZoneDelegation
+        format: yaml
+        timeout: 10s
+    - events:
+        cluster: us
+        format: yaml
+        timeout: 10s
+    - podLogs:
+        cluster: us
+        namespace: k8gb
+        selector: name=k8gb
+        tail: 1000
+        timeout: 10s
   clusters:
     eu:
       kubeconfig: kubeconfig/eu.config

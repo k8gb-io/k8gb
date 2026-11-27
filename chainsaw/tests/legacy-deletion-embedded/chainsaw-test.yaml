@@ -1,0 +1,80 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: legacy-deletion-embedded
+spec:
+  namespace: legacy-deletion-embedded
+  steps:
+  - name: namespace
+    cluster: eu
+    use:
+      template: ../../step-templates/namespace.yaml
+  - name: create legacy owned resources
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/legacy-embedded.yaml
+    - assert:
+        resource:
+          apiVersion: v1
+          kind: Event
+          metadata:
+            namespace: ($namespace)
+          involvedObject:
+            apiVersion: k8gb.absa.oss/v1beta1
+            kind: Gslb
+            name: legacy-deletion-embedded
+          reason: LegacyDeprecated
+        timeout: 75s
+  - name: assert legacy ownership
+    cluster: eu
+    bindings:
+    - name: owner_api_version
+      value: k8gb.absa.oss/v1beta1
+    use:
+      template: ../../step-templates/assert-blocking-gslb-owner.yaml
+  - name: delete protected legacy object before migration completes
+    description: deletion must detach both dependents before removing migration protection
+    cluster: eu
+    try:
+    - script:
+        content: |
+          set -eu
+          kubectl get ingress/legacy-deletion-embedded dnsendpoint/legacy-deletion-embedded -n "$NAMESPACE" -o json |
+            jq '{ingress: (.items[] | select(.kind == "Ingress")), endpoint: (.items[] | select(.kind == "DNSEndpoint"))}'
+        outputs:
+        - name: before
+          value: (json_parse($stdout))
+    - script:
+        content: |
+          set -eu
+          # Model migration protection left on a legacy object at deletion time.
+          # Finalizer-only updates do not trigger the migration update predicate.
+          kubectl patch gslb.k8gb.absa.oss legacy-deletion-embedded -n "$NAMESPACE" --type=merge \
+            -p '{"metadata":{"finalizers":["k8gb.io/legacy-migration-protection"]}}'
+          kubectl delete gslb.k8gb.absa.oss legacy-deletion-embedded -n "$NAMESPACE" --wait=false
+    - wait:
+        apiVersion: k8gb.absa.oss/v1beta1
+        kind: Gslb
+        name: legacy-deletion-embedded
+        for:
+          deletion: {}
+        timeout: 75s
+    - assert:
+        resource:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: legacy-deletion-embedded
+            namespace: ($namespace)
+            uid: ($before.ingress.metadata.uid)
+            (length(ownerReferences || `[]`)): 0
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: legacy-deletion-embedded
+            namespace: ($namespace)
+            uid: ($before.endpoint.metadata.uid)
+            (length(ownerReferences || `[]`)): 0

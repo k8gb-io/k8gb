@@ -17,28 +17,20 @@ spec:
     - apply:
         file: ./testdata/legacy-runtime.yaml
     - script:
-        env:
-        - name: NAME
-          value: legacy-dns-handoff
-        content: |
-          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
-          TMP_JSON=$(mktemp)
-          trap 'rm -f "$TMP_JSON"' EXIT
-          for i in $(seq 1 45); do
-            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
-              if jq -e --arg legacy_uid "$LEGACY_UID" '
-                ([.metadata.ownerReferences[]? |
-                  select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .uid == $legacy_uid)]
-                | length) == 1
-              ' "$TMP_JSON" >/dev/null; then
-                exit 0
-              fi
-            fi
-            sleep 2
-          done
-          echo "DNSEndpoint is not legacy-owned before migration request"
-          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
-          exit 1
+        content: kubectl get gslb.k8gb.absa.oss legacy-dns-handoff -n "$NAMESPACE" -o jsonpath='{.metadata.uid}'
+        outputs:
+        - name: legacyUID
+          value: ($stdout)
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: legacy-dns-handoff
+            namespace: ($namespace)
+            ownerReferences:
+              (length([?apiVersion == 'k8gb.absa.oss/v1beta1' && kind == 'Gslb' && uid == $legacyUID])): 1
+        timeout: 75s
   - name: request migration
     description: set migration request label and verify canonical object creation
     cluster: eu
@@ -72,46 +64,60 @@ spec:
             labels:
               k8gb.io/migrated-to-k8gb-io: "true"
         timeout: 45s
-  - name: assert dnsendpoint owner handoff
-    description: DNSEndpoint ownership should move from legacy to canonical after migration
+  - name: verify owner handoff and delete legacy object
+    description: ownership moves to canonical and deleting legacy must keep canonical resources
     cluster: eu
     try:
     - script:
-        env:
-        - name: NAME
-          value: legacy-dns-handoff
-        content: |
-          LEGACY_UID=$(kubectl get gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
-          CANONICAL_UID=$(kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
-          TMP_JSON=$(mktemp)
-          trap 'rm -f "$TMP_JSON"' EXIT
-          for i in $(seq 1 45); do
-            if kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o json >"$TMP_JSON" 2>/dev/null; then
-              if jq -e --arg canonical_uid "$CANONICAL_UID" --arg legacy_uid "$LEGACY_UID" '
-                ([.metadata.ownerReferences[]? |
-                  select(.apiVersion == "k8gb.io/v1beta1" and .kind == "Gslb" and .uid == $canonical_uid)]
-                | length) == 1 and
-                ([.metadata.ownerReferences[]? |
-                  select(.apiVersion == "k8gb.absa.oss/v1beta1" and .kind == "Gslb" and .uid == $legacy_uid)]
-                | length) == 0
-              ' "$TMP_JSON" >/dev/null; then
-                exit 0
-              fi
-            fi
-            sleep 2
-          done
-          echo "DNSEndpoint owner handoff to canonical did not complete"
-          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE" -o yaml
-          exit 1
-  - name: delete legacy object keeps canonical resources
-    description: deleting legacy object must keep canonical GSLB and DNSEndpoint
-    cluster: eu
-    try:
+        content: kubectl get gslb.k8gb.absa.oss legacy-dns-handoff -n "$NAMESPACE" -o jsonpath='{.metadata.uid}'
+        outputs:
+        - name: legacyUID
+          value: ($stdout)
     - script:
-        env:
-        - name: NAME
-          value: legacy-dns-handoff
-        content: |
-          kubectl delete gslb.k8gb.absa.oss "$NAME" -n "$NAMESPACE" --wait=true --timeout=90s
-          kubectl get gslb.k8gb.io "$NAME" -n "$NAMESPACE"
-          kubectl get dnsendpoint "$NAME" -n "$NAMESPACE"
+        content: kubectl get gslb.k8gb.io legacy-dns-handoff -n "$NAMESPACE" -o jsonpath='{.metadata.uid}'
+        outputs:
+        - name: canonicalUID
+          value: ($stdout)
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: legacy-dns-handoff
+            namespace: ($namespace)
+            ownerReferences:
+              (length([?apiVersion == 'k8gb.io/v1beta1' && kind == 'Gslb' && uid == $canonicalUID])): 1
+              (length([?apiVersion == 'k8gb.absa.oss/v1beta1' && kind == 'Gslb' && uid == $legacyUID])): 0
+        timeout: 75s
+    - script:
+        content: kubectl get dnsendpoint legacy-dns-handoff -n "$NAMESPACE" -o jsonpath='{.metadata.uid}'
+        outputs:
+        - name: endpointUID
+          value: ($stdout)
+    # Native deletion polls for absence within its own budget, without a child
+    # kubectl wait outliving the global script timeout.
+    - delete:
+        ref:
+          apiVersion: k8gb.absa.oss/v1beta1
+          kind: Gslb
+          name: legacy-dns-handoff
+        timeout: 90s
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: legacy-dns-handoff
+            namespace: ($namespace)
+            uid: ($canonicalUID)
+    - assert:
+        resource:
+          apiVersion: externaldns.k8s.io/v1alpha1
+          kind: DNSEndpoint
+          metadata:
+            name: legacy-dns-handoff
+            namespace: ($namespace)
+            uid: ($endpointUID)
+            ownerReferences:
+              (length([?apiVersion == 'k8gb.io/v1beta1' && kind == 'Gslb' && uid == $canonicalUID])): 1
+              (length([?uid == $legacyUID])): 0

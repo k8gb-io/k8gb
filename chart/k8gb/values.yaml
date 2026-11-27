@@ -28,7 +28,6 @@ k8gb:
       loadBalancedZone: "cloud.example.com" # -- zone controlled by gslb (same meaning as the old dnsZone)
       dnsZoneNegTTL: 30  # -- Negative TTL for SOA record# -- host/ip[:port] format is supported here where port defaults to 53
       extraPlugins: [] # -- Extra CoreDNS plugins to be enabled for this zone
-      extraServerBlocks: "" # -- Extra CoreDNS server blocks for this zone
       geoDataFilePath: "" # -- GeoData file path
       geoDataField: "" # -- GeoData field
   edgeDNSServers:
@@ -182,7 +181,7 @@ infoblox:
   wapiPort: 443
   # -- use SSL
   sslVerify: true
-  # -- Request Timeout in secconds
+  # -- Request Timeout in seconds
   httpRequestTimeout: 20
   # -- Size of connections pool
   httpPoolConnections: 10
@@ -241,7 +240,7 @@ tracing:
     # -- OpenTelemetry collector into which the k8gb operator sends the spans. It can be further configured to send its data
     # to somewhere else using exporters (Jaeger for instance)
     repository: otel/opentelemetry-collector
-    tag: 0.164.0
+    tag: 0.166.0
     pullPolicy: Always
 
   jaegerImage:
@@ -257,3 +256,17 @@ istio:
 gatewayapi:
   # -- install gatewayapi RBAC
   enabled: true
+
+# Example:
+#   extraServerBlocks: |
+#     example.com:5353 {
+#       errors
+#       forward . /etc/resolv.conf
+#       k8s_crd {
+#         filter k8gb.io/dnstype=glue
+#       }
+#     }
+
+# -- Extra CoreDNS server blocks to be added after all k8gb zones. Useful for adding glue records or additional DNS zones for cluster discovery.
+extraServerBlocks: ""
+

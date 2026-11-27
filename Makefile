@@ -63,7 +63,7 @@ GATEWAY_API_VERSION ?= v1.7.0
 ISTIO_VERSION ?= v1.32.0
 TRAEFIK_VERSION ?= 36.3.0
 PODINFO_VERSION ?= 6.17.0
-PROMETHEUS_VERSION ?= 29.48.0
+PROMETHEUS_VERSION ?= 30.0.1
 POD_NAMESPACE ?= k8gb
 CLUSTER_GEO_TAG ?= eu
 EXT_GSLB_CLUSTERS_GEO_TAGS ?= us
@@ -723,7 +723,7 @@ terratest: # Run terratest suite
 # executes chainsaw e2e tests
 .PHONY: chainsaw
 chainsaw:
-	mkdir -p chainsaw/kubeconfig
+	mkdir -p chainsaw/kubeconfig tmp/chainsaw
 	k3d kubeconfig get test-gslb1 > chainsaw/kubeconfig/eu.config
 	k3d kubeconfig get test-gslb2 > chainsaw/kubeconfig/us.config
 	@$(eval RUNNING_CLUSTERS := $(shell k3d cluster list --no-headers | grep $(CLUSTER_NAME) -c))
@@ -731,8 +731,11 @@ chainsaw:
 		echo -e "$(RED)Make sure you run the tests against at least two running clusters$(NC)" ;\
 		exit 1;\
 	fi
-	cd chainsaw && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) chainsaw test --config ./config.yaml --values ./values.yaml
-	rm -r chainsaw/kubeconfig
+	@trap 'rm -rf chainsaw/kubeconfig' EXIT; \
+		set -o pipefail; \
+		(cd chainsaw && CLUSTERS_NUMBER=$(RUNNING_CLUSTERS) chainsaw test --config ./config.yaml --values ./values.yaml \
+			--report-format JUNIT-STEP --report-path ../tmp/chainsaw \
+			2>&1) | tee tmp/chainsaw/chainsaw.log
 
 .PHONY: website
 website:

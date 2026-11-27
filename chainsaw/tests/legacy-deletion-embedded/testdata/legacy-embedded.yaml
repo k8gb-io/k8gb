@@ -1,0 +1,23 @@
+apiVersion: k8gb.absa.oss/v1beta1
+kind: Gslb
+metadata:
+  name: legacy-deletion-embedded
+  namespace: ($namespace)
+spec:
+  ingress:
+    ingressClassName: nginx
+    rules:
+      - host: legacy-deletion-embedded.cloud.example.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: frontend-podinfo
+                  port:
+                    name: http
+  strategy:
+    type: failover
+    primaryGeoTag: "eu"
+    dnsTtlSeconds: 5
