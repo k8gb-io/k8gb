@@ -113,7 +113,11 @@ jobs:
         with:
           cluster-name: "test-gslb1"
           # k3d-version: v5.7.4
-          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb1.yaml
+          # Exercise owner-reference admission with the chart's explicit RBAC.
+          args: >-
+            --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }}
+            -c k3d/test-gslb1.yaml
+            --k3s-arg=--kube-apiserver-arg=enable-admission-plugins=OwnerReferencesPermissionEnforcement@server:*
           k3d-version: ${{ env.K3D_VERSION }}
 
 
@@ -122,7 +126,11 @@ jobs:
         with:
           cluster-name: "test-gslb2"
           # k3d-version: v5.7.4
-          args: --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }} -c k3d/test-gslb2.yaml
+          # Exercise owner-reference admission with the chart's explicit RBAC.
+          args: >-
+            --verbose --image docker.io/rancher/k3s:${{ matrix.k8s-version }}
+            -c k3d/test-gslb2.yaml
+            --k3s-arg=--kube-apiserver-arg=enable-admission-plugins=OwnerReferencesPermissionEnforcement@server:*
           k3d-version: ${{ env.K3D_VERSION }}
 
 

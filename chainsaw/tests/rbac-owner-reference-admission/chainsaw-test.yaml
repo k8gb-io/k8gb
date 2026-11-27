@@ -1,0 +1,75 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: rbac-owner-reference-admission
+spec:
+  namespace: rbac-owner-reference-admission
+  steps:
+  - name: namespace
+    cluster: eu
+    use:
+      template: ../../step-templates/namespace.yaml
+  - name: create canonical owned resources
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/resources.yaml
+  - name: assert canonical ownership
+    cluster: eu
+    bindings:
+    - name: owner_api_version
+      value: k8gb.io/v1beta1
+    use:
+      template: ../../step-templates/assert-blocking-gslb-owner.yaml
+  - name: prove owner reference admission is enforced
+    description: restricted credentials must fail the admission checks even though create and patch are allowed
+    cluster: eu
+    try:
+    - script:
+        content: |
+          set -eu
+          kubectl get ingress rbac-owner-reference-admission -n "$NAMESPACE" -o json |
+            jq '.metadata |= {name: "denied-owned-ingress", namespace, ownerReferences} | del(.status)' |
+            kubectl --as="system:serviceaccount:$NAMESPACE:restricted" create -f -
+        check:
+          ($error != null): true
+          (contains($stderr, 'cannot set blockOwnerDeletion')): true
+    - script:
+        content: |
+          kubectl --as="system:serviceaccount:$NAMESPACE:restricted" patch ingress rbac-owner-reference-admission -n "$NAMESPACE" \
+            --type=merge -p '{"metadata":{"ownerReferences":[]}}'
+        check:
+          ($error != null): true
+          (contains($stderr, 'cannot set an ownerRef')): true
+  - name: annotated ingress can own a generated Gslb
+    description: Ingress finalizer permission is required even when OpenShift is disabled
+    cluster: eu
+    try:
+    - apply:
+        file: ./testdata/annotated-ingress.yaml
+        outputs:
+        - name: ingress
+          value: (@)
+    - assert:
+        resource:
+          apiVersion: k8gb.io/v1beta1
+          kind: Gslb
+          metadata:
+            name: rbac-annotated
+            namespace: ($namespace)
+            (length(ownerReferences)): 1
+            ownerReferences:
+            - apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              name: rbac-annotated
+              uid: ($ingress.metadata.uid)
+              controller: true
+              blockOwnerDeletion: true
+          spec:
+            resourceRef:
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              name: rbac-annotated
+          status:
+            geoTag: eu
+        timeout: 75s
