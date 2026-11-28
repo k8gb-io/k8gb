@@ -27,7 +27,68 @@ Join the [Zoom Meeting](https://zoom-lfx.platform.linuxfoundation.org/meeting/92
 - Medium: [https://medium.com/@kubernetesglobalbalancer](https://medium.com/@kubernetesglobalbalancer) 
 - YouTube: [https://youtube.com/@k8gb823](https://youtube.com/@k8gb823)
 
-<details open><summary><strong>October 28, 2026 #104</strong></summary>
+<details open><summary><strong>November 25, 2026 #105</strong></summary>
+
+## November 25, 2026 #105
+
+**Attendees**
+
+- Dinar
+- Yury
+- Bradley
+
+**Backlog**
+
+- [Issue Review](https://github.com/k8gb-io/k8gb/issues)
+- [PR Reviews](https://github.com/k8gb-io/k8gb/pulls)
+
+[**Zoom Recording**]() | [**On YouTube**]()
+
+**Agenda**
+
+- <u>News</u>
+  - Security Slam
+    - The Security Slam is a collaborative, 30-day virtual challenge hosted by the Cloud Native Computing Foundation (CNCF) and the Open Source Security Foundation (OpenSSF) that helps open source maintainers and contributors strengthen their projects' security posture through practical, milestone-based hygiene goals.
+    - Due to [@itsfarhan](https://github.com/itsfarhan)'s efforts, k8gb earned 6/6 badges in this year's Security Slam: https://securityslam.com/outcomes/fall-2026/k8gb
+  - KubeCon
+    - k8gb talks:
+      - Lightning talk
+        - **k8gb is growing up** highlighted k8gb's latest updates, community growth, and real-world applications in resilient AI inference and sovereign multi-cloud infrastructure.
+        - [recording](https://www.youtube.com/watch?v=aUFtEHqHhsY) | [slides](https://drive.google.com/file/d/14CShYYlPqkW1MKxWXSvA7lM0aF1hum6V/view?usp=sharing) | [Fabrizio Sgura](https://github.com/xiloss)'s [linkedin post](https://lnkd.in/p/eFUvCbt4)
+      - Kubernetes on Edge Day
+        - **When the Region Goes Dark** demonstrated how k8gb delivers decentralized, DNS-based global load balancing and automated failover across distributed edge sites, even during intermittent connectivity and network partitions - without relying on a central proxy or single provider.
+        - [recording](https://www.youtube.com/watch?v=0LpKYR3gAz4) | [slides](https://drive.google.com/file/d/1n5xy8EgWB-KP-6en0jAEckYkZBZ6YpeP/view?usp=sharing) | [Fabrizio Sgura](https://github.com/xiloss)'s [linkedin post](https://lnkd.in/p/e9rgrJdv)
+    - booth
+      - lots of preventing split brain, building a sovereign stack, balancing ai inference workloads
+      - multiple folks asked about single-cluster failover - blog post / demo in the coming weeks
+  - KCD Porto
+    - k8gb talks:
+      - In [**Highly Available, Barely Running - Multi-Region HA That Doesn't Cost Twice**](https://kcd-porto-2026.sessionize.com/session/1300190), [Nuno Guedes](https://github.com/infbase) and [Filipe Revez](https://github.com/filipevrevez) demonstrated a cost-effective, open-source architecture for multi-region and multi-cloud high availability that uses Flux, KEDA, and k8gb to scale standby workloads from zero on demand and automate DNS-based failover without expensive, idle infrastructure.
+      - In [**Open Source Is Not Free: Why Enterprises Must Help Build the Software They Depend On**](https://kcd-porto-2026.sessionize.com/session/1298811), [Nuno Guedes](https://github.com/infbase) and [Yury](https://github.com/ytsarev) used the journey of k8gb to show why enterprises must move beyond passive consumption and actively sustain the open-source software they rely on through production validation, maintainer support, and non-code contributions.
+- <u>(More) Community Contributions</u>
+  - [Karsten S](https://www.linkedin.com/in/kubernetes-experte/) explained how network partitions between Kubernetes clusters can trigger a split-brain "false failover" in k8gb hot-cold setups—causing both clusters to serve traffic simultaneously—and shares practical monitoring, testing, and architectural mitigation strategies in [this LinkedIn post](https://lnkd.in/p/ejk6W9RP). Karsten [has written about k8gb before](https://lnkd.in/p/eyQQKVXH). 
+  - [46 PRs closed since last time](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aclosed+closed%3A%3E%40today-4w). Some highlights:
+    - [@vicsufer](https://github.com/vicsufer) added [Gateway API ListenerSet support](https://github.com/k8gb-io/k8gb/pull/2540). k8gb now accepts routes whose parent is a ListenerSet, part of the Gateway API v1.5 standard. Before this, those routes failed because k8gb only looked for a Gateway parent.
+    - [@ankushkhakale](https://github.com/ankushkhakale) added [DNS fallback on SERVFAIL](https://github.com/k8gb-io/k8gb/pull/2625). When a DNS server answers SERVFAIL, k8gb now tries the next configured server. Before, it only did that on network errors. He also [moved public DNS integration tests into their own suite](https://github.com/k8gb-io/k8gb/pull/2605).
+- WIP Reference Architectures / Demos
+  - [NeoNephos](https://github.com/k8gb-io/k8gb/issues/2535)
+  - [KEDA](https://github.com/k8gb-io/k8gb/issues/2536)
+  - [Add opt-in NVIDIA Dynamo routing and failover demo](https://github.com/k8gb-io/k8gb/pull/2579)
+  - [Zero-Traffic Region Upgrades with GitOps](https://github.com/k8gb-io/k8gb/issues/2618)
+
+**Actions**
+
+- [docs PRs](https://github.com/k8gb-io/k8gb/pulls?q=is%3Apr+state%3Aopen+docs%3A)
+- some [old, forgotten actions](#old-actions) 😭 
+- figure out FOSSA failure (looks good in workflows, but badge on site shows failure)... need access / ping LF - FOSSA looks green now
+- https://github.com/k8gb-io/k8gb/actions/runs/38555953119/job/115825003921 - scorecard workflow/job to fix in master
+- k8gb 1.1 release to include latest security fixes
+- https://github.com/k8gb-io/coredns-crd-plugin security release first to include into 1.1
+- figure out how to run the same scanner as artifact hub before the release https://artifacthub.io/packages/helm/k8gb/k8gb?modal=security-report to catch issues early
+
+</details>
+
+<details><summary><strong>October 28, 2026 #104</strong></summary>
 
 ## October 28, 2026 #104
 
